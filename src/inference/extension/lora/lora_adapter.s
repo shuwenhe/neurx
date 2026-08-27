@@ -1,6 +1,6 @@
 package neurx.lora.lora_adapter
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -19,7 +19,7 @@ struct lora_adapter {
     weights: map[string, (vec[vec[float]], vec[vec[float]])]
     is_loaded: bool
     fused: bool
-    fusion_engine: option[&weight_fusion_engine]
+    fusion_engine: option[*weight_fusion_engine]
     metadata: map[string, string]
 }
 
@@ -41,7 +41,7 @@ impl lora_adapter {
         module_name: string,
         lora_a: *vec[vec[float]],
         lora_b: *vec[vec[float]]
-    ) result[(), lora_adapter_error] {
+    ) ((), lora_adapter_error) {
         if !adapter.config.is_target_module(module_name) {
             return (lora_adapter_error {
                 code: "NOT_TARGET_MODULE",
@@ -68,7 +68,7 @@ impl lora_adapter {
 
     func(lora_adapter* adapter) remove_module_weights(
         module_name: string
-    ) result[(), lora_adapter_error] {
+    ) ((), lora_adapter_error) {
         if !adapter.weights.contains(module_name) {
             return (lora_adapter_error {
                 code: "MODULE_NOT_FOUND",
@@ -84,7 +84,7 @@ impl lora_adapter {
         module_name: string,
         input: *vec[float],
         scale: float
-    ) result[&vec[float], lora_adapter_error] {
+    ) (*vec[float), lora_adapter_error] {
         switch adapter.weights.get(module_name) {
             option::some((lora_a, lora_b)) : {
 
@@ -133,10 +133,10 @@ impl lora_adapter {
 
     func(lora_adapter* adapter) apply_lora_batch(
         module_name: string,
-        inputs: *vec[&vec[float]],
+        inputs: *vec[*vec[float]],
         scale: float
-    ) result[&vec[&vec[float]], lora_adapter_error] {
-        outputs := vec[&vec[float]]()
+    ) (*vec[*vec[float)], lora_adapter_error] {
+        outputs := vec[*vec[float]]()
 
         i := 0
         for i < inputs.len() {
@@ -149,8 +149,8 @@ impl lora_adapter {
     }
 
     func(lora_adapter* adapter) fuse_weights(
-        original_weights: *map[string, &vec[vec[float]]]
-    ) result[(), lora_adapter_error] {
+        original_weights: *map[string, *vec[vec[float]]]
+    ) ((), lora_adapter_error) {
         if adapter.fused {
             return (lora_adapter_error {
                 code: "ALREADY_FUSED",
@@ -186,14 +186,14 @@ impl lora_adapter {
             }
         }
 
-        adapter.fusion_engine = option::some(&engine)
+        adapter.fusion_engine = option::some(*engine)
         adapter.fused = true
         ((, ""))
     }
 
     func(lora_adapter* adapter) unfuse_weights(
-        original_weights: *map[string, &vec[vec[float]]]
-    ) result[(), lora_adapter_error] {
+        original_weights: *map[string, *vec[vec[float]]]
+    ) ((), lora_adapter_error) {
         if !adapter.fused {
             return (lora_adapter_error {
                 code: "NOT_FUSED",
@@ -239,7 +239,7 @@ impl lora_adapter {
         total / 1024 / 1024
     }
 
-    func(lora_adapter* adapter) get_module_names() &vec[string] {
+    func(lora_adapter* adapter) get_module_names() *vec[string] {
         names := vec[string]()
         for name in adapter.weights.keys() {
             names.push(name)
@@ -255,7 +255,7 @@ impl lora_adapter {
         adapter.metadata.get(key)
     }
 
-    func(lora_adapter* adapter) validate() result[(), lora_adapter_error] {
+    func(lora_adapter* adapter) validate() ((), lora_adapter_error) {
         if adapter.name.len() == 0 {
             return (lora_adapter_error {
                 code: "INVALID_NAME",

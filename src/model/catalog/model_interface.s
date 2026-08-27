@@ -225,7 +225,7 @@ struct model_performance_metrics {
 }
 
 func create_model_interface(model_id string, model_name string, model_type model_type) *model_interface {
-	return &model_interface{
+	return *model_interface{
 		model_id: model_id,
 		model_name: model_name,
 		model_type: model_type,

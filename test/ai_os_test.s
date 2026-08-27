@@ -29,7 +29,7 @@ struct test_result {
 
 func test_syscall_context() test_result {
     frame := trap_frame_create()
-    ctx := syscall_context_create(SYS_read(), &frame)
+    ctx := syscall_context_create(SYS_read(), *frame)
     
     result := test_result {
         test_name: "System Call Context Creation",
@@ -72,11 +72,11 @@ func test_fork_syscall() test_result {
     
     init_task := task_struct_create(1, 0, "init")
     mm := mm_struct_create(1)
-    init_task.mm = &mm
+    init_task.mm = *mm
     ptable.processes[0] = init_task
     ptable.process_count = 1
     
-    new_pid, success := do_fork(&ptable, 0, 0)
+    new_pid, success := do_fork(*ptable, 0, 0)
     
     passed := success && new_pid == 100 && ptable.process_count == 2
     
@@ -95,7 +95,7 @@ func test_execve_syscall() test_result {
     ptable.processes[0] = task
     ptable.process_count = 1
     
-    success := do_execve(&ptable, 100, "/bin/bash")
+    success := do_execve(*ptable, 100, "/bin/bash")
     
     passed := success && ptable.processes[0].name == "/bin/bash"
     
@@ -115,7 +115,7 @@ func test_exit_syscall() test_result {
     ptable.process_count = 1
     ptable.parent_pids[100] = 1
     
-    success := do_exit(&ptable, 100, 42)
+    success := do_exit(*ptable, 100, 42)
     
     passed := success && ptable.processes[0].exit_code == 42
     
@@ -141,7 +141,7 @@ func test_wait_syscall() test_result {
     ptable.processes[1].state = 5
     ptable.processes[1].exit_code = 0
     
-    pid, code, success := do_wait(&ptable, 1)
+    pid, code, success := do_wait(*ptable, 1)
     
     passed := success && pid == 100 && code == 0
     
@@ -169,12 +169,12 @@ func test_virtual_memory() test_result {
 func test_tlb_operations() test_result {
     tlb := tlb_create()
     
-    tlb_insert(&tlb, 0x1000, 0x4000)
-    tlb_insert(&tlb, 0x2000, 0x5000)
+    tlb_insert(*tlb, 0x1000, 0x4000)
+    tlb_insert(*tlb, 0x2000, 0x5000)
     
-    addr1 := tlb_lookup(&tlb, 0x1000)
-    addr2 := tlb_lookup(&tlb, 0x2000)
-    addr3 := tlb_lookup(&tlb, 0x3000)
+    addr1 := tlb_lookup(*tlb, 0x1000)
+    addr2 := tlb_lookup(*tlb, 0x2000)
+    addr3 := tlb_lookup(*tlb, 0x3000)
     
     passed := (addr1 == 0x4000) && (addr2 == 0x5000) && (addr3 == -1)
     

@@ -1,6 +1,6 @@
 package neurx.runtime.model.json_parser
 
-use std.vec.vec
+use std.slices
 use std.io.println
 
 

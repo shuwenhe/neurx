@@ -1,6 +1,6 @@
 package neurx.fs
 
-use std.vec.vec
+use std.slices
 use std.string.string
 
 // 文件系统 inode 结构
@@ -140,7 +140,7 @@ func (ext4_fs* fs) write_file(int inode_num, int* data, int size) (int, string) 
         return -1, "Invalid inode"
     }
     
-    inode_ptr := &fs.inode_table[inode_num]
+    inode_ptr := *fs.inode_table[inode_num]
     blocks_needed := size / fs.block_size
     
     if size % fs.block_size != 0 {
@@ -180,7 +180,7 @@ func (ext4_fs* fs) delete_file(int inode_num) (int, string) {
         return -1, "Invalid inode"
     }
     
-    inode_ptr := &fs.inode_table[inode_num]
+    inode_ptr := *fs.inode_table[inode_num]
     i := 0
     for i < inode_ptr.block_count {
         if i < 12 {

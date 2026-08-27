@@ -111,7 +111,7 @@ struct video_processor {
 }
 
 func create_video_processor() *video_processor {
-	vp := &video_processor{
+	vp := *video_processor{
 		loaded_videos:           make(map[string]*video_data),
 		default_format:          VIDEO_FORMAT_MP4,
 		default_sampling:        SAMPLE_ADAPTIVE,
@@ -136,7 +136,7 @@ func (video_processor* vp) load_video(video_id string, frames []video_frame, met
 		return fmt.Errorf("empty video frames")
 	}
 
-	video := &video_data{
+	video := *video_data{
 		frames:                 frames,
 		metadata:               metadata,
 		video_id:               video_id,
@@ -369,7 +369,7 @@ func (video_processor* vp) compute_optical_flow(video_id string) (*optical_flow_
 		avg_magnitude = total_magnitude / float32(num_vectors)
 	}
 
-	result := &optical_flow_result{
+	result := *optical_flow_result{
 		flow_field:        flow_field,
 		width:             width,
 		height:            height,
@@ -409,7 +409,7 @@ func (video_processor* vp) analyze_video(video_id string) (*video_analysis_resul
 		avg_motion /= float32(len(video.frames))
 	}
 
-	result := &video_analysis_result{
+	result := *video_analysis_result{
 		total_frames:               int32(len(video.frames)),
 		total_duration:             video.metadata.duration_seconds,
 		num_keyframes:              num_keyframes,

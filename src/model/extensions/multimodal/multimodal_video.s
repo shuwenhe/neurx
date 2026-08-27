@@ -52,7 +52,7 @@ struct video_processor {
 }
 
 func create_video_processor() video_processor* {
-    return &video_processor{
+    return *video_processor{
         target_fps: 2,
         max_frames_to_extract: 8,
         strategy: strategy_keyframe,

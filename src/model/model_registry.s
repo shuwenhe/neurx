@@ -365,7 +365,7 @@ func main() {
         adapter_opt := create_adapter_for_model(name)
         match adapter_opt {
             Some(adapter) => {
-                diag := get_model_diagnostics(&adapter)
+                diag := get_model_diagnostics(*adapter)
 
                 println(f"\n✅ {name}:")
                 println(f"   Parameters: {diag.parameter_count / 1e9:.1f}B")
@@ -374,7 +374,7 @@ func main() {
                 println(f"   Activation Function: {diag.activation}")
                 println(f"   Optimizations Enabled: {diag.optimizations_enabled} items")
 
-                report := check_model_compatibility(&adapter, "cuda", 80)
+                report := check_model_compatibility(*adapter, "cuda", 80)
                 if report.is_compatible {
                     println("   ✓ Compatible A100 (80GB)")
                 } else {

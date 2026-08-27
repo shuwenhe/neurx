@@ -65,7 +65,7 @@ func find_dead_operations(*computation_graph g) vec[int] {
     dead_ops = vec[int]()
 
     used_values = mark_used_values(g)
-    live_ops = mark_live_operations(g, &used_values)
+    live_ops = mark_live_operations(g, *used_values)
 
     for i in range(g.operations.len()) {
         if !live_ops[i] {

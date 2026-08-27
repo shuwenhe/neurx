@@ -288,16 +288,16 @@ func create_default_optimization_config(): training_optimization_config {
 }
 
 func main() {
-    amp_trainer := &mixed_precision_trainer{}
+    amp_trainer := *mixed_precision_trainer{}
     amp_trainer.init(create_default_amp_config())
-    lr_scheduler := &learning_rate_scheduler{
+    lr_scheduler := *learning_rate_scheduler{
         schedule_type: COSINE_ANNEALING,
         base_lr: 5e-4,
         total_steps: 100000,
         warmup_steps: 1000,
         min_lr_ratio: 0.1,
     }
-    grad_clipper := &gradient_clipper{
+    grad_clipper := *gradient_clipper{
         max_grad_norm: 1.0,
         clip_type: "norm",
     }

@@ -34,7 +34,7 @@ func create_model_manager(int32 max_adapters) model_manager* {
         enable_adapter_switching: true,
     }
 
-    return &mgr
+    return *mgr
 }
 
 func (model_manager* mgr) register_adapter(string adapter_name, lora_model* model) bool {
@@ -46,7 +46,7 @@ func (model_manager* mgr) register_adapter(string adapter_name, lora_model* mode
         return false
     }
 
-    registry := &adapter_registry{
+    registry := *adapter_registry{
         adapter_name: adapter_name,
         model: model,
         load_status: load_status_queued,

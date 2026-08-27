@@ -163,7 +163,7 @@ func evict_by_lru(prefix_cache* cache, int64 required_space, int32* evicted) {
         entry := cache.entries[key]
         if entry.last_access_time < least_time {
             least_time = entry.last_access_time
-            least_recent = &entry
+            least_recent = *entry
         }
     }
 
@@ -187,7 +187,7 @@ func evict_by_lfu(prefix_cache* cache, int64 required_space, int32* evicted) {
         entry := cache.entries[key]
         if entry.access_count < least_count {
             least_count = entry.access_count
-            least_used = &entry
+            least_used = *entry
         }
     }
 
@@ -214,7 +214,7 @@ func evict_by_lru_with_decay(prefix_cache* cache, int64 required_space, int32* e
         score := float(entry.access_count) * decay_factor
         if score < best_score {
             best_score = score
-            best_candidate = &entry
+            best_candidate = *entry
         }
     }
 

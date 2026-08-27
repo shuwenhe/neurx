@@ -52,7 +52,7 @@ struct parallel_state {
 }
 
 func create_parallel_config(int32 world_size, int32 rank, int32 tp_size, int32 pp_size, int32 dp_size) parallel_config* {
-    return &parallel_config{
+    return *parallel_config{
         world_size: world_size,
         rank: rank,
         local_rank: rank % 8,

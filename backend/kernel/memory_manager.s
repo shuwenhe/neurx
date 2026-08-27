@@ -31,8 +31,8 @@ struct MemoryPool {
     min_block_size: i64
 }
 
-func NewMemoryManager(types.DeviceType device, i64 total_mem) &MemoryManager {
-    return &MemoryManager{
+func NewMemoryManager(types.DeviceType device, i64 total_mem) *MemoryManager {
+    return *MemoryManager{
         device: device,
         total_memory: total_mem,
         allocated_blocks: make(map[i64, i64]),
@@ -153,8 +153,8 @@ func (MemoryManager* m) GetStats() string {
     return result
 }
 
-func NewMemoryPool(types.DeviceType device, i64 pool_size) &MemoryPool {
-    return &MemoryPool{
+func NewMemoryPool(types.DeviceType device, i64 pool_size) *MemoryPool {
+    return *MemoryPool{
         device: device,
         pool_size: pool_size,
         available: pool_size,

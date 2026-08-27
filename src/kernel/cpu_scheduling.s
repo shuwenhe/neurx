@@ -1,6 +1,6 @@
 package neurx.kernel
 
-use std.vec.vec
+use std.slices
 
 // CPU 亲和性掩码
 struct cpu_affinity {
@@ -22,8 +22,8 @@ struct task {
 
 // CPU 调度器
 struct cpu_scheduler {
-    vec run_queue
-    vec blocked_queue
+    task[] run_queue
+    task[] blocked_queue
     int num_cpus
     int current_task_id
 }

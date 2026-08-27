@@ -114,7 +114,7 @@ func cpu_rq_create(int cpu_id) cpu_rq {
     return rq
 }
 
-func (rq: &mut cpu_rq) enqueue_task(task_struct task) {
+func (rq: *cpu_rq) enqueue_task(task_struct task) {
     rq.nr_running = rq.nr_running + 1
     
     if task.policy == sched_class::sched_normal || task.policy == sched_class::sched_batch {
@@ -126,13 +126,13 @@ func (rq: &mut cpu_rq) enqueue_task(task_struct task) {
     }
 }
 
-func (rq: &mut cpu_rq) dequeue_task(task_struct task) {
+func (rq: *cpu_rq) dequeue_task(task_struct task) {
     if rq.nr_running > 0 {
         rq.nr_running = rq.nr_running - 1
     }
 }
 
-func (rq: &mut cpu_rq) pick_next_task() option[task_struct] {
+func (rq: *cpu_rq) pick_next_task() option[task_struct] {
     if rq.nr_running == 0 {
         return option::none
     }
@@ -180,7 +180,7 @@ func (rq: &mut cpu_rq) pick_next_task() option[task_struct] {
     return option::none
 }
 
-func (rq: &mut cpu_rq) update_load_avg(int delta_exec) {
+func (rq: *cpu_rq) update_load_avg(int delta_exec) {
     avg_update := delta_exec / 1000
     rq.load_avg = rq.load_avg + avg_update
 }
@@ -213,7 +213,7 @@ func scheduler_create(int nr_cpus) scheduler {
     return sched
 }
 
-func (sched: &mut scheduler) enqueue_task(int cpu_id, task_struct task) result[bool, string] {
+func (sched: *scheduler) enqueue_task(int cpu_id, task_struct task) (bool, string) {
     if cpu_id < 0 || cpu_id >= sched.nr_cpus {
         return result::err("Invalid CPU ID")
     }
@@ -224,7 +224,7 @@ func (sched: &mut scheduler) enqueue_task(int cpu_id, task_struct task) result[b
     return result::ok(true)
 }
 
-func (sched: &mut scheduler) dequeue_task(int cpu_id, task_struct task) result[bool, string] {
+func (sched: *scheduler) dequeue_task(int cpu_id, task_struct task) (bool, string) {
     if cpu_id < 0 || cpu_id >= sched.nr_cpus {
         return result::err("Invalid CPU ID")
     }
@@ -237,7 +237,7 @@ func (sched: &mut scheduler) dequeue_task(int cpu_id, task_struct task) result[b
     return result::ok(true)
 }
 
-func (sched: &mut scheduler) pick_next_task(int cpu_id) option[task_struct] {
+func (sched: *scheduler) pick_next_task(int cpu_id) option[task_struct] {
     if cpu_id < 0 || cpu_id >= sched.nr_cpus {
         return option::none
     }
@@ -245,14 +245,14 @@ func (sched: &mut scheduler) pick_next_task(int cpu_id) option[task_struct] {
     return sched.cpus[cpu_id].pick_next_task()
 }
 
-func (sched: &mut scheduler) set_task_nice(int pid, int nice) result[bool, string] {
+func (sched: *scheduler) set_task_nice(int pid, int nice) (bool, string) {
     if nice < -20 || nice > 19 {
         return result::err("Nice value out of range [-20, 19]")
     }
     return result::ok(true)
 }
 
-func (sched: &mut scheduler) load_balance() {
+func (sched: *scheduler) load_balance() {
     imbalance := sched.sched_dom.imbalance_pct
     
     i := 0
@@ -279,7 +279,7 @@ func (sched: &mut scheduler) load_balance() {
     }
 }
 
-func (sched: &scheduler) cpu_stats(int cpu_id) string {
+func (sched: *scheduler) cpu_stats(int cpu_id) string {
     if cpu_id < 0 || cpu_id >= sched.nr_cpus {
         return "Invalid CPU"
     }

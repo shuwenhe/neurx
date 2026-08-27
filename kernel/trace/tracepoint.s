@@ -1,6 +1,6 @@
 package neurx.kernel.trace
 
-use std.vec.vec
+use std.slices
 
 struct trace_event {
     int event_id

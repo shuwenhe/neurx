@@ -197,7 +197,7 @@ func new_engine_config() engine_config {
 }
 
 func new_request_queue(max_size int32) *request_queue {
-    return &request_queue{
+    return *request_queue{
         requests:       make(map[string]*request),
         queue:          make([]*request, 0, max_size),
         priority_queue: make([]*request, 0, max_size),
@@ -270,7 +270,7 @@ func (request_queue* q) size() int32 {
 }
 
 func new_llm_engine(config engine_config) *llm_engine {
-    engine := &llm_engine{
+    engine := *llm_engine{
         config:                  config,
         request_queue:           new_request_queue(config.max_num_seqs),
         running_requests:        make(map[string]*request),
@@ -333,7 +333,7 @@ func (llm_engine* e) add_request(request_id string, prompt string, sampling_para
         request_id = core.GenerateId()
     }
 
-    req := &request{
+    req := *request{
         request_id:      request_id,
         prompt:          prompt,
         sampling_params: sampling_params,
@@ -387,7 +387,7 @@ func (llm_engine* e) step() (bool, error) {
         req.num_scheduled_tokens = 1
         req.num_computed_tokens = 1
 
-        output := &request_output{
+        output := *request_output{
             request_id:    req.request_id,
             prompt:        req.prompt,
             cumulative:    false,

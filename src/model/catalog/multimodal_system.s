@@ -49,7 +49,7 @@ struct multimodal_system {
 }
 
 func create_multimodal_system(model_system* model_sys) *multimodal_system {
-	config := &multimodal_system_config{
+	config := *multimodal_system_config{
 		max_concurrent_inferences:      10,
 		max_cache_size:                 10737418240,
 		enable_audio_processing:        true,
@@ -68,7 +68,7 @@ func create_multimodal_system(model_system* model_sys) *multimodal_system {
 
 	inference_engine := create_multimodal_inference_engine(model_sys, encoder, fusion_engine)
 
-	ms := &multimodal_system{
+	ms := *multimodal_system{
 		audio_proc:      create_audio_processor(),
 		video_proc:      create_video_processor(),
 		encoder:         encoder,

@@ -1,6 +1,6 @@
 package neurx.net
 
-use std.vec.vec
+use std.slices
 
 // QoS 流量分类
 struct qos_class {
@@ -25,7 +25,7 @@ struct netfilter_rule {
 
 // QoS 队列管理器
 struct qos_manager {
-    vec qos_classes
+    qos_class[] qos_classes
     int max_classes
 }
 
@@ -87,7 +87,7 @@ func (qos_manager qm) get_class_stats(int class_id) (int, int, int) {
 
 // Netfilter 防火墙
 struct netfilter {
-    vec rules
+    netfilter_rule[] rules
     int rule_counter
 }
 

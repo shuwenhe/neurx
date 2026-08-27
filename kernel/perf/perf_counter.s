@@ -1,6 +1,6 @@
 package neurx.kernel.perf
 
-use std.vec.vec
+use std.slices
 
 struct perf_event {
     int event_id

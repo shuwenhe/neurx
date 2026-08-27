@@ -140,14 +140,14 @@ func signal_get_pending_count(pid int32) int32 {
     if pid < 0 || pid >= 4096 {
         return 0
     } else {
-        signal_queue* queue = &global_signal_manager.contexts[pid].pending_signals
+        signal_queue* queue = *global_signal_manager.contexts[pid].pending_signals
         return queue->count
     }
 }
 
 func signal_flush_queue(pid int32) {
     if pid >= 0 && pid < 4096 {
-        signal_queue* queue = &global_signal_manager.contexts[pid].pending_signals
+        signal_queue* queue = *global_signal_manager.contexts[pid].pending_signals
         queue->count = 0
         queue->head = 0
         queue->tail = 0
@@ -156,7 +156,7 @@ func signal_flush_queue(pid int32) {
 
 func signal_context_reset(pid int32) {
     if pid >= 0 && pid < 4096 {
-        signal_context* ctx = &global_signal_manager.contexts[pid]
+        signal_context* ctx = *global_signal_manager.contexts[pid]
         ctx->blocked_mask = 0
         ctx->pending_mask = 0
         ctx->delivery_count = 0

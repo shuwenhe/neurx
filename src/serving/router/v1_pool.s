@@ -25,7 +25,7 @@ struct request_pool {
 }
 
 func create_request_pool(int32 max_size, int32 max_running) request_pool* {
-    return &request_pool{
+    return *request_pool{
         strategy: strategy_fcfs,
         pending_requests: make(vec[v1_request*]),
         running_requests: make(vec[v1_request*]),

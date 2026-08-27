@@ -270,7 +270,7 @@ func (cost_optimizer* co) get_cost_report() {
 }
 
 func new_cost_optimizer() *cost_optimizer {
-    return &cost_optimizer{
+    return *cost_optimizer{
         metrics_history: make([]resource_metrics, 0),
         optimization_strategies: make([]optimization_strategy, 0),
     }

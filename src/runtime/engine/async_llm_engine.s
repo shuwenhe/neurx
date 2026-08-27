@@ -112,7 +112,7 @@ func new_async_pool_config() async_pool_config {
 func new_async_llm_engine(config engine_config) *async_llm_engine {
     pool_config := new_async_pool_config()
 
-    async_engine := &async_llm_engine{
+    async_engine := *async_llm_engine{
         config:                  config,
         engine:                  new_llm_engine(config),
         pool_config:             pool_config,
@@ -282,7 +282,7 @@ func (async_llm_engine* ae) generate_completion_async_advanced(
         timeout_ms = ae.pool_config.request_timeout_ms
     }
 
-    req_info := &async_request_info{
+    req_info := *async_request_info{
         request_id:      request_id,
         state:           async_request_state_queued,
         added_time:      core.CurrentTimeMs(),
@@ -293,7 +293,7 @@ func (async_llm_engine* ae) generate_completion_async_advanced(
         retry_count:     0,
     }
 
-    async_req := &async_request{
+    async_req := *async_request{
         request_id:      request_id,
         prompt:          prompt,
         sampling_params: sampling_params,
@@ -465,7 +465,7 @@ func (async_llm_engine* ae) timeout_checker() {
 
             elapsed := current_time - req_info.start_time
             if elapsed > req_info.timeout_ms {
-                event := &async_event{
+                event := *async_event{
                     event_type: "timeout",
                     request_id: request_id,
                 }

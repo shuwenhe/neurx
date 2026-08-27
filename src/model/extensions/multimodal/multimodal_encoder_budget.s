@@ -44,21 +44,21 @@ func create_encoder_budget_manager(int32 max_tokens, int32 text_reserved) encode
         enable_priority_allocation: true,
     }
 
-    mgr.budgets["image"] = &modality_budget{
+    mgr.budgets["image"] = *modality_budget{
         modality: modality_image,
         total_tokens: 0,
         used_tokens: 0,
         remaining_tokens: 0,
     }
 
-    mgr.budgets["video"] = &modality_budget{
+    mgr.budgets["video"] = *modality_budget{
         modality: modality_video,
         total_tokens: 0,
         used_tokens: 0,
         remaining_tokens: 0,
     }
 
-    mgr.budgets["audio"] = &modality_budget{
+    mgr.budgets["audio"] = *modality_budget{
         modality: modality_audio,
         total_tokens: 0,
         used_tokens: 0,
@@ -69,7 +69,7 @@ func create_encoder_budget_manager(int32 max_tokens, int32 text_reserved) encode
     mgr.modality_priorities["video"] = 2
     mgr.modality_priorities["audio"] = 3
 
-    return &mgr
+    return *mgr
 }
 
 func (encoder_budget_manager* mgr) allocate_budgets() {

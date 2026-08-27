@@ -257,7 +257,7 @@ func create_model_list_handler(registry model_registry*) model_list_handler {
 	monitor := create_model_status_monitor(registry)
 	return model_list_handler{
 		registry: registry,
-		monitor:  &monitor,
+		monitor:  *monitor,
 		mu:       sync.Mutex{},
 	}
 }

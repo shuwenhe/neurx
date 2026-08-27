@@ -61,7 +61,7 @@ struct config_validator_impl {
 }
 
 func create_config_validator() (config_validator_impl*) {
-    validator := &config_validator_impl{
+    validator := *config_validator_impl{
         rules: vec[validation_rule*]{},
         custom_rules: vec[validation_rule*]{},
         current_level: validation_level.normal,
@@ -75,35 +75,35 @@ func create_config_validator() (config_validator_impl*) {
 func initialize_default_rules() (vec[validation_rule*]) {
     rules := vec[validation_rule*]{}
 
-    rule_memory := &validation_rule{
+    rule_memory := *validation_rule{
         name: "memory_allocation",
         rule_type: validation_rule_type.range_check,
         description: "Validates memory allocation doesn't exceed available hardware",
     }
     rules = append(rules, rule_memory)
 
-    rule_compute := &validation_rule{
+    rule_compute := *validation_rule{
         name: "compute_capability",
         rule_type: validation_rule_type.compatibility_check,
         description: "Checks if computation config matches device capabilities",
     }
     rules = append(rules, rule_compute)
 
-    rule_precision := &validation_rule{
+    rule_precision := *validation_rule{
         name: "precision_support",
         rule_type: validation_rule_type.compatibility_check,
         description: "Validates device supports requested precision types",
     }
     rules = append(rules, rule_precision)
 
-    rule_feature := &validation_rule{
+    rule_feature := *validation_rule{
         name: "feature_availability",
         rule_type: validation_rule_type.dependency_check,
         description: "Checks if requested features are available on device",
     }
     rules = append(rules, rule_feature)
 
-    rule_parallelism := &validation_rule{
+    rule_parallelism := *validation_rule{
         name: "parallelism_config",
         rule_type: validation_rule_type.compatibility_check,
         description: "Validates parallelism settings match device configuration",
@@ -118,7 +118,7 @@ func (config_validator_impl* v) validate(cfg device_config_full*, hw_info hardwa
 }
 
 func (config_validator_impl* v) validate_with_level(cfg device_config_full*, hw_info hardware_info*, level validation_level) (validation_report*) {
-    report := &validation_report{
+    report := *validation_report{
         is_valid: true,
         errors: vec[validation_error]{},
         warnings: vec[validation_error]{},

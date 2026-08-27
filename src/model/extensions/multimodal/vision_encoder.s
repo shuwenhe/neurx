@@ -13,7 +13,7 @@ struct VisionEncoder {
     max_num_patches: i32,
     device: string,
     cache_enabled: bool,
-    feature_cache: map[string, &types.Tensor]
+    feature_cache: map[string, *types.Tensor]
 }
 
 func NewVisionEncoder(
@@ -21,8 +21,8 @@ func NewVisionEncoder(
     hidden_size: i32,
     patch_size: i32,
     device: string
-) &VisionEncoder {
-    encoder := &VisionEncoder{
+) *VisionEncoder {
+    encoder := *VisionEncoder{
         model_name: model_name,
         hidden_size: hidden_size,
         patch_size: patch_size,
@@ -30,7 +30,7 @@ func NewVisionEncoder(
         max_num_patches: 576,
         device: device,
         cache_enabled: true,
-        feature_cache: make(map[string, &types.Tensor])
+        feature_cache: make(map[string, *types.Tensor])
     }
 
     return encoder
@@ -38,7 +38,7 @@ func NewVisionEncoder(
 
 func (VisionEncoder* e) ExtractPatches(
     image_tensor: *types.Tensor
-) ([]&types.Tensor, types.PatchInfo) {
+) ([]*types.Tensor, types.PatchInfo) {
 
     h := image_tensor.shape[0]
     w := image_tensor.shape[1]
@@ -47,7 +47,7 @@ func (VisionEncoder* e) ExtractPatches(
     patch_h := h / e.patch_size
     patch_w := w / e.patch_size
 
-    patches := make([]&types.Tensor, patch_h * patch_w)
+    patches := make([]*types.Tensor, patch_h * patch_w)
     patch_idx := 0
 
     for ph := 0; ph < patch_h; ph += 1 {
@@ -69,7 +69,7 @@ func (VisionEncoder* e) ExtractPatches(
                 }
             }
 
-            patches[patch_idx] = &types.Tensor{
+            patches[patch_idx] = *types.Tensor{
                 data: patch_data,
                 shape: [3]i32{e.patch_size, e.patch_size, c},
                 dtype: "float32"
@@ -95,7 +95,7 @@ func (VisionEncoder* e) ExtractPatches(
 
 func (VisionEncoder* e) EncodePatch(
     patch: *types.Tensor
-) &types.Tensor {
+) *types.Tensor {
 
     patch_flat_size := patch.shape[0] * patch.shape[1] * patch.shape[2]
 
@@ -109,7 +109,7 @@ func (VisionEncoder* e) EncodePatch(
         embedding[i] = sum / f32(patch_flat_size)
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: embedding,
         shape: [2]i32{1, e.hidden_size},
         dtype: "float32"
@@ -119,11 +119,11 @@ func (VisionEncoder* e) EncodePatch(
 func (VisionEncoder* e) Encode(
     image_data: *types.ImageData,
     image_tensor: *types.Tensor
-) &types.ImageFeatures {
+) *types.ImageFeatures {
 
     if e.cache_enabled {
         if cached, exists := e.feature_cache[image_data.id]; exists {
-            return &types.ImageFeatures{
+            return *types.ImageFeatures{
                 id: image_data.id,
                 embeddings: cached,
                 patch_info: types.PatchInfo{
@@ -160,7 +160,7 @@ func (VisionEncoder* e) Encode(
         }
     }
 
-    embeddings := &types.Tensor{
+    embeddings := *types.Tensor{
         data: encoded_patches,
         shape: [2]i32{patch_info.num_patches, e.hidden_size},
         dtype: "float32"
@@ -170,7 +170,7 @@ func (VisionEncoder* e) Encode(
         e.feature_cache[image_data.id] = embeddings
     }
 
-    return &types.ImageFeatures{
+    return *types.ImageFeatures{
         id: image_data.id,
         embeddings: embeddings,
         patch_info: patch_info,
@@ -186,7 +186,7 @@ func (VisionEncoder* e) EncodeBatch(
     results := make([]types.ImageFeatures, len(images))
 
     for i := 0; i < len(images); i += 1 {
-        results[i] = *e.Encode(&images[i], &tensors[i])
+        results[i] = *e.Encode(*images[i], *tensors[i])
     }
 
     return results
@@ -194,7 +194,7 @@ func (VisionEncoder* e) EncodeBatch(
 
 func (VisionEncoder* e) GetPatchEmbeddings(
     features: *types.ImageFeatures
-) &types.Tensor {
+) *types.Tensor {
 
     num_patches := features.patch_info.num_patches - 1
     patch_embeddings := make([]f32, num_patches * e.hidden_size)
@@ -205,7 +205,7 @@ func (VisionEncoder* e) GetPatchEmbeddings(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: patch_embeddings,
         shape: [2]i32{num_patches, e.hidden_size},
         dtype: "float32"
@@ -214,14 +214,14 @@ func (VisionEncoder* e) GetPatchEmbeddings(
 
 func (VisionEncoder* e) GetClsToken(
     features: *types.ImageFeatures
-) &types.Tensor {
+) *types.Tensor {
     cls_token := make([]f32, e.hidden_size)
 
     for i := 0; i < e.hidden_size; i += 1 {
         cls_token[i] = features.embeddings.data[i]
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: cls_token,
         shape: [2]i32{1, e.hidden_size},
         dtype: "float32"
@@ -229,7 +229,7 @@ func (VisionEncoder* e) GetClsToken(
 }
 
 func (VisionEncoder* e) ClearCache() {
-    e.feature_cache = make(map[string, &types.Tensor])
+    e.feature_cache = make(map[string, *types.Tensor])
 }
 
 func (VisionEncoder* e) GetCacheSize() i32 {

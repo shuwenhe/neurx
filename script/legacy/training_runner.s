@@ -61,13 +61,13 @@ struct training_metrics {
 	tok_per_sec   float64     `json:"tok_per_sec"`
 	timestamp   string      `json:"timestamp"`
 }
-gtraining_state := &training_state{
+gtraining_state := *training_state{
 	current_step: 0,
 	current_epoch: 0,
 	total_loss: 0.0,
 	avg_loss: 0.0,
 }
-g_config := &training_config{
+g_config := *training_config{
 	model_name: "neurx-1t",
 	model_size: "1t",
 	param_count: 1000000000,
@@ -191,11 +191,11 @@ func load_checkpoint(string path) error {
 			return err
 		}
 		var state training_state
-		err = json.Unmarshal(data, &state)
+		err = json.Unmarshal(data, *state)
 		if err != nil {
 			return err
 		}
-			gtraining_state = &state
+			gtraining_state = *state
 			log_info(fmt.Sprintf("Resumed from step %d, epoch %d",
 				gtraining_state.current_step, gtraining_state.current_epoch))
 			return nil
@@ -307,7 +307,7 @@ func run_training() error {
 					tok_per_sec: gtraining_state.tok_per_sec,
 				timestamp: time.Now().Format("2006-01-02 15:04:05"),
 			}
-			log_metric(&metric)
+			log_metric(*metric)
 		}
 		if step % 100 == 0 {
 			log_info(fmt.Sprintf("[Step %d/%d] Loss: %.4f, LR: %.6f, Tok/s: %.0f",

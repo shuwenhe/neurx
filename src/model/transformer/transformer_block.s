@@ -45,7 +45,7 @@ func new_transformer_block(config transformer_config) *transformer_block {
     num_heads := config.num_heads
     head_dim := hidden_dim / num_heads
     inner_dim := config.inner_dim
-    return &transformer_block{
+    return *transformer_block{
         attention: *multi_head_attention{
             query_proj: tensor.Randn(hidden_dim, head_dim*num_heads),
             key_proj:   tensor.Randn(hidden_dim, head_dim*num_heads),

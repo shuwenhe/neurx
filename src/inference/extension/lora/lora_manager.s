@@ -1,6 +1,6 @@
 package neurx.lora.lora_manager
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -37,7 +37,7 @@ func (lora_adapter* adapter) apply_lora(
     module_name: string,
     input: *vec[float],
     output: *vec[vec[float]]
-) result[vec[float], lora_adapter_error] {
+) (vec[float), lora_adapter_error] {
     if !adapter.enabled {
         return (output, "")
     }
@@ -60,7 +60,7 @@ func apply_lora_transformation(
     input: *vec[float],
     weights: *lora_weights,
     scale: float
-) result[vec[float], lora_adapter_error] {
+) (vec[float), lora_adapter_error] {
     if weights.lora_a.len() == 0 || weights.lora_b.len() == 0 {
         return (lora_adapter_error {
             code: "INVALID_WEIGHTS",
@@ -85,7 +85,7 @@ func apply_lora_transformation(
 func matrix_multiply(
     a: *vec[float],
     b: *vec[vec[float]]
-) result[vec[float], lora_adapter_error] {
+) (vec[float), lora_adapter_error] {
     if b.len() == 0 {
         return (lora_adapter_error {
             code: "INVALID_MATRIX",
@@ -127,7 +127,7 @@ func lora_adapter_manager::new() lora_adapter_manager {
 func (lora_adapter_manager* manager) add_adapter(
     name: string,
     adapter: *lora_adapter
-) result[(), lora_adapter_error] {
+) ((), lora_adapter_error) {
     if name.len() == 0 {
         return (lora_adapter_error {
             code: "INVALID_NAME",
@@ -139,7 +139,7 @@ func (lora_adapter_manager* manager) add_adapter(
     ((, ""))
 }
 
-func (lora_adapter_manager* manager) remove_adapter(string name) result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) remove_adapter(string name) ((), lora_adapter_error) {
     if !manager.adapters.contains(name) {
         return (lora_adapter_error {
             code: "ADAPTER_NOT_FOUND",
@@ -161,7 +161,7 @@ func (lora_adapter_manager* manager) remove_adapter(string name) result[(), lora
     ((, ""))
 }
 
-func (lora_adapter_manager* manager) activate_adapter(string name) result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) activate_adapter(string name) ((), lora_adapter_error) {
     if !manager.adapters.contains(name) {
         return (lora_adapter_error {
             code: "ADAPTER_NOT_FOUND",
@@ -185,7 +185,7 @@ func (lora_adapter_manager* manager) activate_adapter(string name) result[(), lo
     }
 }
 
-func (lora_adapter_manager* manager) deactivate_adapter(string name) result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_adapter_error) {
     idx := 0
     for idx < manager.active_adapters.len() {
         if manager.active_adapters[idx] == name {
@@ -209,7 +209,7 @@ func (lora_adapter_manager* manager) deactivate_adapter(string name) result[(), 
     }
 }
 
-func (manager* manager) get_active_adapters() &vec[string] {
+func (manager* manager) get_active_adapters() *vec[string] {
     manager.active_adapters
 }
 
@@ -220,7 +220,7 @@ func (manager* manager) get_adapter(string name) option[lora_adapter] {
     }
 }
 
-func (lora_adapter_manager* manager) set_global_scale(float scale) result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) set_global_scale(float scale) ((), lora_adapter_error) {
     if scale < 0.0 {
         return (lora_adapter_error {
             code: "INVALID_SCALE",
@@ -232,7 +232,7 @@ func (lora_adapter_manager* manager) set_global_scale(float scale) result[(), lo
     ((, ""))
 }
 
-func (lora_adapter_manager* manager) merge_adapters() result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) merge_adapters() ((), lora_adapter_error) {
     i := 0
     for i < manager.active_adapters.len() {
         adapter_name := manager.active_adapters[i]
@@ -257,7 +257,7 @@ func (lora_adapter_manager* manager) merge_adapters() result[(), lora_adapter_er
     ((, ""))
 }
 
-func (lora_adapter_manager* manager) unmerge_adapters() result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) unmerge_adapters() ((), lora_adapter_error) {
     ((, ""))
 }
 
@@ -289,7 +289,7 @@ func (manager* manager) get_memory_usage_mb() int {
     total / 1024 / 1024
 }
 
-func (manager* manager) list_adapters() &vec[string] {
+func (manager* manager) list_adapters() *vec[string] {
     names := vec[string]()
 
     for name in manager.adapters.keys() {

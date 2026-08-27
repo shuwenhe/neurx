@@ -75,7 +75,7 @@ struct worker_process_monitor {
 }
 
 func NewWorkerProcessMonitor() *worker_process_monitor {
-    return &worker_process_monitor{
+    return *worker_process_monitor{
         workers:                   make(map[string]*worker_process_info),
         metrics:                   make(map[string]*worker_metrics),
         health_check_interval_ms:  5000,
@@ -97,7 +97,7 @@ func (worker_process_monitor* monitor) RegisterWorker(
     port int32,
     gpu_device int32,
 ) {
-    info := &worker_process_info{
+    info := *worker_process_info{
         worker_id:           worker_id,
         process_id:          int32(core.Now().Unix() % 65536),
         host:                host,
@@ -119,7 +119,7 @@ func (worker_process_monitor* monitor) RegisterWorker(
         throughput:          0.0,
     }
     monitor.workers[worker_id] = info
-    metrics := &worker_metrics{
+    metrics := *worker_metrics{
         total_requests:      0,
         successful_requests: 0,
         failed_requests:     0,

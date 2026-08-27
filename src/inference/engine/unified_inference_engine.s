@@ -50,7 +50,7 @@ struct unified_inference_engine {
 }
 
 func NewUnifiedInferenceEngine(config engine_config) *unified_inference_engine {
-    engine := &unified_inference_engine{
+    engine := *unified_inference_engine{
         config:         config,
         is_initialized: false,
     }
@@ -140,7 +140,7 @@ func (unified_inference_engine* e) executeBatch(batch_info* batch) {
 }
 
 func (unified_inference_engine* e) GetResult(request_id int64) *generate_response {
-    response := &generate_response{
+    response := *generate_response{
         request_id: request_id,
     }
     return response

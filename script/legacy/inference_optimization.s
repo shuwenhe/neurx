@@ -67,7 +67,7 @@ func (inference_engine* engine) initialize_kv_cache() {
     cache_size := engine.config.max_batch_size *
                  engine.config.max_seq_length *
                  engine.model.hidden_size
-    engine.kv_cache = &kvcache{
+    engine.kv_cache = *kvcache{
         key_cache: make([][]float64, cache_size),
         value_cache: make([][]float64, cache_size),
         cache_size: cache_size,
@@ -292,7 +292,7 @@ func (inference_engine* engine) print_stats() {
 }
 
 func new_inference_engine(config inference_config, model policy_model) *inference_engine {
-    engine := &inference_engine{
+    engine := *inference_engine{
         config: config,
         model: model,
         request_queue: []inference_request{},

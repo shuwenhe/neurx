@@ -47,7 +47,7 @@ func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
     if config.block_size <= 0 {
         config.block_size = 16
     }
-    pool := &kv_cache_pool_v2{
+    pool := *kv_cache_pool_v2{
         config:              config,
         blocks:              []*kv_block{},
         free_blocks:         []int{},
@@ -58,7 +58,7 @@ func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
     }
     for i := 0; i < config.num_blocks; i++ {
         block_data_size := config.block_size * config.hidden_size * 2
-        block := &kv_block{
+        block := *kv_block{
             block_id:          i,
             tokens_per_block:  config.block_size,
             data:              make([]float32, int(block_data_size)),
@@ -80,7 +80,7 @@ func (kv_cache_pool_v2* p) Allocate(request_id int64, num_tokens int32) *kv_allo
     if int32(len(p.free_blocks)) < blocks_needed {
         return nil
     }
-    allocation := &kv_allocation{
+    allocation := *kv_allocation{
         block_table:   []int{},
         block_offsets: []int32{},
         num_tokens:    num_tokens,
@@ -113,7 +113,7 @@ func (kv_cache_pool_v2* p) SharePrefix(source_id int64, target_id int64, prefix_
     }
     target_alloc, exists := p.request_allocations[target_id]
     if !exists {
-        target_alloc = &kv_allocation{
+        target_alloc = *kv_allocation{
             block_table:   []int{},
             block_offsets: []int32{},
             num_tokens:    prefix_tokens,

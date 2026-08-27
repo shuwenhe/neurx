@@ -15,7 +15,7 @@ struct HFTokenizer {
     merges_file: string,
 }
 
-func NewHFTokenizer(types.TokenizerConfig config, string model_path) &HFTokenizer {
+func NewHFTokenizer(types.TokenizerConfig config, string model_path) *HFTokenizer {
     hf := new(HFTokenizer)
     hf.base = tokenizer.NewBaseTokenizer(config)
     hf.model_path = model_path

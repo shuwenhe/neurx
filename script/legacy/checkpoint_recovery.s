@@ -260,7 +260,7 @@ func (recovery_manager* recovery) handle_node_failure() {
     var latest_checkpoint *checkpoint_metadata
     for _, ckpt := range recovery.recovery_points {
         if latest_checkpoint == nil || ckpt.step > latest_checkpoint.step {
-            latest_checkpoint = &ckpt
+            latest_checkpoint = *ckpt
         }
     }
     if latest_checkpoint == nil {
@@ -274,7 +274,7 @@ func (recovery_manager* recovery) handle_node_failure() {
 }
 
 func new_checkpoint_manager(string checkpoint_dir) *checkpoint_manager {
-    return &checkpoint_manager{
+    return *checkpoint_manager{
         checkpoint_dir:    checkpoint_dir,
         checkpoints:       make(map[string]checkpoint),
         latest_checkpoint: "",
@@ -316,14 +316,14 @@ func (checkpoint_manager* manager) run_full_checkpoint_cycle() {
         val_loss := loss + 0.1
         manager.save_checkpoint(step, 1, loss, val_loss, model_weights, opt_state, train_state)
     }
-    recovery := &recovery_manager{
+    recovery := *recovery_manager{
         manager:            manager,
         recovery_points:    []checkpoint_metadata{},
         backup_locations:   []string{},
         verification_status: make(map[string]bool),
     }
     recovery.handle_training_interruption()
-    storage := &checkpoint_storage{
+    storage := *checkpoint_storage{
         backend:             "local",
         base_path:           manager.checkpoint_dir,
         max_checkpoints:     10,

@@ -135,7 +135,7 @@ struct kernel_cache {
 }
 
 func create_kernel_registry() kernel_registry* {
-    return &kernel_registry{
+    return *kernel_registry{
         kernels: make(map[string]kernel_registry_entry*),
         default_kernels: make(map[kernel_type]string),
         optimization_level: 2,
@@ -144,7 +144,7 @@ func create_kernel_registry() kernel_registry* {
 }
 
 func (kernel_registry* kr) register_kernel(string name, kernel_type kt, []compute_capability caps, interface{} fn) error {
-    entry := &kernel_registry_entry{
+    entry := *kernel_registry_entry{
         kernel_name: name,
         kernel_type: kt,
         compute_caps: caps,
@@ -336,7 +336,7 @@ func (kernel_registry* kr) estimate_kernel_time(kernel_type kt, int32 batch_size
 }
 
 func create_kernel_cache() kernel_cache* {
-    return &kernel_cache{
+    return *kernel_cache{
         compiled_kernels: make(map[string]interface{}),
         kernel_configs: make(map[string]kernel_config*),
         cache_hits: 0,

@@ -1,6 +1,6 @@
 package neurx.mm
 
-use std.vec.vec
+use std.slices
 
 // Swap 页面
 struct swap_page {
@@ -16,12 +16,12 @@ struct swap_device {
     int size  // MB
     int used_space  // MB
     int free_space  // MB
-    vec swap_pages
+    swap_page[] swap_pages
 }
 
 // Swap 管理器
 struct swap_manager {
-    vec swap_devices
+    swap_device[] swap_devices
     int total_swap_space
     int used_swap_space
     int swap_operations
@@ -29,7 +29,7 @@ struct swap_manager {
 
 // 初始化 Swap 管理器
 func (swap_manager* swm) init(int total_swap_mb) (int, string) {
-    swm.swap_devices = vec()
+    swm.swap_devices = swap_device[]{}
     swm.total_swap_space = total_swap_mb
     swm.used_swap_space = 0
     swm.swap_operations = 0
@@ -47,7 +47,7 @@ func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
         size: size_mb,
         used_space: 0,
         free_space: size_mb,
-        swap_pages: vec()
+        swap_pages: swap_page[]{}
     }
     
     swm.swap_devices.push(device)
@@ -141,7 +141,7 @@ struct numa_manager {
 
 // 初始化 NUMA 管理器
 func (numa_manager* nm) init(int num_nodes) (int, string) {
-    nm.nodes = vec()
+    nm.nodes = numa_node[]{}
     nm.num_nodes = num_nodes
     
     i := 0
@@ -227,7 +227,7 @@ struct oom_manager {
 
 // 初始化 OOM 管理器
 func (oom_manager* om) init(int memory_threshold_mb) (int, string) {
-    om.processes = vec()
+    om.processes = process[]{}"
     om.memory_threshold = memory_threshold_mb
     om.killed_processes = 0
     return 0, ""

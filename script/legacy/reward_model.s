@@ -260,7 +260,7 @@ func (reward_model_trainer* trainer) calculate_auc(logits []float64, []int label
 }
 
 func new_reward_model_trainer(config reward_model_config) *reward_model_trainer {
-    return &reward_model_trainer{
+    return *reward_model_trainer{
         config: config,
         model: reward_model{
             model_name: "reward_model",

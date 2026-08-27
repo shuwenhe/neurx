@@ -90,7 +90,7 @@ struct profiler_report {
 }
 
 func NewProfiler() *profiler {
-    return &profiler{
+    return *profiler{
         enabled:        true,
         events:         make([]profile_event, 0),
         phase_timings:  make(map[string]phase_timing),
@@ -238,7 +238,7 @@ struct timeline_analyzer {
 }
 
 func NewTimelineAnalyzer() *timeline_analyzer {
-    return &timeline_analyzer{
+    return *timeline_analyzer{
         traces:         make(map[string][]profile_event),
         critical_paths: make(map[string][]profile_event),
     }

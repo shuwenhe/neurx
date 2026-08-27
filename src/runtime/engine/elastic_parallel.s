@@ -58,7 +58,7 @@ struct elastic_stats {
 }
 
 func create_elastic_coordinator(elastic_config* config, parallel_state* ps, communicator* comm) elastic_coordinator* {
-    return &elastic_coordinator{
+    return *elastic_coordinator{
         config: *config,
         state: scaling_state_stable,
         ps: ps,
@@ -81,7 +81,7 @@ func (elastic_coordinator* ec) should_scale_down() bool {
 }
 
 func (elastic_coordinator* ec) create_scaling_plan(int32 target_world_size) scaling_plan* {
-    return &scaling_plan{
+    return *scaling_plan{
         plan_id: ec.num_scaling_events,
         target_state: scaling_state_scaling_up,
         target_world_size: target_world_size,
@@ -120,7 +120,7 @@ func (elastic_coordinator* ec) sync_optimizer_state() error {
 }
 
 func (elastic_coordinator* ec) get_node_info(string node_id) node_info* {
-    return &node_info{
+    return *node_info{
         node_id: node_id,
         num_gpus: 8,
         num_cpus: 96,

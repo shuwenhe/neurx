@@ -46,7 +46,7 @@ struct kv_cache_interface {
 }
 
 func create_kv_cache_interface(int32 num_blocks, int32 block_size) kv_cache_interface* {
-    return &kv_cache_interface{
+    return *kv_cache_interface{
         location: cache_gpu,
         block_size: block_size,
         num_blocks: num_blocks,
@@ -70,7 +70,7 @@ func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
     block_id := cache.num_allocated_blocks
     cache.num_allocated_blocks = cache.num_allocated_blocks + 1
 
-    block := &kv_block{
+    block := *kv_block{
         block_id: block_id,
         seq_id: seq_id,
         key_data: make(vec[float32]),
@@ -81,7 +81,7 @@ func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
     }
 
     cache.blocks[block_id] = block
-    cache.metadata[block_id] = &kv_cache_metadata{
+    cache.metadata[block_id] = *kv_cache_metadata{
         seq_id: seq_id,
         seq_len: 0,
         block_id: block_id,

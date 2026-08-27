@@ -75,10 +75,10 @@ func test_signal_queue_ops() signal_test_result {
     queue.head = 0
     queue.tail = 0
     
-    if signal_queue_enqueue(&queue, SIGTERM) && signal_queue_enqueue(&queue, SIGUSR1) {
+    if signal_queue_enqueue(*queue, SIGTERM) && signal_queue_enqueue(*queue, SIGUSR1) {
         if queue.count == 2 {
-            int32 sig1 = signal_queue_dequeue(&queue)
-            int32 sig2 = signal_queue_dequeue(&queue)
+            int32 sig1 = signal_queue_dequeue(*queue)
+            int32 sig2 = signal_queue_dequeue(*queue)
             
             if sig1 == SIGTERM && sig2 == SIGUSR1 && queue.count == 0 {
                 result.passed = true
@@ -106,10 +106,10 @@ func test_signal_mask_operations() signal_test_result {
     signal_context ctx
     ctx.blocked_mask = 0
     
-    signal_set_mask(&ctx, (1 << (SIGTERM - 1)) | (1 << (SIGUSR1 - 1)))
+    signal_set_mask(*ctx, (1 << (SIGTERM - 1)) | (1 << (SIGUSR1 - 1)))
     
-    if signal_is_blocked(&ctx, SIGTERM) && signal_is_blocked(&ctx, SIGUSR1) {
-        if !signal_is_blocked(&ctx, SIGINT) {
+    if signal_is_blocked(*ctx, SIGTERM) && signal_is_blocked(*ctx, SIGUSR1) {
+        if !signal_is_blocked(*ctx, SIGINT) {
             result.passed = true
             result.message = "Signal masking works correctly"
         } else {
@@ -135,7 +135,7 @@ func test_sigaction_syscall() signal_test_result {
     
     sigaction oldact
     
-    int res = syscall_rt_sigaction(SIGTERM, &act, &oldact, 8)
+    int res = syscall_rt_sigaction(SIGTERM, *act, *oldact, 8)
     
     if res == 0 {
         result.passed = true
@@ -155,7 +155,7 @@ func test_sigprocmask_syscall() signal_test_result {
     int64 set = (1 << (SIGTERM - 1))
     int64 oldset = 0
     
-    int res = syscall_rt_sigprocmask(SIG_BLOCK, &set, &oldset)
+    int res = syscall_rt_sigprocmask(SIG_BLOCK, *set, *oldset)
     
     if res == 0 {
         result.passed = true

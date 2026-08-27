@@ -32,7 +32,7 @@ struct structured_generator {
 }
 
 func create_structured_generator() structured_generator* {
-    return &structured_generator{
+    return *structured_generator{
         config: structured_output_config{
             enable_structured_output: false,
             constraint: nil,
@@ -46,7 +46,7 @@ func create_structured_generator() structured_generator* {
 }
 
 func (structured_generator* gen) set_json_schema(string json_schema) {
-    gen.config.constraint = &output_constraint{
+    gen.config.constraint = *output_constraint{
         constraint_type: constraint_json,
         pattern: json_schema,
         schema_def: make(map[string]interface{}),
@@ -55,7 +55,7 @@ func (structured_generator* gen) set_json_schema(string json_schema) {
 }
 
 func (structured_generator* gen) set_regex_pattern(string pattern) {
-    gen.config.constraint = &output_constraint{
+    gen.config.constraint = *output_constraint{
         constraint_type: constraint_regex,
         pattern: pattern,
         schema_def: make(map[string]interface{}),
@@ -64,7 +64,7 @@ func (structured_generator* gen) set_regex_pattern(string pattern) {
 }
 
 func (structured_generator* gen) set_grammar_constraint(string grammar) {
-    gen.config.constraint = &output_constraint{
+    gen.config.constraint = *output_constraint{
         constraint_type: constraint_grammar,
         pattern: grammar,
         schema_def: make(map[string]interface{}),

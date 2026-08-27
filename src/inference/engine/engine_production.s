@@ -114,27 +114,27 @@ struct metrics_tracker {
 }
 
 func create_inference_engine(model_config cfg) inference_engine* {
-    executor := &model_executor{
+    executor := *model_executor{
         config: cfg,
         device_id: 0,
         is_ready: false,
     }
 
-    sched := &scheduler{
+    sched := *scheduler{
         batch_size: 32,
         max_pending: 1000,
         pending: make(vec[active_request*]),
         tracking: make(map[string, active_request*]),
     }
 
-    cache := &kv_cache{
+    cache := *kv_cache{
         total_blocks: 8192,
         block_size: 128,
         num_free_blocks: 8192,
         allocated: make(map[string, kv_cache_slot]),
     }
 
-    metrics := &metrics_tracker{
+    metrics := *metrics_tracker{
         total_requests_received: 0,
         total_requests_completed: 0,
         total_tokens_generated: 0,
@@ -144,7 +144,7 @@ func create_inference_engine(model_config cfg) inference_engine* {
         current_active_requests: 0,
     }
 
-    return &inference_engine{
+    return *inference_engine{
         state: state_idle,
         config: cfg,
         executor: executor,
@@ -263,7 +263,7 @@ func (inference_engine* e) execute_prefill_batch(vec[active_request] batch) bool
     }
 
     for i := 0; i < len(batch); i = i + 1 {
-        req := &batch[i]
+        req := *batch[i]
         req.state = req_state_prefilling
         req.num_prefill_tokens = len(req.prompt_tokens)
         req.started_at = current_time_ns()
@@ -328,7 +328,7 @@ func (inference_engine* e) allocate_kv_cache_slot(string request_id, int32 seq_l
     e.cache_manager.allocated[request_id] = slot
     e.cache_manager.num_free_blocks = e.cache_manager.num_free_blocks - num_blocks
 
-    return &slot
+    return *slot
 }
 
 func (inference_engine* e) free_kv_cache_slot(string request_id) bool {
@@ -348,7 +348,7 @@ func (inference_engine* e) get_request_status(string request_id) active_request*
     if !exists {
         return nil
     }
-    return &req
+    return *req
 }
 
 func (inference_engine* e) update_metrics() {

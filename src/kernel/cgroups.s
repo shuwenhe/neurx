@@ -1,6 +1,6 @@
 package neurx.kernel
 
-use std.vec.vec
+use std.slices
 
 // cgroup 子系统类型
 struct cgroup_subsystem {
@@ -59,15 +59,15 @@ struct cgroup_group {
 
 // cgroup 管理器
 struct cgroup_manager {
-    vec cgroup_groups
-    vec subsystems
+    cgroup_group[] cgroup_groups
+    cgroup_subsystem[] subsystems
     int next_group_id
 }
 
 // 初始化 cgroup 管理器
 func (cgroup_manager* cm) init() (int, string) {
-    cm.cgroup_groups = vec()
-    cm.subsystems = vec()
+    cm.cgroup_groups = cgroup_group[]{}
+    cm.subsystems = cgroup_subsystem[]{}
     cm.next_group_id = 0
     
     // 初始化子系统
@@ -122,7 +122,7 @@ func (cgroup_manager* cm) create_cgroup(string group_name) (cgroup_group, string
             read_iops_limit: 10000,
             write_iops_limit: 10000
         },
-        processes: vec()
+        processes: int[]{}"
     }
     
     cm.cgroup_groups.push(group)

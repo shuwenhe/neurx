@@ -26,7 +26,7 @@ struct beam_search_state {
 }
 
 func create_beam_search_state(int32 beam_width, int32 max_length, float32 length_penalty, bool early_stopping) beam_search_state* {
-	return &beam_search_state{
+	return *beam_search_state{
 		beam_width: beam_width,
 		max_length: max_length,
 		length_penalty: length_penalty,
@@ -205,7 +205,7 @@ func create_diverse_beam_search_state(int32 beam_width, int32 num_groups, float3
 
 	group_width := beam_width / num_groups
 
-	return &diverse_beam_search_state{
+	return *diverse_beam_search_state{
 		base_state: create_beam_search_state(group_width, 512, 1.0, false),
 		num_groups: num_groups,
 		diversity_penalty: diversity_penalty,

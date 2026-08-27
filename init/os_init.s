@@ -180,8 +180,8 @@ func os_init_complete() bool {
     print_os_boot_sequence()
     
     state := os_state_create()
-    print_os_system_info(&state.os_info)
-    print_os_startup_complete(&state)
+    print_os_system_info(*state.os_info)
+    print_os_startup_complete(*state)
     
     return true
 }

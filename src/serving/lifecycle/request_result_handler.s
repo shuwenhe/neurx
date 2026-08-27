@@ -40,7 +40,7 @@ struct request_result_handler {
 }
 
 func NewRequestResultHandler() *request_result_handler {
-    return &request_result_handler{
+    return *request_result_handler{
         results:        make(map[string]inference_result),
         callbacks:      make(map[string]func(inference_result)),
         error_handlers: make(map[string]func(string)),
@@ -167,7 +167,7 @@ func NewProxyServer(config proxy_config) *proxy_server {
         }
         backends = append(backends, backend)
     }
-    return &proxy_server{
+    return *proxy_server{
         config:          config,
         backends:        backends,
         current_backend: 0,

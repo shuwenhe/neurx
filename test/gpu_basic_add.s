@@ -1,6 +1,6 @@
 package neurx.test.gpu_basic_add
 
-use std.vec.vec
+use std.slices
 
 // CUDA Device context
 struct cuda_device {

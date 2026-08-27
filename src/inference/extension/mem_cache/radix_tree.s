@@ -93,7 +93,7 @@ func (radix_tree* tree) insert_sequence(vec[int32] token_ids, int64 kv_cache_ptr
         } else {
             remaining := token_ids.slice(i, token_ids.len())
             new_node := new_radix_node_leaf(current.prefix_key + "_" + string(token), remaining, kv_cache_ptr, kv_cache_size, current)
-            current.children[token] = &new_node
+            current.children[token] = *new_node
             tree.total_nodes = tree.total_nodes + 1
             tree.total_cached_tokens = tree.total_cached_tokens + remaining.len()
 
@@ -102,7 +102,7 @@ func (radix_tree* tree) insert_sequence(vec[int32] token_ids, int64 kv_cache_ptr
             }
 
             path_key := create_path_key(token_ids, 0, i + 1)
-            tree.token_path_index[path_key] = &new_node
+            tree.token_path_index[path_key] = *new_node
             path_key
         }
     }

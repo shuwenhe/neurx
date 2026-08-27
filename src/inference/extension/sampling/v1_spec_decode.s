@@ -32,7 +32,7 @@ struct v1_spec_decode {
 }
 
 func create_v1_spec_decode(int32 num_spec_tokens) v1_spec_decode* {
-    return &v1_spec_decode{
+    return *v1_spec_decode{
         method: method_medusa,
         num_speculative_tokens: num_spec_tokens,
         num_candidates: 5,

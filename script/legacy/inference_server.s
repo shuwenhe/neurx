@@ -67,7 +67,7 @@ struct server_metrics {
 	memory_usage        int64   `json:"memory_usage_mb"`
 	uptime_seconds      int64   `json:"uptime_seconds"`
 }
-g_config := &inference_server_config{
+g_config := *inference_server_config{
 	server_name: "neurx-inference",
 	host: "0.0.0.0",
 	port: 8080,
@@ -85,7 +85,7 @@ g_config := &inference_server_config{
 	log_level: "INFO",
 	worker_threads: 4,
 }
-g_metrics := &server_metrics{
+g_metrics := *server_metrics{
 	total_requests: 0,
 	successful_requests: 0,
 	failed_requests: 0,
@@ -188,7 +188,7 @@ func process_inference_request(inference_request* req) (*inference_response, err
 	elapsed := time.Since(start_time).Seconds()
 	total_tokens := prompt_tokens + generated_tokens
 	throughput_ms := elapsed * 1000.0 / float64(total_tokens)
-	response := &inference_response{
+	response := *inference_response{
 		request_id: fmt.Sprintf("req_%d", time.Now().UnixNano()),
 		generated: generated,
 		token_count: generated_tokens,
@@ -213,11 +213,11 @@ func process_inference_request(inference_request* req) (*inference_response, err
 
 func handle_inference_request(json_data []byte) ([]byte, error) {
 	var req inference_request
-	err := json.Unmarshal(json_data, &req)
+	err := json.Unmarshal(json_data, *req)
 	if err != nil {
 		return nil, fmt.Errorf("invalid request format: %v", err)
 	}
-	resp, err := process_inference_request(&req)
+	resp, err := process_inference_request(*req)
 	if err != nil {
 		g_metrics.failed_requests++
 		return nil, err
@@ -341,7 +341,7 @@ func run_benchmark() {
 	}
 	for i, req := range test_requests {
 		start_time := time.Now()
-		resp, err := process_inference_request(&req)
+		resp, err := process_inference_request(*req)
 		if err != nil {
 			log_error(fmt.Sprintf("Benchmark request %d failed: %v", i, err))
 			continue

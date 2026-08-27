@@ -81,14 +81,14 @@ func detect_device() device_info {
 }
 
 func create_hw_agnostic_executor(device_info* device, kernel_registry* kr) hw_agnostic_executor* {
-    ctx := &execution_context{
+    ctx := *execution_context{
         device: device,
         kernels: kr,
         tensor_cache: make([]interface{}, 0),
         metadata: make(map[string]interface{}),
     }
 
-    return &hw_agnostic_executor{
+    return *hw_agnostic_executor{
         ctx: ctx,
         tensor_parallel_degree: 1,
         pipeline_parallel_stages: 1,
@@ -110,7 +110,7 @@ func (hw_agnostic_executor* exe) optimize_for_device() error {
 }
 
 func (hw_agnostic_executor* exe) compile_graph(interface{} graph) (graph_executor*, error) {
-    return &graph_executor{
+    return *graph_executor{
         computation_graph: graph,
         graph_nodes: make([]interface{}, 0),
         node_dependencies: make([][]int32, 0),
@@ -153,7 +153,7 @@ func (hw_agnostic_executor* exe) profile_layer(interface{} layer, interface{} in
 }
 
 func create_kernel_scheduler(int32 max_concurrent) kernel_scheduler* {
-    return &kernel_scheduler{
+    return *kernel_scheduler{
         pending_kernels: make([]kernel_type, 0),
         running_kernels: make([]kernel_type, 0),
         max_concurrent_kernels: max_concurrent,
@@ -175,7 +175,7 @@ func (kernel_scheduler* ks) wait_for_completion() error {
 }
 
 func create_graph_executor() graph_executor* {
-    return &graph_executor{
+    return *graph_executor{
         computation_graph: nil,
         graph_nodes: make([]interface{}, 0),
         node_dependencies: make([][]int32, 0),
@@ -197,7 +197,7 @@ func (graph_executor* ge) execute([]interface{} inputs) ([]interface{}, error) {
 }
 
 func create_distributed_executor(int32 rank, int32 world_size) distributed_executor* {
-    return &distributed_executor{
+    return *distributed_executor{
         executors: make([]hw_agnostic_executor*, 0),
         num_processes: world_size,
         communication_backend: "nccl",
@@ -215,7 +215,7 @@ func (distributed_executor* de) all_reduce(interface{} data) error {
 }
 
 func create_pipeline_parallel_executor(int32 num_stages, int32 micro_batch_size) pipeline_parallel_executor* {
-    return &pipeline_parallel_executor{
+    return *pipeline_parallel_executor{
         stage_models: make([]interface{}, num_stages),
         num_stages: num_stages,
         micro_batch_size: micro_batch_size,
@@ -228,7 +228,7 @@ func (pipeline_parallel_executor* ppe) forward(interface{} input) (interface{}, 
 }
 
 func create_tensor_parallel_executor(int32 degree) tensor_parallel_executor* {
-    return &tensor_parallel_executor{
+    return *tensor_parallel_executor{
         tensor_parallel_degree: degree,
         sharding_strategy: "megatron",
         tensor_sharding_map: make(map[string][]int32),
@@ -244,7 +244,7 @@ func (tensor_parallel_executor* tpe) all_gather(string tensor_name) error {
 }
 
 func create_memory_optimizer() memory_optimizer* {
-    return &memory_optimizer{
+    return *memory_optimizer{
         peak_memory_usage: 0,
         current_memory_usage: 0,
         activation_checkpoints: make([]interface{}, 0),

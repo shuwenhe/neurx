@@ -262,7 +262,7 @@ func (safety_filter* filter) print_stats() {
 }
 
 func new_safety_filter(model policy_model) *safety_filter {
-    return &safety_filter{
+    return *safety_filter{
         config: safety_config{
             harmful_keywords: []string{
                 "violence", "illegal", "abuse",

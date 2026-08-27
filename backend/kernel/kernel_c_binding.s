@@ -60,11 +60,11 @@ func create_c_binding_manager(binding_type binding, kernel_backend backend) c_bi
         total_kernel_time_us: 0.0,
     }
 
-    return &mgr
+    return *mgr
 }
 
 func (c_binding_manager* mgr) register_kernel_binding(string kernel_name, kernel_backend backend) {
-    wrapper := &kernel_wrapper{
+    wrapper := *kernel_wrapper{
         kernel_name: kernel_name,
         backend: backend,
         is_loaded: false,

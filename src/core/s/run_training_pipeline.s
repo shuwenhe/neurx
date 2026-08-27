@@ -23,7 +23,7 @@ func setup_training_config(string train_bin) (*training_config, error) {
     if train_bin == "" {
         train_bin = "/tmp/neurx_train"
     }
-    config := &training_config{
+    config := *training_config{
         script_dir:      scriptDir,
         neur_x_dir:       neurxDir,
         checkpoint_dir:  checkpointDir,

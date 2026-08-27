@@ -269,7 +269,7 @@ func (ragintegration* rag) get_rag_statistics() {
 }
 
 func new_rag_integration() *ragintegration {
-    return &ragintegration{
+    return *ragintegration{
         vector_db:   vector_database{},
         metrics_history: make([]ragmetrics, 0),
         cache:       make(map[string][]retrieval_result),

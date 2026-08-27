@@ -1,6 +1,6 @@
 package neurx.mm.virtual_memory
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use neurx.kernel.locking.mutex
@@ -9,9 +9,9 @@ use neurx.mm.page_table
 use neurx.mm.memory_manager
 
 struct virtual_address_space {
-    vm_areas: vec[vm_area],
-    page_table_root: &mut page_table::page_table,
-    fault_handler: &fn(vaddr: u64, is_write: bool) -> result[void, string],
+    vm_areas: vm_area[],
+    page_table_root: *page_table::page_table,
+    fault_handler: *fn(vaddr: u64, is_write: bool) -> result[void, string],
     lock: mutex::mutex[void],
 }
 
@@ -20,17 +20,17 @@ struct vm_area {
     vm_end: u64,
     vm_flags: u32,
     backing_store: option[backing_file],
-    page_cache: vec[u64],
+    page_cache: u64[],
     protection: prot_flags,
-    merge_prev: option[&vm_area],
-    merge_next: option[&vm_area],
+    merge_prev: option[*vm_area],
+    merge_next: option[*vm_area],
 }
 
 struct backing_file {
     file_offset: u64,
     file_size: u64,
-    page_in_handler: &fn(vpage: u64, offset: u64) -> result[void, string],
-    page_out_handler: &fn(vpage: u64, offset: u64, dirty: bool) -> result[void, string],
+    page_in_handler: *fn(vpage: u64, offset: u64) -> result[void, string],
+    page_out_handler: *fn(vpage: u64, offset: u64, dirty: bool) -> result[void, string],
 }
 
 enum prot_flags {
@@ -53,27 +53,27 @@ enum vm_flags {
     vm_io = 512,
 }
 
-func new_virtual_address_space(page_table_root: &mut page_table::page_table) result[&virtual_address_space, string] {
-    let vas := &virtual_address_space{
+func new_virtual_address_space(page_table_root: *page_table::page_table) (*virtual_address_space, string) {
+    let vas := *virtual_address_space{
         vm_areas: vec[vm_area](),
         page_table_root: page_table_root,
         lock: mutex::new(),
-        fault_handler: &default_fault_handler,
-    } as &virtual_address_space
+        fault_handler: *default_fault_handler,
+    } as *virtual_address_space
 
     result::ok(vas)
 }
 
-func default_fault_handler(vaddr: u64, is_write: bool) result[void, string] {
+func default_fault_handler(vaddr: u64, is_write: bool) (void, string) {
     result::err("default handler - not implemented")
 }
 
-func (vas: &mut virtual_address_space) map_vma(
+func (vas: *virtual_address_space) map_vma(
     start: u64,
     size: u64,
     flags: u32,
     backing: option[backing_file],
-) result[void, string] {
+) (void, string) {
     let _guard := vas.lock.lock()?
 
     if size == 0 {
@@ -121,17 +121,17 @@ func decode_prot_flags(flags: u32) prot_flags {
     }
 }
 
-func (vas: &mut virtual_address_space) handle_page_fault(
+func (vas: *virtual_address_space) handle_page_fault(
     vaddr: u64,
     is_write: bool,
-) result[void, string] {
+) (void, string) {
     let _guard := vas.lock.lock()?
 
-    let mut found_vma := option::none as option[&vm_area]
+    let mut found_vma := option::none as option[*vm_area]
     
     for area in vas.vm_areas {
         if (vaddr >= area.vm_start) && (vaddr < area.vm_end) {
-            found_vma = option::some(&area)
+            found_vma = option::some(*area)
             break
         }
     }
@@ -152,11 +152,11 @@ func (vas: &mut virtual_address_space) handle_page_fault(
 }
 
 func fault_in_page(
-    vas: &mut virtual_address_space,
-    vma: &vm_area,
+    vas: *virtual_address_space,
+    vma: *vm_area,
     vaddr: u64,
     is_write: bool,
-) result[void, string] {
+) (void, string) {
     let page_offset := vaddr - vma.vm_start
     let ppage := page_table::allocate_physical_page()?
 
@@ -175,7 +175,7 @@ func fault_in_page(
     }
 }
 
-func (vas: &mut virtual_address_space) unmap_vma(start: u64) result[void, string] {
+func (vas: *virtual_address_space) unmap_vma(start: u64) (void, string) {
     let _guard := vas.lock.lock()?
 
     let mut remove_idx := option::none as option[u32]
@@ -199,19 +199,19 @@ func (vas: &mut virtual_address_space) unmap_vma(start: u64) result[void, string
     }
 }
 
-func (vas: &virtual_address_space) find_vma(vaddr: u64) option[&vm_area] {
+func (vas: *virtual_address_space) find_vma(vaddr: u64) option[*vm_area] {
     for area in vas.vm_areas {
         if (vaddr >= area.vm_start) && (vaddr < area.vm_end) {
-            return option::some(&area)
+            return option::some(*area)
         }
     }
     option::none
 }
 
-func (vas: &mut virtual_address_space) expand_vma_down(
+func (vas: *virtual_address_space) expand_vma_down(
     vma_start: u64,
     new_start: u64,
-) result[void, string] {
+) (void, string) {
     let _guard := vas.lock.lock()?
 
     if new_start >= vma_start {
@@ -231,7 +231,7 @@ func (vas: &mut virtual_address_space) expand_vma_down(
     result::err("vma not found or cannot grow")
 }
 
-func (vas: &mut virtual_address_space) merge_vmas(vma1_start: u64, vma2_start: u64) result[void, string] {
+func (vas: *virtual_address_space) merge_vmas(vma1_start: u64, vma2_start: u64) (void, string) {
     let _guard := vas.lock.lock()?
 
     let mut vma1_idx := option::none as option[u32]
@@ -265,7 +265,7 @@ struct page_reclaim_stats {
     pages_written_back: u64,
 }
 
-func (vas: &mut virtual_address_space) reclaim_pages(target_pages: u64) result[page_reclaim_stats, string] {
+func (vas: *virtual_address_space) reclaim_pages(target_pages: u64) (page_reclaim_stats, string) {
     let _guard := vas.lock.lock()?
 
     let mut stats := page_reclaim_stats{

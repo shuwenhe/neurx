@@ -25,8 +25,8 @@ struct FeatureFusion {
 func NewFeatureFusion(
     hidden_dim: i32,
     fusion_strategy: FusionStrategy
-) &FeatureFusion {
-    return &FeatureFusion{
+) *FeatureFusion {
+    return *FeatureFusion{
         fusion_strategy: fusion_strategy,
         hidden_dim: hidden_dim,
         num_heads: 8,
@@ -37,8 +37,8 @@ func NewFeatureFusion(
 }
 
 func (FeatureFusion* f) FuseConcatenation(
-    embeddings: map[types.Modality, &types.Tensor]
-) &types.Tensor {
+    embeddings: map[types.Modality, *types.Tensor]
+) *types.Tensor {
     var total_dim i32 = 0
     var seq_len i32 = 0
 
@@ -71,7 +71,7 @@ func (FeatureFusion* f) FuseConcatenation(
         col_idx += emb_dim
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: fused,
         shape: [2]i32{seq_len, total_dim},
         dtype: "float32"
@@ -79,9 +79,9 @@ func (FeatureFusion* f) FuseConcatenation(
 }
 
 func (FeatureFusion* f) FuseAddition(
-    embeddings: map[types.Modality, &types.Tensor]
-) &types.Tensor {
-    var fused &types.Tensor
+    embeddings: map[types.Modality, *types.Tensor]
+) *types.Tensor {
+    var fused *types.Tensor
     count := i32(0)
 
     for modality, embedding := range embeddings {
@@ -90,7 +90,7 @@ func (FeatureFusion* f) FuseAddition(
             for i := 0; i < len(embedding.data); i += 1 {
                 fused_data[i] = embedding.data[i]
             }
-            fused = &types.Tensor{
+            fused = *types.Tensor{
                 data: fused_data,
                 shape: embedding.shape,
                 dtype: embedding.dtype
@@ -114,11 +114,11 @@ func (FeatureFusion* f) FuseAddition(
 }
 
 func (FeatureFusion* f) FuseAttention(
-    embeddings: map[types.Modality, &types.Tensor],
+    embeddings: map[types.Modality, *types.Tensor],
     query_modality: types.Modality
-) &types.Tensor {
+) *types.Tensor {
 
-    var query_tensor &types.Tensor
+    var query_tensor *types.Tensor
     if query_emb, exists := embeddings[query_modality]; exists {
         query_tensor = query_emb
     }
@@ -164,7 +164,7 @@ func (FeatureFusion* f) FuseAttention(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: output,
         shape: [2]i32{seq_len, output_dim},
         dtype: "float32"
@@ -172,8 +172,8 @@ func (FeatureFusion* f) FuseAttention(
 }
 
 func (FeatureFusion* f) FuseGating(
-    embeddings: map[types.Modality, &types.Tensor]
-) &types.Tensor {
+    embeddings: map[types.Modality, *types.Tensor]
+) *types.Tensor {
 
     concat := f.FuseConcatenation(embeddings)
 
@@ -207,7 +207,7 @@ func (FeatureFusion* f) FuseGating(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: output,
         shape: [2]i32{seq_len, f.hidden_dim},
         dtype: "float32"
@@ -217,7 +217,7 @@ func (FeatureFusion* f) FuseGating(
 func (FeatureFusion* f) ApplyLayerNorm(
     tensor: *types.Tensor,
     eps: f32
-) &types.Tensor {
+) *types.Tensor {
     seq_len := tensor.shape[0]
     feature_dim := tensor.shape[1]
 
@@ -246,7 +246,7 @@ func (FeatureFusion* f) ApplyLayerNorm(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: normalized,
         shape: tensor.shape,
         dtype: tensor.dtype
@@ -254,9 +254,9 @@ func (FeatureFusion* f) ApplyLayerNorm(
 }
 
 func (FeatureFusion* f) Fuse(
-    embeddings: map[types.Modality, &types.Tensor]
-) &types.FusedFeatures {
-    var fused_embedding &types.Tensor
+    embeddings: map[types.Modality, *types.Tensor]
+) *types.FusedFeatures {
+    var fused_embedding *types.Tensor
 
     if f.fusion_strategy == FusionStrategy.concatenation {
         fused_embedding = f.FuseConcatenation(embeddings)
@@ -274,11 +274,11 @@ func (FeatureFusion* f) Fuse(
         fused_embedding = f.ApplyLayerNorm(fused_embedding, 1e-6)
     }
 
-    return &types.FusedFeatures{
+    return *types.FusedFeatures{
         id: "fused_" + string(rune(i32(len(embeddings)))),
         fused_embedding: fused_embedding,
         modality_embeddings: embeddings,
-        attention_weights: make(map[types.Modality, &types.Tensor]),
+        attention_weights: make(map[types.Modality, *types.Tensor]),
         fusion_type: string(byte(i32(f.fusion_strategy)))
     }
 }
@@ -296,7 +296,7 @@ func Sqrt(f64 x) f64 {
 }
 
 func (FeatureFusion* f) GetFusionDimension(
-    input_embeddings: map[types.Modality, &types.Tensor]
+    input_embeddings: map[types.Modality, *types.Tensor]
 ) i32 {
     if f.fusion_strategy == FusionStrategy.concatenation {
         total := i32(0)

@@ -1,6 +1,6 @@
 package neurx.security
 
-use std.vec.vec
+use std.slices
 
 // 用户结构
 struct user {
@@ -15,7 +15,7 @@ struct user {
 struct user_group {
     int gid
     string group_name
-    vec members  // 用户 UID 列表
+    int[] members  // 用户 UID 列表
 }
 
 // 文件权限结构
@@ -37,16 +37,16 @@ struct acl_entry {
 
 // 用户管理器
 struct user_manager {
-    vec users
-    vec groups
+    user[] users
+    user_group[] groups
     int next_uid
     int next_gid
 }
 
 // 初始化用户管理器
 func (user_manager* um) init() (int, string) {
-    um.users = vec()
-    um.groups = vec()
+    um.users = user[]{}
+    um.groups = user_group[]{}
     um.next_uid = 1000  // 普通用户从 1000 开始
     um.next_gid = 1000
     
@@ -64,7 +64,7 @@ func (user_manager* um) init() (int, string) {
     root_group := user_group{
         gid: 0,
         group_name: "root",
-        members: vec()
+        members: int[]{}"
     }
     um.groups.push(root_group)
     
@@ -116,7 +116,7 @@ func (user_manager* um) create_group(string group_name) (user_group, string) {
     new_group := user_group{
         gid: um.next_gid,
         group_name: group_name,
-        members: vec()
+        members: int[]{}"
     }
     
     um.groups.push(new_group)
@@ -223,8 +223,8 @@ struct file_permission_manager {
 
 // 初始化文件权限管理器
 func (file_permission_manager* fpm) init() (int, string) {
-    fpm.permissions = vec()
-    fpm.acl_entries = vec()
+    fpm.permissions = file_permission[]{}
+    fpm.acl_entries = acl_entry[]{}
     fpm.next_acl_id = 0
     return 0, ""
 }

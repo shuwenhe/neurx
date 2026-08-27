@@ -111,18 +111,18 @@ func (checkpoint_manager* cm) load_checkpoint(int step): (map[string]interface{}
     metadata_path := filepath.Join(checkpoint_path, "metadata.json")
     metadata_bytes, _ := ioutil.ReadFile(metadata_path)
     var metadata checkpoint_metadata
-    json.Unmarshal(metadata_bytes, &metadata)
+    json.Unmarshal(metadata_bytes, *metadata)
     if err := cm.validate_checkpoint(checkpoint_path, metadata); err != nil {
         return nil, err
     }
     model_path := filepath.Join(checkpoint_path, "model_state.json")
     model_bytes, _ := ioutil.ReadFile(model_path)
     var model_state map[string]interface{}
-    json.Unmarshal(model_bytes, &model_state)
+    json.Unmarshal(model_bytes, *model_state)
     optimizer_path := filepath.Join(checkpoint_path, "optimizer_state.json")
     optimizer_bytes, _ := ioutil.ReadFile(optimizer_path)
     var optimizer_state map[string]interface{}
-    json.Unmarshal(optimizer_bytes, &optimizer_state)
+    json.Unmarshal(optimizer_bytes, *optimizer_state)
     return map[string]interface{}{
         "metadata": metadata,
         "model_state": model_state,
@@ -240,7 +240,7 @@ func format_int(int i): string {
 }
 
 func main() {
-    cm := &checkpoint_manager{}
+    cm := *checkpoint_manager{}
     if err := cm.init("./checkpoints", 5); err != nil {
         println("Error initializing checkpoint manager:", err.Error())
         return

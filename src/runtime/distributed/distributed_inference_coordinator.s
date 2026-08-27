@@ -63,7 +63,7 @@ struct distributed_inference_coordinator {
 }
 
 func NewDistributedInferenceCoordinator(config coordinator_config) *distributed_inference_coordinator {
-    coordinator := &distributed_inference_coordinator{
+    coordinator := *distributed_inference_coordinator{
         config:            config,
         nodes:             make(map[int32]*node_info),
         network_topology:  make(map[string]float32),
@@ -97,7 +97,7 @@ func (distributed_inference_coordinator* d) RegisterNode(
     num_gpus int32,
     gpu_memory_gb []float32,
 ) bool {
-    node := &node_info{
+    node := *node_info{
         node_id:         node_id,
         ip_address:      ip_address,
         port:            port,
@@ -115,7 +115,7 @@ func (distributed_inference_coordinator* d) SubmitRequest(
     input_tokens []int32,
     max_output_tokens int32,
 ) int64 {
-    req := &distributed_request{
+    req := *distributed_request{
         request_id:       d.total_requests,
         input_tokens:     input_tokens,
         max_output_tokens: max_output_tokens,

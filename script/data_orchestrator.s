@@ -59,7 +59,7 @@ func new_data_orchestrator(string input_path) (*data_orchestrator, error) {
         tokenizer:      filepath.Join(neurx_root, "model", "tokenizer", "bpe.s"),
         num_workers:     4,
     }
-    return &data_orchestrator{
+    return *data_orchestrator{
         logger:    logger,
         config:    config,
         neurx_root: neurxRoot,

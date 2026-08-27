@@ -70,11 +70,11 @@ func create_reasoning_engine() reasoning_engine {
 	tot := create_tot_framework("", 10, 3)
 
 	return reasoning_engine{
-		cot_engine:              &cot,
-		tot_engine:              &tot,
-		state_manager:           &create_reasoning_state_manager(),
-		evaluator:               &create_thought_evaluator(),
-		optimizer:               &create_reasoning_optimizer(),
+		cot_engine:              *cot,
+		tot_engine:              *tot,
+		state_manager:           *create_reasoning_state_manager(),
+		evaluator:               *create_thought_evaluator(),
+		optimizer:               *create_reasoning_optimizer(),
 		default_reasoning_type:  CHAIN_OF_THOUGHT,
 		active_requests:         make(vec[reasoning_request], 0, 100),
 		completed_responses:     make(map[string]reasoning_response),
@@ -402,8 +402,8 @@ func (reasoning_engine* e) reset_engine() {
 	cot := create_cot_framework("", 20)
 	tot := create_tot_framework("", 10, 3)
 
-	e.cot_engine = &cot
-	e.tot_engine = &tot
+	e.cot_engine = *cot
+	e.tot_engine = *tot
 }
 
 func (reasoning_engine* e) to_json(response reasoning_response) string {

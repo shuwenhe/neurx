@@ -21,8 +21,8 @@ func NewAudioProcessor(
     sample_rate: i32,
     frame_length: i32,
     num_mels: i32
-) &AudioProcessor {
-    return &AudioProcessor{
+) *AudioProcessor {
+    return *AudioProcessor{
         sample_rate: sample_rate,
         target_sample_rate: sample_rate,
         frame_length: frame_length,
@@ -36,7 +36,7 @@ func NewAudioProcessor(
 
 func (AudioProcessor* p) Resample(
     audio: *types.AudioData
-) &types.AudioData {
+) *types.AudioData {
     if audio.sample_rate == p.target_sample_rate {
         return audio
     }
@@ -59,7 +59,7 @@ func (AudioProcessor* p) Resample(
         }
     }
 
-    return &types.AudioData{
+    return *types.AudioData{
         id: audio.id,
         samples: resampled,
         sample_rate: p.target_sample_rate,
@@ -71,7 +71,7 @@ func (AudioProcessor* p) Resample(
 
 func (AudioProcessor* p) Normalize(
     audio: *types.AudioData
-) &types.AudioData {
+) *types.AudioData {
     if len(audio.samples) == 0 {
         return audio
     }
@@ -93,7 +93,7 @@ func (AudioProcessor* p) Normalize(
         normalized[i] = audio.samples[i] / max_val
     }
 
-    return &types.AudioData{
+    return *types.AudioData{
         id: audio.id,
         samples: normalized,
         sample_rate: audio.sample_rate,
@@ -105,7 +105,7 @@ func (AudioProcessor* p) Normalize(
 
 func (AudioProcessor* p) MelSpectrogram(
     audio: *types.AudioData
-) &types.Tensor {
+) *types.Tensor {
     num_frames := (i32(len(audio.samples)) - p.frame_length) / p.hop_length + 1
 
     mel_spec := make([]f32, num_frames * p.num_mels)
@@ -130,7 +130,7 @@ func (AudioProcessor* p) MelSpectrogram(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: mel_spec,
         shape: [2]i32{num_frames, p.num_mels},
         dtype: "float32"
@@ -139,9 +139,9 @@ func (AudioProcessor* p) MelSpectrogram(
 
 func (AudioProcessor* p) ExtractFrames(
     audio: *types.AudioData
-) []&types.Tensor {
+) []*types.Tensor {
     num_frames := (i32(len(audio.samples)) - p.frame_length) / p.hop_length
-    frames := make([]&types.Tensor, num_frames)
+    frames := make([]*types.Tensor, num_frames)
 
     for i := 0; i < num_frames; i += 1 {
         start := i * p.hop_length
@@ -154,7 +154,7 @@ func (AudioProcessor* p) ExtractFrames(
             }
         }
 
-        frames[i] = &types.Tensor{
+        frames[i] = *types.Tensor{
             data: frame_data,
             shape: [1]i32{p.frame_length},
             dtype: "float32"
@@ -166,7 +166,7 @@ func (AudioProcessor* p) ExtractFrames(
 
 func (AudioProcessor* p) Process(
     audio: *types.AudioData
-) &types.Tensor {
+) *types.Tensor {
     resampled := p.Resample(audio)
 
     normalized := p.Normalize(resampled)
@@ -182,7 +182,7 @@ func (AudioProcessor* p) ProcessBatch(
     results := make([]types.Tensor, len(audios))
 
     for i := 0; i < len(audios); i += 1 {
-        results[i] = *p.Process(&audios[i])
+        results[i] = *p.Process(*audios[i])
     }
 
     return results
@@ -206,7 +206,7 @@ func (AudioProcessor* p) GetNumFrames(
 func (AudioProcessor* p) ApplyWindow(
     frame: *types.Tensor,
     window_type: string
-) &types.Tensor {
+) *types.Tensor {
     windowed := make([]f32, len(frame.data))
     n := len(frame.data)
 
@@ -222,7 +222,7 @@ func (AudioProcessor* p) ApplyWindow(
         windowed[i] = frame.data[i] * window_val
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: windowed,
         shape: frame.shape,
         dtype: "float32"

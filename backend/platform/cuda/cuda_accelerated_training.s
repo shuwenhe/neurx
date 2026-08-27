@@ -279,10 +279,10 @@ func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int v
     embedding_size := int64(vocab_size * hidden_dim) * 8
     hidden_size := int64(batch_size * seq_len * hidden_dim) * 8
     output_size := int64(batch_size * seq_len * vocab_size) * 8
-    input_ptr := gpu_malloc(&alloc, input_size)
-    embedding_ptr := gpu_malloc(&alloc, embedding_size)
-    hidden_ptr := gpu_malloc(&alloc, hidden_size)
-    output_ptr := gpu_malloc(&alloc, output_size)
+    input_ptr := gpu_malloc(*alloc, input_size)
+    embedding_ptr := gpu_malloc(*alloc, embedding_size)
+    hidden_ptr := gpu_malloc(*alloc, hidden_size)
+    output_ptr := gpu_malloc(*alloc, output_size)
     fmt.printfln("💾 GPU Memory status:")
     gpu_memory_info(alloc)
     fmt.printfln("")
@@ -290,33 +290,33 @@ func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int v
     fmt.printfln("1. embedding lookup:")
     cuda_gemm(input_ptr, embedding_ptr, hidden_ptr,
               batch_size * seq_len, hidden_dim, 1, ctx)
-    profile_kernel(&prof, "embedding_lookup", 0.5)
+    profile_kernel(*prof, "embedding_lookup", 0.5)
     fmt.printfln("")
     fmt.printfln("2. Attention computation:")
     cuda_gemm(hidden_ptr, hidden_ptr, output_ptr,
               batch_size * seq_len, batch_size * seq_len, hidden_dim, ctx)
-    profile_kernel(&prof, "multi_head_attention", 2.3)
+    profile_kernel(*prof, "multi_head_attention", 2.3)
     fmt.printfln("")
     fmt.printfln("3. Feed-forward:")
     cuda_gemm(hidden_ptr, hidden_ptr, hidden_ptr,
               batch_size * seq_len, hidden_dim * 4, hidden_dim, ctx)
-    profile_kernel(&prof, "feed_forward", 1.8)
+    profile_kernel(*prof, "feed_forward", 1.8)
     fmt.printfln("")
     fmt.printfln("4. Output projection:")
     cuda_gemm(hidden_ptr, embedding_ptr, output_ptr,
               batch_size * seq_len, vocab_size, hidden_dim, ctx)
-    profile_kernel(&prof, "output_projection", 1.2)
+    profile_kernel(*prof, "output_projection", 1.2)
     fmt.printfln("")
     fmt.printfln("Synchronizing GPU...")
     cuda_synchronize(ctx)
     fmt.printfln("")
     print_profiling_summary(prof)
     fmt.printfln("\n🧹 Cleaning up GPU memory...")
-    gpu_free(&alloc, input_ptr)
-    gpu_free(&alloc, embedding_ptr)
-    gpu_free(&alloc, hidden_ptr)
-    gpu_free(&alloc, output_ptr)
-    destroy_cuda_context(&ctx)
+    gpu_free(*alloc, input_ptr)
+    gpu_free(*alloc, embedding_ptr)
+    gpu_free(*alloc, hidden_ptr)
+    gpu_free(*alloc, output_ptr)
+    destroy_cuda_context(*ctx)
     fmt.printfln("\n✅ GPU operations complete!\n")
 }
 

@@ -49,7 +49,7 @@ struct model_system {
 
 func create_model_system(model_system_config* config) *model_system {
 	if config == nil {
-		config = &model_system_config{
+		config = *model_system_config{
 			max_models: 100,
 			max_cache_size_bytes: 10 * 1024 * 1024 * 1024,
 			enable_caching: true,
@@ -62,13 +62,13 @@ func create_model_system(model_system_config* config) *model_system {
 		}
 	}
 
-	cache_config := &cache_config{
+	cache_config := *cache_config{
 		max_size_bytes: config.max_cache_size_bytes,
 		eviction_policy: config.cache_policy,
 		ttl_seconds: config.timeout_seconds,
 	}
 
-	return &model_system{
+	return *model_system{
 		loader: create_model_loader(),
 		registry: create_model_registry(),
 		adapter_registry: create_model_adapter_registry(),
@@ -122,7 +122,7 @@ func (model_system* system) load_model(model_id string, model_type model_type, d
 	system.last_operation_time = time.Now()
 	system.mu.Unlock()
 
-	reg_info := &model_registration_info{
+	reg_info := *model_registration_info{
 		package_id: model_id,
 		model_id: model_id,
 		model_name: model.model_name,
@@ -160,7 +160,7 @@ func (model_system* system) infer(model_id string, request *inference_request) *
 	engine, exists := system.inference_engines[model_id]
 	if !exists {
 		system.mu.Unlock()
-		return &inference_response{
+		return *inference_response{
 			success: false,
 			error_message: fmt.Sprintf("model not found: %s", model_id),
 		}
@@ -179,7 +179,7 @@ func (model_system* system) batch_infer(model_id string, batch_request *batch_in
 	engine, exists := system.inference_engines[model_id]
 	if !exists {
 		system.mu.Unlock()
-		return &batch_inference_response{
+		return *batch_inference_response{
 			success: false,
 			error_message: fmt.Sprintf("model not found: %s", model_id),
 		}
@@ -240,7 +240,7 @@ func (model_system* system) check_system_health() *model_system_health {
 		cache_util = (float64(cache_stats.memory_usage_bytes) / float64(system.config.max_cache_size_bytes)) * 100.0
 	}
 
-	system.health = &model_system_health{
+	system.health = *model_system_health{
 		status: "healthy",
 		healthy: true,
 		uptime_seconds: uptime,

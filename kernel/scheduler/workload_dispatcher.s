@@ -1,6 +1,6 @@
 package neurx.kernel.scheduler.workload_dispatcher
 
-use std.vec.vec
+use std.slices
 
 struct dispatch_request {
     int request_id

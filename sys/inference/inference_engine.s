@@ -1,13 +1,13 @@
 package neurx.sys.inference
 
-use std.vec.vec
+use std.slices
 
 struct model_config {
     model_id: string
     version: int
     batch_size: int
-    input_shapes: vec[int]
-    output_shapes: vec[int]
+    input_shapes: int[]
+    output_shapes: int[]
 }
 
 struct inference_request {
@@ -25,38 +25,38 @@ struct inference_result {
 }
 
 struct inference_engine {
-    model_registry: vec[model_config]
-    active_requests: vec[inference_request]
-    result_queue: vec[inference_result]
+    model_registry: model_config[]
+    active_requests: inference_request[]
+    result_queue: inference_result[]
     next_request_id: int64
 }
 
 func create_inference_engine() inference_engine {
     engine := inference_engine {
-        model_registry: vec[model_config](),
-        active_requests: vec[inference_request](),
-        result_queue: vec[inference_result](),
+        model_registry: model_config[]{},
+        active_requests: inference_request[]{},
+        result_queue: inference_result[]{},
         next_request_id: 1
     }
     engine
 }
 
-func register_model(engine: &mut inference_engine, model_id: string, version: int) bool {
+func register_model(engine: *inference_engine, model_id: string, version: int) bool {
     model := model_config {
         model_id: model_id,
         version: version,
         batch_size: 1,
-        input_shapes: vec[int](),
-        output_shapes: vec[int]()
+        input_shapes: int[]{},
+        output_shapes: int[]{}
     }
-    engine.model_registry.push(model)
+    engine.model_registry = append(engine.model_registry, model)
     true
 }
 
-func find_model(engine: &inference_engine, model_id: string) int {
+func find_model(engine: *inference_engine, model_id: string) int {
     i := 0
-    for i < engine.model_registry.len() {
-        if engine.model_registry.data[i].model_id == model_id {
+    for i < len(engine.model_registry) {
+        if engine.model_registry[i].model_id == model_id {
             return i
         }
         i = i + 1
@@ -64,7 +64,7 @@ func find_model(engine: &inference_engine, model_id: string) int {
     -1
 }
 
-func submit_inference_request(engine: &mut inference_engine, model_id: string, batch_size: int) int64 {
+func submit_inference_request(engine: *inference_engine, model_id: string, batch_size: int) int64 {
     model_idx := find_model(engine, model_id)
     if model_idx < 0 {
         return 0
@@ -80,15 +80,15 @@ func submit_inference_request(engine: &mut inference_engine, model_id: string, b
         priority: 1,
         timeout_ms: 5000
     }
-    engine.active_requests.push(request)
+    engine.active_requests = append(engine.active_requests, request)
     request_id
 }
 
-func get_inference_result(engine: &mut inference_engine, request_id: int64) option[inference_result] {
+func get_inference_result(engine: *inference_engine, request_id: int64) option[inference_result] {
     i := 0
-    for i < engine.result_queue.len() {
-        if engine.result_queue.data[i].request_id == request_id {
-            result := engine.result_queue.data[i]
+    for i < len(engine.result_queue) {
+        if engine.result_queue[i].request_id == request_id {
+            result := engine.result_queue[i]
             return option::some(result)
         }
         i = i + 1
@@ -96,41 +96,41 @@ func get_inference_result(engine: &mut inference_engine, request_id: int64) opti
     option::none
 }
 
-func process_inference_batch(engine: &mut inference_engine) int {
+func process_inference_batch(engine: *inference_engine) int {
     count := 0
-    if engine.active_requests.len() > 0 {
-        request := engine.active_requests.data[0]
+    if len(engine.active_requests) > 0 {
+        request := engine.active_requests[0]
         
         result := inference_result {
             request_id: request.request_id,
             status: 0,
             latency_ms: 10
         }
-        engine.result_queue.push(result)
+        engine.result_queue = append(engine.result_queue, result)
         count = 1
     }
     count
 }
 
-func get_engine_stats(engine: &inference_engine) (int, int, int) {
-    (engine.model_registry.len(), engine.active_requests.len(), engine.result_queue.len())
+func get_engine_stats(engine: *inference_engine) (int, int, int) {
+    (len(engine.model_registry), len(engine.active_requests), len(engine.result_queue))
 }
 
-func set_model_batch_size(engine: &mut inference_engine, model_id: string, batch_size: int) bool {
+func set_model_batch_size(engine: *inference_engine, model_id: string, batch_size: int) bool {
     idx := find_model(engine, model_id)
     if idx >= 0 && batch_size > 0 {
-        engine.model_registry.data[idx].batch_size = batch_size
+        engine.model_registry[idx].batch_size = batch_size
         return true
     }
     false
 }
 
-func unload_model(engine: &mut inference_engine, model_id: string) bool {
+func unload_model(engine: *inference_engine, model_id: string) bool {
     idx := find_model(engine, model_id)
     if idx >= 0 {
         i := idx
-        for i < engine.model_registry.len() - 1 {
-            engine.model_registry.data[i] = engine.model_registry.data[i + 1]
+        for i < len(engine.model_registry) - 1 {
+            engine.model_registry[i] = engine.model_registry[i + 1]
             i = i + 1
         }
         return true
@@ -138,12 +138,12 @@ func unload_model(engine: &mut inference_engine, model_id: string) bool {
     false
 }
 
-func clear_result_queue(engine: &mut inference_engine) {
-    engine.result_queue = vec[inference_result]()
+func clear_result_queue(engine: *inference_engine) {
+    engine.result_queue = inference_result[]{}
 }
 
-func shutdown_inference_engine(engine: &mut inference_engine) {
-    engine.active_requests = vec[inference_request]()
-    engine.result_queue = vec[inference_result]()
-    engine.model_registry = vec[model_config]()
+func shutdown_inference_engine(engine: *inference_engine) {
+    engine.active_requests = inference_request[]{}
+    engine.result_queue = inference_result[]{}
+    engine.model_registry = model_config[]{}
 }

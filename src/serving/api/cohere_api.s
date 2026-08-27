@@ -76,7 +76,7 @@ struct cohere_api_server {
 }
 
 func create_cohere_api_server(llm_engine* engine, int32 port) cohere_api_server* {
-    return &cohere_api_server{
+    return *cohere_api_server{
         engine: engine,
         api_version: "2023-11-01",
         api_key: core.get_env("COHERE_API_KEY"),
@@ -103,7 +103,7 @@ func (cohere_api_server* srv) verify_api_key(string api_key) bool {
 }
 
 func (cohere_api_server* srv) generate(cohere_generate_request* req) (cohere_generate_response*, error) {
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: req.prompt,
         model_id: "cohere",
         config: generation_config{
@@ -119,7 +119,7 @@ func (cohere_api_server* srv) generate(cohere_generate_request* req) (cohere_gen
         return nil, err
     }
 
-    cohere_resp := &cohere_generate_response{
+    cohere_resp := *cohere_generate_response{
         generations: resp.generated_text,
         token_likelihoods: make([]interface{}, 0),
         meta: make(map[string]interface{}),
@@ -129,7 +129,7 @@ func (cohere_api_server* srv) generate(cohere_generate_request* req) (cohere_gen
 }
 
 func (cohere_api_server* srv) chat(cohere_chat_request* req) (cohere_chat_response*, error) {
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: req.message,
         model_id: req.model,
     }
@@ -139,7 +139,7 @@ func (cohere_api_server* srv) chat(cohere_chat_request* req) (cohere_chat_respon
         return nil, err
     }
 
-    chat_resp := &cohere_chat_response{
+    chat_resp := *cohere_chat_response{
         text: "",
         chat_history: make([]cohere_chat_message*, 0),
         citations: make([]interface{}, 0),
@@ -158,7 +158,7 @@ func (cohere_api_server* srv) embed(cohere_embed_request* req) (cohere_embed_res
         embeddings = append(embeddings, embedding)
     }
 
-    embed_resp := &cohere_embed_response{
+    embed_resp := *cohere_embed_response{
         embeddings: embeddings,
         model: req.model,
         meta: make(map[string]interface{}),

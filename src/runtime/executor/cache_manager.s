@@ -9,7 +9,7 @@ struct KVCacheBlockAllocator {
 }
 
 func NewKVCacheManager(total_size_gb f64, eviction_policy i32) *KVCacheManager {
-    manager := &KVCacheManager{
+    manager := *KVCacheManager{
         total_size_gb: total_size_gb,
         allocated_mb: 0,
         free_mb: i32(total_size_gb * 1024),

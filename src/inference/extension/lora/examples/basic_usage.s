@@ -1,6 +1,6 @@
 package neurx.lora.examples.basic_usage
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -9,7 +9,7 @@ use neurx.lora.lora_config::{lora_config}
 use neurx.lora.lora_adapter::{lora_adapter}
 use neurx.lora.lora_manager::{lora_adapter_manager}
 
-func example_create_basic_adapter() result[(), string] {
+func example_create_basic_adapter() ((), string) {
 
     config := lora_config::default()
     config.lora_rank = 8
@@ -23,7 +23,7 @@ func example_create_basic_adapter() result[(), string] {
 
     config.validate().map_err(|e| e.message)
 
-    adapter := lora_adapter::new("lora_basic", &config)
+    adapter := lora_adapter::new("lora_basic", *config)
 
     lora_a := vec[vec[float]]()
     i := 0
@@ -62,7 +62,7 @@ func example_create_basic_adapter() result[(), string] {
     ((, ""))
 }
 
-func example_apply_lora() result[(), string] {
+func example_apply_lora() ((), string) {
 
     config := lora_config::default()
     config.lora_rank = 4
@@ -72,7 +72,7 @@ func example_apply_lora() result[(), string] {
     targets.push("dense")
     config.target_modules = targets
 
-    adapter := lora_adapter::new("lora_apply", &config)
+    adapter := lora_adapter::new("lora_apply", *config)
 
     lora_a := vec[vec[float]]()
     i := 0
@@ -118,7 +118,7 @@ func example_apply_lora() result[(), string] {
     ((, ""))
 }
 
-func example_adapter_manager() result[(), string] {
+func example_adapter_manager() ((), string) {
     manager := lora_adapter_manager::new()
 
     config1 := lora_config::default()
@@ -127,8 +127,8 @@ func example_adapter_manager() result[(), string] {
     targets1.push("q_proj")
     config1.target_modules = targets1
 
-    adapter1 := lora_adapter::new("adapter_1", &config1)
-    manager.add_adapter("adapter_1", &adapter1)
+    adapter1 := lora_adapter::new("adapter_1", *config1)
+    manager.add_adapter("adapter_1", *adapter1)
 
     config2 := lora_config::default()
     config2.lora_rank = 16
@@ -136,8 +136,8 @@ func example_adapter_manager() result[(), string] {
     targets2.push("v_proj")
     config2.target_modules = targets2
 
-    adapter2 := lora_adapter::new("adapter_2", &config2)
-    manager.add_adapter("adapter_2", &adapter2)
+    adapter2 := lora_adapter::new("adapter_2", *config2)
+    manager.add_adapter("adapter_2", *adapter2)
 
     manager.activate_adapter("adapter_1")
     manager.activate_adapter("adapter_2")
@@ -155,14 +155,14 @@ func example_adapter_manager() result[(), string] {
     ((, ""))
 }
 
-func example_batch_apply_lora() result[(), string] {
+func example_batch_apply_lora() ((), string) {
     config := lora_config::default()
     config.lora_rank = 4
     targets := vec[string]()
     targets.push("linear")
     config.target_modules = targets
 
-    adapter := lora_adapter::new("lora_batch", &config)
+    adapter := lora_adapter::new("lora_batch", *config)
 
     lora_a := vec[vec[float]]()
     i := 0
@@ -192,7 +192,7 @@ func example_batch_apply_lora() result[(), string] {
 
     adapter.add_module_weights("linear", lora_a, lora_b)
 
-    inputs := vec[&vec[float]]()
+    inputs := vec[*vec[float]]()
     batch_size := 4
     seq_len := 32
 

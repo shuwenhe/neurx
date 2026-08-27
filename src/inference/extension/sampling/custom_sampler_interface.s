@@ -26,7 +26,7 @@ struct greedy_sampler {
 }
 
 func create_greedy_sampler(int32 seed) greedy_sampler* {
-	return &greedy_sampler{
+	return *greedy_sampler{
 		seed: seed,
 	}
 }
@@ -86,7 +86,7 @@ func create_top_k_sampler(int32 k, float32 temperature, int32 seed) top_k_sample
 		temperature = 1.0
 	}
 
-	return &top_k_sampler{
+	return *top_k_sampler{
 		k: k,
 		seed: seed,
 		temperature: temperature,
@@ -197,7 +197,7 @@ func create_top_p_sampler(float32 p_val, float32 temperature, int32 seed) top_p_
 		temperature = 1.0
 	}
 
-	return &top_p_sampler{
+	return *top_p_sampler{
 		p: p_val,
 		seed: seed,
 		temperature: temperature,
@@ -309,7 +309,7 @@ struct sampler_factory {
 }
 
 func create_sampler_factory() sampler_factory* {
-	return &sampler_factory{
+	return *sampler_factory{
 		samplers: make(map[sampler_type]interface{}),
 	}
 }

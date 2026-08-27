@@ -1,6 +1,6 @@
 package neurx.lora.lora_utils
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -14,7 +14,7 @@ func init_lora_weights_kaiming(
     in_features: int,
     out_features: int,
     rank: int
-) result[(vec[vec[float]], vec[vec[float]]), lora_utils_error] {
+) ((vec[vec[float)], vec[vec[float]]), lora_utils_error] {
     if in_features <= 0 || out_features <= 0 || rank <= 0 {
         return (lora_utils_error {
             code: "INVALID_DIMS",
@@ -75,8 +75,8 @@ func gaussian_random(float std) float {
 }
 
 func load_lora_weights_from_dict(
-    weights_dict: *map[string, &vec[vec[float]]]
-) result[&map[string, (vec[vec[float]], vec[vec[float]])], lora_utils_error] {
+    weights_dict: *map[string, *vec[vec[float]]]
+) (*map[string, (vec[vec[float)], vec[vec[float]])], lora_utils_error] {
     result_weights := map[string, (vec[vec[float]], vec[vec[float]])]()
 
     for name in weights_dict.keys() {
@@ -95,7 +95,7 @@ func load_lora_weights_from_dict(
 func save_lora_weights_to_file(
     output_path: string,
     weights: *map[string, (vec[vec[float]], vec[vec[float]])]
-) result[(), lora_utils_error] {
+) ((), lora_utils_error) {
     if output_path.len() == 0 {
         return (lora_utils_error {
             code: "INVALID_PATH",
@@ -108,7 +108,7 @@ func save_lora_weights_to_file(
 
 func load_lora_weights_from_file(
     file_path: string
-) result[&map[string, (vec[vec[float]], vec[vec[float]])], lora_utils_error] {
+) (*map[string, (vec[vec[float)], vec[vec[float]])], lora_utils_error] {
     if file_path.len() == 0 {
         return (lora_utils_error {
             code: "INVALID_PATH",
@@ -124,7 +124,7 @@ func load_lora_weights_from_file(
 func estimate_lora_rank(
     delta_weights: *vec[vec[float]],
     threshold: float
-) result[int, lora_utils_error] {
+) (int, lora_utils_error) {
     if delta_weights.len() == 0 {
         return (lora_utils_error {
             code: "EMPTY_WEIGHTS",
@@ -162,8 +162,8 @@ func estimate_lora_rank(
 }
 
 func merge_lora_configs(
-    configs: *vec[&map[string, string]]
-) result[&map[string, string], lora_utils_error] {
+    configs: *vec[*map[string, string]]
+) (*map[string, string), lora_utils_error] {
     if configs.len() == 0 {
         return (lora_utils_error {
             code: "EMPTY_CONFIGS",
@@ -192,7 +192,7 @@ func validate_lora_weight_shapes(
     expected_in_features: int,
     expected_out_features: int,
     expected_rank: int
-) result[(), lora_utils_error] {
+) ((), lora_utils_error) {
 
     if lora_a.len() != expected_in_features {
         return (lora_utils_error {
@@ -242,7 +242,7 @@ func calculate_lora_memory_mb(
 func normalize_lora_weights(
     lora_a: *vec[vec[float]],
     lora_b: *vec[vec[float]]
-) result[(vec[vec[float]], vec[vec[float]]), lora_utils_error] {
+) ((vec[vec[float)], vec[vec[float]]), lora_utils_error] {
     if lora_a.len() == 0 || lora_b.len() == 0 {
         return (lora_utils_error {
             code: "EMPTY_WEIGHTS",
@@ -324,7 +324,7 @@ func normalize_lora_weights(
 func check_lora_weights_validity(
     lora_a: *vec[vec[float]],
     lora_b: *vec[vec[float]]
-) result[(), lora_utils_error] {
+) ((), lora_utils_error) {
     i := 0
     for i < lora_a.len() {
         j := 0

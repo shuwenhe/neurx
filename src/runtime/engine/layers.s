@@ -112,7 +112,7 @@ struct transformer_block_state {
 }
 
 func create_layer_config(int32 layer_id, int32 hidden_size, int32 num_heads) layer_config* {
-    return &layer_config{
+    return *layer_config{
         layer_id: layer_id,
         hidden_size: hidden_size,
         num_attention_heads: num_heads,
@@ -128,7 +128,7 @@ func create_layer_config(int32 layer_id, int32 hidden_size, int32 num_heads) lay
 }
 
 func create_attention_config(int32 hidden_size, int32 num_heads, int32 max_seq) attention_config* {
-    return &attention_config{
+    return *attention_config{
         hidden_size: hidden_size,
         num_attention_heads: num_heads,
         num_key_value_heads: num_heads / 2,
@@ -140,7 +140,7 @@ func create_attention_config(int32 hidden_size, int32 num_heads, int32 max_seq) 
 }
 
 func create_mlp_config(int32 hidden_size, activation_fn_type fn) mlp_config* {
-    return &mlp_config{
+    return *mlp_config{
         hidden_size: hidden_size,
         intermediate_size: hidden_size * 11 / 3,
         activation_fn: fn,
@@ -149,7 +149,7 @@ func create_mlp_config(int32 hidden_size, activation_fn_type fn) mlp_config* {
 }
 
 func create_embedding_config(int32 vocab_size, int32 hidden_size, int32 max_pos, model_dtype dtype) embedding_config* {
-    return &embedding_config{
+    return *embedding_config{
         vocab_size: vocab_size,
         hidden_size: hidden_size,
         max_position_embeddings: max_pos,
@@ -170,7 +170,7 @@ func (embedding_state* es) normalize(interface{} embeddings) interface{} {
 }
 
 func create_embedding_layer(embedding_config* config) embedding_state* {
-    return &embedding_state{
+    return *embedding_state{
         token_embeddings: nil,
         position_embeddings: nil,
         norm_weight: nil,
@@ -179,7 +179,7 @@ func create_embedding_layer(embedding_config* config) embedding_state* {
 }
 
 func (attention_state* as) forward(interface{} hidden_states, interface{} attention_mask) (attention_output*, error) {
-    output := &attention_output{
+    output := *attention_output{
         hidden_states: nil,
         attention_weights: nil,
         cache_kv: nil,
@@ -204,7 +204,7 @@ func create_attention_layer(attention_config* config) attention_state* {
     head_dim := config.hidden_size / config.num_attention_heads
     scale := float32(1.0) / float32(head_dim)
 
-    return &attention_state{
+    return *attention_state{
         query_proj: nil,
         key_proj: nil,
         value_proj: nil,
@@ -215,7 +215,7 @@ func create_attention_layer(attention_config* config) attention_state* {
 }
 
 func (mlp_state* ms) forward(interface{} hidden_states) (mlp_output*, error) {
-    output := &mlp_output{
+    output := *mlp_output{
         hidden_states: nil,
         computation_time_ms: 0.0,
     }
@@ -250,7 +250,7 @@ func activate(interface{} x, activation_fn_type fn) interface{} {
 }
 
 func create_mlp_layer(mlp_config* config) mlp_state* {
-    return &mlp_state{
+    return *mlp_state{
         gate_proj: nil,
         down_proj: nil,
         up_proj: nil,
@@ -270,7 +270,7 @@ func (layer_norm_state* lns) rms_norm(interface{} x, float32 eps) interface{} {
 }
 
 func create_layer_norm(layer_norm_config* config) layer_norm_state* {
-    return &layer_norm_state{
+    return *layer_norm_state{
         weight: nil,
         bias: nil,
     }
@@ -304,13 +304,13 @@ func create_transformer_block(layer_config* config) transformer_block_state* {
     attn_config := create_attention_config(config.hidden_size, config.num_attention_heads, config.max_seq_length)
     mlp_cfg := create_mlp_config(config.hidden_size, config.activation_fn)
 
-    ln_config := &layer_norm_config{
+    ln_config := *layer_norm_config{
         hidden_size: config.hidden_size,
         eps: config.layer_norm_eps,
         elementwise_affine: true,
     }
 
-    return &transformer_block_state{
+    return *transformer_block_state{
         self_attention: create_attention_layer(attn_config),
         mlp_layer: create_mlp_layer(mlp_cfg),
         input_norm: create_layer_norm(ln_config),

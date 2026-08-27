@@ -109,7 +109,7 @@ struct audio_processor {
 }
 
 func create_audio_processor() *audio_processor {
-	ap := &audio_processor{
+	ap := *audio_processor{
 		loaded_audios:           make(map[string]*audio_data),
 		default_sample_rate:     16000,
 		target_sample_rate:      16000,
@@ -132,7 +132,7 @@ func (audio_processor* ap) load_audio(audio_id string, samples []float32, metada
 		return fmt.Errorf("empty audio samples")
 	}
 
-	audio := &audio_data{
+	audio := *audio_data{
 		samples:           samples,
 		metadata:          metadata,
 		audio_id:          audio_id,
@@ -274,7 +274,7 @@ func (audio_processor* ap) compute_spectrogram(audio_id string) (*spectrogram_da
 		}
 	}
 
-	spec_data := &spectrogram_data{
+	spec_data := *spectrogram_data{
 		spectrogram:   spectrogram,
 		num_frames:    int32(num_frames),
 		freq_bins:     int32(freq_bins),
@@ -316,7 +316,7 @@ func (audio_processor* ap) compute_mfcc(audio_id string) (*mfcc_features, error)
 		}
 	}
 
-	mfcc := &mfcc_features{
+	mfcc := *mfcc_features{
 		coefficients:        coefficients,
 		num_frames:          spectrogram.num_frames,
 		num_coefficients:    int32(num_filters),
@@ -406,7 +406,7 @@ func (audio_processor* ap) get_audio_stats(audio_id string) (*audio_stats, error
 
 	dynamic_range := 20 * 1.0
 
-	stats := &audio_stats{
+	stats := *audio_stats{
 		mean_amplitude:      mean,
 		std_deviation:       std_dev,
 		min_value:           min_val,

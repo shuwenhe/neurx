@@ -85,7 +85,7 @@ struct speech_to_text_server {
 }
 
 func create_speech_to_text_server(llm_engine* engine, int32 port) speech_to_text_server* {
-    return &speech_to_text_server{
+    return *speech_to_text_server{
         engine: engine,
         default_model: audio_model_whisper,
         port: port,
@@ -138,7 +138,7 @@ func (speech_to_text_server* srv) transcribe(transcription_request* req) (transc
 
     segments := make([]transcription_segment*, 0)
 
-    segment := &transcription_segment{
+    segment := *transcription_segment{
         id: 0,
         start_time_ms: 0,
         end_time_ms: req.config.duration_ms,
@@ -148,7 +148,7 @@ func (speech_to_text_server* srv) transcribe(transcription_request* req) (transc
     }
     segments = append(segments, segment)
 
-    resp := &transcription_response{
+    resp := *transcription_response{
         id: core.generate_uuid(),
         text: "",
         segments: segments,
@@ -165,7 +165,7 @@ func (speech_to_text_server* srv) transcribe(transcription_request* req) (transc
 func (speech_to_text_server* srv) synthesize(text_to_speech_request* req) (text_to_speech_response*, error) {
     audio_data := make([]uint8, 0)
 
-    resp := &text_to_speech_response{
+    resp := *text_to_speech_response{
         id: core.generate_uuid(),
         audio_data: audio_data,
         config: audio_config{

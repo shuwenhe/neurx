@@ -1,6 +1,6 @@
 package neurx.mm
 
-use std.vec.vec
+use std.slices
 use std.collections.hashmap
 
 // 页表项结构

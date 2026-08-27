@@ -29,7 +29,7 @@ func NewChunkedPrefillProcessor(config chunk_config) *chunked_prefill_processor 
     if config.chunk_size <= 0 {
         config.chunk_size = 512
     }
-    return &chunked_prefill_processor{
+    return *chunked_prefill_processor{
         config:       config,
         chunks:       make([]chunk_state, 0),
         total_tokens: 0,
@@ -148,7 +148,7 @@ func NewRingAttentionProcessor(
     sequence_length int32,
     block_size int32,
 ) *ring_attention_processor {
-    return &ring_attention_processor{
+    return *ring_attention_processor{
         num_devices:     num_devices,
         sequence_length: sequence_length,
         block_size:      block_size,
@@ -215,7 +215,7 @@ struct long_context_optimizer {
 func NewLongContextOptimizer(
     config long_context_optimization_config,
 ) *long_context_optimizer {
-    optimizer := &long_context_optimizer{
+    optimizer := *long_context_optimizer{
         config: config,
     }
     if config.enable_chunked_prefill {

@@ -114,8 +114,8 @@ struct VideoFeatures {
 struct FusedFeatures {
     id: string,
     fused_embedding: *types.Tensor,
-    modality_embeddings: map[Modality, &types.Tensor],
-    attention_weights: map[Modality, &types.Tensor],
+    modality_embeddings: map[Modality, *types.Tensor],
+    attention_weights: map[Modality, *types.Tensor],
     fusion_type: string
 }
 

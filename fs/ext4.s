@@ -1,6 +1,6 @@
 package neurx.fs.ext4
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use neurx.kernel.locking.mutex
@@ -48,12 +48,12 @@ struct ext4_dir_entry {
     rec_len: u16,
     name_len: u8,
     file_type: u8,
-    name: &string,
+    name: *string,
 }
 
 struct ext4_file {
     inode_num: u32,
-    inode: &ext4_inode,
+    inode: *ext4_inode,
     block_offset: u32,
     mode: file_mode,
     ref_count: u32,
@@ -66,7 +66,7 @@ enum file_mode {
 }
 
 struct ext4_filesystem {
-    superblock: &ext4_superblock,
+    superblock: *ext4_superblock,
     block_groups: vec[block_group_descriptor],
     inode_table: vec[ext4_inode],
     open_files: vec[ext4_file],
@@ -82,8 +82,8 @@ struct block_group_descriptor {
     used_dirs_count: u16,
 }
 
-func create_superblock(block_size: u32, total_blocks: u32) result[&ext4_superblock, string] {
-    let sb := &ext4_superblock{
+func create_superblock(block_size: u32, total_blocks: u32) (*ext4_superblock, string) {
+    let sb := *ext4_superblock{
         total_inodes: 65536,
         block_size: block_size,
         fragment_size: block_size,
@@ -97,26 +97,26 @@ func create_superblock(block_size: u32, total_blocks: u32) result[&ext4_superblo
         magic: 0xef53,
         state: 1,
         revision_level: 1,
-    } as &ext4_superblock
+    } as *ext4_superblock
 
     result::ok(sb)
 }
 
-func new_ext4_filesystem(block_size: u32) result[&ext4_filesystem, string] {
+func new_ext4_filesystem(block_size: u32) (*ext4_filesystem, string) {
     let sb := create_superblock(block_size, 1000000)?
 
-    let fs := &ext4_filesystem{
+    let fs := *ext4_filesystem{
         superblock: sb,
         block_groups: vec[block_group_descriptor](),
         inode_table: vec[ext4_inode](),
         open_files: vec[ext4_file](),
         lock: mutex::new(),
-    } as &ext4_filesystem
+    } as *ext4_filesystem
 
     result::ok(fs)
 }
 
-func (fs: &mut ext4_filesystem) format() result[void, string] {
+func (fs: *ext4_filesystem) format() (void, string) {
     let _guard := fs.lock.lock()?
 
     let blocks_per_group := fs.superblock.blocks_per_group
@@ -168,7 +168,7 @@ func initialize_blocks() u32[12] {
     blocks
 }
 
-func (fs: &mut ext4_filesystem) create_inode(mode: u16) result[u32, string] {
+func (fs: *ext4_filesystem) create_inode(mode: u16) (u32, string) {
     let _guard := fs.lock.lock()?
 
     let inode_num := fs.inode_table.len() as u32
@@ -199,7 +199,7 @@ func (fs: &mut ext4_filesystem) create_inode(mode: u16) result[u32, string] {
     result::ok(inode_num)
 }
 
-func (fs: &mut ext4_filesystem) delete_inode(inode_num: u32) result[void, string] {
+func (fs: *ext4_filesystem) delete_inode(inode_num: u32) (void, string) {
     let _guard := fs.lock.lock()?
 
     if (inode_num as u32) >= fs.inode_table.len() as u32 {
@@ -209,31 +209,31 @@ func (fs: &mut ext4_filesystem) delete_inode(inode_num: u32) result[void, string
     result::ok(())
 }
 
-func (fs: &mut ext4_filesystem) open_file(
+func (fs: *ext4_filesystem) open_file(
     inode_num: u32,
     mode: file_mode,
-) result[&ext4_file, string] {
+) (*ext4_file, string) {
     let _guard := fs.lock.lock()?
 
     if (inode_num as u32) >= fs.inode_table.len() as u32 {
         return result::err("inode not found")
     }
 
-    let inode_ref := &fs.inode_table.get(inode_num) as &ext4_inode
+    let inode_ref := *fs.inode_table.get(inode_num) as *ext4_inode
 
-    let file := &ext4_file{
+    let file := *ext4_file{
         inode_num: inode_num,
         inode: inode_ref,
         block_offset: 0,
         mode: mode,
         ref_count: 1,
-    } as &ext4_file
+    } as *ext4_file
 
     fs.open_files.push(file)
     result::ok(file)
 }
 
-func (fs: &mut ext4_filesystem) close_file(inode_num: u32) result[void, string] {
+func (fs: *ext4_filesystem) close_file(inode_num: u32) (void, string) {
     let _guard := fs.lock.lock()?
 
     let mut found := false
@@ -262,7 +262,7 @@ func (fs: &mut ext4_filesystem) close_file(inode_num: u32) result[void, string] 
     }
 }
 
-func (fs: &mut ext4_filesystem) allocate_block() result[u32, string] {
+func (fs: *ext4_filesystem) allocate_block() (u32, string) {
     let _guard := fs.lock.lock()?
 
     for group in fs.block_groups {
@@ -275,7 +275,7 @@ func (fs: &mut ext4_filesystem) allocate_block() result[u32, string] {
     result::err("no free blocks available")
 }
 
-func (fs: &mut ext4_filesystem) free_block(block_num: u32) result[void, string] {
+func (fs: *ext4_filesystem) free_block(block_num: u32) (void, string) {
     let _guard := fs.lock.lock()?
 
     for group in fs.block_groups {
@@ -288,21 +288,21 @@ func (fs: &mut ext4_filesystem) free_block(block_num: u32) result[void, string] 
     result::err("block not found")
 }
 
-func (fs: &mut ext4_filesystem) write_inode(inode_num: u32, data: &u8[], offset: u32) result[u32, string] {
+func (fs: *ext4_filesystem) write_inode(inode_num: u32, data: *u8[], offset: u32) (u32, string) {
     let _guard := fs.lock.lock()?
 
     if (inode_num as u32) >= fs.inode_table.len() as u32 {
         return result::err("inode not found")
     }
 
-    let inode := &fs.inode_table.get(inode_num) as &ext4_inode
+    let inode := *fs.inode_table.get(inode_num) as *ext4_inode
     inode.size = inode.size + (data.len() as u32)
     inode.mtime = 0
 
     result::ok(data.len() as u32)
 }
 
-func (fs: &mut ext4_filesystem) read_inode(inode_num: u32, offset: u32, size: u32) result[vec[u8], string] {
+func (fs: *ext4_filesystem) read_inode(inode_num: u32, offset: u32, size: u32) (vec[u8), string] {
     let _guard := fs.lock.lock()?
 
     let buffer := vec[u8]()
@@ -319,7 +319,7 @@ struct ext4_statistics {
     block_size: u32,
 }
 
-func (fs: &mut ext4_filesystem) get_statistics() result[ext4_statistics, string] {
+func (fs: *ext4_filesystem) get_statistics() (ext4_statistics, string) {
     let _guard := fs.lock.lock()?
 
     let mut total_blocks := 0
@@ -343,10 +343,10 @@ func (fs: &mut ext4_filesystem) get_statistics() result[ext4_statistics, string]
     result::ok(stats)
 }
 
-func (fs: &mut ext4_filesystem) journal_add_transaction(inode_num: u32) result[void, string] {
+func (fs: *ext4_filesystem) journal_add_transaction(inode_num: u32) (void, string) {
     result::ok(())
 }
 
-func (fs: &mut ext4_filesystem) journal_commit() result[void, string] {
+func (fs: *ext4_filesystem) journal_commit() (void, string) {
     result::ok(())
 }

@@ -34,7 +34,7 @@ struct http_server {
 }
 
 func create_http_server(string host, int32 port, inference_engine* eng) http_server* {
-    return &http_server{
+    return *http_server{
         host: host,
         port: port,
         engine: eng,

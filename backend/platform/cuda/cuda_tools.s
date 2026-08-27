@@ -129,7 +129,7 @@ func build_runtime_alt(string root) int {
     string build_dir = root + "/artifact/build/cuda_runtime"
     runtime_make_dirs(build_dir)
     string lib = build_dir + "/libcuda_runtime.so"
-    string code = "#include <cuda_runtime.h>\n#include <cublas_v2.h>\n#include <stdint.h>\nextern \"C\" int64_t cuda_malloc(int size) { void *ptr = 0; cudaMalloc(&ptr, size); return (int64_t)ptr; }\nextern \"C\" int cuda_free(int64_t ptr) { cudaFree((void*)ptr); return 0; }\nextern \"C\" int cuda_device_synchronize() { cudaDeviceSynchronize(); return 0; }\nextern \"C\" int64_t cublas_create_api() { cublasHandle_t h; cublasCreate_v2(&h); return (int64_t)h; }\nextern \"C\" int cublas_destroy_api(int64_t h) { cublasDestroy_v2((cublasHandle_t)h); return 0; }\n"
+    string code = "#include <cuda_runtime.h>\n#include <cublas_v2.h>\n#include <stdint.h>\nextern \"C\" int64_t cuda_malloc(int size) { void *ptr = 0; cudaMalloc(*ptr, size); return (int64_t)ptr; }\nextern \"C\" int cuda_free(int64_t ptr) { cudaFree((void*)ptr); return 0; }\nextern \"C\" int cuda_device_synchronize() { cudaDeviceSynchronize(); return 0; }\nextern \"C\" int64_t cublas_create_api() { cublasHandle_t h; cublasCreate_v2(*h); return (int64_t)h; }\nextern \"C\" int cublas_destroy_api(int64_t h) { cublasDestroy_v2((cublasHandle_t)h); return 0; }\n"
     string src = build_dir + "/cuda_runtime_alt.cu"
     runtime_write_text_file(src, code)
     if !run_logged("nvcc -shared -Xcompiler -fPIC " + shell_escape(src) + " -o " + shell_escape(lib) + " -lcudart -lcublas -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0") { return 1 }

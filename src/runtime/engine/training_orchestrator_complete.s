@@ -63,25 +63,25 @@ func create_training_orchestrator(training_config cfg) (training_state, error) {
         steps_since_checkpoint: 0,
     }
     if cfg.distributed_backend != "none" {
-        err := init_distributed_training(&state, cfg)
+        err := init_distributed_training(*state, cfg)
         if err != nil {
             return state, err
         }
     }
-    err := init_device(&state, cfg)
+    err := init_device(*state, cfg)
     if err != nil {
         return state, err
     }
-    err = create_model(&state, cfg)
+    err = create_model(*state, cfg)
     if err != nil {
         return state, err
     }
-    err = create_optimizer_and_scheduler(&state, cfg)
+    err = create_optimizer_and_scheduler(*state, cfg)
     if err != nil {
         return state, err
     }
     if cfg.resume_from_checkpoint {
-        err = load_checkpoint(&state, cfg.resume_checkpoint_path)
+        err = load_checkpoint(*state, cfg.resume_checkpoint_path)
         if err != nil {
             return state, err
         }

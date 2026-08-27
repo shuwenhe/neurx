@@ -27,7 +27,7 @@ struct config_manager {
 }
 
 func create_config_manager() config_manager* {
-    return &config_manager{
+    return *config_manager{
         model_cfg: nil,
         attention_cfg: nil,
         parallel_cfg: nil,
@@ -45,17 +45,17 @@ func create_config_manager() config_manager* {
 }
 
 func (config_manager* mgr) initialize_all_defaults() {
-    mgr.model_cfg = &create_default_model_config()
-    mgr.attention_cfg = &create_default_attention_config()
-    mgr.parallel_cfg = &create_default_parallel_config()
-    mgr.quant_cfg = &create_default_quantization_config()
-    mgr.scheduler_cfg = &create_default_scheduler_config()
-    mgr.spec_cfg = &create_default_speculative_config()
-    mgr.lora_cfg = &create_default_lora_config()
-    mgr.kv_cfg = &create_default_kv_transfer_config()
-    mgr.cache_cfg = &create_default_cache_config()
-    mgr.device_cfg = &create_default_device_config()
-    mgr.kernel_cfg = &create_default_kernel_config()
+    mgr.model_cfg = *create_default_model_config()
+    mgr.attention_cfg = *create_default_attention_config()
+    mgr.parallel_cfg = *create_default_parallel_config()
+    mgr.quant_cfg = *create_default_quantization_config()
+    mgr.scheduler_cfg = *create_default_scheduler_config()
+    mgr.spec_cfg = *create_default_speculative_config()
+    mgr.lora_cfg = *create_default_lora_config()
+    mgr.kv_cfg = *create_default_kv_transfer_config()
+    mgr.cache_cfg = *create_default_cache_config()
+    mgr.device_cfg = *create_default_device_config()
+    mgr.kernel_cfg = *create_default_kernel_config()
     mgr.initialized = true
 }
 

@@ -353,7 +353,7 @@ func (apiserver* server) print_stats() {
 }
 
 func new_api_server(string host, int port) *apiserver {
-    return &apiserver{
+    return *apiserver{
         host:               host,
         port:               port,
         routes:             make(map[string]string),

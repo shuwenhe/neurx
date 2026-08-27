@@ -15,7 +15,7 @@ func syscall_rt_sigaction(sig int32, act sigaction*, oldact sigaction*, sigset_s
             new_action.sa_mask = act->sa_mask
         }
         
-        int result = do_sigaction(0, sig, &new_action, &old_action)
+        int result = do_sigaction(0, sig, *new_action, *old_action)
         
         if result == 0 && oldact != 0 {
             oldact->sa_handler = old_action.sa_handler
@@ -37,7 +37,7 @@ func syscall_rt_sigprocmask(how int32, set int64*, oldset int64*) int {
         }
         
         int64 old_set = 0
-        int result = do_sigprocmask(0, how, &new_set, &old_set)
+        int result = do_sigprocmask(0, how, *new_set, *old_set)
         
         if result == 0 && oldset != 0 {
             oldset* = old_set
@@ -88,7 +88,7 @@ func syscall_signal(sig int32, handler func ptr) func ptr {
         new_action.sa_flags = SA_RESETHAND | SA_RESTART
         new_action.sa_mask = 0
         
-        int result = do_sigaction(0, sig, &new_action, &old_action)
+        int result = do_sigaction(0, sig, *new_action, *old_action)
         
         if result == 0 {
             return old_action.sa_handler
@@ -114,7 +114,7 @@ func syscall_sigpending(set int64*) int {
     if set == 0 {
         return -14
     } else {
-        signal_context* ctx = &global_signal_manager.contexts[0]
+        signal_context* ctx = *global_signal_manager.contexts[0]
         set* = ctx->pending_mask
         return 0
     }
@@ -134,7 +134,7 @@ func syscall_rt_sigpending(set int64*, sigset_size int64) int {
     } else if sigset_size != 8 {
         return -22
     } else {
-        signal_context* ctx = &global_signal_manager.contexts[0]
+        signal_context* ctx = *global_signal_manager.contexts[0]
         set* = ctx->pending_mask
         return 0
     }

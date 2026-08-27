@@ -22,7 +22,7 @@ func generate_initial_constraint(*json_schema schema) token_constraint {
               schema.type_name == schema_types.TYPE_INTEGER {
 
         constraint.allowed_tokens.append(45)
-        add_digit_tokens(&constraint.allowed_tokens)
+        add_digit_tokens(*constraint.allowed_tokens)
     } else if schema.type_name == schema_types.TYPE_BOOLEAN {
 
         constraint.allowed_tokens.append(116)
@@ -66,7 +66,7 @@ func get_object_constraint(string current_output, *json_schema schema, *schema_t
     }
 
     else if ends_with(current_output, ": ") || ends_with(current_output, ":") {
-        add_value_start_tokens(&constraint.allowed_tokens)
+        add_value_start_tokens(*constraint.allowed_tokens)
     }
 
     else if context.in_string == false && count_unclosed_braces(current_output) == 0 {
@@ -82,7 +82,7 @@ func get_array_constraint(string current_output, *json_schema schema, *schema_ty
     constraint.context = "array"
 
     if ends_with(current_output, "[") {
-        add_value_start_tokens(&constraint.allowed_tokens)
+        add_value_start_tokens(*constraint.allowed_tokens)
         constraint.allowed_tokens.append(93)
     }
 
@@ -102,8 +102,8 @@ func get_string_constraint(string current_output, *json_schema schema, *schema_t
         constraint.allowed_tokens.append(34)
     } else {
 
-        add_letter_tokens(&constraint.allowed_tokens)
-        add_digit_tokens(&constraint.allowed_tokens)
+        add_letter_tokens(*constraint.allowed_tokens)
+        add_digit_tokens(*constraint.allowed_tokens)
         constraint.allowed_tokens.append(32)
         constraint.allowed_tokens.append(34)
 
@@ -121,9 +121,9 @@ func get_number_constraint(string current_output, *json_schema schema, *schema_t
 
     if len(context.current_value) == 0 {
         constraint.allowed_tokens.append(45)
-        add_digit_tokens(&constraint.allowed_tokens)
+        add_digit_tokens(*constraint.allowed_tokens)
     } else {
-        add_digit_tokens(&constraint.allowed_tokens)
+        add_digit_tokens(*constraint.allowed_tokens)
         if contains_char(context.current_value, '.') == false {
             constraint.allowed_tokens.append(46)
         }
@@ -259,7 +259,7 @@ func apply_constraint_to_logits([]float logits, *token_constraint constraint) []
 
     i := 0
     for i < len(result) {
-        is_allowed := is_token_allowed(i, &constraint.allowed_tokens)
+        is_allowed := is_token_allowed(i, *constraint.allowed_tokens)
         if is_allowed == false {
             result[i] = -1000000.0
         }

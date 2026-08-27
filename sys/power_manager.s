@@ -86,13 +86,13 @@ func cpufreq_policy_create(int cpu_id) cpufreq_policy {
     return policy
 }
 
-func (policy: &mut cpufreq_policy) set_governor(cpu_freq_governor gov) result[bool, string] {
+func (policy: *cpufreq_policy) set_governor(cpu_freq_governor gov) (bool, string) {
     policy.governor = gov
     policy.transition_samples = 0
     return result::ok(true)
 }
 
-func (policy: &mut cpufreq_policy) set_min_freq(int freq_mhz) result[bool, string] {
+func (policy: *cpufreq_policy) set_min_freq(int freq_mhz) (bool, string) {
     if freq_mhz <= 0 || freq_mhz > policy.max_freq_mhz {
         return result::err("Invalid minimum frequency")
     }
@@ -100,7 +100,7 @@ func (policy: &mut cpufreq_policy) set_min_freq(int freq_mhz) result[bool, strin
     return result::ok(true)
 }
 
-func (policy: &mut cpufreq_policy) set_max_freq(int freq_mhz) result[bool, string] {
+func (policy: *cpufreq_policy) set_max_freq(int freq_mhz) (bool, string) {
     if freq_mhz <= 0 || freq_mhz < policy.min_freq_mhz {
         return result::err("Invalid maximum frequency")
     }
@@ -108,7 +108,7 @@ func (policy: &mut cpufreq_policy) set_max_freq(int freq_mhz) result[bool, strin
     return result::ok(true)
 }
 
-func (policy: &mut cpufreq_policy) scale_frequency(int target_freq_mhz) result[int, string] {
+func (policy: *cpufreq_policy) scale_frequency(int target_freq_mhz) (int, string) {
     if target_freq_mhz < policy.min_freq_mhz || target_freq_mhz > policy.max_freq_mhz {
         return result::err("Frequency out of range")
     }
@@ -123,7 +123,7 @@ func (policy: &mut cpufreq_policy) scale_frequency(int target_freq_mhz) result[i
 func cpuidle_device_create(int cpu_id) cpuidle_device {
     device := cpuidle_device {
         cpu_id: cpu_id,
-        states: vec[cpuidle_state](),
+        states: cpuidle_state[]{},
         cur_state: 0,
         idle_time_us: 0,
         wakeup_latency_us: 0
@@ -176,7 +176,7 @@ func cpuidle_device_create(int cpu_id) cpuidle_device {
     return device
 }
 
-func (device: &mut cpuidle_device) enter_idle_state(int state_id, int idle_duration_us) result[bool, string] {
+func (device: *cpuidle_device) enter_idle_state(int state_id, int idle_duration_us) (bool, string) {
     if state_id < 0 || state_id >= device.states.len() {
         return result::err("Invalid idle state")
     }
@@ -189,7 +189,7 @@ func (device: &mut cpuidle_device) enter_idle_state(int state_id, int idle_durat
     return result::ok(true)
 }
 
-func (device: &mut cpuidle_device) exit_idle_state(int wakeup_latency_us) result[bool, string] {
+func (device: *cpuidle_device) exit_idle_state(int wakeup_latency_us) (bool, string) {
     device.cur_state = 0
     device.wakeup_latency_us = wakeup_latency_us
     return result::ok(true)
@@ -207,13 +207,13 @@ func power_domain_create(string name, int power_id) power_domain {
     return domain
 }
 
-func (domain: &mut power_domain) power_on() result[bool, string] {
+func (domain: *power_domain) power_on() (bool, string) {
     domain.state = power_state::power_on
     domain.ref_count = domain.ref_count + 1
     return result::ok(true)
 }
 
-func (domain: &mut power_domain) power_off() result[bool, string] {
+func (domain: *power_domain) power_off() (bool, string) {
     if domain.ref_count > 0 {
         domain.ref_count = domain.ref_count - 1
     }
@@ -225,9 +225,9 @@ func (domain: &mut power_domain) power_off() result[bool, string] {
 
 func power_manager_create(int nr_cpus) power_manager {
     mgr := power_manager {
-        cpufreq_policies: vec[cpufreq_policy](),
-        cpuidle_devices: vec[cpuidle_device](),
-        power_domains: vec[power_domain](),
+        cpufreq_policies: cpufreq_policy[]{},
+        cpuidle_devices: cpuidle_device[]{},
+        power_domains: power_domain[]{},
         nr_cpus: nr_cpus,
         system_state: power_state::power_on,
         total_transitions: 0,
@@ -248,7 +248,7 @@ func power_manager_create(int nr_cpus) power_manager {
     return mgr
 }
 
-func (mgr: &mut power_manager) set_cpufreq_governor(int cpu_id, cpu_freq_governor gov) result[bool, string] {
+func (mgr: *power_manager) set_cpufreq_governor(int cpu_id, cpu_freq_governor gov) (bool, string) {
     if cpu_id < 0 || cpu_id >= mgr.nr_cpus {
         return result::err("Invalid CPU ID")
     }
@@ -258,7 +258,7 @@ func (mgr: &mut power_manager) set_cpufreq_governor(int cpu_id, cpu_freq_governo
     return result::ok(true)
 }
 
-func (mgr: &mut power_manager) scale_cpu_frequency(int cpu_id, int freq_mhz) result[int, string] {
+func (mgr: *power_manager) scale_cpu_frequency(int cpu_id, int freq_mhz) (int, string) {
     if cpu_id < 0 || cpu_id >= mgr.nr_cpus {
         return result::err("Invalid CPU ID")
     }
@@ -266,7 +266,7 @@ func (mgr: &mut power_manager) scale_cpu_frequency(int cpu_id, int freq_mhz) res
     return mgr.cpufreq_policies[cpu_id].scale_frequency(freq_mhz)
 }
 
-func (mgr: &mut power_manager) enter_c_state(int cpu_id, int state_id, int duration_us) result[bool, string] {
+func (mgr: *power_manager) enter_c_state(int cpu_id, int state_id, int duration_us) (bool, string) {
     if cpu_id < 0 || cpu_id >= mgr.nr_cpus {
         return result::err("Invalid CPU ID")
     }
@@ -277,7 +277,7 @@ func (mgr: &mut power_manager) enter_c_state(int cpu_id, int state_id, int durat
     return result::ok(true)
 }
 
-func (mgr: &mut power_manager) system_idle_stats() string {
+func (mgr: *power_manager) system_idle_stats() string {
     total_idle := mgr.total_power_save_time_us
     transitions := mgr.total_transitions
     return "Total idle time: " + total_idle as string + "us, Transitions: " + transitions as string

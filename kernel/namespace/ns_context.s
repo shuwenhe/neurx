@@ -1,6 +1,6 @@
 package neurx.kernel.namespace
 
-use std.vec.vec
+use std.slices
 
 struct pid_namespace {
     int ns_id

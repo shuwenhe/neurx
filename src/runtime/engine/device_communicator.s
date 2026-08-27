@@ -49,7 +49,7 @@ struct transfer_stats {
 }
 
 func create_device_communicator(device_type dtype, int32 device_id, int32 world_rank, int32 world_size) device_communicator* {
-    return &device_communicator{
+    return *device_communicator{
         dtype: dtype,
         device_id: device_id,
         world_rank: world_rank,
@@ -122,7 +122,7 @@ func (device_communicator* dc) get_nccl_comm() interface{} {
 }
 
 func (device_communicator* dc) create_transfer_plan([]interface{} src_tensors, []interface{} dst_tensors, []int32 src_devs, []int32 dst_devs) transfer_plan* {
-    return &transfer_plan{
+    return *transfer_plan{
         plan_id: 0,
         source_tensors: src_tensors,
         dest_tensors: dst_tensors,

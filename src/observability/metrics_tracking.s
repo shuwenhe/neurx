@@ -59,7 +59,7 @@ struct metrics_tracker {
 }
 
 func create_metrics_tracker() metrics_tracker* {
-    return &metrics_tracker{
+    return *metrics_tracker{
         system: system_metrics{
             total_requests_received: 0,
             total_requests_completed: 0,

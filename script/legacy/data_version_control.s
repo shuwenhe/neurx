@@ -299,7 +299,7 @@ func (data_version_control* dvc) generate_governance_report(
 }
 
 func new_data_version_control() *data_version_control {
-    return &data_version_control{
+    return *data_version_control{
         datasets:       make(map[string][]dataset_version),
         audit_logs:     make([]data_audit_log, 0),
         current_version: make(map[string]string),

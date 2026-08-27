@@ -1,6 +1,6 @@
 package neurx.sys.scheduler
 
-use std.vec.vec
+use std.slices
 
 struct inference_task {
     task_id: int64
@@ -33,7 +33,7 @@ func create_task_queue(max_tasks: int) task_queue {
     queue
 }
 
-func enqueue_task(queue: &mut task_queue, model_id: string, batch_size: int, priority: int, device_id: int) int64 {
+func enqueue_task(queue: *task_queue, model_id: string, batch_size: int, priority: int, device_id: int) int64 {
     if queue.tasks.len() >= queue.max_tasks {
         return 0
     }
@@ -53,7 +53,7 @@ func enqueue_task(queue: &mut task_queue, model_id: string, batch_size: int, pri
     task_id
 }
 
-func dequeue_task(queue: &mut task_queue) option[inference_task] {
+func dequeue_task(queue: *task_queue) option[inference_task] {
     if queue.tasks.len() == 0 {
         return option::none
     }
@@ -81,11 +81,11 @@ func dequeue_task(queue: &mut task_queue) option[inference_task] {
     option::some(task)
 }
 
-func get_queue_size(queue: &task_queue) int {
+func get_queue_size(queue: *task_queue) int {
     queue.tasks.len()
 }
 
-func update_task_status(queue: &mut task_queue, task_id: int64, status: int) bool {
+func update_task_status(queue: *task_queue, task_id: int64, status: int) bool {
     i := 0
     for i < queue.tasks.len() {
         if queue.tasks.data[i].task_id == task_id {
@@ -97,7 +97,7 @@ func update_task_status(queue: &mut task_queue, task_id: int64, status: int) boo
     false
 }
 
-func get_task_status(queue: &task_queue, task_id: int64) int {
+func get_task_status(queue: *task_queue, task_id: int64) int {
     i := 0
     for i < queue.tasks.len() {
         if queue.tasks.data[i].task_id == task_id {
@@ -108,11 +108,11 @@ func get_task_status(queue: &task_queue, task_id: int64) int {
     -1
 }
 
-func clear_queue(queue: &mut task_queue) {
+func clear_queue(queue: *task_queue) {
     queue.tasks = vec[inference_task]()
 }
 
-func get_scheduler_stats(queue: &task_queue) scheduler_stats {
+func get_scheduler_stats(queue: *task_queue) scheduler_stats {
     pending := 0
     running := 0
     
@@ -135,7 +135,7 @@ func get_scheduler_stats(queue: &task_queue) scheduler_stats {
     stats
 }
 
-func reorder_by_priority(queue: &mut task_queue) {
+func reorder_by_priority(queue: *task_queue) {
     i := 0
     for i < queue.tasks.len() - 1 {
         j := 0

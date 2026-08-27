@@ -185,7 +185,7 @@ struct stream_buffer_manager {
 }
 
 func create_stream_buffer_manager(int32 max_buffer) stream_buffer_manager* {
-    return &stream_buffer_manager{
+    return *stream_buffer_manager{
         streams: make(map[string, token_stream]),
         max_buffer_size: max_buffer,
         total_buffered_tokens: 0,
@@ -210,7 +210,7 @@ func (stream_buffer_manager* mgr) register_stream(string request_id) token_strea
     }
 
     mgr.streams[request_id] = stream
-    return &stream
+    return *stream
 }
 
 func (stream_buffer_manager* mgr) unregister_stream(string request_id) bool {

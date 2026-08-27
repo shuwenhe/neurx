@@ -22,7 +22,7 @@ struct comprehensive_test_suite {
 }
 
 func NewComprehensiveTestSuite() *comprehensive_test_suite {
-    return &comprehensive_test_suite{
+    return *comprehensive_test_suite{
         results: make([]test_result, 0),
         stats:   test_stats{},
     }

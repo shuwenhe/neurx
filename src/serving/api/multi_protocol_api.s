@@ -62,7 +62,7 @@ struct cohere_api {
 }
 
 func new_anthropic_api(eng *engine.llm_engine) *anthropic_api {
-    return &anthropic_api{
+    return *anthropic_api{
         engine:     eng,
         api_version: "2023-06-01",
     }
@@ -105,7 +105,7 @@ func (anthropic_api* aa) create_message(req anthropic_request) (*anthropic_respo
         return nil, err
     }
 
-    response := &anthropic_response{
+    response := *anthropic_response{
         id:         core.GenerateId(),
         type:       "message",
         role:       "assistant",
@@ -150,7 +150,7 @@ func (anthropic_api* aa) create_message_stream(req anthropic_request) (chan *ant
 
         prompt = prompt + "Assistant:"
 
-        resp_chan <- &anthropic_response{
+        resp_chan <- *anthropic_response{
             id:    core.GenerateId(),
             type:  "content_block_start",
             role:  "assistant",
@@ -162,7 +162,7 @@ func (anthropic_api* aa) create_message_stream(req anthropic_request) (chan *ant
 }
 
 func new_cohere_api(eng *engine.llm_engine) *cohere_api {
-    return &cohere_api{
+    return *cohere_api{
         engine:     eng,
         api_version: "2024-08-01",
     }
@@ -203,7 +203,7 @@ func (cohere_api* ca) generate(req cohere_request) (*cohere_response, error) {
         generations = append(generations, generation)
     }
 
-    response := &cohere_response{
+    response := *cohere_response{
         id:          core.GenerateId(),
         generations: generations,
     }
@@ -217,7 +217,7 @@ func (cohere_api* ca) generate_stream(req cohere_request) (chan *cohere_response
     go func() {
         defer close(resp_chan)
 
-        resp_chan <- &cohere_response{
+        resp_chan <- *cohere_response{
             id:          core.GenerateId(),
             generations: make([]map[string]interface{}, 0),
         }

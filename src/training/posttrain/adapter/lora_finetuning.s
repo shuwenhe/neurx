@@ -47,7 +47,7 @@ func (lora_adapter* adapter) initialize_lora_modules(model policy_model) {
 }
 
 func (lora_adapter* adapter) create_lora_layer(name string, int in_features, int out_features) {
-    layer := &lora_layer{
+    layer := *lora_layer{
         rank: adapter.config.rank,
         alpha: adapter.config.alpha,
         lora_a: adapter.init_matrix(adapter.config.rank, in_features, 0.0),

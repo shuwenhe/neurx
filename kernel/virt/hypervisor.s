@@ -1,6 +1,6 @@
 package neurx.kernel.virt
 
-use std.vec.vec
+use std.slices
 
 struct virtual_machine {
     int vm_id

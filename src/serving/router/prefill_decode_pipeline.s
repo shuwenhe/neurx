@@ -49,7 +49,7 @@ struct prefill_decode_pipeline {
 }
 
 func create_pipeline(pipeline_config cfg) prefill_decode_pipeline* {
-    return &prefill_decode_pipeline{
+    return *prefill_decode_pipeline{
         config: cfg,
         current_stage: stage_idle,
         current_prefill_batch: nil,
@@ -105,7 +105,7 @@ func (prefill_decode_pipeline* pd) prepare_prefill_batch() prefill_batch* {
         }
     }
 
-    prefill_batch := &prefill_batch{
+    prefill_batch := *prefill_batch{
         requests: batch,
         batch_id: pd.total_prefill_batches_executed,
         total_tokens: total_tokens,
@@ -166,7 +166,7 @@ func (prefill_decode_pipeline* pd) prepare_decode_batch() decode_batch* {
         return nil
     }
 
-    decode_batch := &decode_batch{
+    decode_batch := *decode_batch{
         requests: batch,
         batch_id: pd.total_decode_batches_executed,
         num_decode_steps: 1,

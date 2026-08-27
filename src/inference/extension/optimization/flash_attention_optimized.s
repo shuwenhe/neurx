@@ -29,7 +29,7 @@ func NewFlashAttentionOptimized(config attention_config) *flash_attention_optimi
     if config.block_size <= 0 {
         config.block_size = 128
     }
-    return &flash_attention_optimized{
+    return *flash_attention_optimized{
         config:     config,
         block_size: config.block_size,
     }
@@ -72,7 +72,7 @@ func (flash_attention_optimized* fa) Forward(
                     v_tile := fa.loadVBlock(v, b, h, k_block_start, k_block_end, head_dim)
                     scores := fa.computeScores(q_tile, k_tile, q_block_size, k_block_size, head_dim)
                     scores = fa.applyCausalMask(scores, q_block_start, k_block_start, q_block_size, k_block_size)
-                    probs := fa.stableSoftmax(scores, q_block_size, k_block_size, &m, &l)
+                    probs := fa.stableSoftmax(scores, q_block_size, k_block_size, *m, *l)
                     attn_out := fa.computeAttentionOutput(probs, v_tile, q_block_size, k_block_size, head_dim)
                     output_block = fa.accumulateOutput(output_block, attn_out, q_block_size, head_dim)
                 }

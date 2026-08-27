@@ -82,7 +82,7 @@ func create_super_block(string fs_name, int block_size, int total_blocks) super_
     }
 }
 
-func inode_update_size(i: &inode, int new_size) inode {
+func inode_update_size(i: *inode, int new_size) inode {
     inode_local := i.*
     inode_local.size = new_size
     inode_local.mtime = 0
@@ -91,7 +91,7 @@ func inode_update_size(i: &inode, int new_size) inode {
     inode_local
 }
 
-func inode_increment_nlink(i: &inode) inode {
+func inode_increment_nlink(i: *inode) inode {
     inode_local := i.*
     inode_local.nlink = inode_local.nlink + 1
     
@@ -99,7 +99,7 @@ func inode_increment_nlink(i: &inode) inode {
     inode_local
 }
 
-func file_read(f: &file, int bytes) (file, int) {
+func file_read(f: *file, int bytes) (file, int) {
     file_local := f.*
     
     bytes_read := bytes
@@ -109,7 +109,7 @@ func file_read(f: &file, int bytes) (file, int) {
     (file_local, bytes_read)
 }
 
-func file_write(f: &file, int bytes) (file, int) {
+func file_write(f: *file, int bytes) (file, int) {
     file_local := f.*
     
     bytes_written := bytes
@@ -119,7 +119,7 @@ func file_write(f: &file, int bytes) (file, int) {
     (file_local, bytes_written)
 }
 
-func file_seek(f: &file, int offset) file {
+func file_seek(f: *file, int offset) file {
     file_local := f.*
     file_local.f_offset = offset
     
@@ -127,7 +127,7 @@ func file_seek(f: &file, int offset) file {
     file_local
 }
 
-func dentry_invalidate(d: &dentry) dentry {
+func dentry_invalidate(d: *dentry) dentry {
     dentry_local := d.*
     dentry_local.valid = 0
     

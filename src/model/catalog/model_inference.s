@@ -78,7 +78,7 @@ struct batch_inference_response {
 }
 
 func create_inference_engine(model_id string, model *model_interface) *inference_engine {
-	return &inference_engine{
+	return *inference_engine{
 		model_id: model_id,
 		model: model,
 		request_queue: []*inference_request{},
@@ -117,7 +117,7 @@ func (inference_engine* engine) execute_inference(inference_request* request) *i
 	start_time := time.Now()
 
 	if request == nil || request.input == nil {
-		return &inference_response{
+		return *inference_response{
 			request_id: request.request_id,
 			model_id: engine.model_id,
 			success: false,
@@ -130,7 +130,7 @@ func (inference_engine* engine) execute_inference(inference_request* request) *i
 		tokens_generated = request.generation_config.max_tokens
 	}
 
-	output := &model_output{
+	output := *model_output{
 		output_type: "text",
 		text: fmt.Sprintf("Generated output for: %s", request.input.prompt),
 		tokens: make([]int32, tokens_generated),
@@ -147,7 +147,7 @@ func (inference_engine* engine) execute_inference(inference_request* request) *i
 
 	engine.mu.Unlock()
 
-	response := &inference_response{
+	response := *inference_response{
 		request_id: request.request_id,
 		model_id: engine.model_id,
 		output: output,
@@ -169,7 +169,7 @@ func (inference_engine* engine) submit_batch_inference(batch_inference_request* 
 		engine.stats.total_failed++
 		engine.mu.Unlock()
 
-		return &batch_inference_response{
+		return *batch_inference_response{
 			batch_id: batch_request.batch_id,
 			model_id: engine.model_id,
 			success: false,
@@ -185,7 +185,7 @@ func (inference_engine* engine) submit_batch_inference(batch_inference_request* 
 	for i, input := range batch_request.inputs {
 		item_start := time.Now()
 
-		output := &model_output{
+		output := *model_output{
 			output_type: "text",
 			text: fmt.Sprintf("Batch output %d: %s", i, input.prompt),
 			metadata: make(map[string]interface{}),
@@ -205,7 +205,7 @@ func (inference_engine* engine) submit_batch_inference(batch_inference_request* 
 
 	engine.mu.Unlock()
 
-	return &batch_inference_response{
+	return *batch_inference_response{
 		batch_id: batch_request.batch_id,
 		model_id: engine.model_id,
 		outputs: outputs,
@@ -290,7 +290,7 @@ func (inference_engine* engine) clear_stats() {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 
-	engine.stats = &inference_statistics{}
+	engine.stats = *inference_statistics{}
 }
 
 func (inference_engine* engine) enable_batching(enabled bool) {

@@ -1,6 +1,6 @@
 package neurx.kernel.sched.realtime
 
-use std.vec.vec
+use std.slices
 
 struct rt_task {
     int task_id

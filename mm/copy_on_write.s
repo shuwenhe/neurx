@@ -1,6 +1,6 @@
 package neurx.mm.copy_on_write
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use neurx.kernel.locking.mutex
@@ -15,25 +15,25 @@ struct cow_page {
 }
 
 struct cow_manager {
-    pages: vec[cow_page],
+    pages: cow_page[],
     lock: mutex::mutex[void],
 }
 
 const cow_max_references = 1000
 
-func new_cow_manager() result[&cow_manager, string] {
-    let mgr := &cow_manager{
-        pages: vec[cow_page](),
+func new_cow_manager() (*cow_manager, string) {
+    let mgr := *cow_manager{
+        pages: cow_page[]{},
         lock: mutex::new(),
-    } as &cow_manager
+    } as *cow_manager
 
     result::ok(mgr)
 }
 
-func (mgr: &mut cow_manager) mark_cow(
+func (mgr: *cow_manager) mark_cow(
     vaddr: u64,
     ppage: u64,
-) result[void, string] {
+) (void, string) {
     let _guard := mgr.lock.lock()?
 
     let cow := cow_page{
@@ -48,7 +48,7 @@ func (mgr: &mut cow_manager) mark_cow(
     result::ok(())
 }
 
-func (mgr: &mut cow_manager) increment_reference(ppage: u64) result[void, string] {
+func (mgr: *cow_manager) increment_reference(ppage: u64) (void, string) {
     let _guard := mgr.lock.lock()?
 
     let mut found := false
@@ -70,7 +70,7 @@ func (mgr: &mut cow_manager) increment_reference(ppage: u64) result[void, string
     result::ok(())
 }
 
-func (mgr: &mut cow_manager) decrement_reference(ppage: u64) result[void, string] {
+func (mgr: *cow_manager) decrement_reference(ppage: u64) (void, string) {
     let _guard := mgr.lock.lock()?
 
     let mut found := false
@@ -92,7 +92,7 @@ func (mgr: &mut cow_manager) decrement_reference(ppage: u64) result[void, string
     result::ok(())
 }
 
-func (mgr: &mut cow_manager) get_reference_count(ppage: u64) result[u32, string] {
+func (mgr: *cow_manager) get_reference_count(ppage: u64) (u32, string) {
     let _guard := mgr.lock.lock()?
 
     for page in mgr.pages {
@@ -104,11 +104,11 @@ func (mgr: &mut cow_manager) get_reference_count(ppage: u64) result[u32, string]
     result::err("cow page not found")
 }
 
-func (mgr: &mut cow_manager) handle_cow_fault(
+func (mgr: *cow_manager) handle_cow_fault(
     vaddr: u64,
     ppage: u64,
-    pt: &mut page_table::page_table,
-) result[u64, string] {
+    pt: *page_table::page_table,
+) (u64, string) {
     let _guard := mgr.lock.lock()?
 
     let ref_count := mgr.get_reference_count(ppage)?
@@ -131,11 +131,11 @@ func (mgr: &mut cow_manager) handle_cow_fault(
     result::ok(new_ppage)
 }
 
-func copy_page_memory(src: u64, dst: u64) result[void, string] {
+func copy_page_memory(src: u64, dst: u64) (void, string) {
     result::ok(())
 }
 
-func (mgr: &mut cow_manager) unmap_cow_page(ppage: u64) result[void, string] {
+func (mgr: *cow_manager) unmap_cow_page(ppage: u64) (void, string) {
     let _guard := mgr.lock.lock()?
 
     let mut remove_idx := option::none as option[u32]
@@ -160,15 +160,15 @@ func (mgr: &mut cow_manager) unmap_cow_page(ppage: u64) result[void, string] {
 }
 
 struct fork_context {
-    parent_page_table: &page_table::page_table,
-    child_page_table: &mut page_table::page_table,
-    cow_mgr: &mut cow_manager,
+    parent_page_table: *page_table::page_table,
+    child_page_table: *page_table::page_table,
+    cow_mgr: *cow_manager,
 }
 
-func (mgr: &mut cow_manager) fork_address_space(
-    parent_pt: &page_table::page_table,
-    child_pt: &mut page_table::page_table,
-) result[void, string] {
+func (mgr: *cow_manager) fork_address_space(
+    parent_pt: *page_table::page_table,
+    child_pt: *page_table::page_table,
+) (void, string) {
     let _guard := mgr.lock.lock()?
 
     let mappings := parent_pt.dump_mappings()?
@@ -189,11 +189,11 @@ func (mgr: &mut cow_manager) fork_address_space(
     result::ok(())
 }
 
-func (mgr: &mut cow_manager) get_cow_pages_count() u32 {
+func (mgr: *cow_manager) get_cow_pages_count() u32 {
     mgr.pages.len() as u32
 }
 
-func (mgr: &mut cow_manager) get_total_references() u32 {
+func (mgr: *cow_manager) get_total_references() u32 {
     let mut total := 0
     for page in mgr.pages {
         total = total + page.ref_count
@@ -201,7 +201,7 @@ func (mgr: &mut cow_manager) get_total_references() u32 {
     total
 }
 
-func (mgr: &mut cow_manager) mark_page_dirty(ppage: u64) result[void, string] {
+func (mgr: *cow_manager) mark_page_dirty(ppage: u64) (void, string) {
     let _guard := mgr.lock.lock()?
 
     for page in mgr.pages {
@@ -214,7 +214,7 @@ func (mgr: &mut cow_manager) mark_page_dirty(ppage: u64) result[void, string] {
     result::err("page not found")
 }
 
-func (mgr: &mut cow_manager) is_page_dirty(ppage: u64) result[bool, string] {
+func (mgr: *cow_manager) is_page_dirty(ppage: u64) (bool, string) {
     let _guard := mgr.lock.lock()?
 
     for page in mgr.pages {
@@ -234,7 +234,7 @@ struct cow_statistics {
     dirty_pages: u32,
 }
 
-func (mgr: &mut cow_manager) get_statistics() result[cow_statistics, string] {
+func (mgr: *cow_manager) get_statistics() (cow_statistics, string) {
     let _guard := mgr.lock.lock()?
 
     let total_pages := mgr.get_cow_pages_count()

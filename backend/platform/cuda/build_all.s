@@ -262,7 +262,7 @@ func create_cuda_wrapper(string build_dir) {
         "int cuda_relu_backward(int64_t gi, int64_t go, int64_t i, int n) { return 0; }\n" +
         "int cuda_softmax(int64_t o, int64_t i, int sl, int bs) { return 0; }\n" +
         "int cuda_layer_norm(int64_t o, int64_t i, int64_t w, int64_t b, int n, float e) { return 0; }\n" +
-        "int cuda_get_device_count() { int c = 0; cudaGetDeviceCount(&c); return c; }\n"
+        "int cuda_get_device_count() { int c = 0; cudaGetDeviceCount(*c); return c; }\n"
     runtime_write_text_file(build_dir + "/cuda_kernels_wrapper.c", wrapper)
 }
 

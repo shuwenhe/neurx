@@ -1,6 +1,6 @@
 package neurx.cache.kv_cpu_offload
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -82,7 +82,7 @@ func (kv_cache_pool* pool) put_kv(
     token_position: int,
     key: *vec[float],
     value: *vec[float]
-) result[(), error] {
+) ((), error) {
     cache_key := sequence_id * 1000000 + layer_id * 1000 + token_position
     entry_size := calculate_entry_size(key, value)
 
@@ -120,7 +120,7 @@ func (kv_cache_pool* pool) get_kv(
     sequence_id: int,
     layer_id: int,
     token_position: int
-) result[kv_cache_entry, error] {
+) (kv_cache_entry, error) {
     cache_key := sequence_id * 1000000 + layer_id * 1000 + token_position
 
     if pool.gpu_cache.contains(cache_key) {
@@ -148,7 +148,7 @@ func (kv_cache_pool* pool) get_kv(
     }
 }
 
-func (kv_cache_pool* pool) try_offload_to_cpu() result[(), error] {
+func (kv_cache_pool* pool) try_offload_to_cpu() ((), error) {
     gpu_entries := pool.gpu_cache
 
     oldest_key := 0
@@ -188,7 +188,7 @@ func (kv_cache_pool* pool) try_offload_to_cpu() result[(), error] {
     }
 }
 
-func (kv_cache_pool* pool) restore_from_cpu(int cache_key) result[(), error] {
+func (kv_cache_pool* pool) restore_from_cpu(int cache_key) ((), error) {
     switch pool.cpu_cache.get(cache_key) {
         option::some(entry) : {
             pool.gpu_cache.insert(cache_key, entry)
@@ -228,7 +228,7 @@ func (pool* pool) get_cache_hit_rate() float {
     (pool.stats.restore_count as float) / (total_accesses as float)
 }
 
-func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) result[(), error] {
+func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) ((), error) {
     keys_to_remove := vec[int]()
 
     for key in pool.gpu_cache.keys() {
@@ -257,7 +257,7 @@ func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) result[(), erro
     ((, ""))
 }
 
-func (kv_cache_pool* pool) clear_all() result[(), error] {
+func (kv_cache_pool* pool) clear_all() ((), error) {
     pool.gpu_cache = map[int, kv_cache_entry]()
     pool.cpu_cache = map[int, kv_cache_entry]()
     pool.metadata_map = map[int, cache_metadata]()

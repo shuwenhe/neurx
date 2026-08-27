@@ -92,9 +92,9 @@ func main() {
                 config.seq_len,
             )
             neurx.model.adamw_update(
-                &model,
+                *model,
                 gradients,
-                &opt_state,
+                *opt_state,
                 config.learning_rate,
                 0.9,
                 0.999,

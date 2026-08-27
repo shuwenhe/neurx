@@ -305,7 +305,7 @@ func (scheduler_state* sched) make_decision() scheduling_decision {
         _ => min_latency_schedule(sched),
     }
 
-    check_and_apply_preemption(sched, &decision)
+    check_and_apply_preemption(sched, *decision)
 
     sched.current_iteration += 1
     decision

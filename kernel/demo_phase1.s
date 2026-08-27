@@ -22,10 +22,10 @@ func demonstrate_scheduler() {
     t3 := create_task(3, "realtime_control", 10, 4, true)
     t4 := create_task(4, "background_service", 139, 8, false)
     
-    enqueue_task(&sched, t1)
-    enqueue_task(&sched, t2)
-    enqueue_task(&sched, t3)
-    enqueue_task(&sched, t4)
+    enqueue_task(*sched, t1)
+    enqueue_task(*sched, t2)
+    enqueue_task(*sched, t3)
+    enqueue_task(*sched, t4)
     
     print("✓ 4 tasks enqueued:")
     print("  - GPU inference (priority 50)")
@@ -34,7 +34,7 @@ func demonstrate_scheduler() {
     print("  - Background service (priority 139)")
     print("")
     
-    selected_task, _ := schedule(&sched)
+    selected_task, _ := schedule(*sched)
     print("✓ Scheduler selected task: ")
     print(selected_task.name)
     print(" (PID: ")
@@ -44,7 +44,7 @@ func demonstrate_scheduler() {
     print(")")
     print("")
     
-    print_scheduler_info(&sched)
+    print_scheduler_info(*sched)
 }
 
 func demonstrate_pipes() {
@@ -56,7 +56,7 @@ func demonstrate_pipes() {
     
     pipe_mgr := create_pipe_manager()
     
-    pipe_id, _ := create_pipe(&pipe_mgr, 1024)
+    pipe_id, _ := create_pipe(*pipe_mgr, 1024)
     print("✓ Pipe created (ID: ")
     print(pipe_id as string)
     print(", buffer: 1024 bytes)")
@@ -65,7 +65,7 @@ func demonstrate_pipes() {
     print("✓ Writing 5 integers to pipe...")
     int i = 0
     for i < 5 {
-        write_pipe(&pipe_mgr, pipe_id, 100 + i)
+        write_pipe(*pipe_mgr, pipe_id, 100 + i)
         i = i + 1
     }
     print("")
@@ -73,17 +73,17 @@ func demonstrate_pipes() {
     print("✓ Reading from pipe:")
     int j = 0
     for j < 5 {
-        val, _ := read_pipe(&pipe_mgr, pipe_id)
+        val, _ := read_pipe(*pipe_mgr, pipe_id)
         print("  Data: ")
         print(val as string)
         j = j + 1
     }
     print("")
     
-    close_pipe_end(&pipe_mgr, pipe_id, true)
-    close_pipe_end(&pipe_mgr, pipe_id, false)
+    close_pipe_end(*pipe_mgr, pipe_id, true)
+    close_pipe_end(*pipe_mgr, pipe_id, false)
     
-    print_pipe_manager_info(&pipe_mgr)
+    print_pipe_manager_info(*pipe_mgr)
 }
 
 func demonstrate_msgqueue() {
@@ -95,7 +95,7 @@ func demonstrate_msgqueue() {
     
     mgr := create_msgqueue_manager()
     
-    queue_id, _ := create_message_queue(&mgr, 100)
+    queue_id, _ := create_message_queue(*mgr, 100)
     print("✓ Message queue created (ID: ")
     print(queue_id as string)
     print(", max: 100 messages)")
@@ -104,7 +104,7 @@ func demonstrate_msgqueue() {
     print("✓ Sending 5 messages...")
     int i = 0
     for i < 5 {
-        send_message(&mgr, queue_id, 1000 + i, 1, 10 + i)
+        send_message(*mgr, queue_id, 1000 + i, 1, 10 + i)
         i = i + 1
     }
     print("")
@@ -112,7 +112,7 @@ func demonstrate_msgqueue() {
     print("✓ Receiving messages:")
     int j = 0
     for j < 5 {
-        msg, _ := receive_message(&mgr, queue_id, 2000)
+        msg, _ := receive_message(*mgr, queue_id, 2000)
         print("  Message ID: ")
         print(msg.msg_id as string)
         print(", From PID: ")
@@ -123,7 +123,7 @@ func demonstrate_msgqueue() {
     }
     print("")
     
-    print_msgqueue_manager_info(&mgr)
+    print_msgqueue_manager_info(*mgr)
 }
 
 func demonstrate_process_manager() {
@@ -135,34 +135,34 @@ func demonstrate_process_manager() {
     
     pm := create_process_manager()
     
-    create_process(&pm, 0, "init", 100, false)
-    create_process(&pm, 1, "inference_server", 50, false)
-    create_process(&pm, 1, "training_worker", 80, false)
-    create_process(&pm, 1, "realtime_controller", 10, true)
+    create_process(*pm, 0, "init", 100, false)
+    create_process(*pm, 1, "inference_server", 50, false)
+    create_process(*pm, 1, "training_worker", 80, false)
+    create_process(*pm, 1, "realtime_controller", 10, true)
     
     print("✓ 4 processes created under init")
     print("")
     
-    pgid, _ := create_process_group(&pm, 1, 2)
-    join_process_group(&pm, pgid, 3)
-    join_process_group(&pm, pgid, 4)
+    pgid, _ := create_process_group(*pm, 1, 2)
+    join_process_group(*pm, pgid, 3)
+    join_process_group(*pm, pgid, 4)
     
     print("✓ Process group created with multiple processes")
     print("")
     
-    sid, _ := create_session(&pm, 2)
+    sid, _ := create_session(*pm, 2)
     print("✓ Session created (ID: ")
     print(sid as string)
     print(")")
     print("")
     
-    children, _ := get_child_processes(&pm, 1)
+    children, _ := get_child_processes(*pm, 1)
     print("✓ Found ")
     print(children.len() as string)
     print(" child processes of init")
     print("")
     
-    print_process_manager_info(&pm)
+    print_process_manager_info(*pm)
 }
 
 func main() {

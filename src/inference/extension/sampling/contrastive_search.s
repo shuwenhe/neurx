@@ -15,7 +15,7 @@ struct contrastive_search_state {
 }
 
 func create_contrastive_search_state(float32 alpha, int32 k, bool degenerate) contrastive_search_state* {
-	return &contrastive_search_state{
+	return *contrastive_search_state{
 		alpha: alpha,
 		k: k,
 		degenerate_to_greedy: degenerate,

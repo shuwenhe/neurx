@@ -47,7 +47,7 @@ func create_lora_weights(weight_config config) lora_weights* {
         is_quantized: false,
     }
 
-    return &weights
+    return *weights
 }
 
 func (lora_weights* weights) allocate_buffer(string buffer_id, int32 size, weight_dtype dtype) bool {
@@ -55,7 +55,7 @@ func (lora_weights* weights) allocate_buffer(string buffer_id, int32 size, weigh
         return false
     }
 
-    buffer := &weight_buffer{
+    buffer := *weight_buffer{
         data: make(vec[float32]),
         size: size,
         dtype: dtype,

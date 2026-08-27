@@ -1,6 +1,6 @@
 package neurx.kernel.numa
 
-use std.vec.vec
+use std.slices
 
 struct numa_node {
     int node_id

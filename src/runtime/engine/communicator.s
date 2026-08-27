@@ -89,7 +89,7 @@ struct communicator {
 }
 
 func create_communicator(communication_backend backend, int32 world_rank, int32 world_size) communicator* {
-    return &communicator{
+    return *communicator{
         backend: backend,
         world_rank: world_rank,
         world_size: world_size,

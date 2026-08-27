@@ -81,7 +81,7 @@ struct streaming_response {
 }
 
 func create_llm(llm_config* config) llm_engine* {
-    return &llm_engine{
+    return *llm_engine{
         config: *config,
         model: nil,
         tokenizer: nil,
@@ -114,7 +114,7 @@ func (llm_engine* llm) detokenize([]int32 tokens) (string, error) {
 }
 
 func (llm_engine* llm) complete(completion_request* req) (completion_response*, error) {
-    resp := &completion_response{
+    resp := *completion_response{
         id: core.generate_uuid(),
         model: llm.config.model_name,
         created_time_ms: core.current_time_ms(),
@@ -129,7 +129,7 @@ func (llm_engine* llm) complete(completion_request* req) (completion_response*, 
 }
 
 func (llm_engine* llm) complete_stream(completion_request* req) streaming_response* {
-    return &streaming_response{
+    return *streaming_response{
         id: core.generate_uuid(),
         model: llm.config.model_name,
         token_stream: nil,

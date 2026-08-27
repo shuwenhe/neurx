@@ -88,7 +88,7 @@ struct model_registry {
 }
 
 func new_dynamic_model_loader(model_load_config config, model_loader_options options) *dynamic_model_loader {
-    return &dynamic_model_loader{
+    return *dynamic_model_loader{
         config: config,
         options: options,
         executors: make(map[string]*model_executor),
@@ -142,7 +142,7 @@ func (dynamic_model_loader* dml) load_model_eager(string model_id) (*model_execu
 }
 
 func (dynamic_model_loader* dml) load_model_lazy(string model_id) (*model_executor, error) {
-    executor := &model_executor{
+    executor := *model_executor{
         load_config: dml.config,
         loading_state: model_loading_state{
             status: loader_status_uninitialized,
@@ -171,7 +171,7 @@ func (dynamic_model_loader* dml) load_model_with_strategy(string model_id, weigh
         return nil, err
     }
 
-    executor := &model_executor{
+    executor := *model_executor{
         config: *config,
         load_config: dml.config,
         loading_state: model_loading_state{
@@ -212,7 +212,7 @@ func (dynamic_model_loader* dml) load_model_with_strategy(string model_id, weigh
 }
 
 func (dynamic_model_loader* dml) load_config_from_source(string model_id) (*model_config_spec, error) {
-    config := &model_config_spec{
+    config := *model_config_spec{
         model_id: model_id,
         model_name: model_id,
         hidden_size: 4096,
@@ -287,7 +287,7 @@ func (dynamic_model_loader* dml) load_weights_eager(model_executor* executor) er
 
         for j := int32(0); j < weight_spec_per_layer; j++ {
             weight_name := "layers." + string(i) + ".weights." + string(j)
-            spec := &model_weight_spec{
+            spec := *model_weight_spec{
                 name: weight_name,
                 shape: []int32{config.hidden_size, config.hidden_size},
                 dtype: executor.load_config.dtype,
@@ -342,7 +342,7 @@ func (dynamic_model_loader* dml) initialize_layers(model_executor* executor) err
     executor.layer_executors = []*model_layer_executor{}
 
     for i := int32(0); i < executor.config.num_hidden_layers; i++ {
-        layer := &model_layer_executor{
+        layer := *model_layer_executor{
             layer_id: i,
             layer_type: "transformer_block",
             weights: make(map[string]interface{}),
@@ -390,7 +390,7 @@ func (dynamic_model_loader* dml) invoke_callbacks(model_executor* executor) {
 }
 
 func (dynamic_model_loader* dml) get_metrics() *model_loader_metrics {
-    return &dml.metrics
+    return *dml.metrics
 }
 
 func (dynamic_model_loader* dml) get_loaded_models() []string {

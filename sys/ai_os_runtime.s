@@ -1,6 +1,6 @@
 package neurx.sys.ai_os
 
-use std.vec.vec
+use std.slices
 
 struct resource_quota {
     int cpu_cores
@@ -18,7 +18,7 @@ struct workload_context {
 }
 
 struct ai_os_runtime {
-    vec[workload_context] workloads
+    workload_context[] workloads
     int workload_count
     int total_cpu
     int total_memory
@@ -27,7 +27,7 @@ struct ai_os_runtime {
 
 func create_ai_os_runtime(int cpu, int memory, int disk) ai_os_runtime {
     runtime := ai_os_runtime {
-        workloads: vec[workload_context](),
+        workloads: workload_context[]{},
         workload_count: 0,
         total_cpu: cpu,
         total_memory: memory,

@@ -144,7 +144,7 @@ func parser_parse_value(json_parser* p) json_value {
     if ch == byte(123) {
         keys := make([]string, 0)
         vals := make([]json_value, 0)
-        parser_parse_object(p, &keys, &vals)
+        parser_parse_object(p, *keys, *vals)
         val := json_value{}
         val.type = 5
         val.object_keys = keys
@@ -349,8 +349,8 @@ func parse_float(string s) float {
 
 func json_parse(string text) json_value {
     parser := json_parser_create(text)
-    result := parser_parse_value(&parser)
-    parser_skip_whitespace(&parser)
+    result := parser_parse_value(*parser)
+    parser_skip_whitespace(*parser)
     if parser.pos < len(text) {
         panic("unexpected characters after JSON")
     }

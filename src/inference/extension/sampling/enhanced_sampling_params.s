@@ -68,7 +68,7 @@ struct sampling_params {
 }
 
 func create_sampling_params() sampling_params* {
-	return &sampling_params{
+	return *sampling_params{
 		method: sampling_greedy,
 		n: 1,
 		temperature: 1.0,

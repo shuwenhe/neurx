@@ -32,7 +32,7 @@ struct video_pruner {
 }
 
 func create_video_pruner() video_pruner* {
-    return &video_pruner{
+    return *video_pruner{
         config: pruning_config{
             strategy: prune_motion,
             target_frame_count: 8,
@@ -70,7 +70,7 @@ func (video_pruner* pruner) compute_frame_importance(video_data* vid) vec[frame_
             reason = "temporal"
         }
 
-        score := &frame_importance{
+        score := *frame_importance{
             frame_id: frame.frame_id,
             importance_score: importance,
             is_selected: false,

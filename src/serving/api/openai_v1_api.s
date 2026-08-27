@@ -106,7 +106,7 @@ struct openai_api_server {
 }
 
 func create_openai_api_server(llm_engine* engine, int32 port) openai_api_server* {
-    return &openai_api_server{
+    return *openai_api_server{
         engine: engine,
         api_version: "v1",
         api_key: core.get_env("OPENAI_API_KEY"),
@@ -137,7 +137,7 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
         return nil, nil
     }
 
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: "",
         model_id: req.model,
     }
@@ -147,7 +147,7 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
         return nil, err
     }
 
-    choice := &chat_completion_choice{
+    choice := *chat_completion_choice{
         index: 0,
         message: *chat_completion_message{
             role: role_assistant,
@@ -157,7 +157,7 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
         logprobs: 0.0,
     }
 
-    openai_resp := &chat_completion_response{
+    openai_resp := *chat_completion_response{
         id: "chatcmpl-" + core.generate_uuid(),
         object: "chat.completion",
         created: core.current_time_ms() / 1000,
@@ -179,7 +179,7 @@ func (openai_api_server* srv) create_chat_completion_stream(chat_completion_requ
         return nil
     }
 
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: "",
         model_id: req.model,
     }
@@ -188,7 +188,7 @@ func (openai_api_server* srv) create_chat_completion_stream(chat_completion_requ
 }
 
 func (openai_api_server* srv) create_completion(completion_request* req) (completion_response*, error) {
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: req.prompt,
         model_id: req.model,
     }
@@ -198,7 +198,7 @@ func (openai_api_server* srv) create_completion(completion_request* req) (comple
         return nil, err
     }
 
-    openai_resp := &completion_response{
+    openai_resp := *completion_response{
         id: "cmpl-" + core.generate_uuid(),
         object: "text_completion",
         created: core.current_time_ms() / 1000,

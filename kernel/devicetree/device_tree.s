@@ -1,6 +1,6 @@
 package neurx.kernel.devicetree
 
-use std.vec.vec
+use std.slices
 
 struct dt_property {
     string prop_name

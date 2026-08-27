@@ -130,7 +130,7 @@ func main() {
     println("\n5. Multi-crop Processing")
     println("-" * 40)
 
-    sample_tensor := &types.Tensor{
+    sample_tensor := *types.Tensor{
         data: make([]f32, 384 * 384 * 3),
         shape: [3]i32{384, 384, 3},
         dtype: "float32"
@@ -151,7 +151,7 @@ func main() {
 
     valid_count := i32(0)
     for i := 0; i < len(images); i += 1 {
-        if img_validator.ValidateImage(&images[i]) {
+        if img_validator.ValidateImage(*images[i]) {
             valid_count += 1
         }
     }
@@ -159,7 +159,7 @@ func main() {
 
     audio_valid_count := i32(0)
     for i := 0; i < len(audios); i += 1 {
-        if audio_validator.ValidateAudio(&audios[i]) {
+        if audio_validator.ValidateAudio(*audios[i]) {
             audio_valid_count += 1
         }
     }

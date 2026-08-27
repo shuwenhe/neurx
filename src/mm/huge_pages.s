@@ -1,6 +1,6 @@
 package neurx.mm
 
-use std.vec.vec
+use std.slices
 
 // Huge Pages 支持 (2MB 和 1GB 页面)
 struct huge_page {
@@ -11,8 +11,8 @@ struct huge_page {
 }
 
 struct huge_pages_pool {
-    vec pages_2mb
-    vec pages_1gb
+    huge_page[] pages_2mb
+    huge_page[] pages_1gb
     int total_2mb
     int total_1gb
 }

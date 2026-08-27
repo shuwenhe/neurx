@@ -104,7 +104,7 @@ func (quantization_framework* framework) quantize_weights(weights [][]float64, s
             }
         }
     }
-    layer := &quantized_layer{
+    layer := *quantized_layer{
         name: layer_name,
         weights_int: quantized,
         []int original_shape{len(weights), len(weights[0])},
@@ -219,7 +219,7 @@ func (quantization_framework* framework) estimate_inference_speedup() {
 }
 
 func new_quantization_framework(config quantization_config, model policy_model) *quantization_framework {
-    return &quantization_framework{
+    return *quantization_framework{
         config: config,
         original_model: model,
         quantized_layers: make(map[string]*quantized_layer),

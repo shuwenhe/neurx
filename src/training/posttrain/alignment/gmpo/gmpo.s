@@ -108,7 +108,7 @@ func (gmpo_trainer* trainer) update_reward_statistics(
         if values.len() == 0 {
             continue
         }
-        stats := &trainer.reward_statistics[reward_idx]
+        stats := *trainer.reward_statistics[reward_idx]
         for v in values {
             stats.history.push(v)
         }

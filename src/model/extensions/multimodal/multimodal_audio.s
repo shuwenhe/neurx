@@ -46,7 +46,7 @@ struct audio_processor {
 }
 
 func create_audio_processor() audio_processor* {
-    return &audio_processor{
+    return *audio_processor{
         target_sample_rate: 16000,
         fft_size: 400,
         hop_length: 160,
@@ -69,7 +69,7 @@ func (audio_processor* proc) resample_audio(audio_data* audio, int32 new_sample_
     ratio := float32(new_sample_rate) / float32(audio.metadata.sample_rate)
     new_num_samples := int32(float32(audio.num_samples) * ratio)
 
-    resampled := &audio_data{
+    resampled := *audio_data{
         samples: make(vec[float32]),
         metadata: *audio_metadata{
             sample_rate: new_sample_rate,
@@ -102,7 +102,7 @@ func (audio_processor* proc) normalize_audio(audio_data* audio) audio_data* {
         max_val = 1.0
     }
 
-    normalized := &audio_data{
+    normalized := *audio_data{
         samples: make(vec[float32]),
         metadata: audio.metadata,
         num_samples: audio.num_samples,
@@ -165,7 +165,7 @@ func (audio_processor* proc) remove_silence(audio_data* audio) audio_data* {
         }
     }
 
-    trimmed := &audio_data{
+    trimmed := *audio_data{
         samples: trimmed_samples,
         metadata: audio.metadata,
         num_samples: len(trimmed_samples),

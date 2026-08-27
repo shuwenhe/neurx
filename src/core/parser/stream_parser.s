@@ -251,7 +251,7 @@ func create_stream_builder() StreamBuilder {
 }
 
 func (StreamBuilder* sb) add_chunk(string chunk) {
-    stream_chunk := process_stream_chunk(&sb.current_state, chunk)
+    stream_chunk := process_stream_chunk(*sb.current_state, chunk)
     sb.chunks = append(sb.chunks, stream_chunk)
     sb.full_output = sb.full_output + chunk
 }
@@ -279,5 +279,5 @@ func (StreamBuilder sb) get_progress() float {
 func (StreamBuilder* sb) reset() {
     sb.chunks = []StreamChunk{}
     sb.full_output = ""
-    reset_stream_state(&sb.current_state)
+    reset_stream_state(*sb.current_state)
 }

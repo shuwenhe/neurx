@@ -19,8 +19,8 @@ func NewImageProcessor(
     height: i32,
     mean: [3]f32,
     std: [3]f32
-) &ImageProcessor {
-    return &ImageProcessor{
+) *ImageProcessor {
+    return *ImageProcessor{
         target_size: (width, height),
         mean: mean,
         std: std,
@@ -31,7 +31,7 @@ func NewImageProcessor(
 
 func (ImageProcessor* p) Resize(
     img: *types.ImageData
-) &types.ImageData {
+) *types.ImageData {
     target_w, target_h := p.target_size
 
     if img.width == target_w && img.height == target_h {
@@ -50,7 +50,7 @@ func (ImageProcessor* p) Resize(
         new_w = i32(f32(target_h) * src_ratio)
     }
 
-    return &types.ImageData{
+    return *types.ImageData{
         id: img.id,
         raw_data: resizeImage(img.raw_data, img.width, img.height, new_w, new_h),
         width: new_w,
@@ -63,7 +63,7 @@ func (ImageProcessor* p) Resize(
 
 func (ImageProcessor* p) Pad(
     img: *types.ImageData
-) &types.ImageData {
+) *types.ImageData {
     target_w, target_h := p.target_size
 
     if img.width == target_w && img.height == target_h {
@@ -90,7 +90,7 @@ func (ImageProcessor* p) Pad(
         }
     }
 
-    return &types.ImageData{
+    return *types.ImageData{
         id: img.id,
         raw_data: padded_data,
         width: target_w,
@@ -103,7 +103,7 @@ func (ImageProcessor* p) Pad(
 
 func (ImageProcessor* p) Normalize(
     img: *types.ImageData
-) &types.Tensor {
+) *types.Tensor {
 
     size := len(img.raw_data)
     normalized := make([]f32, size)
@@ -119,7 +119,7 @@ func (ImageProcessor* p) Normalize(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: normalized,
         shape: [3]i32{img.height, img.width, img.channels},
         dtype: "float32"
@@ -128,7 +128,7 @@ func (ImageProcessor* p) Normalize(
 
 func (ImageProcessor* p) CenterCrop(
     img: *types.ImageData
-) &types.ImageData {
+) *types.ImageData {
     target_w, target_h := p.target_size
 
     if img.width <= target_w && img.height <= target_h {
@@ -151,7 +151,7 @@ func (ImageProcessor* p) CenterCrop(
         }
     }
 
-    return &types.ImageData{
+    return *types.ImageData{
         id: img.id,
         raw_data: cropped_data,
         width: target_w,
@@ -164,7 +164,7 @@ func (ImageProcessor* p) CenterCrop(
 
 func (ImageProcessor* p) Process(
     img: *types.ImageData
-) &types.Tensor {
+) *types.Tensor {
 
     resized := p.Resize(img)
 
@@ -181,7 +181,7 @@ func (ImageProcessor* p) ProcessBatch(
     results := make([]types.Tensor, len(images))
 
     for i := 0; i < len(images); i += 1 {
-        results[i] = *p.Process(&images[i])
+        results[i] = *p.Process(*images[i])
     }
 
     return results

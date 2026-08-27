@@ -15,7 +15,7 @@ struct WorkerManager {
 }
 
 func NewWorkerManager(max_workers i32, policy SchedulingPolicy) *WorkerManager {
-    manager := &WorkerManager{
+    manager := *WorkerManager{
         worker_count: 0,
         max_workers: max_workers,
         scheduling_policy: policy,

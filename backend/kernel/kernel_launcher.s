@@ -17,11 +17,11 @@ struct KernelLauncher {
     kernel_stats: map[string, types.KernelStats]
 }
 
-func NewKernelLauncher(i32 device_id) &KernelLauncher {
+func NewKernelLauncher(i32 device_id) *KernelLauncher {
     device_mgr := cuda_primitives.NewCUDADeviceManager()
     device_mgr.InitDevice(device_id)
 
-    return &KernelLauncher{
+    return *KernelLauncher{
         device_manager: device_mgr,
         event_manager: cuda_primitives.NewCUDAEventManager(device_mgr),
         kernel_cache: make(map[string, i32]),

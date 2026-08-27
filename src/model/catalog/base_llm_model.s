@@ -165,19 +165,19 @@ func new_model_config(string model_type) model_config {
 }
 
 func new_base_llm_model(model_config config) *base_llm_model {
-    model := &base_llm_model{
+    model := *base_llm_model{
         config_data: config,
         device:      "cuda",
         dtype:       "float32",
         layers:      []*transformer_layer{},
         quantized:   false,
     }
-    model.embedding = &nn.Embedding{
+    model.embedding = *nn.Embedding{
         num_embeddings: int(config.vocab_size),
         embedding_dim:  int(config.hidden_size),
     }
     for i := int32(0); i < config.num_hidden_layers; i++ {
-        layer := &transformer_layer{
+        layer := *transformer_layer{
             self_attn: *attention_layer{
                 hidden_size:         config.hidden_size,
                 num_heads:           config.num_attention_heads,
@@ -201,11 +201,11 @@ func new_base_llm_model(model_config config) *base_llm_model {
         }
         model.layers = append(model.layers, layer)
     }
-    model.norm = &layer_norm{
+    model.norm = *layer_norm{
         eps:              config.layer_norm_eps,
         normalized_shape: []int{int(config.hidden_size)},
     }
-    model.output_linear = &nn.Linear{
+    model.output_linear = *nn.Linear{
         in_features:  int(config.hidden_size),
         out_features: int(config.vocab_size),
     }

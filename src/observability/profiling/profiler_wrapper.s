@@ -79,7 +79,7 @@ type profiler_manager struct {
 }
 
 func create_profiler_config() profiler_config* {
-	return &profiler_config{
+	return *profiler_config{
 		enabled: true,
 		device: device_cuda,
 		delay_iterations: 0,
@@ -93,7 +93,7 @@ func create_profiler_config() profiler_config* {
 }
 
 func create_profiler_event(event_id string, name string) profiler_event* {
-	return &profiler_event{
+	return *profiler_event{
 		event_id: event_id,
 		name: name,
 		start_time_ns: 0,
@@ -108,7 +108,7 @@ func create_worker_profiler(config profiler_config*) worker_profiler* {
 	if config == nil {
 		config = create_profiler_config()
 	}
-	return &worker_profiler{
+	return *worker_profiler{
 		config: config,
 		status: profiler_status_idle,
 		is_running: false,
@@ -126,7 +126,7 @@ func create_cuda_profiler(config profiler_config*) cuda_profiler* {
 	if config == nil {
 		config = create_profiler_config()
 	}
-	return &cuda_profiler{
+	return *cuda_profiler{
 		base_profiler: create_worker_profiler(config),
 		stream_count: 0,
 		kernel_count: 0,
@@ -135,7 +135,7 @@ func create_cuda_profiler(config profiler_config*) cuda_profiler* {
 }
 
 func create_profiler_manager() profiler_manager* {
-	return &profiler_manager{
+	return *profiler_manager{
 		profilers: make(map[string]worker_profiler*),
 		active_profiler: "",
 		global_stats: create_profiler_stats(),

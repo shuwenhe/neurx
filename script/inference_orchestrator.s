@@ -63,7 +63,7 @@ func new_inference_orchestrator(string model_path) (*inference_orchestrator, err
         port:             8000,
         log_dir:           filepath.Join(neurx_root, "logs", "inference"),
     }
-    return &inference_orchestrator{
+    return *inference_orchestrator{
         logger:    logger,
         config:    config,
         s_compiler: s_compiler,

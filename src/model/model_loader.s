@@ -1,6 +1,6 @@
 package neurx.model.loader
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -268,7 +268,7 @@ func create_solar_config() model_config {
     }
 }
 
-func create_model_config(string model_name) result[model_config, model_loader_error] {
+func create_model_config(string model_name) (model_config, model_loader_error) {
     switch model_name {
         "llama" : (create_llama_config(, "")),
         "llama2" : (create_llama2_config(, "")),
@@ -312,7 +312,7 @@ func (model_config* config) get_intermediate_size() int {
     config.intermediate_size
 }
 
-func (model_config* config) is_valid() result[(), model_loader_error] {
+func (model_config* config) is_valid() ((), model_loader_error) {
     if config.hidden_size <= 0 {
         return (model_loader_error {
             code: "INVALID_CONFIG",
@@ -351,7 +351,7 @@ func (model_config* config) is_valid() result[(), model_loader_error] {
     ((, ""))
 }
 
-func load_model_architecture(string model_name) result[model_architecture, model_loader_error] {
+func load_model_architecture(string model_name) (model_architecture, model_loader_error) {
     config := create_model_config(model_name)
     config.is_valid()
 

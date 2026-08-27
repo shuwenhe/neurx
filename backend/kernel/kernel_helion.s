@@ -43,7 +43,7 @@ struct helion_accelerator {
 }
 
 func create_helion_accelerator(acceleration_type accel_type) helion_accelerator* {
-    return &helion_accelerator{
+    return *helion_accelerator{
         config: helion_config{
             accel_type: accel_type,
             device: device_gpu,
@@ -59,7 +59,7 @@ func create_helion_accelerator(acceleration_type accel_type) helion_accelerator*
 }
 
 func (helion_accelerator* accel) register_accelerated_kernel(string kernel_name, acceleration_type accel_type, float32 speedup) {
-    kernel := &accelerated_kernel{
+    kernel := *accelerated_kernel{
         kernel_name: kernel_name,
         accel_type: accel_type,
         speedup_factor: speedup,

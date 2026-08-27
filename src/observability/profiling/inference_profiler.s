@@ -51,7 +51,7 @@ struct profiler {
 }
 
 func new_profiler() *profiler {
-    return &profiler{
+    return *profiler{
         is_enabled:       false,
         profiles:        make([]*engine_profile, 0),
         request_profiles: make(map[string]*request_profile),
@@ -85,7 +85,7 @@ func (profiler* p) record_engine_stats(eng *engine.llm_engine) {
 
     stats := eng.get_stats()
 
-    profile := &engine_profile{
+    profile := *engine_profile{
         timestamp:      core.CurrentTimeMs(),
         total_requests:  int64(stats["total_requests"].(int64)),
         total_tokens:    int64(stats["total_tokens"].(int64)),
@@ -105,7 +105,7 @@ func (profiler* p) record_request_profile(request_id string, prefill_time_ms, de
         return
     }
 
-    profile := &request_profile{
+    profile := *request_profile{
         request_id:     request_id,
         prefill_time_ms: prefill_time_ms,
         decode_time_ms:  decode_time_ms,
@@ -127,7 +127,7 @@ func (profiler* p) record_layer_profile(layer_id, layer_name, layer_type string,
         return
     }
 
-    profile := &layer_profile{
+    profile := *layer_profile{
         layer_id:       layer_id,
         layer_name:     layer_name,
         layer_type:     layer_type,

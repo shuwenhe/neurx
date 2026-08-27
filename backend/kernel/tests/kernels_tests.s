@@ -63,7 +63,7 @@ func TestMatrixGEMM() {
         B[i] = 1.0
     }
 
-    result := kernel.GEMM(m, n, k, 1.0, A, k, B, n, 0.0, &C, n)
+    result := kernel.GEMM(m, n, k, 1.0, A, k, B, n, 0.0, *C, n)
 
     LogTest("GEMM", result.success, "", result.execution_time_ms)
 }
@@ -93,7 +93,7 @@ func TestMatrixTranspose() {
         }
     }
 
-    result := kernel.Transpose(m, n, A, &B)
+    result := kernel.Transpose(m, n, A, *B)
 
     valid := true
     for i := 0; i < m && valid; i += 1 {
@@ -127,7 +127,7 @@ func TestReLU() {
         input[i] = f32(i) / 500.0 - 1.0
     }
 
-    result := kernel.ReLU(input, &output)
+    result := kernel.ReLU(input, *output)
 
     valid := true
     for i := 0; i < len(output) && valid; i += 1 {
@@ -165,7 +165,7 @@ func TestGELU() {
         input[i] = f32(i) / 500.0 - 1.0
     }
 
-    result := kernel.GELU(input, true, &output)
+    result := kernel.GELU(input, true, *output)
 
     valid := len(output) > 0
     LogTest("GELU", result.success && valid, "", result.execution_time_ms)
@@ -191,7 +191,7 @@ func TestSoftmax() {
         input[i] = f32(i) / 100.0
     }
 
-    result := kernel.Softmax(input, 0, &output)
+    result := kernel.Softmax(input, 0, *output)
 
     sum := f32(0.0)
     for i := 0; i < len(output); i += 1 {
@@ -239,7 +239,7 @@ func TestLayerNorm() {
         track_running_stats: false
     }
 
-    result := kernel.LayerNorm(m, n, input, gamma, beta, params, &output)
+    result := kernel.LayerNorm(m, n, input, gamma, beta, params, *output)
 
     LogTest("LayerNorm", result.success, "", result.execution_time_ms)
 }
@@ -272,7 +272,7 @@ func TestRMSNorm() {
         weight[i] = 1.0
     }
 
-    result := kernel.RMSNorm(m, n, input, weight, 1e-5, &output)
+    result := kernel.RMSNorm(m, n, input, weight, 1e-5, *output)
 
     LogTest("RMSNorm", result.success, "", result.execution_time_ms)
 }

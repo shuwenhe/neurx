@@ -1,6 +1,6 @@
 package neurx.sys.ai_os_integration
 
-use std.vec.vec
+use std.slices
 
 struct workload_request {
     int workload_id

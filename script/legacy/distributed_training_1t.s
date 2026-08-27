@@ -87,7 +87,7 @@ func (pipeline_scheduler* ps) create_pipeline_stages(int num_stages,
             input_activation_shape: [4]int{ps.micro_batch_size, 32768, 12800, 1},
             output_activation_shape: [4]int{ps.micro_batch_size, 32768, 12800, 1},
         }
-        ps.pipeline_stages = append(ps.pipeline_stages, &stage)
+        ps.pipeline_stages = append(ps.pipeline_stages, *stage)
     }
 }
 

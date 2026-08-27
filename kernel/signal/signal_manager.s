@@ -45,7 +45,7 @@ func do_sigaction(pid int32, sig int32, new_action sigaction*, old_action sigact
     } else if pid < 0 || pid >= 4096 {
         return -3
     } else {
-        signal_context* ctx = &global_signal_manager.contexts[pid]
+        signal_context* ctx = *global_signal_manager.contexts[pid]
         
         if old_action != 0 {
             old_action->sa_handler = ctx->actions[sig].sa_handler
@@ -67,7 +67,7 @@ func do_sigprocmask(pid int32, how int32, set int64*, oldset int64*) int {
     if pid < 0 || pid >= 4096 {
         return -3
     } else {
-        signal_context* ctx = &global_signal_manager.contexts[pid]
+        signal_context* ctx = *global_signal_manager.contexts[pid]
         
         if oldset != 0 {
             oldset* = ctx->blocked_mask
@@ -97,7 +97,7 @@ func do_kill(sender_pid int32, target_pid int32, sig int32) int {
     } else if sender_pid < 0 || sender_pid >= 4096 {
         return -3
     } else {
-        signal_queue* queue = &global_signal_manager.contexts[target_pid].pending_signals
+        signal_queue* queue = *global_signal_manager.contexts[target_pid].pending_signals
         
         if queue->count >= 64 {
             return -11
@@ -175,7 +175,7 @@ func signal_check_pending(pid int32) int32 {
     if pid < 0 || pid >= 4096 {
         return -1
     } else {
-        signal_queue* queue = &global_signal_manager.contexts[pid].pending_signals
+        signal_queue* queue = *global_signal_manager.contexts[pid].pending_signals
         if signal_queue_empty(queue) {
             return -1
         } else {
@@ -192,7 +192,7 @@ func signal_deliver_all(pid int32) int32 {
     if pid < 0 || pid >= 4096 {
         return 0
     } else {
-        signal_context* ctx = &global_signal_manager.contexts[pid]
+        signal_context* ctx = *global_signal_manager.contexts[pid]
         int32 delivered = 0
         int32 sig = signal_check_pending(pid)
         

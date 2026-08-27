@@ -1,6 +1,6 @@
 package neurx.kernel.sched
 
-use std.vec.vec
+use std.slices
 
 
     training_task,
@@ -56,9 +56,9 @@ func create_scheduler() (scheduler) {
     completed_tasks := vec[task]()
     
     sched := scheduler {
-        ready_queue: &ready_queue,
-        running_tasks: &running_tasks,
-        completed_tasks: &completed_tasks,
+        ready_queue: *ready_queue,
+        running_tasks: *running_tasks,
+        completed_tasks: *completed_tasks,
         current_task_id: 1,
         total_scheduled_count: 0,
         context_switch_count: 0,

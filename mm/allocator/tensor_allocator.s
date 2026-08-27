@@ -1,6 +1,6 @@
 package neurx.kernel.mm.allocator
 
-use std.vec.vec
+use std.slices
 
 struct memory_region {
     int base_addr
@@ -13,7 +13,7 @@ struct tensor_pool {
     int base_addr
     int total_size
     int allocated_size
-    vec[memory_region] regions
+    memory_region[] regions
 }
 
 struct pool_stats {
@@ -27,7 +27,7 @@ func create_tensor_pool(int base_addr, int total_size) tensor_pool {
         base_addr: base_addr,
         total_size: total_size,
         allocated_size: 0,
-        regions: vec[memory_region]()
+        regions: memory_region[]
     }
     pool
 }

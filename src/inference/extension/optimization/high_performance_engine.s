@@ -30,7 +30,7 @@ struct high_performance_optimization_engine {
 }
 
 func NewHighPerformanceOptimizationEngine(config optimization_config) *high_performance_optimization_engine {
-    engine := &high_performance_optimization_engine{
+    engine := *high_performance_optimization_engine{
         config: config,
     }
     if config.enable_flash_attention {

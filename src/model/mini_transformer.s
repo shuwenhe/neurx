@@ -431,9 +431,9 @@ struct adam_w_state {
 }
 
 func adamw_update(
-    &mini_transformer model,
+    *mini_transformer model,
     map[string]tensor_2 gradients,
-    &adam_w_state state,
+    *adam_w_state state,
     float learning_rate,
     float beta1,
     float beta2,
@@ -447,10 +447,10 @@ func adamw_update(
             state.v_states["output_proj"] = tensor_new(model.output_proj.shape)
         }
         update_parameter(
-            &model.output_proj,
+            *model.output_proj,
             output_grad,
-            &state.m_states["output_proj"],
-            &state.v_states["output_proj"],
+            *state.m_states["output_proj"],
+            *state.v_states["output_proj"],
             state.t,
             learning_rate,
             beta1,
@@ -465,10 +465,10 @@ func adamw_update(
             state.v_states["token_embed"] = tensor_new(model.token_embed.shape)
         }
         update_parameter(
-            &model.token_embed,
+            *model.token_embed,
             embed_grad,
-            &state.m_states["token_embed"],
-            &state.v_states["token_embed"],
+            *state.m_states["token_embed"],
+            *state.v_states["token_embed"],
             state.t,
             learning_rate,
             beta1,
@@ -486,10 +486,10 @@ func adamw_update(
                 state.v_states[state_key] = tensor_new(model.layers[layer_idx].q_proj.shape)
             }
             update_parameter(
-                &model.layers[layer_idx].q_proj,
+                *model.layers[layer_idx].q_proj,
                 q_grad,
-                &state.m_states[state_key],
-                &state.v_states[state_key],
+                *state.m_states[state_key],
+                *state.v_states[state_key],
                 state.t,
                 learning_rate,
                 beta1,
@@ -505,10 +505,10 @@ func adamw_update(
                 state.v_states[state_key] = tensor_new(model.layers[layer_idx].fc1.shape)
             }
             update_parameter(
-                &model.layers[layer_idx].fc1,
+                *model.layers[layer_idx].fc1,
                 fc1_grad,
-                &state.m_states[state_key],
-                &state.v_states[state_key],
+                *state.m_states[state_key],
+                *state.v_states[state_key],
                 state.t,
                 learning_rate,
                 beta1,
@@ -524,10 +524,10 @@ func adamw_update(
                 state.v_states[state_key] = tensor_new(model.layers[layer_idx].fc2.shape)
             }
             update_parameter(
-                &model.layers[layer_idx].fc2,
+                *model.layers[layer_idx].fc2,
                 fc2_grad,
-                &state.m_states[state_key],
-                &state.v_states[state_key],
+                *state.m_states[state_key],
+                *state.v_states[state_key],
                 state.t,
                 learning_rate,
                 beta1,
@@ -540,10 +540,10 @@ func adamw_update(
 }
 
 func update_parameter(
-    &tensor_2 param,
+    *tensor_2 param,
     tensor_2 grad,
-    &tensor_2 m,
-    &tensor_2 v,
+    *tensor_2 m,
+    *tensor_2 v,
     int t,
     float lr,
     float beta1,

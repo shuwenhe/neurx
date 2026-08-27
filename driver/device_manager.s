@@ -93,7 +93,7 @@ func device_create(string device_id, string device_name, device_type dev_type) d
         driver_name: "",
         vendor_id: 0,
         device_id_hw: 0,
-        attributes: vec[device_attribute](),
+        attributes: device_attribute[](),
         irq_number: -1,
         dma_channel: -1,
         instance_count: 0
@@ -101,7 +101,7 @@ func device_create(string device_id, string device_name, device_type dev_type) d
     return dev
 }
 
-func (dev: &mut device) set_attribute(string attr_name, string attr_value) result[bool, string] {
+func (dev: *device) set_attribute(string attr_name, string attr_value) (bool, string) {
     attr := device_attribute {
         attr_name: attr_name,
         attr_value: attr_value,
@@ -111,11 +111,11 @@ func (dev: &mut device) set_attribute(string attr_name, string attr_value) resul
     return result::ok(true)
 }
 
-func (dev: &mut device) set_state(device_state state) {
+func (dev: *device) set_state(device_state state) {
     dev.dev_state = state
 }
 
-func (dev: &mut device) bind_driver(string driver_name, int irq, int dma) result[bool, string] {
+func (dev: *device) bind_driver(string driver_name, int irq, int dma) (bool, string) {
     if driver_name == "" {
         return result::err("Invalid driver name")
     }
@@ -140,22 +140,22 @@ func device_driver_create(string driver_name, string version, device_type dev_ty
     return driver
 }
 
-func (driver: &mut device_driver) probe() result[bool, string] {
+func (driver: *device_driver) probe() (bool, string) {
     driver.probe_count = driver.probe_count + 1
     return result::ok(true)
 }
 
-func (driver: &mut device_driver) remove() result[bool, string] {
+func (driver: *device_driver) remove() (bool, string) {
     driver.remove_count = driver.remove_count + 1
     return result::ok(true)
 }
 
-func (driver: &mut device_driver) suspend() result[bool, string] {
+func (driver: *device_driver) suspend() (bool, string) {
     driver.suspend_count = driver.suspend_count + 1
     return result::ok(true)
 }
 
-func (driver: &mut device_driver) resume() result[bool, string] {
+func (driver: *device_driver) resume() (bool, string) {
     driver.resume_count = driver.resume_count + 1
     return result::ok(true)
 }
@@ -172,7 +172,7 @@ func device_class_create(string class_name, device_type class_type, int max_devi
     return class
 }
 
-func (dev_class: &mut device_class) register_device(device dev) result[bool, string] {
+func (dev_class: *device_class) register_device(device dev) (bool, string) {
     if dev_class.total_devices >= dev_class.max_devices {
         return result::err("Device class full")
     }
@@ -184,7 +184,7 @@ func (dev_class: &mut device_class) register_device(device dev) result[bool, str
     return result::ok(true)
 }
 
-func (dev_class: &mut device_class) unregister_device(string device_id) result[bool, string] {
+func (dev_class: *device_class) unregister_device(string device_id) (bool, string) {
     i := 0
     while i < dev_class.devices.len() {
         if dev_class.devices[i].device_id == device_id {
@@ -205,8 +205,8 @@ func (dev_class: &mut device_class) unregister_device(string device_id) result[b
 func device_bus_create(string bus_name) device_bus {
     bus := device_bus {
         bus_name: bus_name,
-        devices: vec[device](),
-        drivers: vec[device_driver](),
+        devices: device[]{},
+        drivers: device_driver[]{},
         total_devices: 0,
         total_drivers: 0,
         hotplug_enabled: 1
@@ -214,19 +214,19 @@ func device_bus_create(string bus_name) device_bus {
     return bus
 }
 
-func (bus: &mut device_bus) register_device(device dev) result[bool, string] {
+func (bus: *device_bus) register_device(device dev) (bool, string) {
     bus.devices.push(dev)
     bus.total_devices = bus.total_devices + 1
     return result::ok(true)
 }
 
-func (bus: &mut device_bus) register_driver(device_driver driver) result[bool, string] {
+func (bus: *device_bus) register_driver(device_driver driver) (bool, string) {
     bus.drivers.push(driver)
     bus.total_drivers = bus.total_drivers + 1
     return result::ok(true)
 }
 
-func (bus: &mut device_bus) match_and_bind() result[int, string] {
+func (bus: *device_bus) match_and_bind() (int, string) {
     matched := 0
     
     i := 0
@@ -251,8 +251,8 @@ func (bus: &mut device_bus) match_and_bind() result[int, string] {
 
 func device_manager_create() device_manager {
     mgr := device_manager {
-        buses: vec[device_bus](),
-        classes: vec[device_class](),
+        buses: device_bus[]{},
+        classes: device_class[]{},
         total_devices: 0,
         total_drivers: 0,
         hotplug_events: 0,
@@ -261,13 +261,13 @@ func device_manager_create() device_manager {
     return mgr
 }
 
-func (mgr: &mut device_manager) register_bus(string bus_name) result[device_bus, string] {
+func (mgr: *device_manager) register_bus(string bus_name) (device_bus, string) {
     bus := device_bus_create(bus_name)
     mgr.buses.push(bus)
     return result::ok(bus)
 }
 
-func (mgr: &mut device_manager) add_device(string bus_name, device dev) result[bool, string] {
+func (mgr: *device_manager) add_device(string bus_name, device dev) (bool, string) {
     i := 0
     while i < mgr.buses.len() {
         if mgr.buses[i].bus_name == bus_name {
@@ -280,7 +280,7 @@ func (mgr: &mut device_manager) add_device(string bus_name, device dev) result[b
     return result::err("Bus not found")
 }
 
-func (mgr: &mut device_manager) add_driver(string bus_name, device_driver driver) result[bool, string] {
+func (mgr: *device_manager) add_driver(string bus_name, device_driver driver) (bool, string) {
     i := 0
     while i < mgr.buses.len() {
         if mgr.buses[i].bus_name == bus_name {
@@ -293,12 +293,12 @@ func (mgr: &mut device_manager) add_driver(string bus_name, device_driver driver
     return result::err("Bus not found")
 }
 
-func (mgr: &mut device_manager) hotplug_device(string bus_name, device dev) result[bool, string] {
+func (mgr: *device_manager) hotplug_device(string bus_name, device dev) (bool, string) {
     mgr.hotplug_events = mgr.hotplug_events + 1
     return mgr.add_device(bus_name, dev)
 }
 
-func (mgr: &cdevice_manager) device_discovery_stats() string {
+func (mgr: *cdevice_manager) device_discovery_stats() string {
     total_dev := mgr.total_devices
     total_drv := mgr.total_drivers
     hotplug := mgr.hotplug_events

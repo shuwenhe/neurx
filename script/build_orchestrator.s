@@ -59,7 +59,7 @@ func new_build_orchestrator() (*build_orchestrator) {
         clean:         false,
         parallel:      4,
     }
-    return &build_orchestrator{
+    return *build_orchestrator{
         logger:    logger,
         config:    config,
         neurx_root: neurxRoot,

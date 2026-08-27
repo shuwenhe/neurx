@@ -61,11 +61,11 @@ func TestImageProcessor() {
         metadata: make(map[string, string])
     }
 
-    resized := processor.Resize(&small_img)
+    resized := processor.Resize(*small_img)
     assert(resized.width > 0, "Resized image has valid width")
     println("  ✓ Image resize test passed")
 
-    tensor := processor.Process(&img)
+    tensor := processor.Process(*img)
     assert(tensor != nil, "Process returns valid tensor")
     assert(tensor.shape[0] > 0, "Output tensor has valid shape")
     println("  ✓ Image processing pipeline test passed")
@@ -88,7 +88,7 @@ func TestAudioProcessor() {
     assert(len(audio.samples) == 16000, "Audio samples created correctly")
     println("  ✓ Audio creation test passed")
 
-    normalized := processor.Normalize(&audio)
+    normalized := processor.Normalize(*audio)
     assert(normalized != nil, "Normalize returns valid audio")
     println("  ✓ Audio normalization test passed")
 
@@ -103,7 +103,7 @@ func TestVisionEncoder() {
 
     encoder := vision_encoder.NewVisionEncoder("clip-vit", 768, 16, "cuda")
 
-    img_tensor := &types.Tensor{
+    img_tensor := *types.Tensor{
         data: make([]f32, 224 * 224 * 3),
         shape: [3]i32{224, 224, 3},
         dtype: "float32"
@@ -124,7 +124,7 @@ func TestVisionEncoder() {
     assert(patch_info.num_patches > 0, "Patch info computed")
     println(fmt("  ✓ Patch extraction test passed (%d patches)", len(patches)))
 
-    features := encoder.Encode(&img_data, img_tensor)
+    features := encoder.Encode(*img_data, img_tensor)
     assert(features != nil, "Features encoded successfully")
     assert(features.embeddings.shape[0] > 0, "Features have valid sequence length")
     println("  ✓ Vision encoding test passed")
@@ -156,16 +156,16 @@ func TestFeatureFusion() {
 
     fusion := feature_fusion.NewFeatureFusion(512, feature_fusion.FusionStrategy.concatenation)
 
-    embeddings := make(map[types.Modality, &types.Tensor])
+    embeddings := make(map[types.Modality, *types.Tensor])
 
-    vision_emb := &types.Tensor{
+    vision_emb := *types.Tensor{
         data: make([]f32, 577 * 768),
         shape: [2]i32{577, 768},
         dtype: "float32"
     }
     embeddings[types.Modality.image] = vision_emb
 
-    audio_emb := &types.Tensor{
+    audio_emb := *types.Tensor{
         data: make([]f32, 100 * 256),
         shape: [2]i32{100, 256},
         dtype: "float32"
@@ -198,7 +198,7 @@ func TestValidation() {
         metadata: make(map[string, string])
     }
 
-    assert(img_validator.ValidateImage(&valid_img), "Valid image passes validation")
+    assert(img_validator.ValidateImage(*valid_img), "Valid image passes validation")
     println("  ✓ Image validation test passed")
 
     valid_audio := types.AudioData{
@@ -210,7 +210,7 @@ func TestValidation() {
         format: types.AudioFormat.pcm16
     }
 
-    assert(audio_validator.ValidateAudio(&valid_audio), "Valid audio passes validation")
+    assert(audio_validator.ValidateAudio(*valid_audio), "Valid audio passes validation")
     println("  ✓ Audio validation test passed")
 }
 
@@ -231,7 +231,7 @@ func TestUtils() {
     assert(stacked.shape[0] == 3, "Stacked tensor has correct batch size")
     println("  ✓ Tensor stacking test passed")
 
-    emb := &types.Tensor{
+    emb := *types.Tensor{
         data: make([]f32, 768),
         shape: [2]i32{1, 768},
         dtype: "float32"

@@ -1,6 +1,6 @@
 package neurx.init
 
-use std.vec.vec
+use std.slices
 use std.string.string
 use neurx.hal
 use neurx.mm.allocator
@@ -47,14 +47,14 @@ func kernel_main() (core_system) {
     }
     
     core := core_system {
-        state: &state,
+        state: *state,
         mem_pool: mem_pool,
         task_scheduler: task_scheduler,
         monitor_service: monitor_service,
         rpc_srv: rpc_srv
     }
     
-    rpc_framework::start_rpc_server(&core.rpc_srv)
+    rpc_framework::start_rpc_server(*core.rpc_srv)
     core, ""
 }
 
@@ -79,11 +79,11 @@ func init_platform_backends(core_system* core) (int, string) {
     hal_cap := hal::detect_platform_capability()
     
     if hal_cap.gpu_count > 0 {
-        backend_selector::select_and_init_gpu_backend(&hal_cap)
+        backend_selector::select_and_init_gpu_backend(*hal_cap)
     }
     
     if hal_cap.cpu_count > 0 {
-        backend_selector::init_cpu_backend(&hal_cap)
+        backend_selector::init_cpu_backend(*hal_cap)
     }
     0, ""
 }

@@ -33,7 +33,7 @@ struct multimodal_cache {
 }
 
 func create_multimodal_cache(int32 max_size) multimodal_cache* {
-    return &multimodal_cache{
+    return *multimodal_cache{
         policy: policy_hybrid,
         max_cache_size: max_size,
         current_cache_size: 0,
@@ -75,7 +75,7 @@ func (multimodal_cache* cache) put(string key, vec[uint8] data, modality_type mo
         }
     }
 
-    entry := &cache_entry{
+    entry := *cache_entry{
         cache_key: key,
         cached_data: data,
         access_count: 1,

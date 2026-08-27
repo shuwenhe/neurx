@@ -282,7 +282,7 @@ func (experiment_manager* manager) find_best_experiment() string {
 }
 
 func new_experiment_manager() *experiment_manager {
-    return &experiment_manager{
+    return *experiment_manager{
         experiments:        make(map[string]experiment_result),
         current_experiment: "",
         comparison_history: make([]experiment_comparison, 0),

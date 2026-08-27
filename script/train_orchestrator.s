@@ -128,7 +128,7 @@ func new_train_orchestrator(scale training_scale, int num_gpus) (*train_orchestr
     config.log_dir = filepath.Join(neurx_root, "logs", fmt.Sprintf("%s_%s", scale_string(scale), config.timestamp))
     config.checkpoint_dir = filepath.Join(neurx_root, "checkpoints", fmt.Sprintf("%s_%s", scale_string(scale), config.timestamp))
     config.output_dir = filepath.Join(neurx_root, "outputs", fmt.Sprintf("%s_%s", scale_string(scale), config.timestamp))
-    return &train_orchestrator{
+    return *train_orchestrator{
         logger:    logger,
         config:    config,
         s_compiler: s_compiler,

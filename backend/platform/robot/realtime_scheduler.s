@@ -1,6 +1,6 @@
 package neurx.backend.platform.robot
 
-use std.vec.vec
+use std.slices
 use std.io.println
 
 struct realtime_task {

@@ -46,7 +46,7 @@ struct cpu_properties {
     int32 l2_cache_size
     int32 l3_cache_size
     cpu_arch architecture
-    vec[string] features
+    string[] features
 }
 
 struct memory_info {
@@ -63,7 +63,7 @@ struct hardware_info {
     cpu_properties* cpu_props
     memory_info mem_info
     int32 num_devices
-    vec[int32] visible_device_ids
+    int32[] visible_device_ids
     string pytorch_version
     bool cuda_available
     bool rocm_available
@@ -74,8 +74,8 @@ struct hardware_info {
 struct detection_result {
     bool success
     hardware_info* hw_info
-    vec[string] warnings
-    vec[string] errors
+    string[] warnings
+    string[] errors
     int64 detection_time_ms
 }
 
@@ -90,7 +90,7 @@ interface hardware_detector {
 
     func detect_memory_info() (memory_info*)
 
-    func detect_visible_devices() (vec[int32])
+    func detect_visible_devices() (int32[])
 
     func validate_device_access(device_id int32) (bool)
 
@@ -103,7 +103,7 @@ struct hardware_detector_impl {
 }
 
 func create_hardware_detector() (hardware_detector_impl*) {
-    impl := &hardware_detector_impl{
+    impl := *hardware_detector_impl{
         cached_info: nil,
         detection_done: false,
     }
@@ -111,11 +111,11 @@ func create_hardware_detector() (hardware_detector_impl*) {
 }
 
 func (hardware_detector_impl* d) detect() (detection_result*) {
-    result := &detection_result{
+    result := *detection_result{
         success: false,
         hw_info: nil,
-        warnings: vec[string]{},
-        errors: vec[string]{},
+        warnings: string[]{},
+        errors: string[]{},
         detection_time_ms: 0,
     }
 
@@ -131,14 +131,14 @@ func (hardware_detector_impl* d) detect() (detection_result*) {
         return result
     }
 
-    hw_info := &hardware_info{
+    hw_info := *hardware_info{
         device: device,
         device_name: device_type_to_string(device),
         gpu_props: nil,
         cpu_props: nil,
         mem_info: memory_info{},
         num_devices: 0,
-        visible_device_ids: vec[int32]{},
+        visible_device_ids: int32[]{},
         pytorch_version: "2.0+",
         cuda_available: device == device_type.cuda,
         rocm_available: device == device_type.rocm,
@@ -180,7 +180,7 @@ func (hardware_detector_impl* d) detect_device_type() (device_type) {
 }
 
 func (hardware_detector_impl* d) detect_gpu_properties(device_id int32) (gpu_properties*) {
-    props := &gpu_properties{
+    props := *gpu_properties{
         name: "NVIDIA GPU",
         total_memory: 8 * 1024 * 1024 * 1024,
         compute_capability: 80,
@@ -196,7 +196,7 @@ func (hardware_detector_impl* d) detect_gpu_properties(device_id int32) (gpu_pro
 }
 
 func (hardware_detector_impl* d) detect_cpu_properties() (cpu_properties*) {
-    props := &cpu_properties{
+    props := *cpu_properties{
         model_name: "Intel",
         num_cpus: 16,
         num_cores: 8,
@@ -205,13 +205,13 @@ func (hardware_detector_impl* d) detect_cpu_properties() (cpu_properties*) {
         l2_cache_size: 256 * 1024,
         l3_cache_size: 16 * 1024 * 1024,
         architecture: cpu_arch.x86,
-        features: vec[string]{"sse", "sse2", "avx", "avx2"},
+        features: string[]{"sse", "sse2", "avx", "avx2"},
     }
     return props
 }
 
 func (hardware_detector_impl* d) detect_memory_info() (memory_info*) {
-    mem := &memory_info{
+    mem := *memory_info{
         total_memory: 32 * 1024 * 1024 * 1024,
         available_memory: 24 * 1024 * 1024 * 1024,
         used_memory: 8 * 1024 * 1024 * 1024,
@@ -220,8 +220,8 @@ func (hardware_detector_impl* d) detect_memory_info() (memory_info*) {
     return mem
 }
 
-func (hardware_detector_impl* d) detect_visible_devices() (vec[int32]) {
-    devices := vec[int32]{0}
+func (hardware_detector_impl* d) detect_visible_devices() (int32[]) {
+    devices := int32[]{0}
     return devices
 }
 
@@ -236,7 +236,7 @@ func (hardware_detector_impl* d) validate_device_access(device_id int32) (bool) 
 }
 
 func (hardware_detector_impl* d) get_device_capability(device_id int32) (device_capability*) {
-    cap := &device_capability{
+    cap := *device_capability{
         major: 8,
         minor: 0,
     }

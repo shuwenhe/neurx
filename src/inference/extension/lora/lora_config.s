@@ -1,6 +1,6 @@
 package neurx.lora.lora_config
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -12,7 +12,7 @@ struct lora_config {
     target_modules: *vec[string]
     bias: string
     task_type: string
-    modules_to_save: option[&vec[string]]
+    modules_to_save: option[*vec[string]]
     init_lora_weights: bool
 }
 
@@ -34,7 +34,7 @@ func lora_config::default() lora_config {
     }
 }
 
-func (lora_config* config) validate() result[(), lora_config_error] {
+func (lora_config* config) validate() ((), lora_config_error) {
 
     if config.lora_rank <= 0 || config.lora_rank > 1024 {
         return (lora_config_error {
@@ -79,7 +79,7 @@ func (lora_config* config) validate() result[(), lora_config_error] {
 
 func lora_config::from_dict(
     config_dict: *map[string, string]
-) result[lora_config, lora_config_error] {
+) (lora_config, lora_config_error) {
     config := lora_config::default()
 
     switch config_dict.get("lora_rank") {

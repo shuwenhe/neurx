@@ -116,15 +116,15 @@ func escape_xml_string(string s) string {
         ch := s[i]
 
         if ch == '&' {
-            result = result + "&amp;"
+            result = result + "*amp;"
         } else if ch == '<' {
-            result = result + "&lt;"
+            result = result + "*lt;"
         } else if ch == '>' {
-            result = result + "&gt;"
+            result = result + "*gt;"
         } else if ch == '"' {
-            result = result + "&quot;"
+            result = result + "*quot;"
         } else if ch == '\'' {
-            result = result + "&apos;"
+            result = result + "*apos;"
         } else {
             result = result + string(ch)
         }

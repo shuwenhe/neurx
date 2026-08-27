@@ -67,12 +67,12 @@ func cfq_create() cfq_scheduler {
     return sched
 }
 
-func (sched: &mut cfq_scheduler) cfq_add_request(io_queue_entry req) {
+func (sched: *cfq_scheduler) cfq_add_request(io_queue_entry req) {
     sched.queue.push(req)
     sched.stats.total_requests = sched.stats.total_requests + 1
 }
 
-func (sched: &mut cfq_scheduler) cfq_dispatch_request() option[io_queue_entry] {
+func (sched: *cfq_scheduler) cfq_dispatch_request() option[io_queue_entry] {
     if sched.queue.len() == 0 {
         return option::none
     }
@@ -83,7 +83,7 @@ func (sched: &mut cfq_scheduler) cfq_dispatch_request() option[io_queue_entry] {
     return option::some(req)
 }
 
-func (sched: &mut cfq_scheduler) cfq_request_complete(io_queue_entry req) {
+func (sched: *cfq_scheduler) cfq_request_complete(io_queue_entry req) {
     if req.is_read {
         sched.stats.total_sectors_read = sched.stats.total_sectors_read + req.sector_count
     } else {
@@ -112,7 +112,7 @@ func deadline_create() deadline_scheduler {
     return sched
 }
 
-func (sched: &mut deadline_scheduler) deadline_add_request(io_queue_entry req) {
+func (sched: *deadline_scheduler) deadline_add_request(io_queue_entry req) {
     if req.is_read {
         sched.read_queue.push(req)
     } else {
@@ -121,7 +121,7 @@ func (sched: &mut deadline_scheduler) deadline_add_request(io_queue_entry req) {
     sched.stats.total_requests = sched.stats.total_requests + 1
 }
 
-func (sched: &mut deadline_scheduler) deadline_dispatch() option[io_queue_entry] {
+func (sched: *deadline_scheduler) deadline_dispatch() option[io_queue_entry] {
     if sched.read_queue.len() > 0 {
         req := sched.read_queue[0]
         sched.read_queue.pop()
@@ -137,7 +137,7 @@ func (sched: &mut deadline_scheduler) deadline_dispatch() option[io_queue_entry]
     return option::none
 }
 
-func (sched: &mut deadline_scheduler) deadline_complete(io_queue_entry req) {
+func (sched: *deadline_scheduler) deadline_complete(io_queue_entry req) {
     if req.is_read {
         sched.stats.total_sectors_read = sched.stats.total_sectors_read + req.sector_count
     } else {
@@ -165,12 +165,12 @@ func bfq_create() bfq_scheduler {
     return sched
 }
 
-func (sched: &mut bfq_scheduler) bfq_add_request(io_queue_entry req) {
+func (sched: *bfq_scheduler) bfq_add_request(io_queue_entry req) {
     sched.queue.push(req)
     sched.stats.total_requests = sched.stats.total_requests + 1
 }
 
-func (sched: &mut bfq_scheduler) bfq_dispatch() option[io_queue_entry] {
+func (sched: *bfq_scheduler) bfq_dispatch() option[io_queue_entry] {
     if sched.queue.len() == 0 {
         return option::none
     }
@@ -180,7 +180,7 @@ func (sched: &mut bfq_scheduler) bfq_dispatch() option[io_queue_entry] {
     return option::some(req)
 }
 
-func (sched: &mut bfq_scheduler) bfq_complete(io_queue_entry req) {
+func (sched: *bfq_scheduler) bfq_complete(io_queue_entry req) {
     if req.is_read {
         sched.stats.total_sectors_read = sched.stats.total_sectors_read + req.sector_count
     } else {

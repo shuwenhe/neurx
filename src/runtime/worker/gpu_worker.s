@@ -13,7 +13,7 @@ struct GPUWorker {
 }
 
 func NewGPUWorker(config WorkerConfig) *GPUWorker {
-    worker := &GPUWorker{
+    worker := *GPUWorker{
         base: *NewBaseWorker(config),
         gpu_devices: config.gpus,
         device_count: len(config.gpus),

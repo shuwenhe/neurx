@@ -33,7 +33,7 @@ struct sampler {
 func create_sampler(int32 seed) sampler* {
 	enhanced := sampling.integrate_with_v1_engine()
 
-	return &sampler{
+	return *sampler{
 		enhanced_sampler: enhanced,
 		enable_top_k: true,
 		enable_top_p: true,

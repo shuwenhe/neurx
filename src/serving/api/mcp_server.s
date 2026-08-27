@@ -73,7 +73,7 @@ struct message_with_context {
 }
 
 func create_mcp_server(llm_engine* engine, int32 port) mcp_server* {
-    return &mcp_server{
+    return *mcp_server{
         engine: engine,
         server_name: "NeuRx MCP Server",
         server_version: "1.0.0",
@@ -137,7 +137,7 @@ func (mcp_server* srv) list_prompts() ([]prompt_definition*, error) {
 func (mcp_server* srv) call_tool(string tool_name, map[string]interface{} params) (tool_call_result*, error) {
     tool, exists := srv.tools[tool_name]
     if !exists {
-        return &tool_call_result{
+        return *tool_call_result{
             tool_name: tool_name,
             result: nil,
             success: false,
@@ -145,7 +145,7 @@ func (mcp_server* srv) call_tool(string tool_name, map[string]interface{} params
         }, nil
     }
 
-    result := &tool_call_result{
+    result := *tool_call_result{
         tool_name: tool_name,
         result: nil,
         success: true,
@@ -172,7 +172,7 @@ func (mcp_server* srv) get_prompt(string prompt_name) (prompt_definition*, error
 }
 
 func (mcp_server* srv) process_request(mcp_request* req) (mcp_response*, error) {
-    resp := &mcp_response{
+    resp := *mcp_response{
         jsonrpc: "2.0",
         id: req.id,
         result: nil,

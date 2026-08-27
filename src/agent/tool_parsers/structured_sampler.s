@@ -39,7 +39,7 @@ func filter_logits(*structured_sampler sampler, []float logits) []float {
 
     i := 0
     for i < len(result) {
-        allowed := is_token_allowed(i, &sampler.allowed_next)
+        allowed := is_token_allowed(i, *sampler.allowed_next)
 
         if allowed == false {
             if sampler.mode == schema_types.CONSTRAINT_STRICT {
@@ -61,7 +61,7 @@ func update_after_token(*structured_sampler sampler, int token_id, string token_
 
     sampler.current_output = sampler.current_output + token_str
 
-    was_allowed := is_token_allowed(token_id, &sampler.allowed_next)
+    was_allowed := is_token_allowed(token_id, *sampler.allowed_next)
     if was_allowed == false {
         sampler.violations = sampler.violations + 1
         sampler.warnings.append("Token ID " + int_to_string(token_id) + " not in allowed set")
@@ -69,14 +69,14 @@ func update_after_token(*structured_sampler sampler, int token_id, string token_
 
     constraint := constraint_generator.get_next_constraint(
         sampler.current_output,
-        &sampler.schema,
-        &sampler.parse_context
+        *sampler.schema,
+        *sampler.parse_context
     )
 
     sampler.allowed_next = constraint.allowed_tokens
     sampler.state = constraint.state
 
-    if is_complete_output(sampler.current_output, &sampler.schema) {
+    if is_complete_output(sampler.current_output, *sampler.schema) {
         sampler.state = 999
     }
 }
@@ -302,5 +302,5 @@ func create_json_object_schema() json_schema {
 
 func create_json_array_schema() json_schema {
     item_schema := schema_parser.create_string_schema(0, 10000, "")
-    return schema_parser.create_array_schema(&item_schema, 0, 1000)
+    return schema_parser.create_array_schema(*item_schema, 0, 1000)
 }

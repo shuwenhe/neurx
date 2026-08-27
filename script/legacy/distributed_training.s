@@ -225,7 +225,7 @@ struct distributed_context {
 }
 
 func (distributed_context* dc) enter(): error {
-    dc.process = &distributed_process{}
+    dc.process = *distributed_process{}
     return dc.process.init_from_env("nccl")
 }
 
@@ -278,7 +278,7 @@ func create_launch_config_from_env(): launch_config {
 }
 
 func main() {
-    process := &distributed_process{}
+    process := *distributed_process{}
     if err := process.init_from_env("nccl"); err != nil {
         println("Error:", err.Error())
         return
@@ -288,7 +288,7 @@ func main() {
     stats_json, _ := json.Marshal(stats)
     println("\n📊 Distributed config:")
     println(string(stats_json))
-    partitioner := &data_partitioner{
+    partitioner := *data_partitioner{
         world_size: process.config.world_size,
         rank: process.config.rank,
         total_samples: 10000,
@@ -298,7 +298,7 @@ func main() {
     fmt.Printf("\n🔀 Data Partition (Rank %d):\n", process.config.rank)
     fmt.Printf("  Samples assigned: %d\n", len(indices))
     fmt.Printf("  Local batch size: %d\n", partitioner.get_local_batch_size())
-    sampler := &distributed_sampler{
+    sampler := *distributed_sampler{
         num_samples: 10000,
         world_size: process.config.world_size,
         rank: process.config.rank,

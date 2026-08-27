@@ -70,7 +70,7 @@ func test_compilation() test_result {
     for i < 4 {
         string file = files[i]
         bool exists = true
-        test_result_assert_true(&result, exists, "fileEnglish text: " + file)
+        test_result_assert_true(*result, exists, "fileEnglish text: " + file)
         i = i + 1
     }
     result
@@ -123,20 +123,20 @@ func test_distributed_training() test_result {
     println("  GPU English text: 8")
     println("  English text: " + float_to_str(dp_metrics.throughput, 0) + " t/s")
     println("  extensionEnglish text: " + float_to_str(dp_metrics.dp_efficiency * 100.0, 1) + "%")
-    test_result_assert_greater(&result, dp_metrics.dp_efficiency, 0.90, "DP extensionEnglish text >90%")
+    test_result_assert_greater(*result, dp_metrics.dp_efficiency, 0.90, "DP extensionEnglish text >90%")
     println("")
     println("📊 English text (TP) test:")
     distributed_metrics tp_metrics = test_tensor_parallel()
     println("  TP English text: 4")
     println("  English text: " + float_to_str(tp_metrics.throughput, 0) + " t/s")
     println("  TP English text: " + float_to_str(tp_metrics.tp_efficiency * 100.0, 1) + "%")
-    test_result_assert_greater(&result, tp_metrics.tp_efficiency, 0.80, "TP English text >80%")
+    test_result_assert_greater(*result, tp_metrics.tp_efficiency, 0.80, "TP English text >80%")
     println("")
     println("📊 English text (PP) test:")
     distributed_metrics pp_metrics = test_pipeline_parallel()
     println("  PP English text: 4")
     println("  1F1B English text: " + float_to_str(pp_metrics.pp_efficiency * 100.0, 1) + "%")
-    test_result_assert_less(&result, 1.0 - pp_metrics.pp_efficiency, 0.10, "1F1B English text <10%")
+    test_result_assert_less(*result, 1.0 - pp_metrics.pp_efficiency, 0.10, "1F1B English text <10%")
     result
 }
 
@@ -223,9 +223,9 @@ func test_memory() test_result {
         float memory = estimate_memory_usage(cfg)
         println(cfg.name + "              " + float_to_str(memory, 1) + "GB")
         if i == 3 {
-            test_result_assert_less(&result, memory, 100.0, "70B ZeRO-2: <100GB")
+            test_result_assert_less(*result, memory, 100.0, "70B ZeRO-2: <100GB")
         } else if i == 4 {
-            test_result_assert_less(&result, memory, 50.0, "70B ZeRO-3: <50GB")
+            test_result_assert_less(*result, memory, 50.0, "70B ZeRO-3: <50GB")
         }
         i = i + 1
     }
@@ -245,10 +245,10 @@ func test_sft() test_result {
         }
         i = i + 1
     }
-    test_result_assert_true(&result, decreasing, "SFT lossEnglish text")
+    test_result_assert_true(*result, decreasing, "SFT lossEnglish text")
     float final_loss = losses[4]
     println("  English textloss: " + float_to_str(final_loss, 2))
-    test_result_assert_less(&result, final_loss, 1.0, "SFT English textloss <1.0")
+    test_result_assert_less(*result, final_loss, 1.0, "SFT English textloss <1.0")
     result
 }
 
@@ -265,10 +265,10 @@ func test_reward_model() test_result {
         }
         i = i + 1
     }
-    test_result_assert_true(&result, increasing, "rewardmodel AUC English text")
+    test_result_assert_true(*result, increasing, "rewardmodel AUC English text")
     float final_auc = aucs[4]
     println("  English text AUC: " + float_to_str(final_auc, 3))
-    test_result_assert_greater(&result, final_auc, 0.75, "English text AUC >0.75")
+    test_result_assert_greater(*result, final_auc, 0.75, "English text AUC >0.75")
     result
 }
 
@@ -283,7 +283,7 @@ func test_ppo() test_result {
     println("  English textreward: " + float_to_str(initial_reward, 2))
     println("  English textreward: " + float_to_str(final_reward, 2))
     println("  English text: +" + float_to_str(improvement * 100.0, 1) + "%")
-    test_result_assert_greater(&result, improvement, 0.15, "rewardEnglish text >15%")
+    test_result_assert_greater(*result, improvement, 0.15, "rewardEnglish text >15%")
     []float kls = [0.012, 0.010, 0.008, 0.007, 0.006]
     float max_kl = kls[0]
     int i = 1
@@ -294,7 +294,7 @@ func test_ppo() test_result {
         i = i + 1
     }
     println("  English text KL English text: " + float_to_str(max_kl, 4))
-    test_result_assert_less(&result, max_kl, 0.015, "KL English text <0.015")
+    test_result_assert_less(*result, max_kl, 0.015, "KL English text <0.015")
     result
 }
 
@@ -310,13 +310,13 @@ func test_evaluation() test_result {
     println("  harmlessEnglish text: " + float_to_str(harmlessness, 1) + "/5.0")
     println("  truthfulEnglish text: " + float_to_str(honesty, 1) + "/5.0")
     println("  English text: " + float_to_str(consistency, 1) + "/5.0")
-    test_result_assert_greater(&result, helpfulness, 3.5, "helpfulEnglish text >3.5")
-    test_result_assert_greater(&result, harmlessness, 3.5, "harmlessEnglish text >3.5")
-    test_result_assert_greater(&result, honesty, 3.5, "truthfulEnglish text >3.5")
-    test_result_assert_greater(&result, consistency, 3.5, "English text >3.5")
+    test_result_assert_greater(*result, helpfulness, 3.5, "helpfulEnglish text >3.5")
+    test_result_assert_greater(*result, harmlessness, 3.5, "harmlessEnglish text >3.5")
+    test_result_assert_greater(*result, honesty, 3.5, "truthfulEnglish text >3.5")
+    test_result_assert_greater(*result, consistency, 3.5, "English text >3.5")
     float overall_score = (helpfulness + harmlessness + honesty + consistency) / 4.0
     println("  English text: " + float_to_str(overall_score, 1) + "/5.0")
-    test_result_assert_greater(&result, overall_score, 4.0, "English text >4.0")
+    test_result_assert_greater(*result, overall_score, 4.0, "English text >4.0")
     result
 }
 

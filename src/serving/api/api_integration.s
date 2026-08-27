@@ -30,7 +30,7 @@ func create_openai_api_server(
 	chat_h := create_chat_completion_handler(v1_engine, async_engine, sampler)
 	text_h := create_text_completion_handler(v1_engine, async_engine, sampler)
 	emb_h := create_embeddings_handler(nil)
-	model_h := create_model_list_handler(&create_model_registry())
+	model_h := create_model_list_handler(*create_model_registry())
 
 	validator := create_default_validator()
 	validator.add_supported_model("neurx-7b")
@@ -38,14 +38,14 @@ func create_openai_api_server(
 	validator.add_supported_model("neurx-70b")
 
 	return openai_api_server{
-		chat_handler:            &chat_h,
-		text_handler:            &text_h,
-		embeddings_handler_:     &emb_h,
-		model_list_handler_:     &model_h,
+		chat_handler:            *chat_h,
+		text_handler:            *text_h,
+		embeddings_handler_:     *emb_h,
+		model_list_handler_:     *model_h,
 		validator:               validator,
-		error_handler_:          &create_error_handler(),
-		error_recovery_:         &create_error_recovery(),
-		usage_tracker_:          &create_usage_tracker(),
+		error_handler_:          *create_error_handler(),
+		error_recovery_:         *create_error_recovery(),
+		usage_tracker_:          *create_usage_tracker(),
 		v1_engine:               v1_engine,
 		async_engine:            async_engine,
 		is_running:              false,
@@ -63,7 +63,7 @@ func (s openai_api_server*) start() bool {
 
 	s.is_running = true
 
-	registry := &create_model_registry()
+	registry := *create_model_registry()
 	registry.register_model("neurx-7b", model_info{
 		id:       "neurx-7b",
 		object:   "model",
@@ -370,9 +370,9 @@ struct openai_api_middleware {
 
 func create_openai_api_middleware() openai_api_middleware {
 	return openai_api_middleware{
-		validator:      &create_default_validator(),
-		error_handler:  &create_error_handler(),
-		usage_tracker:  &create_usage_tracker(),
+		validator:      *create_default_validator(),
+		error_handler:  *create_error_handler(),
+		usage_tracker:  *create_usage_tracker(),
 		error_recovery: *create_error_recovery(),
 		mu:             sync.Mutex{},
 	}

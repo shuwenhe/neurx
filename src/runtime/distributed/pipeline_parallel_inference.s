@@ -58,7 +58,7 @@ func NewPipelineParallelInference(config pipeline_parallel_config) *pipeline_par
     if config.num_micro_batches <= 0 {
         config.num_micro_batches = 4
     }
-    engine := &pipeline_parallel_inference{
+    engine := *pipeline_parallel_inference{
         config:        config,
         micro_batches: []*micro_batch{},
         recv_buffer:   make(map[int32][]float32),
@@ -69,7 +69,7 @@ func NewPipelineParallelInference(config pipeline_parallel_config) *pipeline_par
     if config.rank == config.pp_size-1 {
         end_layer = config.num_layers
     }
-    engine.stage = &pipeline_stage{
+    engine.stage = *pipeline_stage{
         stage_rank:  config.rank,
         start_layer: start_layer,
         end_layer:   end_layer,
@@ -79,7 +79,7 @@ func NewPipelineParallelInference(config pipeline_parallel_config) *pipeline_par
 }
 
 func (pipeline_parallel_inference* pp) generateSchedule() {
-    schedule := &pipeline_schedule{
+    schedule := *pipeline_schedule{
         forward_ops:  []schedule_op{},
         backward_ops: []schedule_op{},
     }
@@ -94,7 +94,7 @@ func (pipeline_parallel_inference* pp) generateSchedule() {
 }
 
 func (pipeline_parallel_inference* pp) generateOneFlushed1B() *pipeline_schedule {
-    schedule := &pipeline_schedule{
+    schedule := *pipeline_schedule{
         forward_ops:  []schedule_op{},
         backward_ops: []schedule_op{},
     }
@@ -134,7 +134,7 @@ func (pipeline_parallel_inference* pp) generateOneFlushed1B() *pipeline_schedule
 }
 
 func (pipeline_parallel_inference* pp) generateGPipeSchedule() *pipeline_schedule {
-    schedule := &pipeline_schedule{
+    schedule := *pipeline_schedule{
         forward_ops:  []schedule_op{},
         backward_ops: []schedule_op{},
     }

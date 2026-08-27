@@ -25,16 +25,16 @@ func validate_against_schema(string json_str, *json_schema schema) validation_re
     }
 
     if schema.type_name == schema_types.TYPE_OBJECT {
-        result = validate_object(json_str, schema, &result, "root")
+        result = validate_object(json_str, schema, *result, "root")
     } else if schema.type_name == schema_types.TYPE_ARRAY {
-        result = validate_array(json_str, schema, &result, "root")
+        result = validate_array(json_str, schema, *result, "root")
     } else if schema.type_name == schema_types.TYPE_STRING {
-        result = validate_string(json_str, schema, &result, "root")
+        result = validate_string(json_str, schema, *result, "root")
     } else if schema.type_name == schema_types.TYPE_NUMBER ||
               schema.type_name == schema_types.TYPE_INTEGER {
-        result = validate_number(json_str, schema, &result, "root")
+        result = validate_number(json_str, schema, *result, "root")
     } else if schema.type_name == schema_types.TYPE_BOOLEAN {
-        result = validate_boolean(json_str, schema, &result, "root")
+        result = validate_boolean(json_str, schema, *result, "root")
     }
 
     result.is_valid = len(result.errors) == 0
@@ -113,7 +113,7 @@ func validate_string(string json_str, *json_schema schema, *validation_result re
     }
 
     if len(schema.enum_values) > 0 {
-        if contains_string_in_array(s, &schema.enum_values) == false {
+        if contains_string_in_array(s, *schema.enum_values) == false {
             result.errors.append("String \"" + s + "\" at " + path +
                                " is not in enum values")
         }

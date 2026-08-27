@@ -38,7 +38,7 @@ type profiler_stats struct {
 }
 
 func create_operation_stats(name string) operation_stats* {
-	return &operation_stats{
+	return *operation_stats{
 		name: name,
 		cpu_time_us: 0,
 		gpu_time_us: 0,
@@ -48,7 +48,7 @@ func create_operation_stats(name string) operation_stats* {
 }
 
 func create_layer_stats(layer_name string) layer_stats* {
-	return &layer_stats{
+	return *layer_stats{
 		layer_name: layer_name,
 		cpu_time_us: 0,
 		gpu_time_us: 0,
@@ -59,7 +59,7 @@ func create_layer_stats(layer_name string) layer_stats* {
 }
 
 func create_memory_stats() memory_stats* {
-	return &memory_stats{
+	return *memory_stats{
 		allocated_mb: 0,
 		reserved_mb: 0,
 		freed_mb: 0,
@@ -68,7 +68,7 @@ func create_memory_stats() memory_stats* {
 }
 
 func create_profiler_stats() profiler_stats* {
-	return &profiler_stats{
+	return *profiler_stats{
 		start_time_ms: 0,
 		end_time_ms: 0,
 		total_cpu_time_us: 0,

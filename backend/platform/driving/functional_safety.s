@@ -1,6 +1,6 @@
 package neurx.backend.platform.driving
 
-use std.vec.vec
+use std.slices
 use std.io.println
 
 
@@ -21,8 +21,8 @@ use std.io.println
 
 struct functional_safety_monitor {
     safety_level target_level
-    []int fault_count
-    []int fault_history
+    int[] fault_count
+    int[] fault_history
     int fmea_coverage_percent
     bool diagnostics_enabled
 }
@@ -30,8 +30,8 @@ struct functional_safety_monitor {
 func new_functional_safety_monitor(safety_level level) functional_safety_monitor {
     return functional_safety_monitor{
         target_level: level,
-        fault_count: vec[int](),
-        fault_history: vec[int](),
+        fault_count: int[]{},
+        fault_history: int[]{},
         fmea_coverage_percent: 95,
         diagnostics_enabled: true,
     }
@@ -47,8 +47,8 @@ func (functional_safety_monitor* monitor) report_fault(failure_mode mode) {
         failure_mode::unknown: mode_id = 5,
     }
     
-    monitor.fault_history.push(mode_id)
-    if mode_id < monitor.fault_count.len() {
+    monitor.fault_history = append(monitor.fault_history, mode_id)
+    if mode_id < len(monitor.fault_count) {
         monitor.fault_count[mode_id] = monitor.fault_count[mode_id] + 1
     }
 }
@@ -59,7 +59,7 @@ func (monitor* monitor) get_fmea_coverage() int {    monitor.fmea_coverage_perce
 func (monitor* monitor) get_target_level() safety_level {    monitor.target_level
 }
 
-func (monitor* monitor) get_fault_count() int {    monitor.fault_history.len()
+func (monitor* monitor) get_fault_count() int {    len(monitor.fault_history)
 }
 
 func (monitor* monitor) is_diagnostics_enabled() bool {    monitor.diagnostics_enabled

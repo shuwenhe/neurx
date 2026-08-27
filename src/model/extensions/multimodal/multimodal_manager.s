@@ -18,13 +18,13 @@ struct MultimodalManager {
     feature_fusion: *feature_fusion.FeatureFusion,
     resolution_processor: *dynamic_resolution.DynamicResolutionProcessor,
     processing_cache: map[string, types.ProcessingState],
-    feature_cache: map[string, &types.FusedFeatures]
+    feature_cache: map[string, *types.FusedFeatures]
 }
 
 func NewMultimodalManager(
     config: types.MultimodalConfig
-) &MultimodalManager {
-    return &MultimodalManager{
+) *MultimodalManager {
+    return *MultimodalManager{
         config: config,
         image_processor: image_processor.NewImageProcessor(
             config.image_resolution.0,
@@ -53,13 +53,13 @@ func NewMultimodalManager(
             config.num_vision_tokens
         ),
         processing_cache: make(map[string, types.ProcessingState]),
-        feature_cache: make(map[string, &types.FusedFeatures])
+        feature_cache: make(map[string, *types.FusedFeatures])
     }
 }
 
 func (MultimodalManager* m) ProcessMultimodalInput(
     input: *types.MultimodalInput
-) &types.FusedFeatures {
+) *types.FusedFeatures {
 
     if cached, exists := m.feature_cache[input.id]; exists {
         return cached
@@ -74,7 +74,7 @@ func (MultimodalManager* m) ProcessMultimodalInput(
         is_cached: false
     }
 
-    embeddings := make(map[types.Modality, &types.Tensor])
+    embeddings := make(map[types.Modality, *types.Tensor])
 
     if len(input.images) > 0 {
         start_t := GetCurrentTime()
@@ -118,15 +118,15 @@ func (MultimodalManager* m) ProcessMultimodalInput(
 
 func (MultimodalManager* m) ProcessImages(
     images: []types.ImageData
-) &types.Tensor {
+) *types.Tensor {
     if len(images) == 0 {
         return nil
     }
 
-    tensors := make([]&types.Tensor, len(images))
+    tensors := make([]*types.Tensor, len(images))
 
     for i := 0; i < len(images); i += 1 {
-        tensor := m.image_processor.Process(&images[i])
+        tensor := m.image_processor.Process(*images[i])
         tensors[i] = tensor
     }
 
@@ -147,7 +147,7 @@ func (MultimodalManager* m) ProcessImages(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: combined,
         shape: [2]i32{i32(len(features)), m.config.vision_dim},
         dtype: "float32"
@@ -156,7 +156,7 @@ func (MultimodalManager* m) ProcessImages(
 
 func (MultimodalManager* m) ProcessAudio(
     audios: []types.AudioData
-) &types.Tensor {
+) *types.Tensor {
     if len(audios) == 0 {
         return nil
     }
@@ -178,7 +178,7 @@ func (MultimodalManager* m) ProcessAudio(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: combined,
         shape: [2]i32{total_frames, m.config.audio_dim},
         dtype: "float32"
@@ -187,7 +187,7 @@ func (MultimodalManager* m) ProcessAudio(
 
 func (MultimodalManager* m) ProcessText(
     text: string
-) &types.Tensor {
+) *types.Tensor {
 
     text_len := i32(len(text))
     if text_len == 0 {
@@ -201,7 +201,7 @@ func (MultimodalManager* m) ProcessText(
         embedding[i % m.config.fusion_dim] += f32(hash_val) / 256.0
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: embedding,
         shape: [2]i32{1, m.config.fusion_dim},
         dtype: "float32"
@@ -214,7 +214,7 @@ func (MultimodalManager* m) ProcessBatch(
     results := make([]types.FusedFeatures, len(inputs))
 
     for i := 0; i < len(inputs); i += 1 {
-        fused := m.ProcessMultimodalInput(&inputs[i])
+        fused := m.ProcessMultimodalInput(*inputs[i])
         results[i] = *fused
     }
 
@@ -239,7 +239,7 @@ func (MultimodalManager* m) GetProcessingState(
 }
 
 func (MultimodalManager* m) ClearCache() {
-    m.feature_cache = make(map[string, &types.FusedFeatures])
+    m.feature_cache = make(map[string, *types.FusedFeatures])
     m.processing_cache = make(map[string, types.ProcessingState])
     m.vision_encoder.ClearCache()
 }

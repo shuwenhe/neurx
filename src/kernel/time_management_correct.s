@@ -1,6 +1,6 @@
 package neurx.kernel
 
-use std.vec.vec
+use std.slices
 
 // 时钟类型
 struct clock_type {

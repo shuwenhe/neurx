@@ -128,10 +128,10 @@ func init_transformer_model(training_config cfg) transformer_model {
     println("  FF dim: " + str(cfg.d_ff))
     tensor token_emb = randn_tensor([cfg.vocab_size, cfg.d_model]) * 0.02
     tensor pos_emb = randn_tensor([cfg.max_seq_length, cfg.d_model]) * 0.02
-    []transformer_layer layers = []
+    transformer_layer[] layers = transformer_layer[]{}
     for layer_idx in 0..cfg.n_layers {
         transformer_layer layer = init_transformer_layer(cfg.d_model, cfg.d_ff)
-        layers.push(layer)
+        layers = append(layers, layer)
     }
     tensor lm_head = randn_tensor([cfg.d_model, cfg.vocab_size]) * 0.02
     tensor final_ln = ones_tensor([cfg.d_model])
@@ -377,7 +377,7 @@ func run_training(training_config cfg) {
                 break
             }
             forward_result fwd = model_forward(model, b, record_for_backward=true)
-            backward_result_info bw_info = compute_gradients(&model, fwd)
+            backward_result_info bw_info = compute_gradients(*model, fwd)
             float current_lr = get_scheduled_lr(
                 cfg.learning_rate,
                 state.global_step,
@@ -413,16 +413,16 @@ func run_training(training_config cfg) {
                     time_per_step=(fwd.forward_time_ms + bw_info.backward_time_ms),
                 )
                 map<string]string tags = {"epoch": str(epoch), "phase": "train"}
-                log_scalar(&state.lg, "train/loss", loss_value, state.global_step, tags)
-                log_scalar(&state.lg, "train/grad_norm", bw_info.grad_norm, state.global_step, tags)
-                log_scalar(&state.lg, "train/learning_rate", current_lr, state.global_step, tags)
-                log_scalar(&state.lg, "train/throughput", throughput, state.global_step, tags)
-                log_scalar(&state.lg, "train/forward_time", fwd.forward_time_ms, state.global_step, tags)
-                log_scalar(&state.lg, "train/backward_time", bw_info.backward_time_ms, state.global_step, tags)
+                log_scalar(*state.lg, "train/loss", loss_value, state.global_step, tags)
+                log_scalar(*state.lg, "train/grad_norm", bw_info.grad_norm, state.global_step, tags)
+                log_scalar(*state.lg, "train/learning_rate", current_lr, state.global_step, tags)
+                log_scalar(*state.lg, "train/throughput", throughput, state.global_step, tags)
+                log_scalar(*state.lg, "train/forward_time", fwd.forward_time_ms, state.global_step, tags)
+                log_scalar(*state.lg, "train/backward_time", bw_info.backward_time_ms, state.global_step, tags)
                 if cfg.use_wandb {
-                    wandb_log_metric(&wb_run, "train/loss", loss_value, state.global_step, tags)
-                    wandb_log_metric(&wb_run, "train/lr", current_lr, state.global_step, tags)
-                    wandb_log_metric(&wb_run, "train/grad_norm", bw_info.grad_norm, state.global_step, tags)
+                    wandb_log_metric(*wb_run, "train/loss", loss_value, state.global_step, tags)
+                    wandb_log_metric(*wb_run, "train/lr", current_lr, state.global_step, tags)
+                    wandb_log_metric(*wb_run, "train/grad_norm", bw_info.grad_norm, state.global_step, tags)
                 }
                 if cfg.use_tensorboard {
                     write_scalar(tb_writer, "Loss/train", loss_value, state.global_step)
@@ -430,7 +430,7 @@ func run_training(training_config cfg) {
                     write_scalar(tb_writer, "Train/GradNorm", bw_info.grad_norm, state.global_step)
                     if state.global_step % (cfg.log_every_n_steps * 10) == 0:
                         []float grad_values = extract_flat_grad_values(bw_info.parameter_gradients)
-                        log_histogram(&state.lg, "train/gradient_distribution",
+                        log_histogram(*state.lg, "train/gradient_distribution",
                                       grad_values, state.global_step, {})
                         write_histogram(tb_writer, "Gradients/distribution",
                                        grad_values, state.global_step)
@@ -441,11 +441,11 @@ func run_training(training_config cfg) {
                 float val_loss = run_validation(model, state.val_loader, cfg)
                 float val_perplexity = exp(val_loss)
                 map[string]string val_tags = {"epoch": str(epoch), "phase": "validation"}
-                log_scalar(&state.lg, "val/loss", val_loss, state.global_step, val_tags)
-                log_scalar(&state.lg, "val/perplexity", val_perplexity, state.global_step, val_tags)
+                log_scalar(*state.lg, "val/loss", val_loss, state.global_step, val_tags)
+                log_scalar(*state.lg, "val/perplexity", val_perplexity, state.global_step, val_tags)
                 if cfg.use_wandb:
-                    wandb_log_metric(&wb_run, "val/loss", val_loss, state.global_step, val_tags)
-                    wandb_log_metric(&wb_run, "val/perplexity", val_perplexity, state.global_step, val_tags)
+                    wandb_log_metric(*wb_run, "val/loss", val_loss, state.global_step, val_tags)
+                    wandb_log_metric(*wb_run, "val/perplexity", val_perplexity, state.global_step, val_tags)
                 if cfg.use_tensorboard:
                     write_scalar(tb_writer, "Loss/validation", val_loss, state.global_step)
                     write_scalar(tb_writer, "Validation/Perplexity", val_perplexity, state.global_step)
@@ -1112,13 +1112,13 @@ func print_config_pretty(training_config cfg):
     }
 func log_model_summary(logger lg, transformer_model model, training_config cfg):
     """Log model architecture summary"""
-    log_scalar(&lg, "config/neurx/vocab_size", float(cfg.vocab_size), 0, {})
-    log_scalar(&lg, "config/neurx/d_model", float(cfg.d_model), 0, {})
-    log_scalar(&lg, "config/neurx/n_layers", float(cfg.n_layers), 0, {})
-    log_scalar(&lg, "config/neurx/n_heads", float(cfg.n_heads), 0, {})
-    log_scalar(&lg, "config/neurx/parameters", float(count_parameters(model)), 0, {})
-    log_scalar(&lg, "config/neurx/batch_size", float(cfg.batch_size), 0, {})
-    log_scalar(&lg, "config/neurx/learning_rate", cfg.learning_rate, 0, {})
+    log_scalar(*lg, "config/neurx/vocab_size", float(cfg.vocab_size), 0, {})
+    log_scalar(*lg, "config/neurx/d_model", float(cfg.d_model), 0, {})
+    log_scalar(*lg, "config/neurx/n_layers", float(cfg.n_layers), 0, {})
+    log_scalar(*lg, "config/neurx/n_heads", float(cfg.n_heads), 0, {})
+    log_scalar(*lg, "config/neurx/parameters", float(count_parameters(model)), 0, {})
+    log_scalar(*lg, "config/neurx/batch_size", float(cfg.batch_size), 0, {})
+    log_scalar(*lg, "config/neurx/learning_rate", cfg.learning_rate, 0, {})
 func save_best_model(transformer_model model, optimizer opt, int step,
                      string dir, float val_loss):
     """Save best model checkpoint based on validation performance"""

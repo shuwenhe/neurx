@@ -8,8 +8,8 @@ struct ActivationKernels {
     config: types.KernelConfig
 }
 
-func NewActivationKernels(types.KernelConfig config) &ActivationKernels {
-    return &ActivationKernels{
+func NewActivationKernels(types.KernelConfig config) *ActivationKernels {
+    return *ActivationKernels{
         config: config
     }
 }
@@ -266,7 +266,7 @@ func (ActivationKernels* k) LogSoftmax(
 ) types.KernelResult {
 
     softmax_result := make([]f32, len(input))
-    k.Softmax(input, dim, &softmax_result)
+    k.Softmax(input, dim, *softmax_result)
 
     const_ln2 := f32(0.693147180)
 

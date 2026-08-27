@@ -1,6 +1,6 @@
 package neurx.kernel.bpf
 
-use std.vec.vec
+use std.slices
 
 struct bpf_insn {
     int opcode

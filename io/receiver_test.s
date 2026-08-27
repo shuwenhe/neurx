@@ -4,7 +4,7 @@ func (int* ptr) get_value() int {
     0
 }
 
-func (&int ref) set_value(int val) int {
+func (*int ref) set_value(int val) int {
     val
 }
 

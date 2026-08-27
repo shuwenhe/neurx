@@ -93,7 +93,7 @@ struct resource_constraint_checker_impl {
 }
 
 func create_resource_constraint_checker() (resource_constraint_checker_impl*) {
-    checker := &resource_constraint_checker_impl{
+    checker := *resource_constraint_checker_impl{
         mem_constraints: create_default_memory_constraints(),
         compute_constraints: create_default_compute_constraints(),
         bw_constraints: create_default_bandwidth_constraints(),
@@ -103,7 +103,7 @@ func create_resource_constraint_checker() (resource_constraint_checker_impl*) {
 }
 
 func create_default_memory_constraints() (memory_constraints*) {
-    constraints := &memory_constraints{
+    constraints := *memory_constraints{
         max_gpu_memory: 48 * 1024 * 1024 * 1024,
         max_cpu_memory: 256 * 1024 * 1024 * 1024,
         reserved_memory: 2 * 1024 * 1024 * 1024,
@@ -114,7 +114,7 @@ func create_default_memory_constraints() (memory_constraints*) {
 }
 
 func create_default_compute_constraints() (compute_constraints*) {
-    constraints := &compute_constraints{
+    constraints := *compute_constraints{
         max_batch_size: 1024,
         max_sequence_length: 32768,
         max_num_tokens: 33554432,
@@ -125,7 +125,7 @@ func create_default_compute_constraints() (compute_constraints*) {
 }
 
 func create_default_bandwidth_constraints() (bandwidth_constraints*) {
-    constraints := &bandwidth_constraints{
+    constraints := *bandwidth_constraints{
         max_memory_bandwidth: 1024 * 1024 * 1024 * 1024,
         max_pcie_bandwidth: 256 * 1024 * 1024 * 1024,
         max_nvlink_bandwidth: 900 * 1024 * 1024 * 1024,
@@ -134,7 +134,7 @@ func create_default_bandwidth_constraints() (bandwidth_constraints*) {
 }
 
 func create_default_thermal_constraints() (thermal_constraints*) {
-    constraints := &thermal_constraints{
+    constraints := *thermal_constraints{
         max_temperature: 83.0,
         max_power_draw: 700.0,
         thermal_throttle_temp: 75.0,
@@ -143,7 +143,7 @@ func create_default_thermal_constraints() (thermal_constraints*) {
 }
 
 func (resource_constraint_checker_impl* c) check_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_report*) {
-    report := &constraint_report{
+    report := *constraint_report{
         all_satisfied: true,
         checks: vec[constraint_check]{},
         recommendations: vec[string]{},
@@ -287,7 +287,7 @@ func (resource_constraint_checker_impl* c) estimate_memory_usage(cfg device_conf
 }
 
 func (resource_constraint_checker_impl* c) get_available_resources(hw_info hardware_info*) (device_config_full*) {
-    cfg := &device_config_full{}
+    cfg := *device_config_full{}
 
     available_mem := hw_info.mem_info.available_memory - c.mem_constraints.min_free_memory
     mem_cfg := create_default_memory_config(available_mem)
@@ -300,7 +300,7 @@ func (resource_constraint_checker_impl* c) get_available_resources(hw_info hardw
 }
 
 func create_default_memory_config(available_mem int64) (memory_config*) {
-    cfg := &memory_config{
+    cfg := *memory_config{
         max_memory: available_mem,
         gpu_memory_utilization: 85,
         enable_prefix_caching: true,
@@ -314,7 +314,7 @@ func create_default_memory_config(available_mem int64) (memory_config*) {
 }
 
 func create_default_compute_config() (computation_config*) {
-    cfg := &computation_config{
+    cfg := *computation_config{
         enable_flash_attn: true,
         enable_triton: true,
         enable_torch_compile: false,
@@ -328,7 +328,7 @@ func create_default_compute_config() (computation_config*) {
 }
 
 func (resource_constraint_checker_impl* c) apply_conservative_limits(cfg device_config_full*, hw_info hardware_info*) (device_config_full*) {
-    conservative := &device_config_full{}
+    conservative := *device_config_full{}
 
     if cfg.dev_cfg != nil {
         conservative.dev_cfg = cfg.dev_cfg
@@ -338,13 +338,13 @@ func (resource_constraint_checker_impl* c) apply_conservative_limits(cfg device_
         mem_cfg := *cfg.mem_cfg
         mem_cfg.gpu_memory_utilization = 70
         mem_cfg.kv_cache_ratio = 0.6
-        conservative.mem_cfg = &mem_cfg
+        conservative.mem_cfg = *mem_cfg
     }
 
     if cfg.comp_cfg != nil {
         comp_cfg := *cfg.comp_cfg
         comp_cfg.max_batch_size = comp_cfg.max_batch_size / 2
-        conservative.comp_cfg = &comp_cfg
+        conservative.comp_cfg = *comp_cfg
     }
 
     if cfg.attn_cfg != nil {
@@ -355,7 +355,7 @@ func (resource_constraint_checker_impl* c) apply_conservative_limits(cfg device_
         opt_cfg := *cfg.opt_cfg
         opt_cfg.compute_utilization_target = 0.7
         opt_cfg.memory_utilization_target = 0.75
-        conservative.opt_cfg = &opt_cfg
+        conservative.opt_cfg = *opt_cfg
     }
 
     return conservative

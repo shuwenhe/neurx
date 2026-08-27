@@ -60,7 +60,7 @@ func create_worker_manager(int32 num_workers) worker_manager* {
 
     for i := 0; i < num_workers; i = i + 1 {
         worker_id := "worker_" + string(i)
-        worker := &worker_process{
+        worker := *worker_process{
             worker_id: i,
             status: worker_idle,
             assigned_task_id: "",
@@ -71,7 +71,7 @@ func create_worker_manager(int32 num_workers) worker_manager* {
         mgr.workers[worker_id] = worker
     }
 
-    return &mgr
+    return *mgr
 }
 
 func (worker_manager* mgr) submit_task(string task_id, task_type type, string adapter_name, float32 priority) bool {
@@ -79,7 +79,7 @@ func (worker_manager* mgr) submit_task(string task_id, task_type type, string ad
         return false
     }
 
-    task := &worker_task{
+    task := *worker_task{
         task_id: task_id,
         type: type,
         adapter_name: adapter_name,

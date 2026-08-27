@@ -75,7 +75,7 @@ func string_from_char(int code) string {
     ""
 }
 
-func http_request_to_server(string host, int port, string path) result[http_response, string] {
+func http_request_to_server(string host, int port, string path) (http_response, string) {
     switch socket(2, 1, 0) {
         (fd, "") : {
             switch socket_connect(fd, host, port) {

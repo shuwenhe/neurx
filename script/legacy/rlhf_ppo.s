@@ -357,7 +357,7 @@ func (reward_model* model) predict_reward(tokens []int) float64 {
 }
 
 func new_ppo_trainer(config ppoconfig) *ppotrainer {
-    return &ppotrainer{
+    return *ppotrainer{
         config: config,
         policy_model: policy_model{
             model_name: "gpt_large",

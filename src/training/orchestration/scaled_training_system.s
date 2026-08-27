@@ -503,7 +503,7 @@ func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_s
             for i := 0; i < len(logits.grad); i += 1 {
                 logits.grad[i] = 1.0 / float64(batch_size)
             }
-            adamw_step_extended(&optimizer, &model.embedding_weight.data, logits.grad)
+            adamw_step_extended(*optimizer, *model.embedding_weight.data, logits.grad)
             total_loss += loss
             if (step + 1) % 10 == 0 {
                 avg_loss := total_loss / float64(step + 1)

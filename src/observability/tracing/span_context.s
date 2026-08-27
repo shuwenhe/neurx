@@ -176,7 +176,7 @@ func main() {
     io.Println("W3C Format: " + root_ctx.w3c_format()[0])
     io.Println("Sampled: " + io.ToString(root_ctx.is_sampled()))
 
-    child_ctx := new_child_span_context(&root_ctx)
+    child_ctx := new_child_span_context(*root_ctx)
     io.Println("Child Trace ID: " + child_ctx.get_trace_id().to_hex()[0])
     io.Println("Child Span ID: " + child_ctx.get_span_id().to_hex()[0])
 

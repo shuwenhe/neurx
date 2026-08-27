@@ -4,7 +4,7 @@ use std.fs.read_to_string as fs_read_to_string
 use std.fs.write_text_file as fs_write_text_file
 use std.process.run_process
 use std.process.run_process_output
-use std.vec.vec
+use std.slices
 
 struct json_value {
 }

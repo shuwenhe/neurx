@@ -112,14 +112,14 @@ func create_mini_transformer(int vocab_size, int hidden_dim, int ff_dim, int num
         ff_dim: ff_dim,
         num_heads: num_heads,
     }
-    init_weights(&model.embedding_weight)
-    init_weights(&model.q_proj)
-    init_weights(&model.k_proj)
-    init_weights(&model.v_proj)
-    init_weights(&model.out_proj)
-    init_weights(&model.fc1)
-    init_weights(&model.fc2)
-    init_weights(&model.lm_head)
+    init_weights(*model.embedding_weight)
+    init_weights(*model.q_proj)
+    init_weights(*model.k_proj)
+    init_weights(*model.v_proj)
+    init_weights(*model.out_proj)
+    init_weights(*model.fc1)
+    init_weights(*model.fc2)
+    init_weights(*model.lm_head)
     model
 }
 

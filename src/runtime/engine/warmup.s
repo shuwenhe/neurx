@@ -50,7 +50,7 @@ struct model_warmup_engine {
 }
 
 func create_model_warmup_engine(warmup_config* config) model_warmup_engine* {
-    return &model_warmup_engine{
+    return *model_warmup_engine{
         config: config,
         profile: *warmup_profile{
             kernel_profiles: make([]warmup_kernel_info*, 0),
@@ -97,7 +97,7 @@ func (model_warmup_engine* mwe) run_throughput_stage() error {
 }
 
 func (model_warmup_engine* mwe) profile_layer_forward(string layer_name, interface{} layer, interface{} input) (warmup_layer_info*, error) {
-    layer_info := &warmup_layer_info{
+    layer_info := *warmup_layer_info{
         layer_name: layer_name,
         layer_id: 0,
         forward_time_ms: 0.0,
@@ -158,7 +158,7 @@ func (model_warmup_engine* mwe) recommend_optimizations() []string {
 }
 
 func (model_warmup_engine* mwe) reset() {
-    mwe.profile = &warmup_profile{
+    mwe.profile = *warmup_profile{
         kernel_profiles: make([]warmup_kernel_info*, 0),
         layer_profiles: make([]warmup_layer_info*, 0),
         overall_stats: warmup_stats{},

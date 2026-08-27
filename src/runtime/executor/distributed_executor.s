@@ -12,7 +12,7 @@ struct DistributedExecutor {
 
 func NewDistributedExecutor(config ExecutorConfig,
                            dist_config DistributedConfig) *DistributedExecutor {
-    executor := &DistributedExecutor{
+    executor := *DistributedExecutor{
         base: *NewBaseExecutor(config),
         distributed_config: dist_config,
         tensor_parallel_size: dist_config.tensor_parallel,

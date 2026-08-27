@@ -1,6 +1,6 @@
 package neurx.kernel.security
 
-use std.vec.vec
+use std.slices
 
 struct capability {
     int cap_id

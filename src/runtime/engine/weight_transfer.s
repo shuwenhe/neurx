@@ -61,7 +61,7 @@ struct weight_manager {
 }
 
 func create_weight_manager(weight_transfer_config* config, communicator* comm, device_communicator* dev_comm, int32 world_rank, int32 world_size) weight_manager* {
-    return &weight_manager{
+    return *weight_manager{
         config: *config,
         chunks: make(map[string]weight_chunk*),
         comm: comm,
@@ -79,7 +79,7 @@ func (weight_manager* wm) register_weight(string weight_id, int64 total_size) er
     i := 0
     for i < int32(num_chunks) {
         chunk_id := weight_id + "_chunk_" + core.int_to_string(i)
-        chunk := &weight_chunk{
+        chunk := *weight_chunk{
             weight_id: weight_id,
             chunk_id: i,
             chunk_size_bytes: chunk_size,
@@ -111,7 +111,7 @@ func (weight_manager* wm) transfer_weight(string weight_id, weight_location src_
 }
 
 func (weight_manager* wm) create_transfer_plan([]string weight_ids) weight_transfer_plan* {
-    return &weight_transfer_plan{
+    return *weight_transfer_plan{
         plan_id: 0,
         weight_ids: weight_ids,
         chunk_ids: make([]int32, 0),

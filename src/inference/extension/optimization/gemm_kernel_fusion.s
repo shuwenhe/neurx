@@ -29,7 +29,7 @@ func NewFusedGEMMKernel(config gemm_config) *fused_gemm_kernel {
     if config.tile_size <= 0 {
         config.tile_size = 64
     }
-    return &fused_gemm_kernel{
+    return *fused_gemm_kernel{
         config:      config,
         gemms:       make([]gemm_operation, 0),
         fused_output: make([]float32, 0),

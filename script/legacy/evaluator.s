@@ -188,7 +188,7 @@ func format_int(int i): string {
 }
 
 func main() {
-    evaluator := &evaluator{}
+    evaluator := *evaluator{}
     evaluator.init(32, 4)
     steps := []int{100, 500, 1000, 2000}
     initial_ppl := 1000.0

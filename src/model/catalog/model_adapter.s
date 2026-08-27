@@ -67,7 +67,7 @@ struct model_adapter_registry {
 }
 
 func create_model_adapter_registry() *model_adapter_registry {
-	return &model_adapter_registry{
+	return *model_adapter_registry{
 		adapters: make(map[string]interface{}),
 		adapter_configs: make(map[string]map[string]interface{}),
 		adapter_metadata: make(map[string]*model_metadata),
@@ -75,7 +75,7 @@ func create_model_adapter_registry() *model_adapter_registry {
 }
 
 func create_qwen_adapter(model_id string, model_name string, version string) *qwen_adapter {
-	return &qwen_adapter{
+	return *qwen_adapter{
 		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
@@ -89,7 +89,7 @@ func create_qwen_adapter(model_id string, model_name string, version string) *qw
 }
 
 func create_llama_adapter(model_id string, model_name string, context_length int32) *llama_adapter {
-	return &llama_adapter{
+	return *llama_adapter{
 		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
@@ -103,7 +103,7 @@ func create_llama_adapter(model_id string, model_name string, context_length int
 }
 
 func create_mixtral_adapter(model_id string, model_name string, num_experts int32) *mixtral_adapter {
-	return &mixtral_adapter{
+	return *mixtral_adapter{
 		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
@@ -117,7 +117,7 @@ func create_mixtral_adapter(model_id string, model_name string, num_experts int3
 }
 
 func create_chatglm_adapter(model_id string, model_name string, generation_mode string) *chatglm_adapter {
-	return &chatglm_adapter{
+	return *chatglm_adapter{
 		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
@@ -130,7 +130,7 @@ func create_chatglm_adapter(model_id string, model_name string, generation_mode 
 }
 
 func create_baichuan_adapter(model_id string, model_name string) *baichuan_adapter {
-	return &baichuan_adapter{
+	return *baichuan_adapter{
 		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
@@ -143,7 +143,7 @@ func create_baichuan_adapter(model_id string, model_name string) *baichuan_adapt
 }
 
 func create_internlm_adapter(model_id string, model_name string) *internlm_adapter {
-	return &internlm_adapter{
+	return *internlm_adapter{
 		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
@@ -156,7 +156,7 @@ func create_internlm_adapter(model_id string, model_name string) *internlm_adapt
 }
 
 func create_falcon_adapter(model_id string, model_name string, num_heads int32) *falcon_adapter {
-	return &falcon_adapter{
+	return *falcon_adapter{
 		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
@@ -170,7 +170,7 @@ func create_falcon_adapter(model_id string, model_name string, num_heads int32) 
 }
 
 func create_mpt_adapter(model_id string, model_name string, n_layers int32) *mpt_adapter {
-	return &mpt_adapter{
+	return *mpt_adapter{
 		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
@@ -315,35 +315,35 @@ func (mpt_adapter* adapter) enable_alibi(enabled bool) {
 }
 
 func register_all_standard_adapters(model_adapter_registry* registry) {
-	qwen_metadata := &model_metadata{
+	qwen_metadata := *model_metadata{
 		model_type: TYPE_QWEN,
 		vocabulary_size: 32000,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
 	}
 
-	llama_metadata := &model_metadata{
+	llama_metadata := *model_metadata{
 		model_type: TYPE_LLAMA,
 		vocabulary_size: 32000,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION, CAP_CODE_GENERATION},
 	}
 
-	mixtral_metadata := &model_metadata{
+	mixtral_metadata := *model_metadata{
 		model_type: TYPE_MIXTRAL,
 		vocabulary_size: 32000,
 		supported_devices: []model_device_type{DEVICE_CUDA},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION, CAP_CODE_GENERATION},
 	}
 
-	chatglm_metadata := &model_metadata{
+	chatglm_metadata := *model_metadata{
 		model_type: TYPE_CHATGLM,
 		vocabulary_size: 130528,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
 	}
 
-	baichuan_metadata := &model_metadata{
+	baichuan_metadata := *model_metadata{
 		model_type: TYPE_BAICHUAN,
 		vocabulary_size: 125696,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
@@ -355,19 +355,19 @@ func register_all_standard_adapters(model_adapter_registry* registry) {
 	registry.register_adapter(TYPE_MIXTRAL, create_mixtral_adapter("mixtral-8x7b", "Mixtral-8x7B", 8), mixtral_metadata)
 	registry.register_adapter(TYPE_CHATGLM, create_chatglm_adapter("chatglm-6b", "ChatGLM-6B", "chat"), chatglm_metadata)
 	registry.register_adapter(TYPE_BAICHUAN, create_baichuan_adapter("baichuan-7b", "Baichuan-7B"), baichuan_metadata)
-	registry.register_adapter(TYPE_INTERNLM, create_internlm_adapter("internlm-7b", "InternLM-7B"), &model_metadata{
+	registry.register_adapter(TYPE_INTERNLM, create_internlm_adapter("internlm-7b", "InternLM-7B"), *model_metadata{
 		model_type: TYPE_INTERNLM,
 		vocabulary_size: 103168,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
 	})
-	registry.register_adapter(TYPE_FALCON, create_falcon_adapter("falcon-7b", "Falcon-7B", 32), &model_metadata{
+	registry.register_adapter(TYPE_FALCON, create_falcon_adapter("falcon-7b", "Falcon-7B", 32), *model_metadata{
 		model_type: TYPE_FALCON,
 		vocabulary_size: 65024,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
 	})
-	registry.register_adapter(TYPE_MPT, create_mpt_adapter("mpt-7b", "MPT-7B", 32), &model_metadata{
+	registry.register_adapter(TYPE_MPT, create_mpt_adapter("mpt-7b", "MPT-7B", 32), *model_metadata{
 		model_type: TYPE_MPT,
 		vocabulary_size: 50257,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},

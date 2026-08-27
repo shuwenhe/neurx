@@ -38,7 +38,7 @@ func BasicMatrixExample() {
     }
 
     println("Executing GEMM...")
-    result := matrix_kernel.GEMM(m, n, k, 1.0, A, k, B, n, 0.0, &C, n)
+    result := matrix_kernel.GEMM(m, n, k, 1.0, A, k, B, n, 0.0, *C, n)
 
     if result.success {
         println("✅ GEMM succeeded")
@@ -89,7 +89,7 @@ func ActivationExample() {
 
     for i := 0; i < 6; i += 1 {
         println("Testing ", activation_names[i], "...")
-        result := activation_kernel.ApplyActivation(activations[i], input, &output)
+        result := activation_kernel.ApplyActivation(activations[i], input, *output)
 
         if result.success {
             println("  ✅ Success, time: ", result.execution_time_ms, " ms")
@@ -137,7 +137,7 @@ func NormalizationExample() {
         track_running_stats: true
     }
 
-    result := norm_kernel.LayerNorm(m, n, input, gamma, beta, norm_params, &output)
+    result := norm_kernel.LayerNorm(m, n, input, gamma, beta, norm_params, *output)
 
     if result.success {
         println("✅ LayerNorm succeeded")

@@ -119,8 +119,8 @@ func exec_command(string cmd, args ...string) exec_command_result {
     command := exec.command(cmd, args...)
     var stdout strings.Builder
     var stderr strings.Builder
-    command.Stdout = &stdout
-    command.Stderr = &stderr
+    command.Stdout = *stdout
+    command.Stderr = *stderr
     err := command.Run()
     exit_code := 0
     if err != nil {
@@ -144,8 +144,8 @@ func exec_in_dir(string dir, string cmd, args ...string) exec_command_result {
     command.Dir = dir
     var stdout strings.Builder
     var stderr strings.Builder
-    command.Stdout = &stdout
-    command.Stderr = &stderr
+    command.Stdout = *stdout
+    command.Stderr = *stderr
     err := command.Run()
     exit_code := 0
     if err != nil {
@@ -168,8 +168,8 @@ func shell(string command) exec_command_result {
     cmd := exec.command("bash", "-c", command)
     var stdout strings.Builder
     var stderr strings.Builder
-    cmd.Stdout = &stdout
-    cmd.Stderr = &stderr
+    cmd.Stdout = *stdout
+    cmd.Stderr = *stderr
     err := cmd.Run()
     exit_code := 0
     if err != nil {

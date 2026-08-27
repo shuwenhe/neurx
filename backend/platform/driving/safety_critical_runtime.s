@@ -1,6 +1,6 @@
 package neurx.backend.platform.driving
 
-use std.vec.vec
+use std.slices
 use std.io.println
 
 struct safety_critical_runtime {

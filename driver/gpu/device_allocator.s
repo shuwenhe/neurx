@@ -1,6 +1,6 @@
 package neurx.driver.gpu.device_allocator
 
-use std.vec.vec
+use std.slices
 
 struct gpu_device {
     int device_id

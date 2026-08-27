@@ -19,7 +19,7 @@ struct CommunicationHandler {
 }
 
 func NewCommunicationHandler(config CommunicationConfig, worker_count i32) *CommunicationHandler {
-    handler := &CommunicationHandler{
+    handler := *CommunicationHandler{
         config: config,
         queue_count: worker_count,
         total_messages_sent: 0,
@@ -55,7 +55,7 @@ func (CommunicationHandler* h) SendMessage(msg WorkerMessage) WorkerResult {
         }
     }
 
-    queue := &h.message_queues[msg.receiver_id]
+    queue := *h.message_queues[msg.receiver_id]
 
     if queue.queue_size >= queue.max_size {
         return WorkerResult{
@@ -81,7 +81,7 @@ func (CommunicationHandler* h) ReceiveMessage(worker_id i32) WorkerMessage {
         return WorkerMessage{message_id: -1}
     }
 
-    queue := &h.message_queues[worker_id]
+    queue := *h.message_queues[worker_id]
     if queue.queue_size == 0 {
         return WorkerMessage{message_id: 0}
     }
@@ -115,7 +115,7 @@ func (CommunicationHandler* h) BroadcastMessage(msg WorkerMessage, target_ids []
 }
 
 func (CommunicationHandler* h) ReceiveAck(worker_id i32, message_id i64) i32 {
-    queue := &h.message_queues[worker_id]
+    queue := *h.message_queues[worker_id]
 
     for i := 0; i < queue.queue_size; i++ {
         if queue.messages[i].message_id == message_id {
@@ -240,7 +240,7 @@ struct SynchronizationManager {
 }
 
 func NewSynchronizationManager() *SynchronizationManager {
-    return &SynchronizationManager{
+    return *SynchronizationManager{
         completed_syncs: 0,
         failed_syncs: 0,
     }

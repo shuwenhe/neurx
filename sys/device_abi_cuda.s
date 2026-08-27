@@ -1,6 +1,6 @@
 package neurx.sys.device_abi
 
-use std.vec.vec
+use std.slices
 
 // CUDA Error codes (subset)
 struct cuda_error {

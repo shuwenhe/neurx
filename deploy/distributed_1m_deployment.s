@@ -1,6 +1,6 @@
 package neurx.deployment.distributed_1m
 
-use std.vec.vec
+use std.slices
 use std.io.println
 
 struct zone_deployment_config {

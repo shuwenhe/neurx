@@ -42,7 +42,7 @@ func NewTensorParallelInference(config tensor_parallel_config) *tensor_parallel_
     if config.world_size <= 0 {
         config.world_size = 1
     }
-    engine := &tensor_parallel_inference{
+    engine := *tensor_parallel_inference{
         config:        config,
         comm_ops:      []communication_op{},
         async_handles: make(map[int64]bool),

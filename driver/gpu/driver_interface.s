@@ -17,14 +17,14 @@ struct gpu_device {
 struct gpu_driver {
     gpu_driver_type driver_type
     int device_count
-    vec[gpu_device]* devices
+    gpu_device[] devices
 }
 
 func init_gpu_driver(gpu_driver_type driver_type) (gpu_driver*, string) {
     (gpu_driver {
         driver_type: driver_type,
         device_count: 0,
-        devices: vec[gpu_device]()
+        devices: gpu_device[]{}
     })
 }
 

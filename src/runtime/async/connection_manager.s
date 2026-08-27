@@ -348,7 +348,7 @@ func (cm connection_monitor*) check_heartbeats() {
 	for conn := range conns {
 		if cm.pool.heartbeat_config.enabled {
 			if now - conn.last_activity > cm.pool.heartbeat_config.interval_ms*1000000 {
-				cm.send_heartbeat(&conn)
+				cm.send_heartbeat(*conn)
 			}
 		}
 	}

@@ -378,7 +378,7 @@ func main() {
 }
 
 func create_trainer(string model_size, int world_size, int rank): (*large_model_trainer, error) {
-    trainer := &large_model_trainer{}
+    trainer := *large_model_trainer{}
     err := trainer.init(model_size, world_size, rank)
     return trainer, err
 }
@@ -392,9 +392,9 @@ func (large_model_trainer* lmt) get_config(): large_model_config {
 }
 
 func (large_model_trainer* lmt) get_gradient_accumulator(): *gradient_accumulator {
-    return &lmt.grad_accumulator
+    return *lmt.grad_accumulator
 }
 
 func (large_model_trainer* lmt) get_activation_checkpointer(): *activation_checkpointer {
-    return &lmt.activation_ckpt
+    return *lmt.activation_ckpt
 }

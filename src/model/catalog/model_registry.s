@@ -48,7 +48,7 @@ struct model_registry {
 }
 
 func create_model_registry() *model_registry {
-	return &model_registry{
+	return *model_registry{
 		models: make(map[string]*model_registration_info),
 		models_by_type: make(map[model_type][]*model_registration_info),
 		models_by_capability: make(map[model_capability][]*model_registration_info),
@@ -214,7 +214,7 @@ func (model_registry* registry) query_models(model_query* query) *model_query_re
 
 	query_time := int64(time.Since(start_time).Milliseconds())
 
-	return &model_query_result{
+	return *model_query_result{
 		query_id: query.query_id,
 		models: results,
 		total_count: int32(len(results)),

@@ -553,7 +553,7 @@ struct v1_engine {
 }
 
 func new_request_pool(max_size int32) *request_pool {
-    return &request_pool{
+    return *request_pool{
         max_size:  max_size,
         requests: make([]*v1_request, 0, max_size),
         indices:  make(map[string]int32),
@@ -594,7 +594,7 @@ func (request_pool* rp) size() int32 {
 }
 
 func new_v1_engine(eng *engine.llm_engine) *v1_engine {
-    return &v1_engine{
+    return *v1_engine{
         engine:        eng,
         request_pool:   new_request_pool(256),
         is_initialized: false,
@@ -651,7 +651,7 @@ func (v1_engine* ve) execute(v1_request* req) (*v1_response, error) {
         return nil, err
     }
 
-    response := &v1_response{
+    response := *v1_response{
         id:      req.request_id,
         object:  "chat.completion",
         created: core.CurrentTimeMs(),
@@ -695,7 +695,7 @@ func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, 
             return
         }
 
-        resp_chan <- &v1_stream_response{
+        resp_chan <- *v1_stream_response{
             id:      req.request_id,
             object:  "chat.completion.chunk",
             created: core.CurrentTimeMs(),
@@ -714,7 +714,7 @@ func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, 
         for i := 0; i < len(generated_text); i++ {
             token := string(generated_text[i])
 
-            resp_chan <- &v1_stream_response{
+            resp_chan <- *v1_stream_response{
                 id:      req.request_id,
                 object:  "chat.completion.chunk",
                 created: core.CurrentTimeMs(),
@@ -730,7 +730,7 @@ func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, 
             }
         }
 
-        resp_chan <- &v1_stream_response{
+        resp_chan <- *v1_stream_response{
             id:      req.request_id,
             object:  "chat.completion.chunk",
             created: core.CurrentTimeMs(),
@@ -766,7 +766,7 @@ func (v1_engine* ve) execute_async(req *v1_request, callback func(*v1_response, 
         return err
     }
 
-    resp := &v1_response{
+    resp := *v1_response{
         id:      req.request_id,
         object:  "chat.completion",
         created: core.CurrentTimeMs(),

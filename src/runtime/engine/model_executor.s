@@ -185,7 +185,7 @@ struct layer_execution_output {
 }
 
 func new_model_loader(model_load_config config) *model_loader {
-    return &model_loader{
+    return *model_loader{
         config: config,
         executors: make(map[string]*model_executor),
         loading_tasks: make(map[string]interface{}),
@@ -228,7 +228,7 @@ func (model_loader* ml) load_model_async(string model_id) (*model_executor, erro
         return executor, nil
     }
 
-    executor := &model_executor{
+    executor := *model_executor{
         load_config: ml.config,
         loading_state: model_loading_state{
             status: loader_status_loading,
@@ -252,7 +252,7 @@ func (model_loader* ml) load_model_async(string model_id) (*model_executor, erro
 }
 
 func (model_loader* ml) load_model_config(string model_id) (*model_config_spec, error) {
-    config := &model_config_spec{
+    config := *model_config_spec{
         model_id: model_id,
         model_name: model_id,
         hidden_size: 4096,
@@ -310,7 +310,7 @@ func (model_loader* ml) load_weights(model_executor* executor) error {
 
     num_layers := executor.config.num_hidden_layers
     for i := int32(0); i < num_layers; i++ {
-        layer_exec := &model_layer_executor{
+        layer_exec := *model_layer_executor{
             layer_id: i,
             layer_type: "transformer_block",
             weights: make(map[string]interface{}),
@@ -344,7 +344,7 @@ func (model_loader* ml) prepare_weights(model_executor* executor) error {
 
 func (model_loader* ml) get_loading_progress(string model_id) *model_loading_state {
     if executor, exists := ml.executors[model_id]; exists {
-        return &executor.loading_state
+        return *executor.loading_state
     }
     return nil
 }
@@ -386,7 +386,7 @@ func (model_executor* me) execute_layer(int32 layer_id, interface{} input) (*lay
         return nil, "executor not ready"
     }
 
-    output := &layer_execution_output{
+    output := *layer_execution_output{
         hidden_states: nil,
         attention_output: nil,
         mlp_output: nil,
@@ -410,7 +410,7 @@ func (model_executor* me) forward_pass([]int32 tokens) (interface{}, error) {
 }
 
 func (model_executor* me) get_cache_status() *model_executor_cache {
-    return &me.cache
+    return *me.cache
 }
 
 func (model_executor* me) clear_cache() {
@@ -429,7 +429,7 @@ func (model_executor* me) is_ready() bool {
 }
 
 func (model_executor* me) get_config() *model_config_spec {
-    return &me.config
+    return *me.config
 }
 
 func (model_executor* me) get_dtype() model_dtype {
@@ -443,7 +443,7 @@ func (model_executor* me) get_layer_count() int32 {
 func load_model_with_timeout(*model_loader loader, string model_id, int32 timeout_ms) (*model_load_result, error) {
     executor, err := loader.load_model_async(model_id)
     if err != nil {
-        return &model_load_result{
+        return *model_load_result{
             success: false,
             error_message: err,
         }, err
@@ -451,7 +451,7 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
 
     config, err := loader.load_model_config(model_id)
     if err != nil {
-        return &model_load_result{
+        return *model_load_result{
             success: false,
             error_message: err,
         }, err
@@ -461,7 +461,7 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
 
     err = loader.load_weights(executor)
     if err != nil {
-        return &model_load_result{
+        return *model_load_result{
             success: false,
             error_message: err,
         }, err
@@ -469,13 +469,13 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
 
     err = loader.prepare_weights(executor)
     if err != nil {
-        return &model_load_result{
+        return *model_load_result{
             success: false,
             error_message: err,
         }, err
     }
 
-    return &model_load_result{
+    return *model_load_result{
         success: true,
         executor: executor,
         config: config,

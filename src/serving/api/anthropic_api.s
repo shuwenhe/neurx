@@ -63,7 +63,7 @@ struct anthropic_api_server {
 }
 
 func create_anthropic_api_server(llm_engine* engine, int32 port) anthropic_api_server* {
-    return &anthropic_api_server{
+    return *anthropic_api_server{
         engine: engine,
         api_version: "2023-06-01",
         api_key: core.get_env("ANTHROPIC_API_KEY"),
@@ -94,7 +94,7 @@ func (anthropic_api_server* srv) create_message(message_input* req) (message_res
         return nil, nil
     }
 
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: "",
         model_id: req.model,
         config: generation_config{
@@ -108,12 +108,12 @@ func (anthropic_api_server* srv) create_message(message_input* req) (message_res
         return nil, err
     }
 
-    content_block := &message_content_block{
+    content_block := *message_content_block{
         type: content_block_text,
         text: "",
     }
 
-    anthropic_resp := &message_response{
+    anthropic_resp := *message_response{
         id: "msg-" + core.generate_uuid(),
         type: "message",
         role: "assistant",
@@ -133,7 +133,7 @@ func (anthropic_api_server* srv) create_message_stream(message_input* req) strea
         return nil
     }
 
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: "",
         model_id: req.model,
         config: generation_config{

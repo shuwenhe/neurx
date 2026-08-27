@@ -87,7 +87,7 @@ func nsproxy_create() nsproxy {
     return proxy
 }
 
-func (proxy: &mut nsproxy) get_namespace(namespace_type ns_type) option[namespace] {
+func (proxy: *nsproxy) get_namespace(namespace_type ns_type) option[namespace] {
     if ns_type == namespace_type::ipc_namespace {
         return option::some(proxy.ipc_ns)
     }
@@ -115,7 +115,7 @@ func container_config_create(string container_id, string image_name) container_c
     return config
 }
 
-func (cfg: &mut container_config) set_memory_limit(int memory_mb) result[bool, string] {
+func (cfg: *container_config) set_memory_limit(int memory_mb) (bool, string) {
     if memory_mb <= 0 {
         return result::err("Invalid memory limit")
     }
@@ -123,7 +123,7 @@ func (cfg: &mut container_config) set_memory_limit(int memory_mb) result[bool, s
     return result::ok(true)
 }
 
-func (cfg: &mut container_config) set_cpu_shares(int shares) result[bool, string] {
+func (cfg: *container_config) set_cpu_shares(int shares) (bool, string) {
     if shares <= 0 {
         return result::err("Invalid CPU shares")
     }
@@ -131,19 +131,19 @@ func (cfg: &mut container_config) set_cpu_shares(int shares) result[bool, string
     return result::ok(true)
 }
 
-func (cfg: &mut container_config) add_mount(string mount_point, string source, string target) result[bool, string] {
+func (cfg: *container_config) add_mount(string mount_point, string source, string target) (bool, string) {
     mount_str := mount_point + ":" + source + ":" + target
     cfg.mounts.push(mount_str)
     return result::ok(true)
 }
 
-func (cfg: &mut container_config) add_env(string key, string value) result[bool, string] {
+func (cfg: *container_config) add_env(string key, string value) (bool, string) {
     env_str := key + "=" + value
     cfg.env_vars.push(env_str)
     return result::ok(true)
 }
 
-func (cfg: &mut container_config) add_namespace(namespace ns) result[bool, string] {
+func (cfg: *container_config) add_namespace(namespace ns) (bool, string) {
     cfg.namespaces.push(ns)
     return result::ok(true)
 }
@@ -164,19 +164,19 @@ func container_state_create(string container_id) container_state {
     return state
 }
 
-func (state: &mut container_state) start(int pid, int start_time_us) {
+func (state: *container_state) start(int pid, int start_time_us) {
     state.state = "running"
     state.pid = pid
     state.start_time_us = start_time_us
 }
 
-func (state: &mut container_state) stop(int end_time_us, int exit_code) {
+func (state: *container_state) stop(int end_time_us, int exit_code) {
     state.state = "stopped"
     state.end_time_us = end_time_us
     state.exit_code = exit_code
 }
 
-func (state: &mut container_state) update_stats(int cpu_us, int mem_bytes, int io_read, int io_write) {
+func (state: *container_state) update_stats(int cpu_us, int mem_bytes, int io_read, int io_write) {
     state.cpu_time_us = state.cpu_time_us + cpu_us
     state.memory_usage_bytes = mem_bytes
     state.io_read_bytes = state.io_read_bytes + io_read
@@ -194,14 +194,14 @@ func container_engine_create() container_engine {
     return engine
 }
 
-func (engine: &mut container_engine) create_container(string container_id, string image_name) result[container_config, string] {
+func (engine: *container_engine) create_container(string container_id, string image_name) (container_config, string) {
     config := container_config_create(container_id, image_name)
     engine.containers.push(config)
     engine.total_containers = engine.total_containers + 1
     return result::ok(config)
 }
 
-func (engine: &mut container_engine) start_container(string container_id, int pid) result[bool, string] {
+func (engine: *container_engine) start_container(string container_id, int pid) (bool, string) {
     i := 0
     while i < engine.containers.len() {
         if engine.containers[i].container_id == container_id {
@@ -216,7 +216,7 @@ func (engine: &mut container_engine) start_container(string container_id, int pi
     return result::err("Container not found")
 }
 
-func (engine: &mut container_engine) stop_container(string container_id, int exit_code) result[bool, string] {
+func (engine: *container_engine) stop_container(string container_id, int exit_code) (bool, string) {
     i := 0
     while i < engine.container_states.len() {
         if engine.container_states[i].container_id == container_id {
@@ -232,7 +232,7 @@ func (engine: &mut container_engine) stop_container(string container_id, int exi
     return result::err("Container state not found")
 }
 
-func (engine: &ccontainer_engine) get_container_stats(string container_id) string {
+func (engine: *ccontainer_engine) get_container_stats(string container_id) string {
     i := 0
     while i < engine.container_states.len() {
         if engine.container_states[i].container_id == container_id {
@@ -246,7 +246,7 @@ func (engine: &ccontainer_engine) get_container_stats(string container_id) strin
     return "Container not found"
 }
 
-func (engine: &ccontainer_engine) total_stats() string {
+func (engine: *ccontainer_engine) total_stats() string {
     total := engine.total_containers
     running := engine.running_containers
     stopped := engine.stopped_containers

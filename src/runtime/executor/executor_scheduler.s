@@ -11,7 +11,7 @@ struct ExecutionScheduler {
 }
 
 func NewExecutionScheduler(policy i32) *ExecutionScheduler {
-    return &ExecutionScheduler{
+    return *ExecutionScheduler{
         scheduling_policy: policy,
         schedule_count: 0,
         total_scheduled: 0,

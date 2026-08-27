@@ -28,7 +28,7 @@ struct v1_executor {
 }
 
 func create_v1_executor(v1_core* core_instance) v1_executor* {
-    return &v1_executor{
+    return *v1_executor{
         config: executor_config{
             mode: mode_batch,
             batch_size: 32,

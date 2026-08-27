@@ -65,7 +65,7 @@ struct audio_video_aligner {
 }
 
 func create_audio_video_aligner() *audio_video_aligner {
-	ava := &audio_video_aligner{
+	ava := *audio_video_aligner{
 		pair_cache:            make(map[string]*audio_video_pair),
 		latest_sync_results:   make(map[string]*sync_result),
 		alignments:            make(map[string][]temporal_alignment),
@@ -96,7 +96,7 @@ func (audio_video_aligner* ava) create_pair(audio_id string, video_id string, au
 		return "", fmt.Errorf("pair already exists")
 	}
 
-	pair := &audio_video_pair{
+	pair := *audio_video_pair{
 		audio:                  audio,
 		video:                  video,
 		pair_id:                pair_id,
@@ -167,7 +167,7 @@ func (audio_video_aligner* ava) sync_cross_correlation(pair_id string) (*sync_re
 		confidence = 0
 	}
 
-	result := &sync_result{
+	result := *sync_result{
 		is_synchronized:   confidence > ava.confidence_threshold,
 		time_offset_ms:    best_offset,
 		confidence_score:  confidence,
@@ -255,7 +255,7 @@ func (audio_video_aligner* ava) sync_dtw(pair_id string) (*sync_result, error) {
 		best_offset = float64((audio_len - video_len) * 1000 / video_len)
 	}
 
-	result := &sync_result{
+	result := *sync_result{
 		is_synchronized:   confidence > ava.confidence_threshold,
 		time_offset_ms:    best_offset,
 		confidence_score:  confidence,
@@ -358,7 +358,7 @@ func (audio_video_aligner* ava) manually_align(pair_id string, time_offset_ms fl
 	}
 
 	pair.manually_aligned = true
-	result := &sync_result{
+	result := *sync_result{
 		is_synchronized:   true,
 		time_offset_ms:    time_offset_ms,
 		confidence_score:  1.0,

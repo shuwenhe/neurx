@@ -1,6 +1,6 @@
 package neurx.kernel.cgroup
 
-use std.vec.vec
+use std.slices
 
 struct cgroup_resources {
     int cpu_limit

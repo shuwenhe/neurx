@@ -12,7 +12,7 @@ struct BatchProcessor {
 }
 
 func NewBatchProcessor(max_size i32, policy SchedulingPolicy) *BatchProcessor {
-    return &BatchProcessor{
+    return *BatchProcessor{
         max_batch_size: max_size,
         scheduling_policy: policy,
         batch_count: 0,

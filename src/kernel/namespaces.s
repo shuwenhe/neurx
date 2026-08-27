@@ -1,6 +1,6 @@
 package neurx.kernel
 
-use std.vec.vec
+use std.slices
 
 // Namespace 类型定义
 struct namespace {
@@ -15,7 +15,7 @@ struct namespace {
 struct pid_namespace {
     int ns_id
     int parent_pid
-    vec pids  // 该命名空间中的 PID
+    int[] pids  // 该命名空间中的 PID
     int max_pid
     int current_pid_counter
 }
@@ -24,7 +24,7 @@ struct pid_namespace {
 struct network_namespace {
     int ns_id
     int max_interfaces
-    vec interfaces  // 网络接口
+    int[] interfaces  // 网络接口
     int loopback_address
 }
 
@@ -32,7 +32,7 @@ struct network_namespace {
 struct mount_namespace {
     int ns_id
     int root_mount_id
-    vec mount_points
+    int[] mount_points
 }
 
 // User Namespace - 用户隔离
@@ -45,19 +45,19 @@ struct user_namespace {
 
 // Namespace 管理器
 struct namespace_manager {
-    vec pid_namespaces
-    vec network_namespaces
-    vec mount_namespaces
-    vec user_namespaces
+    pid_namespace[] pid_namespaces
+    network_namespace[] network_namespaces
+    mount_namespace[] mount_namespaces
+    user_namespace[] user_namespaces
     int next_ns_id
 }
 
 // 初始化 Namespace 管理器
 func (namespace_manager* nm) init() (int, string) {
-    nm.pid_namespaces = vec()
-    nm.network_namespaces = vec()
-    nm.mount_namespaces = vec()
-    nm.user_namespaces = vec()
+    nm.pid_namespaces = pid_namespace[]{}
+    nm.network_namespaces = network_namespace[]{}
+    nm.mount_namespaces = mount_namespace[]{}
+    nm.user_namespaces = user_namespace[]{}
     nm.next_ns_id = 0
     return 0, ""
 }
@@ -67,7 +67,7 @@ func (namespace_manager* nm) create_pid_namespace(int parent_pid) (pid_namespace
     pidns := pid_namespace{
         ns_id: nm.next_ns_id,
         parent_pid: parent_pid,
-        pids: vec(),
+        pids: int[]{},
         max_pid: 32768,
         current_pid_counter: 1
     }
@@ -102,7 +102,7 @@ func (namespace_manager* nm) create_network_namespace() (network_namespace, stri
     netns := network_namespace{
         ns_id: nm.next_ns_id,
         max_interfaces: 256,
-        interfaces: vec(),
+        interfaces: int[]{},
         loopback_address: 0x7F000001  // 127.0.0.1
     }
     
@@ -135,7 +135,7 @@ func (namespace_manager* nm) create_mount_namespace() (mount_namespace, string) 
     mntns := mount_namespace{
         ns_id: nm.next_ns_id,
         root_mount_id: 0,
-        mount_points: vec()
+        mount_points: int[]{}
     }
     
     nm.mount_namespaces.push(mntns)

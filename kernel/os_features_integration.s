@@ -1,6 +1,6 @@
 package neurx.kernel.os_features_integration
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use neurx.kernel.locking.mutex
@@ -26,14 +26,14 @@ struct os_features_manager {
 }
 
 struct feature_status {
-    name: &string,
+    name: *string,
     enabled: bool,
-    version: &string,
-    description: &string,
+    version: *string,
+    description: *string,
 }
 
-func new_os_features_manager() result[&os_features_manager, string] {
-    let mgr := &os_features_manager{
+func new_os_features_manager() (*os_features_manager, string) {
+    let mgr := *os_features_manager{
         virtual_memory_enabled: false,
         huge_pages_enabled: false,
         filesystem_enabled: false,
@@ -43,141 +43,141 @@ func new_os_features_manager() result[&os_features_manager, string] {
         cpuidle_enabled: false,
         time_management_enabled: false,
         lock: mutex::new(),
-    } as &os_features_manager
+    } as *os_features_manager
 
     result::ok(mgr)
 }
 
-func (mgr: &mut os_features_manager) enable_virtual_memory() result[void, string] {
+func (mgr: *os_features_manager) enable_virtual_memory() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.virtual_memory_enabled = true
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) enable_huge_pages() result[void, string] {
+func (mgr: *os_features_manager) enable_huge_pages() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.huge_pages_enabled = true
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) enable_filesystem() result[void, string] {
+func (mgr: *os_features_manager) enable_filesystem() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.filesystem_enabled = true
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) enable_netfilter() result[void, string] {
+func (mgr: *os_features_manager) enable_netfilter() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.netfilter_enabled = true
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) enable_qos() result[void, string] {
+func (mgr: *os_features_manager) enable_qos() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.qos_enabled = true
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) enable_cpufreq() result[void, string] {
+func (mgr: *os_features_manager) enable_cpufreq() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.cpufreq_enabled = true
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) enable_cpuidle() result[void, string] {
+func (mgr: *os_features_manager) enable_cpuidle() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.cpuidle_enabled = true
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) enable_time_management() result[void, string] {
+func (mgr: *os_features_manager) enable_time_management() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.time_management_enabled = true
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_virtual_memory() result[void, string] {
+func (mgr: *os_features_manager) disable_virtual_memory() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.virtual_memory_enabled = false
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_huge_pages() result[void, string] {
+func (mgr: *os_features_manager) disable_huge_pages() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.huge_pages_enabled = false
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_filesystem() result[void, string] {
+func (mgr: *os_features_manager) disable_filesystem() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.filesystem_enabled = false
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_netfilter() result[void, string] {
+func (mgr: *os_features_manager) disable_netfilter() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.netfilter_enabled = false
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_qos() result[void, string] {
+func (mgr: *os_features_manager) disable_qos() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.qos_enabled = false
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_cpufreq() result[void, string] {
+func (mgr: *os_features_manager) disable_cpufreq() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.cpufreq_enabled = false
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_cpuidle() result[void, string] {
+func (mgr: *os_features_manager) disable_cpuidle() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.cpuidle_enabled = false
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_time_management() result[void, string] {
+func (mgr: *os_features_manager) disable_time_management() (void, string) {
     let _guard := mgr.lock.lock()?
     mgr.time_management_enabled = false
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) is_virtual_memory_enabled() bool {
+func (mgr: *os_features_manager) is_virtual_memory_enabled() bool {
     mgr.virtual_memory_enabled
 }
 
-func (mgr: &mut os_features_manager) is_huge_pages_enabled() bool {
+func (mgr: *os_features_manager) is_huge_pages_enabled() bool {
     mgr.huge_pages_enabled
 }
 
-func (mgr: &mut os_features_manager) is_filesystem_enabled() bool {
+func (mgr: *os_features_manager) is_filesystem_enabled() bool {
     mgr.filesystem_enabled
 }
 
-func (mgr: &mut os_features_manager) is_netfilter_enabled() bool {
+func (mgr: *os_features_manager) is_netfilter_enabled() bool {
     mgr.netfilter_enabled
 }
 
-func (mgr: &mut os_features_manager) is_qos_enabled() bool {
+func (mgr: *os_features_manager) is_qos_enabled() bool {
     mgr.qos_enabled
 }
 
-func (mgr: &mut os_features_manager) is_cpufreq_enabled() bool {
+func (mgr: *os_features_manager) is_cpufreq_enabled() bool {
     mgr.cpufreq_enabled
 }
 
-func (mgr: &mut os_features_manager) is_cpuidle_enabled() bool {
+func (mgr: *os_features_manager) is_cpuidle_enabled() bool {
     mgr.cpuidle_enabled
 }
 
-func (mgr: &mut os_features_manager) is_time_management_enabled() bool {
+func (mgr: *os_features_manager) is_time_management_enabled() bool {
     mgr.time_management_enabled
 }
 
 struct system_capability {
-    name: &string,
+    name: *string,
     major_version: u32,
     minor_version: u32,
     patch_version: u32,
@@ -187,7 +187,7 @@ struct system_capability {
     enabled_count: u32,
 }
 
-func (mgr: &mut os_features_manager) get_system_capabilities() result[system_capability, string] {
+func (mgr: *os_features_manager) get_system_capabilities() (system_capability, string) {
     let _guard := mgr.lock.lock()?
 
     let mut enabled := 0
@@ -231,7 +231,7 @@ func (mgr: &mut os_features_manager) get_system_capabilities() result[system_cap
     result::ok(cap)
 }
 
-func (mgr: &mut os_features_manager) get_feature_status(feature_name: &string) result[feature_status, string] {
+func (mgr: *os_features_manager) get_feature_status(feature_name: *string) (feature_status, string) {
     let _guard := mgr.lock.lock()?
 
     let status := match feature_name {
@@ -307,7 +307,7 @@ func (mgr: &mut os_features_manager) get_feature_status(feature_name: &string) r
     result::ok(status)
 }
 
-func (mgr: &mut os_features_manager) enable_all_tier1_features() result[void, string] {
+func (mgr: *os_features_manager) enable_all_tier1_features() (void, string) {
     mgr.enable_virtual_memory()?
     mgr.enable_huge_pages()?
     mgr.enable_filesystem()?
@@ -317,7 +317,7 @@ func (mgr: &mut os_features_manager) enable_all_tier1_features() result[void, st
     result::ok(())
 }
 
-func (mgr: &mut os_features_manager) disable_all_features() result[void, string] {
+func (mgr: *os_features_manager) disable_all_features() (void, string) {
     mgr.disable_virtual_memory()?
     mgr.disable_huge_pages()?
     mgr.disable_filesystem()?
@@ -335,7 +335,7 @@ struct feature_report {
     feature_list: vec[feature_status],
 }
 
-func (mgr: &mut os_features_manager) generate_feature_report() result[feature_report, string] {
+func (mgr: *os_features_manager) generate_feature_report() (feature_report, string) {
     let _guard := mgr.lock.lock()?
 
     let mut features := vec[feature_status]()

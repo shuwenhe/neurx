@@ -1,6 +1,6 @@
 package neurx.sys.monitor
 
-use std.vec.vec
+use std.slices
 
 
     latency,
@@ -63,8 +63,8 @@ func create_monitoring_service(int interval_ms) (monitoring_service, string) {
         num_metrics: 0,
         sampling_interval_ms: interval_ms,
         is_running: false,
-        buffer: &buffer,
-        health: &health
+        buffer: *buffer,
+        health: *health
     }
     service, ""
 }

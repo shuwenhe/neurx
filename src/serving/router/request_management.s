@@ -228,7 +228,7 @@ struct request_pool {
 }
 
 func create_request_pool(int32 max_size) request_pool* {
-    return &request_pool{
+    return *request_pool{
         all_requests: make(map[string, active_request]),
         pending_ids: make(vec[string]),
         running_ids: make(vec[string]),
@@ -273,7 +273,7 @@ func (request_pool* pool) mark_completed(string request_id) bool {
 func (request_pool* pool) get_request(string request_id) active_request* {
     req, exists := pool.all_requests[request_id]
     if exists {
-        return &req
+        return *req
     }
     return nil
 }

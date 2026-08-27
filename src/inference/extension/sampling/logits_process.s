@@ -46,7 +46,7 @@ func create_logits_processor() logits_processor* {
         total_process_time_us: 0.0,
     }
 
-    return &processor
+    return *processor
 }
 
 func (logits_processor* processor) add_processor(processor_type type, float32 threshold) {

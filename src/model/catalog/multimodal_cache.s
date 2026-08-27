@@ -53,7 +53,7 @@ struct multimodal_cache {
 }
 
 func create_multimodal_cache(max_size int64) *multimodal_cache {
-	cache := &multimodal_cache{
+	cache := *multimodal_cache{
 		entries:          make(map[string]*mm_cache_entry),
 		modality_index:   make(map[string][]string),
 		stats: *mm_cache_statistics{
@@ -102,7 +102,7 @@ func (multimodal_cache* mc) put(entry_id string, content_hash string, data inter
 		}
 	}
 
-	entry := &mm_cache_entry{
+	entry := *mm_cache_entry{
 		entry_id:          entry_id,
 		content_hash:      content_hash,
 		cached_data:       data,

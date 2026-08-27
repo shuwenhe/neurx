@@ -1,6 +1,6 @@
 package neurx.lora.weight_fusion
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -20,7 +20,7 @@ struct weight_fusion_engine {
     lora_rank: int
     lora_alpha: float
     scaling_factor: float
-    fused: map[string, &vec[vec[float]]]
+    fused: map[string, *vec[vec[float]]]
 }
 
 func weight_fusion_engine::new(int lora_rank, float lora_alpha) weight_fusion_engine {
@@ -28,7 +28,7 @@ func weight_fusion_engine::new(int lora_rank, float lora_alpha) weight_fusion_en
         lora_rank: lora_rank,
         lora_alpha: lora_alpha,
         scaling_factor: lora_alpha / lora_rank as float,
-        fused: map[string, &vec[vec[float]]](),
+        fused: map[string, *vec[vec[float]]](),
     }
 }
 
@@ -36,7 +36,7 @@ func compute_lora_delta(
     lora_a: *vec[vec[float]],
     lora_b: *vec[vec[float]],
     scaling: float
-) result[&vec[vec[float]], fusion_error] {
+) (*vec[vec[float)], fusion_error] {
     if lora_a.len() == 0 || lora_b.len() == 0 {
         return (fusion_error {
             code: "INVALID_MATRIX",
@@ -92,7 +92,7 @@ func (weight_fusion_engine* engine) fuse_weights(
     module_name: string,
     original_weights: *vec[vec[float]],
     lora_delta: *vec[vec[float]]
-) result[(), fusion_error] {
+) ((), fusion_error) {
     if original_weights.len() != lora_delta.len() {
         return (fusion_error {
             code: "SHAPE_MISMATCH",
@@ -133,7 +133,7 @@ func (weight_fusion_engine* engine) unfuse_weights(
     module_name: string,
     fused_weights: *vec[vec[float]],
     lora_delta: *vec[vec[float]]
-) result[&vec[vec[float]], fusion_error] {
+) (*vec[vec[float)], fusion_error] {
     if fused_weights.len() != lora_delta.len() {
         return (fusion_error {
             code: "SHAPE_MISMATCH",
@@ -165,7 +165,7 @@ func (weight_fusion_engine* engine) unfuse_weights(
 
 func (weight_fusion_engine* engine) get_fused_weights(
     module_name: string
-) option[&vec[vec[float]]] {
+) option[*vec[vec[float]]] {
     engine.fused.get(module_name)
 }
 
@@ -173,7 +173,7 @@ func (weight_fusion_engine* engine) is_fused(string module_name) bool {
     engine.fused.contains(module_name)
 }
 
-func (weight_fusion_engine* engine) get_fused_modules() &vec[string] {
+func (weight_fusion_engine* engine) get_fused_modules() *vec[string] {
     modules := vec[string]()
 
     for name in engine.fused.keys() {
@@ -206,10 +206,10 @@ func (weight_fusion_engine* engine) get_fused_weights_size_mb() int {
 }
 
 func fuse_multiple_adapters(
-    original_weights: *map[string, &vec[vec[float]]],
-    lora_deltas: *vec[&map[string, &vec[vec[float]]]],
+    original_weights: *map[string, *vec[vec[float]]],
+    lora_deltas: *vec[*map[string, *vec[vec[float]]]],
     adapter_scales: *vec[float]
-) result[&map[string, &vec[vec[float]]], fusion_error] {
+) (*map[string, *vec[vec[float)]], fusion_error] {
     if lora_deltas.len() != adapter_scales.len() {
         return (fusion_error {
             code: "LENGTH_MISMATCH",
@@ -217,7 +217,7 @@ func fuse_multiple_adapters(
         })
     }
 
-    result_weights := map[string, &vec[vec[float]]]()
+    result_weights := map[string, *vec[vec[float]]]()
 
     for module_name in original_weights.keys() {
         switch original_weights.get(module_name) {

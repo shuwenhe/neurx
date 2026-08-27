@@ -42,7 +42,7 @@ struct grpc_server {
 }
 
 func new_grpc_server(server_addr string) *grpc_server {
-    return &grpc_server{
+    return *grpc_server{
         server_addr: server_addr,
         connections: make(map[string]interface{}),
         is_running:  false,
@@ -108,7 +108,7 @@ func (grpc_server* gs) complete(grpc_request* req) (*grpc_response, error) {
         return nil, err
     }
 
-    response := &grpc_response{
+    response := *grpc_response{
         request_id:   req.request_id,
         text:         generated_text,
         finish_reason: "length",
@@ -149,7 +149,7 @@ func (grpc_server* gs) complete_stream(grpc_request* req) (chan *grpc_stream_res
             text := output.text[0]
             for i := 0; i < len(text); i++ {
                 token := string(text[i])
-                resp_chan <- &grpc_stream_response{
+                resp_chan <- *grpc_stream_response{
                     request_id: req.request_id,
                     token:      token,
                     cumulative: false,
@@ -157,7 +157,7 @@ func (grpc_server* gs) complete_stream(grpc_request* req) (chan *grpc_stream_res
                 }
             }
 
-            resp_chan <- &grpc_stream_response{
+            resp_chan <- *grpc_stream_response{
                 request_id:   req.request_id,
                 token:        "",
                 finish_reason: "length",
@@ -193,7 +193,7 @@ func (grpc_server* gs) complete_async(req *grpc_request, callback func(*grpc_res
             return
         }
 
-        resp := &grpc_response{
+        resp := *grpc_response{
             request_id:   req.request_id,
             finish_reason: "length",
             timestamp:    core.current_time_ms(),
@@ -251,7 +251,7 @@ func (grpc_server* gs) health_check() *grpc_health_check_response {
         status = "NOT_SERVING"
     }
 
-    return &grpc_health_check_response{
+    return *grpc_health_check_response{
         status: status,
     }
 }

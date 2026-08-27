@@ -58,7 +58,7 @@ struct erasure_codec {
 }
 
 func create_erasure_codec(erasure_config* config, communicator* comm) erasure_codec* {
-    return &erasure_codec{
+    return *erasure_codec{
         config: *config,
         blocks: make([]erasure_encoded_block*, 0),
         block_cache: make(map[int32]interface{}),
@@ -90,7 +90,7 @@ func (erasure_codec* ec) repair_block(int32 block_id) error {
 }
 
 func (erasure_codec* ec) create_transfer_plan(interface{} data) erasure_transfer_plan* {
-    return &erasure_transfer_plan{
+    return *erasure_transfer_plan{
         plan_id: 0,
         code_type: ec.config.code_type,
         data_blocks: ec.config.data_blocks,

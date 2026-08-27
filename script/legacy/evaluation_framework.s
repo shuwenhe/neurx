@@ -353,7 +353,7 @@ func (evaluation_framework* framework) compare_with_baseline() {
 }
 
 func new_evaluation_framework(config evaluation_config) *evaluation_framework {
-    return &evaluation_framework{
+    return *evaluation_framework{
         config: config,
         benchmarks: make(map[string]benchmark_dataset),
         results: []benchmark_result{},

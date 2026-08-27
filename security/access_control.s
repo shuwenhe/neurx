@@ -1,6 +1,6 @@
 package neurx.security
 
-use std.vec.vec as std_vec
+use std.slices
 
 struct capability {
     cap_id: int
@@ -12,7 +12,7 @@ struct process_context {
     pid: int
     uid: int
     gid: int
-    capabilities: vec[capability]
+    capabilities: capability[]
     tenant_id: int
     security_level: int
 }
@@ -22,15 +22,16 @@ func process_context_create(int pid, int uid, int gid) process_context {
         pid: pid,
         uid: uid,
         gid: gid,
-        capabilities: std_vec[capability](),
+        capabilities: capability[]{},
         tenant_id: 0,
         security_level: 0
     }
     ctx
 }
 
-func (process_context* ctx) has_capability(int cap_id) int {    i := 0
-    for i < ctx.capabilities.len() {
+func (process_context* ctx) has_capability(int cap_id) int {    
+    i := 0
+    for i < len(ctx.capabilities) {
         cap := ctx.capabilities[i]
         if cap.cap_id == cap_id {
             1
@@ -41,21 +42,21 @@ func (process_context* ctx) has_capability(int cap_id) int {    i := 0
     0
 }
 
-func (process_context* ctx) grant_capability(capability cap) int {    ctx.capabilities.push(cap)
-    ctx.capabilities.len() - 1
+func (process_context* ctx) grant_capability(capability cap) int {    ctx.capabilities = append(ctx.capabilities, cap)
+    len(ctx.capabilities) - 1
 }
 
 struct access_control_list {
     acl_id: int
     owner_pid: int
-    permissions: vec[int]
+    permissions: int[]
 }
 
 func acl_create(int id, int owner) access_control_list {
     acl := access_control_list {
         acl_id: id,
         owner_pid: owner,
-        permissions: std_vec[int]()
+        permissions: int[]
     }
     acl
 }
@@ -67,14 +68,14 @@ func (access_control_list* acl) acl_check(int accessor_pid, int resource_id) int
     }
 }
 
-func (access_control_list* acl) acl_grant(int pid, int perm) int {    acl.permissions.push(pid)
-    acl.permissions.push(perm)
+func (access_control_list* acl) acl_grant(int pid, int perm) int {    acl.permissions = append(acl.permissions, pid)
+    acl.permissions = append(acl.permissions, perm)
     0
 }
 
 struct tenant_isolation {
     tenant_id: int
-    isolated_resources: vec[int]
+    isolated_resources: int[]
     quota_memory: int
     quota_cpu: int
     quota_gpu: int
@@ -83,7 +84,7 @@ struct tenant_isolation {
 func tenant_isolation_create(int tenant_id) tenant_isolation {
     ti := tenant_isolation {
         tenant_id: tenant_id,
-        isolated_resources: std_vec[int](),
+        isolated_resources: int[]{},
         quota_memory: 1073741824,
         quota_cpu: 8,
         quota_gpu: 1
@@ -92,7 +93,7 @@ func tenant_isolation_create(int tenant_id) tenant_isolation {
 }
 
 func (tenant_isolation* ti) is_resource_isolated(int resource_id) int {    i := 0
-    for i < ti.isolated_resources.len() {
+    for i < len(ti.isolated_resources) {
         res_id := ti.isolated_resources[i]
         if res_id == resource_id {
             1
@@ -103,8 +104,8 @@ func (tenant_isolation* ti) is_resource_isolated(int resource_id) int {    i := 
     0
 }
 
-func (tenant_isolation* ti) add_isolated_resource(int resource_id) int {    ti.isolated_resources.push(resource_id)
-    ti.isolated_resources.len() - 1
+func (tenant_isolation* ti) add_isolated_resource(int resource_id) int {    ti.isolated_resources = append(ti.isolated_resources, resource_id)
+    len(ti.isolated_resources) - 1
 }
 
 struct audit_log {

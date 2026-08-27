@@ -18,8 +18,8 @@ func NewDynamicResolutionProcessor(
     base_resolution: i32,
     patch_size: i32,
     max_patches: i32
-) &DynamicResolutionProcessor {
-    return &DynamicResolutionProcessor{
+) *DynamicResolutionProcessor {
+    return *DynamicResolutionProcessor{
         base_resolution: base_resolution,
         patch_size: patch_size,
         max_patches: max_patches,
@@ -140,13 +140,13 @@ struct ResolutionPatch {
 func (DynamicResolutionProcessor* p) MultiCropProcess(
     image_tensor: *types.Tensor,
     num_crops: i32
-) []&types.Tensor {
+) []*types.Tensor {
     h := image_tensor.shape[0]
     w := image_tensor.shape[1]
     c := image_tensor.shape[2]
 
     target_h, target_w := p.CalculateTargetResolution(h, w)
-    crops := make([]&types.Tensor, num_crops)
+    crops := make([]*types.Tensor, num_crops)
 
     for crop_idx := 0; crop_idx < num_crops; crop_idx += 1 {
 
@@ -201,7 +201,7 @@ func (DynamicResolutionProcessor* p) MultiCropProcess(
             }
         }
 
-        crops[crop_idx] = &types.Tensor{
+        crops[crop_idx] = *types.Tensor{
             data: crop_data,
             shape: [3]i32{target_h, target_w, c},
             dtype: "float32"

@@ -22,7 +22,7 @@ struct speculative_decoding_engine {
 }
 
 func NewSpeculativeDecodingEngine(config speculative_config) *speculative_decoding_engine {
-    return &speculative_decoding_engine{
+    return *speculative_decoding_engine{
         config:             config,
         main_model_tokens:  0,
         draft_model_tokens: 0,
@@ -131,7 +131,7 @@ func NewVisionLanguageModelAdapter(
     vision_dim int32,
     language_dim int32,
 ) *vision_language_model_adapter {
-    return &vision_language_model_adapter{
+    return *vision_language_model_adapter{
         vision_encoder_dim: vision_dim,
         language_model_dim: language_dim,
         bridge_layer_dim:   language_dim,
@@ -172,7 +172,7 @@ struct lo_ra_adapter {
 }
 
 func NewLoRAAdapter(config lo_ra_config) *lo_ra_adapter {
-    return &lo_ra_adapter{
+    return *lo_ra_adapter{
         config:    config,
         rank:      config.rank,
         adapters:  make(map[string][][]float32),
@@ -215,7 +215,7 @@ struct multi_model_serving_manager {
 }
 
 func NewMultiModelServingManager(max_memory_mb int32) *multi_model_serving_manager {
-    return &multi_model_serving_manager{
+    return *multi_model_serving_manager{
         loaded_models: make(map[string]bool),
         model_cache:   make(map[string][]float32),
         max_memory_mb: max_memory_mb,
@@ -272,7 +272,7 @@ func NewAdvancedFeaturesEngine() *advanced_features_engine {
         alpha:              16.0,
         target_modules:     []string{"q_proj", "v_proj"},
     }
-    return &advanced_features_engine{
+    return *advanced_features_engine{
         speculative_decoder: NewSpeculativeDecodingEngine(spec_config),
         vl_adapter:          NewVisionLanguageModelAdapter(768, 4096),
         lora_manager:        NewLoRAAdapter(lora_config),

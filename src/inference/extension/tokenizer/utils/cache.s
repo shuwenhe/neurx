@@ -29,7 +29,7 @@ struct CacheStats {
     bytes_evicted: i64,
 }
 
-func NewTokenCache(i32 max_size_bytes, string eviction_policy) &TokenCache {
+func NewTokenCache(i32 max_size_bytes, string eviction_policy) *TokenCache {
     cache := new(TokenCache)
     cache.entries = make(map[string]CacheEntry)
     cache.max_size_bytes = max_size_bytes

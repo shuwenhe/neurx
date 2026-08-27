@@ -88,7 +88,7 @@ func bpf_program_create(int prog_id, string name, bpf_program_type prog_type) bp
     return prog
 }
 
-func (prog: &mut bpf_program) add_instruction(int code, int dst_reg, int src_reg, int off, int imm) result[bool, string] {
+func (prog: *bpf_program) add_instruction(int code, int dst_reg, int src_reg, int off, int imm) (bool, string) {
     insn := bpf_insn {
         code: code,
         dst_reg: dst_reg,
@@ -101,7 +101,7 @@ func (prog: &mut bpf_program) add_instruction(int code, int dst_reg, int src_reg
     return result::ok(true)
 }
 
-func (prog: &mut bpf_program) verify() result[bool, string] {
+func (prog: *bpf_program) verify() (bool, string) {
     if prog.instr_count < 1 {
         return result::err("No instructions")
     }
@@ -110,7 +110,7 @@ func (prog: &mut bpf_program) verify() result[bool, string] {
     return result::ok(true)
 }
 
-func (prog: &mut bpf_program) load() result[bool, string] {
+func (prog: *bpf_program) load() (bool, string) {
     if prog.verified == 0 {
         return result::err("Program not verified")
     }
@@ -119,7 +119,7 @@ func (prog: &mut bpf_program) load() result[bool, string] {
     return result::ok(true)
 }
 
-func (prog: &mut bpf_program) run(bpf_context ctx) result[int, string] {
+func (prog: *bpf_program) run(bpf_context ctx) (int, string) {
     if prog.loaded == 0 {
         prog.error_count = prog.error_count + 1
         return result::err("Program not loaded")
@@ -143,7 +143,7 @@ func bpf_map_create(int map_id, string name, bpf_map_type map_type, int key_size
     return map
 }
 
-func (map: &mut bpf_map) insert(string key, string value) result[bool, string] {
+func (map: *bpf_map) insert(string key, string value) (bool, string) {
     if map.current_entries >= map.max_entries {
         return result::err("Map full")
     }
@@ -153,12 +153,12 @@ func (map: &mut bpf_map) insert(string key, string value) result[bool, string] {
     return result::ok(true)
 }
 
-func (map: &mut bpf_map) lookup(string key) option[string] {
+func (map: *bpf_map) lookup(string key) option[string] {
     map.access_count = map.access_count + 1
     return option::none
 }
 
-func (map: &mut bpf_map) delete(string key) result[bool, string] {
+func (map: *bpf_map) delete(string key) (bool, string) {
     if map.current_entries > 0 {
         map.current_entries = map.current_entries - 1
     }
@@ -178,7 +178,7 @@ func bpf_runtime_create() bpf_runtime {
     return runtime
 }
 
-func (runtime: &mut bpf_runtime) register_program(bpf_program prog) result[int, string] {
+func (runtime: *bpf_runtime) register_program(bpf_program prog) (int, string) {
     prog.verify()?
     prog.load()?
     
@@ -188,14 +188,14 @@ func (runtime: &mut bpf_runtime) register_program(bpf_program prog) result[int, 
     return result::ok(prog.prog_id)
 }
 
-func (runtime: &mut bpf_runtime) register_map(bpf_map map) result[int, string] {
+func (runtime: *bpf_runtime) register_map(bpf_map map) (int, string) {
     runtime.maps.push(map)
     runtime.total_maps = runtime.total_maps + 1
     
     return result::ok(map.map_id)
 }
 
-func (runtime: &mut bpf_runtime) execute_program(int prog_id, bpf_context ctx) result[int, string] {
+func (runtime: *bpf_runtime) execute_program(int prog_id, bpf_context ctx) (int, string) {
     i := 0
     while i < runtime.programs.len() {
         if runtime.programs[i].prog_id == prog_id {
@@ -209,7 +209,7 @@ func (runtime: &mut bpf_runtime) execute_program(int prog_id, bpf_context ctx) r
     return result::err("Program not found")
 }
 
-func (runtime: &cbpf_runtime) runtime_stats() string {
+func (runtime: *cbpf_runtime) runtime_stats() string {
     progs := runtime.total_programs
     maps := runtime.total_maps
     insns := runtime.total_instructions_executed

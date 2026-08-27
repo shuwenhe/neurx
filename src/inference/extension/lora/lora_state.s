@@ -1,6 +1,6 @@
 package neurx.lora.lora_state
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -21,7 +21,7 @@ struct lora_state_error {
 
 struct lora_state_manager {
     request_states: map[string, lora_request_state]
-    adapter_cache: map[string, &vec[vec[float]]]
+    adapter_cache: map[string, *vec[vec[float]]]
     max_adapters_per_request: int
     enable_cache: bool
 }
@@ -29,7 +29,7 @@ struct lora_state_manager {
 func lora_state_manager::new(int max_adapters) lora_state_manager {
     lora_state_manager {
         request_states: map[string, lora_request_state](),
-        adapter_cache: map[string, &vec[vec[float]]](),
+        adapter_cache: map[string, *vec[vec[float]]](),
         max_adapters_per_request: max_adapters,
         enable_cache: true,
     }
@@ -39,7 +39,7 @@ func (lora_state_manager* manager) create_request_state(
     request_id: string,
     adapter_names: *vec[string],
     adapter_scales: *vec[float]
-) result[(), lora_state_error] {
+) ((), lora_state_error) {
 
     if request_id.len() == 0 {
         return (lora_state_error {
@@ -106,7 +106,7 @@ func (lora_state_manager* manager) get_request_state(
 func (lora_state_manager* manager) update_adapter_scales(
     request_id: string,
     new_scales: *vec[float]
-) result[(), lora_state_error] {
+) ((), lora_state_error) {
     switch manager.request_states.get(request_id) {
         option::some(state) : {
             if new_scales.len() != state.adapter_names.len() {
@@ -135,7 +135,7 @@ func (lora_state_manager* manager) switch_adapters(
     request_id: string,
     new_adapter_names: *vec[string],
     new_scales: *vec[float]
-) result[(), lora_state_error] {
+) ((), lora_state_error) {
     if new_adapter_names.len() != new_scales.len() {
         return (lora_state_error {
             code: "LENGTH_MISMATCH",
@@ -173,7 +173,7 @@ func (lora_state_manager* manager) switch_adapters(
 
 func (lora_state_manager* manager) remove_request_state(
     request_id: string
-) result[(), lora_state_error] {
+) ((), lora_state_error) {
     if !manager.request_states.contains(request_id) {
         return (lora_state_error {
             code: "REQUEST_NOT_FOUND",
@@ -189,7 +189,7 @@ func (lora_state_manager* manager) remove_request_state(
 
 func (lora_state_manager* manager) activate_request(
     request_id: string
-) result[(), lora_state_error] {
+) ((), lora_state_error) {
     switch manager.request_states.get(request_id) {
         option::some(state) : {
             state.is_active = true
@@ -208,7 +208,7 @@ func (lora_state_manager* manager) activate_request(
 
 func (lora_state_manager* manager) deactivate_request(
     request_id: string
-) result[(), lora_state_error] {
+) ((), lora_state_error) {
     switch manager.request_states.get(request_id) {
         option::some(state) : {
             state.is_active = false
@@ -232,7 +232,7 @@ func (lora_state_manager* manager) is_request_active(string request_id) bool {
     }
 }
 
-func (lora_state_manager* manager) get_active_requests() &vec[string] {
+func (lora_state_manager* manager) get_active_requests() *vec[string] {
     active := vec[string]()
 
     for req_id in manager.request_states.keys() {
@@ -252,7 +252,7 @@ func (lora_state_manager* manager) get_active_requests() &vec[string] {
 func (lora_state_manager* manager) cache_fused_weights(
     cache_key: string,
     weights: *vec[vec[float]]
-) result[(), lora_state_error] {
+) ((), lora_state_error) {
     if !manager.enable_cache {
         return ((, ""))
     }
@@ -270,13 +270,13 @@ func (lora_state_manager* manager) cache_fused_weights(
 
 func (lora_state_manager* manager) get_cached_weights(
     cache_key: string
-) option[&vec[vec[float]]] {
+) option[*vec[vec[float]]] {
     manager.adapter_cache.get(cache_key)
 }
 
 func (lora_state_manager* manager) clear_request_cache(
     request_id: string
-) result[(), lora_state_error] {
+) ((), lora_state_error) {
     keys_to_remove := vec[string]()
 
     for key in manager.adapter_cache.keys() {

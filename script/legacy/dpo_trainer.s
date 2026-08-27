@@ -230,7 +230,7 @@ func (dpotrainer* trainer) get_dpo_summary() {
 }
 
 func new_dpo_trainer() *dpotrainer {
-    return &dpotrainer{
+    return *dpotrainer{
         model_logits:    make(map[string]float64),
         reference_logits: make(map[string]float64),
         metrics_history: make([]dpometrics, 0),

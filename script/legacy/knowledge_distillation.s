@@ -209,7 +209,7 @@ func new_distillation_framework(
     config distillation_config,
     teacher policy_model,
     student policy_model) *distillation_framework {
-    return &distillation_framework{
+    return *distillation_framework{
         config: config,
         teacher_model: teacher,
         student_model: student,

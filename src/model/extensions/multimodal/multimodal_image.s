@@ -49,7 +49,7 @@ struct image_processor {
 }
 
 func create_image_processor() image_processor* {
-    return &image_processor{
+    return *image_processor{
         max_image_width: 2048,
         max_image_height: 2048,
         default_channels: 3,
@@ -65,7 +65,7 @@ func (image_processor* proc) resize_image(image_data* img, int32 new_width, int3
         return nil
     }
 
-    new_img := &image_data{
+    new_img := *image_data{
         raw_data: make(vec[uint8]),
         metadata: *image_metadata{
             width: new_width,
@@ -94,7 +94,7 @@ func (image_processor* proc) convert_format(image_data* img, image_format new_fo
         return nil
     }
 
-    new_img := &image_data{
+    new_img := *image_data{
         raw_data: img.raw_data,
         metadata: *image_metadata{
             width: img.metadata.width,
@@ -118,7 +118,7 @@ func (image_processor* proc) convert_color_space(image_data* img, color_space ne
         return nil
     }
 
-    new_img := &image_data{
+    new_img := *image_data{
         raw_data: img.raw_data,
         metadata: *image_metadata{
             width: img.metadata.width,
@@ -144,7 +144,7 @@ func (image_processor* proc) compress_image(image_data* img, int32 quality) imag
 
     compressed_size := img.size_bytes * quality / 100
 
-    new_img := &image_data{
+    new_img := *image_data{
         raw_data: make(vec[uint8]),
         metadata: img.metadata,
         size_bytes: compressed_size,
@@ -160,7 +160,7 @@ func (image_processor* proc) normalize_image(image_data* img) image_data* {
         return nil
     }
 
-    normalized := &image_data{
+    normalized := *image_data{
         raw_data: img.raw_data,
         metadata: img.metadata,
         size_bytes: img.size_bytes,

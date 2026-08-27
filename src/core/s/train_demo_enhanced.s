@@ -527,7 +527,7 @@ func save_manifest(string manifest_path, []string checkpoints) void:
     write_text_file(manifest_path, content)
 func get_time_ms() int:
 
-func write_text_file(string path, string content) result[void, error]:
+func write_text_file(string path, string content) (void, error):
     pass
 def rename_file(string old_path, string new_path) void:
     pass

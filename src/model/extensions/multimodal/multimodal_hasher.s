@@ -36,7 +36,7 @@ struct multimodal_hasher {
 }
 
 func create_multimodal_hasher() multimodal_hasher* {
-    return &multimodal_hasher{
+    return *multimodal_hasher{
         algorithm: algo_sha256,
         matcher: *hash_matcher{
             enable_fuzzy_matching: true,
@@ -85,7 +85,7 @@ func (multimodal_hasher* hasher) compute_hash(vec[uint8] data, modality_type mod
 func (multimodal_hasher* hasher) add_content(string content_id, vec[uint8] data, modality_type modality) string {
     hash_value := hasher.compute_hash(data, modality)
 
-    hash_obj := &content_hash{
+    hash_obj := *content_hash{
         content_id: content_id,
         hash_value: hash_value,
         algorithm: hasher.algorithm,

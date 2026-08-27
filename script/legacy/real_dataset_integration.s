@@ -236,7 +236,7 @@ func (data_loader* loader) get_next_batch() []data_sample {
 }
 
 func new_data_loader(config dataset_config) *data_loader {
-    return &data_loader{
+    return *data_loader{
         config:          config,
         loaded_samples:  []data_sample{},
         current_index:   0,

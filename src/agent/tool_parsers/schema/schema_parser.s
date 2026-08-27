@@ -6,7 +6,7 @@ use std.vec
 
 func parse_schema_from_json(string json_str) json_schema {
     schema := schema_types.create_empty_schema()
-    schema = parse_schema_object(json_str, 0, &schema)
+    schema = parse_schema_object(json_str, 0, *schema)
     return schema
 }
 
@@ -35,7 +35,7 @@ func parse_schema_object(string json_str, int start_pos, *json_schema schema) js
 
     props_end := find_json_string_value(json_str, "\"properties\"", start_pos)
     if props_end > start_pos {
-        result.properties = extract_properties(json_str, props_end, &result.required)
+        result.properties = extract_properties(json_str, props_end, *result.required)
     }
 
     min_len_end := find_json_string_value(json_str, "\"minLength\"", start_pos)

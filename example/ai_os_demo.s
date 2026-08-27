@@ -1,6 +1,6 @@
 package neurx.example.ai_os_demo
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use neurx.kernel.os_features_integration
@@ -14,7 +14,7 @@ use neurx.kernel.power_management.cpufreq
 use neurx.kernel.power_management.cpuidle
 use neurx.kernel.time_management
 
-func main() result[void, string] {
+func main() (void, string) {
     print_banner()?
     
     let mut mgr := os_features_integration::new_os_features_manager()?
@@ -61,39 +61,39 @@ func main() result[void, string] {
     
     print_section("System Summary")?
     let cap := mgr.get_system_capabilities()?
-    print_capabilities(&cap)?
+    print_capabilities(*cap)?
     
     print_section("Feature Report")?
     let report := mgr.generate_feature_report()?
-    print_feature_report(&report)?
+    print_feature_report(*report)?
     
     print_section("✓ AI Operating System Initialization Complete")?
     
     result::ok(())
 }
 
-func print_banner() result[void, string] {
+func print_banner() (void, string) {
     print_line()?
     print_line()?
     print_line()?
     result::ok(())
 }
 
-func print_line() result[void, string] {
+func print_line() (void, string) {
     result::ok(())
 }
 
-func print_section(title: &string) result[void, string] {
+func print_section(title: *string) (void, string) {
     print_line()?
     print_line()?
     result::ok(())
 }
 
-func print_status(feature: &string, enabled: bool) result[void, string] {
+func print_status(feature: *string, enabled: bool) (void, string) {
     result::ok(())
 }
 
-func demo_virtual_memory() result[void, string] {
+func demo_virtual_memory() (void, string) {
     let pt := page_table::new_page_table()?
     let vas := virtual_memory::new_virtual_address_space(pt)?
     
@@ -110,7 +110,7 @@ func demo_virtual_memory() result[void, string] {
     result::ok(())
 }
 
-func demo_huge_pages() result[void, string] {
+func demo_huge_pages() (void, string) {
     let pool := huge_pages::new_huge_page_pool()?
     let thp := huge_pages::new_thp_manager(pool)?
     
@@ -124,7 +124,7 @@ func demo_huge_pages() result[void, string] {
     result::ok(())
 }
 
-func demo_filesystem() result[void, string] {
+func demo_filesystem() (void, string) {
     let fs := ext4::new_ext4_filesystem(4096)?
     
     fs.format()?
@@ -140,7 +140,7 @@ func demo_filesystem() result[void, string] {
     result::ok(())
 }
 
-func demo_netfilter() result[void, string] {
+func demo_netfilter() (void, string) {
     let engine := netfilter::new_netfilter_engine()?
     
     engine.add_rule(
@@ -158,7 +158,7 @@ func demo_netfilter() result[void, string] {
     result::ok(())
 }
 
-func demo_qos() result[void, string] {
+func demo_qos() (void, string) {
     let qos_engine := qos::new_qos_engine(qos::qos_policy::token_bucket)?
     
     qos_engine.create_qos_class(
@@ -174,7 +174,7 @@ func demo_qos() result[void, string] {
     result::ok(())
 }
 
-func demo_cpufreq() result[void, string] {
+func demo_cpufreq() (void, string) {
     let cpufreq_engine := cpufreq::new_cpufreq_engine(16, 1000000, 4000000)?
     
     cpufreq_engine.set_governor(cpufreq::frequency_scaling_governor::gov_ondemand)?
@@ -188,7 +188,7 @@ func demo_cpufreq() result[void, string] {
     result::ok(())
 }
 
-func demo_cpuidle() result[void, string] {
+func demo_cpuidle() (void, string) {
     let cpuidle_engine := cpuidle::new_cpuidle_engine(16)?
     
     let c1_state := cpuidle::c_state{
@@ -200,7 +200,7 @@ func demo_cpuidle() result[void, string] {
         enabled: true,
     }
     
-    cpuidle_engine.register_c_state(0, &c1_state)?
+    cpuidle_engine.register_c_state(0, *c1_state)?
     
     cpuidle_engine.enable_c_state(0, cpuidle::c_state_type::c1)?
     
@@ -212,18 +212,18 @@ func demo_cpuidle() result[void, string] {
     result::ok(())
 }
 
-func demo_time_management() result[void, string] {
+func demo_time_management() (void, string) {
     let time_engine := time_management::new_time_management_engine()?
     
     let ts := time_management::timespec{ tv_sec: 1724000000, tv_nsec: 0 }
-    time_engine.set_time(time_management::clock_type::clock_realtime, &ts)?
+    time_engine.set_time(time_management::clock_type::clock_realtime, *ts)?
     
     let current_time := time_engine.get_time(time_management::clock_type::clock_realtime)?
     
     let timer_id := time_engine.create_timer(
         time_management::clock_type::clock_monotonic,
-        &ts,
-        option::some(&time_management::timespec{ tv_sec: 1, tv_nsec: 0 }),
+        *ts,
+        option::some(*time_management::timespec{ tv_sec: 1, tv_nsec: 0 }),
         option::none
     )?
     
@@ -236,10 +236,10 @@ func demo_time_management() result[void, string] {
     result::ok(())
 }
 
-func print_capabilities(cap: &os_features_integration::system_capability) result[void, string] {
+func print_capabilities(cap: *os_features_integration::system_capability) (void, string) {
     result::ok(())
 }
 
-func print_feature_report(report: &os_features_integration::feature_report) result[void, string] {
+func print_feature_report(report: *os_features_integration::feature_report) (void, string) {
     result::ok(())
 }

@@ -94,7 +94,7 @@ struct model_load_result {
 }
 
 func create_model_loader() *model_loader {
-	return &model_loader{
+	return *model_loader{
 		status: LOADER_STATUS_IDLE,
 		loaded_packages: make(map[string]*model_package),
 		loading_packages: make(map[string]*model_package),
@@ -133,7 +133,7 @@ func (model_loader* loader) load_model(package_id string, model_type model_type,
 
 	if loader.current_loads >= loader.max_concurrent_loads {
 		loader.mu.Unlock()
-		return &model_load_result{
+		return *model_load_result{
 			success: false,
 			package_id: package_id,
 			error_message: "max concurrent loads exceeded",
@@ -154,7 +154,7 @@ func (model_loader* loader) load_model(package_id string, model_type model_type,
 		loader.total_load_failures++
 		loader.mu.Unlock()
 
-		return &model_load_result{
+		return *model_load_result{
 			success: false,
 			package_id: package_id,
 			error_message: fmt.Sprintf("package not found: %s", package_id),
@@ -172,7 +172,7 @@ func (model_loader* loader) load_model(package_id string, model_type model_type,
 		if len(validation_result.errors) > 0 {
 			error_msg = validation_result.errors[0]
 		}
-		return &model_load_result{
+		return *model_load_result{
 			success: false,
 			package_id: package_id,
 			error_message: error_msg,
@@ -193,7 +193,7 @@ func (model_loader* loader) load_model(package_id string, model_type model_type,
 
 	load_time := int64(time.Since(start_time).Milliseconds())
 
-	return &model_load_result{
+	return *model_load_result{
 		success: true,
 		model_id: pkg.model_id,
 		package_id: package_id,
@@ -206,7 +206,7 @@ func (model_loader* loader) find_package_by_id(package_id string) *model_package
 	for _, path := range loader.model_paths {
 		pkg_path := filepath.Join(path, package_id)
 		if info, err := os.Stat(pkg_path); err == nil && info.IsDir() {
-			return &model_package{
+			return *model_package{
 				package_id: package_id,
 				path: pkg_path,
 				metadata_file: filepath.Join(pkg_path, "config.json"),
@@ -220,7 +220,7 @@ func (model_loader* loader) find_package_by_id(package_id string) *model_package
 }
 
 func (model_loader* loader) validate_model_package(model_package* pkg) *load_validation_result {
-	result := &load_validation_result{
+	result := *load_validation_result{
 		valid: true,
 		errors: []string{},
 		warnings: []string{},

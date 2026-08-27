@@ -1,6 +1,6 @@
 package neurx.kernel
 
-use std.vec.vec
+use std.slices
 
 // 信号定义 (POSIX 标准)
 struct signal {
@@ -22,20 +22,20 @@ struct signal_handler {
 struct signal_mask {
     int pid
     int masked_signals  // 位掩码
-    vec pending_signals  // 待处理信号队列
+    signal[] pending_signals  // 待处理信号队列
 }
 
 // 信号管理器
 struct signal_manager {
-    vec signal_masks
-    vec signal_handlers
+    signal_mask[] signal_masks
+    signal_handler[] signal_handlers
     int num_signals
 }
 
 // 初始化信号管理器
 func (signal_manager* sm) init() (int, string) {
-    sm.signal_masks = vec()
-    sm.signal_handlers = vec()
+    sm.signal_masks = signal_mask[]{}
+    sm.signal_handlers = signal_handler[]{}
     sm.num_signals = 64
     
     // 初始化所有信号处理器为默认
@@ -58,7 +58,7 @@ func (signal_manager* sm) register_pid(int pid) (int, string) {
     mask := signal_mask{
         pid: pid,
         masked_signals: 0,
-        pending_signals: vec()
+        pending_signals: signal[]{}"
     }
     
     sm.signal_masks.push(mask)
@@ -186,7 +186,7 @@ struct interrupt_manager {
 
 // 初始化中断管理器
 func (interrupt_manager* im) init(int num_irqs) (int, string) {
-    im.interrupts = vec()
+    im.interrupts = interrupt_request[]{}"
     im.num_irqs = num_irqs
     
     i := 0

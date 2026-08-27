@@ -1,8 +1,8 @@
 package neurx.hal
 
-use std.vec.vec
+use std.slices
 
-
+enum compute_type {
     cpu_only,
     gpu_nvidia,
     gpu_amd,
@@ -29,15 +29,15 @@ struct platform_capability {
     int cpu_count
     int total_memory_gb
     int network_bandwidth_gbps
-    vec[device_capability]* accelerators
+    device_capability[] accelerators
 }
 
-func detect_platform_capability() result[platform_capability, string] {
+func detect_platform_capability() (platform_capability, string) {
     cpu_count := detect_cpu_count()
     gpu_count := detect_gpu_count()
     total_memory := detect_total_memory()
     
-    accelerators := vec[device_capability]()
+    accelerators := device_capability[]{}
     
     for i in 0..gpu_count {
         gpu_cap := detect_compute_device(i)
@@ -52,13 +52,13 @@ func detect_platform_capability() result[platform_capability, string] {
         cpu_count: cpu_count,
         total_memory_gb: total_memory,
         network_bandwidth_gbps: 10,
-        accelerators: &accelerators
+        accelerators: *accelerators
     }
     
     (platform, "")
 }
 
-func detect_cpu_count() result[int, string] {
+func detect_cpu_count() (int, string) {
     cpu_count := query_cpuid_count()
     
     if cpu_count <= 0 {
@@ -68,7 +68,7 @@ func detect_cpu_count() result[int, string] {
     (cpu_count, "")
 }
 
-func detect_gpu_count() result[int, string] {
+func detect_gpu_count() (int, string) {
     gpu_count := query_nvidia_gpu_count()
     
     if gpu_count == 0 {
@@ -82,7 +82,7 @@ func detect_gpu_count() result[int, string] {
     (gpu_count, "")
 }
 
-func detect_total_memory() result[int, string] {
+func detect_total_memory() (int, string) {
     memory_gb := query_system_memory_gb()
     
     if memory_gb <= 0 {
@@ -92,7 +92,7 @@ func detect_total_memory() result[int, string] {
     (memory_gb, "")
 }
 
-func detect_compute_device(int index) result[device_capability, string] {
+func detect_compute_device(int index) (device_capability, string) {
     if index == 0 {
         return (device_capability {
             compute_type: compute_capability::gpu_nvidia,
@@ -136,21 +136,21 @@ func query_system_memory_gb() int {
     16
 }
 
-func get_device_capability(int device_id) result[device_capability, string] {
+func get_device_capability(int device_id) (device_capability, string) {
     detect_compute_device(device_id)
 }
 
-func is_gpu_available() result[bool, string] {
+func is_gpu_available() (bool, string) {
     gpu_count := detect_gpu_count()
     (gpu_count > 0, "")
 }
 
-func is_nvidia_gpu_available() result[bool, string] {
+func is_nvidia_gpu_available() (bool, string) {
     count := query_nvidia_gpu_count()
     (count > 0, "")
 }
 
-func get_total_compute_capability() result[int, string] {
+func get_total_compute_capability() (int, string) {
     platform := detect_platform_capability()
     
     total_tflops := platform.accelerators*.len() * 89100

@@ -37,7 +37,7 @@ struct oink_ops {
 }
 
 func create_oink_ops() oink_ops* {
-    return &oink_ops{
+    return *oink_ops{
         kernel_cache: make(map[string]interface{}),
         total_ops_executed: 0,
         total_execution_time_us: 0.0,

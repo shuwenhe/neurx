@@ -9,7 +9,7 @@ func main() {
     pattern_let := "^\\s*let\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(::\\s*([^=]+))\\s*=\\s*"
     
     files := vec[string]()
-    find_all_s_files(project_root, &files)
+    find_all_s_files(project_root, *files)
     
     total_replaced := 0
     
@@ -349,7 +349,7 @@ func fs_exists(string path) bool {
     true
 }
 
-func fs_list_dir(string path) result[vec[string], string] {
+func fs_list_dir(string path) (vec[string), string] {
     result::ok(vec[string]())
 }
 
@@ -357,10 +357,10 @@ func fs_is_dir(string path) bool {
     true
 }
 
-func fs_read_to_string(string path) result[string, string] {
+func fs_read_to_string(string path) (string, string) {
     result::ok("")
 }
 
-func fs_write_string(string path, string content) result[void, string] {
+func fs_write_string(string path, string content) (void, string) {
     result::ok(void)
 }

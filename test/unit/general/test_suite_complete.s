@@ -66,7 +66,7 @@ func run_cuda_tests() test_suite {
     suite.results = append(suite.results, test_cuda_memory_allocation())
     suite.results = append(suite.results, test_cuda_memcpy())
     suite.results = append(suite.results, test_cuda_synchronization())
-    print_test_suite_results(&suite)
+    print_test_suite_results(*suite)
     suite
 }
 
@@ -186,7 +186,7 @@ func run_nccl_tests() test_suite {
     suite := test_suite{name: "NCCL Communication", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_nccl_initialization())
     suite.results = append(suite.results, test_nccl_barrier())
-    print_test_suite_results(&suite)
+    print_test_suite_results(*suite)
     suite
 }
 
@@ -246,7 +246,7 @@ func run_model_tests() test_suite {
     suite.results = append(suite.results, test_transformer_forward_pass())
     suite.results = append(suite.results, test_transformer_backward_pass())
     suite.results = append(suite.results, test_attention_computation())
-    print_test_suite_results(&suite)
+    print_test_suite_results(*suite)
     suite
 }
 
@@ -299,7 +299,7 @@ func run_optimizer_tests() test_suite {
     suite := test_suite{name: "optimizer_2", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_adamw_optimizer())
     suite.results = append(suite.results, test_learning_rate_schedule())
-    print_test_suite_results(&suite)
+    print_test_suite_results(*suite)
     suite
 }
 
@@ -345,14 +345,14 @@ func run_integration_tests() test_suite {
     suite.results = append(suite.results, test_end_to_end_training_step())
     suite.results = append(suite.results, test_checkpoint_save_load())
     suite.results = append(suite.results, test_mixed_precision())
-    print_test_suite_results(&suite)
+    print_test_suite_results(*suite)
     suite
 }
 
 func run_industrial_training_tests() test_suite {
     suite := test_suite{name: "Industrial Training", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_industrial_training_smoke())
-    print_test_suite_results(&suite)
+    print_test_suite_results(*suite)
     suite
 }
 

@@ -1,6 +1,6 @@
 package neurx.runtime.model.native_migration
 
-use std.vec.vec
+use std.slices
 use std.io.println
 
 struct json_value {

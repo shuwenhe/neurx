@@ -1,6 +1,6 @@
 package neurx.sys.device_abi
 
-use std.vec.vec
+use std.slices
 
 struct kernel_launch_request {
     int kernel_id

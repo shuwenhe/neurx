@@ -1,6 +1,6 @@
 package neurx.kernel.power_management.cpuidle
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use neurx.kernel.locking.spinlock
@@ -23,7 +23,7 @@ struct c_state {
     exit_latency_us: u32,
     power_usage_mw: u32,
     target_residency_us: u32,
-    description: &string,
+    description: *string,
     enabled: bool,
 }
 
@@ -37,20 +37,20 @@ struct cpu_idle_state {
 }
 
 struct idle_governor {
-    name: &string,
-    predict_fn: &fn(cpu_id: u32) -> c_state_type,
-    enter_fn: &fn(cpu_id: u32, state: c_state_type) -> result[void, string],
+    name: *string,
+    predict_fn: *fn(cpu_id: u32) -> c_state_type,
+    enter_fn: *fn(cpu_id: u32, state: c_state_type) -> result[void, string],
 }
 
 struct cpuidle_engine {
     cpus: vec[cpu_idle_state],
     governors: vec[idle_governor],
-    active_governor: option[&string],
+    active_governor: option[*string],
     lock: spinlock::spinlock[void],
     total_idle_time: u64,
 }
 
-func new_cpuidle_engine(num_cpus: u32) result[&cpuidle_engine, string] {
+func new_cpuidle_engine(num_cpus: u32) (*cpuidle_engine, string) {
     let mut cpus := vec[cpu_idle_state]()
 
     let mut i := 0
@@ -68,44 +68,44 @@ func new_cpuidle_engine(num_cpus: u32) result[&cpuidle_engine, string] {
         i = i + 1
     }
 
-    let engine := &cpuidle_engine{
+    let engine := *cpuidle_engine{
         cpus: cpus,
         governors: vec[idle_governor](),
         active_governor: option::none,
         lock: spinlock::new(),
         total_idle_time: 0,
-    } as &cpuidle_engine
+    } as *cpuidle_engine
 
     result::ok(engine)
 }
 
-func (engine: &mut cpuidle_engine) register_c_state(
+func (engine: *cpuidle_engine) register_c_state(
     cpu_id: u32,
-    state: &c_state,
-) result[void, string] {
+    state: *c_state,
+) (void, string) {
     let _guard := engine.lock.lock()?
 
     if (cpu_id as u32) >= engine.cpus.len() as u32 {
         return result::err("invalid cpu id")
     }
 
-    let cpu_state := &engine.cpus.get(cpu_id) as &cpu_idle_state
+    let cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
     cpu_state.available_states.push(state)
 
     result::ok(())
 }
 
-func (engine: &mut cpuidle_engine) enable_c_state(
+func (engine: *cpuidle_engine) enable_c_state(
     cpu_id: u32,
     state_type: c_state_type,
-) result[void, string] {
+) (void, string) {
     let _guard := engine.lock.lock()?
 
     if (cpu_id as u32) >= engine.cpus.len() as u32 {
         return result::err("invalid cpu id")
     }
 
-    let cpu_state := &engine.cpus.get(cpu_id) as &cpu_idle_state
+    let cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
 
     for state in cpu_state.available_states {
         if state.state_type == state_type {
@@ -117,17 +117,17 @@ func (engine: &mut cpuidle_engine) enable_c_state(
     result::err("c-state not found")
 }
 
-func (engine: &mut cpuidle_engine) disable_c_state(
+func (engine: *cpuidle_engine) disable_c_state(
     cpu_id: u32,
     state_type: c_state_type,
-) result[void, string] {
+) (void, string) {
     let _guard := engine.lock.lock()?
 
     if (cpu_id as u32) >= engine.cpus.len() as u32 {
         return result::err("invalid cpu id")
     }
 
-    let cpu_state := &engine.cpus.get(cpu_id) as &cpu_idle_state
+    let cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
 
     for state in cpu_state.available_states {
         if state.state_type == state_type {
@@ -139,17 +139,17 @@ func (engine: &mut cpuidle_engine) disable_c_state(
     result::err("c-state not found")
 }
 
-func (engine: &mut cpuidle_engine) enter_idle_state(
+func (engine: *cpuidle_engine) enter_idle_state(
     cpu_id: u32,
     target_state: c_state_type,
-) result[void, string] {
+) (void, string) {
     let _guard := engine.lock.lock()?
 
     if (cpu_id as u32) >= engine.cpus.len() as u32 {
         return result::err("invalid cpu id")
     }
 
-    let cpu_state := &engine.cpus.get(cpu_id) as &cpu_idle_state
+    let cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
 
     let mut found := false
     for state in cpu_state.available_states {
@@ -169,14 +169,14 @@ func (engine: &mut cpuidle_engine) enter_idle_state(
     result::ok(())
 }
 
-func (engine: &mut cpuidle_engine) exit_idle_state(cpu_id: u32) result[void, string] {
+func (engine: *cpuidle_engine) exit_idle_state(cpu_id: u32) (void, string) {
     let _guard := engine.lock.lock()?
 
     if (cpu_id as u32) >= engine.cpus.len() as u32 {
         return result::err("invalid cpu id")
     }
 
-    let cpu_state := &engine.cpus.get(cpu_id) as &cpu_idle_state
+    let cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
 
     cpu_state.current_c_state = c_state_type::c0
     cpu_state.wake_time = 0
@@ -184,16 +184,16 @@ func (engine: &mut cpuidle_engine) exit_idle_state(cpu_id: u32) result[void, str
     result::ok(())
 }
 
-func (engine: &mut cpuidle_engine) predict_next_c_state(
+func (engine: *cpuidle_engine) predict_next_c_state(
     cpu_id: u32,
-) result[c_state_type, string] {
+) (c_state_type, string) {
     let _guard := engine.lock.lock()?
 
     if (cpu_id as u32) >= engine.cpus.len() as u32 {
         return result::err("invalid cpu id")
     }
 
-    let cpu_state := &engine.cpus.get(cpu_id) as &cpu_idle_state
+    let cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
 
     let mut deepest_state := c_state_type::c0
 
@@ -206,21 +206,21 @@ func (engine: &mut cpuidle_engine) predict_next_c_state(
     result::ok(deepest_state)
 }
 
-func (engine: &mut cpuidle_engine) register_governor(
-    governor: &idle_governor,
-) result[void, string] {
+func (engine: *cpuidle_engine) register_governor(
+    governor: *idle_governor,
+) (void, string) {
     let _guard := engine.lock.lock()?
 
     engine.governors.push(governor)
     result::ok(())
 }
 
-func (engine: &mut cpuidle_engine) set_governor(name: &string) result[void, string] {
+func (engine: *cpuidle_engine) set_governor(name: *string) (void, string) {
     let _guard := engine.lock.lock()?
 
     for governor in engine.governors {
         if governor.name == name {
-            engine.active_governor = option::some(&governor.name)
+            engine.active_governor = option::some(*governor.name)
             return result::ok(())
         }
     }
@@ -237,7 +237,7 @@ struct idle_statistics {
     deepest_state_reached: c_state_type,
 }
 
-func (engine: &mut cpuidle_engine) get_statistics() result[idle_statistics, string] {
+func (engine: *cpuidle_engine) get_statistics() (idle_statistics, string) {
     let _guard := engine.lock.lock()?
 
     let mut idle_count := 0
@@ -264,34 +264,34 @@ func (engine: &mut cpuidle_engine) get_statistics() result[idle_statistics, stri
     result::ok(stats)
 }
 
-func (engine: &mut cpuidle_engine) update_residency_time(
+func (engine: *cpuidle_engine) update_residency_time(
     cpu_id: u32,
     residency_us: u64,
-) result[void, string] {
+) (void, string) {
     let _guard := engine.lock.lock()?
 
     if (cpu_id as u32) >= engine.cpus.len() as u32 {
         return result::err("invalid cpu id")
     }
 
-    let cpu_state := &engine.cpus.get(cpu_id) as &cpu_idle_state
+    let cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
     cpu_state.residency_time = cpu_state.residency_time + residency_us
     engine.total_idle_time = engine.total_idle_time + residency_us
 
     result::ok(())
 }
 
-func (engine: &mut cpuidle_engine) get_c_state_info(
+func (engine: *cpuidle_engine) get_c_state_info(
     cpu_id: u32,
     state_type: c_state_type,
-) result[c_state, string] {
+) (c_state, string) {
     let _guard := engine.lock.lock()?
 
     if (cpu_id as u32) >= engine.cpus.len() as u32 {
         return result::err("invalid cpu id")
     }
 
-    let cpu_state := &engine.cpus.get(cpu_id) as &cpu_idle_state
+    let cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
 
     for state in cpu_state.available_states {
         if state.state_type == state_type {
@@ -302,7 +302,7 @@ func (engine: &mut cpuidle_engine) get_c_state_info(
     result::err("c-state not found")
 }
 
-func calculate_power_saving(state: &c_state) f32 {
+func calculate_power_saving(state: *c_state) f32 {
     let power_mw := state.power_usage_mw as f32
     let latency_us := state.exit_latency_us as f32
 

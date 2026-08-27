@@ -116,7 +116,7 @@ func (q async_request_queue*) create_request(
 		status:     STATUS_PENDING,
 		is_cancelled: false,
 	}
-	return &req
+	return *req
 }
 
 func (q async_request_queue*) enqueue(req async_request*) (bool, error) {
@@ -179,7 +179,7 @@ func (q async_request_queue*) dequeue_batch() request_batch {
 	}
 
 	batch.size = int32(len(batch.requests))
-	q.processing_batch = append(q.processing_batch, &batch)
+	q.processing_batch = append(q.processing_batch, *batch)
 	q.current_load -= count
 
 	if q.current_load < q.backpressure.low_watermark && q.is_backpressure {

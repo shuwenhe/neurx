@@ -1,6 +1,6 @@
 package neurx.kernel.syscall
 
-use std.vec.vec
+use std.slices
 
 struct syscall_handler_entry {
     int syscall_number
@@ -219,6 +219,6 @@ func syscall_dispatch(syscall_context* ctx) {
 
 func syscall_entry_handler(int number, trap_frame* frame) int64 {
     ctx := syscall_context_create(number, frame)
-    syscall_dispatch(&ctx)
+    syscall_dispatch(*ctx)
     return frame.rax
 }

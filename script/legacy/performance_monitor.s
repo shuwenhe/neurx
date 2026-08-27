@@ -277,7 +277,7 @@ func (performance_monitor* monitor) snapshot_summary() string {
 }
 
 func new_performance_monitor() *performance_monitor {
-    return &performance_monitor{
+    return *performance_monitor{
         config: performance_monitor_config{
             sampling_interval: 5,
             metrics_window: 100,

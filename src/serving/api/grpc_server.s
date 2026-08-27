@@ -90,7 +90,7 @@ struct grpc_stream_context {
 }
 
 func create_grpc_server(grpc_server_config* config, llm_engine* engine) grpc_server* {
-    return &grpc_server{
+    return *grpc_server{
         config: *config,
         engine: engine,
         running: false,
@@ -109,7 +109,7 @@ func (grpc_server* srv) stop() error {
 }
 
 func (grpc_server* srv) complete(completion_request_pb* req) (completion_response_pb*, error) {
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: req.prompt,
         model_id: req.model_id,
         config: generation_config{
@@ -125,14 +125,14 @@ func (grpc_server* srv) complete(completion_request_pb* req) (completion_respons
 
     tokens := make([]token*, 0)
     for _, text := range resp.generated_text {
-        tokens = append(tokens, &token{
+        tokens = append(tokens, *token{
             id: 0,
             text: text,
             log_prob: 0.0,
         })
     }
 
-    pb_resp := &completion_response_pb{
+    pb_resp := *completion_response_pb{
         request_id: resp.id,
         tokens: tokens,
         num_prompt_tokens: resp.input_tokens,
@@ -143,7 +143,7 @@ func (grpc_server* srv) complete(completion_request_pb* req) (completion_respons
 }
 
 func (grpc_server* srv) complete_stream(completion_request_pb* req) streaming_response* {
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: req.prompt,
         model_id: req.model_id,
         config: generation_config{
@@ -156,7 +156,7 @@ func (grpc_server* srv) complete_stream(completion_request_pb* req) streaming_re
 }
 
 func (grpc_server* srv) chat_completion(chat_completion_request_pb* req) (chat_completion_response_pb*, error) {
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: "",
         model_id: req.model_id,
         config: generation_config{
@@ -170,7 +170,7 @@ func (grpc_server* srv) chat_completion(chat_completion_request_pb* req) (chat_c
         return nil, err
     }
 
-    choice := &chat_completion_choice_pb{
+    choice := *chat_completion_choice_pb{
         index: 0,
         message: *chat_message_pb{
             role: "assistant",
@@ -179,7 +179,7 @@ func (grpc_server* srv) chat_completion(chat_completion_request_pb* req) (chat_c
         finish_reason: "stop",
     }
 
-    pb_resp := &chat_completion_response_pb{
+    pb_resp := *chat_completion_response_pb{
         request_id: resp.id,
         choices: []*chat_completion_choice_pb{choice},
         num_prompt_tokens: resp.input_tokens,
@@ -190,7 +190,7 @@ func (grpc_server* srv) chat_completion(chat_completion_request_pb* req) (chat_c
 }
 
 func (grpc_server* srv) chat_completion_stream(chat_completion_request_pb* req) streaming_response* {
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: "",
         model_id: req.model_id,
         config: generation_config{
@@ -206,14 +206,14 @@ func (grpc_server* srv) embed(embedding_request_pb* req) (embedding_response_pb*
     embeddings := make([]embedding_pb*, 0)
 
     for i, _ := range req.texts {
-        emb := &embedding_pb{
+        emb := *embedding_pb{
             index: int32(i),
             values: make([]float32, 0),
         }
         embeddings = append(embeddings, emb)
     }
 
-    pb_resp := &embedding_response_pb{
+    pb_resp := *embedding_response_pb{
         model: req.model_id,
         data: embeddings,
     }
@@ -238,7 +238,7 @@ func (grpc_server* srv) health_check() bool {
 }
 
 func (grpc_server* srv) create_stream_context() grpc_stream_context* {
-    return &grpc_stream_context{
+    return *grpc_stream_context{
         stream_id: core.generate_uuid(),
         send_channel: nil,
         recv_channel: nil,

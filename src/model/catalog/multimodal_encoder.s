@@ -108,7 +108,7 @@ struct multimodal_encoder {
 }
 
 func create_multimodal_encoder(fusion_dim int32) *multimodal_encoder {
-	mme := &multimodal_encoder{
+	mme := *multimodal_encoder{
 		encoder_configs:              make(map[string]*encoder_config),
 		encoder_stats:                make(map[string]interface{}),
 		feature_fusion_dim:           fusion_dim,
@@ -116,7 +116,7 @@ func create_multimodal_encoder(fusion_dim int32) *multimodal_encoder {
 		created_at:                   time.Now(),
 	}
 
-	mme.encoder_configs["text"] = &encoder_config{
+	mme.encoder_configs["text"] = *encoder_config{
 		encoder_type:   ENCODER_TEXT,
 		modality_type:  MODALITY_TEXT,
 		output_dim:     768,
@@ -128,7 +128,7 @@ func create_multimodal_encoder(fusion_dim int32) *multimodal_encoder {
 		activation:     "gelu",
 	}
 
-	mme.encoder_configs["vision"] = &encoder_config{
+	mme.encoder_configs["vision"] = *encoder_config{
 		encoder_type:   ENCODER_VISION,
 		modality_type:  MODALITY_IMAGE,
 		output_dim:     768,
@@ -140,7 +140,7 @@ func create_multimodal_encoder(fusion_dim int32) *multimodal_encoder {
 		activation:     "gelu",
 	}
 
-	mme.encoder_configs["audio"] = &encoder_config{
+	mme.encoder_configs["audio"] = *encoder_config{
 		encoder_type:   ENCODER_AUDIO_SPECTROGRAM,
 		modality_type:  MODALITY_AUDIO,
 		output_dim:     768,
@@ -152,7 +152,7 @@ func create_multimodal_encoder(fusion_dim int32) *multimodal_encoder {
 		activation:     "gelu",
 	}
 
-	mme.encoder_configs["video"] = &encoder_config{
+	mme.encoder_configs["video"] = *encoder_config{
 		encoder_type:   ENCODER_VIDEO_FRAME,
 		modality_type:  MODALITY_VIDEO,
 		output_dim:     768,
@@ -175,7 +175,7 @@ func (multimodal_encoder* mme) register_text_encoder(tokenizer *tokenizer_interf
 		return fmt.Errorf("text encoder already registered")
 	}
 
-	mme.text_enc = &text_encoder{
+	mme.text_enc = *text_encoder{
 		tokenizer:       tokenizer,
 		model_id:        model_id,
 		max_seq_length:  max_seq,
@@ -197,7 +197,7 @@ func (multimodal_encoder* mme) register_vision_encoder(model_id string, image_si
 
 	num_patches := (image_size / patch_size) * (image_size / patch_size)
 
-	mme.vision_enc = &vision_encoder{
+	mme.vision_enc = *vision_encoder{
 		model_id:      model_id,
 		image_size:    image_size,
 		patch_size:    patch_size,
@@ -222,7 +222,7 @@ func (multimodal_encoder* mme) register_audio_encoder(model_id string, sample_ra
 		return fmt.Errorf("audio encoder already registered")
 	}
 
-	config := &audio_encoder_config{
+	config := *audio_encoder_config{
 		encoder_name:    "audio_encoder_v1",
 		sample_rate:     sample_rate,
 		n_mels:          n_mels,
@@ -233,7 +233,7 @@ func (multimodal_encoder* mme) register_audio_encoder(model_id string, sample_ra
 		log_mel:         true,
 	}
 
-	mme.audio_enc = &audio_encoder{
+	mme.audio_enc = *audio_encoder{
 		model_id:       model_id,
 		config:         config,
 		mel_filterbank: make([]float32, n_mels),
@@ -251,7 +251,7 @@ func (multimodal_encoder* mme) register_video_encoder(model_id string, num_frame
 		return fmt.Errorf("video encoder already registered")
 	}
 
-	mme.video_enc = &video_encoder{
+	mme.video_enc = *video_encoder{
 		model_id:                 model_id,
 		num_frames:               num_frames,
 		frame_embedding_dim:      768,
@@ -295,7 +295,7 @@ func (multimodal_encoder* mme) encode_text(text string, max_length int32) (*enco
 		}
 	}
 
-	features := &encoded_features{
+	features := *encoded_features{
 		feature_vector: feature_vector,
 		feature_dim:    768,
 		encoding_time_ms: 10.5,
@@ -325,7 +325,7 @@ func (multimodal_encoder* mme) encode_image(image_data* image_data) (*encoded_fe
 		feature_vector[i] = 0.1
 	}
 
-	features := &encoded_features{
+	features := *encoded_features{
 		feature_vector: feature_vector,
 		feature_dim:    vision_enc.embedding_dim,
 		encoding_time_ms: 25.3,
@@ -359,7 +359,7 @@ func (multimodal_encoder* mme) encode_audio(audio_data* audio_data) (*encoded_fe
 		}
 	}
 
-	features := &encoded_features{
+	features := *encoded_features{
 		feature_vector: feature_vector,
 		feature_dim:    audio_enc.config.output_dim,
 		encoding_time_ms: 20.8,
@@ -398,7 +398,7 @@ func (multimodal_encoder* mme) encode_video(video_data* video_data) (*encoded_fe
 		}
 	}
 
-	features := &encoded_features{
+	features := *encoded_features{
 		feature_vector: feature_vector,
 		feature_dim:    video_enc.frame_embedding_dim,
 		encoding_time_ms: 50.2,

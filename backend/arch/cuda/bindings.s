@@ -91,7 +91,7 @@ static py_object* tensor_cuda_add_bias_3d_device(py_object* , py_object* args) {
     py_object* b_capsule = nullptr;
     int bsz = 0, t = 0, c = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "OOiiis", &a_capsule, &b_capsule, &bsz, &t, &c, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "OOiiis", *a_capsule, *b_capsule, *bsz, *t, *c, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, capsule, b, t, c, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -107,7 +107,7 @@ static py_object* tensor_cuda_add_bias_3d_device(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)bsz * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)bsz * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
         cuda_add_bias_3d_device_float((const float*)a.ptr, (const float*)b.ptr, (float*)d_out, bsz, t, c);
         _cuda_check(cuda_get_last_error(), "cuda_add_bias_3d_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -123,7 +123,7 @@ static py_object* tensor_cuda_matmul_device(py_object* , py_object* args) {
     py_object* b_capsule = nullptr;
     int m = 0, k = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "OOiiis", &a_capsule, &b_capsule, &m, &k, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "OOiiis", *a_capsule, *b_capsule, *m, *k, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, capsule, m, k, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -139,7 +139,7 @@ static py_object* tensor_cuda_matmul_device(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
         cuda_matmul_device_float((const float*)a.ptr, (const float*)b.ptr, (float*)d_out, m, k, n);
         _cuda_check(cuda_get_last_error(), "cuda_matmul_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -157,7 +157,7 @@ static py_object* tensor_cuda_layernorm_device(py_object* , py_object* args) {
     int m = 0, n = 0;
     float eps = 0.00001f;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "OOOiifs", &a_capsule, &g_capsule, &b_capsule, &m, &n, &eps, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "OOOiifs", *a_capsule, *g_capsule, *b_capsule, *m, *n, *eps, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, gamma, beta, m, n, eps, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -174,7 +174,7 @@ static py_object* tensor_cuda_layernorm_device(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
         cuda_layernorm_device_float((const float*)a.ptr, (const float*)g.ptr, (const float*)b.ptr, (float*)d_out, m, n, eps);
         _cuda_check(cuda_get_last_error(), "cuda_layernorm_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -189,7 +189,7 @@ static py_object* tensor_cuda_softmax_device(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiis", *a_capsule, *m, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -204,7 +204,7 @@ static py_object* tensor_cuda_softmax_device(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
         cuda_softmax_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_softmax_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -219,7 +219,7 @@ static py_object* tensor_cuda_reduce_sum_device(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     py_ssize_t size = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Ons", *a_capsule, *size, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, size, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -234,7 +234,7 @@ static py_object* tensor_cuda_reduce_sum_device(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, sizeof(float)), "cudaMalloc");
         cuda_reduce_sum_device_float((const float*)a.ptr, (float*)d_out, (size_t)size);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_sum_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -249,7 +249,7 @@ static py_object* tensor_cuda_reduce_mean_device(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     py_ssize_t size = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Ons", *a_capsule, *size, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, size, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -264,7 +264,7 @@ static py_object* tensor_cuda_reduce_mean_device(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, sizeof(float)), "cudaMalloc");
         cuda_reduce_mean_device_float((const float*)a.ptr, (float*)d_out, (size_t)size);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_mean_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -279,7 +279,7 @@ static py_object* tensor_cuda_reduce_max_device(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     py_ssize_t size = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Ons", *a_capsule, *size, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, size, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -294,7 +294,7 @@ static py_object* tensor_cuda_reduce_max_device(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, sizeof(float)), "cudaMalloc");
         cuda_reduce_max_device_float((const float*)a.ptr, (float*)d_out, (size_t)size);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_max_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -309,7 +309,7 @@ static py_object* tensor_cuda_reduce_min_device(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     py_ssize_t size = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Ons", *a_capsule, *size, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, size, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -324,7 +324,7 @@ static py_object* tensor_cuda_reduce_min_device(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, sizeof(float)), "cudaMalloc");
         cuda_reduce_min_device_float((const float*)a.ptr, (float*)d_out, (size_t)size);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_min_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -339,7 +339,7 @@ static py_object* tensor_cuda_reduce_sum_lastdim_device(py_object* , py_object* 
     py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiis", *a_capsule, *m, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -354,7 +354,7 @@ static py_object* tensor_cuda_reduce_sum_lastdim_device(py_object* , py_object* 
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * sizeof(float)), "cudaMalloc");
         cuda_reduce_sum_lastdim_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_sum_lastdim_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -369,7 +369,7 @@ static py_object* tensor_cuda_reduce_mean_lastdim_device(py_object* , py_object*
     py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiis", *a_capsule, *m, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -384,7 +384,7 @@ static py_object* tensor_cuda_reduce_mean_lastdim_device(py_object* , py_object*
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * sizeof(float)), "cudaMalloc");
         cuda_reduce_mean_lastdim_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_mean_lastdim_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -399,7 +399,7 @@ static py_object* tensor_cuda_reduce_max_lastdim_device(py_object* , py_object* 
     py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiis", *a_capsule, *m, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -414,7 +414,7 @@ static py_object* tensor_cuda_reduce_max_lastdim_device(py_object* , py_object* 
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * sizeof(float)), "cudaMalloc");
         cuda_reduce_max_lastdim_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_max_lastdim_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -429,7 +429,7 @@ static py_object* tensor_cuda_reduce_min_lastdim_device(py_object* , py_object* 
     py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiis", *a_capsule, *m, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -444,7 +444,7 @@ static py_object* tensor_cuda_reduce_min_lastdim_device(py_object* , py_object* 
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * sizeof(float)), "cudaMalloc");
         cuda_reduce_min_lastdim_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_min_lastdim_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -459,7 +459,7 @@ static py_object* tensor_cuda_argmax_lastdim(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiis", *a_capsule, *m, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -474,7 +474,7 @@ static py_object* tensor_cuda_argmax_lastdim(py_object* , py_object* args) {
     }
     long long* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
         cuda_argmax_lastdim_device_int64((const float*)a.ptr, d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_argmax_lastdim");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -489,7 +489,7 @@ static py_object* tensor_cuda_argmin_lastdim(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiis", *a_capsule, *m, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -504,7 +504,7 @@ static py_object* tensor_cuda_argmin_lastdim(py_object* , py_object* args) {
     }
     long long* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
         cuda_argmin_lastdim_device_int64((const float*)a.ptr, d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_argmin_lastdim");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -519,7 +519,7 @@ static py_object* tensor_cuda_transpose_2d(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiis", *a_capsule, *m, *n, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -534,7 +534,7 @@ static py_object* tensor_cuda_transpose_2d(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
         cuda_transpose_2d_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_transpose_2d");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -549,7 +549,7 @@ static py_object* tensor_cuda_permute_3d_0_2_1(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     int b = 0, t = 0, c = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiiis", &a_capsule, &b, &t, &c, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiiis", *a_capsule, *b, *t, *c, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, b, t, c, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -564,7 +564,7 @@ static py_object* tensor_cuda_permute_3d_0_2_1(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
         cuda_permute_3d_0_2_1_device_float((const float*)a.ptr, (float*)d_out, b, t, c);
         _cuda_check(cuda_get_last_error(), "cuda_permute_3d_0_2_1");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -579,7 +579,7 @@ static py_object* tensor_cuda_permute_3d_1_2_0(py_object* , py_object* args) {
     py_object* a_capsule = nullptr;
     int b = 0, t = 0, c = 0;
     const char* dtype_str = nullptr;
-    if (!py_arg_parse_tuple(args, "Oiiis", &a_capsule, &b, &t, &c, &dtype_str)) {
+    if (!py_arg_parse_tuple(args, "Oiiis", *a_capsule, *b, *t, *c, *dtype_str)) {
         return _raise(py_exc_type_error, "expected (capsule, b, t, c, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
@@ -594,7 +594,7 @@ static py_object* tensor_cuda_permute_3d_1_2_0(py_object* , py_object* args) {
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cuda_malloc(&d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(*d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
         cuda_permute_3d_1_2_0_device_float((const float*)a.ptr, (float*)d_out, b, t, c);
         _cuda_check(cuda_get_last_error(), "cuda_permute_3d_1_2_0");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
@@ -639,5 +639,5 @@ static struct py_module_def tensor_cuda_module = {
 };
 py_modinit_func py_init_tensor_cuda(void) {
     import_array();
-    return py_module_create(&tensor_cuda_module);
+    return py_module_create(*tensor_cuda_module);
 }

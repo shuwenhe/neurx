@@ -1,6 +1,6 @@
 package neurx.security
 
-use std.vec.vec
+use std.slices
 
 // 审计日志条目
 struct audit_log_entry {
@@ -26,13 +26,13 @@ struct audit_rule {
 
 // 审计规则集合
 struct audit_ruleset {
-    vec rules
+    audit_rule[] rules
     int max_rules
 }
 
 // 审计管理器
 struct audit_manager {
-    vec log_entries
+    audit_log_entry[] log_entries
     audit_ruleset ruleset
     int max_log_size
     int log_count
@@ -41,8 +41,8 @@ struct audit_manager {
 
 // 初始化审计管理器
 func (audit_manager* am) init(int max_log_size) (int, string) {
-    am.log_entries = vec()
-    am.ruleset.rules = vec()
+    am.log_entries = audit_log_entry[]{}
+    am.ruleset.rules = audit_rule[]{}
     am.ruleset.max_rules = 1024
     am.max_log_size = max_log_size
     am.log_count = 0
@@ -135,8 +135,9 @@ func (audit_manager* am) log_event(int pid, int uid, int event_type, string even
 }
 
 // 查询审计日志
-func (audit_manager am) query_logs(int event_type) (vec, string) {
-    matching_logs := vec()
+func (audit_manager am) query_logs(int event_type) (audit_log_entry[], string) {
+    matching_logs := audit_log_entry[]{}
+
     
     i := 0
     for i < am.log_entries.len() {
@@ -179,20 +180,20 @@ struct capability {
 // 进程能力集
 struct process_capabilities {
     int pid
-    vec effective_caps  // 有效能力
-    vec permitted_caps  // 允许能力
-    vec inheritable_caps  // 可继承能力
+    capability[] effective_caps  // 有效能力
+    capability[] permitted_caps  // 允许能力
+    capability[] inheritable_caps  // 可继承能力
 }
 
 // 权限管理器
 struct capability_manager {
-    vec process_caps
+    process_capabilities[] process_caps
     int next_cap_id
 }
 
 // 初始化权限管理器
 func (capability_manager* capm) init() (int, string) {
-    capm.process_caps = vec()
+    capm.process_caps = process_capabilities[]{}
     capm.next_cap_id = 0
     return 0, ""
 }
@@ -218,9 +219,9 @@ func (capability_manager* capm) add_capability_to_process(int pid, int cap_id) (
     // 如果进程不存在，创建新的能力集
     new_proc_cap := process_capabilities{
         pid: pid,
-        effective_caps: vec(),
-        permitted_caps: vec(),
-        inheritable_caps: vec()
+        effective_caps: capability[]{},
+        permitted_caps: capability[]{},
+        inheritable_caps: capability[]{}
     }
     
     cap := capability{

@@ -45,7 +45,7 @@ func create_peft_helper(peft_config config) peft_model_wrapper* {
         inference_step_count: 0,
     }
 
-    return &wrapper
+    return *wrapper
 }
 
 func (peft_model_wrapper* wrapper) initialize_lora_model(string model_name, lora_config lora_cfg) {

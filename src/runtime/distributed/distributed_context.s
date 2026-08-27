@@ -104,9 +104,9 @@ func (distributed_context* ctx) synchronize() bool {
 }
 
 func (distributed_context* ctx) get_communicator() (*communicator) {
-    &ctx.comm
+    *ctx.comm
 }
 
 func (distributed_context* ctx) get_group_manager() (*process_group_manager) {
-    &ctx.group_manager
+    *ctx.group_manager
 }

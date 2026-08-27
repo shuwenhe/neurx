@@ -210,7 +210,7 @@ func create_inference_response(int request_id, string text, []int tokens, float 
     }
 }
 
-func update_pipeline_metrics(production_pipeline &p, inference_response resp, bool success) {
+func update_pipeline_metrics(production_pipeline *p, inference_response resp, bool success) {
     p.metrics.total_requests = p.metrics.total_requests + 1
     
     if success {
@@ -243,7 +243,7 @@ func print_pipeline_metrics(pipeline_metrics metrics) {
     print("   Memory: " + float_to_string(metrics.memory_used_mb) + " MB\n\n")
 }
 
-func execute_inference_pipeline(production_pipeline &pipeline, inference_request req) inference_response {
+func execute_inference_pipeline(production_pipeline *pipeline, inference_request req) inference_response {
     print("\n")
     print("╔═══════════════════════════════════════════════════════════╗\n")
     print("║  EXECUTING PRODUCTION INFERENCE PIPELINE                  ║\n")

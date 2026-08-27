@@ -52,7 +52,7 @@ struct quantization_engine {
 }
 
 func NewQuantizationEngine(format QuantFormat, mode QuantMode, group_size int) *quantization_engine {
-    engine := &quantization_engine{
+    engine := *quantization_engine{
         format:       format,
         enabled:      format != QUANT_FLOAT32,
         scales_cache: make(map[string][]float32),
@@ -126,7 +126,7 @@ func (quantization_engine* e) QuantizeWeights(weights []float32, shape []int) *q
     if !e.enabled {
         return nil
     }
-    quant_tensor := &quantized_tensor{
+    quant_tensor := *quantized_tensor{
         format:         e.config.format,
         original_shape: shape,
     }
@@ -144,7 +144,7 @@ func (quantization_engine* e) quantizeToInt8(weights []float32, shape []int) *qu
     if len(weights) == 0 {
         return nil
     }
-    quant_tensor := &quantized_tensor{
+    quant_tensor := *quantized_tensor{
         format:         QUANT_INT8,
         original_shape: shape,
         bit_width:      8,
@@ -203,7 +203,7 @@ func (quantization_engine* e) quantizeToInt4(weights []float32, shape []int) *qu
     if len(weights) == 0 {
         return nil
     }
-    quant_tensor := &quantized_tensor{
+    quant_tensor := *quantized_tensor{
         format:         QUANT_INT4,
         original_shape: shape,
         bit_width:      4,
@@ -253,7 +253,7 @@ func (quantization_engine* e) quantizeToFP8(weights []float32, shape []int) *qua
     if len(weights) == 0 {
         return nil
     }
-    quant_tensor := &quantized_tensor{
+    quant_tensor := *quantized_tensor{
         format:         QUANT_FP8,
         original_shape: shape,
         bit_width:      8,

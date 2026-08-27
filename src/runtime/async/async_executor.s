@@ -133,7 +133,7 @@ func (e async_executor*) submit_task(
 		paused_signal:  false,
 	}
 
-	e.task_queue = append(e.task_queue, &task)
+	e.task_queue = append(e.task_queue, *task)
 	e.stats.total_tasks++
 	e.stats.queued_tasks++
 

@@ -52,12 +52,12 @@ func main() {
     println(fmt("✓ Created image: %s (%dx%d)", image_data.id, image_data.width, image_data.height))
 
     image_processor := image_processor.NewImageProcessor(224, 224, [3]f32{0.485, 0.456, 0.406}, [3]f32{0.229, 0.224, 0.225})
-    processed_tensor := image_processor.Process(&image_data)
+    processed_tensor := image_processor.Process(*image_data)
 
     println(fmt("✓ Processed image tensor shape: [%d, %d, %d]", processed_tensor.shape[0], processed_tensor.shape[1], processed_tensor.shape[2]))
 
     vision_encoder := vision_encoder.NewVisionEncoder("clip-vit", 768, 16, "cuda")
-    features := vision_encoder.Encode(&image_data, processed_tensor)
+    features := vision_encoder.Encode(*image_data, processed_tensor)
 
     println(fmt("✓ Vision encoded: %d patches, embedding dim: %d", features.patch_info.num_patches, 768))
 
@@ -79,7 +79,7 @@ func main() {
     println(fmt("  - Text: '%s'", input.text))
     println(fmt("  - Images: %d", len(input.images)))
 
-    fused_features := manager.ProcessMultimodalInput(&input)
+    fused_features := manager.ProcessMultimodalInput(*input)
 
     println("\n3. Fused Features Example")
     println("-" * 40)

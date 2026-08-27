@@ -1,6 +1,6 @@
 package neurx.kernel
 
-use std.vec.vec
+use std.slices
 
 // 定时器结构
 struct timer {
@@ -14,14 +14,14 @@ struct timer {
 
 // 定时器管理器
 struct timer_manager {
-    vec timers
+    timer[] timers
     int current_time  // ms
     int next_timer_id
 }
 
 // 初始化定时器管理器
 func (timer_manager* tm) init() (int, string) {
-    tm.timers = vec()
+    tm.timers = timer[]{}
     tm.current_time = 0
     tm.next_timer_id = 0
     return 0, ""
@@ -122,14 +122,14 @@ struct work_item {
 // 工作队列
 struct workqueue {
     int queue_id
-    vec work_items
+    work_item[] work_items
     int max_workers
     int active_workers
 }
 
 // 工作队列管理器
 struct workqueue_manager {
-    vec workqueues
+    workqueue[] workqueues
     int next_queue_id
 }
 

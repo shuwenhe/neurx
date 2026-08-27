@@ -45,7 +45,7 @@ func new_gpt(config gptconfig) (*gptmodel, error) {
         return nil, fmt.Errorf("hidden_dim must be divisible by num_heads: %d %% %d != 0",
             config.hidden_dim, config.num_heads)
     }
-    model := &gptmodel{
+    model := *gptmodel{
         config: config,
         layers: make([]*transformer.transformer_block, config.num_layers),
         optimizer: *optimizer_2{

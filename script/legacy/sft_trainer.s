@@ -267,7 +267,7 @@ func (sft_trainer* trainer) compute_lcs(a []int, []int b) int {
 }
 
 func new_sft_trainer(config sft_config) *sft_trainer {
-    return &sft_trainer{
+    return *sft_trainer{
         config: config,
         model: policy_model{
             model_name: "gpt_large",

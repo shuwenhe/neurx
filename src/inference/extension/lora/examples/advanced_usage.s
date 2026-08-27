@@ -1,6 +1,6 @@
 package neurx.lora.examples.advanced_usage
 
-use std.vec.vec
+use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
@@ -10,7 +10,7 @@ use neurx.lora.lora_adapter::{lora_adapter}
 use neurx.lora.weight_fusion::{weight_fusion_engine, compute_lora_delta}
 use neurx.lora.lora_state::{lora_state_manager}
 
-func example_weight_fusion() result[(), string] {
+func example_weight_fusion() ((), string) {
     println("example 1: 权重融合")
 
     config := lora_config::default()
@@ -21,7 +21,7 @@ func example_weight_fusion() result[(), string] {
     targets.push("attention")
     config.target_modules = targets
 
-    adapter := lora_adapter::new("fusion_adapter", &config)
+    adapter := lora_adapter::new("fusion_adapter", *config)
 
     lora_a := vec[vec[float]]()
     i := 0
@@ -51,7 +51,7 @@ func example_weight_fusion() result[(), string] {
 
     adapter.add_module_weights("attention", lora_a, lora_b)
 
-    original_weights := map[string, &vec[vec[float]]]()
+    original_weights := map[string, *vec[vec[float]]]()
     orig_weight := vec[vec[float]]()
     i := 0
     for i < 128 {
@@ -66,13 +66,13 @@ func example_weight_fusion() result[(), string] {
     }
     original_weights.insert("attention", orig_weight)
 
-    adapter.fuse_weights(&original_weights)
+    adapter.fuse_weights(*original_weights)
 
     println("  ✓ 权重already融合")
     println("    融合status: " + adapter.is_fused().to_string())
     println("    适配器bigsmall: " + adapter.get_size_mb().to_string() + " MB")
 
-    adapter.unfuse_weights(&original_weights)
+    adapter.unfuse_weights(*original_weights)
 
     println("  ✓ 权重already反融合")
     println("    融合status: " + adapter.is_fused().to_string())
@@ -80,7 +80,7 @@ func example_weight_fusion() result[(), string] {
     ((, ""))
 }
 
-func example_lora_state_management() result[(), string] {
+func example_lora_state_management() ((), string) {
     println("\nexample 2: 请求statusmanagement")
 
     state_manager := lora_state_manager::new(4)
@@ -118,7 +118,7 @@ func example_lora_state_management() result[(), string] {
     ((, ""))
 }
 
-func example_multi_adapter_caching() result[(), string] {
+func example_multi_adapter_caching() ((), string) {
     println("\nexample 3: more适配器缓存management")
 
     state_manager := lora_state_manager::new(8)
@@ -163,7 +163,7 @@ func example_multi_adapter_caching() result[(), string] {
     ((, ""))
 }
 
-func example_dynamic_adapter_switch() result[(), string] {
+func example_dynamic_adapter_switch() ((), string) {
     println("\nexample 4: 动态适配器切换")
 
     state_manager := lora_state_manager::new(4)
@@ -213,7 +213,7 @@ func example_dynamic_adapter_switch() result[(), string] {
     ((, ""))
 }
 
-func example_weight_computation_perf() result[(), string] {
+func example_weight_computation_perf() ((), string) {
     println("\nexample 5: 权重计算ity能")
 
     engine := weight_fusion_engine::new(8, 16.0)

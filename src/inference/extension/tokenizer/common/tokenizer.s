@@ -14,7 +14,7 @@ struct BaseTokenizer {
     cache_size_bytes: i32,
 }
 
-func NewBaseTokenizer(types.TokenizerConfig config) &BaseTokenizer {
+func NewBaseTokenizer(types.TokenizerConfig config) *BaseTokenizer {
     tokenizer := new(BaseTokenizer)
     tokenizer.config = config
     tokenizer.cache_size_bytes = 0

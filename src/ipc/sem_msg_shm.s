@@ -1,6 +1,6 @@
 package neurx.ipc
 
-use std.vec.vec
+use std.slices
 
 // 信号量结构
 struct semaphore {
@@ -8,18 +8,18 @@ struct semaphore {
     int value
     int owner_pid
     int wait_count
-    vec waiters  // 等待的进程 ID
+    int[] waiters  // 等待的进程 ID
 }
 
 // 信号量集合
 struct semaphore_set {
-    vec semaphores
+    semaphore[] semaphores
     int total_sems
 }
 
 // 初始化信号量集合
 func (semaphore_set* ss) init(int max_sems) (int, string) {
-    ss.semaphores = vec()
+    ss.semaphores = semaphore[]{}
     ss.total_sems = max_sems
     return 0, ""
 }
@@ -35,7 +35,7 @@ func (semaphore_set* ss) create_semaphore(int initial_value) (semaphore, string)
         value: initial_value,
         owner_pid: 0,
         wait_count: 0,
-        waiters: vec()
+        waiters: int[]{}
     }
     
     ss.semaphores.push(sem)
@@ -112,7 +112,7 @@ struct message {
 // 消息队列
 struct message_queue {
     int queue_id
-    vec messages
+    message[] messages
     int max_messages
     int receiver_pid
     int sender_pid
@@ -120,13 +120,13 @@ struct message_queue {
 
 // 消息队列管理器
 struct message_queue_manager {
-    vec queues
+    message_queue[] queues
     int next_queue_id
 }
 
 // 初始化消息队列管理器
 func (message_queue_manager* mqm) init() (int, string) {
-    mqm.queues = vec()
+    mqm.queues = message_queue[]{}
     mqm.next_queue_id = 0
     return 0, ""
 }
@@ -135,7 +135,7 @@ func (message_queue_manager* mqm) init() (int, string) {
 func (message_queue_manager* mqm) create_queue(int max_msgs) (message_queue, string) {
     mq := message_queue{
         queue_id: mqm.next_queue_id,
-        messages: vec(),
+        messages: message[]{},
         max_messages: max_msgs,
         receiver_pid: 0,
         sender_pid: 0
@@ -208,13 +208,13 @@ struct shared_memory_segment {
 
 // 共享内存管理器
 struct shared_memory_manager {
-    vec segments
+    shared_memory_segment[] segments
     int next_shmid
 }
 
 // 初始化共享内存管理器
 func (shared_memory_manager* smm) init() (int, string) {
-    smm.segments = vec()
+    smm.segments = shared_memory_segment[]{}"
     smm.next_shmid = 0
     return 0, ""
 }

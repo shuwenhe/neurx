@@ -267,13 +267,13 @@ func get_cuda_wrapper_c() string {
 "\n" +
 "int cuda_get_device_count() {\n" +
 "    int count = 0;\n" +
-"    cudaGetDeviceCount(&count);\n" +
+"    cudaGetDeviceCount(*count);\n" +
 "    return count;\n" +
 "}\n" +
 "\n" +
 "int cuda_get_device_memory(int device_id, int64_t *free_bytes, int64_t *total_bytes) {\n" +
 "    size_t free, total;\n" +
-"    cudaMemGetInfo(&free, &total);\n" +
+"    cudaMemGetInfo(*free, *total);\n" +
 "    if (free_bytes) *free_bytes = (int64_t)free;\n" +
 "    if (total_bytes) *total_bytes = (int64_t)total;\n" +
 "    return 0;\n" +
@@ -287,7 +287,7 @@ func get_cuda_wrapper_c() string {
 "\n" +
 "int cublasCreate(handle* int64_t) {\n" +
 "    cublasHandle_t h;\n" +
-"    cublasStatus_t status = cublasCreate(&h);\n" +
+"    cublasStatus_t status = cublasCreate(*h);\n" +
 "    if (handle) *handle = (int64_t)h;\n" +
 "    return (int)status;\n" +
 "}\n" +

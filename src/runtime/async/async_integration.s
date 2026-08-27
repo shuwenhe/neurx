@@ -101,7 +101,7 @@ func create_async_engine() async_engine {
 	return async_engine{
 		config:         config,
 		request_queue: *create_queue(config.max_queue_capacity, config.batch_size),
-		executor:      &create_executor(config.max_concurrent_tasks, config.worker_pool_size),
+		executor:      *create_executor(config.max_concurrent_tasks, config.worker_pool_size),
 		connection_pool: *create_connection_pool(config.max_connections),
 		stream_states: make(map[string]stream_state),
 		is_running:   false,
@@ -113,7 +113,7 @@ func (ae async_engine*) initialize(v1_engine interface{}, sampler interface{}) b
 	ae.v1_engine = v1_engine
 	ae.sampler = sampler
 
-	ae.connection_monitor = &create_connection_monitor(ae.connection_pool)
+	ae.connection_monitor = *create_connection_monitor(ae.connection_pool)
 	ae.connection_monitor.start()
 
 	ae.is_running = true
@@ -156,7 +156,7 @@ func (ae async_engine*) try_process_batches() {
 			break
 		}
 
-		go ae.process_batch(&batch)
+		go ae.process_batch(*batch)
 	}
 }
 
@@ -231,7 +231,7 @@ func (ae async_engine*) get_or_create_stream(request_id string) stream_state* {
 		ae.stream_states[request_id] = stream
 	}
 
-	return &stream
+	return *stream
 }
 
 func (ae async_engine*) get_stream_events(request_id string) vec[stream_event] {

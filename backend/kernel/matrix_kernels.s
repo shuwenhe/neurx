@@ -9,8 +9,8 @@ struct MatrixKernels {
     stats: types.KernelStats
 }
 
-func NewMatrixKernels(types.KernelConfig config) &MatrixKernels {
-    return &MatrixKernels{
+func NewMatrixKernels(types.KernelConfig config) *MatrixKernels {
+    return *MatrixKernels{
         config: config,
         stats: types.KernelStats{
             name: "matrix_kernel",

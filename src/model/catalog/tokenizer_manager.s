@@ -86,7 +86,7 @@ struct token_info {
 }
 
 func create_tokenizer(tokenizer_id string, model_id string, tokenizer_type tokenizer_type) *tokenizer_interface {
-	return &tokenizer_interface{
+	return *tokenizer_interface{
 		tokenizer_id: tokenizer_id,
 		model_id: model_id,
 		tokenizer_type: tokenizer_type,
@@ -138,7 +138,7 @@ func (tokenizer_interface* t) encode(text string) *encode_result {
 	if t.cache_enabled {
 		if cached_tokens, exists := t.cache[text]; exists {
 			t.mu.Unlock()
-			return &encode_result{
+			return *encode_result{
 				tokens: cached_tokens,
 				encode_time_ms: 0,
 			}
@@ -174,7 +174,7 @@ func (tokenizer_interface* t) encode(text string) *encode_result {
 
 	t.mu.Unlock()
 
-	return &encode_result{
+	return *encode_result{
 		tokens: tokens,
 		encode_time_ms: int64(time.Since(start_time).Milliseconds()),
 	}
@@ -200,7 +200,7 @@ func (tokenizer_interface* t) decode(tokens []int32) *decode_result {
 	decode_time := float64(time.Since(start_time).Microseconds()) / 1000.0
 	t.stats.avg_decode_time_ms = (t.stats.avg_decode_time_ms + decode_time) / 2.0
 
-	return &decode_result{
+	return *decode_result{
 		text: text,
 		decode_time_ms: int64(time.Since(start_time).Milliseconds()),
 	}
@@ -314,7 +314,7 @@ func (tokenizer_interface* t) get_token_info(token_id int32) *token_info {
 
 	_, is_special := t.special_tokens_map[token_text]
 
-	return &token_info{
+	return *token_info{
 		token_id: token_id,
 		token_text: token_text,
 		is_special: is_special,

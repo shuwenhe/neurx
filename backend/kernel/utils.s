@@ -8,8 +8,8 @@ struct KernelUtils {
     verbose: bool
 }
 
-func NewKernelUtils() &KernelUtils {
-    return &KernelUtils{
+func NewKernelUtils() *KernelUtils {
+    return *KernelUtils{
         verbose: false
     }
 }

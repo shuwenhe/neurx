@@ -17,7 +17,7 @@ struct BaseWorker {
 }
 
 func NewBaseWorker(config WorkerConfig) *BaseWorker {
-    worker := &BaseWorker{
+    worker := *BaseWorker{
         config: config,
         state: WORKER_STATE_IDLE,
         queue_size: 0,

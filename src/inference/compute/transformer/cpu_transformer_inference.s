@@ -26,7 +26,7 @@ struct transformer_2 {
 }
 
 func new() *transformer_2 {
-  return &transformer_2{
+  return *transformer_2{
     model_info: model_info{},
     impl: nil,
   }

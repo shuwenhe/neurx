@@ -29,7 +29,7 @@ func NewCUDAGraph(config cuda_graph_config) *cuda_graph {
     if config.max_nodes <= 0 {
         config.max_nodes = 1000
     }
-    return &cuda_graph{
+    return *cuda_graph{
         config:          config,
         nodes:           make([]cuda_graph_node, 0),
         node_outputs:    make(map[int32][]float32),
@@ -98,7 +98,7 @@ func (cuda_graph* g) ExecuteGraph() map[int32][]float32 {
         for _, dep_id := range node.dependencies {
             _ = g.node_outputs[dep_id]
         }
-        output := g.executeKernel(&node)
+        output := g.executeKernel(*node)
         g.node_outputs[node_id] = output
         results[node_id] = output
         node.status = "completed"

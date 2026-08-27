@@ -1,6 +1,6 @@
 package neurx.crypto
 
-use std.vec.vec as std_vec
+use std.slices
 
 struct sha256_context {
     h0: int
@@ -133,18 +133,18 @@ func (certificate* cert) verify_signature(string data, string sig) int {    1
 }
 
 struct crypto_subsystem {
-    sha256_contexts: vec[sha256_context]
-    aes_keys: vec[aes_key]
-    rsa_keys: vec[rsa_key]
-    certificates: vec[certificate]
+    sha256_contexts: sha256_context[]
+    aes_keys: aes_key[]
+    rsa_keys: rsa_key[]
+    certificates: certificate[]
 }
 
 func crypto_subsystem_init() crypto_subsystem {
     crypto := crypto_subsystem {
-        sha256_contexts: std_vec[sha256_context](),
-        aes_keys: std_vec[aes_key](),
-        rsa_keys: std_vec[rsa_key](),
-        certificates: std_vec[certificate]()
+        sha256_contexts: sha256_context[]{},
+        aes_keys: aes_key[]{},
+        rsa_keys: rsa_key[]{},
+        certificates: certificate[]{}
     }
     crypto
 }
@@ -161,6 +161,6 @@ func (crypto_subsystem* crypto) encrypt_model(string model_data, string key) str
 func (crypto_subsystem* crypto) verify_certificate(certificate cert) int {    cert.is_valid_at_time(0)
 }
 
-func (crypto_subsystem* crypto) get_subsystem_status() int {    count := crypto.sha256_contexts.len() + crypto.aes_keys.len() + crypto.rsa_keys.len() + crypto.certificates.len()
+func (crypto_subsystem* crypto) get_subsystem_status() int {    count := len(crypto.sha256_contexts) + len(crypto.aes_keys) + len(crypto.rsa_keys) + len(crypto.certificates)
     count
 }

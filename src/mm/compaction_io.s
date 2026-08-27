@@ -1,6 +1,6 @@
 package neurx.mm
 
-use std.vec.vec
+use std.slices
 
 // 内存压缩统计
 struct memory_compaction_stats {

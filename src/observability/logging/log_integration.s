@@ -47,9 +47,9 @@ func create_logging_system(config logging_config) logging_system {
 	metrics := create_metrics_registry()
 
 	return logging_system{
-		logger:                      &logger,
-		collector:                   &collector,
-		metrics:                     &metrics,
+		logger:                      *logger,
+		collector:                   *collector,
+		metrics:                     *metrics,
 		traces:                      make(vec[distributed_trace], 0, config.max_traces_retained),
 		trace_count:                 0,
 		max_traces:                  config.max_traces_retained,

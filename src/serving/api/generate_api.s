@@ -80,7 +80,7 @@ struct generate_engine {
 }
 
 func create_generate_engine(llm_engine* engine) generate_engine* {
-    return &generate_engine{
+    return *generate_engine{
         engine: engine,
         default_config: generate_config{
             max_new_tokens: 256,
@@ -111,10 +111,10 @@ func (generate_engine* ge) apply_logits_processors([]float32 logits) []float32 {
 
 func (generate_engine* ge) generate(generate_config* config, generate_input* input) (generate_response*, error) {
     if config == nil {
-        config = &ge.default_config
+        config = *ge.default_config
     }
 
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: input.text,
         model_id: config.model_id,
         config: generation_config{
@@ -136,7 +136,7 @@ func (generate_engine* ge) generate(generate_config* config, generate_input* inp
 
     outputs := make([]generated_output*, 0)
     for _, text := range resp.generated_text {
-        output := &generated_output{
+        output := *generated_output{
             output_text: text,
             output_ids: make([]int32, 0),
             tokens: []string{text},
@@ -148,7 +148,7 @@ func (generate_engine* ge) generate(generate_config* config, generate_input* inp
         outputs = append(outputs, output)
     }
 
-    gen_resp := &generate_response{
+    gen_resp := *generate_response{
         generation_id: core.generate_uuid(),
         model_id: config.model_id,
         input: *input,
@@ -162,10 +162,10 @@ func (generate_engine* ge) generate(generate_config* config, generate_input* inp
 
 func (generate_engine* ge) generate_stream(generate_config* config, generate_input* input) streaming_response* {
     if config == nil {
-        config = &ge.default_config
+        config = *ge.default_config
     }
 
-    api_req := &completion_request{
+    api_req := *completion_request{
         prompt: input.text,
         model_id: config.model_id,
         config: generation_config{

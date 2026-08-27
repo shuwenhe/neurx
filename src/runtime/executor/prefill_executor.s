@@ -12,7 +12,7 @@ struct PrefillExecutor {
 }
 
 func NewPrefillExecutor(config ExecutorConfig, prefill_config PrefillConfig) *PrefillExecutor {
-    executor := &PrefillExecutor{
+    executor := *PrefillExecutor{
         base: *NewBaseExecutor(config),
         prefill_config: prefill_config,
         batch_size: 0,

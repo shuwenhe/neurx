@@ -51,7 +51,7 @@ struct tensor_buffer_cache {
 }
 
 func create_gpu_memory_offloader(offload_config* config) gpu_memory_offloader* {
-    return &gpu_memory_offloader{
+    return *gpu_memory_offloader{
         gpu_tier: *memory_tier{
             tier_name: "GPU",
             total_capacity: int64(80) * int64(1024) * int64(1024) * int64(1024),
@@ -106,7 +106,7 @@ func (gpu_memory_offloader* gmo) transfer_tensor(string tensor_id, int32 from_ti
 }
 
 func (gpu_memory_offloader* gmo) create_offload_plan() offload_plan* {
-    return &offload_plan{
+    return *offload_plan{
         tensors_to_offload: make([]string, 0),
         target_tiers: make([]int32, 0),
         offload_sizes: make([]int64, 0),
@@ -158,7 +158,7 @@ func (gpu_memory_offloader* gmo) evict_lru_tensor() error {
 }
 
 func create_tensor_buffer_cache(int32 max_size) tensor_buffer_cache* {
-    return &tensor_buffer_cache{
+    return *tensor_buffer_cache{
         cached_tensors: make(map[string]interface{}),
         access_order: make([]string, 0),
         max_cache_size: max_size,

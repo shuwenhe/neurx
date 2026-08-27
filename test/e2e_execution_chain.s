@@ -1,6 +1,6 @@
 package neurx.test.e2e_execution_chain
 
-use std.vec.vec
+use std.slices
 
 struct test_result {
     string test_name

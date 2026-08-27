@@ -257,7 +257,7 @@ func (data_synthesis_engine* engine) export_to_jsonl() {
 }
 
 func new_data_synthesis_engine(config data_synthesis_config) *data_synthesis_engine {
-    return &data_synthesis_engine{
+    return *data_synthesis_engine{
         config: config,
         synthetic_examples: []synthetic_example{},
         preference_pairs: []preference_pair{},

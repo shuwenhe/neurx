@@ -320,7 +320,7 @@ func format_time(float seconds): string {
 }
 
 func main() {
-    monitor := &advanced_training_monitor{}
+    monitor := *advanced_training_monitor{}
     if err := monitor.init(100000, "./logs/training_advanced.jsonl", 100, 500); err != nil {
         println("Error:", err.Error())
         return

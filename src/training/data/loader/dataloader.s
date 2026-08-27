@@ -269,7 +269,7 @@ func generate_shuffled_indices(int n, uint64 seed) []int {
     rng.inc = 6364136223846793005
     i = n - 1
     for i > 0 {
-        int j = random_int_range(&rng, 0, i)
+        int j = random_int_range(*rng, 0, i)
         int temp = indices[i]
         indices[i] = indices[j]
         indices[j] = temp

@@ -1,6 +1,6 @@
 package neurx.driver
 
-use std.vec.vec
+use std.slices
 
 // CPU 频率缩放
 struct cpu_freq_state {
@@ -21,7 +21,7 @@ struct cpufreq_governor {
 // CPU 电源管理驱动
 struct cpufreq_driver {
     int cpu_id
-    vec governors
+    cpufreq_governor[] governors
     int active_governor
 }
 

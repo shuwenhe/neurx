@@ -13,8 +13,8 @@ struct ImageValidator {
     supported_formats: []types.ImageFormat
 }
 
-func NewImageValidator() &ImageValidator {
-    return &ImageValidator{
+func NewImageValidator() *ImageValidator {
+    return *ImageValidator{
         min_width: 32,
         min_height: 32,
         max_width: 4096,
@@ -65,8 +65,8 @@ struct AudioValidator {
     max_duration_ms: i32
 }
 
-func NewAudioValidator() &AudioValidator {
-    return &AudioValidator{
+func NewAudioValidator() *AudioValidator {
+    return *AudioValidator{
         min_sample_rate: 8000,
         max_sample_rate: 48000,
         min_duration_ms: 100,
@@ -110,8 +110,8 @@ struct StatisticsCollector {
     stats: map[types.Modality, ModalityStatistics]
 }
 
-func NewStatisticsCollector() &StatisticsCollector {
-    return &StatisticsCollector{
+func NewStatisticsCollector() *StatisticsCollector {
+    return *StatisticsCollector{
         stats: make(map[types.Modality, ModalityStatistics])
     }
 }
@@ -167,8 +167,8 @@ struct BatchProcessor {
     max_batch_memory_mb: i64
 }
 
-func NewBatchProcessor(i32 batch_size) &BatchProcessor {
-    return &BatchProcessor{
+func NewBatchProcessor(i32 batch_size) *BatchProcessor {
+    return *BatchProcessor{
         batch_size: batch_size,
         max_batch_memory_mb: 4096
     }
@@ -195,7 +195,7 @@ struct TensorUtils {
 
 func TensorStackTensors(
     tensors: []types.Tensor
-) &types.Tensor {
+) *types.Tensor {
     if len(tensors) == 0 {
         return nil
     }
@@ -213,7 +213,7 @@ func TensorStackTensors(
         }
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: stacked,
         shape: [2]i32{batch_size, feature_dim},
         dtype: "float32"
@@ -221,8 +221,8 @@ func TensorStackTensors(
 }
 
 func ConcatenateEmbeddings(
-    embeddings: []&types.Tensor
-) &types.Tensor {
+    embeddings: []*types.Tensor
+) *types.Tensor {
     if len(embeddings) == 0 {
         return nil
     }
@@ -249,7 +249,7 @@ func ConcatenateEmbeddings(
         col_idx += emb_dim
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: concatenated,
         shape: [2]i32{seq_len, total_dim},
         dtype: "float32"
@@ -295,7 +295,7 @@ func Sqrt(f64 x) f64 {
 
 func NormalizeEmbedding(
     embedding: *types.Tensor
-) &types.Tensor {
+) *types.Tensor {
     norm := f32(0.0)
 
     for i := 0; i < len(embedding.data); i += 1 {
@@ -313,7 +313,7 @@ func NormalizeEmbedding(
         normalized[i] = embedding.data[i] / norm
     }
 
-    return &types.Tensor{
+    return *types.Tensor{
         data: normalized,
         shape: embedding.shape,
         dtype: embedding.dtype

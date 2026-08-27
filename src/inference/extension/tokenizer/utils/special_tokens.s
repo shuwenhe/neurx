@@ -10,7 +10,7 @@ struct SpecialTokenManager {
     user_defined_special_tokens: map[string]i32,
 }
 
-func NewSpecialTokenManager() &SpecialTokenManager {
+func NewSpecialTokenManager() *SpecialTokenManager {
     mgr := new(SpecialTokenManager)
     mgr.tokens = make(map[string]i32)
     mgr.token_to_name = make(map[i32]string)

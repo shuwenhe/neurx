@@ -69,7 +69,7 @@ func NewContinuousBatchingScheduler(config scheduler_config) *continuous_batchin
     if config.prefill_budget <= 0 || config.prefill_budget > 1.0 {
         config.prefill_budget = 0.6
     }
-    return &continuous_batching_scheduler{
+    return *continuous_batching_scheduler{
         config:              config,
         queue:               []*sequence_request{},
         active_prefill:      []*sequence_request{},
@@ -81,7 +81,7 @@ func NewContinuousBatchingScheduler(config scheduler_config) *continuous_batchin
 }
 
 func (continuous_batching_scheduler* s) SubmitRequest(prompt_tokens []int32, max_tokens int32, priority int) int64 {
-    req := &sequence_request{
+    req := *sequence_request{
         request_id:      s.next_request_id,
         prompt_tokens:   prompt_tokens,
         max_tokens:      max_tokens,
@@ -96,7 +96,7 @@ func (continuous_batching_scheduler* s) SubmitRequest(prompt_tokens []int32, max
 }
 
 func (continuous_batching_scheduler* s) Schedule() *batch_info {
-    batch := &batch_info{
+    batch := *batch_info{
         batch_id:      s.next_batch_id,
         requests:      []*sequence_request{},
         batch_size:    0,

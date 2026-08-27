@@ -1,6 +1,6 @@
 package neurx.kernel.io_uring
 
-use std.vec.vec
+use std.slices
 
 struct io_uring_sqe {
     int opcode

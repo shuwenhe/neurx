@@ -1,6 +1,6 @@
 package neurx.net.collective
 
-use std.vec.vec
+use std.slices
 
 struct tensor_descriptor {
     int tensor_id

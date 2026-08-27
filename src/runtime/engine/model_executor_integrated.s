@@ -31,7 +31,7 @@ struct model_executor_integrated {
 }
 
 func create_integrated_model_executor(model_config_spec* config) model_executor_integrated* {
-    return &model_executor_integrated{
+    return *model_executor_integrated{
         executor: nil,
         wl: nil,
         hw_executor: nil,
@@ -60,7 +60,7 @@ func (model_executor_integrated* mei) forward_pass([]int32 token_ids, interface{
 }
 
 func (model_executor_integrated* mei) generate_tokens(inference_request* req) (inference_response*, error) {
-    resp := &inference_response{
+    resp := *inference_response{
         generated_tokens: make([]int32, 0),
         logits: make([]float32, 0),
         inference_time_ms: 0.0,

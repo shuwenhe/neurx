@@ -61,11 +61,11 @@ func create_lora_model(string adapter_name, lora_config config) lora_model* {
         trainable_params: 0,
     }
 
-    return &model
+    return *model
 }
 
 func (lora_model* model) add_lora_layer(string layer_name, int32 in_features, int32 out_features) {
-    layer := &lora_layer{
+    layer := *lora_layer{
         lora_a: *lora_matrix{
             weights: make(vec[vec[float32]]),
             rows: model.config.rank,

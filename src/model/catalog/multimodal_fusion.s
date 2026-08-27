@@ -98,7 +98,7 @@ struct multimodal_fusion_engine {
 }
 
 func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32) *multimodal_fusion_engine {
-	mfe := &multimodal_fusion_engine{
+	mfe := *multimodal_fusion_engine{
 		strategy:                 strategy,
 		config: *fusion_config{
 			fusion_type:         strategy,
@@ -109,7 +109,7 @@ func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32)
 			residual_connections: true,
 			extra_params:        make(map[string]interface{}),
 		},
-		early_fuser:  &early_fusion{
+		early_fuser:  *early_fusion{
 			output_dim:           output_dim,
 			modality_projections: make(map[string][]float32),
 			created_at:           time.Now(),
@@ -121,8 +121,8 @@ func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32)
 			created_at:      time.Now(),
 		},
 		hybrid_fuser: *hybrid_fusion{
-			early_stage:      &early_fusion{output_dim: output_dim / 2, modality_projections: make(map[string][]float32), created_at: time.Now()},
-			late_stage:       &late_fusion{output_dim: output_dim / 2, modality_models: make(map[string]*model_interface), modality_weights: make(map[string]float32), created_at: time.Now()},
+			early_stage:      *early_fusion{output_dim: output_dim / 2, modality_projections: make(map[string][]float32), created_at: time.Now()},
+			late_stage:       *late_fusion{output_dim: output_dim / 2, modality_models: make(map[string]*model_interface), modality_weights: make(map[string]float32), created_at: time.Now()},
 			intermediate_dim: output_dim / 2,
 			early_weight:     0.5,
 			late_weight:      0.5,
@@ -186,7 +186,7 @@ func (multimodal_fusion_engine* mfe) fuse_early(modality_features map[string]*en
 		modality_weights[modality_name] = weight
 	}
 
-	fused := &fused_features{
+	fused := *fused_features{
 		fused_vector:            fused_vector,
 		feature_dim:             total_dim,
 		modality_weights:        modality_weights,
@@ -242,7 +242,7 @@ func (multimodal_fusion_engine* mfe) fuse_late(modality_features map[string]*enc
 		}
 	}
 
-	fused := &fused_features{
+	fused := *fused_features{
 		fused_vector:            fused_vector,
 		feature_dim:             output_dim,
 		modality_weights:        modality_weights,
@@ -293,7 +293,7 @@ func (multimodal_fusion_engine* mfe) fuse_hybrid(modality_features map[string]*e
 		modality_weights[modality_name] = weight
 	}
 
-	fused := &fused_features{
+	fused := *fused_features{
 		fused_vector:            fused_vector,
 		feature_dim:             hybrid_dim,
 		modality_weights:        modality_weights,

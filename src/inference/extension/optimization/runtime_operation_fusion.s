@@ -29,7 +29,7 @@ struct fused_operation_config {
 }
 
 func NewRuntimeFusionOptimizer(config fused_operation_config) *runtime_fusion_optimizer {
-    optimizer := &runtime_fusion_optimizer{
+    optimizer := *runtime_fusion_optimizer{
         fusion_rules:    make([]fusion_rule, 0),
         operation_queue: make([]operation_signature, 0),
         fused_kernels:   make(map[string]bool),

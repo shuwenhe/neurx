@@ -41,7 +41,7 @@ func create_llm_engine_v1() llm_engine_v1* {
     fault_tol := create_v1_fault_tolerance()
     struct_gen := create_structured_generator()
 
-    return &llm_engine_v1{
+    return *llm_engine_v1{
         state: engine_idle,
         pool: pool,
         executor: executor,

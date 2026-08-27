@@ -13,7 +13,7 @@ struct BaseExecutor {
 }
 
 func NewBaseExecutor(config ExecutorConfig) *BaseExecutor {
-    executor := &BaseExecutor{
+    executor := *BaseExecutor{
         config: config,
         state: EXECUTOR_STATE_IDLE,
         sequence_count: 0,
@@ -37,7 +37,7 @@ func (BaseExecutor* e) Initialize() ExecutionResult {
     e.statistics.avg_latency = 0.0
     e.statistics.cache_hit_rate = 0.0
 
-    e.cache_manager = &KVCacheManager{
+    e.cache_manager = *KVCacheManager{
         total_size_gb: e.config.cache_size_gb,
         allocated_mb: 0,
         eviction_policy: e.config.eviction_policy,

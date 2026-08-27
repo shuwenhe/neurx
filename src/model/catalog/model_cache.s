@@ -74,14 +74,14 @@ struct cache_config {
 
 func create_model_cache(cache_config* config) *model_cache {
 	if config == nil {
-		config = &cache_config{
+		config = *cache_config{
 			max_size_bytes: 1024 * 1024 * 1024,
 			eviction_policy: EVICT_LRU,
 			ttl_seconds: 3600,
 		}
 	}
 
-	return &model_cache{
+	return *model_cache{
 		cache_id: config.cache_id,
 		entries: make(map[string]*cache_entry),
 		entry_order: []*cache_entry{},
@@ -100,7 +100,7 @@ func (model_cache* cache) put(key string, value interface{}, entry_type cache_en
 		cache.evict_entries(size_bytes)
 	}
 
-	entry := &cache_entry{
+	entry := *cache_entry{
 		entry_id: key,
 		entry_type: entry_type,
 		key: key,

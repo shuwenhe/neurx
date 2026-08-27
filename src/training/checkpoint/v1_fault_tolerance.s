@@ -38,7 +38,7 @@ struct v1_fault_tolerance {
 }
 
 func create_v1_fault_tolerance() v1_fault_tolerance* {
-    return &v1_fault_tolerance{
+    return *v1_fault_tolerance{
         config: fault_tolerance_config{
             enable_checkpointing: true,
             checkpoint_type_mode: checkpoint_full,
@@ -62,7 +62,7 @@ func (v1_fault_tolerance* ft) create_checkpoint(int32 batch_id, string state_dat
     checkpoint_id := "ckpt_" + string(ft.last_checkpoint_id)
     ft.last_checkpoint_id = ft.last_checkpoint_id + 1
 
-    ckpt := &checkpoint{
+    ckpt := *checkpoint{
         type: ft.config.checkpoint_type_mode,
         checkpoint_id: checkpoint_id,
         timestamp: 0,

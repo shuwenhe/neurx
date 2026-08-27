@@ -9,7 +9,7 @@ struct CUDADeviceManager {
     devices: []types.DeviceType,
     active_device: types.DeviceType,
     device_properties: map[i32, CUDADeviceProperties],
-    streams: map[i32, &types.CUDAStream]
+    streams: map[i32, *types.CUDAStream]
 }
 
 struct CUDADeviceProperties {
@@ -23,12 +23,12 @@ struct CUDADeviceProperties {
     num_multiprocessors: i32
 }
 
-func NewCUDADeviceManager() &CUDADeviceManager {
-    return &CUDADeviceManager{
+func NewCUDADeviceManager() *CUDADeviceManager {
+    return *CUDADeviceManager{
         devices: make([]types.DeviceType, 0),
         active_device: types.DeviceType.cuda,
         device_properties: make(map[i32, CUDADeviceProperties]),
-        streams: make(map[i32, &types.CUDAStream])
+        streams: make(map[i32, *types.CUDAStream])
     }
 }
 
@@ -64,9 +64,9 @@ func (CUDADeviceManager* m) GetDeviceProperties(i32 device_id) CUDADevicePropert
     return CUDADeviceProperties{}
 }
 
-func (CUDADeviceManager* m) CreateStream(i32 priority) &types.CUDAStream {
+func (CUDADeviceManager* m) CreateStream(i32 priority) *types.CUDAStream {
     stream_id := i32(len(m.streams))
-    stream := &types.CUDAStream{
+    stream := *types.CUDAStream{
         stream_id: stream_id,
         device: m.active_device,
         priority: priority,
@@ -96,20 +96,20 @@ func (CUDADeviceManager* m) SynchronizeStream(i32 stream_id) bool {
 }
 
 struct CUDAEventManager {
-    events: map[i32, &types.CUDAEvent],
+    events: map[i32, *types.CUDAEvent],
     device_manager: *CUDADeviceManager
 }
 
-func NewCUDAEventManager(*CUDADeviceManager device_manager) &CUDAEventManager {
-    return &CUDAEventManager{
-        events: make(map[i32, &types.CUDAEvent]),
+func NewCUDAEventManager(*CUDADeviceManager device_manager) *CUDAEventManager {
+    return *CUDAEventManager{
+        events: make(map[i32, *types.CUDAEvent]),
         device_manager: device_manager
     }
 }
 
-func (CUDAEventManager* m) CreateEvent() &types.CUDAEvent {
+func (CUDAEventManager* m) CreateEvent() *types.CUDAEvent {
     event_id := i32(len(m.events))
-    event := &types.CUDAEvent{
+    event := *types.CUDAEvent{
         event_id: event_id,
         device: m.device_manager.active_device,
         is_recorded: false,
@@ -164,7 +164,7 @@ struct CUDAPrimitives {
     memory_manager: *memory_manager.MemoryManager
 }
 
-func NewCUDAPrimitives(i32 device_id) &CUDAPrimitives {
+func NewCUDAPrimitives(i32 device_id) *CUDAPrimitives {
     device_mgr := NewCUDADeviceManager()
     device_mgr.InitDevice(device_id)
 
@@ -175,7 +175,7 @@ func NewCUDAPrimitives(i32 device_id) &CUDAPrimitives {
         i64(8000000000)
     )
 
-    return &CUDAPrimitives{
+    return *CUDAPrimitives{
         device_manager: device_mgr,
         event_manager: event_mgr,
         memory_manager: mem_mgr

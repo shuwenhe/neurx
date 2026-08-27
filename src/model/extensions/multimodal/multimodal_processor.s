@@ -36,7 +36,7 @@ struct multimodal_processor {
 }
 
 func create_multimodal_processor() multimodal_processor* {
-    return &multimodal_processor{
+    return *multimodal_processor{
         img_proc: create_image_processor(),
         vid_proc: create_video_processor(),
         audio_proc: create_audio_processor(),

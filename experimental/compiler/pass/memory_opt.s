@@ -83,7 +83,7 @@ func compute_value_lifetime(*computation_graph g) vec[int] {
 func apply_memory_optimization(*computation_graph g) memory_opt_result {
     usage_before = compute_memory_usage(g)
     lifetime = compute_value_lifetime(g)
-    reusable = find_reusable_values(g, &lifetime)
+    reusable = find_reusable_values(g, *lifetime)
 
     int saved = 0
     for reuse_id in reusable {

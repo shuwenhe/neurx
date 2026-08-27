@@ -223,7 +223,7 @@ func (multi_task_learner* mtl) analyze_performance() {
 }
 
 func new_multi_task_learner(config multi_task_config) *multi_task_learner {
-    return &multi_task_learner{
+    return *multi_task_learner{
         config: config,
         tasks: []task{},
         shared_encoder: policy_model{},

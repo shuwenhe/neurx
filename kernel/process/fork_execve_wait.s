@@ -216,7 +216,7 @@ func get_task_by_pid(process_table* ptable, int pid) task_struct* {
     i := 0
     for i < ptable.process_count {
         if ptable.processes[i].pid == pid {
-            return &ptable.processes[i]
+            return *ptable.processes[i]
         }
         i = i + 1
     }

@@ -89,7 +89,7 @@ struct gateway_stats {
 }
 
 func create_api_gateway(api_gateway_config* config, llm_engine* engine) api_gateway* {
-    return &api_gateway{
+    return *api_gateway{
         config: *config,
         engine: engine,
         openai_srv: nil,
@@ -108,7 +108,7 @@ func create_api_gateway(api_gateway_config* config, llm_engine* engine) api_gate
 func (api_gateway* gw) initialize() error {
     if gw.config.enable_openai {
         gw.openai_srv = create_openai_api_server(gw.engine, gw.config.base_port + 1000)
-        gw.server_info[protocol_openai] = &api_server_info{
+        gw.server_info[protocol_openai] = *api_server_info{
             protocol: protocol_openai,
             port: gw.config.base_port + 1000,
             running: false,
@@ -119,7 +119,7 @@ func (api_gateway* gw) initialize() error {
 
     if gw.config.enable_anthropic {
         gw.anthropic_srv = create_anthropic_api_server(gw.engine, gw.config.base_port + 1001)
-        gw.server_info[protocol_anthropic] = &api_server_info{
+        gw.server_info[protocol_anthropic] = *api_server_info{
             protocol: protocol_anthropic,
             port: gw.config.base_port + 1001,
             running: false,
@@ -130,7 +130,7 @@ func (api_gateway* gw) initialize() error {
 
     if gw.config.enable_cohere {
         gw.cohere_srv = create_cohere_api_server(gw.engine, gw.config.base_port + 1002)
-        gw.server_info[protocol_cohere] = &api_server_info{
+        gw.server_info[protocol_cohere] = *api_server_info{
             protocol: protocol_cohere,
             port: gw.config.base_port + 1002,
             running: false,
@@ -140,7 +140,7 @@ func (api_gateway* gw) initialize() error {
     }
 
     if gw.config.enable_grpc {
-        grpc_cfg := &grpc_server_config{
+        grpc_cfg := *grpc_server_config{
             port: gw.config.base_port + 1003,
             host: "0.0.0.0",
             max_concurrent_streams: 1000,
@@ -148,7 +148,7 @@ func (api_gateway* gw) initialize() error {
             worker_threads: 16,
         }
         gw.grpc_srv = create_grpc_server(grpc_cfg, gw.engine)
-        gw.server_info[protocol_grpc] = &api_server_info{
+        gw.server_info[protocol_grpc] = *api_server_info{
             protocol: protocol_grpc,
             port: gw.config.base_port + 1003,
             running: false,
@@ -159,7 +159,7 @@ func (api_gateway* gw) initialize() error {
 
     if gw.config.enable_mcp {
         gw.mcp_srv = create_mcp_server(gw.engine, gw.config.base_port + 1004)
-        gw.server_info[protocol_mcp] = &api_server_info{
+        gw.server_info[protocol_mcp] = *api_server_info{
             protocol: protocol_mcp,
             port: gw.config.base_port + 1004,
             running: false,
@@ -170,7 +170,7 @@ func (api_gateway* gw) initialize() error {
 
     if gw.config.enable_speech {
         gw.speech_srv = create_speech_to_text_server(gw.engine, gw.config.base_port + 1005)
-        gw.server_info[protocol_speech] = &api_server_info{
+        gw.server_info[protocol_speech] = *api_server_info{
             protocol: protocol_speech,
             port: gw.config.base_port + 1005,
             running: false,
@@ -183,7 +183,7 @@ func (api_gateway* gw) initialize() error {
     gw.gen_engine.initialize()
 
     if gw.config.enable_rest {
-        web_cfg := &web_server_config{
+        web_cfg := *web_server_config{
             host: "0.0.0.0",
             port: gw.config.base_port,
             enable_cors: true,
@@ -194,7 +194,7 @@ func (api_gateway* gw) initialize() error {
         }
         gw.web_srv = create_web_server(web_cfg, gw.engine)
         gw.web_srv.setup_default_routes()
-        gw.server_info[protocol_rest] = &api_server_info{
+        gw.server_info[protocol_rest] = *api_server_info{
             protocol: protocol_rest,
             port: gw.config.base_port,
             running: false,
@@ -299,7 +299,7 @@ func (api_gateway* gw) stop() error {
 func (api_gateway* gw) route_request(api_request_wrapper* req) (api_response_wrapper*, error) {
     start_time := core.current_time_ms()
 
-    resp := &api_response_wrapper{
+    resp := *api_response_wrapper{
         request_id: req.request_id,
         protocol: req.protocol,
         processing_time_ms: 0,
@@ -340,7 +340,7 @@ func (api_gateway* gw) get_all_server_info() map[api_protocol]api_server_info* {
 }
 
 func (api_gateway* gw) get_gateway_stats() gateway_stats* {
-    stats := &gateway_stats{
+    stats := *gateway_stats{
         total_requests: 0,
         total_responses: 0,
         total_errors: 0,

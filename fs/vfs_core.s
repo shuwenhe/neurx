@@ -1,6 +1,6 @@
 package neurx.fs
 
-use std.vec.vec
+use std.slices
 use std.option.option
 
 struct inode {
@@ -17,14 +17,14 @@ struct inode {
 
 struct dentry {
     string name
-    &inode inode_ptr
-    vec[&dentry] children
-    &dentry parent
+    *inode inode_ptr
+    vec[*dentry] children
+    *dentry parent
     int depth
 }
 
 struct file {
-    &inode inode_ptr
+    *inode inode_ptr
     long position
     int flags
     int mode
@@ -33,26 +33,26 @@ struct file {
 struct mount_point {
     string name
     string filesystem_type
-    &dentry root_dentry
+    *dentry root_dentry
     int flags
     int inode_count
     int free_inode_count
 }
 
 struct inode_table {
-    vec[&inode] inodes
+    vec[*inode] inodes
     int max_inodes
     int allocated_inodes
 }
 
 struct dentry_cache {
-    vec[&dentry] dentries
+    vec[*dentry] dentries
     int capacity
     int entries
 }
 
-func create_inode(int inode_num, int mode) &inode {
-    let inode: &inode = box[inode]::alloc()
+func create_inode(int inode_num, int mode) *inode {
+    let inode: *inode = box[inode]::alloc()
     inode.inode_num = inode_num
     inode.mode = mode
     inode.uid = 0
@@ -65,17 +65,17 @@ func create_inode(int inode_num, int mode) &inode {
     inode
 }
 
-func create_dentry(string name, &inode inode_ptr) &dentry {
-    let dentry: &dentry = box[dentry]::alloc()
+func create_dentry(string name, *inode inode_ptr) *dentry {
+    let dentry: *dentry = box[dentry]::alloc()
     dentry.name = name
     dentry.inode_ptr = inode_ptr
-    dentry.children = vec[&dentry]()
-    dentry.parent = 0 as &dentry
+    dentry.children = vec[*dentry]()
+    dentry.parent = 0 as *dentry
     dentry.depth = 0
     dentry
 }
 
-func lookup_inode(&inode_table table, int inode_num) option[&inode] {
+func lookup_inode(*inode_table table, int inode_num) option[*inode] {
     let i = 0
     while i < table.allocated_inodes {
         if table.inodes.get(i).inode_num == inode_num {
@@ -86,7 +86,7 @@ func lookup_inode(&inode_table table, int inode_num) option[&inode] {
     option::none
 }
 
-func add_inode_to_directory(&inode parent, string name, &inode child) int {
+func add_inode_to_directory(*inode parent, string name, *inode child) int {
     if parent.reference_count > 0 {
         parent.reference_count = parent.reference_count + 1
         return 0
@@ -94,7 +94,7 @@ func add_inode_to_directory(&inode parent, string name, &inode child) int {
     1
 }
 
-func inode_allocate_block(&inode inode_ptr) int {
+func inode_allocate_block(*inode inode_ptr) int {
     let block_num = 0
     if inode_ptr.block_pointers.len() < 100 {
         block_num = inode_ptr.block_pointers.len()
@@ -104,7 +104,7 @@ func inode_allocate_block(&inode inode_ptr) int {
     -1
 }
 
-func inode_deallocate_block(&inode inode_ptr, int block_num) int {
+func inode_deallocate_block(*inode inode_ptr, int block_num) int {
     let i = 0
     let found = 0
     while i < inode_ptr.block_pointers.len() {
@@ -116,18 +116,18 @@ func inode_deallocate_block(&inode inode_ptr, int block_num) int {
     found
 }
 
-func inode_update_time(&inode inode_ptr) void {
+func inode_update_time(*inode inode_ptr) void {
     inode_ptr.modified_time = get_current_time()
 }
 
-func dentry_add_child(&dentry parent, &dentry child) int {
+func dentry_add_child(*dentry parent, *dentry child) int {
     child.parent = parent
     child.depth = parent.depth + 1
     parent.children.push(child)
     0
 }
 
-func dentry_lookup_child(&dentry parent, string name) option[&dentry] {
+func dentry_lookup_child(*dentry parent, string name) option[*dentry] {
     let i = 0
     while i < parent.children.len() {
         if parent.children.get(i).name == name {
@@ -138,7 +138,7 @@ func dentry_lookup_child(&dentry parent, string name) option[&dentry] {
     option::none
 }
 
-func path_lookup(&dentry root, string path) option[&dentry] {
+func path_lookup(*dentry root, string path) option[*dentry] {
     if path == "/" {
         return option::some(root)
     }
@@ -192,9 +192,9 @@ func substr(string s, int start, int end) string {
     result
 }
 
-func open_file(&dentry dentry_ptr, int flags) option[&file] {
+func open_file(*dentry dentry_ptr, int flags) option[*file] {
     if dentry_ptr.inode_ptr.reference_count >= 0 {
-        let f: &file = box[file]::alloc()
+        let f: *file = box[file]::alloc()
         f.inode_ptr = dentry_ptr.inode_ptr
         f.position = 0
         f.flags = flags
@@ -205,7 +205,7 @@ func open_file(&dentry dentry_ptr, int flags) option[&file] {
     option::none
 }
 
-func close_file(&file file_ptr) int {
+func close_file(*file file_ptr) int {
     if file_ptr.inode_ptr.reference_count > 0 {
         file_ptr.inode_ptr.reference_count = file_ptr.inode_ptr.reference_count - 1
         return 0
@@ -213,7 +213,7 @@ func close_file(&file file_ptr) int {
     1
 }
 
-func read_file(&file file_ptr, int offset, int size) int {
+func read_file(*file file_ptr, int offset, int size) int {
     if offset < file_ptr.inode_ptr.size {
         let available = (file_ptr.inode_ptr.size - offset) as int
         if available < size {
@@ -224,7 +224,7 @@ func read_file(&file file_ptr, int offset, int size) int {
     0
 }
 
-func write_file(&file file_ptr, int offset, int size) int {
+func write_file(*file file_ptr, int offset, int size) int {
     if offset >= 0 {
         let new_size = offset + size
         if new_size > file_ptr.inode_ptr.size {
@@ -240,37 +240,37 @@ func get_current_time() long {
     0
 }
 
-func create_inode_table(int capacity) &inode_table {
-    let table: &inode_table = box[inode_table]::alloc()
-    table.inodes = vec[&inode]()
+func create_inode_table(int capacity) *inode_table {
+    let table: *inode_table = box[inode_table]::alloc()
+    table.inodes = vec[*inode]()
     table.max_inodes = capacity
     table.allocated_inodes = 0
     table
 }
 
-func create_dentry_cache(int capacity) &dentry_cache {
-    let cache: &dentry_cache = box[dentry_cache]::alloc()
-    cache.dentries = vec[&dentry]()
+func create_dentry_cache(int capacity) *dentry_cache {
+    let cache: *dentry_cache = box[dentry_cache]::alloc()
+    cache.dentries = vec[*dentry]()
     cache.capacity = capacity
     cache.entries = 0
     cache
 }
 
-func vfs_mkdir(&dentry parent, string name, int mode) option[&dentry] {
+func vfs_mkdir(*dentry parent, string name, int mode) option[*dentry] {
     let new_inode = create_inode(parent.inode_ptr.reference_count + 1, mode)
     let new_dentry = create_dentry(name, new_inode)
     dentry_add_child(parent, new_dentry)
     option::some(new_dentry)
 }
 
-func vfs_create_file(&dentry parent, string name, int mode) option[&dentry] {
+func vfs_create_file(*dentry parent, string name, int mode) option[*dentry] {
     let new_inode = create_inode(parent.inode_ptr.reference_count + 100, mode)
     let new_dentry = create_dentry(name, new_inode)
     dentry_add_child(parent, new_dentry)
     option::some(new_dentry)
 }
 
-func vfs_unlink(&dentry parent, string name) int {
+func vfs_unlink(*dentry parent, string name) int {
     switch dentry_lookup_child(parent, name) {
         option::some(child) : {
             child.inode_ptr.reference_count = child.inode_ptr.reference_count - 1
@@ -282,7 +282,7 @@ func vfs_unlink(&dentry parent, string name) int {
     }
 }
 
-func vfs_rmdir(&dentry parent, string name) int {
+func vfs_rmdir(*dentry parent, string name) int {
     switch dentry_lookup_child(parent, name) {
         option::some(child) : {
             if child.children.len() == 0 {

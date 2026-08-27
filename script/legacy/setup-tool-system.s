@@ -72,8 +72,8 @@ func main() {
     println("")
     println("
     println("system.getToolDiscovery().recommendTools(\"English text\",")
-    println("    [](const auto &tools) { ")
-    println("        for (auto &t : tools) qDebug() << t.name; ")
+    println("    [](const auto *tools) { ")
+    println("        for (auto *t : tools) qDebug() << t.name; ")
     println("    }")
     println(");")
     println("")

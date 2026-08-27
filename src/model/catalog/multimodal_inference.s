@@ -84,7 +84,7 @@ struct multimodal_inference_engine {
 }
 
 func create_multimodal_inference_engine(model_sys *model_system, encoder *multimodal_encoder, fusion_eng *multimodal_fusion_engine) *multimodal_inference_engine {
-	mie := &multimodal_inference_engine{
+	mie := *multimodal_inference_engine{
 		model_system:            model_sys,
 		encoder:                 encoder,
 		fusion_engine:           fusion_eng,
@@ -137,7 +137,7 @@ func (multimodal_inference_engine* mie) create_multimodal_input(input_id string,
 		modality = INPUT_ALL
 	}
 
-	input := &multimodal_input{
+	input := *multimodal_input{
 		input_id:         input_id,
 		modality_type:    modality,
 		text_input:       text,
@@ -256,7 +256,7 @@ func (multimodal_inference_engine* mie) reason_cross_modalities(modality_feature
 		confidence /= float32(len(attention_matrix))
 	}
 
-	result := &cross_modal_reasoning_result{
+	result := *cross_modal_reasoning_result{
 		reasoning_text:        cross_modal_text,
 		modality_reasoning:    modality_reasoning,
 		reasoning_steps:       reasoning_steps,
@@ -313,7 +313,7 @@ func (multimodal_inference_engine* mie) submit_inference(multimodal_inference_re
 
 	inference_time := time.Since(start_time).Milliseconds()
 
-	response := &multimodal_inference_response{
+	response := *multimodal_inference_response{
 		response_id:            request.request_id + "_response",
 		request_id:            request.request_id,
 		generated_text:        generated_text,

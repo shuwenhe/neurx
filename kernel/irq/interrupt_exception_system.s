@@ -79,7 +79,7 @@ func interrupt_controller_create() interrupt_controller {
     return ctrl
 }
 
-func (ctrl: &mut interrupt_controller) register_handler(int irq_num, string name, interrupt_type int_type, int priority) result[int, string] {
+func (ctrl: *interrupt_controller) register_handler(int irq_num, string name, interrupt_type int_type, int priority) (int, string) {
     if irq_num < 0 || irq_num > 255 {
         return result::err("Invalid IRQ number")
     }
@@ -110,7 +110,7 @@ func (ctrl: &mut interrupt_controller) register_handler(int irq_num, string name
     return result::ok(irq_num)
 }
 
-func (ctrl: &mut interrupt_controller) handle_interrupt(int irq_num) result[int, string] {
+func (ctrl: *interrupt_controller) handle_interrupt(int irq_num) (int, string) {
     if irq_num < 0 || irq_num > 255 {
         ctrl.spurious_count = ctrl.spurious_count + 1
         return result::err("Spurious interrupt")
@@ -120,14 +120,14 @@ func (ctrl: &mut interrupt_controller) handle_interrupt(int irq_num) result[int,
     return result::ok(irq_num)
 }
 
-func (ctrl: &mut interrupt_controller) mask_irq(int irq_num) result[bool, string] {
+func (ctrl: *interrupt_controller) mask_irq(int irq_num) (bool, string) {
     if irq_num < 0 || irq_num > 255 {
         return result::err("Invalid IRQ")
     }
     return result::ok(true)
 }
 
-func (ctrl: &mut interrupt_controller) unmask_irq(int irq_num) result[bool, string] {
+func (ctrl: *interrupt_controller) unmask_irq(int irq_num) (bool, string) {
     if irq_num < 0 || irq_num > 255 {
         return result::err("Invalid IRQ")
     }
@@ -144,7 +144,7 @@ func exception_manager_create() exception_manager {
     return mgr
 }
 
-func (mgr: &mut exception_manager) register_exception_handler(int exc_num, string name) result[int, string] {
+func (mgr: *exception_manager) register_exception_handler(int exc_num, string name) (int, string) {
     if exc_num < 0 || exc_num > 31 {
         return result::err("Invalid exception number")
     }
@@ -160,7 +160,7 @@ func (mgr: &mut exception_manager) register_exception_handler(int exc_num, strin
     return result::ok(exc_num)
 }
 
-func (mgr: &mut exception_manager) handle_exception(int exc_num, exception_frame frame) result[bool, string] {
+func (mgr: *exception_manager) handle_exception(int exc_num, exception_frame frame) (bool, string) {
     mgr.total_exceptions = mgr.total_exceptions + 1
     
     if exc_num == 0 {
@@ -179,7 +179,7 @@ func (mgr: &mut exception_manager) handle_exception(int exc_num, exception_frame
     return result::ok(true)
 }
 
-func (mgr: &mut exception_manager) exception_stats() string {
+func (mgr: *exception_manager) exception_stats() string {
     total := mgr.total_exceptions
     critical := mgr.critical_count
     panics := mgr.panic_count

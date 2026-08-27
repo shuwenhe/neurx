@@ -61,7 +61,7 @@ struct kv_cache_manager {
 }
 
 func create_kv_cache_manager(kv_cache_config* config, communicator* comm, device_communicator* dev_comm) kv_cache_manager* {
-    return &kv_cache_manager{
+    return *kv_cache_manager{
         config: *config,
         blocks: make(map[int32]kv_cache_block*),
         comm: comm,
@@ -74,7 +74,7 @@ func create_kv_cache_manager(kv_cache_config* config, communicator* comm, device
 }
 
 func (kv_cache_manager* kcm) allocate_block(int32 block_id, int64 block_size) kv_cache_block* {
-    block := &kv_cache_block{
+    block := *kv_cache_block{
         block_id: block_id,
         seq_len: 0,
         block_size_bytes: block_size,
@@ -118,7 +118,7 @@ func (kv_cache_manager* kcm) get_block(int32 block_id) kv_cache_block* {
 }
 
 func (kv_cache_manager* kcm) create_transfer_plan() kv_transfer_plan* {
-    return &kv_transfer_plan{
+    return *kv_transfer_plan{
         plan_id: 0,
         block_ids_to_transfer: make([]int32, 0),
         src_locations: make([]kv_cache_location, 0),

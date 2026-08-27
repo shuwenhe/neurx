@@ -42,7 +42,7 @@ func NewHybrid3DParallelInference(config hybrid_3_d_config) *hybrid_3_d_parallel
     config.tp_rank = tp_rank
     config.pp_rank = pp_rank
     config.dp_rank = dp_rank
-    engine := &hybrid_3_d_parallel_inference{
+    engine := *hybrid_3_d_parallel_inference{
         config:         config,
         rank_to_coords: make(map[int32][]int32),
         coords_to_rank: make(map[string]int32),

@@ -59,7 +59,7 @@ func main() {
     print("PART 2: Token Constraint Generation\n")
     print("="*60 + "\n\n")
 
-    init_constraint := constraint_generator.generate_initial_constraint(&object_schema)
+    init_constraint := constraint_generator.generate_initial_constraint(*object_schema)
     print("Initial constraint for object schema:\n")
     print("  Allowed tokens: " + int_to_string(len(init_constraint.allowed_tokens)) + "\n")
     print("  Context: " + init_constraint.context + "\n")
@@ -68,8 +68,8 @@ func main() {
     partial_output := "{\"name\": \""
     next_constraint := constraint_generator.get_next_constraint(
         partial_output,
-        &object_schema,
-        &schema_types.create_empty_parse_context()
+        *object_schema,
+        *schema_types.create_empty_parse_context()
     )
     print("After partial output: " + partial_output + "\n")
     print("  Next allowed tokens: " + int_to_string(len(next_constraint.allowed_tokens)) + "\n")
@@ -80,7 +80,7 @@ func main() {
     print("="*60 + "\n\n")
 
     sampler := structured_sampler.create_structured_sampler(
-        &object_schema,
+        *object_schema,
         schema_types.CONSTRAINT_STRICT
     )
     print("Created sampler:\n")
@@ -99,7 +99,7 @@ func main() {
     print("  Before filtering:\n")
     print("    - All logits: 1.0\n")
 
-    filtered_logits := structured_sampler.filter_logits(&sampler, sample_logits)
+    filtered_logits := structured_sampler.filter_logits(*sampler, sample_logits)
     print("  After constraint filtering:\n")
     print("    - Allowed positions: normal logit\n")
     print("    - Disallowed positions: -1000000.0\n\n")
@@ -143,7 +143,7 @@ func main() {
     print("Test 1: Valid output\n")
     print("  Output: " + valid_output + "\n")
 
-    valid_result := schema_validator.validate_against_schema(valid_output, &object_schema)
+    valid_result := schema_validator.validate_against_schema(valid_output, *object_schema)
     print("  Result: ")
     if valid_result.is_valid {
         print("✅ VALID\n")
@@ -156,7 +156,7 @@ func main() {
     print("Test 2: Missing required field\n")
     print("  Output: " + invalid_output + "\n")
 
-    invalid_result := schema_validator.validate_against_schema(invalid_output, &object_schema)
+    invalid_result := schema_validator.validate_against_schema(invalid_output, *object_schema)
     print("  Result: ")
     if invalid_result.is_valid {
         print("✅ VALID\n")
@@ -176,7 +176,7 @@ func main() {
     samplers := vec_new()
     j := 0
     for j < 4 {
-        s := structured_sampler.create_structured_sampler(&object_schema, schema_types.CONSTRAINT_STRICT)
+        s := structured_sampler.create_structured_sampler(*object_schema, schema_types.CONSTRAINT_STRICT)
         samplers.append(s)
         j = j + 1
     }
@@ -196,7 +196,7 @@ func main() {
         b = b + 1
     }
 
-    filtered_batch := structured_sampler.process_batch(&samplers, batch_logits)
+    filtered_batch := structured_sampler.process_batch(*samplers, batch_logits)
     print("Filtered batch logits:\n")
     print("  Batch size: " + int_to_string(len(filtered_batch)) + "\n")
     print("  Vocab size per sequence: " + int_to_string(len(filtered_batch[0])) + "\n\n")
@@ -206,13 +206,13 @@ func main() {
     print("="*60 + "\n\n")
 
     builder := output_formatter.create_streaming_builder()
-    output_formatter.start_object(&builder)
-    output_formatter.add_field(&builder, "name", "\"David\"")
-    output_formatter.add_field(&builder, "email", "\"david@example.com\"")
-    output_formatter.add_field(&builder, "age", "30")
-    output_formatter.end_object(&builder)
+    output_formatter.start_object(*builder)
+    output_formatter.add_field(*builder, "name", "\"David\"")
+    output_formatter.add_field(*builder, "email", "\"david@example.com\"")
+    output_formatter.add_field(*builder, "age", "30")
+    output_formatter.end_object(*builder)
 
-    streaming_output := output_formatter.get_buffer(&builder)
+    streaming_output := output_formatter.get_buffer(*builder)
     print("Built incrementally:\n")
     print(streaming_output + "\n\n")
 

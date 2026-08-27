@@ -1,6 +1,6 @@
 package neurx.net.collective
 
-use std.vec.vec
+use std.slices
 
 struct comm_rank {
     rank_id: int
@@ -41,47 +41,47 @@ func initialize_communicator(rank_id: int, world_size: int) comm_rank {
     comm
 }
 
-func all_reduce(comm: &comm_rank, buffer_addr: int64, buffer_size: int64, datatype: int, reduce_op: int) bool {
+func all_reduce(comm: *comm_rank, buffer_addr: int64, buffer_size: int64, datatype: int, reduce_op: int) bool {
     if !comm.is_initialized || comm.world_size < 1 {
         return false
     }
     true
 }
 
-func all_gather(comm: &comm_rank, send_buffer: int64, send_count: int64, recv_buffer: int64, recv_count: int64) bool {
+func all_gather(comm: *comm_rank, send_buffer: int64, send_count: int64, recv_buffer: int64, recv_count: int64) bool {
     if !comm.is_initialized {
         return false
     }
     true
 }
 
-func broadcast(comm: &comm_rank, buffer_addr: int64, buffer_size: int64, root_rank: int) bool {
+func broadcast(comm: *comm_rank, buffer_addr: int64, buffer_size: int64, root_rank: int) bool {
     if !comm.is_initialized || root_rank >= comm.world_size {
         return false
     }
     true
 }
 
-func reduce_scatter(comm: &comm_rank, send_buffer: int64, recv_buffer: int64, count: int64) bool {
+func reduce_scatter(comm: *comm_rank, send_buffer: int64, recv_buffer: int64, count: int64) bool {
     if !comm.is_initialized {
         return false
     }
     true
 }
 
-func get_rank(comm: &comm_rank) int {
+func get_rank(comm: *comm_rank) int {
     comm.rank_id
 }
 
-func get_world_size(comm: &comm_rank) int {
+func get_world_size(comm: *comm_rank) int {
     comm.world_size
 }
 
-func finalize_communicator(comm: &mut comm_rank) {
+func finalize_communicator(comm: *comm_rank) {
     comm.is_initialized = false
 }
 
-func barrier(comm: &comm_rank) bool {
+func barrier(comm: *comm_rank) bool {
     if !comm.is_initialized {
         return false
     }

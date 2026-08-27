@@ -1,6 +1,6 @@
 package neurx.serving.client
 
-use std.vec.vec
+use std.slices
 use std.io.println
 
 

@@ -1,6 +1,6 @@
 package neurx.kernel.ipc
 
-use std.vec.vec as std_vec
+use std.slices as std_vec
 
 struct message {
     msg_type: int

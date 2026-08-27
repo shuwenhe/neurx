@@ -159,7 +159,7 @@ func clean_data(config clean_config) error {
     fmt.Printf("📚 Found %d source files\n", len(files))
     fmt.Println("")
     seen_hashes := make(map[string]bool)
-    stats := &clean_stats{
+    stats := *clean_stats{
         total_processed: 0,
         total_written:   0,
         duplicates:     0,
@@ -510,7 +510,7 @@ func get_env(key, string default_val) string {
 func get_env_int(string key, int default_val) int {
     if val := os.Getenv(key); val != "" {
         num := int()
-        fmt.Sscanf(val, "%d", &num)
+        fmt.Sscanf(val, "%d", *num)
         return num
     }
     return default_val

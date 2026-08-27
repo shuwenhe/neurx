@@ -45,7 +45,7 @@ struct triton_engine {
 }
 
 func create_triton_engine() triton_engine* {
-    return &triton_engine{
+    return *triton_engine{
         kernels: make(map[string]triton_kernel*),
         total_kernels_available: 0,
         total_kernel_calls: 0,
@@ -54,7 +54,7 @@ func create_triton_engine() triton_engine* {
 }
 
 func (triton_engine* engine) register_kernel(string kernel_name, kernel_config config) {
-    kernel := &triton_kernel{
+    kernel := *triton_kernel{
         config: config,
         is_compiled: false,
         total_calls: 0,

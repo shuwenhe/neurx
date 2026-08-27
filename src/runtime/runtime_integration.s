@@ -45,7 +45,7 @@ struct neurx_runtime {
 }
 
 func create_neurx_runtime(runtime_config cfg) neurx_runtime* {
-    runtime := &neurx_runtime{
+    runtime := *neurx_runtime{
         config: cfg,
         engine: nil,
         http_server: nil,

@@ -50,7 +50,7 @@ func create_punica_wrapper(punica_config config) punica_wrapper* {
         is_initialized: false,
     }
 
-    return &wrapper
+    return *wrapper
 }
 
 func (punica_wrapper* wrapper) initialize() bool {
@@ -68,7 +68,7 @@ func (punica_wrapper* wrapper) initialize() bool {
 }
 
 func (punica_wrapper* wrapper) register_kernel(string kernel_name, punica_op operation) {
-    kernel := &punica_kernel{
+    kernel := *punica_kernel{
         operation: operation,
         kernel_name: kernel_name,
         is_compiled: false,

@@ -20,7 +20,7 @@ func create_enhanced_sampler() enhanced_sampler* {
 	factory := create_sampler_factory()
 	factory.create_default_samplers()
 
-	return &enhanced_sampler{
+	return *enhanced_sampler{
 		params: create_sampling_params(),
 		penalty_config: create_penalty_params(),
 

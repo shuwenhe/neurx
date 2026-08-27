@@ -17,7 +17,7 @@ struct BeamSearchData {
 }
 
 func NewDecodeExecutor(config ExecutorConfig, decode_config DecodeConfig) *DecodeExecutor {
-    executor := &DecodeExecutor{
+    executor := *DecodeExecutor{
         base: *NewBaseExecutor(config),
         decode_config: decode_config,
     }

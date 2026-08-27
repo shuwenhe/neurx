@@ -105,7 +105,7 @@ struct weight_loading_stats {
 }
 
 func new_weight_loader(string file_path, model_format format, model_dtype dtype) *weight_loader {
-    return &weight_loader{
+    return *weight_loader{
         file_path: file_path,
         format: format,
         dtype: dtype,
@@ -119,7 +119,7 @@ func new_weight_loader(string file_path, model_format format, model_dtype dtype)
 }
 
 func new_buffer_allocator(int64 capacity) *weight_buffer_allocator {
-    return &weight_buffer_allocator{
+    return *weight_buffer_allocator{
         total_capacity: capacity,
         allocated: 0,
         free: capacity,
@@ -170,7 +170,7 @@ func (weight_loader* wl) detect_format(string file_path) (model_format, error) {
 }
 
 func (weight_loader* wl) load_safetensors(string file_path) (*weight_file_info, error) {
-    file_info := &weight_file_info{
+    file_info := *weight_file_info{
         file_path: file_path,
         file_size_bytes: 0,
         format: model_format_safetensors,
@@ -190,7 +190,7 @@ func (weight_loader* wl) load_safetensors(string file_path) (*weight_file_info, 
 }
 
 func (weight_loader* wl) load_checkpoint(string file_path) (*weight_file_info, error) {
-    file_info := &weight_file_info{
+    file_info := *weight_file_info{
         file_path: file_path,
         file_size_bytes: 0,
         format: model_format_checkpoint,
@@ -230,7 +230,7 @@ func (weight_loader* wl) load_weights_from_file(string file_path) (map[string]*w
 func (weight_loader* wl) load_safetensors_weights(string file_path) (map[string]*weight_buffer, error) {
     weights := make(map[string]*weight_buffer)
 
-    config := &safetensors_header{
+    config := *safetensors_header{
         magic: []byte{},
         header_size: 0,
         format_version: 1,
@@ -254,7 +254,7 @@ func (weight_loader* wl) load_tensor(string name, model_dtype target_dtype) (*we
         return nil, err
     }
 
-    weight_buf := &weight_buffer{
+    weight_buf := *weight_buffer{
         data: buffer,
         dtype: target_dtype,
         shape: []int32{},
@@ -274,7 +274,7 @@ func (weight_loader* wl) load_tensor_quantized(string name, weight_quantization_
         return nil, err
     }
 
-    weight_buf := &weight_buffer{
+    weight_buf := *weight_buffer{
         data: buffer,
         dtype: quant_info.scale_dtype,
         shape: []int32{},
@@ -296,7 +296,7 @@ func (weight_loader* wl) convert_dtype(weight_buffer* src_buffer, model_dtype ta
         return nil, err
     }
 
-    converted := &weight_buffer{
+    converted := *weight_buffer{
         data: dst_buffer,
         dtype: target_dtype,
         shape: src_buffer.shape,
@@ -375,7 +375,7 @@ func load_weights_with_fallback(string primary_path, string fallback_path, model
 }
 
 func create_weight_loading_task(model_executor* executor, int32 layer_id, []*model_weight_spec weights) *weight_loading_task {
-    return &weight_loading_task{
+    return *weight_loading_task{
         executor: executor,
         layer_id: layer_id,
         weights: weights,

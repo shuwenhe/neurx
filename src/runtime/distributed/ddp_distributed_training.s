@@ -154,7 +154,7 @@ func create_ddp_trainer(int rank, int world_size, int batch_size, int param_coun
 
 func ddp_sync_gradients(ddp_trainer* trainer, []float64 gradients) {
     fmt.printfln("[Rank %d] Synchronizing gradients...", trainer.rank)
-    accumulate_gradients(&trainer.gradient_sync, gradients)
+    accumulate_gradients(*trainer.gradient_sync, gradients)
     if should_sync(trainer.gradient_sync) {
         fmt.printfln("   → AllReduce on all %d processes", trainer.world_size)
         allreduce_gradients(trainer.gradient_sync.accumulated_grads, trainer.nccl_comm)
@@ -241,7 +241,7 @@ func run_distributed_training_example() {
     fmt.printfln("──────────────────────────────────────────────────────\n")
     total_loss := 0.0
     for step := 0; step < num_batches; step += 1 {
-        batch_indices := next_batch_indices(&sampler)
+        batch_indices := next_batch_indices(*sampler)
         local_losses := make([]float64, len(batch_indices))
         for i := 0; i < len(batch_indices); i += 1 {
             local_losses[i] = 4.5 - float64(step) * 0.01
@@ -252,7 +252,7 @@ func run_distributed_training_example() {
         for i := 0; i < len(gradients); i += 1 {
             gradients[i] = math.random() * 0.01
         }
-        ddp_sync_gradients(&trainer, gradients)
+        ddp_sync_gradients(*trainer, gradients)
         if (step + 1) % 20 == 0 {
             fmt.printfln("[Rank %d] Step %d: loss = %.4f (synced batches: %d)\n",
                          rank, step + 1, global_loss, trainer.num_batches_synced)
@@ -260,7 +260,7 @@ func run_distributed_training_example() {
     }
     fmt.printfln("\n⏳ Final Synchronization")
     fmt.printfln("──────────────────────────────────────────────────────\n")
-    ddp_barrier(&trainer)
+    ddp_barrier(*trainer)
     fmt.printfln("📈 Training Summary")
     fmt.printfln("──────────────────────────────────────────────────────")
     fmt.printfln("   Rank: %d", rank)

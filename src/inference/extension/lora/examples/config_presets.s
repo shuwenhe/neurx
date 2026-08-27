@@ -1,6 +1,6 @@
 package neurx.lora.examples.config_presets
 
-use std.vec.vec
+use std.slices
 use std.map.map
 use neurx.lora.lora_config::{lora_config}
 

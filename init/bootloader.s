@@ -1,6 +1,6 @@
 package neurx.init
 
-use std.vec.vec
+use std.slices
 use std.string.string
 
 struct boot_context {

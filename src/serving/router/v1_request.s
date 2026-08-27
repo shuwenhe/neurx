@@ -73,7 +73,7 @@ struct v1_request {
 }
 
 func create_v1_request(string request_id, string prompt) v1_request* {
-    req := &v1_request{
+    req := *v1_request{
         request_id: request_id,
         prompt: prompt,
         prompt_token_ids: make(vec[int32]),

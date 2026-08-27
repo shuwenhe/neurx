@@ -85,11 +85,11 @@ func trace_event_create(int event_id, trace_event_type ev_type, int pid, int cpu
     return event
 }
 
-func (event: &mut trace_event) set_data(string data) {
+func (event: *trace_event) set_data(string data) {
     event.event_data = data
 }
 
-func (event: &mut trace_event) set_duration(int duration_us) {
+func (event: *trace_event) set_duration(int duration_us) {
     event.duration_us = duration_us
 }
 
@@ -105,17 +105,17 @@ func tracepoint_create(int tp_id, string name, trace_event_type tp_type) tracepo
     return tp
 }
 
-func (tp: &mut tracepoint) enable() result[bool, string] {
+func (tp: *tracepoint) enable() (bool, string) {
     tp.enabled = 1
     return result::ok(true)
 }
 
-func (tp: &mut tracepoint) disable() result[bool, string] {
+func (tp: *tracepoint) disable() (bool, string) {
     tp.enabled = 0
     return result::ok(true)
 }
 
-func (tp: &mut tracepoint) trigger(trace_event event) result[bool, string] {
+func (tp: *tracepoint) trigger(trace_event event) (bool, string) {
     if tp.enabled == 0 {
         return result::err("Tracepoint not enabled")
     }
@@ -136,17 +136,17 @@ func kprobe_create(int kprobe_id, string symbol, int address) kprobe {
     return kp
 }
 
-func (kp: &mut kprobe) enable() result[bool, string] {
+func (kp: *kprobe) enable() (bool, string) {
     kp.enabled = 1
     return result::ok(true)
 }
 
-func (kp: &mut kprobe) disable() result[bool, string] {
+func (kp: *kprobe) disable() (bool, string) {
     kp.enabled = 0
     return result::ok(true)
 }
 
-func (kp: &mut kprobe) trigger() result[bool, string] {
+func (kp: *kprobe) trigger() (bool, string) {
     if kp.enabled == 0 {
         kp.missed_count = kp.missed_count + 1
         return result::err("Kprobe not enabled")
@@ -167,12 +167,12 @@ func kretprobe_create(int kretprobe_id, string symbol, int address) kretprobe {
     return krp
 }
 
-func (krp: &mut kretprobe) entry_hit(int duration_us) result[bool, string] {
+func (krp: *kretprobe) entry_hit(int duration_us) (bool, string) {
     krp.entry_hit_count = krp.entry_hit_count + 1
     return result::ok(true)
 }
 
-func (krp: &mut kretprobe) exit_hit(int duration_us) result[bool, string] {
+func (krp: *kretprobe) exit_hit(int duration_us) (bool, string) {
     krp.exit_hit_count = krp.exit_hit_count + 1
     if krp.entry_hit_count > 0 {
         krp.avg_duration_us = duration_us / krp.entry_hit_count
@@ -192,7 +192,7 @@ func trace_buffer_create(int max_events) trace_buffer {
     return buffer
 }
 
-func (buffer: &mut trace_buffer) add_event(trace_event event) result[bool, string] {
+func (buffer: *trace_buffer) add_event(trace_event event) (bool, string) {
     if buffer.current_events >= buffer.max_events {
         buffer.overflow_count = buffer.overflow_count + 1
         return result::err("Trace buffer full")
@@ -209,7 +209,7 @@ func (buffer: &mut trace_buffer) add_event(trace_event event) result[bool, strin
     return result::ok(true)
 }
 
-func (buffer: &trace_buffer) get_events_by_type(trace_event_type ev_type) int {
+func (buffer: *trace_buffer) get_events_by_type(trace_event_type ev_type) int {
     count := 0
     i := 0
     while i < buffer.events.len() {
@@ -221,7 +221,7 @@ func (buffer: &trace_buffer) get_events_by_type(trace_event_type ev_type) int {
     return count
 }
 
-func (buffer: &trace_buffer) get_events_by_pid(int pid) int {
+func (buffer: *trace_buffer) get_events_by_pid(int pid) int {
     count := 0
     i := 0
     while i < buffer.events.len() {
@@ -246,38 +246,38 @@ func ftrace_controller_create() ftrace_controller {
     return ctrl
 }
 
-func (ctrl: &mut ftrace_controller) register_tracepoint(string name, trace_event_type ev_type) result[int, string] {
+func (ctrl: *ftrace_controller) register_tracepoint(string name, trace_event_type ev_type) (int, string) {
     tp := tracepoint_create(ctrl.total_tracers, name, ev_type)
     ctrl.tracepoints.push(tp)
     ctrl.total_tracers = ctrl.total_tracers + 1
     return result::ok(tp.tp_id)
 }
 
-func (ctrl: &mut ftrace_controller) register_kprobe(string symbol, int address) result[int, string] {
+func (ctrl: *ftrace_controller) register_kprobe(string symbol, int address) (int, string) {
     kp := kprobe_create(ctrl.total_tracers, symbol, address)
     ctrl.kprobes.push(kp)
     ctrl.total_tracers = ctrl.total_tracers + 1
     return result::ok(kp.kprobe_id)
 }
 
-func (ctrl: &mut ftrace_controller) register_kretprobe(string symbol, int address) result[int, string] {
+func (ctrl: *ftrace_controller) register_kretprobe(string symbol, int address) (int, string) {
     krp := kretprobe_create(ctrl.total_tracers, symbol, address)
     ctrl.kretprobes.push(krp)
     ctrl.total_tracers = ctrl.total_tracers + 1
     return result::ok(krp.kretprobe_id)
 }
 
-func (ctrl: &mut ftrace_controller) enable_tracing() result[bool, string] {
+func (ctrl: *ftrace_controller) enable_tracing() (bool, string) {
     ctrl.enabled = 1
     return result::ok(true)
 }
 
-func (ctrl: &mut ftrace_controller) disable_tracing() result[bool, string] {
+func (ctrl: *ftrace_controller) disable_tracing() (bool, string) {
     ctrl.enabled = 0
     return result::ok(true)
 }
 
-func (ctrl: &cftrace_controller) trace_stats() string {
+func (ctrl: *cftrace_controller) trace_stats() string {
     events := ctrl.buffer.current_events
     tracers := ctrl.total_tracers
     overflow := ctrl.buffer.overflow_count

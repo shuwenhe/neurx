@@ -70,7 +70,7 @@ func create_logprobs_manager(logprobs_config config) logprobs_manager* {
         cache_misses: 0,
     }
 
-    return &mgr
+    return *mgr
 }
 
 func (logprobs_manager* mgr) compute_logprobs(vec[float32] logits, vec[int32] selected_token_ids) vec[logprob_output] {

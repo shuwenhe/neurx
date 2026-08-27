@@ -29,7 +29,7 @@ struct distributed_inference_coordinator {
 }
 
 func create_distributed_inference_coordinator(distributed_inference_config* config) distributed_inference_coordinator* {
-    coord := &distributed_inference_coordinator{
+    coord := *distributed_inference_coordinator{
         config: *config,
         ps: nil,
         comm: nil,
@@ -44,7 +44,7 @@ func create_distributed_inference_coordinator(distributed_inference_config* conf
 }
 
 func (distributed_inference_coordinator* dic) initialize() error {
-    dic.ps = &parallel_state{
+    dic.ps = *parallel_state{
         config: *dic.config.pconfig,
         coordinates: parallel_coordinates{},
         groups: make(map[string]group_info*),

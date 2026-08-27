@@ -88,7 +88,7 @@ struct error_response {
 }
 
 func create_web_server(web_server_config* config, llm_engine* engine) web_server* {
-    return &web_server{
+    return *web_server{
         config: *config,
         engine: engine,
         routes: make([]route_handler*, 0),
@@ -108,7 +108,7 @@ func (web_server* ws) stop() error {
 }
 
 func (web_server* ws) register_route(http_method method, string path, interface{} handler) {
-    route := &route_handler{
+    route := *route_handler{
         method: method,
         path: path,
         handler: handler,
@@ -127,7 +127,7 @@ func (web_server* ws) handle_request(http_request* req) http_response* {
 
     for _, route := range ws.routes {
         if route.path == req.path && route.method == req.method {
-            return &http_response{
+            return *http_response{
                 status: http_ok,
                 headers: make(map[string]string),
                 body: nil,
@@ -136,7 +136,7 @@ func (web_server* ws) handle_request(http_request* req) http_response* {
         }
     }
 
-    return &http_response{
+    return *http_response{
         status: http_not_found,
         headers: make(map[string]string),
         body: *error_response{
@@ -149,7 +149,7 @@ func (web_server* ws) handle_request(http_request* req) http_response* {
 }
 
 func (web_server* ws) build_json_response(interface{} data, string message) json_response* {
-    return &json_response{
+    return *json_response{
         status: "success",
         data: data,
         message: message,
@@ -158,7 +158,7 @@ func (web_server* ws) build_json_response(interface{} data, string message) json
 }
 
 func (web_server* ws) build_error_response(string error_msg, int32 code) error_response* {
-    return &error_response{
+    return *error_response{
         error: "error",
         code: code,
         message: error_msg,

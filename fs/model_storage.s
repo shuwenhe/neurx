@@ -1,6 +1,6 @@
 package neurx.fs.model_storage
 
-use std.vec.vec
+use std.slices
 
 struct model_file {
     string file_path

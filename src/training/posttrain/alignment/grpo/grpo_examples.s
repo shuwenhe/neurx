@@ -219,7 +219,7 @@ func example_custom_reward_functions() {
     print("   - Test reward: Pass unit tests")
     print("   - Efficiency reward: O(n) complexity preferred")
     print("")
-    print("3. Factual Q&A:")
+    print("3. Factual Q*A:")
     print("   - Format reward: Clear structure")
     print("   - Citation reward: Supporting evidence provided")
     print("   - Accuracy reward: Fact-checked against ground truth")

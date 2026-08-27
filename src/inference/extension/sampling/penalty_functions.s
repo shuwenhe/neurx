@@ -274,7 +274,7 @@ struct penalty_params {
 }
 
 func create_penalty_params() penalty_params* {
-	return &penalty_params{
+	return *penalty_params{
 		frequency_penalty: 0.0,
 		presence_penalty: 0.0,
 		repetition_penalty: 1.0,

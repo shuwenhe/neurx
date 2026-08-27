@@ -97,7 +97,7 @@ struct rpc_server {
 }
 
 func NewRpcClient(server_address string, port int32) *rpc_client {
-    return &rpc_client{
+    return *rpc_client{
         server_address: server_address,
         port:           port,
         timeout_ms:     5000,
@@ -145,7 +145,7 @@ func (rpc_client* client) HealthCheck() bool {
 }
 
 func NewRpcServer(listen_address string, port int32) *rpc_server {
-    return &rpc_server{
+    return *rpc_server{
         listen_address: listen_address,
         port:           port,
         handlers:       make(map[string]rpc_server_handler),
@@ -206,7 +206,7 @@ struct rpc_connection_pool {
 }
 
 func NewRpcConnectionPool(max_size int32) *rpc_connection_pool {
-    return &rpc_connection_pool{
+    return *rpc_connection_pool{
         connections:   make(map[string]*rpc_client),
         max_pool_size: max_size,
         current_size:  0,

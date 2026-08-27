@@ -223,7 +223,7 @@ func main() {
 
     io.Println("Root Span: " + root_span.string_rep()[0])
 
-    child_span := t.start_child_span(&root_span, append([]string{}, "ModelInference"))
+    child_span := t.start_child_span(*root_span, append([]string{}, "ModelInference"))
     child_span.set_kind(span_kind_internal)
     child_span.add_attribute(append([]string{}, "model.name"), append([]string{}, "qwen2.5"))
 
@@ -231,9 +231,9 @@ func main() {
 
     io.Println("Child Span: " + child_span.string_rep()[0])
 
-    t.end_span(&child_span)
+    t.end_span(*child_span)
     root_span.set_status(status_ok)
-    t.end_span(&root_span)
+    t.end_span(*root_span)
 
     io.Println("Total spans recorded: " + io.ToString(len(t.get_spans())))
 }

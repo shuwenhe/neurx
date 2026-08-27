@@ -54,7 +54,7 @@ func AttentionExample() {
         scale: f32(1.0) / f32(head_dim) ^ 0.5
     }
 
-    result := attn_kernel.MultiHeadAttention(batch_size, num_heads, seq_len, head_dim, Q, K, V, &output)
+    result := attn_kernel.MultiHeadAttention(batch_size, num_heads, seq_len, head_dim, Q, K, V, *output)
 
     if result.success {
         println("✅ Attention succeeded")
@@ -107,7 +107,7 @@ func CausalAttentionExample() {
         scale: f32(1.0) / f32(head_dim) ^ 0.5
     }
 
-    result := attn_kernel.CausalAttention(params, Q, K, V, &output)
+    result := attn_kernel.CausalAttention(params, Q, K, V, *output)
 
     if result.success {
         println("✅ Causal Attention succeeded")
@@ -138,14 +138,14 @@ func DataTypeConversionExample() {
         input_f32[i] = f32(i) / 512.0 - 1.0
     }
 
-    result := conversion.Float32ToFloat16(input_f32, &output_f16)
+    result := conversion.Float32ToFloat16(input_f32, *output_f16)
     if result.success {
         println("✅ Float32.Float16 succeeded")
     }
 
     println("Converting Float16 back to Float32...")
     output_f32 := make([]f32, 1024)
-    result = conversion.Float16ToFloat32(output_f16, &output_f32)
+    result = conversion.Float16ToFloat32(output_f16, *output_f32)
     if result.success {
         println("✅ Float16.Float32 succeeded")
     }
@@ -155,14 +155,14 @@ func DataTypeConversionExample() {
     scale := f32(0.01)
     zero_point := i8(0)
 
-    result = conversion.Float32ToInt8(input_f32, scale, zero_point, &quantized)
+    result = conversion.Float32ToInt8(input_f32, scale, zero_point, *quantized)
     if result.success {
         println("✅ Quantization succeeded")
     }
 
     println("Dequantizing from Int8...")
     dequantized := make([]f32, 1024)
-    result = conversion.Int8ToFloat32(quantized, scale, zero_point, &dequantized)
+    result = conversion.Int8ToFloat32(quantized, scale, zero_point, *dequantized)
     if result.success {
         println("✅ Dequantization succeeded")
     }
