@@ -1,0 +1,306 @@
+package neurx.mm
+
+use std.vec.vec
+
+// Swap 页面
+struct swap_page {
+    int page_id
+    int physical_address
+    int swap_offset
+    int flags  // 0=in_memory, 1=in_swap
+}
+
+// Swap 设备
+struct swap_device {
+    int device_id
+    int size  // MB
+    int used_space  // MB
+    int free_space  // MB
+    vec swap_pages
+}
+
+// Swap 管理器
+struct swap_manager {
+    vec swap_devices
+    int total_swap_space
+    int used_swap_space
+    int swap_operations
+}
+
+// 初始化 Swap 管理器
+func (swap_manager* swm) init(int total_swap_mb) (int, string) {
+    swm.swap_devices = vec()
+    swm.total_swap_space = total_swap_mb
+    swm.used_swap_space = 0
+    swm.swap_operations = 0
+    return 0, ""
+}
+
+// 创建 Swap 设备
+func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
+    if swm.used_swap_space + size_mb > swm.total_swap_space {
+        return swap_device{}, "Not enough swap space"
+    }
+    
+    device := swap_device{
+        device_id: swm.swap_devices.len(),
+        size: size_mb,
+        used_space: 0,
+        free_space: size_mb,
+        swap_pages: vec()
+    }
+    
+    swm.swap_devices.push(device)
+    swm.used_swap_space = swm.used_swap_space + size_mb
+    
+    return device, ""
+}
+
+// 将页面 Swap Out 到 Swap 设备
+func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string) {
+    if device_id >= swm.swap_devices.len() {
+        return -1, "Invalid device"
+    }
+    
+    device := swm.swap_devices[device_id]
+    
+    if device.free_space <= 0 {
+        return -1, "Swap device full"
+    }
+    
+    swap_pg := swap_page{
+        page_id: page_id,
+        physical_address: 0,
+        swap_offset: device.used_space,
+        flags: 1  // in_swap
+    }
+    
+    device.swap_pages.push(swap_pg)
+    device.used_space = device.used_space + 1
+    device.free_space = device.free_space - 1
+    
+    swm.swap_devices[device_id] = device
+    swm.swap_operations = swm.swap_operations + 1
+    
+    return swap_pg.swap_offset, ""
+}
+
+// 从 Swap 设备 Swap In 页面
+func (swap_manager* swm) swap_in_page(int page_id, int device_id) (int, string) {
+    if device_id >= swm.swap_devices.len() {
+        return -1, "Invalid device"
+    }
+    
+    device := swm.swap_devices[device_id]
+    
+    i := 0
+    for i < device.swap_pages.len() {
+        pg := device.swap_pages[i]
+        if pg.page_id == page_id {
+            pg.flags = 0  // in_memory
+            device.used_space = device.used_space - 1
+            device.free_space = device.free_space + 1
+            
+            // 移除页面
+            j := i
+            for j < device.swap_pages.len() - 1 {
+                device.swap_pages[j] = device.swap_pages[j + 1]
+                j = j + 1
+            }
+            
+            swm.swap_devices[device_id] = device
+            swm.swap_operations = swm.swap_operations + 1
+            
+            return pg.physical_address, ""
+        }
+        i = i + 1
+    }
+    
+    return -1, "Page not found in swap"
+}
+
+// 获取 Swap 统计
+func (swap_manager swm) get_swap_stats() (int, int, int) {
+    return swm.total_swap_space, swm.used_swap_space, swm.swap_operations
+}
+
+// NUMA 节点
+struct numa_node {
+    int node_id
+    int total_memory  // MB
+    int free_memory   // MB
+    int cpu_count
+    int distance_to_other_nodes  // 访问延迟
+}
+
+// NUMA 管理器
+struct numa_manager {
+    vec nodes
+    int num_nodes
+}
+
+// 初始化 NUMA 管理器
+func (numa_manager* nm) init(int num_nodes) (int, string) {
+    nm.nodes = vec()
+    nm.num_nodes = num_nodes
+    
+    i := 0
+    for i < num_nodes {
+        node := numa_node{
+            node_id: i,
+            total_memory: 4096,  // 4GB per node
+            free_memory: 4096,
+            cpu_count: 4,
+            distance_to_other_nodes: 10
+        }
+        nm.nodes.push(node)
+        i = i + 1
+    }
+    
+    return 0, ""
+}
+
+// 在特定 NUMA 节点分配内存
+func (numa_manager* nm) allocate_local(int node_id, int size_mb) (int, string) {
+    if node_id >= nm.num_nodes {
+        return -1, "Invalid node"
+    }
+    
+    node := nm.nodes[node_id]
+    
+    if node.free_memory < size_mb {
+        return -1, "Not enough memory on node"
+    }
+    
+    node.free_memory = node.free_memory - size_mb
+    nm.nodes[node_id] = node
+    
+    return node_id, ""
+}
+
+// 迁移页面到远程 NUMA 节点
+func (numa_manager* nm) migrate_page(int from_node, int to_node) (int, string) {
+    if from_node >= nm.num_nodes || to_node >= nm.num_nodes {
+        return -1, "Invalid node"
+    }
+    
+    from := nm.nodes[from_node]
+    to := nm.nodes[to_node]
+    
+    if to.free_memory <= 0 {
+        return -1, "Target node memory full"
+    }
+    
+    from.free_memory = from.free_memory + 1
+    to.free_memory = to.free_memory - 1
+    
+    nm.nodes[from_node] = from
+    nm.nodes[to_node] = to
+    
+    return 0, ""
+}
+
+// 获取 NUMA 节点统计
+func (numa_manager nm) get_node_stats(int node_id) (int, int, int) {
+    if node_id >= nm.num_nodes {
+        return 0, 0, 0
+    }
+    
+    node := nm.nodes[node_id]
+    return node.total_memory, node.free_memory, node.cpu_count
+}
+
+// OOM 杀手信息
+struct oom_victim {
+    int pid
+    int memory_usage  // MB
+    int priority
+    int oom_score
+}
+
+// OOM 管理器
+struct oom_manager {
+    vec processes
+    int memory_threshold  // MB
+    int killed_processes
+}
+
+// 初始化 OOM 管理器
+func (oom_manager* om) init(int memory_threshold_mb) (int, string) {
+    om.processes = vec()
+    om.memory_threshold = memory_threshold_mb
+    om.killed_processes = 0
+    return 0, ""
+}
+
+// 注册进程内存使用
+func (oom_manager* om) register_process(int pid, int memory_usage) (int, string) {
+    victim := oom_victim{
+        pid: pid,
+        memory_usage: memory_usage,
+        priority: 0,
+        oom_score: 0
+    }
+    
+    om.processes.push(victim)
+    return 0, ""
+}
+
+// 计算 OOM 得分 (分数越高越可能被杀死)
+func (oom_manager* om) calculate_oom_score(int pid) (int, string) {
+    i := 0
+    for i < om.processes.len() {
+        proc := om.processes[i]
+        if proc.pid == pid {
+            score := proc.memory_usage * 100 / om.memory_threshold
+            proc.oom_score = score
+            om.processes[i] = proc
+            return score, ""
+        }
+        i = i + 1
+    }
+    
+    return -1, "Process not found"
+}
+
+// 检查是否触发 OOM 并选择受害者
+func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string) {
+    if total_memory_used < om.memory_threshold {
+        return -1, "No OOM"
+    }
+    
+    // 找到得分最高的进程
+    max_victim := -1
+    max_score := 0
+    
+    i := 0
+    for i < om.processes.len() {
+        proc := om.processes[i]
+        if proc.oom_score > max_score {
+            max_score = proc.oom_score
+            max_victim = i
+        }
+        i = i + 1
+    }
+    
+    if max_victim >= 0 {
+        victim := om.processes[max_victim]
+        om.killed_processes = om.killed_processes + 1
+        
+        // 移除进程
+        i := max_victim
+        for i < om.processes.len() - 1 {
+            om.processes[i] = om.processes[i + 1]
+            i = i + 1
+        }
+        
+        return victim.pid, ""
+    }
+    
+    return -1, "No victim found"
+}
+
+// 获取 OOM 统计
+func (oom_manager om) get_oom_stats() (int, int) {
+    return om.processes.len(), om.killed_processes
+}

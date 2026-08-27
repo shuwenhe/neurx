@@ -1,0 +1,134 @@
+package neurx.mm
+
+use std.vec.vec
+
+// Huge Pages 支持 (2MB 和 1GB 页面)
+struct huge_page {
+    int base_address
+    int size  // 2097152 (2MB) or 1073741824 (1GB)
+    bool free
+    int pool_index
+}
+
+struct huge_pages_pool {
+    vec pages_2mb
+    vec pages_1gb
+    int total_2mb
+    int total_1gb
+}
+
+// 初始化 Huge Pages 池
+func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (int, string) {
+    hpool.pages_2mb = vec()
+    hpool.pages_1gb = vec()
+    hpool.total_2mb = pages_2mb_count
+    hpool.total_1gb = pages_1gb_count
+    
+    i := 0
+    for i < pages_2mb_count {
+        page := huge_page{
+            base_address: 0x200000 + i * 2097152,
+            size: 2097152,
+            free: true,
+            pool_index: i
+        }
+        hpool.pages_2mb.push(page)
+        i = i + 1
+    }
+    
+    j := 0
+    for j < pages_1gb_count {
+        page := huge_page{
+            base_address: 0x40000000 + j * 1073741824,
+            size: 1073741824,
+            free: true,
+            pool_index: j
+        }
+        hpool.pages_1gb.push(page)
+        j = j + 1
+    }
+    
+    return 0, ""
+}
+
+// 分配 2MB Huge Page
+func (huge_pages_pool* hpool) allocate_2mb() (huge_page, string) {
+    i := 0
+    for i < hpool.pages_2mb.len() {
+        page := hpool.pages_2mb[i]
+        if page.free {
+            page.free = false
+            hpool.pages_2mb[i] = page
+            return page, ""
+        }
+        i = i + 1
+    }
+    return huge_page{}, "No free 2MB huge pages"
+}
+
+// 分配 1GB Huge Page
+func (huge_pages_pool* hpool) allocate_1gb() (huge_page, string) {
+    i := 0
+    for i < hpool.pages_1gb.len() {
+        page := hpool.pages_1gb[i]
+        if page.free {
+            page.free = false
+            hpool.pages_1gb[i] = page
+            return page, ""
+        }
+        i = i + 1
+    }
+    return huge_page{}, "No free 1GB huge pages"
+}
+
+// 释放 Huge Page
+func (huge_pages_pool* hpool) free_page(huge_page hp) (int, string) {
+    if hp.size == 2097152 {
+        i := 0
+        for i < hpool.pages_2mb.len() {
+            page := hpool.pages_2mb[i]
+            if page.base_address == hp.base_address {
+                page.free = true
+                hpool.pages_2mb[i] = page
+                return 0, ""
+            }
+            i = i + 1
+        }
+    } else if hp.size == 1073741824 {
+        j := 0
+        for j < hpool.pages_1gb.len() {
+            page := hpool.pages_1gb[j]
+            if page.base_address == hp.base_address {
+                page.free = true
+                hpool.pages_1gb[j] = page
+                return 0, ""
+            }
+            j = j + 1
+        }
+    }
+    return -1, "Page not found"
+}
+
+// 获取 Huge Pages 统计
+func (huge_pages_pool hpool) get_stats() (int, int, int, int) {
+    free_2mb := 0
+    free_1gb := 0
+    
+    i := 0
+    for i < hpool.pages_2mb.len() {
+        if hpool.pages_2mb[i].free {
+            free_2mb = free_2mb + 1
+        }
+        i = i + 1
+    }
+    
+    j := 0
+    for j < hpool.pages_1gb.len() {
+        if hpool.pages_1gb[j].free {
+            free_1gb = free_1gb + 1
+        }
+        j = j + 1
+    }
+    
+    return hpool.total_2mb - free_2mb, hpool.total_1gb - free_1gb, free_2mb, free_1gb
+}
