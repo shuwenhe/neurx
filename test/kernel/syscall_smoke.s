@@ -2,7 +2,7 @@ package test.kernel
 
 use kernel.syscall
 
-func main() int {
+func main() {
     init_syscall_table()
     
     
