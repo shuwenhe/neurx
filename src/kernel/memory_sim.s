@@ -1,6 +1,5 @@
 package kernel.mem
 
-// Simple simulated physical memory for user buffers.
 int[] phys_mem
 
 func init_phys_mem() int {

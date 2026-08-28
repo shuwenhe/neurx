@@ -25,13 +25,11 @@ func init_syscall_table() int {
     syscall_table = append(syscall_table, syscall_entry{number:3, name:"close"})
     fd_table = map[int]int[]{}
     next_fd = 3
-    // init phys mem
     init_phys_mem()
     0
 }
 
 func sys_read(int fd, int buf_addr, int count) int {
-    // copy from fd_table[fd] into phys mem at buf_addr
     data := int[]{}
     if has(fd_table, fd) {
         data = fd_table[fd]
@@ -51,7 +49,6 @@ func sys_read(int fd, int buf_addr, int count) int {
 }
 
 func sys_write(int fd, int buf_addr, int count) int {
-    // read bytes from phys mem at buf_addr and append to fd_table[fd]
     bytes := mem_get(buf_addr, count)
     existing := int[]{}
     if has(fd_table, fd) {

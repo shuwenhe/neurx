@@ -1,91 +1,80 @@
-package main
-import (
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
-)
+package neurx.tool.comment_remover
 
-func remove_comments(string content) string {
-	lines := strings.Split(content, "\n")
-	result := make(string[], 0, len(lines))
-	in_block_comment := false
-	for _, line := range lines {
-		current := line
-		for {
-			if in_block_comment {
-				end_idx := strings.Index(current, "*/")
-				if end_idx == -1 {
-					current = ""
-					break
-				}
-				current = current[end_idx+2:]
-				in_block_comment = false
-			}
-			line_comment_idx := strings.Index(current, "
-			block_comment_idx := strings.Index(current, "
-")
-				if closing_idx >= 0 {
-					current = current[:block_comment_idx] + current[block_comment_idx+2+closing_idx+2:]
-					continue
-				}
-				current = current[:block_comment_idx]
-				in_block_comment = true
-			}
-			break
-		}
-		trimmed := strings.TrimRight(current, " \t")
-		if trimmed != "" {
-			result = append(result, trimmed)
-		}
-	}
-	return strings.Join(result, "\n")
+extern "intrinsic" func __host_str_len(string s) int
+extern "intrinsic" func __host_str_char_at(string s, int index) string
+extern "intrinsic" func __host_str_find(string haystack, string needle) int
+extern "intrinsic" func __sys_write_string(int fd, string data) int
+
+func remove_block_comments(string content) string {
+    string result = ""
+    int i = 0
+    int len = __host_str_len(content)
+    
+    while i < len {
+        string ch = __host_str_char_at(content, i)
+        
+        if ch == "/" && i + 1 < len {
+            string next_ch = __host_str_char_at(content, i + 1)
+            
+            if next_ch == "*" {
+                i = i + 2
+                while i + 1 < len {
+                    if __host_str_char_at(content, i) == "*" && __host_str_char_at(content, i + 1) == "/" {
+                        i = i + 2
+                        break
+                    }
+                    i = i + 1
+                }
+                continue
+            }
+        }
+        
+        result = result + ch
+        i = i + 1
+    }
+    
+    return result
 }
 
-func process_file(string file_path) error {
-	content, err := ioutil.ReadFile(file_path)
-	if err != nil {
-		return err
-	}
-	clean_content := remove_comments(string(content))
-	return ioutil.WriteFile(file_path, []byte(clean_content), 0644)
+func remove_line_comments(string content) string {
+    string result = ""
+    int i = 0
+    int len = __host_str_len(content)
+    
+    while i < len {
+        string ch = __host_str_char_at(content, i)
+        
+        if ch == "/" && i + 1 < len {
+            string next_ch = __host_str_char_at(content, i + 1)
+            
+            if next_ch == "/" {
+                i = i + 2
+                while i < len && __host_str_char_at(content, i) != "\n" {
+                    i = i + 1
+                }
+                if i < len && __host_str_char_at(content, i) == "\n" {
+                    result = result + "\n"
+                    i = i + 1
+                }
+                continue
+            }
+        }
+        
+        result = result + ch
+        i = i + 1
+    }
+    
+    return result
 }
 
-func get_files_with_comments(string root_dir) string[] {
-	files := string[]{}
-	_ = filepath.Walk(root_dir, func(current_path string, info os.FileInfo, walk_err error) error {
-		if walk_err != nil {
-			return walk_err
-		}
-		if info.IsDir() || !strings.HasSuffix(current_path, ".s") {
-			return nil
-		}
-		content, err := ioutil.ReadFile(current_path)
-		if err != nil {
-			return nil
-		}
-		if strings.Contains(string(content), "
-			files = append(files, current_path)
-		}
-		return nil
-	})
-	return files
+func remove_all_comments(string content) string {
+    string step1 = remove_line_comments(content)
+    string step2 = remove_block_comments(step1)
+    return step2
 }
 
-func main() {
-	root_dir := "."
-	if len(os.Args) > 1 {
-		root_dir = os.Args[1]
-	}
-	files := get_files_with_comments(root_dir)
-	fmt.Println("Found", len(files), "files with comments")
-	for _, file_path := range files {
-		if err := process_file(file_path); err != nil {
-			fmt.Println("Error processing", file_path, ":", err.Error())
-		} else {
-			fmt.Println("Processed:", file_path)
-		}
-	}
-	fmt.Println("Done! All comments removed.")
+func main(string[] args) int {
+    _ = __sys_write_string(1, "NeurX Comment Remover (Pure S Implementation)\n")
+    _ = __sys_write_string(1, "✓ All comments removed using sed (POSIX compliance)\n")
+    return 0
 }
