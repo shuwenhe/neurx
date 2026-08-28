@@ -3,6 +3,7 @@ use neurx.runtime.command.{runtime_env_get, runtime_parse_int, runtime_run_comma
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
 use neurx.deployment.cluster_orchestration.{cluster_orchestration_state, new_demo_cluster_state, new_cluster_deployment_spec}
 use neurx.deployment.cluster_runtime_bridge.{cluster_runtime_bridge_result, bridge_probe_runtime, bridge_deployment_summary, bridge_remote_execution_commands, bridge_fault_injection_relaunch_commands, bridge_fault_injection_relaunch_execute}
+use neurx.deployment.hetero_runtime_bridge.{bridge_hetero_demo_script}
 use neurx.distributed.cluster.heartbeat.{create_cluster_heartbeat_state, cluster_heartbeat_is_live, cluster_heartbeat_summary}
 
 func main() {
@@ -50,7 +51,7 @@ func main() {
         runtime_write_text_file("/tmp/neurx_cluster/launch.sh", dry_script)
         runtime_write_text_file("/tmp/neurx_cluster/relaunch.sh", dry_relaunch)
         if enable_hetero_launch == "1" {
-            runtime_write_text_file("/tmp/neurx_cluster/hetero_launch.sh", "#!/bin/sh\n# hetero launch disabled in dry mode\n")
+            runtime_write_text_file("/tmp/neurx_cluster/hetero_launch.sh", bridge_hetero_demo_script("neurx-worker", runtime_env_get("MASTER_ADDR", runtime_env_get("HOSTNAME", "localhost")), master_port))
         }
         println(dry_script)
         return 0
@@ -61,7 +62,7 @@ func main() {
     runtime_write_text_file("/tmp/neurx_cluster/launch.sh", command_script)
     runtime_write_text_file("/tmp/neurx_cluster/relaunch.sh", relaunch_script)
     if enable_hetero_launch == "1" {
-        runtime_write_text_file("/tmp/neurx_cluster/hetero_launch.sh", "#!/bin/sh\n# hetero launch enabled\n")
+        runtime_write_text_file("/tmp/neurx_cluster/hetero_launch.sh", bridge_hetero_demo_script(worker_bin, master_addr, master_port))
     }
     int exit_code = runtime_run_command_exit_code("sh /tmp/neurx_cluster/launch.sh")
     if exit_code != 0 {
