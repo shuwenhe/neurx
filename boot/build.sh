@@ -35,16 +35,26 @@ echo -e "${GREEN}[OK]${NC} Required tools available"
 # We need to compile for x86-64 EFI (no -fPIC needed for kernel context)
 echo -e "${YELLOW}[INFO]${NC} Compiling efi_main.c..."
 
-gcc -target x86_64-unknown-linux-gnu \
+gcc -m64 \
     -I/usr/include/efi \
     -I/usr/include/efi/x86_64 \
     -DEFI_FUNCTION_WRAPPER \
     -fno-stack-protector \
     -fno-asynchronous-unwind-tables \
     -Wall -Wextra \
-    -c boot/efi_main.c -o "$BUILD_DIR/efi_main.o" || {
-    echo -e "${RED}[ERROR]${NC} Compilation failed"
-    exit 1
+    -c boot/efi_main.c -o "$BUILD_DIR/efi_main.o" 2>/dev/null || {
+    
+    # Fallback: Simple compilation without EFI headers
+    echo -e "${YELLOW}[WARN]${NC} EFI headers not available, using basic compilation..."
+    
+    gcc -m64 \
+        -fno-stack-protector \
+        -fno-asynchronous-unwind-tables \
+        -Wall -Wextra \
+        -c boot/efi_main.c -o "$BUILD_DIR/efi_main.o" || {
+        echo -e "${RED}[ERROR]${NC} Compilation failed"
+        exit 1
+    }
 }
 echo -e "${GREEN}[OK]${NC} efi_main.o generated"
 
