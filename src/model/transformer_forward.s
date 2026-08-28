@@ -114,9 +114,32 @@ func transformer_attention_layer(
 
     config := gpu_attention.attention_config_create(num_heads, head_dim, seq_len, batch_size)
 
-    q_config := gpu_gemm.gemm_config_create(batch_size * seq_len, num_heads * head_dim, hidden_size, 1.0, 0.0)
-    k_config := gpu_gemm.gemm_config_create(batch_size * seq_len, num_heads * head_dim, hidden_size, 1.0, 0.0)
-    v_config := gpu_gemm.gemm_config_create(batch_size * seq_len, num_heads * head_dim, hidden_size, 1.0, 0.0)
+    q_params := gpu_gemm.gemm_params {
+        m: batch_size * seq_len,
+        n: num_heads * head_dim,
+        k: hidden_size,
+        alpha: 1.0,
+        beta: 0.0,
+    }
+    q_config := gpu_gemm.gemm_config_create(q_params)
+
+    k_params := gpu_gemm.gemm_params {
+        m: batch_size * seq_len,
+        n: num_heads * head_dim,
+        k: hidden_size,
+        alpha: 1.0,
+        beta: 0.0,
+    }
+    k_config := gpu_gemm.gemm_config_create(k_params)
+
+    v_params := gpu_gemm.gemm_params {
+        m: batch_size * seq_len,
+        n: num_heads * head_dim,
+        k: hidden_size,
+        alpha: 1.0,
+        beta: 0.0,
+    }
+    v_config := gpu_gemm.gemm_config_create(v_params)
 
     q_proj := abi.device_tensor {
         data: hidden_state.data,
@@ -186,9 +209,32 @@ func transformer_ffn_layer(
     hidden_size := context.hidden_size
     intermediate_size := context.intermediate_size
 
-    gate_config := gpu_gemm.gemm_config_create(batch_size * seq_len, intermediate_size, hidden_size, 1.0, 0.0)
-    up_config := gpu_gemm.gemm_config_create(batch_size * seq_len, intermediate_size, hidden_size, 1.0, 0.0)
-    down_config := gpu_gemm.gemm_config_create(batch_size * seq_len, hidden_size, intermediate_size, 1.0, 0.0)
+    gate_params := gpu_gemm.gemm_params {
+        m: batch_size * seq_len,
+        n: intermediate_size,
+        k: hidden_size,
+        alpha: 1.0,
+        beta: 0.0,
+    }
+    gate_config := gpu_gemm.gemm_config_create(gate_params)
+
+    up_params := gpu_gemm.gemm_params {
+        m: batch_size * seq_len,
+        n: intermediate_size,
+        k: hidden_size,
+        alpha: 1.0,
+        beta: 0.0,
+    }
+    up_config := gpu_gemm.gemm_config_create(up_params)
+
+    down_params := gpu_gemm.gemm_params {
+        m: batch_size * seq_len,
+        n: hidden_size,
+        k: intermediate_size,
+        alpha: 1.0,
+        beta: 0.0,
+    }
+    down_config := gpu_gemm.gemm_config_create(down_params)
 
     gate_proj := abi.device_tensor {
         data: hidden_state.data,

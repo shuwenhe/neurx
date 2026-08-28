@@ -13,6 +13,14 @@ struct gemm_config {
     bool transB
 }
 
+struct gemm_params {
+    int m
+    int n
+    int k
+    float alpha
+    float beta
+}
+
 struct gemm_workspace {
     abi.device_tensor temp_output
     int64 workspace_bytes
@@ -21,13 +29,13 @@ struct gemm_workspace {
 
 gemm_workspace g_gemm_workspace
 
-func gemm_config_create(m: int, n: int, k: int, alpha: float, beta: float) gemm_config {
+func gemm_config_create(params: gemm_params) gemm_config {
     return gemm_config {
-        m: m,
-        n: n,
-        k: k,
-        alpha: alpha,
-        beta: beta,
+        m: params.m,
+        n: params.n,
+        k: params.k,
+        alpha: params.alpha,
+        beta: params.beta,
         transA: false,
         transB: false,
     }
