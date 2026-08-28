@@ -110,22 +110,42 @@ func get_html() string {
 
 func get_compact_html() string {
     string html = "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>NeurX Chat</title>"
-    html = html + "<style>body{margin:0;background:#eef1ea;color:#172019;font:16px Georgia,serif}.app{max-width:900px;margin:auto;min-height:100vh;display:flex;flex-direction:column;padding:24px;box-sizing:border-box}"
-    html = html + "h1{margin:0 0 8px}.status{color:#68736a;margin-bottom:20px}#result{flex:1;background:#fff;border:1px solid #cbd2c8;border-radius:14px;padding:20px;overflow:auto;line-height:1.6}"
-    html = html + "#result p{margin:0 0 12px}#result pre{margin:14px 0;padding:14px 16px;overflow:auto;border-radius:10px;background:#111827;color:#e5e7eb;font:14px/1.6 Consolas,Monaco,monospace;white-space:pre}#result code{font:inherit}"
-    html = html + ".code-block{border:1px solid #374151;border-radius:10px;overflow:hidden;margin:14px 0;background:#111827}.code-head{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#1f2937;color:#cbd5e1;font:12px monospace}.copy-code{border:0;border-radius:8px;padding:4px 9px;background:#374151;color:#fff;cursor:pointer;font-size:12px}"
-    html = html + ".composer{display:flex;gap:12px;margin-top:16px}textarea{flex:1;min-height:72px;padding:14px;border:1px solid #aeb8ab;border-radius:12px;font:16px sans-serif;resize:vertical}"
-    html = html + "button{width:130px;border:0;border-radius:12px;background:#176b46;color:#fff;font-weight:bold;cursor:pointer}button:disabled{opacity:.55}</style></head><body>"
-    html = html + "<main class=\"app\"><h1>NeurX Chat</h1><div class=\"status\">Backend 127.0.0.1:18084</div><div id=\"result\">Ready.</div><div class=\"composer\">"
+    html = html + "<style>body{margin:0;background:linear-gradient(180deg,#eef1ea 0%,#e5ebe3 100%);color:#172019;font:16px Georgia,serif}.app{max-width:960px;margin:auto;min-height:100vh;display:flex;flex-direction:column;padding:24px;box-sizing:border-box}"
+    html = html + "h1{margin:0 0 8px}.status{color:#68736a;margin-bottom:20px}.chat{flex:1;background:#fff;border:1px solid #cbd2c8;border-radius:18px;padding:18px;overflow:auto;box-shadow:0 10px 30px rgba(18,24,20,.06)}"
+    html = html + ".message{display:flex;gap:10px;margin:14px 0}.message.user{justify-content:flex-end}.message.assistant{justify-content:flex-start}.bubble{max-width:min(760px,92%);border-radius:18px;padding:14px 16px;line-height:1.65;box-shadow:0 2px 10px rgba(0,0,0,.04)}"
+    html = html + ".user .bubble{background:#176b46;color:#fff;border-bottom-right-radius:6px}.assistant .bubble{background:#f7f8f5;color:#172019;border:1px solid #d7ddd5;border-bottom-left-radius:6px}"
+    html = html + ".bubble p{margin:0 0 12px}.bubble p:last-child{margin-bottom:0}.bubble pre{margin:14px 0;padding:14px 16px;overflow:auto;border-radius:12px;background:#111827;color:#e5e7eb;font:14px/1.6 Consolas,Monaco,monospace;white-space:pre}.bubble code{font:inherit}"
+    html = html + ".code-block{border:1px solid #374151;border-radius:12px;overflow:hidden;margin:14px 0;background:#111827}.code-head{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#1f2937;color:#cbd5e1;font:12px monospace}.copy-code{border:0;border-radius:8px;padding:4px 9px;background:#374151;color:#fff;cursor:pointer;font-size:12px}"
+    html = html + ".kw{color:#93c5fd}.ty{color:#f9a8d4}.fn{color:#fbbf24}.st{color:#86efac}.cm{color:#94a3b8;font-style:italic}"
+    html = html + ".composer{display:flex;gap:12px;margin-top:16px}textarea{flex:1;min-height:72px;padding:14px;border:1px solid #aeb8ab;border-radius:12px;font:16px sans-serif;resize:vertical;background:#fff}button{width:130px;border:0;border-radius:12px;background:#176b46;color:#fff;font-weight:bold;cursor:pointer}button:disabled{opacity:.55}</style></head><body>"
+    html = html + "<main class=\"app\"><h1>NeurX Chat</h1><div class=\"status\">Backend 127.0.0.1:18084</div><div id=\"chat\" class=\"chat\"><div class=\"message assistant\"><div class=\"bubble\" id=\"result\">Ready.</div></div></div><div class=\"composer\">"
     html = html + "<textarea id=\"prompt\" placeholder=\"Enter a request\"></textarea><button id=\"send\" onclick=\"sendRequest()\">Send</button></div></main><script>"
     html = html + "function esc(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\"','&quot;')}"
     html = html + "function renderText(s){return esc(s).split('\\n\\n').map(p=>'<p>'+p.split('\\n').join('<br>')+'</p>').join('')}"
-    html = html + "function renderMarkdown(text){let out='',i=0,blocks=[];while(i<text.length){const open=text.indexOf('```',i);if(open<0){out+=renderText(text.slice(i));break}out+=renderText(text.slice(i,open));let j=open+3,lang='';while(j<text.length&&/[A-Za-z0-9_+.-]/.test(text[j])){lang+=text[j];j++}while(j<text.length&&(text[j]===' '||text.charCodeAt(j)===10||text.charCodeAt(j)===13))j++;const close=text.indexOf('```',j);const code=close<0?text.slice(j):text.slice(j,close);const id=blocks.push(code)-1;out+='<div class=\"code-block\"><div class=\"code-head\"><span>'+(lang||'code')+'</span><button class=\"copy-code\" onclick=\"copyCode('+id+',this)\">Copy</button></div><pre><code>'+esc(code)+'</code></pre></div>';if(close<0)break;i=close+3}window.__blocks=blocks;return out}"
+    html = html + "function hlCpp(code){const kw='int|bool|string|float|double|void|func|struct|return|if|else|for|while|break|continue|true|false|new|extern|package|use|map|slice|len|int32|int64';let out=esc(code);out=out.replaceAll(/\\/\\/.*$/gm,'<span class=\"cm\">$&</span>');out=out.replaceAll(/\"([^\"\\\\]|\\\\.)*\"/g,'<span class=\"st\">$&</span>');out=out.replaceAll(new RegExp('\\\\b('+kw+')\\\\b','g'),'<span class=\"kw\">$1</span>');out=out.replaceAll(/\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()/g,'<span class=\"fn\">$1</span>');return out}"
+    html = html + "function renderMarkdown(text){let out='',i=0,blocks=[];while(i<text.length){const open=text.indexOf('```',i);if(open<0){out+=renderText(text.slice(i));break}out+=renderText(text.slice(i,open));let j=open+3,lang='';while(j<text.length&&/[A-Za-z0-9_+.-]/.test(text[j])){lang+=text[j];j++}while(j<text.length&&(text[j]===' '||text.charCodeAt(j)===10||text.charCodeAt(j)===13))j++;const close=text.indexOf('```',j);const code=close<0?text.slice(j):text.slice(j,close);const id=blocks.push({lang:lang,code:code})-1;const shown=lang==='cpp'||lang==='c++'?hlCpp(code):esc(code);out+='<div class=\"code-block\"><div class=\"code-head\"><span>'+(lang||'code')+'</span><button class=\"copy-code\" onclick=\"copyCode('+id+',this)\">Copy</button></div><pre><code>'+shown+'</code></pre></div>';if(close<0)break;i=close+3}window.__blocks=blocks;return out}"
     html = html + "async function copyCode(i,btn){await navigator.clipboard.writeText((window.__blocks&&window.__blocks[i])||'');const t=btn.textContent;btn.textContent='Copied';setTimeout(()=>btn.textContent=t,900)}"
-    html = html + "async function sendRequest(){const p=document.getElementById('prompt'),r=document.getElementById('result'),b=document.getElementById('send'),text=p.value.trim();if(!text)return;"
-    html = html + "b.disabled=true;r.innerHTML='<p>Generating...</p>';try{const x=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},"
-    html = html + "body:JSON.stringify({prompt:text,max_tokens:128})}),body=await x.text();if(!x.ok)throw new Error('HTTP '+x.status);try{const d=JSON.parse(body);"
-    html = html + "const msg=d.output||d.text||d.response||d.generated_text||body;r.innerHTML=renderMarkdown(msg)}catch(e){r.innerHTML=renderMarkdown(body)}}catch(e){r.innerHTML='<p>Request failed: '+esc(e.message)+'</p>'}finally{b.disabled=false}}"
+    html = html + "function extractJsonBody(raw){const i=raw.indexOf('\\r\\n\\r\\n');if(i>=0)return raw.slice(i+4);const j=raw.indexOf('\\n\\n');if(j>=0)return raw.slice(j+2);return raw}"
+    html = html + "function setAssistant(content){document.getElementById('chat').insertAdjacentHTML('beforeend','<div class=\"message assistant\"><div class=\"bubble\">'+content+'</div></div>');const c=document.getElementById('chat');c.scrollTop=c.scrollHeight}"
+    html = html + "function setUser(content){document.getElementById('chat').insertAdjacentHTML('beforeend','<div class=\"message user\"><div class=\"bubble\">'+content+'</div></div>');const c=document.getElementById('chat');c.scrollTop=c.scrollHeight}"
+    html = html + "function sanitizeText(s){return String(s).replaceAll(String.fromCharCode(65533),'').replaceAll('\\r','')}"
+    html = html + "function streamBubble(bubble, text){text=sanitizeText(text);bubble.innerHTML='';let i=0;function step(){i=Math.min(text.length,i+8);bubble.innerHTML=renderMarkdown(text.slice(0,i));const c=document.getElementById('chat');c.scrollTop=c.scrollHeight;if(i<text.length){requestAnimationFrame(step)}}step()}"
+    html = html + "async function sendRequest(){const p=document.getElementById('prompt'),b=document.getElementById('send'),text=p.value.trim();if(!text)return;"
+    html = html + "p.value='';setUser(renderText(text));b.disabled=true;setAssistant('<p>Generating...</p>');"
+    html = html + "const chat=document.getElementById('chat');chat.scrollTop=chat.scrollHeight;try{"
+    html = html + "const x=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:text,max_tokens:1024,max_new_tokens:1024,stream:true})});"
+    html = html + "if(!x.ok||!x.body)throw new Error('HTTP '+x.status);"
+    html = html + "const reader=x.body.getReader(),decoder=new TextDecoder();let pending='',output='',finished=false;"
+    html = html + "while(!finished){const part=await reader.read();finished=part.done;pending+=decoder.decode(part.value||new Uint8Array(),{stream:!finished});"
+    html = html + "const lines=pending.split(String.fromCharCode(10));pending=lines.pop()||'';"
+    html = html + "for(const line0 of lines){let line=line0.trim();if(!line)continue;if(line.indexOf('data:')===0)line=line.slice(5).trim();if(!line||line==='[DONE]'){finished=true;continue}"
+    html = html + "let event;try{event=JSON.parse(line)}catch(e){continue}"
+    html = html + "if(event.error)throw new Error(event.error);let delta='';if(event.delta)delta=event.delta;else if(event.content)delta=event.content;else if(event.choices&&event.choices[0]&&event.choices[0].delta){delta=event.choices[0].delta.content||''}"
+    html = html + "if(delta){output=sanitizeText(output+delta);const last=chat.querySelector('.message.assistant:last-of-type .bubble');if(last)last.innerHTML=renderMarkdown(output)}"
+    html = html + "if(event.done||event.is_final||event.finish_reason==='stop')finished=true}}"
+    html = html + "if(pending.trim()){let line=pending.trim();if(line.indexOf('data:')===0)line=line.slice(5).trim();if(line&&line!=='[DONE]'){let event;try{event=JSON.parse(line)}catch(e){event=null}if(event){let delta='';if(event.delta)delta=event.delta;else if(event.content)delta=event.content;else if(event.choices&&event.choices[0]&&event.choices[0].delta){delta=event.choices[0].delta.content||''}if(delta){output=sanitizeText(output+delta);const last=chat.querySelector('.message.assistant:last-of-type .bubble');if(last)last.innerHTML=renderMarkdown(output)}}}}"
+    html = html + "const last=chat.querySelector('.message.assistant:last-of-type .bubble');if(last&&output===''){last.innerHTML='<p></p>'}}"
+    html = html + "catch(e){const last=chat.querySelector('.message.assistant:last-of-type .bubble');if(last)last.innerHTML='<p>Request failed: '+esc(e.message)+'</p>';else setAssistant('<p>Request failed: '+esc(e.message)+'</p>')}finally{b.disabled=false;chat.scrollTop=chat.scrollHeight}}"
     html = html + "document.getElementById('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendRequest()}});</script></body></html>"
     return html
 }
@@ -187,126 +207,120 @@ func proxy_stream_to_backend(int client_fd, string request_body) {
     backend_request = backend_request + "Content-Length: " + int_to_string(len(request_body)) + "\r\n"
     backend_request = backend_request + "Connection: close\r\n\r\n" + request_body
     _ = __sys_write_string(backend_sock, backend_request)
+    _ = __sys_write_string(client_fd, "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n")
     string chunk = __sys_read_string(backend_sock, 4096)
+    bool passed_headers = false
+    string buffered = ""
     for len(chunk) > 0 {
-        _ = __sys_write_string(client_fd, chunk)
+        if !passed_headers {
+            buffered = buffered + chunk
+            int header_end = __host_str_find(buffered, "\r\n\r\n")
+            if header_end >= 0 {
+                int body_start = header_end + 4
+                int body_len = __host_str_len(buffered)
+                if body_start < body_len {
+                    _ = __sys_write_string(client_fd, __host_slice(buffered, body_start, body_len))
+                }
+                passed_headers = true
+                buffered = ""
+            }
+        } else {
+            _ = __sys_write_string(client_fd, chunk)
+        }
         chunk = __sys_read_string(backend_sock, 4096)
     }
     _ = __sys_close(backend_sock)
 }
 
+func __request_is_get_root(string request) bool {
+    if __host_str_find(request, "GET / HTTP/1.1") == 0 {
+        return true
+    }
+    if __host_str_find(request, "GET / \r\n") == 0 {
+        return true
+    }
+    return false
+}
+
+func __request_is_post_infer(string request) bool {
+    if __host_str_find(request, "POST /api/infer HTTP/1.1") == 0 {
+        return true
+    }
+    return false
+}
+
+func __extract_body(string request) string {
+    int sep_pos = __host_str_find(request, "\r\n\r\n")
+    if sep_pos < 0 {
+        return ""
+    }
+    int body_start = sep_pos + 4
+    int body_end = __host_str_len(request)
+    if body_start >= body_end {
+        return ""
+    }
+    return __host_slice(request, body_start, body_end)
+}
+
+func __http_response(string body, string content_type) string {
+    string response = "HTTP/1.1 200 OK\r\n"
+    response = response + "Content-Type: " + content_type + "\r\n"
+    response = response + "Content-Length: " + int_to_string(len(body)) + "\r\n"
+    response = response + "Connection: close\r\n\r\n"
+    response = response + body
+    return response
+}
+
+func __http_json_response(string body) string {
+    return __http_response(body, "application/json")
+}
+
+func __http_html_response(string body) string {
+    return __http_response(body, "text/html; charset=utf-8")
+}
+
 func main() {
     _ = __sys_write_string(1, "🚀 NeurX Web UI Server starting on port 8081...\n")
-    
     int listener = __sys_socket(2, 1, 6)
     if listener < 0 {
         _ = __sys_write_string(1, "❌ Socket creation failed\n")
         return 1
     }
-    
-        string full_request = __sys_read_string(client, 4096)
-        string response = ""
-        
-        if full_request == "" {
-            response = "HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n"
+    if __sys_setsockopt(listener, 1, 2, 1) < 0 {
+        _ = __sys_write_string(1, "❌ setsockopt failed\n")
+        return 1
+    }
+    if __sys_bind(listener, "127.0.0.1", 8081, 2) < 0 {
+        _ = __sys_write_string(1, "❌ bind failed\n")
+        return 1
+    }
+    if __sys_listen(listener, 16) < 0 {
+        _ = __sys_write_string(1, "❌ listen failed\n")
+        return 1
+    }
+    _ = __sys_write_string(1, "✅ HTTP server bound to 127.0.0.1:8081\n")
+    _ = __sys_write_string(1, "📌 Backend URL: http://127.0.0.1:18084\n")
+    for 1 {
+        int client = __sys_accept(listener)
+        if client < 0 {
+            continue
+        }
+        string request = __sys_read_string(client, 4096)
+        if request == "" {
+            _ = __sys_write_string(client, "HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n")
+            _ = __sys_close(client)
+            continue
+        }
+        if __request_is_get_root(request) {
+            string page = get_compact_html()
+            _ = __sys_write_string(client, __http_html_response(page))
+        } else if __request_is_post_infer(request) {
+            string body = __extract_body(request)
+            proxy_stream_to_backend(client, body)
         } else {
-            if post_pos == 0 {
-                is_post = 1
-            }
-            if get_pos == 0 {
-                is_get = 1
-            }
-            
-    if needle == "POST" {
-        string try_post = "POST"
-        
-        if pos0 == variant1 { return 1 }
-        
-        int search_idx = 0
-        for search_idx < 200 {
-            search_idx = search_idx + 1
+            _ = __sys_write_string(client, "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n")
         }
+        _ = __sys_close(client)
     }
-    
-    if needle == "GET" {
-    int len_to_check = 30
-    
     return 0
-}
-
-func __request_starts_with_get(string request) int {
-    string test_g = "G" + ""
-    string test_ge = "GE" + ""
-    string test_get = "GET" + ""
-    
-    return 0
-}
-
-
-func __extract_body(string request) string {
-    int sep_pos = __host_str_find(request, "\r\n\r\n")
-    
-    if sep_pos < 0 {
-    int backend_sock = __sys_socket(2, 1, 6)
-    if backend_sock < 0 {
-        return "{\"error\":\"socket creation failed\"}"
-    }
-    
-    if __sys_connect(backend_sock, "127.0.0.1", 18084, 2) < 0 {
-        _ = __sys_close(backend_sock)
-        return "{\"error\":\"backend connection failed\",\"backend\":\"127.0.0.1:18084\"}"
-    }
-    
-    string full_response = ""
-    string chunk = __sys_read_string(backend_sock, 2048)
-    for __has_data(chunk) {
-        full_response = full_response + chunk
-        chunk = __sys_read_string(backend_sock, 2048)
-    }
-    _ = __sys_close(backend_sock)
-    
-    }
-    return json_response
-}
-
-func __has_data(string s) bool {
-    return s != ""
-}
-
-func __starts_with(string text, string prefix) bool {
-    if prefix == "GET / " || prefix == "GET /" {
-        if text == "" { return false }
-        if __get_first_char(text, 0) == 71 {
-            if __get_first_char(text, 1) == 69 {
-                if __get_first_char(text, 2) == 84 {
-                    return true
-                }
-            }
-        }
-    }
-    
-            if __get_first_char(text, 1) == 79 {
-                if __get_first_char(text, 2) == 83 {
-                    if __get_first_char(text, 3) == 84 {
-                        return true
-                    }
-                }
-            }
-        }
-    }
-    
-    return false
-}
-
-func __get_first_char(string s, int idx) int {
-    if idx == 0 { return 71 }
-    return 0
-}
-
-func __strlen(string s) int {
-    return 100
-}
-
-func __getchar(string s, int idx) int {
-    return 65
 }

@@ -2484,7 +2484,7 @@ numeric-alignment-test:
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" test/numeric_alignment_pytorch.py \
 		artifact/build/numeric_alignment/numeric_alignment_probe
-.PHONY: inference-feature-gap-check
+.PHONY: inference-feature-gap-check cluster-runtime-test cluster-parallel-plan-test cluster-runtime-bridge-parallel-test cluster-parallel-assignment-test cluster-launch-plan-test cluster-parallel-launch-test cluster-parallel-grouped-launch-test cluster-parallel-execution-test cluster-execute-launch-plan-test cluster-parallel-execution-script-test cluster-remote-execution-test cluster-heartbeat-test cluster-heartbeat-scan-test cluster-recovery-test
 S_INFERENCE_CHECK_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../../s/bin/s /home/shuwen/s/bin/s) $(S_COMPILER))
 INFERENCE_FEATURE_GAP_S_MODULES := \
 	src/serving/lifecycle/inference_request.s \
@@ -2515,6 +2515,78 @@ inference-feature-gap-check:
 		-o artifact/build/inference_feature_gap/model_manifest_test.ir
 	@"$(S_INFERENCE_CHECK_COMPILER)" ir test/production_engine_contract_test.s \
 		-o artifact/build/inference_feature_gap/production_engine_contract_test.ir
+cluster-runtime-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_runtime_test.s \
+		artifact/build/cluster_runtime/cluster_runtime_test.ir
+	@$(S_SEED_COMPILER) test/distributed/cluster_runtime_bridge_test.s \
+		artifact/build/cluster_runtime/cluster_runtime_bridge_test.ir
+	@echo "✅ Cluster runtime S tests compiled"
+cluster-parallel-plan-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_parallel_plan_test.s \
+		artifact/build/cluster_runtime/cluster_parallel_plan_test.ir
+	@echo "✅ Cluster parallel plan S test compiled"
+cluster-runtime-bridge-parallel-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_runtime_bridge_parallel_test.s \
+		artifact/build/cluster_runtime/cluster_runtime_bridge_parallel_test.ir
+	@echo "✅ Cluster bridge parallel S test compiled"
+cluster-parallel-assignment-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_parallel_assignment_test.s \
+		artifact/build/cluster_runtime/cluster_parallel_assignment_test.ir
+	@echo "✅ Cluster parallel assignment S test compiled"
+cluster-launch-plan-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_launch_plan_test.s \
+		artifact/build/cluster_runtime/cluster_launch_plan_test.ir
+	@echo "✅ Cluster launch plan S test compiled"
+cluster-parallel-launch-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_parallel_launch_test.s \
+		artifact/build/cluster_runtime/cluster_parallel_launch_test.ir
+	@echo "✅ Cluster parallel launch S test compiled"
+cluster-parallel-grouped-launch-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_parallel_grouped_launch_test.s \
+		artifact/build/cluster_runtime/cluster_parallel_grouped_launch_test.ir
+	@echo "✅ Cluster grouped launch S test compiled"
+cluster-parallel-execution-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_parallel_execution_test.s \
+		artifact/build/cluster_runtime/cluster_parallel_execution_test.ir
+	@echo "✅ Cluster parallel execution S test compiled"
+cluster-execute-launch-plan-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_execute_launch_plan_test.s \
+		artifact/build/cluster_runtime/cluster_execute_launch_plan_test.ir
+	@echo "✅ Cluster execute launch plan S test compiled"
+cluster-parallel-execution-script-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_parallel_execution_script_test.s \
+		artifact/build/cluster_runtime/cluster_parallel_execution_script_test.ir
+	@echo "✅ Cluster parallel execution script S test compiled"
+cluster-remote-execution-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_remote_execution_test.s \
+		artifact/build/cluster_runtime/cluster_remote_execution_test.ir
+	@echo "✅ Cluster remote execution S test compiled"
+cluster-heartbeat-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_heartbeat_test.s \
+		artifact/build/cluster_runtime/cluster_heartbeat_test.ir
+	@echo "✅ Cluster heartbeat S test compiled"
+cluster-heartbeat-scan-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_heartbeat_scan_test.s \
+		artifact/build/cluster_runtime/cluster_heartbeat_scan_test.ir
+	@echo "✅ Cluster heartbeat scan S test compiled"
+cluster-recovery-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_recovery_test.s \
+		artifact/build/cluster_runtime/cluster_recovery_test.ir
+	@echo "✅ Cluster recovery S test compiled"
 inference-runtime-test:
 	@mkdir -p artifact/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
