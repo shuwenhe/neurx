@@ -1,8 +1,8 @@
 # NeurX Boot Gates Architecture (G0 vs G1)
 
-**Date**: 2026-08-29  
-**Status**: Gate Architecture Clarified & Separated  
-**Key Insight**: Two different boot paths must prove different things
+**Date**: 2026-08-28 (G1 BOOTX64.EFI + ESP boot harness complete)  
+**Status**: Build-time: Framework Ready | Runtime: Execution Blocked  
+**Key Principle**: Build success ≠ Runtime success. ABI correctness only proven at execution.
 
 ---
 
@@ -270,6 +270,134 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 
 ---
 
+## Execution Plan: From Build-Time to Runtime Evidence
+
+### Phase 1: Prerequisites (No QEMU)
+✅ **Currently Complete**:
+- G0: kernel.elf compiles to 14KB Multiboot2 format
+- G1: BOOTX64.EFI compiles to 5.4K PE/COFF format
+- G1: ESP directory structure ready
+- G1: No -kernel parameter injection
+- G1: No SeaBIOS fallback
+
+⏳ **Awaiting Environment**:
+- QEMU x86-64 emulator installation
+- OVMF UEFI firmware installation (for G1 only)
+
+### Phase 2: G0 Execution (Once QEMU Available)
+
+```bash
+# Install QEMU only (no UEFI needed for G0)
+sudo apt update && sudo apt install -y qemu-system-x86_64
+
+# Execute bare-metal boot
+bash boot/test_g0.sh
+```
+
+**Possible Outcomes**:
+
+| Result | Meaning | Next Step |
+|--------|---------|-----------|
+| ✅ PASS with markers | G0 proof complete | Proceed to Phase 3 |
+| ❌ Timeout, no output | QEMU/environment issue | Debug QEMU setup |
+| ❌ Markers out of order | kernel.elf code bug | Fix boot/build_pure.sh |
+| ❌ Some markers missing | kernel.elf code bug | Fix boot/build_pure.sh |
+
+**If PASS**: Save evidence
+```bash
+cp /tmp/neurx_g0_serial.log boot/G0_SERIAL_EVIDENCE.txt
+git add boot/G0_SERIAL_EVIDENCE.txt
+git commit -m "G0 Runtime Evidence: PASS"
+```
+
+### Phase 3: G1 Execution (After G0 PASS, with OVMF)
+
+```bash
+# Install OVMF (UEFI firmware)
+sudo apt install -y ovmf
+
+# Execute UEFI boot ownership transfer
+bash boot/test_g1.sh
+```
+
+**Expected Execution Flow**:
+
+```
+boot/test_g1.sh
+  └─ Step 1: Build BOOTX64.EFI
+      └─ Should complete (already verified)
+  
+  └─ Step 2: Verify PE/COFF format
+      └─ Should pass (already verified)
+  
+  └─ Step 3: Create ESP directory
+      └─ Should pass (file system operation)
+  
+  └─ Step 4: Check QEMU
+      └─ PASS or exits immediately
+  
+  └─ Step 5: Check OVMF
+      └─ PASS or exits with helpful message
+  
+  └─ Step 6: Launch QEMU with OVMF
+      └─ Timeout after 10 seconds
+  
+  └─ Step 7: Parse serial output
+      └─ Check for NEURX_G1_* markers in order
+```
+
+**Critical Checkpoint**: First serial output
+
+The most important line is the very first marker:
+
+```
+NEURX_G1_EFI_ENTRY
+```
+
+If this appears, it proves:
+- ✅ PE/COFF format accepted by OVMF
+- ✅ Entry point call succeeded
+- ✅ ABI structure layout at least partially correct
+
+If no output at all:
+- ❌ OVMF didn't execute BOOTX64.EFI
+- ❌ Entry point offset wrong
+- ❌ File corruption
+
+**Marker Progression Indicates ABI Validation**:
+
+| Markers Seen | ABI Validation | Confidence |
+|---|---|---|
+| None | Entry point wrong or OVMF failed | Very low |
+| EFI_ENTRY | Minimal ABI correct (entry) | Low |
+| EFI_ENTRY, MEMORY_MAP_READY | GetMemoryMap struct valid | Medium |
+| EFI_ENTRY, MEMORY_MAP_READY, BOOT_SERVICES_EXITED | ExitBootServices call valid | High |
+| All 6 markers in order | Full G1 proof complete | Complete |
+
+### Phase 4: Debug If Needed
+
+**If G1 produces no output**:
+
+The issue is likely in efi_minimal.h structure definitions. Verify:
+
+1. EFI_SYSTEM_TABLE field offsets match UEFI spec
+2. EFI_BOOT_SERVICES function pointer offsets match spec
+3. Entry point signature matches EFIAPI calling convention
+4. BOOTX64.EFI PE header is correct (use `objdump -x`)
+
+**If G1 produces partial output**:
+
+Each missing marker points to a specific struct or function issue.
+
+### Phase 5: G2 Readiness
+
+Proceed to G2 only when:
+- ✅ G0 PASS (bare-metal execution proven)
+- ✅ G1 PASS (UEFI ownership transfer proven)
+- ✅ Both have archived serial logs as evidence
+
+---
+
 ## Evidence Requirements
 
 ### G0 Proof (Serial Log)
@@ -346,45 +474,126 @@ NEURX_G1_PASS
 
 ---
 
-## Summary
-
-| Gate | Kernel Logic | Boot Harness | QEMU Exec | Status |
-|------|--------------|--------------|-----------|--------|
-| **G0** | ✅ kernel_main() | ✅ test_g0.sh | ⏳ BLOCKED | Ready |
-| **G1** | ✅ efi_main() | ✅ BOOTX64.EFI PE/COFF | ⏳ BLOCKED | Ready |
-| **G2+** | ❌ Not started | N/A | N/A | Future |
+## Summary: Evidence Status
 
 ### G0 (Multiboot2 Bare-Metal)
-- ✅ Code ready
-- ✅ Kernel compiles to 14KB Multiboot2 ELF
-- ✅ Test script `test_g0.sh` complete
-- ⏳ Execution blocked: QEMU not installed
+
+**Build Evidence** ✅:
+- kernel_main() source complete
+- Multiboot2 ELF compiles to 14KB
+- UART initialization code present
+- Serial markers defined in code
+
+**Runtime Evidence** ⏳:
+- Bare-metal execution: NOT TESTED
+- QEMU loading: NOT TESTED
+- Actual serial output: NOT TESTED
+- Markers appearing in order: NOT PROVEN
+
+**Blocker**: QEMU not installed
 
 ### G1 (UEFI Boot Ownership)
-- ✅ Code ready
-- ✅ BOOTX64.EFI generates as **PE32+ executable (EFI application) x86-64**
-- ✅ Built with true PE/COFF conversion (objcopy ELF→PE/COFF)
-- ✅ ESP directory structure created: `build/esp/EFI/BOOT/BOOTX64.EFI`
-- ✅ Test script `test_g1.sh` rewritten for true UEFI chain
-- ✅ NO `-kernel` parameter (Multiboot2 only)
-- ✅ NO SeaBIOS fallback (UEFI only)
-- ✅ ExitBootServices() state machine implemented per UEFI spec
-- ⏳ Execution blocked: QEMU + OVMF not installed
 
-### Problem Solved
-**Previous Issue**: G1 was using `-kernel` (Multiboot2 parameter), not ESP-based UEFI boot
-**Solution**: 
-1. BOOTX64.EFI now genuine PE/COFF format (verified with `file` command)
-2. ESP directory structure ready for OVMF to discover
-3. test_g1.sh completely rewritten with `-hda fat:ro:$ESP_ROOT` instead of `-kernel`
-4. Removed SeaBIOS fallback (must be UEFI or nothing)
+**Build Evidence** ✅:
+- efi_main.c source complete
+- Compiles with fallback efi_minimal.h
+- BOOTX64.EFI generates as PE32+ executable (x86-64)
+- File command: "PE32+ executable (EFI application)"
+- Objdump: "file format pei-x86-64"
+- SHA256: 6feb219046744e158423cd2e5c3f09476f8bfbacdcc9e5c306825ac237947e85
+- ESP directory structure created
+- No -kernel parameter in boot chain
+- No SeaBIOS fallback
+- ExitBootServices state machine implemented in source
 
-### Architectural Guarantee
-**No confusion possible between G0 and G1**:
-- G0 runs Multiboot2 kernel via `-kernel` → No ExitBootServices callable
-- G1 runs BOOTX64.EFI from ESP → ExitBootServices MUST be called
-- G1 marker `NEURX_G1_BOOT_SERVICES_EXITED` impossible in G0 path
-- Each gate has distinct, non-overlapping execution proof
+**Build Format Verification** ✅:
+- ✓ Binary format is PE/COFF (not ELF)
+- ✓ Subsystem marked as EFI Application
+- ✓ Architecture is x86-64
+- ✓ Binary size 5.4K reasonable for minimal EFI app
+
+**Critical Unverified** ❌:
+- **ABI correctness**: efi_minimal.h structure layouts may not match actual UEFI
+- **Field offsets**: Struct padding/alignment unvalidated
+- **Function pointers**: EFIAPI calling convention untested
+- **Entry point**: Whether efi_main() signature matches UEFI spec
+
+**Runtime Evidence** ⏳:
+- OVMF discovering BOOTX64.EFI: NOT TESTED
+- efi_main() executing: NOT TESTED
+- GetMemoryMap() returning data: NOT TESTED
+- ExitBootServices() returning EFI_SUCCESS: NOT TESTED
+- Post-ExitBootServices COM1 I/O: NOT TESTED
+- Serial markers in sequence: NOT PROVEN
+- Boot services actually unavailable post-EBS: NOT PROVEN
+
+**Blockers**: 
+- QEMU not installed
+- OVMF firmware not installed
+- UEFI ABI correctness unvalidated
+
+### G2+ (Real Memory Ownership)
+
+Not started. Depends on both G0 and G1 runtime PASS.
+
+---
+
+## Risk Assessment: efi_minimal.h
+
+The main risk point is the custom `efi_minimal.h` implementation:
+
+```
+What OVMF provides:
+  EFI_SYSTEM_TABLE*
+       ↓
+  BootServices*
+       ↓
+  Fixed ABI / Fixed struct layout per UEFI spec
+```
+
+What we defined:
+  - Custom EFI_SYSTEM_TABLE struct
+  - Custom EFI_BOOT_SERVICES struct
+  - Custom field offsets and padding
+
+**Any error in**:
+  - Field order
+  - Field sizes
+  - Padding/alignment
+  - Function pointer signatures
+  - EFIAPI calling convention
+
+**Results in**:
+  - Compilation success (binary looks fine)
+  - Runtime ABI mismatch (wrong field accesses, wrong function calls)
+  - Possible crash or undefined behavior
+
+**Verification timeline**:
+  1. Build succeeds → Binary format valid (current)
+  2. OVMF loads BOOTX64.EFI → ABI entry point correct (future)
+  3. efi_main() executes → First marker appears (future)
+  4. GetMemoryMap() returns data → Struct offsets correct (future)
+  5. ExitBootServices() returns EFI_SUCCESS → Full ABI validated (future)
+
+Currently at step 1. Steps 2-5 require OVMF execution.
+
+---
+
+## Execution Readiness Matrix
+
+| Component | Status | Evidence | Risk |
+|-----------|--------|----------|------|
+| G0 build | ✅ | 14KB kernel.elf | Low |
+| G0 format | ✅ | Multiboot2 compliance | Low |
+| G0 run | ⏳ | Blocked on QEMU | Medium |
+| G1 build | ✅ | BOOTX64.EFI compiles | Low |
+| G1 format | ✅ | PE/COFF file command | Medium |
+| G1 ABI | ❌ | efi_minimal.h unvalidated | **HIGH** |
+| G1 run | ⏳ | Blocked on QEMU+OVMF | High |
+
+**Key blocker**: QEMU/OVMF unavailable
+**Key risk**: efi_minimal.h may have ABI errors invisible at compile-time
+**Key dependency**: First OVMF serial output will reveal ABI correctness
 
 ## Execution Prerequisites
 
