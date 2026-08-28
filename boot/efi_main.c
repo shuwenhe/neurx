@@ -145,6 +145,15 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
         return Status;
     }
     
+    /* Send G1 marker: UEFI entry complete */
+    com1_init();
+    com1_puts("NEURX_G1_EFI_ENTRY\n");
+    io_delay();
+    
+    /* Send G1 marker: Memory map ready */
+    com1_puts("NEURX_G1_MEMORY_MAP_READY\n");
+    io_delay();
+    
     efi_print(L"NeurX G1: Memory map retrieved, exiting boot services...\r\n");
     
     /* Exit Boot Services - This is the critical transition point */
@@ -176,22 +185,18 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
      * Boot Services are now permanently unavailable
      * No UEFI calls allowed after this point
      * CPU is under NeurX control
+     * 
+     * Send proof of successful exit
      */
-    
-    /* Initialize COM1 UART */
-    com1_init();
-    
-    /* Send boot messages via COM1 serial port */
-    com1_puts("NEURX_G1_KERNEL_ENTRY\n");
-    io_delay();
-    io_delay();
-    
     com1_puts("NEURX_G1_BOOT_SERVICES_EXITED\n");
     io_delay();
     io_delay();
     
-    com1_puts("NEURX_G1_COM1_OWNED\n");
+    /* Kernel entry in bare-metal mode */
+    com1_puts("NEURX_G1_KERNEL_ENTRY\n");
     io_delay();
+    
+    com1_puts("NEURX_G1_COM1_OWNED\n");
     io_delay();
     
     com1_puts("NEURX_G1_PASS\n");

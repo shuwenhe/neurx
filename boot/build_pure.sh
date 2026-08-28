@@ -120,25 +120,21 @@ struct {
     .end_tag_zero = 8
 };
 
-/* Main kernel entry point - called by bootloader */
+/* Main kernel entry point - called by Multiboot2 bootloader */
 void kernel_main(void) {
     /* Initialize UART */
     uart_init();
     
-    /* Send boot markers */
-    uart_puts("NEURX_G1_KERNEL_ENTRY\n");
+    /* Send G0 boot markers (Bare-metal Multiboot2 execution) */
+    uart_puts("NEURX_G0_KERNEL_ENTRY\n");
     io_delay();
     io_delay();
     
-    uart_puts("NEURX_G1_BOOT_SERVICES_EXITED\n");
+    uart_puts("NEURX_G0_COM1_OWNED\n");
     io_delay();
     io_delay();
     
-    uart_puts("NEURX_G1_COM1_OWNED\n");
-    io_delay();
-    io_delay();
-    
-    uart_puts("NEURX_G1_PASS\n");
+    uart_puts("NEURX_G0_PASS\n");
     io_delay();
     io_delay();
     
