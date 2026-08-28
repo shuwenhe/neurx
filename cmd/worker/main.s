@@ -15,6 +15,7 @@ func main() {
     string local_rank_text = runtime_env_get("LOCAL_RANK", "0")
     string node_name = runtime_env_get("NEURX_NODE_NAME", runtime_env_get("HOSTNAME", "worker"))
     string node_host = runtime_env_get("NEURX_NODE_HOST", runtime_env_get("HOSTNAME", "localhost"))
+    string enable_relaunch = runtime_env_get("NEURX_ENABLE_RELAUNCH_EXECUTION", "0")
     int node_port = runtime_parse_int(runtime_env_get("NEURX_NODE_PORT", master_port), runtime_parse_int(master_port, 29500))
     int world_size = runtime_parse_int(world_size_text, 0)
     int rank = runtime_parse_int(rank_text, -1)
@@ -45,6 +46,10 @@ func main() {
     cluster_heartbeat_state heartbeat = create_cluster_heartbeat_state(cluster_name, runtime_env_get("NEURX_HEARTBEAT_DIR", "/tmp/neurx_cluster/heartbeat"))
     runtime_make_dirs(runtime_env_get("NEURX_HEARTBEAT_DIR", "/tmp/neurx_cluster/heartbeat"))
     heartbeat = cluster_heartbeat_write(heartbeat, runtime_parse_int(runtime_env_get("NEURX_NODE_ID", "1"), 1), node_name, node_host, rank, local_rank, 1000, true, "ready")
+    if enable_relaunch == "1" {
+        heartbeat = cluster_heartbeat_write(heartbeat, runtime_parse_int(runtime_env_get("NEURX_NODE_ID", "1"), 1), node_name, node_host, rank, local_rank, 1001, true, "relaunching")
+        heartbeat = cluster_heartbeat_write(heartbeat, runtime_parse_int(runtime_env_get("NEURX_NODE_ID", "1"), 1), node_name, node_host, rank, local_rank, 1002, true, "ready")
+    }
     println("[neurx-worker] heartbeat=" + cluster_heartbeat_summary(heartbeat))
     if runtime_run_command_exit_code("test -x " + runtime_shell_escape(worker_bin)) != 0 {
         println("[neurx-worker] worker binary is not executable: " + worker_bin)

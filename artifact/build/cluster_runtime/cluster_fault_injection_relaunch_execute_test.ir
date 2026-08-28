@@ -1,0 +1,45 @@
+SSEED-TARGET-V1
+FUNC_BEGIN|expect|_|_
+PARAM|condition|_|_
+PARAM|name|_|_
+JUMP_IF_FALSE|L0|condition|_
+ARG|"PASS "|_|_
+CALL|t0|print|1
+ARG|name|_|_
+CALL|t1|print|1
+RET|0|_|_
+JUMP|L1|_|_
+LABEL|L0|_|_
+LABEL|L1|_|_
+ARG|"FAIL "|_|_
+CALL|t2|print|1
+ARG|name|_|_
+CALL|t3|print|1
+RET|1|_|_
+RET|0|_|_
+FUNC_END|expect|_|_
+FUNC_BEGIN|main|_|_
+CALL|t4|new_demo_cluster_state|0
+MOV|state|t4|_
+ARG|state|_|_
+CALL|t5|bridge_fault_injection_relaunch_execute|1
+MOV|exit_code|t5|_
+MOV|failures|0|_
+CMP_GE|t6|exit_code|0
+ARG|t6|_|_
+ARG|"relaunch execute exit code"|_|_
+CALL|t7|expect|2
+ADD|t8|failures|t7
+MOV|failures|t8|_
+CMP_EQ|t9|failures|0
+JUMP_IF_FALSE|L2|t9|_
+ARG|"PASS cluster fault injection relaunch execute"|_|_
+CALL|t10|println|1
+RET|0|_|_
+JUMP|L3|_|_
+LABEL|L2|_|_
+LABEL|L3|_|_
+ARG|"FAIL cluster fault injection relaunch execute"|_|_
+CALL|t11|println|1
+RET|1|_|_
+FUNC_END|main|_|_

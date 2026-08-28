@@ -2484,7 +2484,7 @@ numeric-alignment-test:
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" test/numeric_alignment_pytorch.py \
 		artifact/build/numeric_alignment/numeric_alignment_probe
-.PHONY: inference-feature-gap-check cluster-runtime-test cluster-parallel-plan-test cluster-runtime-bridge-parallel-test cluster-parallel-assignment-test cluster-launch-plan-test cluster-parallel-launch-test cluster-parallel-grouped-launch-test cluster-parallel-execution-test cluster-execute-launch-plan-test cluster-parallel-execution-script-test cluster-remote-execution-test cluster-heartbeat-test cluster-heartbeat-scan-test cluster-recovery-test cluster-fault-injection-recovery-test cluster-fault-injection-e2e-test cluster-fault-injection-relaunch-test
+.PHONY: inference-feature-gap-check cluster-runtime-test cluster-parallel-plan-test cluster-runtime-bridge-parallel-test cluster-parallel-assignment-test cluster-launch-plan-test cluster-parallel-launch-test cluster-parallel-grouped-launch-test cluster-parallel-execution-test cluster-execute-launch-plan-test cluster-parallel-execution-script-test cluster-remote-execution-test cluster-heartbeat-test cluster-heartbeat-scan-test cluster-recovery-test cluster-fault-injection-recovery-test cluster-fault-injection-e2e-test cluster-fault-injection-relaunch-test cluster-fault-injection-relaunch-execute-test cluster-fault-injection-worker-relaunch-test hetero-topology-test cluster-hetero-placement-test hetero-runtime-bridge-test
 S_INFERENCE_CHECK_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../../s/bin/s /home/shuwen/s/bin/s) $(S_COMPILER))
 INFERENCE_FEATURE_GAP_S_MODULES := \
 	src/serving/lifecycle/inference_request.s \
@@ -2602,6 +2602,31 @@ cluster-fault-injection-relaunch-test:
 	@$(S_SEED_COMPILER) test/distributed/cluster_fault_injection_relaunch_test.s \
 		artifact/build/cluster_runtime/cluster_fault_injection_relaunch_test.ir
 	@echo "✅ Cluster fault injection relaunch S test compiled"
+cluster-fault-injection-relaunch-execute-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_fault_injection_relaunch_execute_test.s \
+		artifact/build/cluster_runtime/cluster_fault_injection_relaunch_execute_test.ir
+	@echo "✅ Cluster fault injection relaunch execute S test compiled"
+cluster-fault-injection-worker-relaunch-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_fault_injection_worker_relaunch_test.s \
+		artifact/build/cluster_runtime/cluster_fault_injection_worker_relaunch_test.ir
+	@echo "✅ Cluster fault injection worker relaunch S test compiled"
+hetero-topology-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/hetero_topology_test.s \
+		artifact/build/cluster_runtime/hetero_topology_test.ir
+	@echo "✅ Hetero topology S test compiled"
+cluster-hetero-placement-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/hetero_topology_test.s \
+		artifact/build/cluster_runtime/hetero_topology_test.ir
+	@echo "✅ Cluster hetero placement S test compiled"
+hetero-runtime-bridge-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/hetero_runtime_bridge_test.s \
+		artifact/build/cluster_runtime/hetero_runtime_bridge_test.ir
+	@echo "✅ Hetero runtime bridge S test compiled"
 inference-runtime-test:
 	@mkdir -p artifact/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \

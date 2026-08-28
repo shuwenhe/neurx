@@ -367,6 +367,27 @@ func device_silu(
     return false, "backend not implemented"
 }
 
+func device_vector_add(
+    device_tensor a,
+    device_tensor b,
+    device_tensor* c,
+    stream_handle stream
+) (bool, string) {
+    if a.element_count != b.element_count {
+        return false, "Tensor size mismatch for vector_add"
+    }
+    if a.element_count != c.element_count {
+        return false, "Output tensor size mismatch for vector_add"
+    }
+    if a.dtype != b.dtype || a.dtype != c.dtype {
+        return false, "Tensor dtype mismatch for vector_add"
+    }
+    if a.dtype != 0 {  // only float32 for now
+        return false, "Only float32 supported for vector_add"
+    }
+    return false, "backend not implemented"
+}
+
 func device_softmax(
     device_tensor input,
     int axis,
