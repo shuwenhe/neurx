@@ -12,8 +12,18 @@
  * Goal: Prove CPU control is in NeurX, not Linux.
  */
 
-#include <efi.h>
-#include <efilib.h>
+#ifdef __has_include
+  #if __has_include(<efi.h>)
+    #include <efi.h>
+    #include <efilib.h>
+  #else
+    #include "efi_minimal.h"
+  #endif
+#else
+  /* Fallback to minimal headers if __has_include not supported */
+  #include "efi_minimal.h"
+#endif
+
 #include <stdint.h>
 #include <string.h>
 
@@ -21,6 +31,10 @@ typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;
+
+/* Global UEFI pointers (set by InitializeLib) */
+EFI_BOOT_SERVICES *BS = NULL;
+EFI_SYSTEM_TABLE *ST = NULL;
 
 /* COM1 UART Port I/O */
 #define COM1_BASE       0x3F8

@@ -9,92 +9,164 @@
 #include <stdint.h>
 #include <string.h>
 
-/* UEFI status codes */
-typedef uint64_t EFI_STATUS;
-typedef void* EFI_HANDLE;
+/* Basic UEFI Types */
+typedef uint8_t UINT8;
+typedef uint16_t UINT16;
+typedef uint32_t UINT32;
+typedef uint64_t UINT64;
+typedef int8_t INT8;
+typedef int16_t INT16;
+typedef int32_t INT32;
+typedef int64_t INT64;
+typedef uint64_t UINTN;
+typedef int64_t INTN;
+typedef uint16_t CHAR16;
+typedef char CHAR8;
+typedef void VOID;
+typedef UINT8 BOOLEAN;
+
+#define TRUE  1
+#define FALSE 0
+
+/* Calling convention */
+#define EFIAPI
+
+/* Handle */
+typedef VOID* EFI_HANDLE;
+
+/* UEFI Status Codes */
+typedef UINT64 EFI_STATUS;
 
 #define EFI_SUCCESS               0
-#define EFI_INVALID_PARAMETER     (1ULL << 63) | 0x2
-#define EFI_ERROR(Status)         ((Status) != EFI_SUCCESS)
+#define EFI_LOAD_ERROR            1
+#define EFI_INVALID_PARAMETER     2
+#define EFI_UNSUPPORTED           3
+#define EFI_BAD_BUFFER_SIZE       4
+#define EFI_BUFFER_TOO_SMALL      5
+#define EFI_ERROR(Status)         (((INT64)(Status)) < 0)
 
-/* UEFI memory types */
-typedef uint32_t EFI_MEMORY_TYPE;
-#define EfiLoaderCode   1
-#define EfiLoaderData   2
-#define EfiBootServicesCode  3
-#define EfiBootServicesData  4
+/* Memory Types */
+typedef UINT32 EFI_MEMORY_TYPE;
+#define EfiReservedMemoryType 0
+#define EfiLoaderCode         1
+#define EfiLoaderData         2
+#define EfiBootServicesCode   3
+#define EfiBootServicesData   4
+#define EfiRuntimeServicesCode 5
+#define EfiRuntimeServicesData 6
+#define EfiConventionalMemory 7
 
-/* UEFI memory descriptor */
+/* Memory Descriptor */
 typedef struct {
-    uint32_t Type;
-    uint64_t PhysicalStart;
-    uint64_t VirtualStart;
-    uint64_t NumberOfPages;
-    uint64_t Attribute;
+    UINT32 Type;
+    UINT32 Pad;
+    UINT64 PhysicalStart;
+    UINT64 VirtualStart;
+    UINT64 NumberOfPages;
+    UINT64 Attribute;
 } EFI_MEMORY_DESCRIPTOR;
 
-/* Minimal Boot Services table */
-typedef struct {
-    /* Minimal subset of Boot Services */
-    uint64_t Padding[0x20];  /* Skip to the functions we need */
-    
-    /* GetMemoryMap is at offset 0x28 in UEFI spec */
-    EFI_STATUS (*GetMemoryMap)(
-        uint64_t *MemoryMapSize,
-        EFI_MEMORY_DESCRIPTOR *MemoryMap,
-        uint64_t *MapKey,
-        uint64_t *DescriptorSize,
-        uint32_t *DescriptorVersion
+/* Simple Text Output Protocol */
+typedef struct _EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL {
+    VOID *Reset;
+    EFI_STATUS (EFIAPI *OutputString)(
+        VOID *This,
+        CHAR16 *String
     );
-    
-    /* ExitBootServices is at offset 0x30 */
-    EFI_STATUS (*ExitBootServices)(
-        EFI_HANDLE ImageHandle,
-        uint64_t MapKey
-    );
-} EFI_BOOT_SERVICES_MINIMAL;
+    VOID *TestString;
+    VOID *QueryMode;
+    VOID *SetMode;
+    VOID *SetAttribute;
+    VOID *ClearScreen;
+    VOID *SetCursorPosition;
+    VOID *EnableCursor;
+    VOID *Mode;
+} EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
 
-/* UEFI System Table */
+/* Boot Services Table */
 typedef struct {
-    uint64_t Signature;
-    uint32_t Revision;
-    uint32_t HeaderSize;
-    uint32_t CRC32;
-    uint32_t Reserved;
+    /* Skip first 52 bytes */
+    UINT8 _Padding[52];
     
-    void* FirmwareVendor;
-    uint32_t FirmwareRevision;
+    /* Offset 52: AllocatePool */
+    EFI_STATUS (EFIAPI *AllocatePool)(
+        EFI_MEMORY_TYPE PoolType,
+        UINTN Size,
+        VOID **Buffer
+    );
+    
+    /* Offset 60: FreePool */
+    EFI_STATUS (EFIAPI *FreePool)(
+        VOID *Buffer
+    );
+    
+    /* Offset 68: GetMemoryMap */
+    EFI_STATUS (EFIAPI *GetMemoryMap)(
+        UINTN *MemoryMapSize,
+        EFI_MEMORY_DESCRIPTOR *MemoryMap,
+        UINTN *MapKey,
+        UINTN *DescriptorSize,
+        UINT32 *DescriptorVersion
+    );
+    
+    /* More functions follow, but we use padding for the rest */
+    UINT8 _Padding2[200];
+    
+    /* Offset around 228: SetWatchdogTimer */
+    EFI_STATUS (EFIAPI *SetWatchdogTimer)(
+        UINTN Timeout,
+        UINT64 WatchdogCode,
+        UINTN DataSize,
+        VOID *WatchdogData
+    );
+    
+    /* More padding */
+    UINT8 _Padding3[200];
+    
+    /* Near the end: ExitBootServices */
+    EFI_STATUS (EFIAPI *ExitBootServices)(
+        EFI_HANDLE ImageHandle,
+        UINTN MapKey
+    );
+} EFI_BOOT_SERVICES;
+
+/* System Table */
+typedef struct {
+    UINT64 Signature;
+    UINT32 Revision;
+    UINT32 HeaderSize;
+    UINT32 CRC32;
+    UINT32 Reserved;
+    
+    VOID *FirmwareVendor;
+    UINT32 FirmwareRevision;
     
     EFI_HANDLE ConsoleInHandle;
-    void* ConIn;
+    VOID *ConIn;
     
     EFI_HANDLE ConsoleOutHandle;
-    void* ConOut;
+    EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *ConOut;
     
     EFI_HANDLE StandardErrorHandle;
-    void* StdErr;
+    VOID *StdErr;
     
-    void* RuntimeServices;
-    EFI_BOOT_SERVICES_MINIMAL* BootServices;
+    VOID *RuntimeServices;
+    EFI_BOOT_SERVICES *BootServices;
     
-    uint64_t NumberOfTableEntries;
-    void* ConfigurationTable;
-} EFI_SYSTEM_TABLE_MINIMAL;
+    UINTN NumberOfTableEntries;
+    VOID *ConfigurationTable;
+} EFI_SYSTEM_TABLE;
 
-/* Simple print for UEFI ConOut */
-static inline void efi_print(EFI_SYSTEM_TABLE_MINIMAL* SystemTable, const uint16_t* Str) {
-    if (!SystemTable || !SystemTable->ConOut) {
-        return;
-    }
-    
-    /* ConOut is an UEFI Simple Text Output Protocol */
-    /* First function at offset 0 is OutputString */
-    typedef EFI_STATUS (*OutputString_t)(void* This, uint16_t* Str);
-    OutputString_t OutputString = (OutputString_t)(((void**)SystemTable->ConOut)[0]);
-    
-    if (OutputString) {
-        OutputString(SystemTable->ConOut, (uint16_t*)Str);
-    }
+/* Global Boot Services and System Table pointers */
+extern EFI_BOOT_SERVICES *BS;
+extern EFI_SYSTEM_TABLE *ST;
+
+/* Library initialization function */
+static inline void InitializeLib(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
+    extern EFI_BOOT_SERVICES *BS;
+    extern EFI_SYSTEM_TABLE *ST;
+    ST = SystemTable;
+    BS = SystemTable->BootServices;
 }
 
 #endif /* __EFI_MINIMAL_H__ */

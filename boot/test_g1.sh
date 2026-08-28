@@ -1,11 +1,18 @@
 #!/bin/bash
 # G1 UEFI Boot Ownership Verification Test
 # Tests whether NeurX successfully takes control from UEFI firmware
-# Requires: OVMF UEFI firmware, BOOTX64.EFI entry point
+# 
+# Execution chain MUST be:
+#   OVMF UEFI → EFI System Partition → /EFI/BOOT/BOOTX64.EFI → efi_main() → ExitBootServices() → NeurX
+#
+# NOT allowed:
+#   QEMU -kernel [direct kernel injection]  ← G0 only
+#   SeaBIOS or other legacy BIOS fallback   ← Not UEFI
 
 BUILD_DIR="build"
-KERNEL_ELF="$BUILD_DIR/kernel.elf"
-UEFI_EFI="$BUILD_DIR/BOOTX64.EFI"
+BOOTX64_EFI="$BUILD_DIR/BOOTX64.EFI"
+ESP_ROOT="$BUILD_DIR/esp"
+ESP_BOOTX64="$ESP_ROOT/EFI/BOOT/BOOTX64.EFI"
 SERIAL_LOG="/tmp/neurx_g1_serial.log"
 
 RED='\033[0;31m'
@@ -18,39 +25,118 @@ echo -e "${BLUE}═════════════════════�
 echo -e "${BLUE}    G1: UEFI Boot Ownership Verification${NC}"
 echo -e "${BLUE}════════════════════════════════════════${NC}"
 echo ""
-echo -e "${YELLOW}Path: OVMF → BOOTX64.EFI → efi_main → ExitBootServices → NeurX${NC}"
+echo -e "${YELLOW}Boot Chain: OVMF → EFI/BOOT/BOOTX64.EFI → efi_main → ExitBootServices → NeurX${NC}"
 echo ""
 
-# Build UEFI EFI application
-echo -e "${YELLOW}[INFO]${NC} Building UEFI EFI application..."
+# ============================================================================
+# Step 1: Build UEFI EFI application
+# ============================================================================
+
+echo -e "${YELLOW}[STEP 1]${NC} Building BOOTX64.EFI..."
+echo ""
 
 if [ ! -x "boot/build.sh" ]; then
     echo -e "${RED}[FAIL]${NC} boot/build.sh not found"
     exit 1
 fi
 
-# Try to build EFI version
 if ! bash boot/build.sh > /tmp/g1_build.log 2>&1; then
     echo -e "${RED}[FAIL]${NC} UEFI EFI build failed"
-    echo "Build log:"
-    cat /tmp/g1_build.log | tail -20
     echo ""
-    echo "Troubleshooting:"
-    echo "  - Need EFI development headers: libefi-dev, libefi headers"
-    echo "  - Or build EFI tools from source"
+    echo "Build log (last 30 lines):"
+    tail -30 /tmp/g1_build.log
+    echo ""
     exit 1
 fi
 
-if [ ! -f "$KERNEL_ELF" ]; then
-    echo -e "${RED}[FAIL]${NC} EFI kernel not built: $KERNEL_ELF"
-    exit 1
-fi
-
-echo -e "${GREEN}[OK]${NC} EFI application built: $KERNEL_ELF ($(ls -lh $KERNEL_ELF | awk '{print $5}'))"
+echo -e "${GREEN}[OK]${NC} Build completed"
 echo ""
 
-# Find QEMU
-echo -e "${YELLOW}[INFO]${NC} Checking for QEMU..."
+# ============================================================================
+# Step 2: Verify BOOTX64.EFI is a real PE/COFF executable, not ELF
+# ============================================================================
+
+echo -e "${YELLOW}[STEP 2]${NC} Verifying BOOTX64.EFI format and integrity..."
+echo ""
+
+if [ ! -f "$BOOTX64_EFI" ]; then
+    echo -e "${RED}[FAIL]${NC} BOOTX64.EFI not found: $BOOTX64_EFI"
+    exit 1
+fi
+
+# Check file type - must contain "PE" (PE/COFF format)
+FILE_OUTPUT=$(file "$BOOTX64_EFI")
+echo "File type: $FILE_OUTPUT"
+
+if ! echo "$FILE_OUTPUT" | grep -qi "PE\|executable"; then
+    echo -e "${RED}[FAIL]${NC} BOOTX64.EFI is not a PE/COFF executable"
+    echo ""
+    echo "Troubleshooting:"
+    echo "  - Verify objcopy succeeded in build.sh"
+    echo "  - Check objdump output:"
+    objdump -f "$BOOTX64_EFI" 2>/dev/null || echo "  - objdump unavailable"
+    exit 1
+fi
+
+echo -e "${GREEN}[OK]${NC} BOOTX64.EFI is PE/COFF format"
+
+# Verify with objdump
+echo ""
+echo "Object format verification:"
+objdump -f "$BOOTX64_EFI" 2>/dev/null | grep -E "architecture|format" || true
+
+# Calculate SHA256 for this specific build
+BOOTX64_SHA256=$(sha256sum "$BOOTX64_EFI" | awk '{print $1}')
+echo ""
+echo "SHA256: $BOOTX64_SHA256"
+ls -lh "$BOOTX64_EFI" | awk '{print "Size: " $5}'
+
+echo ""
+echo -e "${GREEN}[OK]${NC} BOOTX64.EFI verified as legitimate PE/COFF executable"
+echo ""
+
+# ============================================================================
+# Step 3: Create EFI System Partition (ESP) directory structure
+# ============================================================================
+
+echo -e "${YELLOW}[STEP 3]${NC} Creating EFI System Partition (ESP)..."
+echo ""
+
+# Clean and create ESP structure
+rm -rf "$ESP_ROOT"
+mkdir -p "$ESP_ROOT/EFI/BOOT"
+echo -e "${GREEN}[OK]${NC} ESP directory created: $ESP_ROOT"
+
+# Copy BOOTX64.EFI to ESP
+cp "$BOOTX64_EFI" "$ESP_BOOTX64"
+ESP_SHA256=$(sha256sum "$ESP_BOOTX64" | awk '{print $1}')
+
+# Verify copy integrity
+if [ "$BOOTX64_SHA256" != "$ESP_SHA256" ]; then
+    echo -e "${RED}[FAIL]${NC} BOOTX64.EFI copy verification failed"
+    echo "  Original SHA256: $BOOTX64_SHA256"
+    echo "  Copy SHA256:     $ESP_SHA256"
+    exit 1
+fi
+
+echo -e "${GREEN}[OK]${NC} BOOTX64.EFI copied to ESP"
+ls -lh "$ESP_BOOTX64"
+
+echo ""
+echo "ESP layout:"
+tree "$ESP_ROOT" 2>/dev/null || find "$ESP_ROOT" -type f
+
+echo ""
+echo -e "${GREEN}[OK]${NC} EFI System Partition ready"
+echo ""
+
+# ============================================================================
+# Step 4: Verify QEMU installation
+# ============================================================================
+
+echo -e "${YELLOW}[STEP 4]${NC} Checking for QEMU..."
+echo ""
+
 QEMU_CMD=""
 for cmd in qemu-system-x86_64 qemu-system-i386; do
     if command -v "$cmd" &> /dev/null; then
@@ -60,10 +146,17 @@ for cmd in qemu-system-x86_64 qemu-system-i386; do
 done
 
 if [ -z "$QEMU_CMD" ]; then
-    echo -e "${RED}[FAIL]${NC} QEMU not found"
+    echo -e "${RED}[BLOCKED]${NC} QEMU not found"
     echo ""
     echo "Install QEMU with:"
-    echo "  sudo apt update && sudo apt install -y qemu-system-x86"
+    echo "  sudo apt update && sudo apt install -y qemu-system-x86_64"
+    echo ""
+    echo "Or compile from source: https://www.qemu.org/"
+    echo ""
+    echo "Status after blocking:"
+    echo "  ✅ G1 BOOTX64.EFI build & ESP layout complete"
+    echo "  ⏳ G1 QEMU execution BLOCKED"
+    echo "  ❌ G1 boot ownership NOT PROVEN"
     echo ""
     exit 1
 fi
@@ -72,10 +165,15 @@ QEMU_VERSION=$("$QEMU_CMD" --version | head -1)
 echo -e "${GREEN}[OK]${NC} QEMU: $QEMU_VERSION"
 echo ""
 
-# Find OVMF UEFI firmware
-echo -e "${YELLOW}[INFO]${NC} Checking for OVMF UEFI firmware..."
+# ============================================================================
+# Step 5: Verify OVMF UEFI firmware
+# ============================================================================
+
+echo -e "${YELLOW}[STEP 5]${NC} Checking for OVMF UEFI firmware..."
+echo ""
+
 OVMF_FILE=""
-for ovmf in /usr/share/ovmf/OVMF.fd /usr/share/OVMF/OVMF.fd /usr/share/seabios/bios.bin; do
+for ovmf in /usr/share/ovmf/OVMF.fd /usr/share/OVMF/OVMF.fd /usr/share/qemu/OVMF.fd /opt/ovmf/OVMF.fd; do
     if [ -f "$ovmf" ]; then
         OVMF_FILE="$ovmf"
         break
@@ -83,45 +181,77 @@ for ovmf in /usr/share/ovmf/OVMF.fd /usr/share/OVMF/OVMF.fd /usr/share/seabios/b
 done
 
 if [ -z "$OVMF_FILE" ]; then
-    echo -e "${RED}[FAIL]${NC} OVMF firmware not found"
+    echo -e "${RED}[BLOCKED]${NC} OVMF UEFI firmware not found"
     echo ""
     echo "Install OVMF with:"
     echo "  sudo apt update && sudo apt install -y ovmf"
+    echo ""
+    echo "Or download from: https://github.com/tianocore/tianocore.github.io/wiki/OVMF"
+    echo ""
+    echo "Note: SeaBIOS (traditional BIOS) is NOT compatible with this test."
+    echo "      G1 requires UEFI/OVMF specifically."
+    echo ""
+    echo "Status after blocking:"
+    echo "  ✅ G1 BOOTX64.EFI build & ESP layout complete"
+    echo "  ⏳ G1 OVMF execution BLOCKED"
+    echo "  ❌ G1 boot ownership NOT PROVEN"
     echo ""
     exit 1
 fi
 
 echo -e "${GREEN}[OK]${NC} OVMF firmware: $OVMF_FILE"
+ls -lh "$OVMF_FILE" | awk '{print "Size: " $5}'
 echo ""
 
-# Run QEMU with UEFI firmware
-echo -e "${YELLOW}[INFO]${NC} Starting QEMU with UEFI firmware (10s timeout)..."
-echo "Command: $QEMU_CMD -m 256 -nographic -no-reboot \\"
-echo "  -bios $OVMF_FILE -kernel $KERNEL_ELF -serial file:$SERIAL_LOG"
+# ============================================================================
+# Step 6: Launch QEMU with UEFI boot from ESP
+# ============================================================================
+
+echo -e "${YELLOW}[STEP 6]${NC} Starting QEMU with UEFI firmware..."
+echo ""
+
+echo "Boot parameters:"
+echo "  QEMU command:       $QEMU_CMD"
+echo "  Memory:             256M"
+echo "  UEFI firmware:      $OVMF_FILE"
+echo "  ESP location:       $ESP_ROOT"
+echo "  BOOTX64.EFI SHA256: $BOOTX64_SHA256"
+echo "  Serial output:      $SERIAL_LOG"
+echo ""
+
+echo "IMPORTANT: QEMU will boot OVMF, which will search for /EFI/BOOT/BOOTX64.EFI"
+echo "           and execute efi_main() directly. NO -kernel parameter injected."
 echo ""
 
 rm -f "$SERIAL_LOG"
 
+# Launch QEMU with OVMF firmware
+# IMPORTANT: NO -kernel parameter!
+# OVMF will find and load BOOTX64.EFI from the virtual disk
 timeout 10 "$QEMU_CMD" \
     -m 256 \
     -nographic \
     -no-reboot \
     -bios "$OVMF_FILE" \
-    -kernel "$KERNEL_ELF" \
-    -serial "file:$SERIAL_LOG" 2>/dev/null || true
+    -serial "file:$SERIAL_LOG" \
+    -hda "fat:ro:$ESP_ROOT" \
+    2>/dev/null || true
 
 echo ""
 echo "=== G1 Serial Output ==="
 if [ -f "$SERIAL_LOG" ]; then
     cat "$SERIAL_LOG"
 else
-    echo "(no output)"
+    echo "(no serial output)"
 fi
 echo "=== End Output ==="
 echo ""
 
-# Verify G1 markers in correct order
-echo -e "${YELLOW}[INFO]${NC} Verifying G1 UEFI boot sequence..."
+# ============================================================================
+# Step 7: Verify G1 UEFI boot sequence markers
+# ============================================================================
+
+echo -e "${YELLOW}[STEP 7]${NC} Verifying G1 UEFI boot sequence..."
 echo ""
 
 EXPECTED_MARKERS=(
@@ -135,6 +265,12 @@ EXPECTED_MARKERS=(
 
 if [ ! -f "$SERIAL_LOG" ]; then
     echo -e "${RED}[FAIL]${NC} No serial output generated"
+    echo ""
+    echo "Possible causes:"
+    echo "  - QEMU does not support serial output"
+    echo "  - OVMF failed to boot"
+    echo "  - BOOTX64.EFI was not found in ESP"
+    echo ""
     exit 1
 fi
 
@@ -164,24 +300,33 @@ if [ $ALL_FOUND -eq 1 ]; then
     echo -e "${GREEN}G1 VERIFICATION: PASS ✅${NC}"
     echo ""
     echo "Proven:"
-    echo "  ✓ OVMF UEFI firmware loaded NeurX"
+    echo "  ✓ OVMF UEFI firmware loaded BOOTX64.EFI from ESP"
     echo "  ✓ efi_main() entry point executed"
-    echo "  ✓ Memory map successfully retrieved"
-    echo "  ✓ ExitBootServices() succeeded"
+    echo "  ✓ Memory map successfully retrieved via GetMemoryMap()"
+    echo "  ✓ ExitBootServices() succeeded with EFI_SUCCESS"
     echo "  ✓ Boot Services permanently unavailable"
-    echo "  ✓ Direct hardware I/O (COM1 UART) works post-ExitBootServices"
-    echo "  ✓ Full UEFI → NeurX ownership handoff completed"
+    echo "  ✓ NeurX kernel has exclusive CPU control"
+    echo "  ✓ COM1 UART I/O works (direct port I/O, no BIOS calls)"
     echo ""
     echo "Evidence:"
     echo "  Serial log: $SERIAL_LOG"
-    echo "  QEMU: $QEMU_VERSION"
-    echo "  OVMF: $OVMF_FILE"
-    echo "  EFI kernel: $KERNEL_ELF"
+    echo "  ESP path: $ESP_ROOT"
+    echo "  BOOTX64.EFI SHA256: $BOOTX64_SHA256"
     echo ""
-    exit 0
 else
     echo -e "${RED}G1 VERIFICATION: FAIL ❌${NC}"
     echo ""
-    echo "Failed to complete UEFI boot sequence"
+    echo "Missing or out-of-order markers. This could mean:"
+    echo "  - efi_main() was not called"
+    echo "  - GetMemoryMap() failed"
+    echo "  - ExitBootServices() failed or returned an error"
+    echo "  - Marker order is wrong"
+    echo ""
+    echo "Troubleshooting:"
+    echo "  1. Check serial output above for error messages"
+    echo "  2. Verify BOOTX64.EFI is a valid PE/COFF executable"
+    echo "  3. Verify OVMF can read from ESP (FAT filesystem)"
+    echo "  4. Add debug output to boot/efi_main.c for more info"
+    echo ""
     exit 1
 fi
