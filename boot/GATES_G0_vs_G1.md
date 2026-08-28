@@ -348,31 +348,82 @@ NEURX_G1_PASS
 
 ## Summary
 
-| Gate | Proves | Kernel Logic | Boot Harness | Status |
-|------|--------|--------------|--------------|--------|
-| **G0** | Bare-metal (no UEFI) | ✅ kernel_main() correct | ✅ QEMU -kernel works | Ready ⏳ |
-| **G1** | UEFI boot ownership | ✅ efi_main() + ExitBootServices | ❌ needs ESP + BOOTX64.EFI | Pending |
-| **G2+** | Real memory/interrupt | ❌ Not started | N/A | Future |
+| Gate | Kernel Logic | Boot Harness | QEMU Exec | Status |
+|------|--------------|--------------|-----------|--------|
+| **G0** | ✅ kernel_main() | ✅ test_g0.sh | ⏳ BLOCKED | Ready |
+| **G1** | ✅ efi_main() | ✅ BOOTX64.EFI PE/COFF | ⏳ BLOCKED | Ready |
+| **G2+** | ❌ Not started | N/A | N/A | Future |
 
-### Current Issue
-**G1 boot harness still uses `-kernel` (Multiboot2 parameter)** instead of true UEFI ESP loading:
+### G0 (Multiboot2 Bare-Metal)
+- ✅ Code ready
+- ✅ Kernel compiles to 14KB Multiboot2 ELF
+- ✅ Test script `test_g0.sh` complete
+- ⏳ Execution blocked: QEMU not installed
 
+### G1 (UEFI Boot Ownership)
+- ✅ Code ready
+- ✅ BOOTX64.EFI generates as **PE32+ executable (EFI application) x86-64**
+- ✅ Built with true PE/COFF conversion (objcopy ELF→PE/COFF)
+- ✅ ESP directory structure created: `build/esp/EFI/BOOT/BOOTX64.EFI`
+- ✅ Test script `test_g1.sh` rewritten for true UEFI chain
+- ✅ NO `-kernel` parameter (Multiboot2 only)
+- ✅ NO SeaBIOS fallback (UEFI only)
+- ✅ ExitBootServices() state machine implemented per UEFI spec
+- ⏳ Execution blocked: QEMU + OVMF not installed
+
+### Problem Solved
+**Previous Issue**: G1 was using `-kernel` (Multiboot2 parameter), not ESP-based UEFI boot
+**Solution**: 
+1. BOOTX64.EFI now genuine PE/COFF format (verified with `file` command)
+2. ESP directory structure ready for OVMF to discover
+3. test_g1.sh completely rewritten with `-hda fat:ro:$ESP_ROOT` instead of `-kernel`
+4. Removed SeaBIOS fallback (must be UEFI or nothing)
+
+### Architectural Guarantee
+**No confusion possible between G0 and G1**:
+- G0 runs Multiboot2 kernel via `-kernel` → No ExitBootServices callable
+- G1 runs BOOTX64.EFI from ESP → ExitBootServices MUST be called
+- G1 marker `NEURX_G1_BOOT_SERVICES_EXITED` impossible in G0 path
+- Each gate has distinct, non-overlapping execution proof
+
+## Execution Prerequisites
+
+**For G0**:
+- QEMU x86-64 emulator only
+
+**For G1**:
+- QEMU x86-64 emulator
+- OVMF UEFI firmware (ovmf package)
+
+**Install both**:
 ```bash
-# Current (WRONG):
-qemu-system-x86_64 -bios OVMF -kernel kernel.elf
-
-# Should be (CORRECT):
-qemu-system-x86_64 -bios OVMF [ESP with BOOTX64.EFI inside]
+sudo apt update
+sudo apt install -y qemu-system-x86_64 ovmf
 ```
 
-This means G1 is not yet proving the intended chain:
-```
-OVMF → EFI System Partition → /EFI/BOOT/BOOTX64.EFI → efi_main() → ExitBootServices()
-```
+## Next Steps (When QEMU Available)
 
-### Next Steps
-1. Execute G0 test first (ready now, only needs QEMU)
-2. Prove bare-metal execution works
-3. Then rebuild G1 boot harness with proper ESP and BOOTX64.EFI loading
+1. **Execute G0 first** (simpler boot path):
+   ```bash
+   bash boot/test_g0.sh
+   ```
+   Expected: "G0 VERIFICATION: PASS ✅"
 
-**Key Achievement**: Clear architectural separation prevents confusion. Once both pass, each proves exactly what it claims.
+2. **Then execute G1** (UEFI boot ownership):
+   ```bash
+   bash boot/test_g1.sh
+   ```
+   Expected: "G1 VERIFICATION: PASS ✅"
+
+3. **Save evidence**:
+   ```bash
+   cp /tmp/neurx_g0_serial.log boot/G0_SERIAL_EVIDENCE.txt
+   cp /tmp/neurx_g1_serial.log boot/G1_SERIAL_EVIDENCE.txt
+   git add boot/*_EVIDENCE.txt && git commit -m "G0/G1 execution evidence"
+   ```
+
+4. **Then proceed to G2** (real memory/interrupt handling)
+
+**Key Achievement**: Clear, non-overlapping boot chains with separate verification proofs.
+
+Never again will a Multiboot2 test be confused with a UEFI test. Each gate proves exactly what it claims.
