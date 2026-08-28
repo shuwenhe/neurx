@@ -412,3 +412,8 @@ func bridge_fault_injection_recovery(cluster_orchestration_state state) cluster_
         scan_summary: cluster_heartbeat_scan_summary(scan)
     }
 }
+
+func bridge_fault_injection_relaunch_commands(cluster_orchestration_state state) string {
+    cluster_fault_injection_result result = bridge_fault_injection_recovery(state)
+    result.relaunch_execution_script.script
+}

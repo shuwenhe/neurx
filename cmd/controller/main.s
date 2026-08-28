@@ -2,7 +2,7 @@ package main
 use neurx.runtime.command.{runtime_env_get, runtime_parse_int, runtime_run_command_exit_code, runtime_shell_escape}
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
 use neurx.deployment.cluster_orchestration.{cluster_orchestration_state, new_demo_cluster_state, new_cluster_deployment_spec}
-use neurx.deployment.cluster_runtime_bridge.{cluster_runtime_bridge_result, bridge_probe_runtime, bridge_deployment_summary, bridge_remote_execution_commands}
+use neurx.deployment.cluster_runtime_bridge.{cluster_runtime_bridge_result, bridge_probe_runtime, bridge_deployment_summary, bridge_remote_execution_commands, bridge_fault_injection_relaunch_commands}
 use neurx.distributed.cluster.heartbeat.{create_cluster_heartbeat_state, cluster_heartbeat_is_live, cluster_heartbeat_summary}
 
 func main() {
@@ -10,6 +10,7 @@ func main() {
     string worker_host = runtime_env_get("NEURX_WORKER_HOST", "")
     string worker_bin = runtime_env_get("NEURX_REMOTE_WORKER_BIN", "")
     string master_addr = runtime_env_get("MASTER_ADDR", "")
+    string enable_relaunch = runtime_env_get("NEURX_ENABLE_RELAUNCH_EXECUTION", "0")
     string master_port_text = runtime_env_get("MASTER_PORT", "29500")
     string world_size_text = runtime_env_get("WORLD_SIZE", "1")
     int world_size = runtime_parse_int(world_size_text, 1)
@@ -43,18 +44,29 @@ func main() {
     if worker_host == "" || worker_bin == "" || master_addr == "" {
         println("[neurx-controller] dry control-plane pass complete; set NEURX_WORKER_HOST, NEURX_REMOTE_WORKER_BIN and MASTER_ADDR to launch workers")
         string dry_script = bridge_remote_execution_commands(orch, true)
+        string dry_relaunch = bridge_fault_injection_relaunch_commands(orch)
         runtime_make_dirs("/tmp/neurx_cluster")
         runtime_write_text_file("/tmp/neurx_cluster/launch.sh", dry_script)
+        runtime_write_text_file("/tmp/neurx_cluster/relaunch.sh", dry_relaunch)
         println(dry_script)
         return 0
     }
     string command_script = bridge_remote_execution_commands(orch, true)
+    string relaunch_script = bridge_fault_injection_relaunch_commands(orch)
     runtime_make_dirs("/tmp/neurx_cluster")
     runtime_write_text_file("/tmp/neurx_cluster/launch.sh", command_script)
+    runtime_write_text_file("/tmp/neurx_cluster/relaunch.sh", relaunch_script)
     int exit_code = runtime_run_command_exit_code("sh /tmp/neurx_cluster/launch.sh")
     if exit_code != 0 {
         println("[neurx-controller] worker launch failed")
         return exit_code
+    }
+    if enable_relaunch == "1" {
+        int relaunch_exit_code = runtime_run_command_exit_code("sh /tmp/neurx_cluster/relaunch.sh")
+        if relaunch_exit_code != 0 {
+            println("[neurx-controller] worker relaunch failed")
+            return relaunch_exit_code
+        }
     }
     0
 }
