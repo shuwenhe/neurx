@@ -1,6 +1,5 @@
 package ops
 
-
     element_wise
     reduction
     matmul
@@ -11,7 +10,6 @@ package ops
     fusion
     custom
 }
-
 
     sm_70
     sm_75

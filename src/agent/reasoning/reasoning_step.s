@@ -1,13 +1,11 @@
 package neurx.reasoning.reasoning_step
 
-
     pending
     processing
     completed
     failed
     backtracked
 }
-
 
     analysis
     deduction

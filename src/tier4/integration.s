@@ -1,9 +1,5 @@
 package neurx.tier4.integration
 
-
-
-
-
 struct os_tier4_integration {
     int tier1_initialized
     int tier2_initialized
@@ -11,7 +7,6 @@ struct os_tier4_integration {
     int tier4_status
     vec tier4_features
 }
-
 
 func new_os_tier4_integration() (os_tier4_integration, string) {
     integration := os_tier4_integration{
@@ -35,17 +30,13 @@ func new_os_tier4_integration() (os_tier4_integration, string) {
     return integration, ""
 }
 
-
 func (ti* os_tier4_integration) get_status() (int, string) {
     return ti.tier4_status, ""
 }
 
-
 func (ti* os_tier4_integration) list_features() (vec, string) {
     return ti.tier4_features, ""
 }
-
-
 
 struct tier4_stats {
     int total_features

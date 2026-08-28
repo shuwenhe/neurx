@@ -2,13 +2,11 @@ package neurx.kernel
 
 use std.slices
 
-
 struct cgroup_subsystem {
     int subsys_id  
     string name
     int enabled
 }
-
 
 struct cgroup_cpu {
     int group_id
@@ -17,7 +15,6 @@ struct cgroup_cpu {
     int shares  
     int cpu_count  
 }
-
 
 struct cgroup_memory {
     int group_id
@@ -28,7 +25,6 @@ struct cgroup_memory {
     int oom_kill_disable
 }
 
-
 struct cgroup_io {
     int group_id
     int read_bps_limit  
@@ -36,7 +32,6 @@ struct cgroup_io {
     int read_iops_limit  
     int write_iops_limit
 }
-
 
 struct cgroup_process {
     int pid
@@ -47,7 +42,6 @@ struct cgroup_process {
     int io_write  
 }
 
-
 struct cgroup_group {
     int group_id
     string group_name
@@ -57,13 +51,11 @@ struct cgroup_group {
     vec processes
 }
 
-
 struct cgroup_manager {
     cgroup_group[] cgroup_groups
     cgroup_subsystem[] subsystems
     int next_group_id
 }
-
 
 func (cgroup_manager* cm) init() (int, string) {
     cm.cgroup_groups = cgroup_group[]{}
@@ -94,7 +86,6 @@ func (cgroup_manager* cm) init() (int, string) {
     
     return 0, ""
 }
-
 
 func (cgroup_manager* cm) create_cgroup(string group_name) (cgroup_group, string) {
     group := cgroup_group{
@@ -131,7 +122,6 @@ func (cgroup_manager* cm) create_cgroup(string group_name) (cgroup_group, string
     return group, ""
 }
 
-
 func (cgroup_manager* cm) add_process_to_cgroup(int group_id, int pid) (int, string) {
     if group_id >= len(cm.cgroup_groups) {
         return -1, "Invalid cgroup"
@@ -154,7 +144,6 @@ func (cgroup_manager* cm) add_process_to_cgroup(int group_id, int pid) (int, str
     return pid, ""
 }
 
-
 func (cgroup_manager* cm) set_cpu_limit(int group_id, int quota, int period) (int, string) {
     if group_id >= len(cm.cgroup_groups) {
         return -1, "Invalid cgroup"
@@ -168,7 +157,6 @@ func (cgroup_manager* cm) set_cpu_limit(int group_id, int quota, int period) (in
     return 0, ""
 }
 
-
 func (cgroup_manager* cm) set_memory_limit(int group_id, int memory_limit_mb) (int, string) {
     if group_id >= len(cm.cgroup_groups) {
         return -1, "Invalid cgroup"
@@ -180,7 +168,6 @@ func (cgroup_manager* cm) set_memory_limit(int group_id, int memory_limit_mb) (i
     
     return 0, ""
 }
-
 
 func (cgroup_manager* cm) set_io_limit(int group_id, int read_bps, int write_bps) (int, string) {
     if group_id >= len(cm.cgroup_groups) {
@@ -194,7 +181,6 @@ func (cgroup_manager* cm) set_io_limit(int group_id, int read_bps, int write_bps
     
     return 0, ""
 }
-
 
 func (cgroup_manager* cm) check_limits(int group_id) (int, string) {
     if group_id >= len(cm.cgroup_groups) {
@@ -223,7 +209,6 @@ func (cgroup_manager* cm) check_limits(int group_id) (int, string) {
     
     return 0, ""
 }
-
 
 func (cgroup_manager cm) get_cgroup_stats(int group_id) (int, int, int, int) {
     if group_id >= len(cm.cgroup_groups) {

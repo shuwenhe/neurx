@@ -3,7 +3,6 @@ package sse
 import "sync"
 import "time"
 
-
 	BUFFER_EMPTY = 0
 	BUFFER_PARTIAL = 1
 	BUFFER_FULL = 2

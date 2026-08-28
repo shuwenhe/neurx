@@ -1,8 +1,5 @@
 package neurx.tier4.certs
 
-
-
-
 struct rsa_key {
     int key_id
     int key_size        
@@ -12,7 +9,6 @@ struct rsa_key {
     int p
     int q
 }
-
 
 struct x509_cert {
     int cert_id
@@ -29,7 +25,6 @@ struct x509_cert {
     int self_signed
 }
 
-
 struct cert_request {
     int request_id
     int subject_id
@@ -37,7 +32,6 @@ struct cert_request {
     vec attributes
     int request_time
 }
-
 
 struct certificate_authority {
     int ca_id
@@ -48,7 +42,6 @@ struct certificate_authority {
     int ca_cert_id
 }
 
-
 struct cert_manager {
     vec certificates
     vec ca_list
@@ -57,7 +50,6 @@ struct cert_manager {
     int cert_counter
     int crl_updated
 }
-
 
 func cert_manager_init() (cert_manager, string) {
     manager := cert_manager{
@@ -71,7 +63,6 @@ func cert_manager_init() (cert_manager, string) {
     
     return manager, ""
 }
-
 
 func (manager* cert_manager) issue_certificate(subject_id int, issuer_id int, public_key rsa_key, validity_days int) (int, string) {
     cert := x509_cert{
@@ -102,7 +93,6 @@ func (manager* cert_manager) issue_certificate(subject_id int, issuer_id int, pu
     return cert.cert_id, ""
 }
 
-
 func (manager* cert_manager) verify_signature(cert_id int, data vec) (int, string) {
     if cert_id >= len(manager.certificates) {
         return 0, "certificate not found"
@@ -118,7 +108,6 @@ func (manager* cert_manager) verify_signature(cert_id int, data vec) (int, strin
     return 0, "signature verification failed"
 }
 
-
 func (manager* cert_manager) revoke_certificate(cert_id int) (int, string) {
     if cert_id >= len(manager.certificates) {
         return -1, "certificate not found"
@@ -127,7 +116,6 @@ func (manager* cert_manager) revoke_certificate(cert_id int) (int, string) {
     manager.revocation_list = append(manager.revocation_list, cert_id)
     return 0, ""
 }
-
 
 func (manager* cert_manager) is_revoked(cert_id int) int {
     i := 0
@@ -141,7 +129,6 @@ func (manager* cert_manager) is_revoked(cert_id int) int {
     
     return 0  
 }
-
 
 func (manager* cert_manager) verify_chain(cert_id int) (int, string) {
     if cert_id >= len(manager.certificates) {
@@ -170,7 +157,6 @@ func (manager* cert_manager) verify_chain(cert_id int) (int, string) {
     
     return 1, ""  
 }
-
 
 struct cert_info {
     int cert_id
@@ -201,20 +187,15 @@ func (manager* cert_manager) get_cert_info(cert_id int) (cert_info, string) {
     return info, ""
 }
 
-
-
-
 const int AUDIO_FORMAT_PCM = 0
 const int AUDIO_FORMAT_MP3 = 1
 const int AUDIO_FORMAT_AAC = 2
 const int AUDIO_FORMAT_FLAC = 3
 
-
 const int SAMPLE_RATE_8K = 8000
 const int SAMPLE_RATE_16K = 16000
 const int SAMPLE_RATE_44K = 44100
 const int SAMPLE_RATE_48K = 48000
-
 
 struct audio_buffer {
     int buffer_id
@@ -224,7 +205,6 @@ struct audio_buffer {
     int format          
     int channels        
 }
-
 
 struct audio_device {
     int device_id
@@ -238,14 +218,12 @@ struct audio_device {
     int overrun_count
 }
 
-
 struct audio_driver {
     vec devices
     vec mixers          
     int device_counter
     int volume_level    
 }
-
 
 func audio_driver_init() (audio_driver, string) {
     driver := audio_driver{
@@ -257,7 +235,6 @@ func audio_driver_init() (audio_driver, string) {
     
     return driver, ""
 }
-
 
 func (driver* audio_driver) register_device(device_type int, sample_rate int, channels int) (int, string) {
     device := audio_device{
@@ -278,7 +255,6 @@ func (driver* audio_driver) register_device(device_type int, sample_rate int, ch
     return device.device_id, ""
 }
 
-
 func (driver* audio_driver) play_audio(device_id int, buffer audio_buffer) (int, string) {
     if device_id >= len(driver.devices) {
         return -1, "device not found"
@@ -294,7 +270,6 @@ func (driver* audio_driver) play_audio(device_id int, buffer audio_buffer) (int,
     
     return -1, "device does not support playback"
 }
-
 
 func (driver* audio_driver) capture_audio(device_id int, sample_count int) (audio_buffer, string) {
     if device_id >= len(driver.devices) {
@@ -326,7 +301,6 @@ func (driver* audio_driver) capture_audio(device_id int, sample_count int) (audi
     return audio_buffer{}, "device does not support capture"
 }
 
-
 func (driver* audio_driver) set_volume(level int) (int, string) {
     if level < 0 || level > 100 {
         return -1, "invalid volume level"
@@ -336,11 +310,9 @@ func (driver* audio_driver) set_volume(level int) (int, string) {
     return level, ""
 }
 
-
 func (driver* audio_driver) get_volume() int {
     return driver.volume_level
 }
-
 
 struct audio_info {
     int device_id

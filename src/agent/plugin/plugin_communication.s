@@ -3,7 +3,6 @@ package plugins
 import "sync"
 import "time"
 
-
 	MSG_REQUEST = 0
 	MSG_RESPONSE = 1
 	MSG_EVENT = 2
@@ -11,7 +10,6 @@ import "time"
 	MSG_PING = 4
 	MSG_PONG = 5
 }
-
 
 	PRIORITY_LOW = 0
 	PRIORITY_NORMAL = 1

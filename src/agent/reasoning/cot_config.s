@@ -1,12 +1,10 @@
 package neurx.reasoning.cot_config
 
-
     step_by_step
     detailed
     summarized
     hierarchical
 }
-
 
     none
     consistency

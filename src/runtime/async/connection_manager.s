@@ -4,7 +4,6 @@ import "sync"
 import "time"
 import "net"
 
-
 	STATE_IDLE           = 0
 	STATE_CONNECTING     = 1
 	STATE_CONNECTED      = 2

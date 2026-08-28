@@ -3,7 +3,6 @@ package reasoning
 import "sync"
 import "time"
 
-
 	INITIAL = 0
 	PROCESSING = 1
 	PAUSED = 2

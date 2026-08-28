@@ -3,7 +3,6 @@ package neurx.runtime.model.json_parser
 use std.slices
 use std.io.println
 
-
     null_type,
     bool_type,
     number_type,

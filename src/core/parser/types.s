@@ -1,13 +1,11 @@
 package neurx.parser.types
 
-
     SUCCESS = 0
     PARTIAL = 1
     INCOMPLETE = 2
     ERROR = 3
     RECOVERED = 4
 }
-
 
     TEXT = 0
     JSON = 1
@@ -19,13 +17,11 @@ package neurx.parser.types
     MIXED = 7
 }
 
-
     STRICT = 0
     LENIENT = 1
     STREAMING = 2
     CACHED = 3
 }
-
 
     NONE = 0
     SKIP_INVALID = 1

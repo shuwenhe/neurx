@@ -6,12 +6,10 @@ package neurx.inference.advanced.multimodal
     AUDIO
 }
 
-
     PNG
     JPEG
     WEBP
 }
-
 
     WAV
     MP3

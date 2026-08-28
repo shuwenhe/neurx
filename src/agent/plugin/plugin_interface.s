@@ -2,7 +2,6 @@ package plugins
 
 import "time"
 
-
 	PLUGIN_UNINITIALIZED = 0
 	PLUGIN_LOADED = 1
 	PLUGIN_INITIALIZED = 2
@@ -14,7 +13,6 @@ import "time"
 	PLUGIN_UNLOADING = 8
 }
 
-
 	TYPE_SAMPLER = 0
 	TYPE_ENCODER = 1
 	TYPE_REASONER = 2
@@ -23,7 +21,6 @@ import "time"
 	TYPE_MONITOR = 5
 	TYPE_CUSTOM = 6
 }
-
 
 	HOOK_ON_LOAD = 0
 	HOOK_ON_INIT = 1

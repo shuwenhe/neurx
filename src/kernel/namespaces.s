@@ -2,7 +2,6 @@ package neurx.kernel
 
 use std.slices
 
-
 struct namespace {
     int ns_id
     int ns_type  
@@ -10,7 +9,6 @@ struct namespace {
     int ref_count
     int owner_pid
 }
-
 
 struct pid_namespace {
     int ns_id
@@ -20,7 +18,6 @@ struct pid_namespace {
     int current_pid_counter
 }
 
-
 struct network_namespace {
     int ns_id
     int max_interfaces
@@ -28,13 +25,11 @@ struct network_namespace {
     int loopback_address
 }
 
-
 struct mount_namespace {
     int ns_id
     int root_mount_id
     int[] mount_points
 }
-
 
 struct user_namespace {
     int ns_id
@@ -42,7 +37,6 @@ struct user_namespace {
     int uid_map_count
     int gid_map_count
 }
-
 
 struct namespace_manager {
     pid_namespace[] pid_namespaces
@@ -52,7 +46,6 @@ struct namespace_manager {
     int next_ns_id
 }
 
-
 func (namespace_manager* nm) init() (int, string) {
     nm.pid_namespaces = pid_namespace[]{}
     nm.network_namespaces = network_namespace[]{}
@@ -61,7 +54,6 @@ func (namespace_manager* nm) init() (int, string) {
     nm.next_ns_id = 0
     return 0, ""
 }
-
 
 func (namespace_manager* nm) create_pid_namespace(int parent_pid) (pid_namespace, string) {
     pidns := pid_namespace{
@@ -77,7 +69,6 @@ func (namespace_manager* nm) create_pid_namespace(int parent_pid) (pid_namespace
     
     return pidns, ""
 }
-
 
 func (namespace_manager* nm) add_pid_to_namespace(int ns_id, int pid) (int, string) {
     if ns_id >= len(nm.pid_namespaces) {
@@ -97,7 +88,6 @@ func (namespace_manager* nm) add_pid_to_namespace(int ns_id, int pid) (int, stri
     return pid, ""
 }
 
-
 func (namespace_manager* nm) create_network_namespace() (network_namespace, string) {
     netns := network_namespace{
         ns_id: nm.next_ns_id,
@@ -111,7 +101,6 @@ func (namespace_manager* nm) create_network_namespace() (network_namespace, stri
     
     return netns, ""
 }
-
 
 func (namespace_manager* nm) add_interface_to_namespace(int ns_id, string interface_name) (int, string) {
     if ns_id >= len(nm.network_namespaces) {
@@ -130,7 +119,6 @@ func (namespace_manager* nm) add_interface_to_namespace(int ns_id, string interf
     return len(netns.interfaces) - 1, ""
 }
 
-
 func (namespace_manager* nm) create_mount_namespace() (mount_namespace, string) {
     mntns := mount_namespace{
         ns_id: nm.next_ns_id,
@@ -144,7 +132,6 @@ func (namespace_manager* nm) create_mount_namespace() (mount_namespace, string) 
     return mntns, ""
 }
 
-
 func (namespace_manager* nm) add_mount_point(int ns_id, string mount_path) (int, string) {
     if ns_id >= len(nm.mount_namespaces) {
         return -1, "Invalid namespace"
@@ -156,7 +143,6 @@ func (namespace_manager* nm) add_mount_point(int ns_id, string mount_path) (int,
     
     return len(mntns.mount_points) - 1, ""
 }
-
 
 func (namespace_manager* nm) create_user_namespace(int parent_ns_id) (user_namespace, string) {
     userns := user_namespace{
@@ -172,7 +158,6 @@ func (namespace_manager* nm) create_user_namespace(int parent_ns_id) (user_names
     return userns, ""
 }
 
-
 func (namespace_manager* nm) add_uid_mapping(int ns_id) (int, string) {
     if ns_id >= len(nm.user_namespaces) {
         return -1, "Invalid namespace"
@@ -184,7 +169,6 @@ func (namespace_manager* nm) add_uid_mapping(int ns_id) (int, string) {
     
     return userns.uid_map_count, ""
 }
-
 
 func (namespace_manager nm) get_namespace_stats() (int, int, int, int) {
     return len(nm.pid_namespaces), len(nm.network_namespaces), 

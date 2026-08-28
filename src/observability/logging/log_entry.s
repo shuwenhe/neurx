@@ -2,7 +2,6 @@ package neurx.observability.logging
 
 import "time"
 
-
 	TRACE = 0
 	DEBUG = 1
 	INFO = 2
@@ -10,7 +9,6 @@ import "time"
 	ERROR = 4
 	FATAL = 5
 }
-
 
 	REQUEST_RECEIVED = 0
 	PROCESSING_START = 1

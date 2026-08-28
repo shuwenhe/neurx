@@ -7,7 +7,6 @@ import "neurx.util.math"
     RLAIF = 3
 }
 
-
     COLLECTING = 0
     TRAINING = 1
     EVALUATING = 2

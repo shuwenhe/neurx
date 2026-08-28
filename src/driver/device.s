@@ -1,6 +1,5 @@
 package neurx.driver
 
-
 struct device_driver_ops {
     int probe_id
     int remove_id
@@ -12,7 +11,6 @@ struct device_driver_ops {
     int write_id
 }
 
-
 struct device_driver {
     int driver_id
     string driver_name
@@ -22,7 +20,6 @@ struct device_driver {
     int loaded
     int total_operations
 }
-
 
 struct device {
     int device_id
@@ -34,14 +31,12 @@ struct device {
     int minor_num
 }
 
-
 struct device_id_table {
     int table_id
     int device_id
     int device_class
     int vendor_id
 }
-
 
 struct device_driver_framework {
     vec drivers
@@ -54,7 +49,6 @@ struct device_driver_framework {
     int total_removes
     int total_device_operations
 }
-
 
 func create_device_driver(name string, version string) (device_driver, string) {
     driver := device_driver{
@@ -70,7 +64,6 @@ func create_device_driver(name string, version string) (device_driver, string) {
     return driver, ""
 }
 
-
 func create_device(name string, device_type int, major int, minor int) (device, string) {
     dev := device{
         device_id: 0,
@@ -85,7 +78,6 @@ func create_device(name string, device_type int, major int, minor int) (device, 
     return dev, ""
 }
 
-
 func (framework* device_driver_framework) register_driver(driver device_driver) (int, string) {
     driver.driver_id = framework.driver_counter
     driver.loaded = 1
@@ -96,7 +88,6 @@ func (framework* device_driver_framework) register_driver(driver device_driver) 
     
     return driver_id, ""
 }
-
 
 func (framework* device_driver_framework) unregister_driver(driver_id int) (int, string) {
     if driver_id >= len(framework.drivers) {
@@ -110,7 +101,6 @@ func (framework* device_driver_framework) unregister_driver(driver_id int) (int,
     return driver_id, ""
 }
 
-
 func (framework* device_driver_framework) register_device(device device) (int, string) {
     device.device_id = framework.device_counter
     device.state = 1  
@@ -121,7 +111,6 @@ func (framework* device_driver_framework) register_device(device device) (int, s
     
     return device_id, ""
 }
-
 
 func (framework* device_driver_framework) unregister_device(device_id int) (int, string) {
     if device_id >= len(framework.devices) {
@@ -134,7 +123,6 @@ func (framework* device_driver_framework) unregister_device(device_id int) (int,
     
     return device_id, ""
 }
-
 
 func (framework* device_driver_framework) probe_device(device_id int, driver_id int) (int, string) {
     if device_id >= len(framework.devices) || driver_id >= len(framework.drivers) {
@@ -154,7 +142,6 @@ func (framework* device_driver_framework) probe_device(device_id int, driver_id 
     
     return device_id, ""
 }
-
 
 func (framework* device_driver_framework) remove_device(device_id int) (int, string) {
     if device_id >= len(framework.devices) {
@@ -179,7 +166,6 @@ func (framework* device_driver_framework) remove_device(device_id int) (int, str
     return device_id, ""
 }
 
-
 func (framework* device_driver_framework) device_read(device_id int) (vec, string) {
     if device_id >= len(framework.devices) {
         return {}, "Device not found"
@@ -195,7 +181,6 @@ func (framework* device_driver_framework) device_read(device_id int) (vec, strin
     
     return {}, ""
 }
-
 
 func (framework* device_driver_framework) device_write(device_id int, data vec) (int, string) {
     if device_id >= len(framework.devices) {
@@ -213,7 +198,6 @@ func (framework* device_driver_framework) device_write(device_id int, data vec) 
     return len(data), ""
 }
 
-
 func create_device_driver_framework() (device_driver_framework, string) {
     framework := device_driver_framework{
         drivers: {},
@@ -229,7 +213,6 @@ func create_device_driver_framework() (device_driver_framework, string) {
     
     return framework, ""
 }
-
 
 func (framework* device_driver_framework) get_stats() (device_driver_framework, string) {
     return framework, ""

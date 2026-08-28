@@ -3,7 +3,6 @@ package plugins
 import "sync"
 import "time"
 
-
 	EVENT_LOADING = 0
 	EVENT_LOADED = 1
 	EVENT_INITIALIZING = 2

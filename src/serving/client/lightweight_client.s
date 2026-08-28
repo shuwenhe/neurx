@@ -3,7 +3,6 @@ package neurx.serving.client
 use std.slices
 use std.io.println
 
-
     centralized,
     edge_compute,
     hybrid,

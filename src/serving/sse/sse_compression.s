@@ -2,7 +2,6 @@ package sse
 
 import "time"
 
-
 	ALGO_GZIP = 0
 	ALGO_DEFLATE = 1
 	ALGO_BROTLI = 2

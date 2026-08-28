@@ -1,8 +1,5 @@
 package neurx.tier4.virt
 
-
-
-
 struct vcpu {
     int vcpu_id
     int kvm_fd           
@@ -15,7 +12,6 @@ struct vcpu {
     int exit_reason      
 }
 
-
 struct virtual_machine {
     int vm_id
     int kvm_fd
@@ -27,7 +23,6 @@ struct virtual_machine {
     int exit_count
 }
 
-
 struct vm_memory_slot {
     int slot_id
     int guest_phys_addr
@@ -36,14 +31,12 @@ struct vm_memory_slot {
     int flags
 }
 
-
 struct vm_device {
     int device_id
     int device_type     
     int port_base
     int irq
 }
-
 
 struct kvm_manager {
     int kvm_fd          
@@ -52,7 +45,6 @@ struct kvm_manager {
     int vm_counter
     int device_counter
 }
-
 
 func kvm_init() (kvm_manager, string) {
     manager := kvm_manager{
@@ -65,7 +57,6 @@ func kvm_init() (kvm_manager, string) {
     
     return manager, ""
 }
-
 
 func (manager* kvm_manager) create_vm(vcpu_count int, memory_mb int) (int, string) {
     vm := virtual_machine{
@@ -103,7 +94,6 @@ func (manager* kvm_manager) create_vm(vcpu_count int, memory_mb int) (int, strin
     return vm.vm_id, ""
 }
 
-
 func (manager* kvm_manager) vm_run(vm_id int) (int, string) {
     if vm_id >= len(manager.vms) {
         return -1, "vm not found"
@@ -116,7 +106,6 @@ func (manager* kvm_manager) vm_run(vm_id int) (int, string) {
     return 0, ""
 }
 
-
 func (manager* kvm_manager) vm_stop(vm_id int) (int, string) {
     if vm_id >= len(manager.vms) {
         return -1, "vm not found"
@@ -128,7 +117,6 @@ func (manager* kvm_manager) vm_stop(vm_id int) (int, string) {
     
     return 0, ""
 }
-
 
 func (manager* kvm_manager) vcpu_run(vm_id int, vcpu_id int) (int, string) {
     if vm_id >= len(manager.vms) {
@@ -148,7 +136,6 @@ func (manager* kvm_manager) vcpu_run(vm_id int, vcpu_id int) (int, string) {
     return 0, ""
 }
 
-
 func (manager* kvm_manager) set_vcpu_registers(vm_id int, vcpu_id int, rip int, rsp int) (int, string) {
     if vm_id >= len(manager.vms) {
         return -1, "vm not found"
@@ -166,7 +153,6 @@ func (manager* kvm_manager) set_vcpu_registers(vm_id int, vcpu_id int, rip int, 
     return 0, ""
 }
 
-
 func (manager* kvm_manager) get_vcpu_registers(vm_id int, vcpu_id int) (int, int, string) {
     if vm_id >= len(manager.vms) {
         return 0, 0, "vm not found"
@@ -177,7 +163,6 @@ func (manager* kvm_manager) get_vcpu_registers(vm_id int, vcpu_id int) (int, int
     
     return vcpu.guest_rip, vcpu.guest_rsp, ""
 }
-
 
 func (manager* kvm_manager) add_device(vm_id int, device_type int, port_base int, irq int) (int, string) {
     device := vm_device{
@@ -192,7 +177,6 @@ func (manager* kvm_manager) add_device(vm_id int, device_type int, port_base int
     
     return device.device_id, ""
 }
-
 
 struct vm_info {
     int vm_id
@@ -219,7 +203,6 @@ func (manager* kvm_manager) get_vm_info(vm_id int) (vm_info, string) {
     return info, ""
 }
 
-
 func (manager* kvm_manager) handle_vm_exit(vm_id int, vcpu_id int, exit_reason int) (int, string) {
     if vm_id >= len(manager.vms) {
         return -1, "vm not found"
@@ -238,15 +221,11 @@ func (manager* kvm_manager) handle_vm_exit(vm_id int, vcpu_id int, exit_reason i
     return exit_reason, ""
 }
 
-
-
-
 const int ACPI_STATE_D0 = 0      
 const int ACPI_STATE_D1 = 1      
 const int ACPI_STATE_D2 = 2      
 const int ACPI_STATE_D3 = 3      
 const int ACPI_STATE_D3_COLD = 4 
-
 
 struct cpu_cstate {
     int state_id        
@@ -254,13 +233,11 @@ struct cpu_cstate {
     int power_mw        
 }
 
-
 struct cpu_pstate {
     int freq_mhz        
     int voltage_mv      
     int power_mw        
 }
-
 
 struct power_manager {
     vec cpu_cstates     
@@ -270,7 +247,6 @@ struct power_manager {
     int acpi_enabled
     int idle_timeout_ms
 }
-
 
 func power_init() (power_manager, string) {
     pm := power_manager{
@@ -296,7 +272,6 @@ func power_init() (power_manager, string) {
     return pm, ""
 }
 
-
 func (pm* power_manager) set_pstate(pstate_id int) (int, string) {
     if pstate_id >= len(pm.cpu_pstates) {
         return -1, "invalid pstate"
@@ -307,7 +282,6 @@ func (pm* power_manager) set_pstate(pstate_id int) (int, string) {
     
     return pstate.freq_mhz, ""
 }
-
 
 func (pm* power_manager) set_cstate(cstate_id int) (int, string) {
     if cstate_id >= len(pm.cpu_cstates) {
@@ -320,7 +294,6 @@ func (pm* power_manager) set_cstate(cstate_id int) (int, string) {
     return cstate.latency_us, ""
 }
 
-
 func (pm* power_manager) get_power_consumption() int {
     pstate := pm.cpu_pstates[pm.current_pstate]
     cstate := pm.cpu_cstates[pm.current_cstate]
@@ -328,7 +301,6 @@ func (pm* power_manager) get_power_consumption() int {
     
     return pstate.power_mw + cstate.power_mw / 10
 }
-
 
 struct power_stats {
     int current_freq

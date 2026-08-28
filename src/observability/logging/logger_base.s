@@ -6,7 +6,6 @@ package neurx.observability.logging
     ERROR,
 }
 
-
     SCALAR,
     HISTOGRAM,
     IMAGE,

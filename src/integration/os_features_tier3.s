@@ -16,7 +16,6 @@ use neurx.driver.cpufreq
 use neurx.mm.compaction_io
 use neurx.kernel.cpu_scheduling
 
-
 struct os_features_tier3_integration {
     
     vm_manager vm_manager
@@ -48,7 +47,6 @@ struct os_features_tier3_integration {
     users user_manager
     file_perms file_permission_manager
 }
-
 
 func new_os_features_tier3_integration() os_features_tier3_integration {
     osfi3 := os_features_tier3_integration{}
@@ -90,8 +88,6 @@ func new_os_features_tier3_integration() os_features_tier3_integration {
     return osfi3
 }
 
-
-
 func (osfi3* os) create_pid_namespace(int parent_pid) (pid_namespace, string) {
     return osfi3.namespaces.create_pid_namespace(parent_pid)
 }
@@ -107,8 +103,6 @@ func (osfi3* os) create_mount_namespace() (mount_namespace, string) {
 func (osfi3* os) create_user_namespace(int parent_ns_id) (user_namespace, string) {
     return osfi3.namespaces.create_user_namespace(parent_ns_id)
 }
-
-
 
 func (osfi3* os) create_cgroup(string group_name) (cgroup_group, string) {
     return osfi3.cgroups.create_cgroup(group_name)
@@ -134,8 +128,6 @@ func (osfi3* os) check_cgroup_limits(int group_id) (int, string) {
     return osfi3.cgroups.check_limits(group_id)
 }
 
-
-
 func (osfi3* os) add_audit_rule(int event_type, string target, int action) (audit_rule, string) {
     return osfi3.audit.add_rule(event_type, target, action)
 }
@@ -143,8 +135,6 @@ func (osfi3* os) add_audit_rule(int event_type, string target, int action) (audi
 func (osfi3* os) log_audit_event(int pid, int uid, int event_type, string event_name, string details, int result) (int, string) {
     return osfi3.audit.log_event(pid, uid, event_type, event_name, details, result)
 }
-
-
 
 func (osfi3* os) add_capability(int pid, int cap_id) (int, string) {
     return osfi3.capabilities.add_capability_to_process(pid, cap_id)
@@ -157,8 +147,6 @@ func (osfi3* os) remove_capability(int pid, int cap_id) (int, string) {
 func (osfi3* os) check_capability(int pid, int cap_id) (int, string) {
     return osfi3.capabilities.has_capability(pid, cap_id)
 }
-
-
 
 func (osfi3* os) create_user(string username, string home_dir, int gid) (user, string) {
     return osfi3.users.create_user(username, home_dir, gid)
@@ -183,8 +171,6 @@ func (osfi3* os) add_acl_entry(int file_id, int subject_id, int subject_type, in
 func (osfi3* os) check_file_permission(int file_id, int uid, int operation) (int, string) {
     return osfi3.file_perms.check_permission(file_id, uid, operation)
 }
-
-
 
 func (osfi3 os) get_system_stats_tier3() (int, int, int, int, int, int, int) {
     vm_used := osfi3.vm_manager.total_pages - osfi3.vm_manager.free_pages

@@ -3,7 +3,6 @@ package reasoning
 import "sync"
 import "time"
 
-
 	INITIAL_ANALYSIS = 0
 	INTERMEDIATE_STEP = 1
 	VERIFICATION = 2

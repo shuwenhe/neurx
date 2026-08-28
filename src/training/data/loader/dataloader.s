@@ -8,7 +8,6 @@ package neurx.data.loader.dataloader
     FORMAT_CUSTOM,
 }
 
-
     PACKING_NONE,
     PACKING_FIXED_LENGTH,
     PACKING_BINNING,
@@ -105,7 +104,6 @@ struct training_batch {
     float64 tokenize_time_ms
     float64 total_prepare_time_ms
 }
-
 
     LOADER_IDLE,
     LOADER_LOADING,

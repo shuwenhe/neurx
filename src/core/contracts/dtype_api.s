@@ -1,10 +1,8 @@
-
     floating_point
     integer
     complex
     boolean
 }
-
 
     float_16
     b_float_16

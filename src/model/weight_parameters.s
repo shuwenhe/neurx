@@ -1,6 +1,5 @@
 package model
 
-
     float32
     float16
     bfloat16
@@ -8,7 +7,6 @@ package model
     int4
     nf4
 }
-
 
     none
     symmetric

@@ -1,6 +1,5 @@
 package inference
 
-
     submitted
     queued
     acquiring_resources
@@ -10,7 +9,6 @@ package inference
     failed
     timeout
 }
-
 
     critical
     high

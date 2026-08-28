@@ -3,7 +3,6 @@ package reasoning
 import "sync"
 import "time"
 
-
 	RELEVANCE = 0
 	COMPLETENESS = 1
 	LOGICAL_CONSISTENCY = 2

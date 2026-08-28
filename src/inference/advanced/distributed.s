@@ -6,13 +6,11 @@ import "time"
     ROCm_GPU
 }
 
-
     DATA_PARALLEL
     TENSOR_PARALLEL
     PIPELINE_PARALLEL
     HYBRID_PARALLEL
 }
-
 
     NCCL
     GLOO
@@ -49,7 +47,6 @@ struct tensor_shard {
     num_shards int
     shard_index int
 }
-
 
     ALL_REDUCE
     ALL_GATHER

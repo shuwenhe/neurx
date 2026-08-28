@@ -3,14 +3,12 @@ package reasoning
 import "sync"
 import "time"
 
-
 	UNEXPLORED = 0
 	EXPLORING = 1
 	EVALUATED = 2
 	PRUNED = 3
 	SELECTED = 4
 }
-
 
 	BREADTH_FIRST = 0
 	DEPTH_FIRST = 1

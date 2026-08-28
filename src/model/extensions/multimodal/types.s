@@ -2,7 +2,6 @@ package neurx.multimodal.types
 
 import "neurx.tensor.types"
 
-
     image,
     text,
     audio,
@@ -11,7 +10,6 @@ import "neurx.tensor.types"
     unknown
 }
 
-
     rgb,
     rgba,
     bgr,
@@ -19,13 +17,11 @@ import "neurx.tensor.types"
     yuv
 }
 
-
     pcm16,
     pcm32,
     float32,
     mu_law
 }
-
 
     pad,
     resize,

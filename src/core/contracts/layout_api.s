@@ -1,4 +1,3 @@
-
     dense
     channels_last
     channels_first

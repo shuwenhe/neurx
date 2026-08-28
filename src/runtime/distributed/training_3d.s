@@ -61,7 +61,6 @@ struct training_config {
     int rope_target_length
 }
 
-
     PHASE_IDLE,
     PHASE_FORWARD,
     PHASE_BACKWARD,
@@ -100,7 +99,6 @@ struct pipeline_stage_state {
     float backward_time_ms
     float comm_time_ms
 }
-
 
     SCHEDULE_1F1B,
     SCHEDULE_GPIPE,

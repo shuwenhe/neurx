@@ -8,7 +8,6 @@ package neurx.observability.training.training_observability
     LOG_ALL
 }
 
-
     ALERT_WEBHOOK,
     ALERT_EMAIL,
     ALERT_CONSOLE,
@@ -153,7 +152,6 @@ struct alert_info {
     string suggested_action
 }
 
-
     SEVERITY_INFO,
     SEVERITY_WARNING,
     SEVERITY_CRITICAL,
@@ -180,10 +178,6 @@ struct recommendation {
     expected_improvement
     complexity complexity
 }
-
-
-
-
 
 struct monitoring_manager {
     monitoring_config config

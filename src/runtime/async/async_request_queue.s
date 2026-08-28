@@ -23,7 +23,6 @@ struct async_request {
 	mu          sync.Mutex
 }
 
-
 	STATUS_PENDING    = 0
 	STATUS_QUEUED     = 1
 	STATUS_PROCESSING = 2

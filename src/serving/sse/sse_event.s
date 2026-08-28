@@ -2,14 +2,12 @@ package sse
 
 import "time"
 
-
 	FIELD_EVENT = 0
 	FIELD_DATA = 1
 	FIELD_ID = 2
 	FIELD_RETRY = 3
 	FIELD_COMMENT = 4
 }
-
 
 	COMPRESSION_NONE = 0
 	COMPRESSION_GZIP = 1

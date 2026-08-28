@@ -45,7 +45,6 @@ struct outline_node {
     revisions: int = 0
 }
 
-
     PENDING
     GENERATING
     COMPLETED

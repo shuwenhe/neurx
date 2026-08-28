@@ -3,14 +3,12 @@ package reasoning
 import "sync"
 import "time"
 
-
 	GREEDY = 0
 	BEAM_SEARCH = 1
 	BRANCH_AND_BOUND = 2
 	DYNAMIC_PROGRAMMING = 3
 	ADAPTIVE = 4
 }
-
 
 	SCORE_BASED = 0
 	DEPTH_BASED = 1

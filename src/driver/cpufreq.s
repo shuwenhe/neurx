@@ -2,7 +2,6 @@ package neurx.driver
 
 use std.slices
 
-
 struct cpu_freq_state {
     int frequency  
     int voltage    
@@ -18,13 +17,11 @@ struct cpufreq_governor {
     cpu_freq_state[] available_states
 }
 
-
 struct cpufreq_driver {
     int cpu_id
     cpufreq_governor[] governors
     int active_governor
 }
-
 
 func (cpufreq_driver* driver) init(int cpu_id) (int, string) {
     driver.cpu_id = cpu_id
@@ -33,7 +30,6 @@ func (cpufreq_driver* driver) init(int cpu_id) (int, string) {
     return 0, ""
 }
 
-
 func add_freq_state(int freq, int voltage, int power) cpu_freq_state {
     return cpu_freq_state{
         frequency: freq,
@@ -41,7 +37,6 @@ func add_freq_state(int freq, int voltage, int power) cpu_freq_state {
         power power
     }
 }
-
 
 func (cpufreq_driver* driver) create_ondemand_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
@@ -64,7 +59,6 @@ func (cpufreq_driver* driver) create_ondemand_governor(int min_freq, int max_fre
     return governor, ""
 }
 
-
 func (cpufreq_driver* driver) create_powersave_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
         governor_id: len(driver.governors),
@@ -84,7 +78,6 @@ func (cpufreq_driver* driver) create_powersave_governor(int min_freq, int max_fr
     driver.governors = append(driver.governors, governor)
     return governor, ""
 }
-
 
 func (cpufreq_driver* driver) create_performance_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
@@ -106,7 +99,6 @@ func (cpufreq_driver* driver) create_performance_governor(int min_freq, int max_
     return governor, ""
 }
 
-
 func (cpufreq_driver* driver) set_governor(int governor_id) (int, string) {
     if governor_id >= len(driver.governors) {
         return -1, "Invalid governor"
@@ -115,7 +107,6 @@ func (cpufreq_driver* driver) set_governor(int governor_id) (int, string) {
     driver.active_governor = governor_id
     return 0, ""
 }
-
 
 func (cpufreq_driver* driver) update_frequency(int cpu_load) (int, string) {
     if driver.active_governor < 0 {
@@ -144,7 +135,6 @@ func (cpufreq_driver* driver) update_frequency(int cpu_load) (int, string) {
     return gov.current_freq, ""
 }
 
-
 func (cpufreq_driver driver) get_current_freq() int {
     if driver.active_governor < 0 {
         return 0
@@ -152,7 +142,6 @@ func (cpufreq_driver driver) get_current_freq() int {
     gov := driver.governors[driver.active_governor]
     return gov.current_freq
 }
-
 
 func (cpufreq_driver driver) get_power_consumption() (int, string) {
     if driver.active_governor < 0 {

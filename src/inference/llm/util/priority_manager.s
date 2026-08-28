@@ -1,6 +1,5 @@
 package inference
 
-
     p0_critical
     p1_high
     p2_normal

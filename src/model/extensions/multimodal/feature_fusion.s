@@ -5,7 +5,6 @@ import (
     "neurx.multimodal.types"
 )
 
-
     concatenation,
     addition,
     attention,

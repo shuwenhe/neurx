@@ -1,6 +1,5 @@
 package attention
 
-
     cuda_sm_70
     cuda_sm_80
     cuda_sm_90

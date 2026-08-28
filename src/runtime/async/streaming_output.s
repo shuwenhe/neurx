@@ -3,7 +3,6 @@ package async
 import "time"
 import "encoding/json"
 
-
 	EVENT_TOKEN_DELTA   = 0
 	EVENT_CHUNK         = 1
 	EVENT_ERROR         = 2

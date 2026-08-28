@@ -41,7 +41,6 @@ struct streaming_handler {
 	sync.Mutex                     mu
 }
 
-
 	STREAM_STARTED = 0
 	STREAM_CHUNK_RECEIVED = 1
 	STREAM_REASONING_STEP = 2

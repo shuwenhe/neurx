@@ -2,7 +2,6 @@ package neurx.ipc
 
 use std.slices
 
-
 struct semaphore {
     int sem_id
     int value
@@ -11,19 +10,16 @@ struct semaphore {
     int[] waiters  
 }
 
-
 struct semaphore_set {
     semaphore[] semaphores
     int total_sems
 }
-
 
 func (semaphore_set* ss) init(int max_sems) (int, string) {
     ss.semaphores = semaphore[]{}
     ss.total_sems = max_sems
     return 0, ""
 }
-
 
 func (semaphore_set* ss) create_semaphore(int initial_value) (semaphore, string) {
     if len(ss.semaphores) >= ss.total_sems {
@@ -41,7 +37,6 @@ func (semaphore_set* ss) create_semaphore(int initial_value) (semaphore, string)
     ss.semaphores = append(ss.semaphores, sem)
     return sem, ""
 }
-
 
 func (semaphore_set* ss) wait_semaphore(int sem_id, int pid) (int, string) {
     if sem_id >= len(ss.semaphores) {
@@ -62,7 +57,6 @@ func (semaphore_set* ss) wait_semaphore(int sem_id, int pid) (int, string) {
     ss.semaphores[sem_id] = sem
     return 1, "BLOCKED"  
 }
-
 
 func (semaphore_set* ss) signal_semaphore(int sem_id) (int, string) {
     if sem_id >= len(ss.semaphores) {
@@ -90,7 +84,6 @@ func (semaphore_set* ss) signal_semaphore(int sem_id) (int, string) {
     return 0, ""
 }
 
-
 func (semaphore_set ss) get_semaphore_value(int sem_id) (int, string) {
     if sem_id >= len(ss.semaphores) {
         return 0, "Invalid semaphore"
@@ -100,7 +93,6 @@ func (semaphore_set ss) get_semaphore_value(int sem_id) (int, string) {
     return sem.value, ""
 }
 
-
 struct message {
     int msg_id
     int sender_pid
@@ -108,7 +100,6 @@ struct message {
     int timestamp
     int priority
 }
-
 
 struct message_queue {
     int queue_id
@@ -118,19 +109,16 @@ struct message_queue {
     int sender_pid
 }
 
-
 struct message_queue_manager {
     message_queue[] queues
     int next_queue_id
 }
-
 
 func (message_queue_manager* mqm) init() (int, string) {
     mqm.queues = message_queue[]{}
     mqm.next_queue_id = 0
     return 0, ""
 }
-
 
 func (message_queue_manager* mqm) create_queue(int max_msgs) (message_queue, string) {
     mq := message_queue{
@@ -145,7 +133,6 @@ func (message_queue_manager* mqm) create_queue(int max_msgs) (message_queue, str
     mqm.next_queue_id = mqm.next_queue_id + 1
     return mq, ""
 }
-
 
 func (message_queue_manager* mqm) send_message(int queue_id, int sender_pid, string content, int priority) (int, string) {
     if queue_id >= len(mqm.queues) {
@@ -171,7 +158,6 @@ func (message_queue_manager* mqm) send_message(int queue_id, int sender_pid, str
     return msg.msg_id, ""
 }
 
-
 func (message_queue_manager* mqm) receive_message(int queue_id) (message, string) {
     if queue_id >= len(mqm.queues) {
         return message{}, "Invalid queue"
@@ -196,7 +182,6 @@ func (message_queue_manager* mqm) receive_message(int queue_id) (message, string
     return msg, ""
 }
 
-
 struct shared_memory_segment {
     int shmid
     int size
@@ -206,19 +191,16 @@ struct shared_memory_segment {
     int permissions  
 }
 
-
 struct shared_memory_manager {
     shared_memory_segment[] segments
     int next_shmid
 }
-
 
 func (shared_memory_manager* smm) init() (int, string) {
     smm.segments = shared_memory_segment[]{}"
     smm.next_shmid = 0
     return 0, ""
 }
-
 
 func (shared_memory_manager* smm) create_shared_memory(int size) (shared_memory_segment, string) {
     shm := shared_memory_segment{
@@ -235,7 +217,6 @@ func (shared_memory_manager* smm) create_shared_memory(int size) (shared_memory_
     return shm, ""
 }
 
-
 func (shared_memory_manager* smm) attach_shared_memory(int shmid) (int, string) {
     if shmid >= len(smm.segments) {
         return -1, "Invalid shared memory"
@@ -247,7 +228,6 @@ func (shared_memory_manager* smm) attach_shared_memory(int shmid) (int, string) 
     
     return shmid, ""
 }
-
 
 func (shared_memory_manager* smm) detach_shared_memory(int shmid) (int, string) {
     if shmid >= len(smm.segments) {
@@ -263,7 +243,6 @@ func (shared_memory_manager* smm) detach_shared_memory(int shmid) (int, string) 
     return 0, ""
 }
 
-
 func (shared_memory_manager* smm) remove_shared_memory(int shmid) (int, string) {
     if shmid >= len(smm.segments) {
         return -1, "Invalid shared memory"
@@ -278,7 +257,6 @@ func (shared_memory_manager* smm) remove_shared_memory(int shmid) (int, string) 
     smm.segments[shmid] = seg
     return 0, ""
 }
-
 
 func (shared_memory_manager smm) get_shm_stats() (int, int) {
     total_attached := 0

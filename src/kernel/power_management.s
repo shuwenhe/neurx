@@ -12,7 +12,6 @@ const CPU_STATE_C6 = 6
 const FREQ_STATE_P0 = 0    
 const FREQ_STATE_P15 = 15  
 
-
 struct cpu_idle_state {
     int cstate
     int latency_us
@@ -20,7 +19,6 @@ struct cpu_idle_state {
     int residency_us
     int time_in_state_ms
 }
-
 
 struct cpu_freq_state {
     int pstate
@@ -30,7 +28,6 @@ struct cpu_freq_state {
     int time_in_state_ms
 }
 
-
 struct power_domain {
     int domain_id
     string domain_name
@@ -39,7 +36,6 @@ struct power_domain {
     int power_consumption_mw
 }
 
-
 struct acpi_policy {
     int policy_id
     string policy_name
@@ -47,7 +43,6 @@ struct acpi_policy {
     int max_freq
     int thermal_limit
 }
-
 
 struct power_manager {
     vec idle_states
@@ -62,7 +57,6 @@ struct power_manager {
     int system_idle_time_ms
 }
 
-
 func create_cpu_idle_state(cstate int, latency_us int, power_mw int, residency_us int) (cpu_idle_state, string) {
     state := cpu_idle_state{
         cstate: cstate,
@@ -74,7 +68,6 @@ func create_cpu_idle_state(cstate int, latency_us int, power_mw int, residency_u
     
     return state, ""
 }
-
 
 func create_cpu_freq_state(pstate int, freq_mhz int, voltage_mv int, power_mw int) (cpu_freq_state, string) {
     state := cpu_freq_state{
@@ -88,7 +81,6 @@ func create_cpu_freq_state(pstate int, freq_mhz int, voltage_mv int, power_mw in
     return state, ""
 }
 
-
 func create_power_domain(name string) (power_domain, string) {
     domain := power_domain{
         domain_id: 0,
@@ -100,7 +92,6 @@ func create_power_domain(name string) (power_domain, string) {
     
     return domain, ""
 }
-
 
 func create_power_manager() (power_manager, string) {
     idle_states := {}
@@ -141,7 +132,6 @@ func create_power_manager() (power_manager, string) {
     return mgr, ""
 }
 
-
 func (mgr* power_manager) enter_idle_state(cpu_id int, cstate int) (int, string) {
     if cstate >= len(mgr.idle_states) {
         return -1, "Invalid C-state"
@@ -157,14 +147,12 @@ func (mgr* power_manager) enter_idle_state(cpu_id int, cstate int) (int, string)
     return cstate, ""
 }
 
-
 func (mgr* power_manager) exit_idle_state() (int, string) {
     mgr.current_idle_state = CPU_STATE_C0
     mgr.total_power_transitions = mgr.total_power_transitions + 1
     
     return CPU_STATE_C0, ""
 }
-
 
 func (mgr* power_manager) change_cpu_frequency(cpu_id int, pstate int) (int, string) {
     if pstate >= len(mgr.freq_states) {
@@ -181,14 +169,12 @@ func (mgr* power_manager) change_cpu_frequency(cpu_id int, pstate int) (int, str
     return pstate, ""
 }
 
-
 func (mgr* power_manager) system_sleep(sleep_state int) (int, string) {
     mgr.current_power_state = sleep_state
     mgr.total_power_transitions = mgr.total_power_transitions + 1
     
     return sleep_state, ""
 }
-
 
 func (mgr* power_manager) system_wakeup() (int, string) {
     mgr.current_power_state = POWER_STATE_S0
@@ -197,7 +183,6 @@ func (mgr* power_manager) system_wakeup() (int, string) {
     return POWER_STATE_S0, ""
 }
 
-
 func (mgr* power_manager) add_power_domain(name string) (int, string) {
     domain, _ := create_power_domain(name)
     domain.domain_id = len(mgr.power_domains)
@@ -205,7 +190,6 @@ func (mgr* power_manager) add_power_domain(name string) (int, string) {
     mgr.power_domains = append(mgr.power_domains, domain)
     return domain.domain_id, ""
 }
-
 
 func (mgr* power_manager) power_on_domain(domain_id int) (int, string) {
     if domain_id >= len(mgr.power_domains) {
@@ -219,7 +203,6 @@ func (mgr* power_manager) power_on_domain(domain_id int) (int, string) {
     mgr.power_domains[domain_id] = domain
     return domain_id, ""
 }
-
 
 func (mgr* power_manager) power_off_domain(domain_id int) (int, string) {
     if domain_id >= len(mgr.power_domains) {
@@ -239,11 +222,9 @@ func (mgr* power_manager) power_off_domain(domain_id int) (int, string) {
     return domain_id, ""
 }
 
-
 func (mgr* power_manager) get_stats() (power_manager, string) {
     return mgr, ""
 }
-
 
 func (mgr* power_manager) calculate_power_consumption() (int, string) {
     total_power := 0

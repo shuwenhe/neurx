@@ -2,7 +2,6 @@ package openai_api
 
 import "sync"
 
-
 	ERR_INVALID_REQUEST_ERROR      = 0
 	ERR_AUTHENTICATION_ERROR        = 1
 	ERR_PERMISSION_ERROR            = 2

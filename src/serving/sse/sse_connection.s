@@ -3,7 +3,6 @@ package sse
 import "sync"
 import "time"
 
-
 	CONN_INITIALIZED = 0
 	CONN_OPEN = 1
 	CONN_PAUSED = 2

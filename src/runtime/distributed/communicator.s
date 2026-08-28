@@ -1,12 +1,10 @@
 package distributed
 
-
     nccl
     ucc
     gloo
     cpu_only
 }
-
 
     all_reduce
     all_gather

@@ -4,14 +4,12 @@ const SELINUX_MODE_DISABLED = 0
 const SELINUX_MODE_PERMISSIVE = 1
 const SELINUX_MODE_ENFORCING = 2
 
-
 struct selinux_context {
     string user
     string role
     string type_str
     string level
 }
-
 
 struct te_rule {
     string source_type
@@ -21,13 +19,11 @@ struct te_rule {
     int allow  
 }
 
-
 struct rbac_rule {
     string user
     string role
     int allow  
 }
-
 
 struct selinux_policy {
     vec te_rules
@@ -35,7 +31,6 @@ struct selinux_policy {
     string policy_name
     int policy_version
 }
-
 
 struct selinux_manager {
     int mode  
@@ -47,7 +42,6 @@ struct selinux_manager {
     int policy_reloads
 }
 
-
 func create_selinux_context(user string, role string, type_str string, level string) (selinux_context, string) {
     ctx := selinux_context{
         user: user,
@@ -58,7 +52,6 @@ func create_selinux_context(user string, role string, type_str string, level str
     
     return ctx, ""
 }
-
 
 func (mgr* selinux_manager) add_te_rule(source_type string, target_type string, 
                                         object_class string, permission string, allow int) (int, string) {
@@ -74,7 +67,6 @@ func (mgr* selinux_manager) add_te_rule(source_type string, target_type string,
     mgr.policy.te_rules = append(mgr.policy.te_rules, rule)
     return len(mgr.policy.te_rules) - 1, ""
 }
-
 
 func (mgr* selinux_manager) check_te_permission(source_type string, target_type string, 
                                                 object_class string, permission string) (int, string) {
@@ -102,7 +94,6 @@ func (mgr* selinux_manager) check_te_permission(source_type string, target_type 
     return 0, "rule not found"
 }
 
-
 func (mgr* selinux_manager) add_rbac_rule(user string, role string, allow int) (int, string) {
     rule := rbac_rule{
         user: user,
@@ -113,7 +104,6 @@ func (mgr* selinux_manager) add_rbac_rule(user string, role string, allow int) (
     mgr.policy.rbac_rules = append(mgr.policy.rbac_rules, rule)
     return len(mgr.policy.rbac_rules) - 1, ""
 }
-
 
 func (mgr* selinux_manager) check_role_permission(user string, role string) (int, string) {
     i := 0
@@ -130,24 +120,20 @@ func (mgr* selinux_manager) check_role_permission(user string, role string) (int
     return 0, "role not found"
 }
 
-
 func (mgr* selinux_manager) set_mode(mode int) (int, string) {
     mgr.mode = mode
     return mode, ""
 }
-
 
 func (mgr* selinux_manager) load_policy(policy_file string) (int, string) {
     mgr.policy_loads = mgr.policy_loads + 1
     return mgr.policy_loads, ""
 }
 
-
 func (mgr* selinux_manager) reload_policy() (int, string) {
     mgr.policy_reloads = mgr.policy_reloads + 1
     return mgr.policy_reloads, ""
 }
-
 
 func create_selinux_manager() (selinux_manager, string) {
     policy := selinux_policy{
@@ -169,7 +155,6 @@ func create_selinux_manager() (selinux_manager, string) {
     
     return mgr, ""
 }
-
 
 func (mgr* selinux_manager) get_stats() (selinux_manager, string) {
     return mgr, ""

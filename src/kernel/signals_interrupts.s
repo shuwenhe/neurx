@@ -2,7 +2,6 @@ package neurx.kernel
 
 use std.slices
 
-
 struct signal {
     int sig_num  
     int sender_pid
@@ -11,13 +10,11 @@ struct signal {
     int info  
 }
 
-
 struct signal_handler {
     int sig_num
     int handler_type  
     int handler_addr  
 }
-
 
 struct signal_mask {
     int pid
@@ -25,13 +22,11 @@ struct signal_mask {
     signal[] pending_signals  
 }
 
-
 struct signal_manager {
     signal_mask[] signal_masks
     signal_handler[] signal_handlers
     int num_signals
 }
-
 
 func (signal_manager* sm) init() (int, string) {
     sm.signal_masks = signal_mask[]{}
@@ -53,7 +48,6 @@ func (signal_manager* sm) init() (int, string) {
     return 0, ""
 }
 
-
 func (signal_manager* sm) register_pid(int pid) (int, string) {
     mask := signal_mask{
         pid: pid,
@@ -64,7 +58,6 @@ func (signal_manager* sm) register_pid(int pid) (int, string) {
     sm.signal_masks = append(sm.signal_masks, mask)
     return 0, ""
 }
-
 
 func (signal_manager* sm) set_signal_handler(int sig_num, int handler_type) (int, string) {
     if sig_num < 1 || sig_num > 64 {
@@ -77,7 +70,6 @@ func (signal_manager* sm) set_signal_handler(int sig_num, int handler_type) (int
     
     return 0, ""
 }
-
 
 func (signal_manager* sm) mask_signal(int pid, int sig_num) (int, string) {
     i := 0
@@ -94,7 +86,6 @@ func (signal_manager* sm) mask_signal(int pid, int sig_num) (int, string) {
     return -1, "PID not found"
 }
 
-
 func (signal_manager* sm) unmask_signal(int pid, int sig_num) (int, string) {
     i := 0
     for i < len(sm.signal_masks) {
@@ -109,7 +100,6 @@ func (signal_manager* sm) unmask_signal(int pid, int sig_num) (int, string) {
     
     return -1, "PID not found"
 }
-
 
 func (signal_manager* sm) send_signal(int sender_pid, int receiver_pid, int sig_num) (int, string) {
     if sig_num < 1 || sig_num > 64 {
@@ -143,7 +133,6 @@ func (signal_manager* sm) send_signal(int sender_pid, int receiver_pid, int sig_
     return -1, "Receiver PID not found"
 }
 
-
 func (signal_manager* sm) get_pending_signal(int pid) (signal, string) {
     i := 0
     for i < len(sm.signal_masks) {
@@ -169,7 +158,6 @@ func (signal_manager* sm) get_pending_signal(int pid) (signal, string) {
     return signal{}, "No pending signals"
 }
 
-
 struct interrupt_request {
     int irq_num
     int priority
@@ -178,12 +166,10 @@ struct interrupt_request {
     int handled_count
 }
 
-
 struct interrupt_manager {
     vec interrupts
     int num_irqs
 }
-
 
 func (interrupt_manager* im) init(int num_irqs) (int, string) {
     im.interrupts = interrupt_request[]{}"
@@ -205,7 +191,6 @@ func (interrupt_manager* im) init(int num_irqs) (int, string) {
     return 0, ""
 }
 
-
 func (interrupt_manager* im) register_irq_handler(int irq_num, int priority) (int, string) {
     if irq_num >= im.num_irqs {
         return -1, "Invalid IRQ number"
@@ -219,7 +204,6 @@ func (interrupt_manager* im) register_irq_handler(int irq_num, int priority) (in
     return 0, ""
 }
 
-
 func (interrupt_manager* im) disable_irq(int irq_num) (int, string) {
     if irq_num >= im.num_irqs {
         return -1, "Invalid IRQ number"
@@ -232,7 +216,6 @@ func (interrupt_manager* im) disable_irq(int irq_num) (int, string) {
     return 0, ""
 }
 
-
 func (interrupt_manager* im) enable_irq(int irq_num) (int, string) {
     if irq_num >= im.num_irqs {
         return -1, "Invalid IRQ number"
@@ -244,7 +227,6 @@ func (interrupt_manager* im) enable_irq(int irq_num) (int, string) {
     
     return 0, ""
 }
-
 
 func (interrupt_manager* im) handle_interrupt(int irq_num) (int, string) {
     if irq_num >= im.num_irqs {
@@ -262,7 +244,6 @@ func (interrupt_manager* im) handle_interrupt(int irq_num) (int, string) {
     
     return 0, ""
 }
-
 
 func (interrupt_manager im) get_irq_stats(int irq_num) (int, int) {
     if irq_num >= im.num_irqs {

@@ -7,7 +7,6 @@ use neurx.net as net_mod
 use neurx.kernel as kernel_mod
 use neurx.driver as driver_mod
 
-
 struct os_features_tier4_integration {
     int crypto_hash_mgr_id
     int crypto_cipher_engine_id
@@ -20,7 +19,6 @@ struct os_features_tier4_integration {
     int device_framework_id
     int total_initialized
 }
-
 
 func new_os_features_tier4_integration() (os_features_tier4_integration, string) {
     
@@ -92,71 +90,58 @@ func new_os_features_tier4_integration() (os_features_tier4_integration, string)
     return osfi4, ""
 }
 
-
 func (osfi4* os_features_tier4_integration) sha256_hash(data vec, len int) (vec, string) {
     return crypto_mod.sha256_hash(data, len)
 }
-
 
 func (osfi4* os_features_tier4_integration) sha1_hash(data vec, len int) (vec, string) {
     return crypto_mod.sha1_hash(data, len)
 }
 
-
 func (osfi4* os_features_tier4_integration) md5_hash(data vec, len int) (vec, string) {
     return crypto_mod.md5_hash(data, len)
 }
-
 
 func (osfi4* os_features_tier4_integration) hmac_sha256(key vec, key_len int, data vec, data_len int) (vec, string) {
     return crypto_mod.hmac_sha256(key, key_len, data, data_len)
 }
 
-
 func (osfi4* os_features_tier4_integration) aes128_init(key vec, key_len int) (crypto_mod.aes_context, string) {
     return crypto_mod.aes128_init(key, key_len)
 }
-
 
 func (osfi4* os_features_tier4_integration) aes256_init(key vec, key_len int) (crypto_mod.aes_context, string) {
     return crypto_mod.aes256_init(key, key_len)
 }
 
-
 func (osfi4* os_features_tier4_integration) create_io_uring(queue_depth int) (io_mod.io_uring, string) {
     return io_mod.io_uring_setup(queue_depth)
 }
-
 
 func (osfi4* os_features_tier4_integration) create_tcp_connection(tcp_mgr* net_mod.tcp_manager, 
                                                                    local_port int, remote_port int, remote_ip int) (int, string) {
     return tcp_mgr.create_connection(local_port, remote_port, remote_ip)
 }
 
-
 func (osfi4* os_features_tier4_integration) create_vm(virt* kernel_mod.virtualizer, 
                                                        name string, vcpu_count int, memory_mb int, disk_size_gb int) (int, string) {
     return virt.create_vm(name, vcpu_count, memory_mb, disk_size_gb)
 }
-
 
 func (osfi4* os_features_tier4_integration) change_cpu_frequency(power_mgr* kernel_mod.power_manager, 
                                                                   cpu_id int, pstate int) (int, string) {
     return power_mgr.change_cpu_frequency(cpu_id, pstate)
 }
 
-
 func (osfi4* os_features_tier4_integration) register_driver(framework* driver_mod.device_driver_framework, 
                                                              driver driver_mod.device_driver) (int, string) {
     return framework.register_driver(driver)
 }
 
-
 func (osfi4* os_features_tier4_integration) register_device(framework* driver_mod.device_driver_framework, 
                                                              device driver_mod.device) (int, string) {
     return framework.register_device(device)
 }
-
 
 func (osfi4* os_features_tier4_integration) check_te_permission(selinux_mgr* security_mod.selinux_manager, 
                                                                  source_type string, target_type string, 
@@ -164,17 +149,14 @@ func (osfi4* os_features_tier4_integration) check_te_permission(selinux_mgr* sec
     return selinux_mgr.check_te_permission(source_type, target_type, object_class, permission)
 }
 
-
 func (osfi4* os_features_tier4_integration) check_syscall(seccomp_mgr* security_mod.seccomp_manager, 
                                                           syscall_nr int, arg0 int, arg1 int, arg2 int) (int, string) {
     return seccomp_mgr.check_syscall(syscall_nr, arg0, arg1, arg2)
 }
 
-
 func (osfi4* os_features_tier4_integration) get_system_stats() (os_features_tier4_integration, string) {
     return osfi4, ""
 }
-
 
 func (osfi4* os_features_tier4_integration) describe_tier4_features() (string, string) {
     features := "Tier 4 Enterprise Features (v4.0):\n" +

@@ -3,7 +3,6 @@ package neurx.mm
 use std.slices
 use std.collections.hashmap
 
-
 struct page_table_entry {
     int address
     bool present
@@ -11,7 +10,6 @@ struct page_table_entry {
     bool accessed
     int permissions  
 }
-
 
 struct vm_area {
     int vm_start
@@ -21,13 +19,11 @@ struct vm_area {
     page_table_entry[] page_table
 }
 
-
 struct vm_manager {
     vec vm_areas
     int total_pages
     int free_pages
 }
-
 
 func (vm_manager* vmm) init(int total_memory) (int, string) {
     vmm.total_pages = total_memory / 4096
@@ -35,7 +31,6 @@ func (vm_manager* vmm) init(int total_memory) (int, string) {
     vmm.vm_areas = {}
     return 0, ""
 }
-
 
 func (vm_manager* vmm) allocate_area(int size) (vm_area, string) {
     if vmm.free_pages * 4096 < size {
@@ -67,7 +62,6 @@ func (vm_manager* vmm) allocate_area(int size) (vm_area, string) {
     return area, ""
 }
 
-
 func (vm_manager* vmm) handle_page_fault(int address) (int, string) {
     i := 0
     for i < len(vmm.vm_areas) {
@@ -89,7 +83,6 @@ func (vm_manager* vmm) handle_page_fault(int address) (int, string) {
     return -1, "Invalid page fault"
 }
 
-
 func (vm_manager vmm) get_page_entry(int address) (page_table_entry, string) {
     i := 0
     for i < len(vmm.vm_areas) {
@@ -102,7 +95,6 @@ func (vm_manager vmm) get_page_entry(int address) (page_table_entry, string) {
     }
     return page_table_entry{}, "Address not found"
 }
-
 
 func (vm_manager* vmm) set_page_permissions(int address, int perms) (int, string) {
     i := 0

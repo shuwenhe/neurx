@@ -4,7 +4,6 @@ import "sync"
 import "time"
 import "encoding/json"
 
-
 	CHAIN_OF_THOUGHT = 0
 	TREE_OF_THOUGHT = 1
 }

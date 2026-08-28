@@ -144,7 +144,6 @@ func preset_conversational() lora_config {
     config
 }
 
-
     lightweight,
     balanced,
     high_quality,

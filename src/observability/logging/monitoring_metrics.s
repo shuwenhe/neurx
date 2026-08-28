@@ -3,7 +3,6 @@ package neurx.observability.logging
 import "sync"
 import "time"
 
-
 	COUNTER = 0
 	GAUGE = 1
 	HISTOGRAM = 2

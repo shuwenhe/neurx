@@ -1,6 +1,5 @@
 package attention
 
-
     training
     inference
 }

@@ -1,14 +1,12 @@
 import "std/string"
 import "std/vector"
 
-
     HUGGINGFACE,
     SENTENCEPIECE,
     TIKTOKEN,
     LLAMA,
     CUSTOM,
 }
-
 
     NORMAL,
     SPECIAL,

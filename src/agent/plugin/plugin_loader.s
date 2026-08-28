@@ -3,7 +3,6 @@ package plugins
 import "time"
 import "sync"
 
-
 	LOADER_READY = 0
 	LOADER_LOADING = 1
 	LOADER_VALIDATING = 2

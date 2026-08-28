@@ -5,7 +5,6 @@ use std.option.option
 use std.result.result
 use std.map.map
 
-
     gpu,
     cpu,
     disk,

@@ -1,6 +1,5 @@
 package inference
 
-
     submitted
     queued
     acquiring_resources

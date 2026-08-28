@@ -9,7 +9,6 @@ const SECCOMP_MODE_DISABLED = 0
 const SECCOMP_MODE_STRICT = 1
 const SECCOMP_MODE_FILTER = 2
 
-
 struct seccomp_rule {
     int rule_id
     int syscall_nr
@@ -18,13 +17,11 @@ struct seccomp_rule {
     int condition_count
 }
 
-
 struct seccomp_condition {
     int arg_index  
     int comparator  
     int value
 }
-
 
 struct seccomp_filter {
     int filter_id
@@ -33,7 +30,6 @@ struct seccomp_filter {
     vec conditions
     int total_rules
 }
-
 
 struct seccomp_manager {
     int mode  
@@ -45,7 +41,6 @@ struct seccomp_manager {
     int killed_processes
     int logged_violations
 }
-
 
 func create_seccomp_rule(syscall_nr int, syscall_name string, action int) (seccomp_rule, string) {
     rule := seccomp_rule{
@@ -59,7 +54,6 @@ func create_seccomp_rule(syscall_nr int, syscall_name string, action int) (secco
     return rule, ""
 }
 
-
 func (filter* seccomp_filter) add_rule(rule seccomp_rule) (int, string) {
     rule.rule_id = filter.total_rules
     filter.rules = append(filter.rules, rule)
@@ -67,7 +61,6 @@ func (filter* seccomp_filter) add_rule(rule seccomp_rule) (int, string) {
     
     return rule.rule_id, ""
 }
-
 
 func (filter* seccomp_filter) add_condition(arg_index int, comparator int, value int) (int, string) {
     condition := seccomp_condition{
@@ -79,7 +72,6 @@ func (filter* seccomp_filter) add_condition(arg_index int, comparator int, value
     filter.conditions = append(filter.conditions, condition)
     return len(filter.conditions) - 1, ""
 }
-
 
 func (mgr* seccomp_manager) check_syscall(syscall_nr int, arg0 int, arg1 int, arg2 int) (int, string) {
     
@@ -117,7 +109,6 @@ func (mgr* seccomp_manager) check_syscall(syscall_nr int, arg0 int, arg1 int, ar
     return SECCOMP_ACTION_DENY, "syscall not in whitelist"
 }
 
-
 func create_seccomp_filter(name string) (seccomp_filter, string) {
     filter := seccomp_filter{
         filter_id: 0,
@@ -129,7 +120,6 @@ func create_seccomp_filter(name string) (seccomp_filter, string) {
     
     return filter, ""
 }
-
 
 func create_seccomp_manager() (seccomp_manager, string) {
     filter, _ := create_seccomp_filter("default")
@@ -148,24 +138,20 @@ func create_seccomp_manager() (seccomp_manager, string) {
     return mgr, ""
 }
 
-
 func (mgr* seccomp_manager) set_mode(mode int) (int, string) {
     mgr.mode = mode
     return mode, ""
 }
-
 
 func (mgr* seccomp_manager) enable_whitelist() (int, string) {
     mgr.mode = SECCOMP_MODE_FILTER
     return 0, ""
 }
 
-
 func (mgr* seccomp_manager) enable_blacklist() (int, string) {
     mgr.mode = SECCOMP_MODE_FILTER
     return 0, ""
 }
-
 
 func (mgr* seccomp_manager) load_filter(filter seccomp_filter) (int, string) {
     filter.filter_id = mgr.filter_counter
@@ -175,7 +161,6 @@ func (mgr* seccomp_manager) load_filter(filter seccomp_filter) (int, string) {
     
     return filter.filter_id, ""
 }
-
 
 func (mgr* seccomp_manager) get_stats() (seccomp_manager, string) {
     return mgr, ""

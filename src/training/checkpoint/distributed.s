@@ -5,7 +5,6 @@ package neurx.checkpoint.distributed
     COMPRESSION_ZSTD,
 }
 
-
     FORMAT_PT,
     FORMAT_SAFE_TENSORS,
     FORMAT_HF_DS,
@@ -110,7 +109,6 @@ struct data_iterator_state {
     int samples_consumed_from_file
     string dataset_version
 }
-
 
     CKPT_IDLE,
     CKPT_PREPARING,

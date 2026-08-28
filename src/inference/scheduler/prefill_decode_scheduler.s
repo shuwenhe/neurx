@@ -2,14 +2,12 @@ package neurx.inference.prefill_decode_scheduler
 
 use std.slices
 
-
     fcfs,
     priority,
     min_latency,
     max_throughput,
     balanced
 }
-
 
     low,
     normal,

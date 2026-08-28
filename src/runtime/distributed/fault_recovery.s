@@ -6,7 +6,6 @@ module distributed_fault_recovery
     CKPT_ASYNC,
 }
 
-
     IMMEDIATE,
     ROLLBACK,
     PARTIAL_ROLLBACK,

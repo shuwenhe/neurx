@@ -1,15 +1,11 @@
 package neurx.tier4.security
 
-
-
-
 struct se_context {
     int user_id
     int role_id
     int type_id
     int level_id
 }
-
 
 struct te_rule {
     int source_type
@@ -18,12 +14,10 @@ struct te_rule {
     int effect         
 }
 
-
 struct role_type_map {
     int role_id
     int type_id
 }
-
 
 struct selinux_policy {
     vec users          
@@ -35,14 +29,12 @@ struct selinux_policy {
     int policy_loaded  
 }
 
-
 const int PERM_READ = 1
 const int PERM_WRITE = 2
 const int PERM_EXECUTE = 4
 const int PERM_APPEND = 8
 const int PERM_UNLINK = 16
 const int PERM_LINK = 32
-
 
 func selinux_init() (selinux_policy, string) {
     policy := selinux_policy{
@@ -74,7 +66,6 @@ func selinux_init() (selinux_policy, string) {
     return policy, ""
 }
 
-
 func (policy* selinux_policy) add_te_rule(source_type int, target_type int, permissions int, effect int) (int, string) {
     rule := te_rule{
         source_type: source_type,
@@ -86,7 +77,6 @@ func (policy* selinux_policy) add_te_rule(source_type int, target_type int, perm
     policy.te_rules = append(policy.te_rules, rule)
     return len(policy.te_rules) - 1, ""
 }
-
 
 func (policy* selinux_policy) check_permission(source_type int, target_type int, requested_perm int) (int, string) {
     i := 0
@@ -109,7 +99,6 @@ func (policy* selinux_policy) check_permission(source_type int, target_type int,
     return 0, "no matching rule"
 }
 
-
 func (policy* selinux_policy) set_file_context(file_id int, user_id int, role_id int, type_id int) (int, string) {
     context := se_context{
         user_id: user_id,
@@ -124,7 +113,6 @@ func (policy* selinux_policy) set_file_context(file_id int, user_id int, role_id
     
     return file_id, ""
 }
-
 
 func (policy* selinux_policy) get_file_context(file_id int) (se_context, string) {
     if file_id * 3 >= len(policy.context_cache) {
@@ -141,15 +129,11 @@ func (policy* selinux_policy) get_file_context(file_id int) (se_context, string)
     return ctx, ""
 }
 
-
-
-
 const int SECCOMP_ACTION_ALLOW = 0
 const int SECCOMP_ACTION_KILL = 1
 const int SECCOMP_ACTION_TRAP = 2
 const int SECCOMP_ACTION_ERRNO = 3
 const int SECCOMP_ACTION_LOG = 4
-
 
 struct seccomp_rule {
     int syscall_nr      
@@ -158,13 +142,11 @@ struct seccomp_rule {
     int arg1_mask       
 }
 
-
 struct seccomp_filter {
     vec rules            
     int default_action   
     int locked           
 }
-
 
 func seccomp_init(default_action int) (seccomp_filter, string) {
     filter := seccomp_filter{
@@ -175,7 +157,6 @@ func seccomp_init(default_action int) (seccomp_filter, string) {
     
     return filter, ""
 }
-
 
 func (filter* seccomp_filter) add_rule(syscall_nr int, action int) (int, string) {
     if filter.locked == 1 {
@@ -193,7 +174,6 @@ func (filter* seccomp_filter) add_rule(syscall_nr int, action int) (int, string)
     return len(filter.rules) - 1, ""
 }
 
-
 func (filter* seccomp_filter) add_arg_rule(syscall_nr int, action int, arg_value int, arg_mask int) (int, string) {
     if filter.locked == 1 {
         return -1, "filter is locked"
@@ -209,7 +189,6 @@ func (filter* seccomp_filter) add_arg_rule(syscall_nr int, action int, arg_value
     filter.rules = append(filter.rules, rule)
     return len(filter.rules) - 1, ""
 }
-
 
 func (filter* seccomp_filter) check_syscall(syscall_nr int, arg_value int) (int, string) {
     i := 0
@@ -227,12 +206,10 @@ func (filter* seccomp_filter) check_syscall(syscall_nr int, arg_value int) (int,
     return filter.default_action, ""
 }
 
-
 func (filter* seccomp_filter) load_filter() (int, string) {
     filter.locked = 1
     return 0, ""
 }
-
 
 struct seccomp_stats {
     int rules_count
