@@ -691,11 +691,16 @@ All 6 markers appear in strict order:
 ```
 
 Each marker validates a progressive layer of the UEFI ABI:
-- Marker 1-2: Entry point and SystemTable/BootServices structs
-- Marker 3: ExitBootServices call and return value
-- Marker 4-6: Kernel execution and hardware control
+- Marker 1-2: Entry point and SystemTable/BootServices structs  
+- Marker 3: **ExitBootServices() returned EFI_SUCCESS** (critical ownership boundary)
+  - Only printed if: `Status == EFI_SUCCESS` (enforced in efi_main.c)
+  - If `EFI_ERROR(Status)`: infinite halt instead (no marker printed)
+  - This marker **cannot appear without genuine ExitBootServices success**
+  - Proof: efi_main.c verifies status before printing BOOT_SERVICES_EXITED
+- Marker 4-6: Post-EBS kernel execution and hardware control
 
 Missing marker 3 (BOOT_SERVICES_EXITED) = no ownership transfer = G1 FAIL
+**Critical**: Marker #3 has evidential value ONLY because it's strictly gated by EFI_SUCCESS verification
 
 ---
 
@@ -708,11 +713,12 @@ Missing marker 3 (BOOT_SERVICES_EXITED) = no ownership transfer = G1 FAIL
 **Runtime Status**: Blocked on QEMU/OVMF environment  
 **ABI Status**: CRITICAL - efi_minimal.h unvalidated, awaits first OVMF serial output  
 
-**Commits in this baseline**:
+**Commits in this baseline** (5 total, frozen at c89e135f):
 - f80cf9c2: Architecture refactor - Separate G0/G1 gates
 - 4d5719d3: G1 UEFI boot harness - BOOTX64.EFI PE/COFF + ESP
 - 0120736c: Update architecture doc - G1 framework ready status
 - af8f59ca: Documentation - Build vs runtime evidence separation
+- c89e135f: Refine G1 PASS criteria, clarify ownership boundary
 
 **Decision for next phase**: 
 - NO G2 code until G0 and G1 pass execution
@@ -726,3 +732,78 @@ Missing marker 3 (BOOT_SERVICES_EXITED) = no ownership transfer = G1 FAIL
 - All 6 markers = full ownership transfer proven
 
 Do not claim G1 success without all 6 markers in sequence.
+
+---
+
+## Final Gate Definitions (Baseline Frozen at c89e135f)
+
+**G0 PASS Criterion** (Multiboot2 Bare-Metal Ownership):
+```
+QEMU loads kernel.elf via Multiboot2
+         ↓
+kernel_main() executes
+         ↓
+NEURX_G0_KERNEL_ENTRY (proof: entry point reached)
+         ↓
+NEURX_G0_COM1_OWNED (proof: UART I/O works)
+         ↓
+NEURX_G0_PASS (proof: sequence complete)
+         ↓
+Serial log archived
+         ↓
+G0 PASS = ✅ Bare-metal execution proven
+```
+
+**G1 PASS Criterion** (UEFI Boot Ownership Transfer):
+```
+OVMF loads BOOTX64.EFI from ESP
+         ↓
+efi_main() executes
+         ↓
+NEURX_G1_EFI_ENTRY (proof: entry point reachable, partial ABI valid)
+         ↓
+NEURX_G1_MEMORY_MAP_READY (proof: GetMemoryMap() struct offsets correct)
+         ↓
+ExitBootServices(ImageHandle, MapKey)
+         ↓
+Status == EFI_SUCCESS verified (NOT EFI_ERROR, NOT halt)
+         ↓
+NEURX_G1_BOOT_SERVICES_EXITED (proof: ExitBootServices succeeded, ownership transferred)
+         ↓
+NEURX_G1_KERNEL_ENTRY (proof: post-EBS kernel execution works)
+         ↓
+NEURX_G1_COM1_OWNED (proof: direct port I/O without UEFI services)
+         ↓
+NEURX_G1_PASS (proof: full sequence complete)
+         ↓
+All 6 markers in strict order
+         ↓
+Serial log archived
+         ↓
+G1 PASS = ✅ UEFI ownership transfer proven
+```
+
+**Prerequisite for G2**:
+```
+G0 PASS ✅
+    AND
+G1 PASS ✅
+    ↓
+==================================================
+G2 Unlocked: Physical Memory Ownership
+==================================================
+    ↓
+Page Allocator (G2.1)
+    ↓
+Page Tables / CR3 (G2.2)
+    ↓
+Real #PF (Page Fault) handling (G2.3)
+    ↓
+G2 PASS
+```
+
+**Engineering Principle**: 
+No new code should be added to G2+ until both G0 and G1 pass with serial evidence archived.
+The next meaningful event in development is NOT code changes, but actual QEMU/OVMF execution producing first markers.
+
+---
