@@ -7,11 +7,13 @@ struct device_ptr {
 
 struct device_tensor {
     device_ptr data
-    int[] shape
-    int[] stride
+    vec[int] shape
+    vec[int64] strides
     int dtype
     int device_id
-    int element_count
+    int64 element_count
+    int ref_count
+    bool is_view
 }
 
 struct stream_handle {
