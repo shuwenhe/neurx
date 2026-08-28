@@ -2484,7 +2484,7 @@ numeric-alignment-test:
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" test/numeric_alignment_pytorch.py \
 		artifact/build/numeric_alignment/numeric_alignment_probe
-.PHONY: inference-feature-gap-check cluster-runtime-test cluster-parallel-plan-test cluster-runtime-bridge-parallel-test cluster-parallel-assignment-test cluster-launch-plan-test cluster-parallel-launch-test cluster-parallel-grouped-launch-test cluster-parallel-execution-test cluster-execute-launch-plan-test cluster-parallel-execution-script-test cluster-remote-execution-test cluster-heartbeat-test cluster-heartbeat-scan-test cluster-recovery-test cluster-fault-injection-recovery-test cluster-fault-injection-e2e-test cluster-fault-injection-relaunch-test cluster-fault-injection-relaunch-execute-test cluster-fault-injection-worker-relaunch-test hetero-topology-test cluster-hetero-placement-test hetero-runtime-bridge-test hetero-runtime-bridge-demo-test
+.PHONY: inference-feature-gap-check cluster-runtime-test cluster-parallel-plan-test cluster-runtime-bridge-parallel-test cluster-parallel-assignment-test cluster-launch-plan-test cluster-parallel-launch-test cluster-parallel-grouped-launch-test cluster-parallel-execution-test cluster-execute-launch-plan-test cluster-parallel-execution-script-test cluster-remote-execution-test cluster-heartbeat-test cluster-heartbeat-scan-test cluster-recovery-test cluster-fault-injection-recovery-test cluster-fault-injection-e2e-test cluster-fault-injection-relaunch-test cluster-fault-injection-relaunch-execute-test cluster-fault-injection-worker-relaunch-test hetero-topology-test cluster-hetero-placement-test hetero-runtime-bridge-test hetero-runtime-bridge-demo-test fabric-planner-test
 S_INFERENCE_CHECK_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../../s/bin/s /home/shuwen/s/bin/s) $(S_COMPILER))
 INFERENCE_FEATURE_GAP_S_MODULES := \
 	src/serving/lifecycle/inference_request.s \
@@ -2617,6 +2617,11 @@ hetero-topology-test:
 	@$(S_SEED_COMPILER) test/distributed/hetero_topology_test.s \
 		artifact/build/cluster_runtime/hetero_topology_test.ir
 	@echo "✅ Hetero topology S test compiled"
+fabric-planner-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/fabric_planner_test.s \
+		artifact/build/cluster_runtime/fabric_planner_test.ir
+	@echo "✅ Fabric planner S contract compiled"
 cluster-hetero-placement-test:
 	@mkdir -p artifact/build/cluster_runtime
 	@$(S_SEED_COMPILER) test/distributed/hetero_topology_test.s \
