@@ -218,6 +218,8 @@ DEVICE_ABI_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/device_abi
 DEVICE_ABI_COMMON_LIB := $(DEVICE_ABI_BUILD_DIR)/libneurx_device.so
 DEVICE_ABI_CUDA_PLUGIN := $(DEVICE_ABI_BUILD_DIR)/libneurx_backend_cuda.so
 DEVICE_ABI_CANN_PLUGIN := $(DEVICE_ABI_BUILD_DIR)/libneurx_backend_cann.so
+COLLECTIVE_ABI_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/collective_abi
+COLLECTIVE_ABI_LIB := $(COLLECTIVE_ABI_BUILD_DIR)/libneurx_collective.so
 
 .PHONY: device-abi-build device-abi-probe-test
 device-abi-build: $(DEVICE_ABI_COMMON_LIB) $(DEVICE_ABI_CANN_PLUGIN) $(if $(shell command -v $(CUDA_NVCC) 2>/dev/null),$(DEVICE_ABI_CUDA_PLUGIN))
@@ -261,6 +263,30 @@ s-transformer-cuda-runtime-test: s-transformer-cuda-runtime-build
 device-abi-probe-test: device-abi-build $(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test
 	@NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' '$(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test' cann
 	@if [ -f '$(DEVICE_ABI_CUDA_PLUGIN)' ]; then NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' '$(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test' cuda; fi
+
+.PHONY: collective-abi-build collective-abi-test collective-nccl-device-test
+collective-abi-build: $(COLLECTIVE_ABI_LIB)
+
+$(COLLECTIVE_ABI_BUILD_DIR):
+	@mkdir -p '$@'
+
+$(COLLECTIVE_ABI_LIB): backend/common/collective_abi.cpp backend/api/collective_abi.h | $(COLLECTIVE_ABI_BUILD_DIR)
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -fPIC -shared -Ibackend/api '$<' -ldl -o '$@'
+
+$(COLLECTIVE_ABI_BUILD_DIR)/collective_abi_test: test/contract/collective_abi_test.cpp $(COLLECTIVE_ABI_LIB)
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -Ibackend/api '$<' -L'$(COLLECTIVE_ABI_BUILD_DIR)' \
+		-lneurx_collective -Wl,-rpath,'$(COLLECTIVE_ABI_BUILD_DIR)' -o '$@'
+
+collective-abi-test: collective-abi-build $(COLLECTIVE_ABI_BUILD_DIR)/collective_abi_test
+	@'$(COLLECTIVE_ABI_BUILD_DIR)/collective_abi_test'
+
+$(COLLECTIVE_ABI_BUILD_DIR)/collective_nccl_device_test: test/distributed/collective_nccl_device_test.cpp $(COLLECTIVE_ABI_LIB)
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -pthread -Ibackend/api '$<' \
+		-L'$(COLLECTIVE_ABI_BUILD_DIR)' -lneurx_collective -ldl -Wl,-rpath,'$(COLLECTIVE_ABI_BUILD_DIR)' -o '$@'
+
+collective-nccl-device-test: collective-abi-build $(COLLECTIVE_ABI_BUILD_DIR)/collective_nccl_device_test
+	@'$(COLLECTIVE_ABI_BUILD_DIR)/collective_nccl_device_test'; status=$$?; \
+		if [ $$status -eq 77 ]; then exit 0; fi; exit $$status
 
 help:
 	@echo "  make shard"
