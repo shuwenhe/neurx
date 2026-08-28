@@ -150,15 +150,11 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
     /* Exit Boot Services - This is the critical transition point */
     Status = BS->ExitBootServices(ImageHandle, MemMapKey);
     if (EFI_ERROR(Status)) {
-        /* If ExitBootServices fails, try again with updated key */
-        efi_print(L"First ExitBootServices failed, retrying...\r\n");
-        BS->GetMemoryMap(&MemMapSize, MemoryMap, &MemMapKey, &DescSize, &DescVersion);
-        Status = BS->ExitBootServices(ImageHandle, MemMapKey);
-        if (EFI_ERROR(Status)) {
-            /* Cannot exit boot services */
-            while (1) {
-                asm volatile("hlt");
-            }
+        /* ExitBootServices MUST succeed on first call */
+        /* Do NOT call any Boot Services after failure (per UEFI spec) */
+        /* If it fails, halt immediately */
+        while (1) {
+            asm volatile("hlt");
         }
     }
     
