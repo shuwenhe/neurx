@@ -14,6 +14,7 @@ struct plugin_manager {
 	int32                         total_requests_failed
 	sync.Mutex                    mu
 }
+
 struct plugin_import_descriptor {
 	string                  descriptor_id
 	string                  plugin_name
@@ -24,6 +25,7 @@ struct plugin_import_descriptor {
 	bool                    auto_enable
 	int32                   startup_priority
 }
+
 struct plugin_compatibility_info {
 	string                  plugin_id
 	string[]             compatible_phases
@@ -33,6 +35,7 @@ struct plugin_compatibility_info {
 	bool                    is_compatible
 	string                  compatibility_message
 }
+
 struct phase_plugin_adapter {
 	string                  adapter_id
 	string                  phase_name
@@ -41,6 +44,7 @@ struct phase_plugin_adapter {
 	map[string]interface{}  adapter_config
 	bool                    is_active
 }
+
 func create_plugin_manager(max_plugins int32) plugin_manager {
 	return plugin_manager{
 		system:                     create_plugin_system(max_plugins),
@@ -56,6 +60,7 @@ func create_plugin_manager(max_plugins int32) plugin_manager {
 		mu:                         sync.Mutex{},
 	}
 }
+
 func (plugin_manager* m) import_and_load_plugin(descriptor plugin_import_descriptor) (plugin_interface, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -79,6 +84,7 @@ func (plugin_manager* m) import_and_load_plugin(descriptor plugin_import_descrip
 	m.total_requests_processed++
 	return plugin, true
 }
+
 func (plugin_manager* m) perform_plugin_health_check(plugin_id string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -100,11 +106,13 @@ func (plugin_manager* m) perform_plugin_health_check(plugin_id string) bool {
 	m.plugin_last_health_check[plugin_id] = now
 	return plugin.is_active()
 }
+
 func (plugin_manager* m) perform_system_health_check() plugin_system_health {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.system.get_system_health()
 }
+
 func (plugin_manager* m) get_compatible_plugins_for_phase(phase_name string) string[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -119,6 +127,7 @@ func (plugin_manager* m) get_compatible_plugins_for_phase(phase_name string) str
 	}
 	return compatible
 }
+
 func (plugin_manager* m) get_manager_stats() map[string]interface{} {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -133,6 +142,7 @@ func (plugin_manager* m) get_manager_stats() map[string]interface{} {
 	stats["manager_uptime_ms"] = uptime_ms
 	return stats
 }
+
 func create_plugin_import_descriptor(plugin_name string, version string) plugin_import_descriptor {
 	return plugin_import_descriptor{
 		descriptor_id:       "",
@@ -145,9 +155,11 @@ func create_plugin_import_descriptor(plugin_name string, version string) plugin_
 		startup_priority:    100,
 	}
 }
+
 func (plugin_import_descriptor* d) add_import_parameter(key string, value string) {
 	d.import_parameters[key] = value
 }
+
 func create_phase_plugin_adapter(adapter_id string, phase_name string) phase_plugin_adapter {
 	return phase_plugin_adapter{
 		adapter_id:    adapter_id,
@@ -158,16 +170,20 @@ func create_phase_plugin_adapter(adapter_id string, phase_name string) phase_plu
 		is_active:     false,
 	}
 }
+
 func (phase_plugin_adapter* a) add_phase_endpoint(endpoint string) {
 	a.phase_endpoints = append(a.phase_endpoints, endpoint)
 	a.endpoint_count++
 }
+
 func (phase_plugin_adapter* a) activate() {
 	a.is_active = true
 }
+
 func (phase_plugin_adapter* a) deactivate() {
 	a.is_active = false
 }
+
 struct phase6_plugin_integration {
 	phase_plugin_adapter    adapter
 	string[]             sampling_method_plugins
@@ -175,6 +191,7 @@ struct phase6_plugin_integration {
 	string[]             penalty_function_plugins
 	int32                   penalty_plugins_count
 }
+
 struct phase9_plugin_integration {
 	phase_plugin_adapter    adapter
 	string[]             chat_endpoint_plugins
@@ -182,6 +199,7 @@ struct phase9_plugin_integration {
 	string[]             embedding_plugins
 	int32                   embedding_plugins_count
 }
+
 struct phase12_plugin_integration {
 	phase_plugin_adapter    adapter
 	string[]             sse_handler_plugins
@@ -189,6 +207,7 @@ struct phase12_plugin_integration {
 	string[]             compression_plugins
 	int32                   compression_plugins_count
 }
+
 func create_phase6_plugin_integration() phase6_plugin_integration {
 	return phase6_plugin_integration{
 		adapter:                  create_phase_plugin_adapter("phase6_adapter", "phase6"),
@@ -198,6 +217,7 @@ func create_phase6_plugin_integration() phase6_plugin_integration {
 		penalty_plugins_count:    0,
 	}
 }
+
 func create_phase9_plugin_integration() phase9_plugin_integration {
 	return phase9_plugin_integration{
 		adapter:                 create_phase_plugin_adapter("phase9_adapter", "phase9"),
@@ -207,6 +227,7 @@ func create_phase9_plugin_integration() phase9_plugin_integration {
 		embedding_plugins_count: 0,
 	}
 }
+
 func create_phase12_plugin_integration() phase12_plugin_integration {
 	return phase12_plugin_integration{
 		adapter:                create_phase_plugin_adapter("phase12_adapter", "phase12"),
@@ -216,26 +237,32 @@ func create_phase12_plugin_integration() phase12_plugin_integration {
 		compression_plugins_count: 0,
 	}
 }
+
 func (phase6_plugin_integration* p) register_sampling_plugin(plugin_id string) {
 	p.sampling_method_plugins = append(p.sampling_method_plugins, plugin_id)
 	p.sampling_plugins_count++
 }
+
 func (phase6_plugin_integration* p) register_penalty_plugin(plugin_id string) {
 	p.penalty_function_plugins = append(p.penalty_function_plugins, plugin_id)
 	p.penalty_plugins_count++
 }
+
 func (phase9_plugin_integration* p) register_chat_plugin(plugin_id string) {
 	p.chat_endpoint_plugins = append(p.chat_endpoint_plugins, plugin_id)
 	p.chat_plugins_count++
 }
+
 func (phase9_plugin_integration* p) register_embedding_plugin(plugin_id string) {
 	p.embedding_plugins = append(p.embedding_plugins, plugin_id)
 	p.embedding_plugins_count++
 }
+
 func (phase12_plugin_integration* p) register_sse_handler(plugin_id string) {
 	p.sse_handler_plugins = append(p.sse_handler_plugins, plugin_id)
 	p.sse_plugins_count++
 }
+
 func (phase12_plugin_integration* p) register_compression_plugin(plugin_id string) {
 	p.compression_plugins = append(p.compression_plugins, plugin_id)
 	p.compression_plugins_count++

@@ -5,6 +5,7 @@ struct nucleus_processor {
     int min_tokens_to_keep
     float epsilon
 }
+
 func create_nucleus_processor(float p) nucleus_processor {
     nucleus_processor {
         p: p,
@@ -12,6 +13,7 @@ func create_nucleus_processor(float p) nucleus_processor {
         epsilon: 1e-7,
     }
 }
+
 func apply_nucleus(
     logits: float[],
     nucleus_processor processor
@@ -55,6 +57,7 @@ func apply_nucleus(
     }
     processor_utils.apply_token_mask(logits, mask)
 }
+
 func apply_adaptive_nucleus(
     logits: float[],
     base_p: float,
@@ -75,6 +78,7 @@ func apply_adaptive_nucleus(
     processor := create_nucleus_processor(adaptive_p)
     apply_nucleus(logits, processor)
 }
+
 func apply_nucleus_batch(
     logits_batch: float[][],
     nucleus_processor processor
@@ -86,6 +90,7 @@ func apply_nucleus_batch(
     }
     filtered_batch
 }
+
 func sample_from_nucleus(
     logits: float[],
     processor: nucleus_processor,
@@ -107,6 +112,7 @@ func sample_from_nucleus(
     }
     best_token
 }
+
 func apply_top_k_nucleus(
     logits: float[],
     k: int,
@@ -154,6 +160,7 @@ func apply_top_k_nucleus(
     }
     processor_utils.apply_token_mask(logits, mask)
 }
+
 struct nucleus_stats {
     int vocab_size
     float p
@@ -162,6 +169,7 @@ struct nucleus_stats {
     float cumulative_prob
     float[] kept_token_probs
 }
+
 func analyze_nucleus_filtering(
     logits: float[],
     float p
@@ -202,6 +210,7 @@ func analyze_nucleus_filtering(
         kept_token_probs: kept_probs,
     }
 }
+
 func nucleus_stats_to_string(nucleus_stats stats) string {
     string s = ""
     s = s + "Nucleus (Top-P) Filtering Statistics\n"

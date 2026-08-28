@@ -6,6 +6,7 @@ struct DecodeExecutor {
     active_sequences    string[]
     beam_search_state   map[string]BeamSearchData
 }
+
 struct BeamSearchData {
     sequence_id     string
     beam_width      i32
@@ -13,6 +14,7 @@ struct BeamSearchData {
     log_probs       []f64
     token_ids       [][]i32
 }
+
 func NewDecodeExecutor(config ExecutorConfig, decode_config DecodeConfig) *DecodeExecutor {
     executor := *DecodeExecutor{
         base: *NewBaseExecutor(config),
@@ -20,9 +22,11 @@ func NewDecodeExecutor(config ExecutorConfig, decode_config DecodeConfig) *Decod
     }
     return executor
 }
+
 func (DecodeExecutor* de) Initialize() ExecutionResult {
     return de.base.Initialize()
 }
+
 func (DecodeExecutor* de) ProcessDecodeStep(sequences string[]) ExecutionResult {
     if de.base.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
@@ -64,6 +68,7 @@ func (DecodeExecutor* de) ProcessDecodeStep(sequences string[]) ExecutionResult 
         throughput: f64(len(sequences)) / (f64(latency) / 1000.0),
     }
 }
+
 func (DecodeExecutor* de) load_kv_cache(sequence_id string) ExecutionResult {
     found := 0
     for i := 0; i < de.base.cache_manager.block_count; i++ {
@@ -84,9 +89,11 @@ func (DecodeExecutor* de) load_kv_cache(sequence_id string) ExecutionResult {
     }
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DecodeExecutor* de) compute_attention_step(sequence_id string) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DecodeExecutor* de) sample_next_tokens(sequences string[]) []i32 {
     output_tokens := make([]i32, len(sequences))
     for i := 0; i < len(sequences); i++ {
@@ -98,12 +105,15 @@ func (DecodeExecutor* de) sample_next_tokens(sequences string[]) []i32 {
     }
     return output_tokens
 }
+
 func (DecodeExecutor* de) sample_greedy(sequence_id string) i32 {
     return 1
 }
+
 func (DecodeExecutor* de) sample_beam_search(sequence_id string) i32 {
     return 1
 }
+
 func (DecodeExecutor* de) update_kv_cache(sequence_id string, token i32) ExecutionResult {
     for i := 0; i < de.base.cache_manager.block_count; i++ {
         block := de.base.cache_manager.blocks[i]
@@ -119,6 +129,7 @@ func (DecodeExecutor* de) update_kv_cache(sequence_id string, token i32) Executi
     }
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DecodeExecutor* de) ProcessBeamSearch(sequences string[], beam_width i32) ExecutionResult {
     if beam_width <= 0 {
         return ExecutionResult{
@@ -137,21 +148,26 @@ func (DecodeExecutor* de) ProcessBeamSearch(sequences string[], beam_width i32) 
     }
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DecodeExecutor* de) GetBeamHypotheses(sequence_id string) [][]i32 {
     if data, exists := de.beam_search_state[sequence_id]; exists {
         return data.token_ids
     }
     return [][]i32{}
 }
+
 func (DecodeExecutor* de) SwapCache(sequence_id string, from_device i32, to_device i32) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DecodeExecutor* de) PrefixMatching(prompt_tokens []i32) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DecodeExecutor* de) Shutdown() ExecutionResult {
     return de.base.Shutdown()
 }
+
 func get_time_ms() i64 {
     return 0
 }

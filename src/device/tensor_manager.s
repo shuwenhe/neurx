@@ -9,6 +9,7 @@ struct tensor_allocation {
     int64 allocated_bytes
     int ref_count
 }
+
 struct device_tensor_manager {
     int device_id
     stream_handle default_stream
@@ -17,6 +18,7 @@ struct device_tensor_manager {
     tensor_allocation[] allocations
     int num_allocations
 }
+
 func create_device_tensor_manager(
     int device_id,
     int64 max_memory_bytes,
@@ -32,6 +34,7 @@ func create_device_tensor_manager(
     }
     return mgr, true, ""
 }
+
 func (device_tensor_manager* mgr) allocate_tensor(
     int[] shape,
     int dtype
@@ -73,6 +76,7 @@ func (device_tensor_manager* mgr) allocate_tensor(
     }
     return tensor, true, ""
 }
+
 func (device_tensor_manager* mgr) free_tensor(device_tensor* tensor) (bool, string) {
     int idx = 0
     int found = -1
@@ -101,6 +105,7 @@ func (device_tensor_manager* mgr) free_tensor(device_tensor* tensor) (bool, stri
     }
     return true, ""
 }
+
 func (device_tensor_manager* mgr) add_tensor_ref(device_tensor* tensor) (bool, string) {
     int idx = 0
     int found = -1
@@ -117,11 +122,13 @@ func (device_tensor_manager* mgr) add_tensor_ref(device_tensor* tensor) (bool, s
     mgr.allocations[found].ref_count = mgr.allocations[found].ref_count + 1
     return true, ""
 }
+
 func (device_tensor_manager* mgr) get_memory_usage() (int64, int64, float) {
     free_bytes := mgr.max_allocation_bytes - mgr.total_allocated_bytes
     usage_percent := float(mgr.total_allocated_bytes) / float(mgr.max_allocation_bytes)
     return mgr.total_allocated_bytes, free_bytes, usage_percent
 }
+
 func (device_tensor_manager* mgr) clear_all() (bool, string) {
     int idx = 0
     for idx < mgr.num_allocations {
@@ -132,6 +139,7 @@ func (device_tensor_manager* mgr) clear_all() (bool, string) {
     mgr.total_allocated_bytes = 0
     return true, ""
 }
+
 func (device_tensor_manager* mgr) copy_h2d(
     int64 host_ptr,
     device_tensor* device_t
@@ -139,6 +147,7 @@ func (device_tensor_manager* mgr) copy_h2d(
     total_bytes := device_t.element_count * device_get_dtype_size(device_t.dtype)
     return device_memcpy_h2d(device_t.data, host_ptr, int64(total_bytes), mgr.default_stream)
 }
+
 func (device_tensor_manager* mgr) copy_d2h(
     device_tensor device_t,
     int64 host_ptr
@@ -146,6 +155,7 @@ func (device_tensor_manager* mgr) copy_d2h(
     total_bytes := device_t.element_count * device_get_dtype_size(device_t.dtype)
     return device_memcpy_d2h(host_ptr, device_t.data, int64(total_bytes), mgr.default_stream)
 }
+
 func (device_tensor_manager* mgr) copy_d2d(
     device_tensor* dst,
     device_tensor src
@@ -156,16 +166,20 @@ func (device_tensor_manager* mgr) copy_d2d(
     total_bytes := src.element_count * device_get_dtype_size(src.dtype)
     return device_memcpy_d2d(dst.data, src.data, int64(total_bytes), mgr.default_stream)
 }
+
 func (device_tensor_manager* mgr) zeros(device_tensor* tensor) (bool, string) {
     total_bytes := tensor.element_count * device_get_dtype_size(tensor.dtype)
     return device_memset(tensor.data, 0, int64(total_bytes), mgr.default_stream)
 }
+
 func (device_tensor_manager* mgr) ones(device_tensor* tensor) (bool, string) {
     return false, "ones not implemented"
 }
+
 func (device_tensor_manager* mgr) fill(device_tensor* tensor, float value) (bool, string) {
     return false, "fill not implemented"
 }
+
 func (device_tensor_manager* mgr) reshape(
     device_tensor* tensor,
     int[] new_shape
@@ -183,6 +197,7 @@ func (device_tensor_manager* mgr) reshape(
     tensor.stride = compute_strides(new_shape)
     return true, ""
 }
+
 func (device_tensor_manager* mgr) view(
     device_tensor tensor,
     int[] view_shape
@@ -207,10 +222,12 @@ func (device_tensor_manager* mgr) view(
     mgr.add_tensor_ref(&view_tensor)
     return view_tensor, true, ""
 }
+
 func (device_tensor_manager* mgr) get_stats() (int, int64, int64, float) {
     allocated, free, usage := mgr.get_memory_usage()
     return mgr.num_allocations, allocated, free, usage
 }
+
 func (device_tensor_manager* mgr) destroy() (bool, string) {
     return mgr.clear_all()
 }

@@ -23,6 +23,7 @@ struct llm_engine_v1 {
     int32 total_tokens_generated
     map[string]interface{} engine_stats
 }
+
 func create_llm_engine_v1() llm_engine_v1* {
     kv_cache := create_kv_cache_interface(1024, 256)
     pool := create_request_pool(1000, 128)
@@ -50,9 +51,11 @@ func create_llm_engine_v1() llm_engine_v1* {
         engine_stats: make(map[string]interface{}),
     }
 }
+
 func (llm_engine_v1* engine) add_request(v1_request* req) bool {
     return engine.pool.add_request(req)
 }
+
 func (llm_engine_v1* engine) step() bool {
     if engine.state == engine_shutdown {
         return false
@@ -82,6 +85,7 @@ func (llm_engine_v1* engine) step() bool {
     engine.state = engine_idle
     return true
 }
+
 func (llm_engine_v1* engine) complete(string prompt, int32 max_tokens) string {
     req := create_v1_request("req_1", prompt)
     req.max_tokens = max_tokens
@@ -94,6 +98,7 @@ func (llm_engine_v1* engine) complete(string prompt, int32 max_tokens) string {
     }
     return ""
 }
+
 func (llm_engine_v1* engine) complete_stream(string prompt, int32 max_tokens) string[] {
     req := create_v1_request("req_stream", prompt)
     req.max_tokens = max_tokens
@@ -107,6 +112,7 @@ func (llm_engine_v1* engine) complete_stream(string prompt, int32 max_tokens) st
     }
     return outputs
 }
+
 func (llm_engine_v1* engine) get_engine_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["state"] = engine.state
@@ -128,19 +134,23 @@ func (llm_engine_v1* engine) get_engine_stats() map[string]interface{} {
     stats["structured_output"] = struct_stats
     return stats
 }
+
 func (llm_engine_v1* engine) set_max_batch_size(int32 batch_size) {
     if batch_size > 0 {
         engine.max_batch_size = batch_size
         engine.executor.set_batch_size(batch_size)
     }
 }
+
 func (llm_engine_v1* engine) shutdown() {
     engine.state = engine_shutdown
     engine.pool.clear_completed()
 }
+
 func (llm_engine_v1* engine) pause() {
     engine.state = engine_paused
 }
+
 func (llm_engine_v1* engine) resume() {
     engine.state = engine_idle
 }

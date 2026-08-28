@@ -17,6 +17,7 @@ struct sse_server {
 	int32                       total_bytes_processed
 	sync.Mutex                  mu
 }
+
 struct sse_server_config {
 	int32                       max_connections
 	int32                       max_streams_per_connection
@@ -25,6 +26,7 @@ struct sse_server_config {
 	compression_type            default_compression
 	int32                       heartbeat_interval_ms
 }
+
 struct sse_response_frame {
 	string                      response_id
 	string                      status
@@ -38,6 +40,7 @@ struct sse_response_frame {
 	int64                       created_at
 	int32                       sequence_number
 }
+
 func create_sse_server_config() sse_server_config {
 	return sse_server_config{
 		max_connections:             1000,
@@ -48,6 +51,7 @@ func create_sse_server_config() sse_server_config {
 		heartbeat_interval_ms:       30000,
 	}
 }
+
 func create_sse_server(config sse_server_config) sse_server {
 	buffer_config := buffer_config{
 		capacity:       config.buffer_capacity,
@@ -70,6 +74,7 @@ func create_sse_server(config sse_server_config) sse_server {
 		mu:                          sync.Mutex{},
 	}
 }
+
 func (sse_server* s) open_connection(connection_id string, client_id string, stream_id string) (sse_connection, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -82,6 +87,7 @@ func (sse_server* s) open_connection(connection_id string, client_id string, str
 	s.total_connections_opened++
 	return conn, true
 }
+
 func (sse_server* s) close_connection(connection_id string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -95,6 +101,7 @@ func (sse_server* s) close_connection(connection_id string) bool {
 	s.total_connections_closed++
 	return true
 }
+
 func (sse_server* s) send_event(connection_id string, event sse_event) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -118,6 +125,7 @@ func (sse_server* s) send_event(connection_id string, event sse_event) bool {
 	s.total_bytes_processed = s.total_bytes_processed + encoded.size_bytes
 	return true
 }
+
 func (sse_server* s) create_stream(stream_id string, client_id string) (sse_stream, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -125,6 +133,7 @@ func (sse_server* s) create_stream(stream_id string, client_id string) (sse_stre
 	s.active_streams[stream_id] = stream
 	return stream, true
 }
+
 func (sse_server* s) close_stream(stream_id string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -137,6 +146,7 @@ func (sse_server* s) close_stream(stream_id string) bool {
 	delete(s.active_streams, stream_id)
 	return true
 }
+
 func (sse_server* s) enable_stream_compression(stream_id string, ctype compression_type) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -148,6 +158,7 @@ func (sse_server* s) enable_stream_compression(stream_id string, ctype compressi
 	s.active_streams[stream_id] = stream
 	return true
 }
+
 func (sse_server* s) get_server_stats() map[string]interface{} {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -165,6 +176,7 @@ func (sse_server* s) get_server_stats() map[string]interface{} {
 	stats["buffer_events"] = buffer_stats.current_events
 	return stats
 }
+
 func (sse_server* s) flush_pending_events() int32 {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -179,6 +191,7 @@ func (sse_server* s) flush_pending_events() int32 {
 	}
 	return count
 }
+
 func (sse_server* s) create_checkpoint(connection_id string) connection_checkpoint {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -190,6 +203,7 @@ func (sse_server* s) create_checkpoint(connection_id string) connection_checkpoi
 	s.active_connections[connection_id] = conn
 	return checkpoint
 }
+
 func (sse_server* s) pause_connection(connection_id string) resume_token {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -201,6 +215,7 @@ func (sse_server* s) pause_connection(connection_id string) resume_token {
 	s.active_connections[connection_id] = conn
 	return token
 }
+
 func (sse_server* s) resume_connection(connection_id string, token resume_token) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -215,6 +230,7 @@ func (sse_server* s) resume_connection(connection_id string, token resume_token)
 	}
 	return success
 }
+
 func (sse_server* s) get_connection_resume_events(connection_id string, from_event_id int32) sse_event[] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -232,6 +248,7 @@ func (sse_server* s) get_connection_resume_events(connection_id string, from_eve
 	}
 	return result
 }
+
 func (sse_server* s) broadcast_event(event sse_event) int32 {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -247,12 +264,14 @@ func (sse_server* s) broadcast_event(event sse_event) int32 {
 	s.total_events_processed = s.total_events_processed + count
 	return count
 }
+
 struct sse_integration {
 	sse_server                  server
 	int64                       last_log_time
 	int64                       last_metric_time
 	map[string]interface{]]     performance_metrics
 }
+
 func create_sse_integration(config sse_server_config) sse_integration {
 	return sse_integration{
 		server:                   create_sse_server(config),
@@ -261,12 +280,14 @@ func create_sse_integration(config sse_server_config) sse_integration {
 		performance_metrics:      make(map[string]interface{}),
 	}
 }
+
 func (sse_integration* i) process_request_sse(request map[string]interface{}) map[string]interface{} {
 	response := make(map[string]interface{})
 	response["status"] = "success"
 	response["timestamp"] = time.Now().UnixNano()
 	return response
 }
+
 func (sse_integration* i) log_sse_event(event string, details map[string]interface{}) {
 	log_entry := make(map[string]interface{})
 	log_entry["event"] = event
@@ -274,12 +295,14 @@ func (sse_integration* i) log_sse_event(event string, details map[string]interfa
 	log_entry["timestamp"] = time.Now().UnixNano()
 	i.last_log_time = time.Now().UnixNano()
 }
+
 func (sse_integration* i) record_metrics() {
 	server_stats := i.server.get_server_stats()
 	i.performance_metrics["server_stats"] = server_stats
 	i.performance_metrics["timestamp"] = time.Now().UnixNano()
 	i.last_metric_time = time.Now().UnixNano()
 }
+
 func (sse_integration* i) get_health_status() map[string]interface{} {
 	health := make(map[string]interface{})
 	health["status"] = "healthy"

@@ -5,18 +5,21 @@ struct http_request {
     string[] headers
     string body
 }
+
 struct http_response {
     int status_code
     string status_message
     string[] headers
     string body
 }
+
 struct inference_request {
     string model
     string[] messages
     int max_tokens
     float temperature
 }
+
 struct inference_response {
     string id
     string object
@@ -28,12 +31,14 @@ struct inference_response {
     int completion_tokens
     int total_tokens
 }
+
 struct api_config {
     string host
     int port
     string model_path
     bool enable_logging
 }
+
 func extract_json_value(string json, string key) string {
     int key_len = len(key)
     int search_key_len = key_len + 4
@@ -92,10 +97,12 @@ func extract_json_value(string json, string key) string {
     }
     return result
 }
+
 func extract_string_field(string body, string field_name) string {
     string search_str = "\"" + field_name + "\":"
     return extract_json_value(body, field_name)
 }
+
 func extract_int_field(string body, string field_name) int {
     string value_str = extract_json_value(body, field_name)
     if value_str == "" {
@@ -112,6 +119,7 @@ func extract_int_field(string body, string field_name) int {
     }
     return result
 }
+
 func extract_float_field(string body, string field_name) float {
     string value_str = extract_json_value(body, field_name)
     if value_str == "" {
@@ -141,9 +149,11 @@ func extract_float_field(string body, string field_name) float {
     }
     return result
 }
+
 func estimate_token_count(string text) int {
     return len(text) / 4 + 1
 }
+
 func format_json_string(string s) string {
     string result = ""
     int i = 0
@@ -166,6 +176,7 @@ func format_json_string(string s) string {
     }
     return result
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -197,6 +208,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func float_to_string(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 100.0)
@@ -211,6 +223,7 @@ func float_to_string(float f) string {
     result = result + int_to_string(frac_part)
     return result
 }
+
 func run_inference(string prompt, int max_tokens, float temperature) string {
     print("🤖 运doinference\n")
     print("   prompt: " + prompt + "\n")
@@ -229,6 +242,7 @@ func run_inference(string prompt, int max_tokens, float temperature) string {
     }
     return response
 }
+
 func handle_chat_completion(http_request req) http_response {
     print("\n📨 processing聊天complete请求\n")
     string model = extract_string_field(req.body, "model")
@@ -279,6 +293,7 @@ func handle_chat_completion(http_request req) http_response {
     resp.body = body
     return resp
 }
+
 func handle_health_check(http_request req) http_response {
     print("\n💚 processinghealthcheck\n")
     string body = "{"
@@ -294,6 +309,7 @@ func handle_health_check(http_request req) http_response {
     resp.body = body
     return resp
 }
+
 func handle_list_models(http_request req) http_response {
     print("\n📋 列出可usemodel\n")
     string body = "{"
@@ -313,6 +329,7 @@ func handle_list_models(http_request req) http_response {
     resp.body = body
     return resp
 }
+
 func handle_error(int status_code, string message) http_response {
     string body = "{"
     body = body + "\"error\":{"
@@ -326,6 +343,7 @@ func handle_error(int status_code, string message) http_response {
     resp.body = body
     return resp
 }
+
 func route_request(http_request req) http_response {
     print("\n" + "="*70 + "\n")
     print("🌐 NeurX REST API - 路由请求\n")
@@ -342,6 +360,7 @@ func route_request(http_request req) http_response {
         return handle_error(404, "endpoint未找到: " + req.path)
     }
 }
+
 func print_response(http_response resp) {
     print("\n" + "─"*70 + "\n")
     print("✅ API response\n")
@@ -351,6 +370,7 @@ func print_response(http_response resp) {
     print(resp.body + "\n")
     print("="*70 + "\n\n")
 }
+
 func main() {
     print("\n╔════════════════════════════════════════════════════════════════════╗\n")
     print("║          🚀 NeurX REST API server (pure S languageimplementation)               ║\n")

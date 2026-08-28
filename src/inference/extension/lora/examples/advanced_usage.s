@@ -64,6 +64,7 @@ func example_weight_fusion() ((), string) {
     println("    融合status: " + adapter.is_fused().to_string())
     return (), ""
 }
+
 func example_lora_state_management() ((), string) {
     println("\nexample 2: 请求statusmanagement")
     state_manager := new(4)
@@ -90,6 +91,7 @@ func example_lora_state_management() ((), string) {
     println("    活跃请求: " + len(active).to_string())
     return (), ""
 }
+
 func example_multi_adapter_caching() ((), string) {
     println("\nexample 3: more适配器缓存management")
     state_manager := new(8)
@@ -123,6 +125,7 @@ func example_multi_adapter_caching() ((), string) {
     println("    clear除back缓存条目: " + cache_entries.to_string())
     return (), ""
 }
+
 func example_dynamic_adapter_switch() ((), string) {
     println("\nexample 4: 动态适配器切换")
     state_manager := new(4)
@@ -160,6 +163,7 @@ func example_dynamic_adapter_switch() ((), string) {
     println("  ✓ already更new缩放because子")
     return (), ""
 }
+
 func example_weight_computation_perf() ((), string) {
     println("\nexample 5: 权重计算ity能")
     engine := new(8, 16.0)
@@ -198,6 +202,7 @@ func example_weight_computation_perf() ((), string) {
     println("    输出形状: (" + len(delta).to_string() + ", " + delta[0].len().to_string() + ")")
     return (), ""
 }
+
 func main() {
     println("=== LoRA high级使useexample ===\n")
     switch example_weight_fusion() {

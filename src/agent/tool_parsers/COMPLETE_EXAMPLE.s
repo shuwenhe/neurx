@@ -28,6 +28,7 @@ func main() {
     test_gemma_parser()
     test_custom_extraction()
 }
+
 func test_deepseek_parser() {
     println("═════════════════════════════════════════════════════════════════")
     println("TEST 1: DeepSeek V3 Parser")
@@ -56,6 +57,7 @@ func test_deepseek_parser() {
     }
     print("\n\n")
 }
+
 func test_qwen_parser() {
     println("═════════════════════════════════════════════════════════════════")
     println("TEST 2: Qwen3 Parser")
@@ -80,6 +82,7 @@ func test_qwen_parser() {
     }
     print("\n\n")
 }
+
 func test_mistral_parser() {
     println("═════════════════════════════════════════════════════════════════")
     println("TEST 3: Mistral Parser")
@@ -104,6 +107,7 @@ func test_mistral_parser() {
     }
     print("\n\n")
 }
+
 func test_gemma_parser() {
     println("═════════════════════════════════════════════════════════════════")
     println("TEST 4: Gemma4 Parser")
@@ -128,6 +132,7 @@ func test_gemma_parser() {
     }
     print("\n\n")
 }
+
 func test_custom_extraction() {
     println("═════════════════════════════════════════════════════════════════")
     println("TEST 5: Tool Call Validation & Filtering")
@@ -173,9 +178,11 @@ func test_custom_extraction() {
     println("  Valid: " + bool_to_string(is_invalid))
     print("\n\n")
 }
+
 func bool_to_string(bool b) . str {
     if b { "true" } else { "false" }
 }
+
 func int_to_string(i32 i) . str {
     i.to_string()
 }

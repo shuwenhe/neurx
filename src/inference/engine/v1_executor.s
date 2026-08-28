@@ -13,6 +13,7 @@ struct executor_config {
     int32 decode_batch_size
     bool separate_prefill_decode
 }
+
 struct v1_executor {
     executor_config config
     v1_core* core
@@ -20,6 +21,7 @@ struct v1_executor {
     int32 total_batches
     v1_request*[] current_batch
 }
+
 func create_v1_executor(v1_core* core_instance) v1_executor* {
     return *v1_executor{
         config: executor_config{
@@ -36,6 +38,7 @@ func create_v1_executor(v1_core* core_instance) v1_executor* {
         current_batch: make(v1_request*[]),
     }
 }
+
 func (v1_executor* exec) prepare_batch(v1_request*[] requests) bool {
     if len(requests) == 0 {
         return false
@@ -50,6 +53,7 @@ func (v1_executor* exec) prepare_batch(v1_request*[] requests) bool {
     }
     return true
 }
+
 func (v1_executor* exec) execute_prefill() bool {
     if len(exec.current_batch) == 0 {
         return false
@@ -68,6 +72,7 @@ func (v1_executor* exec) execute_prefill() bool {
     success := exec.core.batch_prefill(batch_input_ids, batch_logits)
     return success
 }
+
 func (v1_executor* exec) execute_decode() bool {
     if len(exec.current_batch) == 0 {
         return false
@@ -87,6 +92,7 @@ func (v1_executor* exec) execute_decode() bool {
     }
     return true
 }
+
 func (v1_executor* exec) execute() bool {
     if len(exec.current_batch) == 0 {
         return false
@@ -103,6 +109,7 @@ func (v1_executor* exec) execute() bool {
     exec.total_batches = exec.total_batches + 1
     return true
 }
+
 func (v1_executor* exec) get_executor_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["mode"] = exec.config.mode
@@ -112,6 +119,7 @@ func (v1_executor* exec) get_executor_stats() map[string]interface{} {
     stats["current_batch_size"] = len(exec.current_batch)
     return stats
 }
+
 func (v1_executor* exec) set_batch_size(int32 batch_size) {
     if batch_size > 0 && batch_size <= exec.config.max_batch_size {
         exec.config.batch_size = batch_size

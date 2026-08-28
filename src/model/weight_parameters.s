@@ -12,6 +12,7 @@ package model
     per_channel
     per_token
 }
+
 struct parameter_metadata {
     string param_name
     int64[] shape
@@ -22,6 +23,7 @@ struct parameter_metadata {
     bool is_quantized
     string device_type
 }
+
 struct quantization_config {
     quantization_method method
     parameter_dtype target_dtype
@@ -29,6 +31,7 @@ struct quantization_config {
     float scale_factor
     bool symmetric
 }
+
 struct model_weight {
     string weight_id
     parameter_metadata metadata
@@ -37,6 +40,7 @@ struct model_weight {
     int64 pack_ratio
     map[string, string] attributes
 }
+
 struct packed_weight {
     string weight_id
     string original_weight_id
@@ -46,6 +50,7 @@ struct packed_weight {
     string compression_algorithm
     bool is_compressed
 }
+
 struct quantized_weight {
     string weight_id
     parameter_dtype original_dtype
@@ -57,12 +62,14 @@ struct quantized_weight {
     float scale
     float zero_point
 }
+
 struct weight_parameter {
     model_weight weight
     quantized_weight quant_data
     bool uses_quantization
     bool uses_packing
 }
+
 func new_parameter_metadata(string name, int64[] shape, parameter_dtype dtype) parameter_metadata {
     total_elements := 1
     i := 0
@@ -90,6 +97,7 @@ func new_parameter_metadata(string name, int64[] shape, parameter_dtype dtype) p
         device_type: "cuda",
     }
 }
+
 func new_model_weight(string weight_id, parameter_metadata metadata) model_weight {
     model_weight {
         weight_id: weight_id,
@@ -100,6 +108,7 @@ func new_model_weight(string weight_id, parameter_metadata metadata) model_weigh
         attributes: map[string, string]{},
     }
 }
+
 func new_quantized_weight(string weight_id, parameter_dtype original_dtype, parameter_dtype target_dtype) quantized_weight {
     quantized_weight {
         weight_id: weight_id,
@@ -119,6 +128,7 @@ func new_quantized_weight(string weight_id, parameter_dtype original_dtype, para
         zero_point: 0.0,
     }
 }
+
 func new_packed_weight(string weight_id, string original_weight_id, string algorithm) packed_weight {
     packed_weight {
         weight_id: weight_id,
@@ -130,6 +140,7 @@ func new_packed_weight(string weight_id, string original_weight_id, string algor
         is_compressed: false,
     }
 }
+
 func (model_weight* weight) get_dtype_string() string {
     switch weight.metadata.dtype {
         parameter_dtype_float32 : "float32",
@@ -140,22 +151,28 @@ func (model_weight* weight) get_dtype_string() string {
         parameter_dtype_nf4 : "nf4",
     }
 }
+
 func (model_weight* weight) get_size_bytes() int64 {
     weight.metadata.size_bytes
 }
+
 func (model_weight* weight) get_total_elements() int64 {
     weight.metadata.total_elements
 }
+
 func (model_weight* weight) set_device(string device_type) () {
     weight.metadata.device_type = device_type
 }
+
 func (model_weight* weight) get_device() string {
     weight.metadata.device_type
 }
+
 func (quantized_weight* qweight) set_scales(float scale, float zero_pt) () {
     qweight.scale = scale
     qweight.zero_point = zero_pt
 }
+
 func (quantized_weight* qweight) get_compression_ratio() float {
     switch qweight.quantized_dtype {
         parameter_dtype_int8 : 4.0,
@@ -166,17 +183,21 @@ func (quantized_weight* qweight) get_compression_ratio() float {
         parameter_dtype_bfloat16 : 2.0,
     }
 }
+
 func (weight_parameter* pweight) enable_quantization() bool {
     pweight.uses_quantization = true
     true
 }
+
 func (weight_parameter* pweight) enable_packing() bool {
     pweight.uses_packing = true
     true
 }
+
 func (weight_parameter* pweight) is_compressed() bool {
     pweight.uses_quantization || pweight.uses_packing
 }
+
 struct layer_weights {
     string layer_id
     map[string, weight_parameter] weights
@@ -184,6 +205,7 @@ struct layer_weights {
     bool all_quantized
     int weight_count
 }
+
 func new_layer_weights(string layer_id) layer_weights {
     layer_weights {
         layer_id: layer_id,
@@ -193,12 +215,14 @@ func new_layer_weights(string layer_id) layer_weights {
         weight_count: 0,
     }
 }
+
 func (layer_weights* layer) add_weight(string weight_id, weight_parameter param) bool {
     layer.weights[weight_id] = param
     layer.total_memory_bytes = layer.total_memory_bytes + param.weight.get_size_bytes()
     layer.weight_count = layer.weight_count + 1
     true
 }
+
 func (layer_weights* layer) get_weight(string weight_id) weight_parameter {
     if weight_id in layer.weights {
         layer.weights[weight_id]
@@ -212,12 +236,15 @@ func (layer_weights* layer) get_weight(string weight_id) weight_parameter {
         uses_packing: false,
     }
 }
+
 func (layer_weights* layer) has_weight(string weight_id) bool {
     weight_id in layer.weights
 }
+
 func (layer_weights* layer) get_total_memory() int64 {
     layer.total_memory_bytes
 }
+
 func (layer_weights* layer) get_weight_count() int {
     layer.weight_count
 }

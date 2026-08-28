@@ -5,6 +5,7 @@ struct beam_hypothesis {
 	score float32
 	length int32
 }
+
 struct beam_search_state {
 	beam_width int32
 	max_length int32
@@ -18,6 +19,7 @@ struct beam_search_state {
 	pad_token_id int32
 	step int32
 }
+
 func create_beam_search_state(int32 beam_width, int32 max_length, float32 length_penalty, bool early_stopping) beam_search_state* {
 	return *beam_search_state{
 		beam_width: beam_width,
@@ -33,6 +35,7 @@ func create_beam_search_state(int32 beam_width, int32 max_length, float32 length
 		step: 0,
 	}
 }
+
 func (b* beam_search_state) init_beams(int32[] initial_tokens) {
 	b.current_beams = make(beam_hypothesis[])
 	for i := 0; i < int32(b.beam_width); i = i + 1 {
@@ -48,6 +51,7 @@ func (b* beam_search_state) init_beams(int32[] initial_tokens) {
 	}
 	b.step = 1
 }
+
 func (b* beam_search_state) expand_beams(float32[] logits) beam_hypothesis[] {
 	candidates := make(beam_hypothesis[])
 	for beam_idx := 0; beam_idx < len(b.current_beams); beam_idx = beam_idx + 1 {
@@ -69,6 +73,7 @@ func (b* beam_search_state) expand_beams(float32[] logits) beam_hypothesis[] {
 	}
 	return candidates
 }
+
 func (b* beam_search_state) select_top_beams(beam_hypothesis[] candidates) beam_hypothesis[] {
 	if len(candidates) <= 0 {
 		return make(beam_hypothesis[])
@@ -96,6 +101,7 @@ func (b* beam_search_state) select_top_beams(beam_hypothesis[] candidates) beam_
 	}
 	return result
 }
+
 func (b* beam_search_state) step_beam_search(float32[] logits) bool {
 	if b.step >= b.max_length {
 		return false
@@ -106,6 +112,7 @@ func (b* beam_search_state) step_beam_search(float32[] logits) bool {
 	b.step = b.step + 1
 	return true
 }
+
 func (b* beam_search_state) finalize() int32[][]] {
 	result := make(int32[][]])
 	sorted := make(beam_hypothesis[])
@@ -130,6 +137,7 @@ func (b* beam_search_state) finalize() int32[][]] {
 	}
 	return result
 }
+
 func (b* beam_search_state) is_finished() bool {
 	if b.step >= b.max_length {
 		return true
@@ -148,12 +156,14 @@ func (b* beam_search_state) is_finished() bool {
 	}
 	return false
 }
+
 struct diverse_beam_search_state {
 	base_state* beam_search_state
 	num_groups int32
 	diversity_penalty float32
 	group_beams beam_hypothesis[[]]
 }
+
 func create_diverse_beam_search_state(int32 beam_width, int32 num_groups, float32 diversity_penalty) diverse_beam_search_state* {
 	if num_groups <= 0 {
 		num_groups = 1
@@ -166,6 +176,7 @@ func create_diverse_beam_search_state(int32 beam_width, int32 num_groups, float3
 		group_beams: make(beam_hypothesis[[]]),
 	}
 }
+
 func (d* diverse_beam_search_state) step(float32[] logits) bool {
 	for group_idx := 0; group_idx < int32(d.num_groups); group_idx = group_idx + 1 {
 		adjusted_logits := make(float32[])
@@ -189,6 +200,7 @@ func (d* diverse_beam_search_state) step(float32[] logits) bool {
 	}
 	return true
 }
+
 func calculate_beam_search_probs(float32[] logits) float32[] {
 	max_logit := logits[0]
 	for i := 1; i < len(logits); i = i + 1 {

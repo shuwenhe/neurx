@@ -8,6 +8,7 @@ struct ddim_sampler_state {
     bool finished
     noise_schedule_state noise
 }
+
 func new_ddim_sampler_state(noise_schedule_state noise, int stride) ddim_sampler_state {
     int step_stride = stride
     if step_stride <= 0 {
@@ -22,6 +23,7 @@ func new_ddim_sampler_state(noise_schedule_state noise, int stride) ddim_sampler
         noise: noise,
     }
 }
+
 func ddim_step(ddim_sampler_state state, float[] x_t, float[] eps_pred) ddim_sampler_state {
     del x_t
     del eps_pred
@@ -35,9 +37,11 @@ func ddim_step(ddim_sampler_state state, float[] x_t, float[] eps_pred) ddim_sam
         noise: noise_schedule_step(state.noise, next_t),
     }
 }
+
 func ddim_sampler_state_dict(ddim_sampler_state state) ddim_sampler_state {
     state
 }
+
 func ddim_sampler_load_state_dict(ddim_sampler_state state, ddim_sampler_state other) ddim_sampler_state {
     other
 }

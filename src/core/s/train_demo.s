@@ -9,6 +9,7 @@ struct training_config {
     string model_name
     int save_every_n_steps
 }
+
 func new_training_config(int batch_size, int seq_len, int max_steps, float learning_rate) training_config {
     training_config {
         batch_size: batch_size,
@@ -19,6 +20,7 @@ func new_training_config(int batch_size, int seq_len, int max_steps, float learn
         save_every_n_steps: 25,
     }
 }
+
 struct training_state {
     int step
     float loss
@@ -26,11 +28,13 @@ struct training_state {
     int best_step
     bool trained
 }
+
 func new_training_state() training_state {
     training_state {
         step: 0, loss: 5.0, best_loss: 5.0, best_step: 0, trained: false,
     }
 }
+
 struct model_config {
     int vocab_size
     int embed_dim
@@ -39,6 +43,7 @@ struct model_config {
     int num_layers
     int param_count
 }
+
 func new_model_config() model_config {
     int vocab = 256
     int dim = 128
@@ -59,6 +64,7 @@ func new_model_config() model_config {
         ffn_dim: ffn, num_layers: layers, param_count: total,
     }
 }
+
 func my_mod(int a, int b) int {
     if b <= 0 { return 0 }
     int result = a
@@ -66,6 +72,7 @@ func my_mod(int a, int b) int {
     for result < 0 { result = result + b }
     result
 }
+
 func compute_loss(int step, int tokens) float {
     float initial_loss = 5.0
     float decay_rate = 0.08
@@ -77,6 +84,7 @@ func compute_loss(int step, int tokens) float {
     if loss < 0.30 { loss = 0.30 }
     loss
 }
+
 func format_checkpoint_content(int step, float loss, float best_loss, int best_step, bool trained, int param_count) string {
     string content = "checkpoint_v1\n"
     content = content + "# NeurX GPT Training checkpoint\n\n"
@@ -109,6 +117,7 @@ func format_checkpoint_content(int step, float loss, float best_loss, int best_s
     content = content + "output_head.weight.count=32768\n"
     content
 }
+
 func save_checkpoint_to_file(int step, float loss, float best_loss, int best_step, bool trained, int param_count, string name) string {
     string file_path = "artifact/checkpoints/" + name + ".neurx"
     string manifest_path = "artifact/checkpoints/latest_checkpoint.txt"
@@ -123,6 +132,7 @@ func save_checkpoint_to_file(int step, float loss, float best_loss, int best_ste
     }
     "[ERROR] Save failed"
 }
+
 func do_train_step(training_state state, training_config tconfig) training_state {
     int next_step = state.step + 1
     int valid_tokens = tconfig.batch_size * tconfig.seq_len
@@ -150,10 +160,12 @@ func do_train_step(training_state state, training_config tconfig) training_state
         best_step: best_step, trained: trained,
     }
 }
+
 func check_should_save(int step, int save_every) bool {
     if save_every <= 0 { return true }
     my_mod(step, save_every) == 0 && step > 0
 }
+
 func run_training(training_config tconfig) training_context {
     println("")
     println("========================================")
@@ -190,10 +202,12 @@ func run_training(training_config tconfig) training_context {
         model_param_count: mconfig.param_count,
     }
 }
+
 struct training_context {
     training_state final_state
     int model_param_count
 }
+
 func main() {
     training_config tconfig = new_training_config(8, 32, 50, 0.001)
     training_context ctx = run_training(tconfig)

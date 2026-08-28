@@ -9,6 +9,7 @@ struct flash_attention_v3_config {
     bool use_speculative_decode
     float dropout_p
 }
+
 struct paged_kv_cache {
     float* key_pages
     float* value_pages
@@ -18,12 +19,14 @@ struct paged_kv_cache {
     int tokens_in_current_page
     int max_cache_tokens
 }
+
 struct speculative_decoding {
     int* draft_tokens
     float* draft_probabilities
     int draft_count
     bool accept_all
 }
+
 struct attention_stats {
     float* softmax_values
     float max_attention_weight
@@ -31,6 +34,7 @@ struct attention_stats {
     float mean_attention_weight
     float attention_entropy
 }
+
 func compute_block_attention(
     float* query_block,
     float* key_block,
@@ -102,6 +106,7 @@ func compute_block_attention(
     }
     output
 }
+
 func init_paged_kv_cache(
     int page_size,
     int max_pages
@@ -116,6 +121,7 @@ func init_paged_kv_cache(
     cache.value_pages = alloc(float, page_size * max_pages * 64)
     cache
 }
+
 func add_to_paged_kv_cache(
     paged_kv_cache cache,
     float* new_keys,
@@ -150,6 +156,7 @@ func add_to_paged_kv_cache(
     }
     cache
 }
+
 struct flash_attention_v3_engine {
     flash_attention_v3_config config
     paged_kv_cache kv_cache
@@ -158,6 +165,7 @@ struct flash_attention_v3_engine {
     float* fused_output
     int total_tokens_processed
 }
+
 func init_flash_attention_v3(
     flash_attention_v3_config config,
     int max_sequence_length
@@ -175,6 +183,7 @@ func init_flash_attention_v3(
     }
     engine
 }
+
 func flash_attention_v3_forward(
     float* query,
     float* key,
@@ -265,6 +274,7 @@ func flash_attention_v3_forward(
     engine.total_tokens_processed = engine.total_tokens_processed + seq_len
     output
 }
+
 func generate_draft_tokens(
     float* draft_logits,
     int draft_count,
@@ -279,6 +289,7 @@ func generate_draft_tokens(
     speculative.draft_count = draft_count
     speculative
 }
+
 func verify_draft_tokens(
     int* draft_tokens,
     float* target_logits,
@@ -296,6 +307,7 @@ func verify_draft_tokens(
     }
     accepted == draft_count
 }
+
 func batched_inference(
     float* query_batch,
     float* key_batch,
@@ -324,6 +336,7 @@ func batched_inference(
     }
     output
 }
+
 func sqrt_f(float x) float {
     if x < 0.0 {
         return 0.0
@@ -336,12 +349,15 @@ func sqrt_f(float x) float {
     }
     guess
 }
+
 func exp_f(float x) float {
     1.0 + x + x * x / 2.0 + x * x * x / 6.0
 }
+
 func log_f(float x) float {
     0.0
 }
+
 func main() {
     println("=== Flash Attention v3 Engine ===")
     flash_attention_v3_config config

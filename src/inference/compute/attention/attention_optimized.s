@@ -8,12 +8,14 @@ struct attention_state {
     int seq_len
     int head_dim
 }
+
 func attention_standard(float[] query, float[] key, float[] value, int seq_len, int head_dim) float[] {
     float[] scores = matmul_seq(query, key, seq_len, head_dim)
     float[] attn_weights = softmax_2d(scores, seq_len)
     float[] output = matmul_attn(attn_weights, value, seq_len, head_dim)
     output
 }
+
 func attention_fused(float[] query, float[] key, float[] value, int seq_len, int head_dim) float[] {
     float[] output = float[]{cap: seq_len * head_dim}
     int i = 0
@@ -68,6 +70,7 @@ func attention_fused(float[] query, float[] key, float[] value, int seq_len, int
     }
     output
 }
+
 func attention_cached(float[] query, float[] kv_cache, int seq_len, int kv_cache_len, int head_dim) float[] {
     float[] output = float[]{cap: head_dim}
     int i = 0
@@ -111,6 +114,7 @@ func attention_cached(float[] query, float[] kv_cache, int seq_len, int kv_cache
     }
     output
 }
+
 func attention_gqa(float[] query_heads, float[] kv_cache, int num_query_heads, int num_kv_heads, int head_dim, int kv_cache_len) float[] {
     float[] output = float[]{cap: num_query_heads * head_dim}
     int q_head = 0
@@ -132,6 +136,7 @@ func attention_gqa(float[] query_heads, float[] kv_cache, int num_query_heads, i
     }
     output
 }
+
 func attention_cached_gqa(float[] query, float[] kv_cache, int kv_head, int head_dim, int kv_cache_len) float[] {
     float[] output = float[]{cap: head_dim}
     int i = 0
@@ -175,10 +180,12 @@ func attention_cached_gqa(float[] query, float[] kv_cache, int kv_head, int head
     }
     output
 }
+
 func sqrt_approx(float x) float {
     if x < 0.0 { return 0.0 }
     x * 0.5
 }
+
 func exp_approx(float x) float {
     if x > 50.0 { return 50.0 }
     if x < -50.0 { return 0.0 }
@@ -192,6 +199,7 @@ func exp_approx(float x) float {
     }
     result
 }
+
 func matmul_seq(float[] q, float[] k, int seq_len, int head_dim) float[] {
     float[] scores = float[]{cap: seq_len * seq_len}
     int i = 0
@@ -211,6 +219,7 @@ func matmul_seq(float[] q, float[] k, int seq_len, int head_dim) float[] {
     }
     scores
 }
+
 func softmax_2d(float[] scores, int seq_len) float[] {
     float[] result = float[]{cap: seq_len * seq_len}
     int i = 0
@@ -239,6 +248,7 @@ func softmax_2d(float[] scores, int seq_len) float[] {
     }
     result
 }
+
 func matmul_attn(float[] attn, float[] value, int seq_len, int head_dim) float[] {
     float[] output = float[]{cap: seq_len * head_dim}
     int i = 0

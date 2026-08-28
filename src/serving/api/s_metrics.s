@@ -29,6 +29,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func format_metrics_json(int total_requests, int avg_latency_ms, int p99_latency_ms, int error_rate) string {
     string json = "{"
     json = json + "\"total_requests\":" + int_to_string(total_requests)
@@ -38,6 +39,7 @@ func format_metrics_json(int total_requests, int avg_latency_ms, int p99_latency
     json = json + "}"
     return json
 }
+
 func format_endpoint_stats(string endpoint, int request_count, int success_count, int error_count) string {
     string json = "{"
     json = json + "\"endpoint\":\"" + endpoint + "\""
@@ -47,6 +49,7 @@ func format_endpoint_stats(string endpoint, int request_count, int success_count
     json = json + "}"
     return json
 }
+
 func format_latency_histogram(int p50, int p90, int p95, int p99) string {
     string json = "{"
     json = json + "\"p50_ms\":" + int_to_string(p50)
@@ -56,6 +59,7 @@ func format_latency_histogram(int p50, int p90, int p95, int p99) string {
     json = json + "}"
     return json
 }
+
 func format_alert_json(string severity, string message, string metric_name) string {
     string json = "{"
     json = json + "\"severity\":\"" + severity + "\""
@@ -65,15 +69,19 @@ func format_alert_json(string severity, string message, string metric_name) stri
     json = json + "}"
     return json
 }
+
 func json_health_check_full() string {
     return "{\"status\":\"healthy\",\"uptime_seconds\":3600,\"memory_usage_mb\":128,\"cpu_usage_percent\":15,\"active_connections\":42}"
 }
+
 func json_request_rate() string {
     return "{\"current_rps\":250,\"average_rps\":200,\"peak_rps\":500,\"min_rps\":10}"
 }
+
 func json_error_summary() string {
     return "{\"http_400\":5,\"http_404\":12,\"http_500\":2,\"timeout_errors\":1,\"parse_errors\":3}"
 }
+
 func main() {
     print("✅ pure S ity能监控系统already编译\n")
     string metrics = format_metrics_json(10000, 45, 200, 2)

@@ -25,6 +25,7 @@ package neurx.parser.types
     TRUNCATE = 3
     FALLBACK_TEXT = 4
 }
+
 struct ParsedValue {
     int type
     string string_value
@@ -35,6 +36,7 @@ struct ParsedValue {
     object_values: []ParsedValue
     string raw_text
 }
+
 struct ParseResult {
     int status
     ParsedValue value
@@ -50,6 +52,7 @@ struct ParseResult {
     warnings: string[]
     map[string]string metadata
 }
+
 struct IncrementalParseState {
     string buffer
     int position
@@ -61,6 +64,7 @@ struct IncrementalParseState {
     bool is_complete
     string last_token
 }
+
 struct ParserConfig {
     int mode
     int format
@@ -77,6 +81,7 @@ struct ParserConfig {
     bool normalize_output
     bool cache_intermediate
 }
+
 struct TokenBuffer {
     tokens: string[]
     positions: int[]
@@ -84,6 +89,7 @@ struct TokenBuffer {
     confidence: float[]
     int buffer_size
 }
+
 struct ParseContext {
     string input
     int position
@@ -97,12 +103,14 @@ struct ParseContext {
     errors: string[]
     warnings: string[]
 }
+
 struct FormatDetectionResult {
     int detected_format
     float confidence
     indicators: string[]
     map[string]string metadata
 }
+
 struct StreamChunk {
     string data
     int position
@@ -111,6 +119,7 @@ struct StreamChunk {
     ParsedValue partial_parse
     string error
 }
+
 struct ParserStats {
     int total_parses
     int successful_parses
@@ -122,6 +131,7 @@ struct ParserStats {
     int cache_misses
     map[string]int formats_detected
 }
+
 func create_parse_result() ParseResult {
     return ParseResult{
         status: 3,
@@ -139,6 +149,7 @@ func create_parse_result() ParseResult {
         metadata: map[string]string{},
     }
 }
+
 func create_null_value() ParsedValue {
     return ParsedValue{
         type: 0,
@@ -151,6 +162,7 @@ func create_null_value() ParsedValue {
         raw_text: "null",
     }
 }
+
 func create_string_value(string s) ParsedValue {
     return ParsedValue{
         type: 3,
@@ -163,6 +175,7 @@ func create_string_value(string s) ParsedValue {
         raw_text: "\"" + s + "\"",
     }
 }
+
 func create_number_value(float n) ParsedValue {
     str_val := ""
     int_n := int(n)
@@ -182,6 +195,7 @@ func create_number_value(float n) ParsedValue {
         raw_text: str_val,
     }
 }
+
 func create_bool_value(bool b) ParsedValue {
     str_val := if b { "true" } else { "false" }
     return ParsedValue{
@@ -195,6 +209,7 @@ func create_bool_value(bool b) ParsedValue {
         raw_text: str_val,
     }
 }
+
 func create_array_value([]ParsedValue items) ParsedValue {
     return ParsedValue{
         type: 4,
@@ -207,6 +222,7 @@ func create_array_value([]ParsedValue items) ParsedValue {
         raw_text: "[...]",
     }
 }
+
 func create_object_value(string[] keys, []ParsedValue values) ParsedValue {
     return ParsedValue{
         type: 5,
@@ -219,6 +235,7 @@ func create_object_value(string[] keys, []ParsedValue values) ParsedValue {
         raw_text: "{...}",
     }
 }
+
 func create_default_config() ParserConfig {
     return ParserConfig{
         mode: 1,
@@ -237,6 +254,7 @@ func create_default_config() ParserConfig {
         cache_intermediate: true,
     }
 }
+
 func create_parser_context(string input, ParseConfig config) ParseContext {
     return ParseContext{
         input: input,
@@ -268,24 +286,31 @@ func create_parser_context(string input, ParseConfig config) ParseContext {
         warnings: string[]{},
     }
 }
+
 func (ParsedValue v) is_null() bool {
     return v.type == 0
 }
+
 func (ParsedValue v) is_bool() bool {
     return v.type == 1
 }
+
 func (ParsedValue v) is_number() bool {
     return v.type == 2
 }
+
 func (ParsedValue v) is_string() bool {
     return v.type == 3
 }
+
 func (ParsedValue v) is_array() bool {
     return v.type == 4
 }
+
 func (ParsedValue v) is_object() bool {
     return v.type == 5
 }
+
 func create_parser_stats() ParserStats {
     formats := map[string]int{}
     return ParserStats{

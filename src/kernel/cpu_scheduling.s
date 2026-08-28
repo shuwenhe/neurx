@@ -5,6 +5,7 @@ struct cpu_affinity {
     int cpu_id
     int preferred_cpu
 }
+
 struct task {
     int task_id
     string name
@@ -14,12 +15,14 @@ struct task {
     int runtime  
     int state  
 }
+
 struct cpu_scheduler {
     task[] run_queue
     task[] blocked_queue
     int num_cpus
     int current_task_id
 }
+
 func (cpu_scheduler* sched) init(int num_cpus) (int, string) {
     sched.run_queue = {}
     sched.blocked_queue = {}
@@ -27,6 +30,7 @@ func (cpu_scheduler* sched) init(int num_cpus) (int, string) {
     sched.current_task_id = 0
     return 0, ""
 }
+
 func (cpu_scheduler* sched) create_task(string name, int priority) (task, string) {
     new_task := task{
         task_id: sched.current_task_id,
@@ -41,6 +45,7 @@ func (cpu_scheduler* sched) create_task(string name, int priority) (task, string
     sched.run_queue = append(sched.run_queue, new_task)
     return new_task, ""
 }
+
 func (cpu_scheduler* sched) set_affinity(int task_id, int cpu_mask) (int, string) {
     i := 0
     for i < len(sched.run_queue) {
@@ -54,6 +59,7 @@ func (cpu_scheduler* sched) set_affinity(int task_id, int cpu_mask) (int, string
     }
     return -1, "Task not found"
 }
+
 func (cpu_scheduler* sched) select_cpu_for_task(int task_id) (int, string) {
     i := 0
     for i < len(sched.run_queue) {
@@ -77,6 +83,7 @@ func (cpu_scheduler* sched) select_cpu_for_task(int task_id) (int, string) {
     }
     return -1, "Task not found"
 }
+
 func (cpu_scheduler* sched) schedule() (task, string) {
     if len(sched.run_queue) == 0 {
         return task{}, "No runnable tasks"
@@ -92,6 +99,7 @@ func (cpu_scheduler* sched) schedule() (task, string) {
     sched.run_queue[len(sched.run_queue) - 1] = next_task
     return next_task, ""
 }
+
 func (cpu_scheduler* sched) block_task(int task_id) (int, string) {
     i := 0
     for i < len(sched.run_queue) {
@@ -110,6 +118,7 @@ func (cpu_scheduler* sched) block_task(int task_id) (int, string) {
     }
     return -1, "Task not found"
 }
+
 func (cpu_scheduler* sched) wake_task(int task_id) (int, string) {
     i := 0
     for i < len(sched.blocked_queue) {
@@ -128,9 +137,11 @@ func (cpu_scheduler* sched) wake_task(int task_id) (int, string) {
     }
     return -1, "Task not found"
 }
+
 func (cpu_scheduler sched) get_stats() (int, int) {
     return len(sched.run_queue), len(sched.blocked_queue)
 }
+
 func (cpu_scheduler sched) get_task_info(int task_id) (int, int, int, string) {
     i := 0
     for i < len(sched.run_queue) {

@@ -8,6 +8,7 @@ use std.slices
     decoding,
     finished
 }
+
 struct request_state {
     int request_id
     int[] prompt_tokens
@@ -22,6 +23,7 @@ struct request_state {
     int arrival_time_ms
     int start_time_ms
 }
+
 struct batch_config {
     int max_batch_size
     int max_total_tokens
@@ -30,12 +32,14 @@ struct batch_config {
     int decode_token_budget
     float prefill_ratio
 }
+
 struct phase_state {
     phase_type phase
     []request_state requests
     int token_count
     int compute_time_ms
 }
+
 struct prefill_decode_engine {
     batch_config config
     []request_state pending_requests
@@ -47,6 +51,7 @@ struct prefill_decode_engine {
     int total_decoded_tokens
     int total_time_ms
 }
+
 func new_prefill_decode_engine(batch_config config) prefill_decode_engine {
     prefill_decode_engine {
         config: config,
@@ -60,12 +65,14 @@ func new_prefill_decode_engine(batch_config config) prefill_decode_engine {
         total_time_ms: 0,
     }
 }
+
 func (prefill_decode_engine* engine) enqueue_request(request_state req) {
     new_req := req
     new_req.status = request_status.pending
     new_req.arrival_time_ms = engine.total_time_ms
     engine.pending_requests = append(engine.pending_requests, new_req)
 }
+
 func (prefill_decode_engine* engine) schedule_prefill() bool {
     if engine.pending_requests.is_empty() {
         return false
@@ -93,6 +100,7 @@ func (prefill_decode_engine* engine) schedule_prefill() bool {
     }
     return prefill_count > 0
 }
+
 func (prefill_decode_engine* engine) schedule_decode() bool {
     if engine.prefilling_requests.is_empty() && engine.decoding_requests.is_empty() {
         return false
@@ -139,6 +147,7 @@ func (prefill_decode_engine* engine) schedule_decode() bool {
     }
     return decode_batch_size > 0
 }
+
 func (prefill_decode_engine* engine) iteration() {
     engine.current_iteration += 1
     prefill_scheduled := engine.schedule_prefill()
@@ -150,9 +159,11 @@ func (prefill_decode_engine* engine) iteration() {
     engine.total_prefilled_tokens += prefill_tokens
     engine.total_time_ms += 10
 }
+
 func (prefill_decode_engine* engine) run_one_step() {
     engine.iteration()
 }
+
 struct engine_stats {
     int total_iterations
     int total_prefilled_tokens
@@ -162,6 +173,7 @@ struct engine_stats {
     float avg_decode_latency_ms
     float total_throughput_req_per_sec
 }
+
 func (prefill_decode_engine* engine) get_stats() engine_stats {
     total_tokens := engine.total_prefilled_tokens + engine.total_decoded_tokens
     avg_prefill_latency := if len(engine.prefilling_requests) > 0 {
@@ -189,9 +201,11 @@ func (prefill_decode_engine* engine) get_stats() engine_stats {
         total_throughput_req_per_sec: throughput,
     }
 }
+
 func rand_next_token() int {
     42
 }
+
 func main() {
     println("🚀 Prefill/Decode 分离架构 - 核心engine")
     println("========================================")

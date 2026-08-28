@@ -14,6 +14,7 @@ func attempt_recovery(string error_msg, string text, int strategy) ParseResult {
         _ => return result
     }
 }
+
 func skip_invalid(string text) ParseResult {
     result := create_parse_result()
     result.raw_output = text
@@ -42,6 +43,7 @@ func skip_invalid(string text) ParseResult {
     result.confidence = float(valid_count) / float(len(text))
     return result
 }
+
 func attempt_fix(string text) ParseResult {
     result := create_parse_result()
     result.raw_output = text
@@ -55,6 +57,7 @@ func attempt_fix(string text) ParseResult {
     }
     return fix_common_issues(text)
 }
+
 func fix_json(string text) ParseResult {
     result := create_parse_result()
     result.recovery_method = "fix_json"
@@ -93,12 +96,14 @@ func fix_json(string text) ParseResult {
     result.confidence = 0.7
     return result
 }
+
 func contains_json_content(string text) bool {
     has_colon := find_substring(text, ":", 0) >= 0
     has_comma := find_substring(text, ",", 0) >= 0
     has_quotes := find_substring(text, "\"", 0) >= 0
     return has_colon || (has_comma && has_quotes)
 }
+
 func fix_xml(string text) ParseResult {
     result := create_parse_result()
     result.recovery_method = "fix_xml"
@@ -127,6 +132,7 @@ func fix_xml(string text) ParseResult {
     result.confidence = 0.65
     return result
 }
+
 func fix_common_issues(string text) ParseResult {
     result := create_parse_result()
     result.recovery_method = "fix_common_issues"
@@ -144,6 +150,7 @@ func fix_common_issues(string text) ParseResult {
     result.confidence = 0.6
     return result
 }
+
 func truncate_at_error(string text, string error_msg) ParseResult {
     result := create_parse_result()
     result.recovery_method = "truncate"
@@ -177,6 +184,7 @@ func truncate_at_error(string text, string error_msg) ParseResult {
     result.confidence = 0.5
     return result
 }
+
 func truncate_at_last_token(string text) string {
     last_space := -1
     last_newline := -1
@@ -196,6 +204,7 @@ func truncate_at_last_token(string text) string {
     }
     return text
 }
+
 func fallback_to_text(string text) ParseResult {
     result := create_parse_result()
     result.recovery_method = "fallback_to_text"
@@ -207,6 +216,7 @@ func fallback_to_text(string text) ParseResult {
     result.confidence = 0.4
     return result
 }
+
 func extract_last_tag(string xml) string {
     last_tag_start := -1
     last_tag_end := -1
@@ -230,6 +240,7 @@ func extract_last_tag(string xml) string {
     }
     return ""
 }
+
 func parse_int(string s) int {
     result := 0
     i := 0
@@ -239,6 +250,7 @@ func parse_int(string s) int {
     }
     return result
 }
+
 func suggest_recovery_strategy(string error_msg, string text) int {
     if find_substring(error_msg, "brace", 0) >= 0 ||
        find_substring(error_msg, "bracket", 0) >= 0 {
@@ -256,6 +268,7 @@ func suggest_recovery_strategy(string error_msg, string text) int {
     }
     return 4
 }
+
 func validate_recovery(string original, string recovered) bool {
     if len(recovered) < len(original) / 2 {
         return false
@@ -265,12 +278,14 @@ func validate_recovery(string original, string recovered) bool {
     }
     return true
 }
+
 struct RepairStrategy {
     int strategy_type
     int max_attempts
     float preserve_ratio
     bool strict
 }
+
 func create_default_repair_strategy() RepairStrategy {
     return RepairStrategy{
         strategy_type: 2,

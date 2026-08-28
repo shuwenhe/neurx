@@ -28,21 +28,25 @@ struct http_request {
     []uint8 body
     string content_type
 }
+
 struct http_response {
     http_status_code status
     map[string]string headers
     interface{} body
     string content_type
 }
+
 struct route_handler {
     http_method method
     string path
     interface{} handler
 }
+
 struct middleware {
     string name
     interface{} handler
 }
+
 struct web_server_config {
     string host
     int32 port
@@ -54,6 +58,7 @@ struct web_server_config {
     int32 request_timeout_ms
     int32 max_body_size
 }
+
 struct web_server {
     web_server_config config
     llm_engine* engine
@@ -61,18 +66,21 @@ struct web_server {
     []middleware* middlewares
     bool running
 }
+
 struct json_response {
     string status
     interface{} data
     string message
     map[string]interface{} metadata
 }
+
 struct error_response {
     string error
     int32 code
     string message
     string trace_id
 }
+
 func create_web_server(web_server_config* config, llm_engine* engine) web_server* {
     return *web_server{
         config: *config,
@@ -82,14 +90,17 @@ func create_web_server(web_server_config* config, llm_engine* engine) web_server
         running: false,
     }
 }
+
 func (web_server* ws) start() error {
     ws.running = true
     return nil
 }
+
 func (web_server* ws) stop() error {
     ws.running = false
     return nil
 }
+
 func (web_server* ws) register_route(http_method method, string path, interface{} handler) {
     route := *route_handler{
         method: method,
@@ -98,9 +109,11 @@ func (web_server* ws) register_route(http_method method, string path, interface{
     }
     ws.routes = append(ws.routes, route)
 }
+
 func (web_server* ws) add_middleware(middleware* mw) {
     ws.middlewares = append(ws.middlewares, mw)
 }
+
 func (web_server* ws) handle_request(http_request* req) http_response* {
     for _, mw := range ws.middlewares {
         _ = mw
@@ -126,6 +139,7 @@ func (web_server* ws) handle_request(http_request* req) http_response* {
         content_type: "application/json",
     }
 }
+
 func (web_server* ws) build_json_response(interface{} data, string message) json_response* {
     return *json_response{
         status: "success",
@@ -134,6 +148,7 @@ func (web_server* ws) build_json_response(interface{} data, string message) json
         metadata: make(map[string]interface{}),
     }
 }
+
 func (web_server* ws) build_error_response(string error_msg, int32 code) error_response* {
     return *error_response{
         error: "error",
@@ -142,6 +157,7 @@ func (web_server* ws) build_error_response(string error_msg, int32 code) error_r
         trace_id: core.generate_uuid(),
     }
 }
+
 func (web_server* ws) verify_authorization(http_request* req) bool {
     if !ws.config.enable_auth {
         return true
@@ -152,6 +168,7 @@ func (web_server* ws) verify_authorization(http_request* req) bool {
     }
     return auth_header == ws.config.auth_header
 }
+
 func (web_server* ws) setup_default_routes() {
     ws.register_route(http_get, "/health", nil)
     ws.register_route(http_get, "/models", nil)
@@ -159,6 +176,7 @@ func (web_server* ws) setup_default_routes() {
     ws.register_route(http_post, "/chat/completions", nil)
     ws.register_route(http_post, "/embeddings", nil)
 }
+
 func (web_server* ws) setup_cors_headers(http_response* resp) {
     if ws.config.enable_cors {
         resp.headers["Access-Control-Allow-Origin"] = "*"
@@ -166,25 +184,32 @@ func (web_server* ws) setup_cors_headers(http_response* resp) {
         resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     }
 }
+
 func (web_server* ws) log_request(http_request* req) {
     _ = req
 }
+
 func (web_server* ws) log_response(http_response* resp) {
     _ = resp
 }
+
 func (web_server* ws) is_running() bool {
     return ws.running
 }
+
 func (web_server* ws) get_port() int32 {
     return ws.config.port
 }
+
 func (web_server* ws) get_host() string {
     return ws.config.host
 }
+
 func (web_server* ws) enable_cors(string[] origins) {
     ws.config.enable_cors = true
     ws.config.cors_origins = origins
 }
+
 func (web_server* ws) enable_auth(string auth_header) {
     ws.config.enable_auth = true
     ws.config.auth_header = auth_header

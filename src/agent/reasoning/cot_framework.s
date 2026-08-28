@@ -8,6 +8,7 @@ import "time"
 	CONCLUSION = 4
 	ERROR_CORRECTION = 5
 }
+
 struct thought {
 	string          id
 	thought_type    type_enum
@@ -18,6 +19,7 @@ struct thought {
 	int64           created_at
 	int32           parent_step
 }
+
 struct cot_reasoning_step {
 	int32           step_id
 	string          reasoning_text
@@ -27,6 +29,7 @@ struct cot_reasoning_step {
 	bool            is_valid
 	int64           timestamp
 }
+
 struct cot_framework {
 	cot_reasoning_step[]     steps
 	thought[]                thoughts
@@ -37,6 +40,7 @@ struct cot_framework {
 	bool                        reasoning_complete
 	sync.Mutex                  mu
 }
+
 func create_cot_framework(
 	problem string,
 	max_steps int32,
@@ -52,6 +56,7 @@ func create_cot_framework(
 		mu:                      sync.Mutex{},
 	}
 }
+
 func (cot_framework* f) add_reasoning_step(
 	step_id int32,
 	reasoning_text string,
@@ -74,6 +79,7 @@ func (cot_framework* f) add_reasoning_step(
 	f.step_results[step_id] = reasoning_text
 	return step, true
 }
+
 func (cot_framework* f) add_thought(
 	thought_content string,
 	thought_type thought_type,
@@ -96,6 +102,7 @@ func (cot_framework* f) add_thought(
 	f.thoughts = append(f.thoughts, new_thought)
 	return thought_id
 }
+
 func (cot_framework* f) add_thought_dependency(
 	thought_id string,
 	dependency_id string,
@@ -113,6 +120,7 @@ func (cot_framework* f) add_thought_dependency(
 	}
 	return false
 }
+
 func (cot_framework* f) get_reasoning_chain() string[] {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -122,6 +130,7 @@ func (cot_framework* f) get_reasoning_chain() string[] {
 	}
 	return chain
 }
+
 func (cot_framework* f) validate_reasoning_step(step_id int32) bool {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -132,6 +141,7 @@ func (cot_framework* f) validate_reasoning_step(step_id int32) bool {
 	}
 	return false
 }
+
 func (cot_framework* f) get_step_confidence(step_id int32) float32 {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -142,6 +152,7 @@ func (cot_framework* f) get_step_confidence(step_id int32) float32 {
 	}
 	return 0.0
 }
+
 func (cot_framework* f) update_step_result(
 	step_id int32,
 	result string,
@@ -161,6 +172,7 @@ func (cot_framework* f) update_step_result(
 	}
 	return found
 }
+
 func (cot_framework* f) get_step_dependencies(thought_id string) string[] {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -175,6 +187,7 @@ func (cot_framework* f) get_step_dependencies(thought_id string) string[] {
 	}
 	return make(string[], 0)
 }
+
 func (cot_framework* f) get_thoughts_by_type(
 	thought_type thought_type,
 ) thought[] {
@@ -188,6 +201,7 @@ func (cot_framework* f) get_thoughts_by_type(
 	}
 	return filtered
 }
+
 func (cot_framework* f) get_confidence_average() float32 {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -200,6 +214,7 @@ func (cot_framework* f) get_confidence_average() float32 {
 	}
 	return total / float32(len(f.steps))
 }
+
 func (cot_framework* f) complete_reasoning(final_answer string) bool {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -207,21 +222,25 @@ func (cot_framework* f) complete_reasoning(final_answer string) bool {
 	f.step_results[int32(len(f.steps))] = final_answer
 	return true
 }
+
 func (cot_framework* f) is_reasoning_complete() bool {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return f.reasoning_complete
 }
+
 func (cot_framework* f) get_total_steps() int32 {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return int32(len(f.steps))
 }
+
 func (cot_framework* f) get_thought_count() int32 {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return int32(len(f.thoughts))
 }
+
 func (cot_framework* f) verify_reasoning_consistency() bool {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -235,6 +254,7 @@ func (cot_framework* f) verify_reasoning_consistency() bool {
 	}
 	return true
 }
+
 func (cot_framework* f) clear_reasoning() {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -243,6 +263,7 @@ func (cot_framework* f) clear_reasoning() {
 	f.step_results = make(map[int32]string)
 	f.reasoning_complete = false
 }
+
 func generate_thought_id() string {
 	return "thought_" + string(time.Now().UnixNano())
 }

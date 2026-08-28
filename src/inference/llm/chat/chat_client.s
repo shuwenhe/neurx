@@ -23,6 +23,7 @@ func int_to_string(int value) string {
     if negative { out = "-" + out }
     return out
 }
+
 func json_escape(string value) string {
     string output = ""
     int i = 0
@@ -38,6 +39,7 @@ func json_escape(string value) string {
     }
     return output
 }
+
 func string_to_int(string text) int {
     string trimmed = trim(text)
     if len(trimmed) == 0 { return 0 }
@@ -69,10 +71,12 @@ func string_to_int(string text) int {
     if negative { result = 0 - result }
     return result
 }
+
 func read_line() string {
     string result = __sys_read_string(0, 4096)
     trim(result)
 }
+
 func extract_json_string(string json, string key) string {
     string search = "\"" + key + "\":"
     int pos = 0
@@ -134,6 +138,7 @@ func extract_json_string(string json, string key) string {
     }
     return result
 }
+
 func http_request(string host, int port, string method, string path, string body, string extra_headers) string {
     int conn_fd = __sys_socket(2, 1, 6)
     if conn_fd < 0 {
@@ -171,6 +176,7 @@ func http_request(string host, int port, string method, string path, string body
     _ = __sys_close(conn_fd)
     response
 }
+
 func http_body(string response) string {
     if !starts_with(response, "HTTP/1.1 200") {
         return ""
@@ -181,6 +187,7 @@ func http_body(string response) string {
     }
     __host_slice(response, separator + 4, len(response))
 }
+
 func starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) { return false }
     int i = 0
@@ -192,6 +199,7 @@ func starts_with(string text, string prefix) bool {
     }
     return true
 }
+
 func index_of(string text, string needle) int {
     if len(needle) > len(text) { return -1 }
     if len(needle) == 0 { return 0 }
@@ -211,6 +219,7 @@ func index_of(string text, string needle) int {
     }
     return -1
 }
+
 func main() {
     string host = runtime_env_get("NEURX_S_HOST", "127.0.0.1")
     string port_str = runtime_env_get("NEURX_S_PORT", "18083")

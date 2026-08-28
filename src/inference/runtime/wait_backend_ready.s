@@ -20,6 +20,7 @@ func parse_int_or_default(string s, int default_val) int {
     }
     result
 }
+
 func format_int(int value) string {
     if value == 0 { return "0" }
     if value == 1 { return "1" }
@@ -40,6 +41,7 @@ func format_int(int value) string {
     if value == 150 { return "150" }
     return ""
 }
+
 func main() {
     string host = runtime_env_get("NEURX_S_HOST", "127.0.0.1")
     int port = parse_int_or_default(runtime_env_get("NEURX_S_PORT", "18083"), 18083)

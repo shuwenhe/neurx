@@ -14,6 +14,7 @@ struct gspo_config {
     bool use_aux_loss
     string sequence_group_method
 }
+
 struct gspo_trainer {
     gspo_config config
     *model policy_model
@@ -22,6 +23,7 @@ struct gspo_trainer {
     expert_routing_counts: []i32
     load_balance_losses: []f32
 }
+
 func new_gspo_trainer(gspo_config config, *model model, *model ref_model) . gspo_trainer {
     optimizer := adamw_optimizer(model.parameters(), config.learning_rate)
     return gspo_trainer{
@@ -33,6 +35,7 @@ func new_gspo_trainer(gspo_config config, *model model, *model ref_model) . gspo
         load_balance_losses: [],
     }
 }
+
 func (gspo_trainer* trainer) group_sequences([]tensor sequences) . [][]tensor {
     match trainer.config.sequence_group_method {
         "length" => return trainer.group_by_length(sequences),
@@ -41,6 +44,7 @@ func (gspo_trainer* trainer) group_sequences([]tensor sequences) . [][]tensor {
         _ => return trainer.group_randomly(sequences),
     }
 }
+
 func (gspo_trainer* trainer) group_by_length([]tensor sequences) . [][]tensor {
     sorted_seqs := sequences.clone()
     sorted_seqs.sort(|a, b| a.shape[0] - b.shape[0])
@@ -58,6 +62,7 @@ func (gspo_trainer* trainer) group_by_length([]tensor sequences) . [][]tensor {
     }
     return groups
 }
+
 func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) . [][]tensor {
     embeddings := []
     for seq in sequences {
@@ -75,6 +80,7 @@ func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) . [][]tenso
     }
     return groups
 }
+
 func (gspo_trainer* trainer) group_randomly([]tensor sequences) . [][]tensor {
     shuffled := sequences.clone()
     shuffled.shuffle()
@@ -92,6 +98,7 @@ func (gspo_trainer* trainer) group_randomly([]tensor sequences) . [][]tensor {
     }
     return groups
 }
+
 func (gspo_trainer* trainer) compute_sequence_advantages(
     []tensor group,
     []f32 rewards
@@ -113,6 +120,7 @@ func (gspo_trainer* trainer) compute_sequence_advantages(
     }
     return advantages
 }
+
 func (gspo_trainer* trainer) compute_load_balance_loss(tensor router_logits) . tensor {
     batch_size := router_logits.shape[0]
     seq_len := router_logits.shape[1]
@@ -123,6 +131,7 @@ func (gspo_trainer* trainer) compute_load_balance_loss(tensor router_logits) . t
     lb_loss := expert_fractions.var() * f32(num_experts)
     return lb_loss * trainer.config.moe_load_balance_coeff
 }
+
 func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
     prompts := batch.prompts
     rewards := batch.rewards
@@ -174,6 +183,7 @@ func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
     trainer.optimizer.zero_grad()
     return total_policy_loss, total_lb_loss
 }
+
 func (gspo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     lb_losses := []
@@ -190,6 +200,7 @@ func (gspo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     }
     return policy_losses, lb_losses
 }
+
 func kmeans_clustering([]tensor embeddings, i32 k) . []i32 {
     n := len(embeddings)
     dim := embeddings[0].shape[0]
@@ -226,6 +237,7 @@ func kmeans_clustering([]tensor embeddings, i32 k) . []i32 {
     }
     return assignments
 }
+
 func compute_reward(tensor prompt, tensor response) . f32 {
     return random_uniform(-1.0, 1.0)
 }

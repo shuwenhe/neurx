@@ -8,12 +8,14 @@ struct tensor_metadata {
     int data_offset
     int data_size
 }
+
 struct safetensors_file {
     []tensor_metadata tensors
     string model_path
     int header_size
     int data_start
 }
+
 func read_u64_le(int[] bytes, int offset) int {
     if offset + 8 > len(bytes) {
         return 0
@@ -32,6 +34,7 @@ func read_u64_le(int[] bytes, int offset) int {
     }
     return value
 }
+
 func parse_safetensors_header(string model_path) safetensors_file {
     int[] header_len_bytes = __host_read_binary_file_range(model_path, 0, 8)
     if len(header_len_bytes) < 8 {
@@ -66,6 +69,7 @@ func parse_safetensors_header(string model_path) safetensors_file {
     print("[SafeTensors] Parsed header: " + __host_slice(header_json, 0, 200) + "...\n")
     safetensors_file{tensors: []tensor_metadata{cap: 0}, model_path: model_path, header_size: header_size, data_start: 8 + header_size}
 }
+
 func get_layer_weight_offset(string layer_name, int layer_idx, string weight_type, int hidden_size, int intermediate_size) int {
     int layer_offset = 0
     if layer_idx > 0 {
@@ -82,6 +86,7 @@ func get_layer_weight_offset(string layer_name, int layer_idx, string weight_typ
     }
     return 0
 }
+
 func load_embeddings(string model_path, int vocab_size, int hidden_dim) float[] {
     float[] embeddings = float[]{cap: vocab_size * hidden_dim}
     int offset = 8 + 10000
@@ -106,6 +111,7 @@ func load_embeddings(string model_path, int vocab_size, int hidden_dim) float[] 
     print("[Embeddings] Loaded " + int_to_string(len(embeddings)) + " embedding values\n")
     return embeddings
 }
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -131,6 +137,7 @@ func int_to_string(int value) string {
     }
     return result
 }
+
 func contains_substring(string haystack, string needle) bool {
     if len(needle) == 0 {
         return true

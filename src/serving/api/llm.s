@@ -21,6 +21,7 @@ struct llm_config {
     int32 tensor_parallel_size
     int32 pipeline_parallel_size
 }
+
 struct generation_config {
     int32 max_new_tokens
     float32 temperature
@@ -32,11 +33,13 @@ struct generation_config {
     bool return_full_text
     string[] stop_sequences
 }
+
 struct chat_message {
     string role
     string content
     map[string]interface{} metadata
 }
+
 struct completion_request {
     string prompt
     generation_config config
@@ -44,6 +47,7 @@ struct completion_request {
     []chat_message* messages
     map[string]interface{} extra_kwargs
 }
+
 struct completion_response {
     string id
     string model
@@ -55,6 +59,7 @@ struct completion_response {
     float32 generation_time_ms
     map[string]interface{} metadata
 }
+
 struct llm_engine {
     llm_config config
     interface{} model
@@ -63,12 +68,14 @@ struct llm_engine {
     bool initialized
     map[string]interface{} cache
 }
+
 struct streaming_response {
     string id
     string model
     interface{} token_stream
     bool is_streaming
 }
+
 func create_llm(llm_config* config) llm_engine* {
     return *llm_engine{
         config: *config,
@@ -79,23 +86,29 @@ func create_llm(llm_config* config) llm_engine* {
         cache: make(map[string]interface{}),
     }
 }
+
 func (llm_engine* llm) initialize() error {
     llm.initialized = true
     return nil
 }
+
 func (llm_engine* llm) load_model() error {
     return nil
 }
+
 func (llm_engine* llm) unload_model() error {
     llm.model = nil
     return nil
 }
+
 func (llm_engine* llm) tokenize(string text) (int[]32, error) {
     return make(int[]32, 0), nil
 }
+
 func (llm_engine* llm) detokenize(int[]32 tokens) (string, error) {
     return "", nil
 }
+
 func (llm_engine* llm) complete(completion_request* req) (completion_response*, error) {
     resp := *completion_response{
         id: core.generate_uuid(),
@@ -110,6 +123,7 @@ func (llm_engine* llm) complete(completion_request* req) (completion_response*, 
     }
     return resp, nil
 }
+
 func (llm_engine* llm) complete_stream(completion_request* req) streaming_response* {
     return *streaming_response{
         id: core.generate_uuid(),
@@ -118,6 +132,7 @@ func (llm_engine* llm) complete_stream(completion_request* req) streaming_respon
         is_streaming: true,
     }
 }
+
 func (llm_engine* llm) batch_complete([]completion_request* requests) ([]completion_response*, error) {
     results := make([]completion_response*, 0)
     for _, req := range requests {
@@ -129,24 +144,30 @@ func (llm_engine* llm) batch_complete([]completion_request* requests) ([]complet
     }
     return results, nil
 }
+
 func (llm_engine* llm) get_model_config() llm_config {
     return llm.config
 }
+
 func (llm_engine* llm) set_model_config(llm_config* config) {
     llm.config = *config
 }
+
 func (llm_engine* llm) is_initialized() bool {
     return llm.initialized
 }
+
 func (llm_engine* llm) get_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["model_name"] = llm.config.model_name
     stats["initialized"] = llm.initialized
     return stats
 }
+
 func (llm_engine* llm) prefill_cache(string[] prompts) error {
     return nil
 }
+
 func (llm_engine* llm) clear_cache() {
     llm.cache = make(map[string]interface{})
 }

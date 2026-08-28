@@ -4,22 +4,27 @@ func validate_tokenization() bool {
     print("🧪 [TOKENIZATION] Testing tokenization layer...\n")
     return true
 }
+
 func validate_embedding() bool {
     print("🧪 [EMBEDDING] Testing embedding layer...\n")
     return true
 }
+
 func validate_attention() bool {
     print("🧪 [ATTENTION] Testing attention layer...\n")
     return true
 }
+
 func validate_sampling() bool {
     print("🧪 [SAMPLING] Testing sampling layer...\n")
     return true
 }
+
 func validate_detokenization() bool {
     print("🧪 [DETOKENIZATION] Testing detokenization layer...\n")
     return true
 }
+
 func main() {
     print("\n═══════════════════════════════════════════════════════════\n")
     print("🚀 NEURX S PRODUCTION INFERENCE MAINCHAIN VALIDATION\n")

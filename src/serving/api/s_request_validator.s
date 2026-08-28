@@ -8,6 +8,7 @@ func starts_with(string str, string prefix) bool {
     }
     return true
 }
+
 func int_to_string(int n) string {
     if n == 0 { return "0" }
     string result = ""
@@ -38,6 +39,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func extract_json_string_value(string json_body, string key) string {
     int key_start = 0
     int i = 0
@@ -84,6 +86,7 @@ func extract_json_string_value(string json_body, string key) string {
     }
     return ""
 }
+
 func extract_json_number_value(string json_body, string key) string {
     int key_start = 0
     int i = 0
@@ -164,6 +167,7 @@ func extract_json_number_value(string json_body, string key) string {
     }
     return ""
 }
+
 func validate_json_structure(string json_body) bool {
     if len(json_body) < 2 { return false }
     int brace_count = 0
@@ -195,6 +199,7 @@ func validate_json_structure(string json_body) bool {
     }
     return brace_count == 0 && bracket_count == 0
 }
+
 func validate_model_param(string model) bool {
     if len(model) == 0 { return false }
     if starts_with(model, "Qwen") {
@@ -208,6 +213,7 @@ func validate_model_param(string model) bool {
     }
     return false
 }
+
 func validate_temperature(string temp_str) bool {
     if len(temp_str) == 0 {
         return false
@@ -223,6 +229,7 @@ func validate_temperature(string temp_str) bool {
     }
     return has_digit
 }
+
 func format_error_response(int status, string error_msg) string {
     string body = "{\"error\":\"" + error_msg + "\"}"
     string response = "HTTP/1.1 "
@@ -235,6 +242,7 @@ func format_error_response(int status, string error_msg) string {
     response = response + body
     return response
 }
+
 func main() {
     print("✅ pure S 请求validationmodulealready编译\n")
 }

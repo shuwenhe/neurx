@@ -11,6 +11,7 @@ struct ExecutionResult {
     success         bool
     error_msg       string[]
 }
+
 struct AsyncBatchExecutor {
     batch_size      int
     max_batch_size  int
@@ -25,6 +26,7 @@ struct AsyncBatchExecutor {
     stream_enabled  bool
     mutex           sync.Mutex
 }
+
 func new_async_batch_executor(max_batch_size int, prefill_threads int, decode_threads int) AsyncBatchExecutor {
     return AsyncBatchExecutor{
         batch_size:      0,
@@ -40,6 +42,7 @@ func new_async_batch_executor(max_batch_size int, prefill_threads int, decode_th
         mutex:          sync.Mutex{},
     }
 }
+
 func (AsyncBatchExecutor* executor) load_batch(batch RequestBatch) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -52,6 +55,7 @@ func (AsyncBatchExecutor* executor) load_batch(batch RequestBatch) {
         }
     }
 }
+
 func (AsyncBatchExecutor* executor) execute_batch() []ExecutionResult {
     executor.mutex.Lock()
     batch := executor.current_batch
@@ -111,6 +115,7 @@ func (AsyncBatchExecutor* executor) execute_batch() []ExecutionResult {
     executor.mutex.Unlock()
     return results
 }
+
 func (AsyncBatchExecutor* executor) execute_prefill_phase(req InferenceRequest) int[] {
     output := make(int[], len(req.input_ids))
     for i := 0; i < len(req.input_ids); i++ {
@@ -118,10 +123,12 @@ func (AsyncBatchExecutor* executor) execute_prefill_phase(req InferenceRequest) 
     }
     return output
 }
+
 func (AsyncBatchExecutor* executor) execute_decode_step(req InferenceRequest, result ExecutionResult) int {
     token := 1000 + ((len(result.output_ids) * 7) % 5000)
     return token
 }
+
 func (AsyncBatchExecutor* executor) stream_token(request_id string[], token int) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -135,6 +142,7 @@ func (AsyncBatchExecutor* executor) stream_token(request_id string[], token int)
     }
     executor.stream_buffers[request_id[0]] = append(executor.stream_buffers[request_id[0]], token_str)
 }
+
 func (AsyncBatchExecutor* executor) get_streamed_tokens(request_id string[]) string[][] {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -143,6 +151,7 @@ func (AsyncBatchExecutor* executor) get_streamed_tokens(request_id string[]) str
     }
     return executor.stream_buffers[request_id[0]]
 }
+
 func (AsyncBatchExecutor* executor) clear_stream_buffer(request_id string[]) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -150,6 +159,7 @@ func (AsyncBatchExecutor* executor) clear_stream_buffer(request_id string[]) {
         delete(executor.stream_buffers, request_id[0])
     }
 }
+
 func (AsyncBatchExecutor* executor) store_result(result ExecutionResult) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -157,6 +167,7 @@ func (AsyncBatchExecutor* executor) store_result(result ExecutionResult) {
         executor.results[result.request_id[0]] = result
     }
 }
+
 func (AsyncBatchExecutor* executor) get_result(request_id string[]) ExecutionResult {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -165,6 +176,7 @@ func (AsyncBatchExecutor* executor) get_result(request_id string[]) ExecutionRes
     }
     return executor.results[request_id[0]]
 }
+
 func (AsyncBatchExecutor* executor) get_all_results() []ExecutionResult {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -174,11 +186,13 @@ func (AsyncBatchExecutor* executor) get_all_results() []ExecutionResult {
     }
     return results
 }
+
 func (AsyncBatchExecutor* executor) set_streaming_enabled(enabled bool) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
     executor.stream_enabled = enabled
 }
+
 func (AsyncBatchExecutor* executor) get_executor_statistics() map[string]interface{} {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -192,12 +206,14 @@ func (AsyncBatchExecutor* executor) get_executor_statistics() map[string]interfa
     }
     return stats
 }
+
 func (AsyncBatchExecutor* executor) cancel_batch() {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
     executor.current_batch = RequestBatch{}
     executor.batch_size = 0
 }
+
 func main() {
     executor := new_async_batch_executor(32, 4, 8)
     executor.set_streaming_enabled(true)

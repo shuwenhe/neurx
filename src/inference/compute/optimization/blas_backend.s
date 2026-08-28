@@ -3,6 +3,7 @@ func blas_provider_available(string provider) bool {
     if provider == "native_s" { return true }
     false
 }
+
 func blas_sgemm(
     float[] A, int M, int K,
     float[] B, int K2, int N,
@@ -12,6 +13,7 @@ func blas_sgemm(
 ) float[] {
     return blas_sgemm_native_s(A, M, K, B, K2, N, C, M2, N2, alpha, beta)
 }
+
 func blas_sgemm_native_s(
     float[] A, int M, int K,
     float[] B, int K2, int N,
@@ -44,6 +46,7 @@ func blas_sgemm_native_s(
     }
     out
 }
+
 func blas_sgemv(float[] A, int M, int N, float[] x, float alpha, float beta) float[] {
     float[] y = float[]{cap: M}
     int i = 0
@@ -59,6 +62,7 @@ func blas_sgemv(float[] A, int M, int N, float[] x, float alpha, float beta) flo
     }
     y
 }
+
 func blas_sdot(float[] x, float[] y) float {
     float result = 0.0
     int i = 0
@@ -68,6 +72,7 @@ func blas_sdot(float[] x, float[] y) float {
     }
     result
 }
+
 func blas_saxpy(float[] x, float[] y, float alpha) float[] {
     float[] out = float[]{cap: len(y)}
     int i = 0
@@ -77,6 +82,7 @@ func blas_saxpy(float[] x, float[] y, float alpha) float[] {
     }
     out
 }
+
 struct blas_config {
     string provider
     int gemm_threshold_ops
@@ -84,6 +90,7 @@ struct blas_config {
     bool use_simd
     int cache_line_size
 }
+
 func get_default_blas_config() blas_config {
     return blas_config{
         provider: "native_s",
@@ -93,6 +100,7 @@ func get_default_blas_config() blas_config {
         cache_line_size: 64,
     }
 }
+
 func benchmark_blas_gemm(int M, int K, int N) float {
     0.0
 }

@@ -7,6 +7,7 @@ struct prefill_request {
     float temperature
     int64 arrival_time_ns
 }
+
 struct decode_state {
     int request_id
     int current_seq_length
@@ -18,6 +19,7 @@ struct decode_state {
     float top_p
     bool is_finished
 }
+
 struct prefill_batch {
     int batch_id
     prefill_request[] requests
@@ -27,6 +29,7 @@ struct prefill_batch {
     float[] batched_attention_mask
     int batch_size
 }
+
 struct decode_batch {
     int batch_id
     decode_state[] requests
@@ -34,6 +37,7 @@ struct decode_batch {
     int current_step
     bool has_active_requests
 }
+
 struct prefill_decode_scheduler {
     int scheduler_id
     prefill_batch current_prefill_batch
@@ -51,6 +55,7 @@ struct prefill_decode_scheduler {
     float decode_latency_per_token_ms
     float ttft_ms
 }
+
 func new_prefill_decode_scheduler(
     int scheduler_id,
     int max_prefill_batch_size,
@@ -89,6 +94,7 @@ func new_prefill_decode_scheduler(
     }
     return sched
 }
+
 func (prefill_decode_scheduler* sched) enqueue_prefill_request(
     prefill_request req
 ) {
@@ -96,6 +102,7 @@ func (prefill_decode_scheduler* sched) enqueue_prefill_request(
         sched.prefill_queue = append(sched.prefill_queue, req)
     }
 }
+
 func (prefill_decode_scheduler* sched) build_prefill_batch() (prefill_batch, bool) {
     if len(sched.prefill_queue) == 0 {
         return prefill_batch{}, false
@@ -129,6 +136,7 @@ func (prefill_decode_scheduler* sched) build_prefill_batch() (prefill_batch, boo
     sched.total_prefill_batches = sched.total_prefill_batches + 1
     return new_batch, true
 }
+
 func (prefill_decode_scheduler* sched) execute_prefill_batch(
     prefill_batch* batch
 ) (decode_state[], bool) {
@@ -158,6 +166,7 @@ func (prefill_decode_scheduler* sched) execute_prefill_batch(
     }
     return decode_states, true
 }
+
 func (prefill_decode_scheduler* sched) build_decode_batch(
     decode_state[] prefilled_states
 ) (decode_batch, bool) {
@@ -186,6 +195,7 @@ func (prefill_decode_scheduler* sched) build_decode_batch(
     }
     return new_batch, false
 }
+
 func (prefill_decode_scheduler* sched) decode_one_token_step(
     decode_batch* batch
 ) (float[], bool) {
@@ -216,6 +226,7 @@ func (prefill_decode_scheduler* sched) decode_one_token_step(
     }
     return logits, true
 }
+
 func (prefill_decode_scheduler* sched) get_decode_completion_status(
     decode_batch* batch
 ) (int, int, float) {
@@ -233,12 +244,14 @@ func (prefill_decode_scheduler* sched) get_decode_completion_status(
     completion_rate := float(total_finished) / float(len(batch.requests))
     return total_finished, total_generated, completion_rate
 }
+
 func (prefill_decode_scheduler* sched) can_prefill_and_decode_overlap() bool {
     if sched.current_prefill_batch.batch_size > 0 && sched.current_decode_batch.batch_size > 0 {
         return true
     }
     return false
 }
+
 func (prefill_decode_scheduler* sched) get_scheduler_stats() (int, int, int, float, float) {
     prefill_queue_len := len(sched.prefill_queue)
     decode_queue_len := len(sched.decode_queue)
@@ -248,6 +261,7 @@ func (prefill_decode_scheduler* sched) get_scheduler_stats() (int, int, int, flo
            sched.prefill_latency_ms,
            sched.decode_latency_per_token_ms
 }
+
 func (prefill_decode_scheduler* sched) update_latency_metrics(
     float prefill_ms,
     float decode_per_token_ms,
@@ -257,6 +271,7 @@ func (prefill_decode_scheduler* sched) update_latency_metrics(
     sched.decode_latency_per_token_ms = (sched.decode_latency_per_token_ms * 0.9) + (decode_per_token_ms * 0.1)
     sched.ttft_ms = (sched.ttft_ms * 0.9) + (ttft_ms * 0.1)
 }
+
 func (prefill_decode_scheduler* sched) move_finished_to_completion(
     decode_batch* batch
 ) int {
@@ -279,6 +294,7 @@ func (prefill_decode_scheduler* sched) move_finished_to_completion(
     }
     return completed_count
 }
+
 func (prefill_decode_scheduler* sched) should_pause_prefill_for_decode() bool {
     decode_utilization := float(len(sched.decode_queue)) / float(sched.max_decode_batch_size)
     if decode_utilization > 0.8 {

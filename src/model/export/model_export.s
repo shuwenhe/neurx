@@ -1,5 +1,6 @@
 package neurx.exporter
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
+
 struct model_export_config {
     string model_name
     string source_model_dir
@@ -14,6 +15,7 @@ struct model_export_config {
     string distillation_manifest_path
     string version
 }
+
 struct model_export_artifact {
     string export_dir
     string manifest_path
@@ -22,6 +24,7 @@ struct model_export_artifact {
     string bundle_summary_path
     string deployment_hint_path
 }
+
 func default_model_export_config() model_export_config {
     model_export_config {
         model_name: "neurx-model",
@@ -38,6 +41,7 @@ func default_model_export_config() model_export_config {
         version: "1.0",
     }
 }
+
 func model_export_artifact_paths(string export_dir) model_export_artifact {
     model_export_artifact {
         export_dir: export_dir,
@@ -48,6 +52,7 @@ func model_export_artifact_paths(string export_dir) model_export_artifact {
         deployment_hint_path: export_dir + "/deployment_hint.txt",
     }
 }
+
 func model_export_load_optional_text(string path) string {
     if path == "" {
         return ""
@@ -57,6 +62,7 @@ func model_export_load_optional_text(string path) string {
     }
     runtime_read_text_file(path)
 }
+
 func model_export_format_suffix(string export_format) string {
     if export_format == "onnx" {
         return ".onnx"
@@ -72,6 +78,7 @@ func model_export_format_suffix(string export_format) string {
     }
     ".bin"
 }
+
 func model_export_bundle_summary_text(model_export_config config, string quant_text, string distill_text) string {
     string out = ""
     out = out + "model.name=" + config.model_name + "\n"
@@ -91,6 +98,7 @@ func model_export_bundle_summary_text(model_export_config config, string quant_t
     }
     out
 }
+
 func model_export_metadata_text(model_export_config config, string manifest_path) string {
     string out = ""
     out = out + "manifest_path=" + manifest_path + "\n"
@@ -102,6 +110,7 @@ func model_export_metadata_text(model_export_config config, string manifest_path
     out = out + "distilled=" + bool_text(config.distilled) + "\n"
     out
 }
+
 func model_export_card_text(model_export_config config, string quant_text, string distill_text) string {
     string out = ""
     out = out + "# model Export Card\n"
@@ -121,6 +130,7 @@ func model_export_card_text(model_export_config config, string quant_text, strin
     }
     out
 }
+
 func model_export_deployment_hint_text(model_export_config config) string {
     string out = ""
     out = out + "deploy.export_dir=" + config.export_dir + "\n"
@@ -132,6 +142,7 @@ func model_export_deployment_hint_text(model_export_config config) string {
     out = out + "deploy.suggested_backend=" + model_export_suggest_backend(config) + "\n"
     out
 }
+
 func model_export_suggest_backend(model_export_config config) string {
     if config.export_format == "tensorrt" {
         return "nvidia-tensorrt"
@@ -144,6 +155,7 @@ func model_export_suggest_backend(model_export_config config) string {
     }
     "neurx-runtime"
 }
+
 func prepare_model_export_bundle(model_export_config config) model_export_artifact {
     string root = trim(config.export_dir)
     if root == "" {
@@ -161,6 +173,7 @@ func prepare_model_export_bundle(model_export_config config) model_export_artifa
     runtime_write_text_file(artifact.deployment_hint_path, model_export_deployment_hint_text(config))
     artifact
 }
+
 func model_export_summary_text(model_export_artifact artifact, model_export_config config) string {
     string out = ""
     out = out + "export_dir=" + artifact.export_dir + "\n"
@@ -173,6 +186,7 @@ func model_export_summary_text(model_export_artifact artifact, model_export_conf
     out = out + "target_runtime=" + config.target_runtime + "\n"
     out
 }
+
 func bool_text(bool value) string {
     if value {
         return "true"

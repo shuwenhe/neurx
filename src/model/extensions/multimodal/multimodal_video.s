@@ -11,6 +11,7 @@ struct frame_info {
     bool is_keyframe
     float32 scene_change_score
 }
+
 struct video_metadata {
     int32 width
     int32 height
@@ -20,18 +21,21 @@ struct video_metadata {
     string codec
     int32 bitrate_kbps
 }
+
 struct video_frame {
     int32 frame_id
     uint8[] frame_data
     frame_info* info
     int32 size_bytes
 }
+
 struct video_data {
     video_frame*[] frames
     video_metadata* metadata
     int32 total_frames
     string source_url
 }
+
 struct video_processor {
     int32 target_fps
     int32 max_frames_to_extract
@@ -41,6 +45,7 @@ struct video_processor {
     bool enable_scene_detection
     float32 scene_change_threshold
 }
+
 func create_video_processor() video_processor* {
     return *video_processor{
         target_fps: 2,
@@ -52,6 +57,7 @@ func create_video_processor() video_processor* {
         scene_change_threshold: 0.3,
     }
 }
+
 func (video_processor* proc) extract_frames_uniform(video_data* vid, int32 num_frames) video_frame*[] {
     result := make(video_frame*[])
     if vid == nil || vid.metadata == nil || vid.total_frames == 0 {
@@ -72,6 +78,7 @@ func (video_processor* proc) extract_frames_uniform(video_data* vid, int32 num_f
     }
     return result
 }
+
 func (video_processor* proc) extract_frames_keyframe(video_data* vid, int32 num_frames) video_frame*[] {
     result := make(video_frame*[])
     if vid == nil || vid.metadata == nil {
@@ -100,6 +107,7 @@ func (video_processor* proc) extract_frames_keyframe(video_data* vid, int32 num_
     }
     return result
 }
+
 func (video_processor* proc) extract_frames_adaptive(video_data* vid, int32 num_frames) video_frame*[] {
     result := make(video_frame*[])
     if vid == nil || vid.metadata == nil {
@@ -124,6 +132,7 @@ func (video_processor* proc) extract_frames_adaptive(video_data* vid, int32 num_
     }
     return result
 }
+
 func (video_processor* proc) extract_frames(video_data* vid, int32 num_frames) video_frame*[] {
     if proc.strategy == strategy_uniform {
         return proc.extract_frames_uniform(vid, num_frames)
@@ -136,6 +145,7 @@ func (video_processor* proc) extract_frames(video_data* vid, int32 num_frames) v
     }
     return proc.extract_frames_uniform(vid, num_frames)
 }
+
 func (video_processor* proc) detect_scene_changes(video_data* vid) int32[] {
     scene_changes := make(int32[])
     if vid == nil || len(vid.frames) < 2 {
@@ -148,6 +158,7 @@ func (video_processor* proc) detect_scene_changes(video_data* vid) int32[] {
     }
     return scene_changes
 }
+
 func (video_processor* proc) get_video_stats(video_data* vid) map[string]interface{} {
     stats := make(map[string]interface{})
     if vid == nil || vid.metadata == nil {

@@ -5,6 +5,7 @@ func mod(int a, int b) int {
     }
     a - (a / b) * b
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -23,6 +24,7 @@ func int_to_str(int n) string {
     }
     return s
 }
+
 struct admission_control_state {
     int max_active_requests
     int max_prefill_tokens
@@ -34,12 +36,14 @@ struct admission_control_state {
     int last_remaining_tokens
     int last_priority_score
 }
+
 func normalize_policy(string policy) string {
     if policy == "srpt" {
         return "srpt"
     }
     "fcfs"
 }
+
 func new_admission_control_state_with_policy(int max_active_requests, int max_prefill_tokens, string policy) admission_control_state {
     int normalized_active = max_active_requests
     if normalized_active <= 0 {
@@ -61,6 +65,7 @@ func new_admission_control_state_with_policy(int max_active_requests, int max_pr
         last_priority_score: 0,
     }
 }
+
 func admission_priority_score(admission_control_state state, int remaining_tokens, int queue_depth) int {
     int normalized_remaining = remaining_tokens
     if normalized_remaining < 0 {
@@ -75,6 +80,7 @@ func admission_priority_score(admission_control_state state, int remaining_token
     }
     normalized_queue
 }
+
 func admission_can_enqueue_with_remaining(admission_control_state state, int active_requests, int prefill_tokens, int remaining_tokens) bool {
     int add_prefill = prefill_tokens
     if add_prefill < 0 {
@@ -95,6 +101,7 @@ func admission_can_enqueue_with_remaining(admission_control_state state, int act
     }
     true
 }
+
 func admission_on_enqueue_with_remaining(admission_control_state state, int prefill_tokens, int remaining_tokens, bool accepted) admission_control_state {
     int add_prefill = prefill_tokens
     if add_prefill < 0 {
@@ -129,6 +136,7 @@ func admission_on_enqueue_with_remaining(admission_control_state state, int pref
         last_priority_score: admission_priority_score(state, normalized_remaining, state.admitted + state.rejected),
     }
 }
+
 func admission_on_decode_step(admission_control_state state, int decode_tokens) admission_control_state {
     int add_decode = decode_tokens
     if add_decode < 0 {
@@ -146,6 +154,7 @@ func admission_on_decode_step(admission_control_state state, int decode_tokens) 
         last_priority_score: state.last_priority_score,
     }
 }
+
 func admission_on_finish(admission_control_state state, int release_prefill_tokens) admission_control_state {
     int release_tokens = release_prefill_tokens
     if release_tokens < 0 {
@@ -167,6 +176,7 @@ func admission_on_finish(admission_control_state state, int release_prefill_toke
         last_priority_score: state.last_priority_score,
     }
 }
+
 struct continuous_batch_state {
     int capacity
     int active_requests
@@ -176,6 +186,7 @@ struct continuous_batch_state {
     int prefill_tokens
     int decode_tokens
 }
+
 func new_continuous_batch_state(int capacity) continuous_batch_state {
     int effective_capacity = capacity
     if effective_capacity <= 0 {
@@ -191,6 +202,7 @@ func new_continuous_batch_state(int capacity) continuous_batch_state {
         decode_tokens: 0,
     }
 }
+
 func continuous_batch_enqueue_request(continuous_batch_state state, int prefill_tokens) continuous_batch_state {
     int next_active = state.active_requests
     int next_queued = state.queued_requests
@@ -213,6 +225,7 @@ func continuous_batch_enqueue_request(continuous_batch_state state, int prefill_
         decode_tokens: state.decode_tokens,
     }
 }
+
 func continuous_batch_record_decode_step(continuous_batch_state state, int tokens) continuous_batch_state {
     int add_tokens = tokens
     if add_tokens < 0 {
@@ -228,6 +241,7 @@ func continuous_batch_record_decode_step(continuous_batch_state state, int token
         decode_tokens: state.decode_tokens + add_tokens,
     }
 }
+
 func continuous_batch_finish_request(continuous_batch_state state) continuous_batch_state {
     int next_active = state.active_requests
     if next_active > 0 {
@@ -250,6 +264,7 @@ func continuous_batch_finish_request(continuous_batch_state state) continuous_ba
         decode_tokens: state.decode_tokens,
     }
 }
+
 struct runtime_state {
     int queue_depth
     string pending_request_id
@@ -259,6 +274,7 @@ struct runtime_state {
     int last_prefill_tokens
     int last_remaining_tokens
 }
+
 func new_runtime_state(int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string strategy) runtime_state {
     runtime_state {
         queue_depth: 0,
@@ -270,6 +286,7 @@ func new_runtime_state(int layer_count, int page_size, int max_pages, int max_pr
         last_remaining_tokens: 0,
     }
 }
+
 func runtime_enqueue_request(runtime_state state, string request_id, int prefill_tokens, int remaining_tokens, bool accepted) runtime_state {
     int next_queue_depth = state.queue_depth
     int next_hits = state.cache_hits
@@ -302,6 +319,7 @@ func runtime_enqueue_request(runtime_state state, string request_id, int prefill
         last_remaining_tokens: normalized_remaining,
     }
 }
+
 func runtime_schedule_next(runtime_state state) runtime_state {
     if state.queue_depth <= 0 {
         return state
@@ -320,6 +338,7 @@ func runtime_schedule_next(runtime_state state) runtime_state {
         last_remaining_tokens: state.last_remaining_tokens,
     }
 }
+
 func runtime_record_decode(runtime_state state, int decode_tokens) runtime_state {
     runtime_state {
         queue_depth: state.queue_depth,
@@ -331,6 +350,7 @@ func runtime_record_decode(runtime_state state, int decode_tokens) runtime_state
         last_remaining_tokens: state.last_remaining_tokens,
     }
 }
+
 func runtime_finish_request(runtime_state state, int release_tokens) runtime_state {
     runtime_state {
         queue_depth: state.queue_depth,
@@ -342,21 +362,25 @@ func runtime_finish_request(runtime_state state, int release_tokens) runtime_sta
         last_remaining_tokens: state.last_remaining_tokens,
     }
 }
+
 func runtime_queue_depth(runtime_state state) int {
     state.queue_depth
 }
+
 struct infer_request_state {
     string request_id
     string model
     int input_tokens
     int max_new_tokens
 }
+
 struct infer_response_state {
     string request_id
     int output_tokens
     bool finished
     int status
 }
+
 func new_infer_request_state(string request_id, string model, int input_tokens, int max_new_tokens) infer_request_state {
     infer_request_state {
         request_id: request_id,
@@ -365,6 +389,7 @@ func new_infer_request_state(string request_id, string model, int input_tokens, 
         max_new_tokens: max_new_tokens,
     }
 }
+
 func new_infer_response_state(string request_id) infer_response_state {
     infer_response_state {
         request_id: request_id,
@@ -373,6 +398,7 @@ func new_infer_response_state(string request_id) infer_response_state {
         status: 200,
     }
 }
+
 func infer_response_update(infer_response_state state, int output_tokens, bool finished, int status) infer_response_state {
     infer_response_state {
         request_id: state.request_id,
@@ -381,18 +407,23 @@ func infer_response_update(infer_response_state state, int output_tokens, bool f
         status: status,
     }
 }
+
 func infer_request_state_dict(infer_request_state state) infer_request_state {
     state
 }
+
 func infer_request_load_state_dict(infer_request_state state, infer_request_state other) infer_request_state {
     other
 }
+
 func infer_response_state_dict(infer_response_state state) infer_response_state {
     state
 }
+
 func infer_response_load_state_dict(infer_response_state state, infer_response_state other) infer_response_state {
     other
 }
+
 struct serving_runtime_config {
     int max_active_requests
     int max_prefill_tokens
@@ -404,6 +435,7 @@ struct serving_runtime_config {
     int max_prefix_tokens
     string policy
 }
+
 struct serving_runtime_state {
     int max_active_requests
     int max_prefill_tokens
@@ -438,6 +470,7 @@ struct serving_runtime_state {
     int finished_requests
     int last_status
 }
+
 func serving_runtime_effective_capacity(int max_active_requests, int batch_capacity) int {
     int effective_capacity = batch_capacity
     if effective_capacity <= 0 {
@@ -448,6 +481,7 @@ func serving_runtime_effective_capacity(int max_active_requests, int batch_capac
     }
     effective_capacity
 }
+
 func new_serving_runtime_config(int max_active_requests, int max_prefill_tokens, int batch_capacity, int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string policy) serving_runtime_config {
     int normalized_active_requests = max_active_requests
     if normalized_active_requests <= 0 {
@@ -489,6 +523,7 @@ func new_serving_runtime_config(int max_active_requests, int max_prefill_tokens,
         policy: policy,
     }
 }
+
 func new_serving_runtime_state(int max_active_requests, int max_prefill_tokens, int batch_capacity, int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string policy) serving_runtime_state {
     serving_runtime_config config = new_serving_runtime_config(max_active_requests, max_prefill_tokens, batch_capacity, layer_count, page_size, max_pages, max_prefix_entries, max_prefix_tokens, policy)
     admission_control_state admission = new_admission_control_state_with_policy(config.max_active_requests, config.max_prefill_tokens, config.policy)
@@ -529,6 +564,7 @@ func new_serving_runtime_state(int max_active_requests, int max_prefill_tokens, 
         last_status: 200,
     }
 }
+
 func serving_runtime_submit_request(serving_runtime_state state, string request_id, int prefill_tokens, int remaining_tokens) serving_runtime_state {
     int normalized_prefill = prefill_tokens
     if normalized_prefill < 0 {
@@ -618,6 +654,7 @@ func serving_runtime_submit_request(serving_runtime_state state, string request_
         last_status: next_status,
     }
 }
+
 func serving_runtime_schedule_next(serving_runtime_state state) serving_runtime_state {
     runtime_state runtime_engine = runtime_state {
         queue_depth: state.queue_depth,
@@ -669,6 +706,7 @@ func serving_runtime_schedule_next(serving_runtime_state state) serving_runtime_
         last_status: next_status,
     }
 }
+
 func serving_runtime_record_decode(serving_runtime_state state, int decode_tokens) serving_runtime_state {
     int normalized_tokens = decode_tokens
     if normalized_tokens < 0 {
@@ -741,6 +779,7 @@ func serving_runtime_record_decode(serving_runtime_state state, int decode_token
         last_status: state.last_status,
     }
 }
+
 func serving_runtime_finish_request(serving_runtime_state state, int release_tokens) serving_runtime_state {
     int normalized_tokens = release_tokens
     if normalized_tokens < 0 {
@@ -813,36 +852,45 @@ func serving_runtime_finish_request(serving_runtime_state state, int release_tok
         last_status: 200,
     }
 }
+
 func serving_runtime_active_requests(serving_runtime_state state) int {
     int active_requests = state.active_requests
     active_requests
 }
+
 func serving_runtime_queue_depth(serving_runtime_state state) int {
     int queue_depth = state.queue_depth
     queue_depth
 }
+
 func serving_runtime_last_selected_request(serving_runtime_state state) string {
     string request_id = state.last_selected_request
     request_id
 }
+
 func serving_runtime_cache_hits(serving_runtime_state state) int {
     int cache_hits = state.cache_hits
     cache_hits
 }
+
 func serving_runtime_cache_misses(serving_runtime_state state) int {
     int cache_misses = state.cache_misses
     cache_misses
 }
+
 func serving_runtime_avg_queue_depth(serving_runtime_state state) float {
     float queue_depth = float(state.queue_depth)
     queue_depth
 }
+
 func serving_runtime_state_dict(serving_runtime_state state) serving_runtime_state {
     state
 }
+
 func serving_runtime_load_state_dict(serving_runtime_state state, serving_runtime_state other) serving_runtime_state {
     other
 }
+
 func serving_runtime_smoke_test() int {
     serving_runtime_state state = new_serving_runtime_state(4, 128, 4, 8, 16, 16, 64, 1024, "srpt")
     println("serving smoke test")

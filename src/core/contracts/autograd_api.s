@@ -5,27 +5,32 @@ struct graph_node {
     tensor forward_output
     backward_fn: func(tensor grad) . []tensor
 }
+
 struct graph_edge {
     i64 from_node_id
     i64 to_node_id
     i64 tensor_index
     prev_func: func(tensor grad) . tensor
 }
+
 struct computation_graph {
     map[i64]graph_node nodes
     edges: []graph_edge
     leaf_tensors: []tensor
     tensor output_tensor
 }
+
 struct graph_task {
     i64 id
     i64 node_id
     tensor grad_tensor
     i64 dependencies_remaining
 }
+
 struct ready_queue {
     tasks: []graph_task
 }
+
 struct autograd_engine {
     computation_graph graph
     ready_queue ready_queue

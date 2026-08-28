@@ -6,6 +6,7 @@ struct KVCacheBlockAllocator {
     allocated_map   map[string][]i32
     eviction_policy CacheEvictionPolicy
 }
+
 func NewKVCacheManager(total_size_gb f64, eviction_policy i32) *KVCacheManager {
     manager := *KVCacheManager{
         total_size_gb: total_size_gb,
@@ -16,6 +17,7 @@ func NewKVCacheManager(total_size_gb f64, eviction_policy i32) *KVCacheManager {
     }
     return manager
 }
+
 func (KVCacheManager* m) AllocateBlock(sequence_id string, token_range_start i32,
                                        token_range_end i32) ExecutionResult {
     size_bytes := (token_range_end - token_range_start) * 100
@@ -41,6 +43,7 @@ func (KVCacheManager* m) AllocateBlock(sequence_id string, token_range_start i32
     m.free_mb -= size_bytes / (1024 * 1024)
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (KVCacheManager* m) FreeBlock(block_id i32) ExecutionResult {
     for i := 0; i < m.block_count; i++ {
         if m.blocks[i].block_id == block_id {
@@ -57,6 +60,7 @@ func (KVCacheManager* m) FreeBlock(block_id i32) ExecutionResult {
         error_message: "Block not found",
     }
 }
+
 func (KVCacheManager* m) FreeSequenceBlocks(sequence_id string) ExecutionResult {
     freed := 0
     for i := 0; i < m.block_count; i++ {
@@ -73,6 +77,7 @@ func (KVCacheManager* m) FreeSequenceBlocks(sequence_id string) ExecutionResult 
         error_code: ERROR_SUCCESS,
     }
 }
+
 func (KVCacheManager* m) EvictBlocks() ExecutionResult {
     match m.eviction_policy {
     case EVICTION_LRU:
@@ -87,6 +92,7 @@ func (KVCacheManager* m) EvictBlocks() ExecutionResult {
         return m.evict_lru()
     }
 }
+
 func (KVCacheManager* m) evict_lru() ExecutionResult {
     oldest_block := i32(-1)
     oldest_time := i64(9223372036854775807)
@@ -107,6 +113,7 @@ func (KVCacheManager* m) evict_lru() ExecutionResult {
         error_message: "No blocks to evict",
     }
 }
+
 func (KVCacheManager* m) evict_lfu() ExecutionResult {
     min_block := i32(-1)
     min_access := i64(9223372036854775807)
@@ -127,6 +134,7 @@ func (KVCacheManager* m) evict_lfu() ExecutionResult {
         error_message: "No blocks to evict",
     }
 }
+
 func (KVCacheManager* m) evict_fifo() ExecutionResult {
     if m.block_count > 0 && m.blocks[0].is_allocated == 1 {
         return m.FreeBlock(m.blocks[0].block_id)
@@ -137,6 +145,7 @@ func (KVCacheManager* m) evict_fifo() ExecutionResult {
         error_message: "No blocks to evict",
     }
 }
+
 func (KVCacheManager* m) evict_adaptive() ExecutionResult {
     min_block := i32(-1)
     min_cost := f64(9223372036854775807)
@@ -158,6 +167,7 @@ func (KVCacheManager* m) evict_adaptive() ExecutionResult {
         error_message: "No blocks to evict",
     }
 }
+
 func (KVCacheManager* m) GetBlockStats() map[string]i64 {
     stats := make(map[string]i64)
     allocated := 0
@@ -181,6 +191,7 @@ func (KVCacheManager* m) GetBlockStats() map[string]i64 {
     stats["total_size_mb"] = i64(m.total_size_gb * 1024)
     return stats
 }
+
 func (KVCacheManager* m) GetCacheUtilization() f64 {
     total := m.total_size_gb * 1024
     if total == 0 {
@@ -188,21 +199,27 @@ func (KVCacheManager* m) GetCacheUtilization() f64 {
     }
     return f64(m.allocated_mb) / total * 100.0
 }
+
 func (KVCacheManager* m) CompactCache() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (KVCacheManager* m) SwapToHost(sequence_id string, num_tokens i32) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (KVCacheManager* m) SwapToDevice(sequence_id string, num_tokens i32) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (KVCacheManager* m) PrefixCache(prefix_hash string, tokens i32) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (KVCacheManager* m) GetPrefixCache(prefix_hash string) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (KVCacheManager* m) GetCacheHitRate() f64 {
     if m.block_count == 0 {
         return 0.0
@@ -219,6 +236,7 @@ func (KVCacheManager* m) GetCacheHitRate() f64 {
     }
     return f64(hits) / f64(total_accesses)
 }
+
 func (KVCacheManager* m) Shutdown() ExecutionResult {
     m.allocated_mb = 0
     m.free_mb = i32(m.total_size_gb * 1024)
@@ -226,6 +244,7 @@ func (KVCacheManager* m) Shutdown() ExecutionResult {
     m.blocks = []KVCacheBlock{}
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func get_current_time_us() i64 {
     return 0
 }

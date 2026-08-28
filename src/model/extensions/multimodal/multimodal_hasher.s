@@ -13,6 +13,7 @@ struct content_hash {
     modality_type modality
     int64 computed_time
 }
+
 struct hash_matcher {
     bool enable_fuzzy_matching
     float32 similarity_threshold
@@ -20,6 +21,7 @@ struct hash_matcher {
     map[string]content_hash* hash_cache
     map[string]string[]*] similar_content
 }
+
 struct multimodal_hasher {
     hash_algorithm algorithm
     hash_matcher* matcher
@@ -27,6 +29,7 @@ struct multimodal_hasher {
     int32 duplicates_found
     map[string]int32 hash_to_count
 }
+
 func create_multimodal_hasher() multimodal_hasher* {
     return *multimodal_hasher{
         algorithm: algo_sha256,
@@ -42,6 +45,7 @@ func create_multimodal_hasher() multimodal_hasher* {
         hash_to_count: make(map[string]int32),
     }
 }
+
 func (multimodal_hasher* hasher) compute_hash(uint8[] data, modality_type modality) string {
     if len(data) == 0 {
         return ""
@@ -69,6 +73,7 @@ func (multimodal_hasher* hasher) compute_hash(uint8[] data, modality_type modali
     hasher.total_hashes_computed = hasher.total_hashes_computed + 1
     return hash_value
 }
+
 func (multimodal_hasher* hasher) add_content(string content_id, uint8[] data, modality_type modality) string {
     hash_value := hasher.compute_hash(data, modality)
     hash_obj := *content_hash{
@@ -88,6 +93,7 @@ func (multimodal_hasher* hasher) add_content(string content_id, uint8[] data, mo
     }
     return hash_value
 }
+
 func (multimodal_hasher* hasher) find_duplicates(string content_id) string[] {
     duplicates := make(string[])
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
@@ -99,6 +105,7 @@ func (multimodal_hasher* hasher) find_duplicates(string content_id) string[] {
     }
     return duplicates
 }
+
 func (multimodal_hasher* hasher) compute_similarity(string hash1, string hash2) float32 {
     if hash1 == hash2 {
         return 1.0
@@ -118,6 +125,7 @@ func (multimodal_hasher* hasher) compute_similarity(string hash1, string hash2) 
     }
     return float32(common_chars) / float32(max_len)
 }
+
 func (multimodal_hasher* hasher) find_similar(string content_id) string[] {
     similar := make(string[])
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
@@ -132,12 +140,14 @@ func (multimodal_hasher* hasher) find_similar(string content_id) string[] {
     }
     return similar
 }
+
 func (multimodal_hasher* hasher) get_hash(string content_id) option[string] {
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
         return option[string]{value: hash_obj.hash_value}
     }
     return option[string]{}
 }
+
 func (multimodal_hasher* hasher) get_hasher_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["algorithm"] = hasher.algorithm
@@ -147,6 +157,7 @@ func (multimodal_hasher* hasher) get_hasher_stats() map[string]interface{} {
     stats["cached_content"] = len(hasher.matcher.hash_cache)
     return stats
 }
+
 func (multimodal_hasher* hasher) clear() {
     hasher.matcher.hash_cache = make(map[string]content_hash*)
     hasher.hash_to_count = make(map[string]int32)

@@ -4,6 +4,7 @@ use std.conv.parse_int_default as parse_int
 func string_char(int c) string {
     string(c)
 }
+
 func trim(string s) string {
     int begin = 0
     for begin < len(s) {
@@ -31,6 +32,7 @@ func trim(string s) string {
     }
     out
 }
+
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -46,6 +48,7 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -66,6 +69,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func print_help() {
     println("NeurX Shard Manager")
     println("")
@@ -76,18 +80,23 @@ func print_help() {
     println("  clean        Clean up shard files")
     println("  help         Show this help message")
 }
+
 func env_get(string name, string default_value) string {
     runtime_env_get(name, default_value)
 }
+
 func default_neurx_root() string {
     env_get("NEURX_HOME", ".")
 }
+
 func default_shard_dir(string root) string {
     env_get("ENWIKI_SHARD_DIR", root + "/dataset/pretrain/shard")
 }
+
 func default_manifest(string root) string {
     env_get("ENWIKI_MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")
 }
+
 func run_wikipedia() int {
     root := default_neurx_root()
     script_dir := env_get("NEURX_SHARD_SCRIPT_DIR", root + "/shard")
@@ -149,6 +158,7 @@ func run_wikipedia() int {
     }
     0
 }
+
 func run_verify() int {
     root := default_neurx_root()
     shard_dir := default_shard_dir(root)
@@ -168,6 +178,7 @@ func run_verify() int {
     }
     0
 }
+
 func run_list() int {
     root := default_neurx_root()
     shard_dir := default_shard_dir(root)
@@ -183,6 +194,7 @@ func run_list() int {
     }
     0
 }
+
 func run_clean() int {
     root := default_neurx_root()
     shard_dir := default_shard_dir(root)
@@ -196,6 +208,7 @@ func run_clean() int {
     }
     0
 }
+
 func main() {
     cmd := env_get("NEURX_SHARD_CMD", "help")
     if cmd == "wikipedia" || cmd == "shard" {

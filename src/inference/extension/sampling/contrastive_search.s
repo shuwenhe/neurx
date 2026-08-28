@@ -4,12 +4,14 @@ struct embedding_cache {
 	token_embeddings map[int32]float32[]
 	model_embeddings float32[][]]
 }
+
 struct contrastive_search_state {
 	alpha float32
 	k int32
 	degenerate_to_greedy bool
 	embedding_cache* embedding_cache
 }
+
 func create_contrastive_search_state(float32 alpha, int32 k, bool degenerate) contrastive_search_state* {
 	return *contrastive_search_state{
 		alpha: alpha,
@@ -21,6 +23,7 @@ func create_contrastive_search_state(float32 alpha, int32 k, bool degenerate) co
 		},
 	}
 }
+
 func cosine_similarity(float32[] vec_a, float32[] vec_b) float32 {
 	if len(vec_a) == 0 || len(vec_b) == 0 {
 		return 0.0
@@ -40,6 +43,7 @@ func cosine_similarity(float32[] vec_a, float32[] vec_b) float32 {
 	norm_b = math.sqrt(norm_b)
 	return dot_product / (norm_a * norm_b)
 }
+
 func (c* contrastive_search_state) compute_model_diversity(float32[] model_embedding, float32[][]] generated_embeddings) float32 {
 	if len(generated_embeddings) == 0 {
 		return 0.0
@@ -56,6 +60,7 @@ func (c* contrastive_search_state) compute_model_diversity(float32[] model_embed
 	}
 	return 1.0 - max_similarity
 }
+
 func (c* contrastive_search_state) compute_model_confidence(float32[] logits, int32 candidate_token) float32 {
 	if candidate_token < 0 || candidate_token >= int32(len(logits)) {
 		return 0.0
@@ -78,6 +83,7 @@ func (c* contrastive_search_state) compute_model_confidence(float32[] logits, in
 	}
 	return 0.0
 }
+
 func (c* contrastive_search_state) select_token(float32[] logits, float32[][]] generated_embeddings, float32[][]] model_embeddings) int32 {
 	if len(model_embeddings) == 0 || len(logits) == 0 {
 		max_idx := 0
@@ -137,11 +143,13 @@ func (c* contrastive_search_state) select_token(float32[] logits, float32[][]] g
 	}
 	return best_token
 }
+
 func (c* contrastive_search_state) cache_embeddings(int32 token_id, float32[] embedding) {
 	if c.embedding_cache != nil {
 		c.embedding_cache.token_embeddings[token_id] = embedding
 	}
 }
+
 func contrastive_decoding_step(float32[] logits, float32[][]] context_embeddings, float32 alpha, int32 k) int32 {
 	if alpha < 0.0 {
 		alpha = 0.0

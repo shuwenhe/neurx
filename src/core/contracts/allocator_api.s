@@ -6,12 +6,14 @@ import "device_api"
     async_alloc
     unified_alloc
 }
+
 struct allocation_info {
     device device
     i64 size
     i64 alignment
     AllocatorStrategy strategy
 }
+
 struct allocation_result {
     i64 ptr
     i64 allocated_size

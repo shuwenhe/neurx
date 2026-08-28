@@ -5,6 +5,7 @@ struct test_result {
     int failed
     int total_tests
 }
+
 func test_tcp_ip_stack() (int, string) {
     passed := 0
     local_ip := 192168001001
@@ -23,6 +24,7 @@ func test_tcp_ip_stack() (int, string) {
     }
     return passed, "TCP/IP 栈测试完成"
 }
+
 func test_selinux_security() (int, string) {
     passed := 0
     policy_loaded := 1
@@ -36,6 +38,7 @@ func test_selinux_security() (int, string) {
     }
     return passed, "SELinux 安全测试完成"
 }
+
 func test_kvm_virtualization() (int, string) {
     passed := 0
     vcpu_count := 4
@@ -49,6 +52,7 @@ func test_kvm_virtualization() (int, string) {
     }
     return passed, "虚拟化测试完成"
 }
+
 func test_power_management() (int, string) {
     passed := 0
     pm_ready := 1
@@ -66,6 +70,7 @@ func test_power_management() (int, string) {
     }
     return passed, "电源管理测试完成"
 }
+
 func test_block_devices() (int, string) {
     passed := 0
     device_type := 1
@@ -80,6 +85,7 @@ func test_block_devices() (int, string) {
     }
     return passed, "块设备测试完成"
 }
+
 func test_driver_framework() (int, string) {
     passed := 0
     module_type := 0
@@ -93,6 +99,7 @@ func test_driver_framework() (int, string) {
     }
     return passed, "驱动框架测试完成"
 }
+
 func test_certificate_management() (int, string) {
     passed := 0
     cert_mgr_ok := 1
@@ -106,6 +113,7 @@ func test_certificate_management() (int, string) {
     }
     return passed, "证书管理测试完成"
 }
+
 func test_audio_driver() (int, string) {
     passed := 0
     audio_ok := 1
@@ -123,6 +131,7 @@ func test_audio_driver() (int, string) {
     }
     return passed, "音频驱动测试完成"
 }
+
 func run_all_tier4_tests() (test_result, string) {
     result := test_result{
         test_id: 4,

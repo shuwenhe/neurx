@@ -11,18 +11,21 @@ struct output_constraint {
     string pattern
     map[string]interface{} schema_def
 }
+
 struct structured_output_config {
     bool enable_structured_output
     output_constraint* constraint
     bool validate_output
     bool reject_invalid
 }
+
 struct structured_generator {
     structured_output_config config
     map[string]interface{} valid_tokens
     int32 valid_token_count
     int32 invalid_token_count
 }
+
 func create_structured_generator() structured_generator* {
     return *structured_generator{
         config: structured_output_config{
@@ -36,6 +39,7 @@ func create_structured_generator() structured_generator* {
         invalid_token_count: 0,
     }
 }
+
 func (structured_generator* gen) set_json_schema(string json_schema) {
     gen.config.constraint = *output_constraint{
         constraint_type: constraint_json,
@@ -44,6 +48,7 @@ func (structured_generator* gen) set_json_schema(string json_schema) {
     }
     gen.config.enable_structured_output = true
 }
+
 func (structured_generator* gen) set_regex_pattern(string pattern) {
     gen.config.constraint = *output_constraint{
         constraint_type: constraint_regex,
@@ -52,6 +57,7 @@ func (structured_generator* gen) set_regex_pattern(string pattern) {
     }
     gen.config.enable_structured_output = true
 }
+
 func (structured_generator* gen) set_grammar_constraint(string grammar) {
     gen.config.constraint = *output_constraint{
         constraint_type: constraint_grammar,
@@ -60,6 +66,7 @@ func (structured_generator* gen) set_grammar_constraint(string grammar) {
     }
     gen.config.enable_structured_output = true
 }
+
 func (structured_generator* gen) validate_json(string json_str) bool {
     if !gen.config.enable_structured_output {
         return true
@@ -74,6 +81,7 @@ func (structured_generator* gen) validate_json(string json_str) bool {
     gen.invalid_token_count = gen.invalid_token_count + 1
     return false
 }
+
 func (structured_generator* gen) validate_output(string output) bool {
     if !gen.config.validate_output {
         return true
@@ -84,6 +92,7 @@ func (structured_generator* gen) validate_output(string output) bool {
     gen.valid_token_count = gen.valid_token_count + 1
     return true
 }
+
 func (structured_generator* gen) filter_valid_tokens(int32[] token_ids) int32[] {
     if !gen.config.enable_structured_output {
         return token_ids
@@ -94,6 +103,7 @@ func (structured_generator* gen) filter_valid_tokens(int32[] token_ids) int32[] 
     }
     return valid_tokens
 }
+
 func (structured_generator* gen) get_structured_output_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["enabled"] = gen.config.enable_structured_output
@@ -102,9 +112,11 @@ func (structured_generator* gen) get_structured_output_stats() map[string]interf
     stats["invalid_tokens"] = gen.invalid_token_count
     return stats
 }
+
 func (structured_generator* gen) enable_structured_output() {
     gen.config.enable_structured_output = true
 }
+
 func (structured_generator* gen) disable_structured_output() {
     gen.config.enable_structured_output = false
 }

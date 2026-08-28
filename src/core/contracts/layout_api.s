@@ -8,6 +8,7 @@
 type layout interface {
     name() string
 }
+
 struct layout_info {
     LayoutType layout_type
     strides: []i64

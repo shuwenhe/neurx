@@ -9,6 +9,7 @@ struct gpu_resource {
     int64 last_update_ns
     bool is_available
 }
+
 struct gpu_score {
     int gpu_id
     float load_score
@@ -17,6 +18,7 @@ struct gpu_score {
     float network_score
     float total_score
 }
+
 struct dynamic_load_balancer {
     int num_gpus
     gpu_resource[] resources
@@ -26,6 +28,7 @@ struct dynamic_load_balancer {
     int64 last_rebalance_time_ns
     int rebalance_interval_ms
 }
+
 func new_dynamic_load_balancer(int num_gpus) dynamic_load_balancer {
     weights := make(float[], 4)
     weights[0] = 0.4
@@ -67,6 +70,7 @@ func new_dynamic_load_balancer(int num_gpus) dynamic_load_balancer {
     }
     return balancer
 }
+
 func (dynamic_load_balancer* balancer) update_gpu_metrics(
     int gpu_id,
     float utilization,
@@ -90,6 +94,7 @@ func (dynamic_load_balancer* balancer) update_gpu_metrics(
         resource.is_available = false
     }
 }
+
 func (dynamic_load_balancer* balancer) calculate_gpu_scores() {
     float max_utilization = 100.0
     float max_queue_length = 100.0
@@ -123,6 +128,7 @@ func (dynamic_load_balancer* balancer) calculate_gpu_scores() {
         i = i + 1
     }
 }
+
 func (dynamic_load_balancer* balancer) select_best_gpu_for_request(
     int kv_cache_size_mb,
     int min_available_memory_gb
@@ -153,6 +159,7 @@ func (dynamic_load_balancer* balancer) select_best_gpu_for_request(
     }
     return best_gpu
 }
+
 func (dynamic_load_balancer* balancer) select_gpu_least_loaded() int {
     int least_loaded_gpu = 0
     int min_queue_length = 1000000
@@ -167,6 +174,7 @@ func (dynamic_load_balancer* balancer) select_gpu_least_loaded() int {
     }
     return least_loaded_gpu
 }
+
 func (dynamic_load_balancer* balancer) detect_overloaded_gpus(float threshold_percent) int[] {
     overloaded := int[]{cap: len(balancer.resources)}
     int i = 0
@@ -179,6 +187,7 @@ func (dynamic_load_balancer* balancer) detect_overloaded_gpus(float threshold_pe
     }
     return overloaded
 }
+
 func (dynamic_load_balancer* balancer) detect_idle_gpus(float threshold_percent) int[] {
     idle := int[]{cap: len(balancer.resources)}
     int i = 0
@@ -191,6 +200,7 @@ func (dynamic_load_balancer* balancer) detect_idle_gpus(float threshold_percent)
     }
     return idle
 }
+
 func (dynamic_load_balancer* balancer) can_migrate_task(int from_gpu, int to_gpu) bool {
     if from_gpu < 0 || from_gpu >= len(balancer.resources) {
         return false
@@ -211,6 +221,7 @@ func (dynamic_load_balancer* balancer) can_migrate_task(int from_gpu, int to_gpu
     }
     return true
 }
+
 func (dynamic_load_balancer* balancer) get_load_statistics() (float, float, float) {
     float avg_utilization = 0.0
     float max_utilization = 0.0
@@ -230,6 +241,7 @@ func (dynamic_load_balancer* balancer) get_load_statistics() (float, float, floa
     avg_utilization = avg_utilization / float(len(balancer.resources))
     return avg_utilization, max_utilization, min_utilization
 }
+
 func (dynamic_load_balancer* balancer) get_imbalance_ratio() float {
     avg, max_util, min_util := balancer.get_load_statistics()
     if avg <= 0.0 {
@@ -238,6 +250,7 @@ func (dynamic_load_balancer* balancer) get_imbalance_ratio() float {
     float imbalance = (max_util - min_util) / avg
     return imbalance
 }
+
 func (dynamic_load_balancer* balancer) suggest_rebalance_actions() (int[], int[], int[]) {
     overloaded := balancer.detect_overloaded_gpus(85.0)
     idle := balancer.detect_idle_gpus(20.0)
@@ -253,20 +266,25 @@ func (dynamic_load_balancer* balancer) suggest_rebalance_actions() (int[], int[]
     }
     return overloaded, idle, migrate_from
 }
+
 func (dynamic_load_balancer* balancer) get_all_gpu_resources() gpu_resource[] {
     return balancer.resources
 }
+
 func (dynamic_load_balancer* balancer) get_all_scores() gpu_score[] {
     return balancer.scores
 }
+
 func (dynamic_load_balancer* balancer) set_score_weights(float[] weights) {
     if len(weights) == 4 {
         balancer.score_weights = weights
     }
 }
+
 func (dynamic_load_balancer* balancer) get_num_gpus() int {
     return balancer.num_gpus
 }
+
 func (dynamic_load_balancer* balancer) record_assignment(int gpu_id) {
     if len(balancer.gpu_assignment_history) < 1000 {
         balancer.gpu_assignment_history = append(balancer.gpu_assignment_history, gpu_id)

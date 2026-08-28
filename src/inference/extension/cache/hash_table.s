@@ -5,6 +5,7 @@ struct hash_entry {
     int access_count
     int next_idx
 }
+
 struct hash_table {
     []hash_entry buckets
     int num_buckets
@@ -14,6 +15,7 @@ struct hash_table {
     int collision_count
     float load_factor_threshold
 }
+
 func hash_function(string key, int table_size) int {
     int hash = 0
     int i = 0
@@ -26,6 +28,7 @@ func hash_function(string key, int table_size) int {
     if index < 0 { index = index + table_size }
     return index
 }
+
 func create_hash_table(int bucket_count, int max_entries_val) hash_table {
     hash_table ht = hash_table{}
     ht.num_buckets = bucket_count
@@ -49,6 +52,7 @@ func create_hash_table(int bucket_count, int max_entries_val) hash_table {
     print("[HashTable] Created with " + int_to_string(bucket_count) + " buckets\n")
     return ht
 }
+
 func hash_table_insert(hash_table ht, string key, int[] block_ids) int {
     if ht.num_entries >= ht.max_entries {
         print("[HashTable] Table full, cannot insert key " + key + "\n")
@@ -97,6 +101,7 @@ func hash_table_insert(hash_table ht, string key, int[] block_ids) int {
     print("[HashTable] Collision chain extended, collisions=" + int_to_string(ht.collision_count) + "\n")
     return 1
 }
+
 func hash_table_lookup(hash_table ht, string key) int[] {
     int index = hash_function(key, ht.num_buckets)
     int entry_idx = index
@@ -113,6 +118,7 @@ func hash_table_lookup(hash_table ht, string key) int[] {
     print("[HashTable] MISS for key " + key + "\n")
     return int[]{cap: 0}
 }
+
 func hash_table_remove(hash_table ht, string key) int {
     int index = hash_function(key, ht.num_buckets)
     int entry_idx = index
@@ -145,6 +151,7 @@ func hash_table_remove(hash_table ht, string key) int {
     print("[HashTable] Key not found: " + key + "\n")
     return 0
 }
+
 func hash_table_get_stats(hash_table ht) string {
     float load_factor = float(ht.num_entries) / float(ht.num_buckets)
     string stats = "[HashTable] Entries=" + int_to_string(ht.num_entries) + "/" + int_to_string(ht.max_entries) +
@@ -153,6 +160,7 @@ func hash_table_get_stats(hash_table ht) string {
                    ", Collisions=" + int_to_string(ht.collision_count)
     return stats
 }
+
 func hash_table_clear(hash_table ht) {
     int i = 0
     for i < len(ht.buckets) {
@@ -166,9 +174,11 @@ func hash_table_clear(hash_table ht) {
     ht.collision_count = 0
     print("[HashTable] Cleared all entries\n")
 }
+
 func hash_table_update_time(hash_table ht, int64 new_time) {
     ht.current_time = new_time
 }
+
 func hash_table_should_resize(hash_table ht) int {
     float load_factor = float(ht.num_entries) / float(ht.num_buckets)
     if load_factor > ht.load_factor_threshold {
@@ -176,6 +186,7 @@ func hash_table_should_resize(hash_table ht) int {
     }
     return 0
 }
+
 func hash_table_get_lru_entry(hash_table ht) string {
     int lru_idx = 0
     int64 oldest_time = ht.buckets[0].timestamp

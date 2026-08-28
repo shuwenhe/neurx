@@ -7,30 +7,36 @@ struct ToolCall {
     str id
     FunctionCall function
 }
+
 struct FunctionCall {
     str name
     str arguments
 }
+
 struct ExtractedToolCallInformation {
     bool tools_called
     Vec<ToolCall> tool_calls
     str content
 }
+
 struct DeltaToolCall {
     i32 index
     str type
     DeltaFunctionCall function
 }
+
 struct DeltaFunctionCall {
     str name
     str arguments
 }
+
 struct ParserRequest {
     Vec<str> messages
     Vec<str> tools
     str tool_choice
     str model
 }
+
 struct ParserResponse {
     bool tools_called
     Vec<ToolCall> tool_calls
@@ -59,6 +65,7 @@ trait ToolParser {
         ""
     }
 }
+
 struct BaseToolParser {
     str parser_name
     bool supports_streaming
@@ -67,6 +74,7 @@ struct BaseToolParser {
     str tokenizer
     Vec<str> tools
 }
+
 func new(str name) . BaseToolParser {
     BaseToolParser {
         parser_name: name,
@@ -77,22 +85,27 @@ func new(str name) . BaseToolParser {
         tools: Vec_new()
     }
 }
+
 func set_tools(self, Vec<str> tools) . BaseToolParser {
     self.tools = tools
     self
 }
+
 func set_streaming(self, bool streaming) . BaseToolParser {
     self.supports_streaming = streaming
     self
 }
+
 func set_tool_choice_required(self, bool required) . BaseToolParser {
     self.supports_required = required
     self
 }
+
 func set_structural_tag(self, str tag) . BaseToolParser {
     self.structural_tag_model = tag
     self
 }
+
 struct ToolExtractionContext {
     i32 current_pos
     i32 bracket_depth
@@ -101,6 +114,7 @@ struct ToolExtractionContext {
     i32 last_newline_pos
     i32 tool_call_count
 }
+
 func create_extraction_context() . ToolExtractionContext {
     ToolExtractionContext {
         current_pos: 0,
@@ -111,6 +125,7 @@ func create_extraction_context() . ToolExtractionContext {
         tool_call_count: 0
     }
 }
+
 func find_json_boundaries(str text, i32 start) . (i32, i32) {
     brace_depth := 0
     in_string := false
@@ -152,6 +167,7 @@ func find_json_boundaries(str text, i32 start) . (i32, i32) {
     }
     (start_pos, end_pos)
 }
+
 func extract_json_field(str json_str, str field_name) . str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
     re := regex_compile(pattern)
@@ -160,6 +176,7 @@ func extract_json_field(str json_str, str field_name) . str {
         None => ""
     }
 }
+
 func validate_tool_call(ToolCall tool_call, Vec<str> available_tools) . bool {
     found := false
     for tool_name in available_tools {

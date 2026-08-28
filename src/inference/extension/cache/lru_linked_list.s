@@ -6,6 +6,7 @@ struct lru_node {
     int prev_idx
     int next_idx
 }
+
 struct lru_cache {
     []lru_node nodes
     int head_idx
@@ -14,6 +15,7 @@ struct lru_cache {
     int max_nodes
     int64 current_time
 }
+
 func create_lru_cache(int capacity) lru_cache {
     lru_cache lru = lru_cache{}
     lru.max_nodes = capacity
@@ -25,6 +27,7 @@ func create_lru_cache(int capacity) lru_cache {
     print("[LRUCache] Created with capacity " + int_to_string(capacity) + "\n")
     return lru
 }
+
 func lru_cache_put(lru_cache lru, string key, int block_id) int {
     int idx = 0
     for idx < lru.num_nodes {
@@ -62,6 +65,7 @@ func lru_cache_put(lru_cache lru, string key, int block_id) int {
     print("[LRUCache] Added key " + key + " at head\n")
     return 1
 }
+
 func lru_cache_get(lru_cache lru, string key) int {
     int idx = 0
     for idx < lru.num_nodes {
@@ -79,6 +83,7 @@ func lru_cache_get(lru_cache lru, string key) int {
     print("[LRUCache] MISS for key " + key + "\n")
     return -1
 }
+
 func lru_cache_remove(lru_cache lru, string key) int {
     int idx = 0
     for idx < lru.num_nodes {
@@ -107,6 +112,7 @@ func lru_cache_remove(lru_cache lru, string key) int {
     }
     return 0
 }
+
 func lru_cache_move_to_front(lru_cache lru, int idx) {
     if idx == lru.head_idx {
         return
@@ -128,6 +134,7 @@ func lru_cache_move_to_front(lru_cache lru, int idx) {
     lru.head_idx = idx
     lru.nodes[idx] = node
 }
+
 func lru_cache_evict_tail(lru_cache lru) string {
     if lru.tail_idx == -1 {
         return ""
@@ -151,18 +158,21 @@ func lru_cache_evict_tail(lru_cache lru) string {
     print("[LRUCache] Evicted tail: " + evicted_key + "\n")
     return evicted_key
 }
+
 func lru_cache_clear(lru_cache lru) {
     lru.num_nodes = 0
     lru.head_idx = -1
     lru.tail_idx = -1
     print("[LRUCache] Cleared all nodes\n")
 }
+
 func lru_cache_get_lru_key(lru_cache lru) string {
     if lru.tail_idx == -1 {
         return ""
     }
     return lru.nodes[lru.tail_idx].key
 }
+
 func lru_cache_get_stats(lru_cache lru) string {
     int total_accesses = 0
     int idx = 0
@@ -174,6 +184,7 @@ func lru_cache_get_stats(lru_cache lru) string {
                    ", TotalAccesses=" + int_to_string(total_accesses)
     return stats
 }
+
 func lru_cache_update_time(lru_cache lru, int64 new_time) {
     lru.current_time = new_time
 }

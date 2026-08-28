@@ -1,5 +1,6 @@
 package neurx.optimizer.optimizer_adamw
 use neurx.tensor.{tensor, zeros, ones, fill, new}
+
 struct adam_state {
     float learning_rate
     float beta1
@@ -11,6 +12,7 @@ struct adam_state {
     []tensor v
     []tensor param
 }
+
 struct optimizer_config {
     float learning_rate
     float beta1
@@ -20,6 +22,7 @@ struct optimizer_config {
     int warmup_steps
     string lr_schedule
 }
+
 func init_adam_state(
     []tensor parameters,
     optimizer_config config
@@ -44,6 +47,7 @@ func init_adam_state(
         param: parameters,
     }
 }
+
 func get_learning_rate(
     float base_lr,
     string schedule,
@@ -68,6 +72,7 @@ func get_learning_rate(
     }
     base_lr
 }
+
 func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
     float total_norm = 0.0
     int i = 0
@@ -95,6 +100,7 @@ func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
     }
     gradients
 }
+
 func adam_step_param(
     tensor param,
     tensor grad,
@@ -123,6 +129,7 @@ func adam_step_param(
     }
     (param, m, v)
 }
+
 func adam_step(
     adam_state state,
     []tensor gradients,
@@ -158,12 +165,14 @@ func adam_step(
     }
     state
 }
+
 func linear_warmup_scheduler(int current_step, int warmup_steps, float base_lr) float {
     if current_step < warmup_steps {
         return base_lr * float_from_int(current_step) / float_from_int(warmup_steps)
     }
     base_lr
 }
+
 func cosine_warmup_scheduler(
     int current_step,
     int warmup_steps,
@@ -180,11 +189,13 @@ func cosine_warmup_scheduler(
     if progress > 1.0 { progress = 1.0 }
     base_lr * (1.0 + cos_approx(pi * progress)) / 2.0
 }
+
 struct optimizer_checkpoint {
     adam_state state
     int global_step
     float best_loss
 }
+
 func save_optimizer_state(adam_state state, int step, float loss) optimizer_checkpoint {
     optimizer_checkpoint {
         state: state,
@@ -192,12 +203,15 @@ func save_optimizer_state(adam_state state, int step, float loss) optimizer_chec
         best_loss: loss,
     }
 }
+
 func restore_optimizer_state(optimizer_checkpoint ckpt) adam_state {
     ckpt.state
 }
+
 func float_from_int(int x) float {
     0.0 + x
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -208,12 +222,14 @@ func sqrt_approx(float x) float {
     }
     y
 }
+
 func pow_approx(float base, float exp) float {
     if base <= 0.0 { return 0.0 }
     if exp == 0.0 { return 1.0 }
     float ln_base = log_approx(base)
     exp_approx(exp * ln_base)
 }
+
 func log_approx(float x) float {
     float v = x
     if v <= 0.0 { v = 0.000000000001 }
@@ -223,6 +239,7 @@ func log_approx(float x) float {
     float y5 = y3 * y2
     2.0 * (y + (y3 / 3.0) + (y5 / 5.0))
 }
+
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -236,6 +253,7 @@ func exp_approx(float x) float {
     }
     result
 }
+
 func cos_approx(float x) float {
     float pi = 3.141592653589793
     float x_mod = x - float_from_int(int_from_float(x / (2.0 * pi))) * 2.0 * pi
@@ -247,6 +265,7 @@ func cos_approx(float x) float {
     result = result - (x2 * x2 * x2 / 720.0)
     result
 }
+
 func int_from_float(float x) int {
     int n = 0
     float y = x

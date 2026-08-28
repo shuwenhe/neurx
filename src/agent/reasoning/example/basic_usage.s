@@ -35,6 +35,7 @@ func example_math_reasoning() {
     validator := new_reasoning_validator(config)
     result := validator.validate_chain(chain)
 }
+
 func example_logical_reasoning() {
     config := new_default_cot_config()
     user_prompt := "All humans are mortal. Socrates is a human. Is Socrates mortal"
@@ -52,6 +53,7 @@ func example_logical_reasoning() {
     chain = chain.add_step(step2)
     chain = chain.complete("Yes, Socrates is mortal.")
 }
+
 func example_with_manager() {
     config := new_default_cot_config()
     manager := new_reasoning_manager(config)
@@ -72,6 +74,7 @@ func example_with_manager() {
     }
     stats := manager.get_statistics()
 }
+
 func example_with_backtracking() {
     config := new_default_cot_config()
     config.enable_backtracking = true
@@ -89,6 +92,7 @@ func example_with_backtracking() {
         chain = chain.backtrack(2)
     }
 }
+
 func example_hierarchical_reasoning() {
     config := new_detailed_cot_config()
     config.enable_branching = true
@@ -114,6 +118,7 @@ func example_hierarchical_reasoning() {
     synthesis_step.confidence = 0.88
     chain = chain.add_step(synthesis_step)
 }
+
 func example_prompt_engineering() {
     config := new_default_cot_config()
     engineer := new_prompt_engineer(config)
@@ -131,6 +136,7 @@ func example_prompt_engineering() {
     }
     summary_prompt := engineer.get_summary_prompt(steps)
 }
+
 func example_validation() {
     config := new_default_cot_config()
     chain := new_reasoning_chain("validation_chain", "Validate reasoning", config)

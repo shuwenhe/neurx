@@ -14,6 +14,7 @@ struct AudioProcessor {
     f_min: f32,
     f32 f_max
 }
+
 func NewAudioProcessor(
     sample_rate: i32,
     frame_length: i32,
@@ -30,6 +31,7 @@ func NewAudioProcessor(
         f_max: f32(sample_rate) / 2.0
     }
 }
+
 func (AudioProcessor* p) Resample(
     audio: *types.AudioData
 ) *types.AudioData {
@@ -59,6 +61,7 @@ func (AudioProcessor* p) Resample(
         format: audio.format
     }
 }
+
 func (AudioProcessor* p) Normalize(
     audio: *types.AudioData
 ) *types.AudioData {
@@ -88,6 +91,7 @@ func (AudioProcessor* p) Normalize(
         format: audio.format
     }
 }
+
 func (AudioProcessor* p) MelSpectrogram(
     audio: *types.AudioData
 ) *types.Tensor {
@@ -114,6 +118,7 @@ func (AudioProcessor* p) MelSpectrogram(
         dtype: "float32"
     }
 }
+
 func (AudioProcessor* p) ExtractFrames(
     audio: *types.AudioData
 ) []*types.Tensor {
@@ -136,6 +141,7 @@ func (AudioProcessor* p) ExtractFrames(
     }
     return frames
 }
+
 func (AudioProcessor* p) Process(
     audio: *types.AudioData
 ) *types.Tensor {
@@ -144,6 +150,7 @@ func (AudioProcessor* p) Process(
     mel_spec := p.MelSpectrogram(normalized)
     return mel_spec
 }
+
 func (AudioProcessor* p) ProcessBatch(
     audios: []types.AudioData
 ) []types.Tensor {
@@ -153,6 +160,7 @@ func (AudioProcessor* p) ProcessBatch(
     }
     return results
 }
+
 func (AudioProcessor* p) GetAudioDuration(
     audio: *types.AudioData
 ) i32 {
@@ -161,11 +169,13 @@ func (AudioProcessor* p) GetAudioDuration(
     }
     return i32(len(audio.samples) * 1000 / audio.sample_rate)
 }
+
 func (AudioProcessor* p) GetNumFrames(
     audio: *types.AudioData
 ) i32 {
     return (i32(len(audio.samples)) - p.frame_length) / p.hop_length + 1
 }
+
 func (AudioProcessor* p) ApplyWindow(
     frame: *types.Tensor,
     string window_type
@@ -187,6 +197,7 @@ func (AudioProcessor* p) ApplyWindow(
         dtype: "float32"
     }
 }
+
 func main() {
     println("Audio Processor Module")
     println("✅ Audio processing ready")

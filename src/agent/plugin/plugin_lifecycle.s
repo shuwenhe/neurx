@@ -17,6 +17,7 @@ import "time"
 	EVENT_UNLOADED = 13
 	EVENT_ERROR = 14
 }
+
 struct lifecycle_event {
 	lifecycle_event_type    event_type
 	string                  event_description
@@ -29,6 +30,7 @@ struct lifecycle_event {
 	string                  event_data
 	map[string]interface{}  event_context
 }
+
 struct lifecycle_listener {
 	string                  listener_id
 	string                  listener_name
@@ -37,6 +39,7 @@ struct lifecycle_listener {
 	int32                   events_received
 	int64                   created_at
 }
+
 struct plugin_lifecycle_manager {
 	map[string]lifecycle_listener]  listeners
 	int32                           listener_count
@@ -50,6 +53,7 @@ struct plugin_lifecycle_manager {
 	int32                           shutdown_timeout_ms
 	sync.Mutex                      mu
 }
+
 struct lifecycle_transition {
 	plugin_state            from_state
 	plugin_state            to_state
@@ -60,6 +64,7 @@ struct lifecycle_transition {
 	string                  error_message
 	map[string]interface{}  transition_context
 }
+
 struct plugin_lifecycle_stats {
 	int32                   total_plugins_initialized
 	int32                   total_plugins_started
@@ -71,6 +76,7 @@ struct plugin_lifecycle_stats {
 	int32                   average_startup_time_ms
 	int32                   average_shutdown_time_ms
 }
+
 func create_plugin_lifecycle_manager(max_history int32) plugin_lifecycle_manager {
 	return plugin_lifecycle_manager{
 		listeners:                make(map[string]lifecycle_listener),
@@ -86,6 +92,7 @@ func create_plugin_lifecycle_manager(max_history int32) plugin_lifecycle_manager
 		mu:                       sync.Mutex{},
 	}
 }
+
 func create_lifecycle_event(event_type lifecycle_event_type, plugin_id string) lifecycle_event {
 	return lifecycle_event{
 		event_type:        event_type,
@@ -100,6 +107,7 @@ func create_lifecycle_event(event_type lifecycle_event_type, plugin_id string) l
 		event_context:     make(map[string]interface{}),
 	}
 }
+
 func (plugin_lifecycle_manager* m) register_listener(listener lifecycle_listener) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -111,6 +119,7 @@ func (plugin_lifecycle_manager* m) register_listener(listener lifecycle_listener
 	m.listener_count++
 	return true
 }
+
 func (plugin_lifecycle_manager* m) unregister_listener(listener_id string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -122,6 +131,7 @@ func (plugin_lifecycle_manager* m) unregister_listener(listener_id string) bool 
 	m.listener_count--
 	return true
 }
+
 func (plugin_lifecycle_manager* m) subscribe_to_event(listener_id string, event_type lifecycle_event_type) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -134,6 +144,7 @@ func (plugin_lifecycle_manager* m) subscribe_to_event(listener_id string, event_
 	m.listeners[listener_id] = listener
 	return true
 }
+
 func (plugin_lifecycle_manager* m) emit_lifecycle_event(event lifecycle_event) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -151,6 +162,7 @@ func (plugin_lifecycle_manager* m) emit_lifecycle_event(event lifecycle_event) {
 		m.plugin_attempt_counts[event.plugin_id] = 1
 	}
 }
+
 func (plugin_lifecycle_manager* m) get_event_history(plugin_id string) lifecycle_event[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -162,6 +174,7 @@ func (plugin_lifecycle_manager* m) get_event_history(plugin_id string) lifecycle
 	}
 	return result
 }
+
 func (plugin_lifecycle_manager* m) get_all_events() lifecycle_event[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -171,6 +184,7 @@ func (plugin_lifecycle_manager* m) get_all_events() lifecycle_event[] {
 	}
 	return result
 }
+
 func (plugin_lifecycle_manager* m) get_plugin_attempt_count(plugin_id string) int32 {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -180,6 +194,7 @@ func (plugin_lifecycle_manager* m) get_plugin_attempt_count(plugin_id string) in
 	}
 	return 0
 }
+
 func (plugin_lifecycle_manager* m) record_transition(transition lifecycle_transition) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -201,6 +216,7 @@ func (plugin_lifecycle_manager* m) record_transition(transition lifecycle_transi
 		m.event_history_count++
 	}
 }
+
 func (plugin_lifecycle_manager* m) get_lifecycle_stats() plugin_lifecycle_stats {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -238,12 +254,14 @@ func (plugin_lifecycle_manager* m) get_lifecycle_stats() plugin_lifecycle_stats 
 	}
 	return stats
 }
+
 func (plugin_lifecycle_manager* m) clear_event_history() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.event_history = make(lifecycle_event[], 0, m.max_history_size)
 	m.event_history_count = 0
 }
+
 func (plugin_lifecycle_manager* m) get_listener_subscription_count(listener_id string) int32 {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -253,6 +271,7 @@ func (plugin_lifecycle_manager* m) get_listener_subscription_count(listener_id s
 	}
 	return 0
 }
+
 func create_lifecycle_listener(listener_id string, name string) lifecycle_listener {
 	return lifecycle_listener{
 		listener_id:         listener_id,
@@ -263,6 +282,7 @@ func create_lifecycle_listener(listener_id string, name string) lifecycle_listen
 		created_at:          time.Now().UnixNano(),
 	}
 }
+
 func create_lifecycle_transition(from plugin_state, to plugin_state) lifecycle_transition {
 	return lifecycle_transition{
 		from_state:               from,
@@ -275,15 +295,18 @@ func create_lifecycle_transition(from plugin_state, to plugin_state) lifecycle_t
 		transition_context:       make(map[string]interface{}),
 	}
 }
+
 func (lifecycle_transition* t) mark_success() {
 	t.transition_end_time = time.Now().UnixNano()
 	t.transition_success = true
 }
+
 func (lifecycle_transition* t) mark_failed(error_msg string) {
 	t.transition_end_time = time.Now().UnixNano()
 	t.transition_success = false
 	t.error_message = error_msg
 }
+
 func (lifecycle_transition* t) get_duration_ms() int64 {
 	return (t.transition_end_time - t.transition_start_time) / 1000000
 }

@@ -13,18 +13,21 @@ struct pruning_config {
     float32 motion_threshold
     bool enable_adaptive_pruning
 }
+
 struct frame_importance {
     int32 frame_id
     float32 importance_score
     bool is_selected
     string reason
 }
+
 struct video_pruner {
     pruning_config config
     frame_importance*[] frame_scores
     int32 total_frames_pruned
     int32 total_frames_kept
 }
+
 func create_video_pruner() video_pruner* {
     return *video_pruner{
         config: pruning_config{
@@ -39,6 +42,7 @@ func create_video_pruner() video_pruner* {
         total_frames_kept: 0,
     }
 }
+
 func (video_pruner* pruner) compute_frame_importance(video_data* vid) frame_importance*[] {
     scores := make(frame_importance*[])
     if vid == nil || len(vid.frames) == 0 {
@@ -69,6 +73,7 @@ func (video_pruner* pruner) compute_frame_importance(video_data* vid) frame_impo
     pruner.frame_scores = scores
     return scores
 }
+
 func (video_pruner* pruner) prune_quality(video_data* vid) video_frame*[] {
     result := make(video_frame*[])
     scores := pruner.compute_frame_importance(vid)
@@ -89,6 +94,7 @@ func (video_pruner* pruner) prune_quality(video_data* vid) video_frame*[] {
     pruner.total_frames_pruned = len(vid.frames) - selected_count
     return result
 }
+
 func (video_pruner* pruner) prune_motion(video_data* vid) video_frame*[] {
     result := make(video_frame*[])
     scores := pruner.compute_frame_importance(vid)
@@ -119,6 +125,7 @@ func (video_pruner* pruner) prune_motion(video_data* vid) video_frame*[] {
     pruner.total_frames_pruned = len(vid.frames) - selected_count
     return result
 }
+
 func (video_pruner* pruner) prune_temporal(video_data* vid) video_frame*[] {
     result := make(video_frame*[])
     if len(vid.frames) == 0 {
@@ -140,6 +147,7 @@ func (video_pruner* pruner) prune_temporal(video_data* vid) video_frame*[] {
     pruner.total_frames_pruned = len(vid.frames) - selected_count
     return result
 }
+
 func (video_pruner* pruner) prune_video(video_data* vid) video_frame*[] {
     if pruner.config.strategy == prune_quality {
         return pruner.prune_quality(vid)
@@ -152,6 +160,7 @@ func (video_pruner* pruner) prune_video(video_data* vid) video_frame*[] {
     }
     return pruner.prune_temporal(vid)
 }
+
 func (video_pruner* pruner) get_pruning_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["strategy"] = pruner.config.strategy

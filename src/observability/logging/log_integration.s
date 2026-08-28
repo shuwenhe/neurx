@@ -17,6 +17,7 @@ struct logging_system {
 	int32              total_errors_encountered
 	sync.Mutex         mu
 }
+
 struct logging_config {
 	string             system_name
 	string             system_version
@@ -24,6 +25,7 @@ struct logging_config {
 	int32              flush_interval_ms
 	int32              max_traces_retained
 }
+
 func create_logging_system(config logging_config) logging_system {
 	logger_cfg := logger_config{
 		name:                 config.system_name,
@@ -50,6 +52,7 @@ func create_logging_system(config logging_config) logging_system {
 		mu:                          sync.Mutex{},
 	}
 }
+
 func (logging_system* sys) log_api_request(request_id string, endpoint string, component string) {
 	ctx := create_log_context(request_id, component)
 	entry := create_log_entry()
@@ -64,6 +67,7 @@ func (logging_system* sys) log_api_request(request_id string, endpoint string, c
 	sys.total_requests_processed++
 	sys.mu.Unlock()
 }
+
 func (logging_system* sys) log_reasoning_step(request_id string, step_number int32, reasoning_text string, confidence float32) {
 	entry := create_log_entry()
 	entry.message = "Reasoning step " + string(step_number) + " completed"
@@ -78,6 +82,7 @@ func (logging_system* sys) log_reasoning_step(request_id string, step_number int
 	sys.metrics.record_observation("reasoning.step.confidence", confidence,
 		map[string]string{"request_id": request_id})
 }
+
 func (logging_system* sys) log_sampling_execution(request_id string, method string, duration_ms int32, selected_index int32) {
 	entry := create_log_entry()
 	entry.message = "Sampling method " + method + " executed"
@@ -91,6 +96,7 @@ func (logging_system* sys) log_sampling_execution(request_id string, method stri
 	sys.logger.log_entry(entry)
 	sys.metrics.record_histogram_value("sampling.execution_time_ms", float32(duration_ms))
 }
+
 func (logging_system* sys) log_async_processing(request_id string, queue_size int32, priority int32) {
 	entry := create_log_entry()
 	entry.message = "Async request queued"
@@ -103,6 +109,7 @@ func (logging_system* sys) log_async_processing(request_id string, queue_size in
 	sys.logger.log_entry(entry)
 	sys.metrics.set_gauge("async.queue_size", float32(queue_size))
 }
+
 func (logging_system* sys) log_error_event(request_id string, component string, error_code int32, error_msg string) {
 	entry := create_log_entry()
 	entry.message = error_msg
@@ -118,6 +125,7 @@ func (logging_system* sys) log_error_event(request_id string, component string, 
 	sys.total_errors_encountered++
 	sys.mu.Unlock()
 }
+
 func (logging_system* sys) start_trace(trace_id string) distributed_trace {
 	trace := create_distributed_trace()
 	trace.trace_id = trace_id
@@ -131,6 +139,7 @@ func (logging_system* sys) start_trace(trace_id string) distributed_trace {
 	sys.mu.Unlock()
 	return trace
 }
+
 func (logging_system* sys) end_trace(trace_id string) {
 	sys.mu.Lock()
 	defer sys.mu.Unlock()
@@ -142,10 +151,12 @@ func (logging_system* sys) end_trace(trace_id string) {
 		}
 	}
 }
+
 func (logging_system* sys) flush_all() {
 	sys.logger.flush_if_needed()
 	sys.collector.collect_all()
 }
+
 func (logging_system* sys) get_system_health() map[string]interface{} {
 	health := make(map[string]interface{})
 	health["system_name"] = sys.system_name
@@ -169,6 +180,7 @@ func (logging_system* sys) get_system_health() map[string]interface{} {
 	health["metrics_stats"] = metrics_stats
 	return health
 }
+
 func (logging_system* sys) export_as_json() string {
 	sys.flush_all()
 	entries := sys.collector.get_collected_entries()
@@ -181,12 +193,14 @@ func (logging_system* sys) export_as_json() string {
 	json_str = json_str + "}"
 	return json_str
 }
+
 func (logging_system* sys) clear_all_logs() {
 	sys.logger.clear_all()
 	sys.collector.clear()
 	sys.traces = make(distributed_trace[], 0, sys.max_traces)
 	sys.trace_count = 0
 }
+
 func (logging_system* sys) get_performance_summary() map[string]interface{} {
 	summary := make(map[string]interface{})
 	collector_stats := sys.collector.get_collection_stats()

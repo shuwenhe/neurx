@@ -22,6 +22,7 @@ func init_syscall_table() int {
     init_phys_mem()
     0
 }
+
 func sys_read(int fd, int buf_addr, int count) int {
     data := int[]{}
     if has(fd_table, fd) {
@@ -40,6 +41,7 @@ func sys_read(int fd, int buf_addr, int count) int {
     mem_set(buf_addr, slice)
     n
 }
+
 func sys_write(int fd, int buf_addr, int count) int {
     bytes := mem_get(buf_addr, count)
     existing := int[]{}
@@ -54,6 +56,7 @@ func sys_write(int fd, int buf_addr, int count) int {
     fd_table[fd] = existing
     len(bytes)
 }
+
 func sys_open(string path, int flags) int {
     eprintln("sys_open called path=" + path)
     fd := next_fd
@@ -61,28 +64,34 @@ func sys_open(string path, int flags) int {
     fd_table[fd] = int[]{}
     fd
 }
+
 func sys_close(int fd) int {
     if has(fd_table, fd) {
         fd_table[fd] = int[]{}
     }
     0
 }
+
 func sys_fstat(int fd, int stat_buf_addr) int {
     eprintln("sys_fstat fd=" + int_to_string(fd))
     0
 }
+
 func sys_mmap(int addr, int length, int prot, int flags, int fd, int offset) int {
     mmap_region(0x100000, length, prot)
     0x100000
 }
+
 func sys_brk(int brk_addr) int {
     eprintln("sys_brk called: " + int_to_string(brk_addr))
     0x200000
 }
+
 func sys_exit(int code) int {
     eprintln("sys_exit called: code=" + int_to_string(code))
     code
 }
+
 func syscall_dispatch(int num, int[] args) int {
     eprintln("syscall_dispatch: " + int_to_string(num))
     if num == 0 {

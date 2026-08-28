@@ -39,6 +39,7 @@ func AdaptiveBatchingExample() {
     executor.Shutdown()
     println("\nAdaptive batching complete\n")
 }
+
 func CacheEvictionPoliciesExample() {
     println("=== Cache Eviction Policies Example ===")
     policies := []i32{EVICTION_LRU, EVICTION_LFU, EVICTION_FIFO, EVICTION_ADAPTIVE}
@@ -61,6 +62,7 @@ func CacheEvictionPoliciesExample() {
     }
     println()
 }
+
 func PrefillDecodeOptimizationExample() {
     println("=== Prefill-Decode Optimization Example ===")
     config := ExecutorConfig{
@@ -90,6 +92,7 @@ func PrefillDecodeOptimizationExample() {
     executor.Shutdown()
     println("\nOptimization example complete\n")
 }
+
 func PromptCachingExample() {
     println("=== Prompt Caching Example ===")
     cache_manager := NewKVCacheManager(16, EVICTION_LRU)
@@ -118,6 +121,7 @@ func PromptCachingExample() {
     cache_manager.Shutdown()
     println("\nPrompt caching example complete\n")
 }
+
 func TensorParallelismExample() {
     println("=== Tensor Parallelism Example ===")
     config := ExecutorConfig{
@@ -147,6 +151,7 @@ func TensorParallelismExample() {
     dist_exec.Shutdown()
     println("\nTensor parallelism example complete\n")
 }
+
 func PipelineParallelismExample() {
     println("=== Pipeline Parallelism Example ===")
     config := ExecutorConfig{
@@ -178,6 +183,7 @@ func PipelineParallelismExample() {
     dist_exec.Shutdown()
     println("\nPipeline parallelism example complete\n")
 }
+
 func MultiLevelSchedulingExample() {
     println("=== Multi-Level Scheduling Example ===")
     scheduler := NewExecutionScheduler(SCHEDULE_PRIORITY)
@@ -199,6 +205,7 @@ func MultiLevelSchedulingExample() {
     }
     println("\nMulti-level scheduling example complete\n")
 }
+
 func CacheSwappingExample() {
     println("=== Cache Swapping Example ===")
     cache_manager := NewKVCacheManager(8, EVICTION_LRU)
@@ -225,6 +232,7 @@ func CacheSwappingExample() {
     cache_manager.Shutdown()
     println("\nCache swapping example complete\n")
 }
+
 func main() {
     println("╔════════════════════════════════════════════╗")
     println("║  NeurX Executor Advanced Examples          ║")

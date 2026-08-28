@@ -10,6 +10,7 @@ struct CacheEntry {
     size_bytes: i32,
     access_time: i64,
 }
+
 struct TokenCache {
     entries: map[string]CacheEntry,
     max_size_bytes: i32,
@@ -18,6 +19,7 @@ struct TokenCache {
     eviction_policy: string,
     stats: CacheStats,
 }
+
 struct CacheStats {
     total_hits: i64,
     total_misses: i64,
@@ -25,6 +27,7 @@ struct CacheStats {
     total_insertions: i64,
     bytes_evicted: i64,
 }
+
 func NewTokenCache(i32 max_size_bytes, string eviction_policy) *TokenCache {
     cache := new(TokenCache)
     cache.entries = make(map[string]CacheEntry)
@@ -35,6 +38,7 @@ func NewTokenCache(i32 max_size_bytes, string eviction_policy) *TokenCache {
     cache.stats = CacheStats{}
     return cache
 }
+
 func (TokenCache* c) Get(string key) (i32[], bool) {
     if entry, ok := c.entries[key]; ok {
         c.stats.total_hits += 1
@@ -45,9 +49,11 @@ func (TokenCache* c) Get(string key) (i32[], bool) {
     c.stats.total_misses += 1
     return make(i32[], 0), false
 }
+
 func (TokenCache* c) Put(string key, i32[] tokens) bool {
     return c.PutWithHash(key, tokens, hash_string(key))
 }
+
 func (TokenCache* c) PutWithHash(string key, i32[] tokens, u64 hash) bool {
     if _, exists := c.entries[key]; exists {
         return false
@@ -73,6 +79,7 @@ func (TokenCache* c) PutWithHash(string key, i32[] tokens, u64 hash) bool {
     c.stats.total_insertions += 1
     return true
 }
+
 func (TokenCache* c) Remove(string key) bool {
     if entry, ok := c.entries[key]; ok {
         delete(c.entries, key)
@@ -81,10 +88,12 @@ func (TokenCache* c) Remove(string key) bool {
     }
     return false
 }
+
 func (TokenCache* c) Contains(string key) bool {
     _, exists := c.entries[key]
     return exists
 }
+
 func (TokenCache* c) evict_one() {
     if len(c.entries) == 0 {
         return
@@ -125,6 +134,7 @@ func (TokenCache* c) evict_one() {
         }
     }
 }
+
 func (TokenCache* c) GetBatch(string[] keys) map[string]i32[] {
     results := make(map[string]i32[])
     for i := 0; i < len(keys); i += 1 {
@@ -134,6 +144,7 @@ func (TokenCache* c) GetBatch(string[] keys) map[string]i32[] {
     }
     return results
 }
+
 func (TokenCache* c) PutBatch(map[string]i32[] entries) i32 {
     count := i32(0)
     for key, tokens := range entries {
@@ -143,12 +154,14 @@ func (TokenCache* c) PutBatch(map[string]i32[] entries) i32 {
     }
     return count
 }
+
 func (TokenCache* c) Clear() {
     for key := range c.entries {
         delete(c.entries, key)
     }
     c.current_size_bytes = 0
 }
+
 func (TokenCache* c) Compact(i32 min_hit_count) i32 {
     removed := i32(0)
     keys_to_remove := make(string[], 0)
@@ -164,6 +177,7 @@ func (TokenCache* c) Compact(i32 min_hit_count) i32 {
     }
     return removed
 }
+
 func (TokenCache* c) PurgeOld(i64 max_age_ms) i32 {
     removed := i32(0)
     current_time := current_time_ms()
@@ -180,9 +194,11 @@ func (TokenCache* c) PurgeOld(i64 max_age_ms) i32 {
     }
     return removed
 }
+
 func (TokenCache* c) GetStatistics() CacheStats {
     return c.stats
 }
+
 func (TokenCache* c) GetHitRate() f32 {
     total := c.stats.total_hits + c.stats.total_misses
     if total == 0 {
@@ -190,18 +206,22 @@ func (TokenCache* c) GetHitRate() f32 {
     }
     return f32(100.0 * c.stats.total_hits / total)
 }
+
 func (TokenCache* c) GetUtilization() f32 {
     if c.max_size_bytes == 0 {
         return 0.0
     }
     return f32(100.0 * c.current_size_bytes / c.max_size_bytes)
 }
+
 func (TokenCache* c) GetEntryCount() i32 {
     return i32(len(c.entries))
 }
+
 func (TokenCache* c) GetSizeBytes() i32 {
     return c.current_size_bytes
 }
+
 func (TokenCache* c) PrintStatistics() {
     println("Cache Statistics:")
     println("  Total Hits:", c.stats.total_hits)
@@ -214,6 +234,7 @@ func (TokenCache* c) PrintStatistics() {
     println("  Evictions:", c.stats.total_evictions)
     println("  Bytes Evicted:", c.stats.bytes_evicted)
 }
+
 func (TokenCache* c) GetLargestEntries(i32 count) CacheEntry[] {
     entries := make(CacheEntry[], 0)
     for _, entry := range c.entries {
@@ -233,6 +254,7 @@ func (TokenCache* c) GetLargestEntries(i32 count) CacheEntry[] {
     }
     return entries
 }
+
 func (TokenCache* c) GetHotEntries(i32 count) CacheEntry[] {
     entries := make(CacheEntry[], 0)
     for _, entry := range c.entries {
@@ -252,6 +274,7 @@ func (TokenCache* c) GetHotEntries(i32 count) CacheEntry[] {
     }
     return entries
 }
+
 func hash_string(string s) u64 {
     hash := u64(5381)
     for i := 0; i < len(s); i += 1 {
@@ -259,6 +282,7 @@ func hash_string(string s) u64 {
     }
     return hash
 }
+
 func current_time_ms() i64 {
     return i64(0)
 }

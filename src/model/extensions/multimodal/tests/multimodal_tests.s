@@ -20,11 +20,13 @@ func assert(bool condition, string message) {
         println(fmt("❌ ASSERTION FAILED: %s", message))
     }
 }
+
 func assertEqual(i32 expected, i32 actual, string message) {
     if expected != actual {
         println(fmt("❌ ASSERTION FAILED: %s (expected %d, got %d)", message, expected, actual))
     }
 }
+
 func TestImageProcessor() {
     println("\n▶ Testing ImageProcessor...")
     processor := image_processor.NewImageProcessor(224, 224,
@@ -58,6 +60,7 @@ func TestImageProcessor() {
     assert(tensor.shape[0] > 0, "Output tensor has valid shape")
     println("  ✓ Image processing pipeline test passed")
 }
+
 func TestAudioProcessor() {
     println("\n▶ Testing AudioProcessor...")
     processor := audio_encoder.NewAudioProcessor(16000, 400, 128)
@@ -79,6 +82,7 @@ func TestAudioProcessor() {
     assert(mel_spec.shape[1] > 0, "Mel-spectrogram has valid frequency bins")
     println("  ✓ Mel-spectrogram computation test passed")
 }
+
 func TestVisionEncoder() {
     println("\n▶ Testing VisionEncoder...")
     encoder := vision_encoder.NewVisionEncoder("clip-vit", 768, 16, "cuda")
@@ -105,6 +109,7 @@ func TestVisionEncoder() {
     assert(features.embeddings.shape[0] > 0, "Features have valid sequence length")
     println("  ✓ Vision encoding test passed")
 }
+
 func TestDynamicResolution() {
     println("\n▶ Testing DynamicResolution...")
     res_proc := dynamic_resolution.NewDynamicResolutionProcessor(224, 16, 196 + 1)
@@ -120,6 +125,7 @@ func TestDynamicResolution() {
     assert(info.original_height == 384, "Resolution info correct")
     println("  ✓ Resolution info test passed")
 }
+
 func TestFeatureFusion() {
     println("\n▶ Testing FeatureFusion...")
     fusion := feature_fusion.NewFeatureFusion(512, feature_fusion.FusionStrategy.concatenation)
@@ -144,6 +150,7 @@ func TestFeatureFusion() {
     assert(fusion_dim > 0, "Fusion dimension calculated")
     println(fmt("  ✓ Fusion dimension test passed (dim: %d)", fusion_dim))
 }
+
 func TestValidation() {
     println("\n▶ Testing Validation...")
     img_validator := utils.NewImageValidator()
@@ -170,6 +177,7 @@ func TestValidation() {
     assert(audio_validator.ValidateAudio(*valid_audio), "Valid audio passes validation")
     println("  ✓ Audio validation test passed")
 }
+
 func TestUtils() {
     println("\n▶ Testing Utils...")
     tensors := make([]types.Tensor, 3)
@@ -196,6 +204,7 @@ func TestUtils() {
     assert(normalized != nil, "Normalization successful")
     println("  ✓ Embedding normalization test passed")
 }
+
 func RunAllTests() {
     println("\n" + "=" * 60)
     println("NeurX Multimodal Processing Test Suite")
@@ -211,9 +220,11 @@ func RunAllTests() {
     println("✅ All tests completed!")
     println("=" * 60)
 }
+
 func main() {
     RunAllTests()
 }
+
 func fmt(string format, ...interface{} args) string {
     return format
 }

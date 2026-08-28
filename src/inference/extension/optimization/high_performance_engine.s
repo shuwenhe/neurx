@@ -8,6 +8,7 @@ struct optimization_config {
     enable_runtime_fusion       bool
     optimization_level          int32
 }
+
 struct optimization_stats {
     total_speedup               float32
     attention_speedup           float32
@@ -17,6 +18,7 @@ struct optimization_stats {
     memory_reduction            float32
     latency_reduction           float32
 }
+
 struct high_performance_optimization_engine {
     config                      optimization_config
     flash_attention             *flash_attention_optimized
@@ -25,6 +27,7 @@ struct high_performance_optimization_engine {
     runtime_fusion              *runtime_fusion_optimizer
     stats                       optimization_stats
 }
+
 func NewHighPerformanceOptimizationEngine(config optimization_config) *high_performance_optimization_engine {
     engine := *high_performance_optimization_engine{
         config: config,
@@ -70,6 +73,7 @@ func NewHighPerformanceOptimizationEngine(config optimization_config) *high_perf
     }
     return engine
 }
+
 func (high_performance_optimization_engine* hpe) OptimizeAttention(
     q float[]32,
     k float[]32,
@@ -80,6 +84,7 @@ func (high_performance_optimization_engine* hpe) OptimizeAttention(
     }
     return hpe.flash_attention.Forward(q, k, v)
 }
+
 func (high_performance_optimization_engine* hpe) OptimizeGEMM(
     a float[]32,
     b float[]32,
@@ -101,6 +106,7 @@ func (high_performance_optimization_engine* hpe) OptimizeGEMM(
     }
     return hpe.basicGEMM(a, b)
 }
+
 func (high_performance_optimization_engine* hpe) OptimizeWithCUDAGraph(
     kernels string[],
     dependencies int[][]32,
@@ -113,6 +119,7 @@ func (high_performance_optimization_engine* hpe) OptimizeWithCUDAGraph(
     }
     return hpe.cuda_graph.ExecuteGraph()
 }
+
 func (high_performance_optimization_engine* hpe) ApplyRuntimeFusion(
     operations string[],
     shapes int[][]32,
@@ -126,6 +133,7 @@ func (high_performance_optimization_engine* hpe) ApplyRuntimeFusion(
     }
     return hpe.runtime_fusion.ExecuteFusedOperations()
 }
+
 func (high_performance_optimization_engine* hpe) basicAttention(
     q float[]32,
     k float[]32,
@@ -137,6 +145,7 @@ func (high_performance_optimization_engine* hpe) basicAttention(
     }
     return output
 }
+
 func (high_performance_optimization_engine* hpe) basicGEMM(
     a float[]32,
     b float[]32,
@@ -147,6 +156,7 @@ func (high_performance_optimization_engine* hpe) basicGEMM(
     }
     return output
 }
+
 func (high_performance_optimization_engine* hpe) ComputeOptimizationStats() optimization_stats {
     stats := optimization_stats{}
     if hpe.config.enable_flash_attention && hpe.flash_attention != nil {
@@ -184,6 +194,7 @@ func (high_performance_optimization_engine* hpe) ComputeOptimizationStats() opti
     hpe.stats = stats
     return stats
 }
+
 func (high_performance_optimization_engine* hpe) GetOptimizationLevel() string {
     switch hpe.config.optimization_level {
     case 0:
@@ -198,6 +209,7 @@ func (high_performance_optimization_engine* hpe) GetOptimizationLevel() string {
         return "UNKNOWN"
     }
 }
+
 func (high_performance_optimization_engine* hpe) ApplyOptimizations() {
     stats := hpe.ComputeOptimizationStats()
     core.Println("High Performance Optimization Engine Report")
@@ -227,6 +239,7 @@ func (high_performance_optimization_engine* hpe) ApplyOptimizations() {
     core.Println("  Latency Reduction: ", stats.latency_reduction, "x")
     core.Println()
 }
+
 func main() {
     config := optimization_config{
         enable_flash_attention: true,

@@ -8,6 +8,7 @@ struct medusa_head {
     weights: float[][]
     bias: float[]
 }
+
 struct medusa_heads_config {
     int num_heads
     int base_hidden_dim
@@ -17,6 +18,7 @@ struct medusa_heads_config {
     int top_k
     float top_p
 }
+
 struct medusa_candidate_tree {
     tree_tokens: int[][][]
     tree_probs: float[][][]
@@ -24,12 +26,14 @@ struct medusa_candidate_tree {
     int tree_depth
     int branching_factor
 }
+
 struct medusa_verification_batch {
     input_ids: int[][]
     candidate_trees: []medusa_candidate_tree
     int batch_size
     int max_tree_depth
 }
+
 struct medusa_runtime_stats {
     int64 total_prefill_tokens
     int64 total_decode_tokens
@@ -42,6 +46,7 @@ struct medusa_runtime_stats {
     float acceptance_rate
     float speedup_factor
 }
+
 func new_medusa_head(int head_id, int layer_depth, int hidden_dim, int vocab_size) medusa_head {
     head := medusa_head{
         head_id: head_id,
@@ -53,6 +58,7 @@ func new_medusa_head(int head_id, int layer_depth, int hidden_dim, int vocab_siz
     }
     head
 }
+
 func initialize_medusa_head_weights(medusa_head head) medusa_head {
     updated := head
     i := 0
@@ -70,6 +76,7 @@ func initialize_medusa_head_weights(medusa_head head) medusa_head {
     }
     updated
 }
+
 func initialize_medusa_heads(medusa_heads_config config) []medusa_head {
     heads := []medusa_head{}
     i := 0
@@ -85,6 +92,7 @@ func initialize_medusa_heads(medusa_heads_config config) []medusa_head {
     }
     heads
 }
+
 func medusa_head_forward(
     medusa_head head,
     float[] hidden_state,
@@ -115,6 +123,7 @@ func medusa_head_forward(
     top_k_tokens := sample_top_k_from_logits(logits, top_k)
     top_k_tokens
 }
+
 func sample_top_k_from_logits(float[] logits, int k) int[] {
     probs := softmax_stable(logits)
     top_k_indices := int[]{}
@@ -145,6 +154,7 @@ func sample_top_k_from_logits(float[] logits, int k) int[] {
     }
     top_k_indices
 }
+
 func softmax_stable(float[] logits) float[] {
     max_logit := -1000000.0
     i := 0
@@ -171,6 +181,7 @@ func softmax_stable(float[] logits) float[] {
     }
     probs
 }
+
 func generate_medusa_candidate_tree(
     []medusa_head heads,
     float[] hidden_states,
@@ -211,6 +222,7 @@ func generate_medusa_candidate_tree(
     }
     tree
 }
+
 func verify_medusa_candidates(
     int[][] candidate_sequences,
     float[][] verifier_logits,
@@ -238,6 +250,7 @@ func verify_medusa_candidates(
     }
     results
 }
+
 func sigmoid(float x) float {
     if x < -20.0 {
         0.0
@@ -247,6 +260,7 @@ func sigmoid(float x) float {
         1.0 / (1.0 + exp_approx(-x))
     }
 }
+
 func exp_approx(float x) float {
     if x < -20.0 {
         0.0
@@ -265,6 +279,7 @@ func exp_approx(float x) float {
         }
     }
 }
+
 func rejection_sample_medusa_tokens(
     float[][] candidate_logits,
     float[][] verifier_logits,
@@ -290,12 +305,14 @@ func rejection_sample_medusa_tokens(
     }
     accepted_tokens
 }
+
 struct medusa_generation_pipeline {
     heads: []medusa_head
     medusa_heads_config config
     medusa_runtime_stats stats
     acceptance_rates: float[]
 }
+
 func new_medusa_pipeline(medusa_heads_config config) medusa_generation_pipeline {
     heads := initialize_medusa_heads(config)
     stats := medusa_runtime_stats{
@@ -318,6 +335,7 @@ func new_medusa_pipeline(medusa_heads_config config) medusa_generation_pipeline 
     }
     pipeline
 }
+
 func medusa_prefill(
     medusa_generation_pipeline pipeline,
     float[][] hidden_states,
@@ -331,6 +349,7 @@ func medusa_prefill(
     }
     (updated, last_hidden)
 }
+
 func medusa_decode_step(
     medusa_generation_pipeline pipeline,
     float[] current_hidden,
@@ -353,6 +372,7 @@ func medusa_decode_step(
     updated.stats.total_draft_tokens = updated.stats.total_draft_tokens + int64(draft_sequences.len)
     (updated, draft_sequences)
 }
+
 func medusa_adaptive_draft_length(
     medusa_generation_pipeline pipeline,
     float recent_acceptance_rate
@@ -374,6 +394,7 @@ func medusa_adaptive_draft_length(
     }
     current_draft
 }
+
 func insert_at(int[] arr, int idx, int val) int[] {
     result := int[]{}
     i := 0
@@ -389,6 +410,7 @@ func insert_at(int[] arr, int idx, int val) int[] {
     }
     result
 }
+
 func insert_at_float(float[] arr, int idx, float val) float[] {
     result := float[]{}
     i := 0
@@ -404,6 +426,7 @@ func insert_at_float(float[] arr, int idx, float val) float[] {
     }
     result
 }
+
 func slice_array_int(int[] arr, int start, int end) int[] {
     result := int[]{}
     i := start
@@ -413,6 +436,7 @@ func slice_array_int(int[] arr, int start, int end) int[] {
     }
     result
 }
+
 func slice_array_float(float[] arr, int start, int end) float[] {
     result := float[]{}
     i := start
@@ -422,6 +446,7 @@ func slice_array_float(float[] arr, int start, int end) float[] {
     }
     result
 }
+
 func compute_speedup(
     medusa_generation_pipeline pipeline,
     float baseline_latency_ms,
@@ -433,6 +458,7 @@ func compute_speedup(
         baseline_latency_ms / medusa_latency_ms
     }
 }
+
 func update_acceptance_rate(
     medusa_generation_pipeline pipeline,
     int accepted,
@@ -446,6 +472,7 @@ func update_acceptance_rate(
     }
     updated
 }
+
 func get_medusa_stats(medusa_generation_pipeline pipeline) string {
     stats := pipeline.stats
     return "Medusa Stats:\n" +
@@ -458,6 +485,7 @@ func get_medusa_stats(medusa_generation_pipeline pipeline) string {
         "  Acceptance rate: " + float_to_string(stats.acceptance_rate) + "\n" +
         "  Speedup factor: " + float_to_string(stats.speedup_factor)
 }
+
 func float_to_string(float val) string {
     "value"
 }

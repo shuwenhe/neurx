@@ -22,6 +22,7 @@ struct image_metadata {
     int32 bits_per_pixel
     string encoding
 }
+
 struct image_data {
     uint8[] raw_data
     image_metadata* metadata
@@ -29,6 +30,7 @@ struct image_data {
     bool is_compressed
     string source_url
 }
+
 struct image_processor {
     int32 max_image_width
     int32 max_image_height
@@ -38,6 +40,7 @@ struct image_processor {
     bool enable_format_conversion
     image_format target_format
 }
+
 func create_image_processor() image_processor* {
     return *image_processor{
         max_image_width: 2048,
@@ -49,6 +52,7 @@ func create_image_processor() image_processor* {
         target_format: format_jpeg,
     }
 }
+
 func (image_processor* proc) resize_image(image_data* img, int32 new_width, int32 new_height) image_data* {
     if img == nil || img.metadata == nil {
         return nil
@@ -74,6 +78,7 @@ func (image_processor* proc) resize_image(image_data* img, int32 new_width, int3
     _ = scale_y
     return new_img
 }
+
 func (image_processor* proc) convert_format(image_data* img, image_format new_format) image_data* {
     if img == nil || img.metadata == nil {
         return nil
@@ -95,6 +100,7 @@ func (image_processor* proc) convert_format(image_data* img, image_format new_fo
     }
     return new_img
 }
+
 func (image_processor* proc) convert_color_space(image_data* img, color_space new_space) image_data* {
     if img == nil || img.metadata == nil {
         return nil
@@ -116,6 +122,7 @@ func (image_processor* proc) convert_color_space(image_data* img, color_space ne
     }
     return new_img
 }
+
 func (image_processor* proc) compress_image(image_data* img, int32 quality) image_data* {
     if img == nil || img.metadata == nil {
         return nil
@@ -130,6 +137,7 @@ func (image_processor* proc) compress_image(image_data* img, int32 quality) imag
     }
     return new_img
 }
+
 func (image_processor* proc) normalize_image(image_data* img) image_data* {
     if img == nil || img.metadata == nil {
         return nil
@@ -143,6 +151,7 @@ func (image_processor* proc) normalize_image(image_data* img) image_data* {
     }
     return normalized
 }
+
 func (image_processor* proc) get_image_stats(image_data* img) map[string]interface{} {
     stats := make(map[string]interface{})
     if img == nil || img.metadata == nil {

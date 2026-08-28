@@ -12,6 +12,7 @@ struct tensor_meta {
     int data_length
     int num_elements
 }
+
 struct safetensors_header {
     string path
     int header_length
@@ -20,6 +21,7 @@ struct safetensors_header {
     int data_start
     bool valid
 }
+
 func load_safetensors_header(string path) safetensors_header {
     safetensors_header hdr = safetensors_header{
         path: path,
@@ -50,6 +52,7 @@ func load_safetensors_header(string path) safetensors_header {
     hdr.valid = len(tensors) > 0
     hdr
 }
+
 func skip_ws(string json, int pos) int {
     for pos < len(json) {
         int ch = int(json[pos])
@@ -61,6 +64,7 @@ func skip_ws(string json, int pos) int {
     }
     pos
 }
+
 func parse_header_json(string json) []tensor_meta {
     []tensor_meta tensors = []tensor_meta{}
     int pos = skip_ws(json, 0)
@@ -108,6 +112,7 @@ func parse_header_json(string json) []tensor_meta {
     }
     tensors
 }
+
 func parse_json_string(string json, int start) (string, int) {
     int pos = start
     for pos < len(json) && int(json[pos]) != 34 {
@@ -130,6 +135,7 @@ func parse_json_string(string json, int start) (string, int) {
     }
     (result, pos)
 }
+
 func parse_tensor_object(string json, int start, string name) tensor_meta {
     tensor_meta t = tensor_meta{name: name, shape: int[]{}, dtype: "", data_offset: 0, data_length: 0, num_elements: 0}
     int pos = start + 1
@@ -180,6 +186,7 @@ func parse_tensor_object(string json, int start, string name) tensor_meta {
     t.num_elements = nelem
     t
 }
+
 func parse_int_array(string json, int start) (int[], int) {
     int[] result = int[]{}
     int pos = start
@@ -223,6 +230,7 @@ func parse_int_array(string json, int start) (int[], int) {
     }
     (result, pos)
 }
+
 func find_object_end(string json, int start) int {
     int depth = 0
     int pos = start
@@ -240,6 +248,7 @@ func find_object_end(string json, int start) int {
     }
     pos
 }
+
 func skip_value(string json, int pos) int {
     if pos >= len(json) {
         return pos
@@ -277,6 +286,7 @@ func skip_value(string json, int pos) int {
     }
     pos
 }
+
 func find_tensor(safetensors_header hdr, string name) int {
     int i = 0
     for i < hdr.total_tensors {
@@ -287,6 +297,7 @@ func find_tensor(safetensors_header hdr, string name) int {
     }
     -1
 }
+
 func load_tensor_floats(safetensors_header hdr, string name) float[] {
     int idx = find_tensor(hdr, name)
     if idx < 0 {
@@ -313,6 +324,7 @@ func load_tensor_floats(safetensors_header hdr, string name) float[] {
     }
     result
 }
+
 func ints_to_float(int b0, int b1, int b2, int b3) float {
     int bits = b0 + b1 * 256 + b2 * 65536 + b3 * 16777216
     int sign_bit = bits / 2147483648
@@ -336,6 +348,7 @@ func ints_to_float(int b0, int b1, int b2, int b3) float {
     float mantissa_val = 1.0 + float(mantissa) / 8388608.0
     sign * mantissa_val * exp_val
 }
+
 func pow2(int n) float {
     float result = 1.0
     if n > 0 {
@@ -353,9 +366,11 @@ func pow2(int n) float {
     }
     result
 }
+
 func has_tensor(safetensors_header hdr, string name) bool {
     find_tensor(hdr, name) >= 0
 }
+
 func tensor_names(safetensors_header hdr) string[] {
     string[] names = string[]{}
     int i = 0

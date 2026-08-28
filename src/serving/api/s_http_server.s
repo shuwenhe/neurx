@@ -5,12 +5,14 @@ struct http_request {
     string headers
     string body
 }
+
 struct http_response {
     int status
     string reason
     string headers
     string body
 }
+
 struct server_config {
     string host
     int port
@@ -18,6 +20,7 @@ struct server_config {
     int timeout_sec
     bool debug_mode
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -49,6 +52,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func create_http_response(int status, string reason, string body) http_response {
     http_response resp
     resp.status = status
@@ -59,12 +63,14 @@ func create_http_response(int status, string reason, string body) http_response 
     resp.headers = resp.headers + "Access-Control-Allow-Origin: *\r\n"
     return resp
 }
+
 func format_http_response(http_response resp) string {
     string result = "HTTP/1.1 " + int_to_string(resp.status) + " " + resp.reason + "\r\n"
     result = result + resp.headers
     result = result + "\r\n" + resp.body
     return result
 }
+
 func print_config(server_config config) {
     print("╔════════════════════════════════════════════════════════════╗\n")
     print("║         🚀 NeurX pure S language REST API server               ║\n")
@@ -75,6 +81,7 @@ func print_config(server_config config) {
     print("   监听team列: " + int_to_string(config.backlog) + "\n")
     print("   超时: " + int_to_string(config.timeout_sec) + " 秒\n\n")
 }
+
 func main() {
     server_config config
     config.host = "0.0.0.0"

@@ -17,9 +17,11 @@ func trim(string s) string {
     }
     return __host_slice(s, i, j + 1)
 }
+
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
+
 func generate_assistant_response(real_text_engine_state state, string prompt) string {
     if !state.ready {
         return "error: " + state.error_message
@@ -33,12 +35,14 @@ func generate_assistant_response(real_text_engine_state state, string prompt) st
     }
     return result.text
 }
+
 func stream_assistant_token(string token) bool {
     if len(token) > 0 {
         print(token + " ")
     }
     true
 }
+
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
@@ -92,6 +96,7 @@ func main() {
         conversation_history = conversation_history + "Assistant: " + response + "\n"
     }
 }
+
 func runtime_env_get(string name, string default_value) string {
     default_value
 }

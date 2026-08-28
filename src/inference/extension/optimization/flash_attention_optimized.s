@@ -10,6 +10,7 @@ struct attention_config {
     enable_dropout  bool
     dropout_rate    float32
 }
+
 struct flash_attention_block {
     q_block         float[]32
     k_block         float[]32
@@ -17,10 +18,12 @@ struct flash_attention_block {
     scores          float[]32
     output          float[]32
 }
+
 struct flash_attention_optimized {
     config          attention_config
     block_size      int32
 }
+
 func NewFlashAttentionOptimized(config attention_config) *flash_attention_optimized {
     if config.block_size <= 0 {
         config.block_size = 128
@@ -30,6 +33,7 @@ func NewFlashAttentionOptimized(config attention_config) *flash_attention_optimi
         block_size: config.block_size,
     }
 }
+
 func (flash_attention_optimized* fa) Forward(
     q float[]32,
     k float[]32,
@@ -84,6 +88,7 @@ func (flash_attention_optimized* fa) Forward(
     }
     return output
 }
+
 func (flash_attention_optimized* fa) loadQBlock(
     q float[]32,
     batch int32,
@@ -102,6 +107,7 @@ func (flash_attention_optimized* fa) loadQBlock(
     }
     return result
 }
+
 func (flash_attention_optimized* fa) loadKBlock(
     k float[]32,
     batch int32,
@@ -120,6 +126,7 @@ func (flash_attention_optimized* fa) loadKBlock(
     }
     return result
 }
+
 func (flash_attention_optimized* fa) loadVBlock(
     v float[]32,
     batch int32,
@@ -138,6 +145,7 @@ func (flash_attention_optimized* fa) loadVBlock(
     }
     return result
 }
+
 func (flash_attention_optimized* fa) computeScores(
     q float[]32,
     k float[]32,
@@ -158,6 +166,7 @@ func (flash_attention_optimized* fa) computeScores(
     }
     return scores
 }
+
 func (flash_attention_optimized* fa) applyCausalMask(
     scores float[]32,
     q_start int32,
@@ -178,6 +187,7 @@ func (flash_attention_optimized* fa) applyCausalMask(
     }
     return result
 }
+
 func (flash_attention_optimized* fa) stableSoftmax(
     scores float[]32,
     q_size int32,
@@ -210,6 +220,7 @@ func (flash_attention_optimized* fa) stableSoftmax(
     }
     return probs
 }
+
 func (flash_attention_optimized* fa) computeAttentionOutput(
     probs float[]32,
     v float[]32,
@@ -231,6 +242,7 @@ func (flash_attention_optimized* fa) computeAttentionOutput(
     }
     return output
 }
+
 func (flash_attention_optimized* fa) accumulateOutput(
     accum float[]32,
     new_block float[]32,
@@ -246,6 +258,7 @@ func (flash_attention_optimized* fa) accumulateOutput(
     }
     return result
 }
+
 func (flash_attention_optimized* fa) GetMemorySaving() float32 {
     seq_len := fa.config.seq_len
     block_size := fa.config.block_size
@@ -258,6 +271,7 @@ func (flash_attention_optimized* fa) GetMemorySaving() float32 {
     }
     return reduction
 }
+
 func (flash_attention_optimized* fa) GetSpeedup() float32 {
     seq_len := fa.config.seq_len
     if seq_len < 256 {
@@ -270,6 +284,7 @@ func (flash_attention_optimized* fa) GetSpeedup() float32 {
         return 3.0
     }
 }
+
 func main() {
     config := attention_config{
         batch_size:     1,

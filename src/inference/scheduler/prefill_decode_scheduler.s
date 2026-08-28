@@ -10,6 +10,7 @@ use std.slices
     normal,
     high
 }
+
 struct request_metrics {
     int request_id
     int arrival_time_ms
@@ -20,6 +21,7 @@ struct request_metrics {
     float estimated_latency_ms
     bool is_preemptible
 }
+
 struct scheduler_config {
     scheduling_strategy strategy
     int max_prefill_batch_size
@@ -29,6 +31,7 @@ struct scheduler_config {
     float preemption_threshold
     bool enable_priority
 }
+
 struct scheduling_decision {
     int[] prefill_request_ids
     int[] decode_request_ids
@@ -36,6 +39,7 @@ struct scheduling_decision {
     int iteration_number
     int total_token_budget_used
 }
+
 struct scheduler_state {
     scheduler_config config
     []request_metrics pending_metrics
@@ -44,6 +48,7 @@ struct scheduler_state {
     int current_iteration
     long total_tokens_processed
 }
+
 func new_scheduler_state(scheduler_config config) scheduler_state {
     scheduler_state {
         config: config,
@@ -54,9 +59,11 @@ func new_scheduler_state(scheduler_config config) scheduler_state {
         total_tokens_processed: 0,
     }
 }
+
 func (scheduler_state* sched) add_request(request_metrics metrics) {
     sched.pending_metrics = append(sched.pending_metrics, metrics)
 }
+
 func min_latency_schedule(*scheduler_state sched) scheduling_decision {
     decision := scheduling_decision {
         prefill_request_ids: [](),
@@ -92,6 +99,7 @@ func min_latency_schedule(*scheduler_state sched) scheduling_decision {
     }
     decision
 }
+
 func max_throughput_schedule(*scheduler_state sched) scheduling_decision {
     decision := scheduling_decision {
         prefill_request_ids: [](),
@@ -127,6 +135,7 @@ func max_throughput_schedule(*scheduler_state sched) scheduling_decision {
     }
     decision
 }
+
 func priority_schedule(*scheduler_state sched) scheduling_decision {
     decision := scheduling_decision {
         prefill_request_ids: [](),
@@ -180,6 +189,7 @@ func priority_schedule(*scheduler_state sched) scheduling_decision {
     }
     decision
 }
+
 func balanced_schedule(*scheduler_state sched) scheduling_decision {
     decision := scheduling_decision {
         prefill_request_ids: [](),
@@ -218,6 +228,7 @@ func balanced_schedule(*scheduler_state sched) scheduling_decision {
     decision.total_token_budget_used = prefill_used + decode_used
     decision
 }
+
 func check_and_apply_preemption(
     sched: *scheduler_state,
     *scheduling_decision decision
@@ -250,6 +261,7 @@ func check_and_apply_preemption(
         }
     }
 }
+
 func (scheduler_state* sched) make_decision() scheduling_decision {
     decision := match sched.config.strategy {
         scheduling_strategy.min_latency => min_latency_schedule(sched),
@@ -262,6 +274,7 @@ func (scheduler_state* sched) make_decision() scheduling_decision {
     sched.current_iteration += 1
     decision
 }
+
 func priority_value(request_priority prio) int {
     match prio {
         request_priority.low => 0,
@@ -269,6 +282,7 @@ func priority_value(request_priority prio) int {
         request_priority.high => 2,
     }
 }
+
 struct scheduler_stats {
     int total_iterations
     int total_prefilled
@@ -277,6 +291,7 @@ struct scheduler_stats {
     float avg_decode_batch_size
     float total_throughput
 }
+
 func (scheduler_state* sched) get_stats() scheduler_stats {
     total_requests := len(sched.completed_metrics)
     scheduler_stats {
@@ -288,6 +303,7 @@ func (scheduler_state* sched) get_stats() scheduler_stats {
         total_throughput: 0.0,
     }
 }
+
 func main() {
     println("🎯 Prefill/Decode high级调度策略")
     println("================================")

@@ -12,6 +12,7 @@ struct WorkerManager {
     pending_requests    []RequestMetadata
     pending_count       i32
 }
+
 func NewWorkerManager(max_workers i32, policy SchedulingPolicy) *WorkerManager {
     manager := *WorkerManager{
         worker_count: 0,
@@ -24,6 +25,7 @@ func NewWorkerManager(max_workers i32, policy SchedulingPolicy) *WorkerManager {
     }
     return manager
 }
+
 func (WorkerManager* m) RegisterWorker(worker_state WorkerState) WorkerResult {
     if m.worker_count >= m.max_workers {
         return WorkerResult{
@@ -36,6 +38,7 @@ func (WorkerManager* m) RegisterWorker(worker_state WorkerState) WorkerResult {
     m.worker_count++
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (WorkerManager* m) SubmitRequest(request RequestMetadata) WorkerResult {
     if m.worker_count == 0 {
         return WorkerResult{
@@ -49,6 +52,7 @@ func (WorkerManager* m) SubmitRequest(request RequestMetadata) WorkerResult {
     m.request_counter++
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (WorkerManager* m) ScheduleBatch(batch Batch) WorkerResult {
     if m.worker_count == 0 {
         return WorkerResult{
@@ -70,6 +74,7 @@ func (WorkerManager* m) ScheduleBatch(batch Batch) WorkerResult {
     m.last_schedule_time = get_current_time()
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (WorkerManager* m) GetNextBatch(max_size i32) Batch {
     batch_size := max_size
     if m.pending_count < max_size {
@@ -104,6 +109,7 @@ func (WorkerManager* m) GetNextBatch(max_size i32) Batch {
     }
     return batch
 }
+
 func (WorkerManager* m) select_worker() i32 {
     best_worker := i32(-1)
     match m.scheduling_policy.policy_type {
@@ -120,6 +126,7 @@ func (WorkerManager* m) select_worker() i32 {
     }
     return best_worker
 }
+
 func (WorkerManager* m) select_round_robin() i32 {
     for i := 0; i < m.worker_count; i++ {
         if m.workers[i].state == WORKER_STATE_READY {
@@ -128,6 +135,7 @@ func (WorkerManager* m) select_round_robin() i32 {
     }
     return i32(-1)
 }
+
 func (WorkerManager* m) select_least_loaded() i32 {
     best_worker := i32(-1)
     min_load := i32(101)
@@ -143,6 +151,7 @@ func (WorkerManager* m) select_least_loaded() i32 {
     }
     return best_worker
 }
+
 func (WorkerManager* m) select_priority_based() i32 {
     for i := 0; i < m.worker_count; i++ {
         if m.workers[i].state == WORKER_STATE_READY {
@@ -151,6 +160,7 @@ func (WorkerManager* m) select_priority_based() i32 {
     }
     return m.select_least_loaded()
 }
+
 func (WorkerManager* m) select_affinity_based() i32 {
     for i := 0; i < m.worker_count; i++ {
         if m.workers[i].state == WORKER_STATE_READY {
@@ -159,12 +169,14 @@ func (WorkerManager* m) select_affinity_based() i32 {
     }
     return i32(-1)
 }
+
 func (WorkerManager* m) GetWorkerState(worker_id i32) WorkerState {
     if worker_id >= 0 && worker_id < m.worker_count {
         return m.workers[worker_id]
     }
     return WorkerState{worker_id: -1, state: WORKER_STATE_ERROR}
 }
+
 func (WorkerManager* m) GetPoolState() WorkerPool {
     active := i32(0)
     idle := i32(0)
@@ -192,6 +204,7 @@ func (WorkerManager* m) GetPoolState() WorkerPool {
         error_workers: error,
     }
 }
+
 func (WorkerManager* m) UpdateWorkerState(worker_id i32, new_state i32) WorkerResult {
     if worker_id < 0 || worker_id >= m.worker_count {
         return WorkerResult{
@@ -204,6 +217,7 @@ func (WorkerManager* m) UpdateWorkerState(worker_id i32, new_state i32) WorkerRe
     m.workers[worker_id].last_update = get_current_time()
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (WorkerManager* m) GetPoolStatistics() WorkerPoolStats {
     stats := WorkerPoolStats{
         total_requests: m.request_counter,
@@ -228,6 +242,7 @@ func (WorkerManager* m) GetPoolStatistics() WorkerPoolStats {
     }
     return stats
 }
+
 func (WorkerManager* m) MonitorHealth() {
     current_time := get_current_time()
     for i := 0; i < m.worker_count; i++ {
@@ -241,10 +256,12 @@ func (WorkerManager* m) MonitorHealth() {
         }
     }
 }
+
 func (WorkerManager* m) redistribute_worker_load(failed_worker_id i32) {
     for i := 0; i < len(m.workers[failed_worker_id].stats); i++ {
     }
 }
+
 func (WorkerManager* m) Shutdown() WorkerResult {
     for i := 0; i < m.worker_count; i++ {
         m.workers[i].state = WORKER_STATE_SHUTDOWN
@@ -252,6 +269,7 @@ func (WorkerManager* m) Shutdown() WorkerResult {
     m.worker_count = 0
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func get_current_time() i64 {
     return 0
 }

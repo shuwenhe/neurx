@@ -12,17 +12,21 @@ struct test_result {
     int assertions_passed
     int assertions_failed
 }
+
 struct test_logger {
     []test_result results
 }
+
 func new_test_logger() test_logger {
     test_logger {
         results: []test_result{},
     }
 }
+
 func (test_logger* logger) add_result(test_result result) {
     logger.results = append(logger.results, result)
 }
+
 func (test_logger* logger) get_summary() string {
     passed := 0
     failed := 0
@@ -39,6 +43,7 @@ func (test_logger* logger) get_summary() string {
     summary = summary + "Failed: " + string(failed) + "\n"
     summary
 }
+
 func test_config_creation(test_logger logger) test_result {
     test_name := "Config Creation and Validation"
     config := new_default_cot_config()
@@ -69,6 +74,7 @@ func test_config_creation(test_logger logger) test_result {
         assertions_failed: 0,
     }
 }
+
 func test_step_creation(test_logger logger) test_result {
     test_name := "Reasoning Step Creation"
     step := new_reasoning_step(1, 1, step_type.analysis)
@@ -109,6 +115,7 @@ func test_step_creation(test_logger logger) test_result {
         assertions_failed: 0,
     }
 }
+
 func test_chain_creation(test_logger logger) test_result {
     test_name := "Reasoning Chain Creation"
     config := new_default_cot_config()
@@ -152,6 +159,7 @@ func test_chain_creation(test_logger logger) test_result {
         assertions_failed: 0,
     }
 }
+
 func test_confidence_calculation(test_logger logger) test_result {
     test_name := "Confidence Calculation"
     config := new_default_cot_config()
@@ -183,6 +191,7 @@ func test_confidence_calculation(test_logger logger) test_result {
         assertions_failed: 0,
     }
 }
+
 func test_validator(test_logger logger) test_result {
     test_name := "Chain Validator"
     config := new_default_cot_config()
@@ -213,6 +222,7 @@ func test_validator(test_logger logger) test_result {
         assertions_failed: 0,
     }
 }
+
 func test_manager(test_logger logger) test_result {
     test_name := "Reasoning Manager"
     config := new_default_cot_config()
@@ -257,6 +267,7 @@ func test_manager(test_logger logger) test_result {
         assertions_failed: 0,
     }
 }
+
 func test_backtracking(test_logger logger) test_result {
     test_name := "Backtracking"
     config := new_default_cot_config()
@@ -308,6 +319,7 @@ func test_backtracking(test_logger logger) test_result {
         assertions_failed: 0,
     }
 }
+
 func run_all_tests() test_logger {
     logger := new_test_logger()
     logger.add_result(test_config_creation(logger))
@@ -319,6 +331,7 @@ func run_all_tests() test_logger {
     logger.add_result(test_backtracking(logger))
     logger
 }
+
 func print_results(test_logger logger) {
     for _, result := range logger.results {
         string status = if result.passed { "✓ PASS" } else { "✗ FAIL" }

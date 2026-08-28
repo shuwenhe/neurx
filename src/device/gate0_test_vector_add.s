@@ -59,6 +59,7 @@ func gate0_test_vector_add() (bool, string) {
     }
     return true, "Vector add test passed! Total allocations: " + state.total_allocations as string
 }
+
 func main() {
     test_ok, test_msg := gate0_test_vector_add()
     if test_ok {

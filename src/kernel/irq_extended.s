@@ -9,12 +9,14 @@ struct irq_desc {
     int depth
     int flags
 }
+
 struct irq_action {
     int irq_num
     int flags
     int cpu_affinity
     string handler_name
 }
+
 struct irq_chip {
     int irq_num
     int mask
@@ -51,6 +53,7 @@ func init_irq_system(int nr_irqs) int {
     }
     0
 }
+
 func request_irq(int irq_num, int flags, string handler_name) (int, string) {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1, "Invalid IRQ number"
@@ -60,6 +63,7 @@ func request_irq(int irq_num, int flags, string handler_name) (int, string) {
     desc.count = desc.count + 1
     0, ""
 }
+
 func request_threaded_irq(int irq_num, int flags, string primary_handler, string thread_handler) (int, string) {
     var res, msg := request_irq(irq_num, flags, primary_handler)
     if msg != "" {
@@ -67,6 +71,7 @@ func request_threaded_irq(int irq_num, int flags, string primary_handler, string
     }
     0, ""
 }
+
 func free_irq(int irq_num) int {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1
@@ -77,6 +82,7 @@ func free_irq(int irq_num) int {
     }
     0
 }
+
 func enable_irq(int irq_num) int {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1
@@ -87,6 +93,7 @@ func enable_irq(int irq_num) int {
     }
     0
 }
+
 func disable_irq(int irq_num) int {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1
@@ -95,6 +102,7 @@ func disable_irq(int irq_num) int {
     desc.depth = desc.depth + 1
     0
 }
+
 func irq_set_affinity(int irq_num, int cpumask) (int, string) {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1, "Invalid IRQ"
@@ -103,6 +111,7 @@ func irq_set_affinity(int irq_num, int cpumask) (int, string) {
     desc.cpu_affinity = cpumask
     0, ""
 }
+
 func irq_get_affinity(int irq_num) (int, string) {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1, "Invalid IRQ"
@@ -110,6 +119,7 @@ func irq_get_affinity(int irq_num) (int, string) {
     var desc = g_irq_descriptors[irq_num]
     desc.cpu_affinity, ""
 }
+
 func irq_balance_load() int {
     var i = 0
     var total_count = 0
@@ -131,6 +141,7 @@ func irq_balance_load() int {
     }
     0
 }
+
 func handle_irq(int irq_num) int {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1
@@ -142,18 +153,21 @@ func handle_irq(int irq_num) int {
     desc.count = desc.count + 1
     0
 }
+
 func ack_irq(int irq_num) int {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1
     }
     0
 }
+
 func eoi_irq(int irq_num) int {
     if irq_num < 0 || irq_num >= g_nr_irqs {
         return -1
     }
     0
 }
+
 func irq_stats() (int, int, int) {
     var total = g_nr_irqs
     var active = 0

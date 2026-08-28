@@ -31,14 +31,17 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func health() string {
     print("💚 Health check endpoint\n")
     return "{\"status\":\"healthy\",\"service\":\"neurx-inference\",\"version\":\"1.0.0-s\"}"
 }
+
 func models() string {
     print("📋 Models endpoint\n")
     return "{\"object\":\"list\",\"data\":[{\"id\":\"Qwen2.5-0.5B-Instruct\",\"object\":\"model\"}]}"
 }
+
 func chat(string model, string message) string {
     print("🤖 Chat completion endpoint\n")
     print("   Model: " + model + "\n")
@@ -59,18 +62,21 @@ func chat(string model, string message) string {
     result = result + "}}"
     return result
 }
+
 func print_header() {
     print("\n╔═════════════════════════════════════════════════════╗\n")
     print("║   🚀 NeurX Pure S Language REST API                ║\n")
     print("║      (100% S Implementation - No Python)           ║\n")
     print("╚═════════════════════════════════════════════════════╝\n\n")
 }
+
 func print_endpoint(string name, string response) {
     print("───────────────────────────────────────────────────────\n")
     print("📌 " + name + "\n")
     print("───────────────────────────────────────────────────────\n")
     print(response + "\n\n")
 }
+
 func main() {
     print_header()
     print("🧪 Test 1: Health Check\n")

@@ -6,6 +6,7 @@ struct block_multiply_config {
     bool use_cache_locality
     int parallel_threads
 }
+
 func default_block_multiply_config() block_multiply_config {
     block_multiply_config{
         block_size: 32,
@@ -13,6 +14,7 @@ func default_block_multiply_config() block_multiply_config {
         parallel_threads: 4,
     }
 }
+
 func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b, int m, int n, int k, block_multiply_config config) bool {
     int block_size = config.block_size
     if block_size <= 0 || block_size > 256 {
@@ -54,6 +56,7 @@ func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b,
     }
     true
 }
+
 func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] vector, int rows, int cols) bool {
     int i = 0
     for i < rows {
@@ -69,6 +72,7 @@ func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] ve
     }
     true
 }
+
 func fused_matmul_add(float[] result, float[] a, float[] b, float[] bias, int m, int n, int k) bool {
     int i = 0
     for i < m {
@@ -90,6 +94,7 @@ func fused_matmul_add(float[] result, float[] a, float[] b, float[] bias, int m,
     }
     true
 }
+
 func memory_efficient_gemm(float[] result, float[] a, float[] b, int m, int n, int k, int cache_line_size) bool {
     if cache_line_size <= 0 {
         return false
@@ -104,6 +109,7 @@ func memory_efficient_gemm(float[] result, float[] a, float[] b, int m, int n, i
         parallel_threads: 1,
     })
 }
+
 func transpose_optimized(float[] result, float[] input, int rows, int cols) bool {
     int i = 0
     for i < rows {
@@ -118,6 +124,7 @@ func transpose_optimized(float[] result, float[] input, int rows, int cols) bool
     }
     true
 }
+
 func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
     if size <= 0 {
         return false

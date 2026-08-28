@@ -24,6 +24,7 @@ func example_adaptive_reasoning_length() {
     chain_complex := new_reasoning_chain("complex_analysis", complex_prompt, config_complex)
     chain_complex = chain_complex.start()
 }
+
 func example_multi_path_reasoning() {
     config := new_hierarchical_cot_config()
     config.max_branches = 3
@@ -60,6 +61,7 @@ func example_multi_path_reasoning() {
     chain = chain.add_step(synthesis)
     chain = chain.complete("An integrated approach combining technology, policy, and individual action is optimal.")
 }
+
 func example_dynamic_step_adjustment() {
     config := new_default_cot_config()
     config.checkpoint_interval = 3
@@ -84,6 +86,7 @@ func example_dynamic_step_adjustment() {
         }
     }
 }
+
 func example_error_correction() {
     config := new_default_cot_config()
     chain := new_reasoning_chain("error_correction_chain", "Solve equation: 2x + 3 = 7", config)
@@ -104,6 +107,7 @@ func example_error_correction() {
     }
     chain = chain.complete("x = 2")
 }
+
 func example_cross_chain_coordination() {
     config := new_default_cot_config()
     manager := new_reasoning_manager(config)
@@ -139,6 +143,7 @@ func example_cross_chain_coordination() {
     }
     stats := manager.get_statistics()
 }
+
 func example_context_aware_reasoning() {
     config := new_default_cot_config()
     domain := "mathematics"
@@ -164,6 +169,7 @@ func example_context_aware_reasoning() {
     chain := new_reasoning_chain("math_proof", prompt, config)
     chain = chain.start()
 }
+
 func example_performance_monitoring() {
     config := new_default_cot_config()
     manager := new_reasoning_manager(config)
@@ -185,6 +191,7 @@ func example_performance_monitoring() {
     }
     stats := manager.get_statistics()
 }
+
 func example_reasoning_export() {
     config := new_default_cot_config()
     chain := new_reasoning_chain("export_chain", "Sample reasoning", config)

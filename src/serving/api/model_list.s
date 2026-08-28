@@ -7,6 +7,7 @@ struct model_registry {
 	string                          default_model
 	sync.Mutex                      mu
 }
+
 func create_model_registry() model_registry {
 	return model_registry{
 		models:           make(map[string]model_info),
@@ -15,6 +16,7 @@ func create_model_registry() model_registry {
 		mu:               sync.Mutex{},
 	}
 }
+
 func (r model_registry*) register_model(model_id string, model model_info) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -28,6 +30,7 @@ func (r model_registry*) register_model(model_id string, model model_info) bool 
 	}
 	return true
 }
+
 func (r model_registry*) unregister_model(model_id string) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -50,12 +53,14 @@ func (r model_registry*) unregister_model(model_id string) bool {
 	}
 	return true
 }
+
 func (r model_registry*) get_model(model_id string) (model_info, bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	model, exists := r.models[model_id]
 	return model, exists
 }
+
 func (r model_registry*) list_models() model_info[] {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -67,6 +72,7 @@ func (r model_registry*) list_models() model_info[] {
 	}
 	return models
 }
+
 func (r model_registry*) get_available_model_ids() string[] {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -76,12 +82,14 @@ func (r model_registry*) get_available_model_ids() string[] {
 	}
 	return ids
 }
+
 func (r model_registry*) is_model_available(model_id string) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	_, exists := r.models[model_id]
 	return exists
 }
+
 func (r model_registry*) set_default_model(model_id string) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -91,16 +99,19 @@ func (r model_registry*) set_default_model(model_id string) bool {
 	r.default_model = model_id
 	return true
 }
+
 func (r model_registry*) get_default_model() string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return r.default_model
 }
+
 func (r model_registry*) get_model_count() int32 {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return int32(len(r.models))
 }
+
 struct model_capabilities {
 	bool            supports_chat_completion
 	bool            supports_text_completion
@@ -113,12 +124,14 @@ struct model_capabilities {
 	int32           max_output_tokens
 	string          training_data_cutoff
 }
+
 struct extended_model_info {
 	base_model           model_info
 	capabilities         model_capabilities
 	performance_metrics  map[string]interface{}
 	pricing              map[string]interface{}
 }
+
 func create_extended_model_info(
 	model_id string,
 	capabilities model_capabilities,
@@ -136,6 +149,7 @@ func create_extended_model_info(
 		pricing:              make(map[string]interface{}),
 	}
 }
+
 struct model_availability {
 	model_id      string
 	available     bool
@@ -143,12 +157,14 @@ struct model_availability {
 	status        string
 	error_message string
 }
+
 struct model_status_monitor {
 	registry      model_registry*
 	availability  map[string]model_availability
 	check_interval int64
 	mu             sync.Mutex
 }
+
 func create_model_status_monitor(registry model_registry*) model_status_monitor {
 	return model_status_monitor{
 		registry:       registry,
@@ -157,6 +173,7 @@ func create_model_status_monitor(registry model_registry*) model_status_monitor 
 		mu:             sync.Mutex{},
 	}
 }
+
 func (m model_status_monitor*) check_model_status(model_id string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -173,12 +190,14 @@ func (m model_status_monitor*) check_model_status(model_id string) bool {
 	}
 	return available
 }
+
 func (m model_status_monitor*) get_availability(model_id string) (model_availability, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	avail, exists := m.availability[model_id]
 	return avail, exists
 }
+
 func (m model_status_monitor*) check_all_models() model_availability[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -192,11 +211,13 @@ func (m model_status_monitor*) check_all_models() model_availability[] {
 	}
 	return availabilities
 }
+
 struct model_list_handler {
 	registry   model_registry*
 	monitor    model_status_monitor*
 	mu         sync.Mutex
 }
+
 func create_model_list_handler(registry model_registry*) model_list_handler {
 	monitor := create_model_status_monitor(registry)
 	return model_list_handler{
@@ -205,6 +226,7 @@ func create_model_list_handler(registry model_registry*) model_list_handler {
 		mu:       sync.Mutex{},
 	}
 }
+
 func (h model_list_handler*) list_models() model_list_response {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -214,42 +236,51 @@ func (h model_list_handler*) list_models() model_list_response {
 		data:   models,
 	}
 }
+
 func (h model_list_handler*) get_model(model_id string) (model_info, bool) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	return h.registry.get_model(model_id)
 }
+
 func (h model_list_handler*) register_model(model_id string, model model_info) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	return h.registry.register_model(model_id, model)
 }
+
 func (h model_list_handler*) delete_model(model_id string) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	return h.registry.unregister_model(model_id)
 }
+
 func (h model_list_handler*) get_default_model() string {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	return h.registry.get_default_model()
 }
+
 func (h model_list_handler*) set_default_model(model_id string) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	return h.registry.set_default_model(model_id)
 }
+
 func (h model_list_handler*) check_model_status(model_id string) bool {
 	return h.monitor.check_model_status(model_id)
 }
+
 func (h model_list_handler*) check_all_models_status() model_availability[] {
 	return h.monitor.check_all_models()
 }
+
 func (h model_list_handler*) get_model_count() int32 {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	return h.registry.get_model_count()
 }
+
 func (h model_list_handler*) list_available_model_ids() string[] {
 	h.mu.Lock()
 	defer h.mu.Unlock()

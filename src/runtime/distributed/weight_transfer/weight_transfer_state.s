@@ -1,20 +1,26 @@
 package neurx.distributed.weight_transfer
 func weight_update_idle() int { 0 }
+
 func weight_update_active() int { 1 }
+
 func weight_update_complete() int { 2 }
+
 func weight_update_failed() int { 3 }
+
 struct weight_parameter_metadata {
     string name
     string dtype
     int[] shape
     int byte_count
 }
+
 struct weight_transfer_config {
     string backend
     int rank
     int world_size
     bool supports_draft_model
 }
+
 struct weight_transfer_state {
     weight_transfer_config config
     bool initialized
@@ -26,15 +32,18 @@ struct weight_transfer_state {
     string last_parameter_name
     string error_message
 }
+
 struct weight_apply_result {
     weight_transfer_state state
     bool success
     string error_message
 }
+
 func weight_transfer_config_valid(weight_transfer_config config) bool {
     bool backend_valid = config.backend == "nccl" || config.backend == "ipc" || config.backend == "sparse_nccl"
     backend_valid && config.world_size > 0 && config.rank >= 0 && config.rank < config.world_size
 }
+
 func init_weight_transfer_engine(weight_transfer_config config) weight_transfer_state {
     bool initialized = weight_transfer_config_valid(config)
     string error_message = ""
@@ -53,6 +62,7 @@ func init_weight_transfer_engine(weight_transfer_config config) weight_transfer_
         error_message: error_message,
     }
 }
+
 func start_weight_update(weight_transfer_state state, int update_id, int expected_parameters, bool draft_model) weight_apply_result {
     if !state.initialized {
         return weight_apply_result {state: state, success: false, error_message: "weight transfer engine is not initialized"}
@@ -82,6 +92,7 @@ func start_weight_update(weight_transfer_state state, int update_id, int expecte
         error_message: "",
     }
 }
+
 func apply_weight_parameter(weight_transfer_state state, weight_parameter_metadata metadata) weight_apply_result {
     if state.phase != weight_update_active() {
         return weight_apply_result {state: state, success: false, error_message: "weight update is not active"}
@@ -111,6 +122,7 @@ func apply_weight_parameter(weight_transfer_state state, weight_parameter_metada
         error_message: "",
     }
 }
+
 func finish_weight_update(weight_transfer_state state) weight_apply_result {
     if state.phase != weight_update_active() {
         return weight_apply_result {state: state, success: false, error_message: "weight update is not active"}
@@ -145,6 +157,7 @@ func finish_weight_update(weight_transfer_state state) weight_apply_result {
         error_message: "",
     }
 }
+
 func shutdown_weight_transfer_engine(weight_transfer_state state) weight_transfer_state {
     weight_transfer_state {
         config: state.config,

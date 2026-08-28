@@ -32,12 +32,14 @@ struct json_schema {
     string default_value
     examples: string[]
 }
+
 struct json_property {
     string name
     json_schema schema
     bool required
     string description
 }
+
 struct token_constraint {
     allowed_tokens: int[]
     forbidden_tokens: int[]
@@ -45,17 +47,20 @@ struct token_constraint {
     string context
     bool is_terminal
 }
+
 struct dfa_state {
     int state_id
     transitions: []dfa_transition
     bool is_accepting
     token_set: int[]
 }
+
 struct dfa_transition {
     int token_id
     int next_state
     string condition
 }
+
 struct parse_context {
     current_path: string[]
     string current_value
@@ -76,6 +81,7 @@ struct sampler_state {
     int rejected_count
     warnings: string[]
 }
+
 func is_valid_json_type(string type_name) bool {
     if type_name == TYPE_STRING {
         return true
@@ -94,6 +100,7 @@ func is_valid_json_type(string type_name) bool {
     }
     return false
 }
+
 func create_empty_schema() json_schema {
     schema := json_schema{
         title: "",
@@ -122,6 +129,7 @@ func create_empty_schema() json_schema {
     }
     return schema
 }
+
 func create_empty_parse_context() parse_context {
     ctx := parse_context{
         current_path: vec_new(),
@@ -134,6 +142,7 @@ func create_empty_parse_context() parse_context {
     }
     return ctx
 }
+
 func create_empty_constraint() token_constraint {
     constraint := token_constraint{
         allowed_tokens: vec_new(),
@@ -144,6 +153,7 @@ func create_empty_constraint() token_constraint {
     }
     return constraint
 }
+
 func create_sampler_state(string mode, *json_schema schema) sampler_state {
     state := sampler_state{
         mode: mode,

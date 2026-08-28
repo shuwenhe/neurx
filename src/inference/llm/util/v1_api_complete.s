@@ -6,21 +6,25 @@ use std.slices
     in_decode,
     finished
 }
+
 struct prefill_batch {
     int[] request_ids
     int total_tokens
     int batch_size
 }
+
 struct decode_batch {
     int[] request_ids
     int batch_size
 }
+
 struct iteration_result {
     int prefill_count
     int decode_count
     int tokens_processed
     int finished_requests
 }
+
 struct v1_engine_config {
     int max_batch_size
     int max_total_tokens
@@ -31,6 +35,7 @@ struct v1_engine_config {
     bool enable_paged_attention
     bool enable_prefix_cache
 }
+
 struct v1_engine {
     v1_engine_config config
     []request_phase request_phases
@@ -43,6 +48,7 @@ struct v1_engine {
     int iteration_count
     int total_compute_time_ms
 }
+
 func new_v1_engine(v1_engine_config config) v1_engine {
     v1_engine {
         config: config,
@@ -64,6 +70,7 @@ func new_v1_engine(v1_engine_config config) v1_engine {
         total_compute_time_ms: 0,
     }
 }
+
 func (v1_engine* engine) submit_request(
     prompt_tokens: int[],
     int max_new_tokens
@@ -75,6 +82,7 @@ func (v1_engine* engine) submit_request(
     engine.generated_lengths = append(engine.generated_lengths, 0)
     return request_id
 }
+
 func (v1_engine* engine) schedule_prefill_batch() bool {
     engine.current_prefill_batch.request_ids.clear()
     engine.current_prefill_batch.total_tokens = 0
@@ -101,6 +109,7 @@ func (v1_engine* engine) schedule_prefill_batch() bool {
     engine.current_prefill_batch.batch_size = prefill_count
     return prefill_count > 0
 }
+
 func (v1_engine* engine) execute_prefill() {
     if engine.current_prefill_batch.batch_size == 0 {
         return
@@ -113,6 +122,7 @@ func (v1_engine* engine) execute_prefill() {
         engine.request_phases[*req_id] = request_phase.waiting_decode
     }
 }
+
 func (v1_engine* engine) schedule_decode_batch() bool {
     engine.current_decode_batch.request_ids.clear()
     engine.current_decode_batch.batch_size = 0
@@ -142,6 +152,7 @@ func (v1_engine* engine) schedule_decode_batch() bool {
     engine.current_decode_batch.batch_size = decode_count
     return decode_count > 0
 }
+
 func (v1_engine* engine) execute_decode() {
     if engine.current_decode_batch.batch_size == 0 {
         return
@@ -153,6 +164,7 @@ func (v1_engine* engine) execute_decode() {
         engine.generated_lengths[*req_id] += 1
     }
 }
+
 func (v1_engine* engine) iteration() iteration_result {
     engine.iteration_count += 1
     prefill_ok := engine.schedule_prefill_batch()
@@ -170,6 +182,7 @@ func (v1_engine* engine) iteration() iteration_result {
         finished_requests: engine.total_requests_completed,
     }
 }
+
 struct v1_engine_stats {
     int total_iterations
     int total_requests_completed
@@ -180,6 +193,7 @@ struct v1_engine_stats {
     float throughput_tok_per_sec
     float gpu_utilization_percent
 }
+
 func (v1_engine* engine) get_stats() v1_engine_stats {
     total_tokens := 0
     for i in len(0..engine.generated_lengths) {
@@ -222,6 +236,7 @@ func (v1_engine* engine) get_stats() v1_engine_stats {
         gpu_utilization_percent: gpu_util,
     }
 }
+
 func (v1_engine* engine) run_to_completion() {
     for engine.total_requests_completed < engine.total_requests_received {
         result := engine.iteration()
@@ -230,6 +245,7 @@ func (v1_engine* engine) run_to_completion() {
         }
     }
 }
+
 func main() {
     println("🚀 V1 API - Prefill/Decode 分离inferenceengine")
     println("=========================================")

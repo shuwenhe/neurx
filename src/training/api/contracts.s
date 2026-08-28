@@ -9,17 +9,21 @@ struct training_job_config {
     int max_steps
     int checkpoint_interval
 }
+
 struct training_validation_result {
     bool valid
     string error_code
     string error_message
 }
+
 func valid_training_job() training_validation_result {
     training_validation_result { valid: true, error_code: "", error_message: "" }
 }
+
 func invalid_training_job(string code, string message) training_validation_result {
     training_validation_result { valid: false, error_code: code, error_message: message }
 }
+
 func validate_training_job(training_job_config config) training_validation_result {
     if config.job_id == "" {
         return invalid_training_job("missing_job_id", "job_id is required")

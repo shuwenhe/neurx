@@ -18,6 +18,7 @@ struct dppo_config {
     f32 value_loss_coeff
     f32 value_clip_epsilon
 }
+
 struct dppo_trainer {
     dppo_config config
     *model policy_model
@@ -28,6 +29,7 @@ struct dppo_trainer {
     kl_history: []f32
     i64 step_count
 }
+
 func new_dppo_trainer(
     dppo_config config,
     *model policy,
@@ -50,6 +52,7 @@ func new_dppo_trainer(
         step_count: 0,
     }
 }
+
 func (dppo_trainer* trainer) compute_binary_kl_constraint(
     Tensor new_probs,
     Tensor old_probs,
@@ -66,6 +69,7 @@ func (dppo_trainer* trainer) compute_binary_kl_constraint(
                            1.0 * kl_violation
     return constrained_ratio * advantage
 }
+
 func (dppo_trainer* trainer) compute_binary_tv_constraint(
     Tensor new_probs,
     Tensor old_probs,
@@ -78,6 +82,7 @@ func (dppo_trainer* trainer) compute_binary_tv_constraint(
                            1.0 * tv_violation
     return constrained_ratio * advantage
 }
+
 func (dppo_trainer* trainer) compute_constrained_objective(
     Tensor new_log_probs,
     Tensor old_log_probs,
@@ -112,6 +117,7 @@ func (dppo_trainer* trainer) compute_constrained_objective(
     }
     return constrained_obj
 }
+
 func (dppo_trainer* trainer) update_adaptive_epsilon(f32 current_kl) {
     if !trainer.config.use_adaptive_epsilon {
         return
@@ -132,6 +138,7 @@ func (dppo_trainer* trainer) update_adaptive_epsilon(f32 current_kl) {
         trainer.config.epsilon_max
     )
 }
+
 func (dppo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
@@ -161,6 +168,7 @@ func (dppo_trainer* trainer) compute_gae(
     }
     return advantages, returns
 }
+
 func (dppo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
@@ -262,6 +270,7 @@ func (dppo_trainer* trainer) train_step(
         avg_kl
     )
 }
+
 func (dppo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     value_losses := []
@@ -283,6 +292,7 @@ func (dppo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
+
 func compute_mean([]f32 values) . f32 {
     if len(values) == 0 {
         return 0.0
@@ -293,6 +303,7 @@ func compute_mean([]f32 values) . f32 {
     }
     return sum / f32(len(values))
 }
+
 func compute_std([]f32 values, f32 mean) . f32 {
     if len(values) == 0 {
         return 1.0
@@ -303,6 +314,7 @@ func compute_std([]f32 values, f32 mean) . f32 {
     }
     return sqrt(sum_sq / f32(len(values)))
 }
+
 func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

@@ -10,6 +10,7 @@ struct text_completion_handler {
 	sync.Mutex                  mu
 	bool                        processing
 }
+
 func create_text_completion_handler(
 	v1_engine interface{},
 	async_engine interface{},
@@ -25,6 +26,7 @@ func create_text_completion_handler(
 		processing:     false,
 	}
 }
+
 func (h text_completion_handler*) handle_completion(
 	req completion_request,
 	validator request_validator,
@@ -39,6 +41,7 @@ func (h text_completion_handler*) handle_completion(
 		return h.handle_non_streaming_completion(req)
 	}
 }
+
 func (h text_completion_handler*) handle_non_streaming_completion(
 	req completion_request,
 ) (completion_response, error) {
@@ -80,6 +83,7 @@ func (h text_completion_handler*) handle_non_streaming_completion(
 	h.mu.Unlock()
 	return response, nil
 }
+
 func (h text_completion_handler*) handle_streaming_completion(
 	req completion_request,
 ) (completion_response, error) {
@@ -120,9 +124,11 @@ func (h text_completion_handler*) handle_streaming_completion(
 	}
 	return batch_response, nil
 }
+
 func (h text_completion_handler*) count_tokens(text string) int32 {
 	return int32(len(text) / 4)
 }
+
 func (h text_completion_handler*) handle_echo_completion(
 	req completion_request,
 ) (completion_response, error) {
@@ -158,6 +164,7 @@ func (h text_completion_handler*) handle_echo_completion(
 	)
 	return response, nil
 }
+
 struct text_completion_stream {
 	request_id       string
 	model            string
@@ -170,6 +177,7 @@ struct text_completion_stream {
 	current_position int32
 	mu               sync.Mutex
 }
+
 func create_text_completion_stream(request_id string, model string, prompt string) text_completion_stream {
 	return text_completion_stream{
 		request_id:    request_id,
@@ -181,6 +189,7 @@ func create_text_completion_stream(request_id string, model string, prompt strin
 		start_time:    time.Now().UnixNano(),
 	}
 }
+
 func (s text_completion_stream*) add_token_to_stream(token_text string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -202,6 +211,7 @@ func (s text_completion_stream*) add_token_to_stream(token_text string) bool {
 	s.stream_buffer = append(s.stream_buffer, chunk)
 	return true
 }
+
 func (s text_completion_stream*) finish_stream(finish_reason string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -224,6 +234,7 @@ func (s text_completion_stream*) finish_stream(finish_reason string) bool {
 	s.stream_buffer = append(s.stream_buffer, final_chunk)
 	return true
 }
+
 func (s text_completion_stream*) get_pending_chunks() completion_response[] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -238,14 +249,17 @@ func (s text_completion_stream*) get_pending_chunks() completion_response[] {
 	s.events_sent += int64(len(chunks))
 	return chunks
 }
+
 func (s text_completion_stream*) is_complete() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.is_finished
 }
+
 func (s text_completion_stream*) get_elapsed_time_ms() int64 {
 	return (time.Now().UnixNano() - s.start_time) / 1000000
 }
+
 struct text_completion_batch_processor {
 	handler       text_completion_handler*
 	validator     request_validator*
@@ -253,6 +267,7 @@ struct text_completion_batch_processor {
 	results       map[string]completion_response
 	mu            sync.Mutex
 }
+
 func create_completion_batch_processor(
 	handler text_completion_handler*,
 	validator request_validator*,
@@ -265,6 +280,7 @@ func create_completion_batch_processor(
 		mu:           sync.Mutex{},
 	}
 }
+
 func (bp text_completion_batch_processor*) add_request(req completion_request) bool {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
@@ -275,6 +291,7 @@ func (bp text_completion_batch_processor*) add_request(req completion_request) b
 	bp.pending_reqs = append(bp.pending_reqs, req)
 	return true
 }
+
 func (bp text_completion_batch_processor*) process_batch() int32 {
 	bp.mu.Lock()
 	reqs := make(completion_request[], 0, len(bp.pending_reqs))
@@ -295,6 +312,7 @@ func (bp text_completion_batch_processor*) process_batch() int32 {
 	}
 	return processed
 }
+
 func (bp text_completion_batch_processor*) get_results() completion_response[] {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
@@ -305,6 +323,7 @@ func (bp text_completion_batch_processor*) get_results() completion_response[] {
 	bp.results = make(map[string]completion_response)
 	return results
 }
+
 func (bp text_completion_batch_processor*) get_pending_count() int32 {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()

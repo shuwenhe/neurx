@@ -52,6 +52,7 @@ type ray_dispatcher struct {
     max_task_retries uint32
     task_timeout_seconds uint32
 }
+
 func create_ray_task(
     task_id string,
     actor_name string,
@@ -72,6 +73,7 @@ func create_ray_task(
     task.max_retries = 3
     return task
 }
+
 func create_actor_load(actor_name string) actor_load* {
     load := new(actor_load)
     load.actor_name = actor_name
@@ -83,6 +85,7 @@ func create_actor_load(actor_name string) actor_load* {
     load.last_heartbeat_ms = 0
     return load
 }
+
 func create_task_queue(size_limit uint32) task_queue* {
     queue := new(task_queue)
     queue.queue = make(ray_task*[], 0)
@@ -90,6 +93,7 @@ func create_task_queue(size_limit uint32) task_queue* {
     queue.current_size = 0
     return queue
 }
+
 func create_ray_dispatcher(strategy string) ray_dispatcher* {
     dispatcher := new(ray_dispatcher)
     dispatcher.tasks = make(map[string]ray_task*)
@@ -107,6 +111,7 @@ func create_ray_dispatcher(strategy string) ray_dispatcher* {
     dispatcher.task_timeout_seconds = 300
     return dispatcher
 }
+
 func (dispatcher ray_dispatcher*) register_actor(actor_name string) bool {
     if _, exists := dispatcher.actor_loads[actor_name]; exists {
         return false
@@ -114,6 +119,7 @@ func (dispatcher ray_dispatcher*) register_actor(actor_name string) bool {
     dispatcher.actor_loads[actor_name] = create_actor_load(actor_name)
     return true
 }
+
 func (dispatcher ray_dispatcher*) submit_task(task ray_task*) bool {
     if task == nil {
         return false
@@ -128,6 +134,7 @@ func (dispatcher ray_dispatcher*) submit_task(task ray_task*) bool {
     dispatcher.statistics["tasks_submitted"] = submitted + 1
     return true
 }
+
 func (dispatcher ray_dispatcher*) dispatch_task(task ray_task*) bool {
     if task == nil {
         return false
@@ -143,6 +150,7 @@ func (dispatcher ray_dispatcher*) dispatch_task(task ray_task*) bool {
     actor_load.pending_tasks = actor_load.pending_tasks + 1
     return true
 }
+
 func (dispatcher ray_dispatcher*) complete_task(task_id string, result interface{}) bool {
     task, exists := dispatcher.tasks[task_id]
     if !exists {
@@ -159,6 +167,7 @@ func (dispatcher ray_dispatcher*) complete_task(task_id string, result interface
     dispatcher.statistics["tasks_completed"] = completed + 1
     return true
 }
+
 func (dispatcher ray_dispatcher*) fail_task(task_id string, error_msg string) bool {
     task, exists := dispatcher.tasks[task_id]
     if !exists {
@@ -184,6 +193,7 @@ func (dispatcher ray_dispatcher*) fail_task(task_id string, error_msg string) bo
     dispatcher.statistics["tasks_failed"] = failed + 1
     return true
 }
+
 func (dispatcher ray_dispatcher*) select_actor() string {
     if len(dispatcher.actor_loads) == 0 {
         return ""
@@ -200,6 +210,7 @@ func (dispatcher ray_dispatcher*) select_actor() string {
     }
     return dispatcher.select_actor_round_robin()
 }
+
 func (dispatcher ray_dispatcher*) select_actor_round_robin() string {
     if len(dispatcher.actor_loads) == 0 {
         return ""
@@ -215,6 +226,7 @@ func (dispatcher ray_dispatcher*) select_actor_round_robin() string {
     }
     return ""
 }
+
 func (dispatcher ray_dispatcher*) select_actor_least_loaded() string {
     if len(dispatcher.actor_loads) == 0 {
         return ""
@@ -229,6 +241,7 @@ func (dispatcher ray_dispatcher*) select_actor_least_loaded() string {
     }
     return selected
 }
+
 func (dispatcher ray_dispatcher*) select_actor_random() string {
     if len(dispatcher.actor_loads) == 0 {
         return ""
@@ -242,6 +255,7 @@ func (dispatcher ray_dispatcher*) select_actor_random() string {
     }
     return ""
 }
+
 func (dispatcher ray_dispatcher*) select_actor_hash() string {
     if len(dispatcher.actor_loads) == 0 {
         return ""
@@ -255,6 +269,7 @@ func (dispatcher ray_dispatcher*) select_actor_hash() string {
     }
     return ""
 }
+
 func (dispatcher ray_dispatcher*) get_task(task_id string) ray_task* {
     task, exists := dispatcher.tasks[task_id]
     if !exists {
@@ -262,6 +277,7 @@ func (dispatcher ray_dispatcher*) get_task(task_id string) ray_task* {
     }
     return task
 }
+
 func (dispatcher ray_dispatcher*) get_task_status(task_id string) task_status {
     task, exists := dispatcher.tasks[task_id]
     if !exists {
@@ -269,6 +285,7 @@ func (dispatcher ray_dispatcher*) get_task_status(task_id string) task_status {
     }
     return task.status
 }
+
 func (dispatcher ray_dispatcher*) get_actor_load(actor_name string) actor_load* {
     load, exists := dispatcher.actor_loads[actor_name]
     if !exists {
@@ -276,6 +293,7 @@ func (dispatcher ray_dispatcher*) get_actor_load(actor_name string) actor_load* 
     }
     return load
 }
+
 func (dispatcher ray_dispatcher*) list_actors() string[] {
     actors := make(string[], 0)
     for name := range dispatcher.actor_loads {
@@ -283,6 +301,7 @@ func (dispatcher ray_dispatcher*) list_actors() string[] {
     }
     return actors
 }
+
 func (dispatcher ray_dispatcher*) set_actor_availability(actor_name string, available bool) bool {
     load, exists := dispatcher.actor_loads[actor_name]
     if !exists {
@@ -291,14 +310,17 @@ func (dispatcher ray_dispatcher*) set_actor_availability(actor_name string, avai
     load.is_available = available
     return true
 }
+
 func (dispatcher ray_dispatcher*) get_queue_size() uint32 {
     return dispatcher.task_queue.current_size
 }
+
 func (dispatcher ray_dispatcher*) clear_queue() {
     clear_queue := make(ray_task*[], 0)
     dispatcher.task_queue.queue = clear_queue
     dispatcher.task_queue.current_size = 0
 }
+
 func (dispatcher ray_dispatcher*) process_queue(max_tasks uint32) uint32 {
     processed := uint32(0)
     queue_size := len(dispatcher.task_queue.queue)
@@ -316,6 +338,7 @@ func (dispatcher ray_dispatcher*) process_queue(max_tasks uint32) uint32 {
     }
     return processed
 }
+
 func (dispatcher ray_dispatcher*) get_dispatcher_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["num_actors"] = uint32(len(dispatcher.actor_loads))
@@ -329,6 +352,7 @@ func (dispatcher ray_dispatcher*) get_dispatcher_stats() map[string]interface{} 
     stats["strategy"] = dispatcher.strategy
     return stats
 }
+
 func (dispatcher ray_dispatcher*) cancel_task(task_id string) bool {
     task, exists := dispatcher.tasks[task_id]
     if !exists {
@@ -344,14 +368,17 @@ func (dispatcher ray_dispatcher*) cancel_task(task_id string) bool {
     }
     return true
 }
+
 func (dispatcher ray_dispatcher*) set_dispatch_strategy(strategy string) bool {
     dispatcher.strategy = strategy
     dispatcher.round_robin_index = 0
     return true
 }
+
 func (dispatcher ray_dispatcher*) get_dispatch_strategy() string {
     return dispatcher.strategy
 }
+
 func (dispatcher ray_dispatcher*) update_actor_heartbeat(actor_name string) bool {
     load, exists := dispatcher.actor_loads[actor_name]
     if !exists {
@@ -360,6 +387,7 @@ func (dispatcher ray_dispatcher*) update_actor_heartbeat(actor_name string) bool
     load.last_heartbeat_ms = 0
     return true
 }
+
 func (dispatcher ray_dispatcher*) cleanup() {
     clear_tasks := make(map[string]ray_task*)
     dispatcher.tasks = clear_tasks

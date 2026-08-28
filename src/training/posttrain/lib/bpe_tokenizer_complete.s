@@ -18,14 +18,17 @@ struct bpe_tokenizer {
     bool add_bos_token
     bool add_eos_token
 }
+
 struct tokenization_state {
     string[] tokens
     int[] token_ids
     int position
 }
+
 func normalize_text(string text) string {
     return normalize_ascii_text(text)
 }
+
 func pretokenize(string text) string[] {
     string[] tokens
     string current = ""
@@ -54,6 +57,7 @@ func pretokenize(string text) string[] {
     }
     return tokens
 }
+
 func word_to_byte_tokens(string word) string[] {
     string[] tokens
     int i = 0
@@ -73,6 +77,7 @@ func word_to_byte_tokens(string word) string[] {
     }
     return tokens
 }
+
 func apply_bpe(string[] tokens, map[string]int merge_rank) string[] {
     string[] result = tokens
     int iteration = 0
@@ -112,6 +117,7 @@ func apply_bpe(string[] tokens, map[string]int merge_rank) string[] {
     }
     return result
 }
+
 func encode(bpe_tokenizer tokenizer, string text) int[] {
     int[] result
     if tokenizer.add_bos_token {
@@ -141,6 +147,7 @@ func encode(bpe_tokenizer tokenizer, string text) int[] {
     }
     return result
 }
+
 func decode(bpe_tokenizer tokenizer, int[] token_ids) string {
     string result = ""
     int i = 0
@@ -175,6 +182,7 @@ func decode(bpe_tokenizer tokenizer, int[] token_ids) string {
     }
     return result
 }
+
 func create_tokenizer() bpe_tokenizer {
     bpe_tokenizer tokenizer
     tokenizer.vocab = map[string]int{}
@@ -189,6 +197,7 @@ func create_tokenizer() bpe_tokenizer {
     tokenizer.add_eos_token = true
     return tokenizer
 }
+
 func load_tokenizer_hf(string directory) bpe_tokenizer {
     bpe_tokenizer tokenizer = create_tokenizer()
     eprintln("Loading tokenizer from: " + directory)
@@ -216,6 +225,7 @@ func load_tokenizer_hf(string directory) bpe_tokenizer {
     }
     return tokenizer
 }
+
 func extract_vocab_size(string json) int {
     string search = "\"vocab_size\":"
     int pos = 0
@@ -244,6 +254,7 @@ func extract_vocab_size(string json) int {
     }
     return parse_int(num_str)
 }
+
 func parse_int(string text) int {
     int result = 0
     int i = 0
@@ -256,6 +267,7 @@ func parse_int(string text) int {
     }
     return result
 }
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     bool negative = n < 0
@@ -269,21 +281,25 @@ func int_to_str(int n) string {
     if negative { result = "-" + result }
     return result
 }
+
 func vocab_size(bpe_tokenizer tokenizer) int {
     return len(tokenizer.id_to_token)
 }
+
 func get_token_id(bpe_tokenizer tokenizer, string token) int {
     if tokenizer.vocab[token] > 0 {
         return tokenizer.vocab[token]
     }
     return tokenizer.unk_token_id
 }
+
 func get_token(bpe_tokenizer tokenizer, int token_id) string {
     if token_id >= 0 && token_id < len(tokenizer.id_to_token) {
         return tokenizer.id_to_token[token_id]
     }
     return "[UNK]"
 }
+
 func main() {
     eprintln("BPE Tokenizer - Complete Implementation")
     eprintln("✓ Text normalization")

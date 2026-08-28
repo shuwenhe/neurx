@@ -17,6 +17,7 @@ func nccl_allgather(
     log_collective_op("ALLGATHER", "concat", total_bytes, comm.config.world_size)
     nil
 }
+
 func nccl_reducescatter(
     nccl_communicator *comm,
     uint64 recv_buffer,

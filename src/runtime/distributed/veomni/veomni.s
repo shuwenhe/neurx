@@ -6,6 +6,7 @@ import "neurx.util.math"
     PIPELINE_PARALLEL = 3
     HYBRID = 4
 }
+
 struct veomni_config {
     parallel_mode mode
     int world_size
@@ -23,6 +24,7 @@ struct veomni_config {
     float gradient_accumulation_factor
     int checkpoint_interval
 }
+
 struct parallel_group {
     int group_id
     int[] ranks
@@ -30,6 +32,7 @@ struct parallel_group {
     int rank
     bool is_root
 }
+
 struct pipeline_stage {
     int stage_id
     int start_layer
@@ -39,6 +42,7 @@ struct pipeline_stage {
     bool is_first_stage
     bool is_last_stage
 }
+
 struct veomni_state {
     veomni_config config
     parallel_group dp_group
@@ -53,6 +57,7 @@ struct veomni_state {
     int iteration
     int step
 }
+
 struct communication_stats {
     float allreduce_time
     float allgather_time
@@ -62,6 +67,7 @@ struct communication_stats {
     float pipeline_recv_time
     int total_communicated_bytes
 }
+
 func new_veomni_config() veomni_config {
     veomni_config {
         mode: HYBRID,
@@ -81,6 +87,7 @@ func new_veomni_config() veomni_config {
         checkpoint_interval: 1000,
     }
 }
+
 func new_parallel_group(int group_id, int[] ranks, int rank) parallel_group {
     parallel_group {
         group_id: group_id,
@@ -90,6 +97,7 @@ func new_parallel_group(int group_id, int[] ranks, int rank) parallel_group {
         is_root: rank == ranks[0],
     }
 }
+
 func new_pipeline_stage(int stage_id, int start_layer, int end_layer, int hidden_dim) pipeline_stage {
     pipeline_stage {
         stage_id: stage_id,
@@ -101,6 +109,7 @@ func new_pipeline_stage(int stage_id, int start_layer, int end_layer, int hidden
         is_last_stage: false,
     }
 }
+
 func new_veomni_state(veomni_config config) veomni_state {
     veomni_state state {
         config: config,
@@ -133,6 +142,7 @@ func new_veomni_state(veomni_config config) veomni_state {
     }
     state
 }
+
 func configure_hybrid_parallelism(veomni_state state, int rank) veomni_state {
     veomni_config config = state.config
     int dp_size = config.data_parallel_size
@@ -169,6 +179,7 @@ func configure_hybrid_parallelism(veomni_state state, int rank) veomni_state {
     state.current_stage = pp_rank
     state
 }
+
 func allreduce(parallel_group group, float[] data) float[] {
     int size = len(data)
     int group_size = group.size
@@ -200,6 +211,7 @@ func allreduce(parallel_group group, float[] data) float[] {
     }
     result
 }
+
 func allgather(parallel_group group, float[] local_data, int local_size) float[] {
     int group_size = group.size
     int global_size = local_size * group_size
@@ -232,6 +244,7 @@ func allgather(parallel_group group, float[] local_data, int local_size) float[]
     }
     result
 }
+
 func broadcast(parallel_group group, float[] data, int root_rank) float[] {
     int size = len(data)
     int group_size = group.size
@@ -266,6 +279,7 @@ func broadcast(parallel_group group, float[] data, int root_rank) float[] {
     }
     result
 }
+
 func reduce_scatter(parallel_group group, float[] global_data, int local_size) float[] {
     int group_size = group.size
     int global_size = local_size * group_size
@@ -303,6 +317,7 @@ func reduce_scatter(parallel_group group, float[] global_data, int local_size) f
     }
     result
 }
+
 func pipeline_forward(pipeline_stage stage, float[] input, int batch_size, int seq_len) float[] {
     int hidden_dim = 8192
     int total_tokens = batch_size * seq_len
@@ -315,6 +330,7 @@ func pipeline_forward(pipeline_stage stage, float[] input, int batch_size, int s
     stage.output_buffer = output
     output
 }
+
 func pipeline_backward(pipeline_stage stage, float[] grad_output, int batch_size, int seq_len) float[] {
     int hidden_dim = 8192
     int total_tokens = batch_size * seq_len
@@ -326,6 +342,7 @@ func pipeline_backward(pipeline_stage stage, float[] grad_output, int batch_size
     }
     grad_input
 }
+
 func apply_transformer_layer(float[] input, int total_tokens, int hidden_dim) float[] {
     float[] output = math.allocate_float(total_tokens * hidden_dim, 0.0)
     int i = 0
@@ -335,6 +352,7 @@ func apply_transformer_layer(float[] input, int total_tokens, int hidden_dim) fl
     }
     output
 }
+
 func apply_transformer_layer_backward(float[] grad_output, int total_tokens, int hidden_dim) float[] {
     float[] grad_input = math.allocate_float(total_tokens * hidden_dim, 0.0)
     int i = 0
@@ -344,6 +362,7 @@ func apply_transformer_layer_backward(float[] grad_output, int total_tokens, int
     }
     grad_input
 }
+
 func pipeline_send_recv(veomni_state state, float[] data, bool is_forward) float[] {
     pipeline_stage current_stage = state.stages[state.current_stage]
     if is_forward {
@@ -359,16 +378,20 @@ func pipeline_send_recv(veomni_state state, float[] data, bool is_forward) float
     }
     data
 }
+
 func data_parallel_gradient_sync(veomni_state state) veomni_state {
     state.gradients = allreduce(state.dp_group, state.gradients)
     state
 }
+
 func model_parallel_allgather(veomni_state state, float[] local_data, int local_size) float[] {
     allgather(state.mp_group, local_data, local_size)
 }
+
 func expert_parallel_reduce_scatter(veomni_state state, float[] global_data, int local_size) float[] {
     reduce_scatter(state.ep_group, global_data, local_size)
 }
+
 func veomni_train_step(veomni_state state, float[] input, int batch_size, int seq_len) veomni_state {
     veomni_config config = state.config
     int num_micro_batches = int(config.global_batch_size / config.micro_batch_size)
@@ -392,6 +415,7 @@ func veomni_train_step(veomni_state state, float[] input, int batch_size, int se
     state.step = state.step + 1
     state
 }
+
 func extract_micro_batch(float[] input, int micro_batch_idx, int micro_batch_size, int seq_len) float[] {
     int hidden_dim = 8192
     int micro_batch_tokens = micro_batch_size * seq_len
@@ -406,6 +430,7 @@ func extract_micro_batch(float[] input, int micro_batch_idx, int micro_batch_siz
     }
     micro_batch
 }
+
 func compute_loss(float[] output, int batch_size, int seq_len) float[] {
     int total_tokens = batch_size * seq_len
     float[] loss = math.allocate_float(total_tokens, 0.0)
@@ -416,6 +441,7 @@ func compute_loss(float[] output, int batch_size, int seq_len) float[] {
     }
     loss
 }
+
 func compute_gradient(float[] loss, float[] output, int batch_size, int seq_len) float[] {
     int hidden_dim = 8192
     int total_tokens = batch_size * seq_len
@@ -427,6 +453,7 @@ func compute_gradient(float[] loss, float[] output, int batch_size, int seq_len)
     }
     grad
 }
+
 func accumulate_gradients(float[] gradients, float[] new_gradients) float[] {
     if len(gradients) == 0 {
         return math.copy_float(new_gradients)
@@ -438,6 +465,7 @@ func accumulate_gradients(float[] gradients, float[] new_gradients) float[] {
     }
     gradients
 }
+
 func apply_optimizer(float[] parameters, float[] gradients, float[] optimizer_state) float[] {
     float lr = 3e-5
     int i = 0
@@ -447,6 +475,7 @@ func apply_optimizer(float[] parameters, float[] gradients, float[] optimizer_st
     }
     parameters
 }
+
 func veomni_auto_parallel_configure(veomni_state state, int world_size, int model_size) veomni_state {
     int num_gpus_per_node = 8
     int num_nodes = world_size / num_gpus_per_node
@@ -463,6 +492,7 @@ func veomni_auto_parallel_configure(veomni_state state, int world_size, int mode
     state.config.global_batch_size = dp_size * state.config.micro_batch_size * int(state.config.gradient_accumulation_factor)
     state
 }
+
 func veomni_get_stats(veomni_state state) communication_stats {
     communication_stats {
         allreduce_time: 0.0,
@@ -474,6 +504,7 @@ func veomni_get_stats(veomni_state state) communication_stats {
         total_communicated_bytes: 0,
     }
 }
+
 func veomni_reset(veomni_state state) veomni_state {
     state.iteration = 0
     state.step = 0

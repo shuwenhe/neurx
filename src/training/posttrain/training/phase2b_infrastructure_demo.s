@@ -7,6 +7,7 @@ use neurx.posttrain.training.metrics.{
     compute_accuracy
 }
 use neurx.posttrain.training.accuracy.{argmax, accuracy_percentage}
+
 func main() {
     println("====================================================")
     println("[Phase 2B] Complete Training Infrastructure")
@@ -120,6 +121,7 @@ func main() {
     println("[✓] Phase 2B Step 2 Complete: Observability Enabled")
     println("")
 }
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -146,6 +148,7 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
+
 func float_to_str_2(float value) string {
     float current = value
     bool negative = current < 0.0

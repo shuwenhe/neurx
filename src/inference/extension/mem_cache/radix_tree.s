@@ -3,6 +3,7 @@ package mem_cache
     leaf
     branch
 }
+
 struct radix_node {
     node_type node_t
     string prefix_key
@@ -14,6 +15,7 @@ struct radix_node {
     int64 last_access_time
     radix_node* parent
 }
+
 struct radix_tree {
     radix_node* root
     int64 total_nodes
@@ -22,6 +24,7 @@ struct radix_tree {
     int32 compression_ratio
     map[string, radix_node*] token_path_index
 }
+
 struct tree_search_result {
     bool found
     radix_node* matched_node
@@ -29,6 +32,7 @@ struct tree_search_result {
     int32 remaining_tokens
     int32[] remaining_ids
 }
+
 func new_radix_tree() radix_tree {
     root := new_radix_node_internal("root", int32[]{}, nil)
     radix_tree {
@@ -40,6 +44,7 @@ func new_radix_tree() radix_tree {
         token_path_index: map[string, radix_node*]{},
     }
 }
+
 func new_radix_node_internal(string prefix, int32[] tokens, radix_node* parent) radix_node {
     radix_node {
         node_t: node_type_internal,
@@ -53,6 +58,7 @@ func new_radix_node_internal(string prefix, int32[] tokens, radix_node* parent) 
         parent: parent,
     }
 }
+
 func new_radix_node_leaf(string prefix, int32[] tokens, int64 cache_ptr, int32 cache_size, radix_node* parent) radix_node {
     radix_node {
         node_t: node_type_leaf,
@@ -66,6 +72,7 @@ func new_radix_node_leaf(string prefix, int32[] tokens, int64 cache_ptr, int32 c
         parent: parent,
     }
 }
+
 func (radix_tree* tree) insert_sequence(int32[] token_ids, int64 kv_cache_ptr, int32 kv_cache_size) string {
     if len(token_ids) == 0 {
         ""
@@ -95,6 +102,7 @@ func (radix_tree* tree) insert_sequence(int32[] token_ids, int64 kv_cache_ptr, i
     current.kv_cache_size = kv_cache_size
     create_path_key(token_ids, 0, len(token_ids))
 }
+
 func (radix_tree* tree) find_longest_prefix(int32[] query_tokens) tree_search_result {
     if len(query_tokens) == 0 {
         tree_search_result {
@@ -132,6 +140,7 @@ func (radix_tree* tree) find_longest_prefix(int32[] query_tokens) tree_search_re
         remaining_ids: int32[]{},
     }
 }
+
 func (radix_tree* tree) get_node_by_path(int32[] tokens) radix_node* {
     path_key := create_path_key(tokens, 0, len(tokens))
     if path_key in tree.token_path_index {
@@ -139,6 +148,7 @@ func (radix_tree* tree) get_node_by_path(int32[] tokens) radix_node* {
     }
     nil
 }
+
 func (radix_tree* tree) update_access_stats(radix_node* node, int64 current_time) {
     if node == nil {
         false
@@ -147,6 +157,7 @@ func (radix_tree* tree) update_access_stats(radix_node* node, int64 current_time
     node.last_access_time = current_time
     true
 }
+
 func (radix_tree* tree) get_cache_stats() map[string, int64] {
     stats := map[string, int64]{}
     stats["total_nodes"] = tree.total_nodes
@@ -155,6 +166,7 @@ func (radix_tree* tree) get_cache_stats() map[string, int64] {
     stats["compression_ratio"] = int64(tree.compression_ratio)
     stats
 }
+
 func (radix_tree* tree) prune_node(radix_node* node) bool {
     if node == nil || node == tree.root {
         false
@@ -173,6 +185,7 @@ func (radix_tree* tree) prune_node(radix_node* node) bool {
     }
     false
 }
+
 func create_path_key(int32[] token_ids, int32 start, int32 end) string {
     key := "path:"
     for i in start..end {
@@ -180,11 +193,13 @@ func create_path_key(int32[] token_ids, int32 start, int32 end) string {
     }
     key
 }
+
 func (radix_tree* tree) find_high_reuse_nodes() radix_node*[] {
     results := radix_node*[]{}
     collect_high_reuse_nodes_recursive(tree.root, 3, results)
     results
 }
+
 func collect_high_reuse_nodes_recursive(radix_node* node, int32 min_access, radix_node*[]* results) {
     if node == nil {
         ""
@@ -197,6 +212,7 @@ func collect_high_reuse_nodes_recursive(radix_node* node, int32 min_access, radi
         collect_high_reuse_nodes_recursive(child, min_access, results)
     }
 }
+
 func (radix_tree* tree) estimate_compression() {
     total_original := tree.total_cached_tokens
     if total_original == 0 {

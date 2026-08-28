@@ -7,6 +7,7 @@ struct cuda_graph_node {
     int[] output_ids
     bool is_executed
 }
+
 struct cuda_graph {
     int graph_id
     []cuda_graph_node nodes
@@ -16,6 +17,7 @@ struct cuda_graph {
     int optimization_level
     bool is_frozen
 }
+
 struct cuda_graph_manager {
     []cuda_graph graphs
     int next_graph_id
@@ -23,6 +25,7 @@ struct cuda_graph_manager {
     string[] kernel_cache
     int cache_size
 }
+
 func new_cuda_graph_manager(int max_graphs) cuda_graph_manager {
     cuda_graph_manager {
         graphs: []cuda_graph{},
@@ -32,6 +35,7 @@ func new_cuda_graph_manager(int max_graphs) cuda_graph_manager {
         cache_size: 0,
     }
 }
+
 func create_cuda_graph(
     cuda_graph_manager manager,
     string name,
@@ -54,6 +58,7 @@ func create_cuda_graph(
     new_manager.next_graph_id = manager.next_graph_id + 1
     return new_manager, new_graph.graph_id
 }
+
 func add_operation_to_graph(
     cuda_graph graph,
     string operation,
@@ -72,12 +77,14 @@ func add_operation_to_graph(
     new_graph.total_nodes = graph.total_nodes + 1
     return new_graph
 }
+
 func freeze_cuda_graph(cuda_graph graph) cuda_graph {
     new_graph = graph
     new_graph.is_frozen = true
     new_graph.execution_mode = "launch"
     return new_graph
 }
+
 func execute_cuda_graph(cuda_graph graph, float[] input_data) (cuda_graph, float[]) {
     if !graph.is_frozen {
         logger.warning("Cannot execute non-frozen graph")
@@ -111,6 +118,7 @@ func execute_cuda_graph(cuda_graph graph, float[] input_data) (cuda_graph, float
     }
     return new_graph, output_data
 }
+
 func optimize_cuda_graph(cuda_graph graph) cuda_graph {
     if graph.optimization_level == 0 {
         return graph
@@ -128,6 +136,7 @@ func optimize_cuda_graph(cuda_graph graph) cuda_graph {
     }
     return new_graph
 }
+
 func fuse_operations(cuda_graph graph) cuda_graph {
     new_nodes = []cuda_graph_node{}
     i = 0
@@ -156,6 +165,7 @@ func fuse_operations(cuda_graph graph) cuda_graph {
     new_graph.total_nodes = len(new_nodes)
     return new_graph
 }
+
 func eliminate_redundant_ops(cuda_graph graph) cuda_graph {
     visited = map[string]bool{}
     new_nodes = []cuda_graph_node{}
@@ -174,9 +184,11 @@ func eliminate_redundant_ops(cuda_graph graph) cuda_graph {
     new_graph.total_nodes = len(new_nodes)
     return new_graph
 }
+
 func apply_memory_optimization(cuda_graph graph) cuda_graph {
     return graph
 }
+
 func can_fuse(string op1, string op2) bool {
     if op1 == "gemm" && op2 == "activation" {
         return true
@@ -186,6 +198,7 @@ func can_fuse(string op1, string op2) bool {
     }
     return false
 }
+
 func get_graph_stats(cuda_graph graph) string {
     result = "CUDA Graph Statistics:\n"
     result = result + "  Graph ID: " + string(graph.graph_id) + "\n"
@@ -196,6 +209,7 @@ func get_graph_stats(cuda_graph graph) string {
     result = result + "  Execution Mode: " + graph.execution_mode + "\n"
     return result
 }
+
 func main() {
     logger.info("CUDA Graph Engine Initialized")
     manager = new_cuda_graph_manager(100)

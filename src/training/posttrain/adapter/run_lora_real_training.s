@@ -8,6 +8,7 @@ struct tensor_2 {
     int[] shape
     int dtype
 }
+
 struct lora_weights {
     string name
     tensor_2 A
@@ -15,6 +16,7 @@ struct lora_weights {
     float alpha
     int rank
 }
+
 struct training_config {
     string model_path
     string dataset_path
@@ -27,6 +29,7 @@ struct training_config {
     float lora_alpha
     int num_layers
 }
+
 struct training_state {
     int current_epoch
     int total_steps
@@ -34,6 +37,7 @@ struct training_state {
     float best_loss
     float[] loss_history
 }
+
 func load_model_config(string model_path) training_config {
     training_config config
     config.model_path = model_path
@@ -47,6 +51,7 @@ func load_model_config(string model_path) training_config {
     config.output_dir = model_path + "/../base-model-posttrain"
     return config
 }
+
 func verify_model_files(string model_path) bool {
     println("\n📖 Verifying model files...")
     println("  Base path: " + model_path)
@@ -55,17 +60,20 @@ func verify_model_files(string model_path) bool {
     println("  ✓ tokenizer.json detected")
     return true
 }
+
 struct attention_weights {
     tensor_2 query_proj
     tensor_2 key_proj
     tensor_2 value_proj
     tensor_2 output_proj
 }
+
 struct ffnweights {
     tensor_2 gate_proj
     tensor_2 up_proj
     tensor_2 down_proj
 }
+
 struct transformer_block {
     tensor_2 ln1_weight
     attention_weights attn
@@ -73,6 +81,7 @@ struct transformer_block {
     ffnweights ffn
     lora_weights lora
 }
+
 struct base_model {
     tensor_2 embedding
     []transformer_block blocks
@@ -81,6 +90,7 @@ struct base_model {
     int vocab_size
     int num_blocks
 }
+
 func init_base_model(training_config config) base_model {
     base_model model
     model.hidden_dim = 896
@@ -109,12 +119,14 @@ func init_base_model(training_config config) base_model {
     model.output_proj = zeros(model.vocab_size, model.hidden_dim)
     return model
 }
+
 func apply_lora_linear(tensor_2 x, tensor_2 W, lora_weights lora) tensor_2 {
     tensor_2 result
     result.data = x.data
     result.shape = x.shape
     return result
 }
+
 func transformer_block_forward(
     tensor_2 x,
     transformer_block block
@@ -124,6 +136,7 @@ func transformer_block_forward(
     output = apply_lora_linear(output, block.ffn.gate_proj, block.lora)
     return output
 }
+
 func base_model_forward(
     tensor_2 input_ids,
     base_model model
@@ -136,6 +149,7 @@ func base_model_forward(
     tensor_2 logits = hidden
     return logits
 }
+
 func cross_entropy_loss(
     tensor_2 logits,
     tensor_2 labels
@@ -156,6 +170,7 @@ func cross_entropy_loss(
     println("  Accuracy: " + float_to_string(accuracy * 100) + "%")
     return loss
 }
+
 func compute_lora_gradients(
     tensor_2 grad_output,
     tensor_2 input_x,
@@ -164,6 +179,7 @@ func compute_lora_gradients(
     lora_weights gradients = lora
     return gradients
 }
+
 func optimizer_step(
     lora_weights weights,
     lora_weights gradients,
@@ -172,6 +188,7 @@ func optimizer_step(
     float update_scale = learning_rate * 0.1
     println("  Updating LoRA weights (scale=" + float_to_string(update_scale) + ")")
 }
+
 func train_epoch(
     base_model model,
     training_config config,
@@ -203,6 +220,7 @@ func train_epoch(
     state.loss_history = append(state.loss_history, avg_loss)
     return avg_loss
 }
+
 func train_model(
     base_model model,
     training_config config
@@ -227,6 +245,7 @@ func train_model(
     }
     return state
 }
+
 func merge_lora_to_model(
     tensor_2 original_weight,
     lora_weights lora
@@ -235,6 +254,7 @@ func merge_lora_to_model(
     tensor_2 merged = original_weight
     return merged
 }
+
 func save_merged_model(
     base_model model,
     training_config config,
@@ -254,6 +274,7 @@ func save_merged_model(
     println("  ✓ tokenizer.json")
     println("  ✓ generation_config.json")
 }
+
 func verify_training_results(
     string original_path,
     string output_path,
@@ -275,6 +296,7 @@ func verify_training_results(
     println("  微调backinferenceexample:   'The capital of France is...'")
     println("  ✓ inference结果one致（权重修改有效）")
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -295,6 +317,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func float_to_string(float f) string {
     int int_part = f
     int frac_part = (f - int_part) * 10000
@@ -311,9 +334,11 @@ func float_to_string(float f) string {
     result = result + int_to_string(frac_part)
     return result
 }
+
 func float(int n) float {
     return f
 }
+
 func main() {
     println("\n" + "="*60)
     println("🎯 NeurX complete LoRA SFT 训练implementation")

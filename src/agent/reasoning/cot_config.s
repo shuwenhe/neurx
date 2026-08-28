@@ -9,6 +9,7 @@ package neurx.reasoning.cot_config
     logical
     semantic
 }
+
 struct cot_config {
     bool enabled
     reasoning_style style
@@ -29,6 +30,7 @@ struct cot_config {
     float confidence_threshold
     bool summarize_at_end
 }
+
 func new_default_cot_config() cot_config {
     cot_config {
         enabled: true,
@@ -51,6 +53,7 @@ func new_default_cot_config() cot_config {
         summarize_at_end: true,
     }
 }
+
 func new_detailed_cot_config() cot_config {
     cfg := new_default_cot_config()
     cfg.style = reasoning_style.detailed
@@ -61,6 +64,7 @@ func new_detailed_cot_config() cot_config {
     cfg.validation = validation_strategy.semantic
     cfg
 }
+
 func new_fast_cot_config() cot_config {
     cfg := new_default_cot_config()
     cfg.style = reasoning_style.summarized
@@ -71,6 +75,7 @@ func new_fast_cot_config() cot_config {
     cfg.validation = validation_strategy.none
     cfg
 }
+
 func new_hierarchical_cot_config() cot_config {
     cfg := new_detailed_cot_config()
     cfg.style = reasoning_style.hierarchical
@@ -80,6 +85,7 @@ func new_hierarchical_cot_config() cot_config {
     cfg.backtrack_depth = 2
     cfg
 }
+
 func (cot_config* cfg) validate() bool {
     if cfg.max_steps <= 0 {
         return false
@@ -104,6 +110,7 @@ func (cot_config* cfg) validate() bool {
     }
     true
 }
+
 func (cot_config* cfg) get_style_string() string {
     match cfg.style {
         reasoning_style.step_by_step: "step-by-step",
@@ -113,6 +120,7 @@ func (cot_config* cfg) get_style_string() string {
         default: "unknown",
     }
 }
+
 func (cot_config* cfg) get_validation_string() string {
     match cfg.validation {
         validation_strategy.none: "none",
@@ -122,12 +130,14 @@ func (cot_config* cfg) get_validation_string() string {
         default: "unknown",
     }
 }
+
 func (cot_config* cfg) set_max_steps(int steps) cot_config {
     if steps > 0 {
         cfg.max_steps = steps
     }
     cfg
 }
+
 func (cot_config* cfg) set_max_tokens(int per_step, int total) cot_config {
     if per_step > 0 {
         cfg.max_tokens_per_step = per_step
@@ -137,6 +147,7 @@ func (cot_config* cfg) set_max_tokens(int per_step, int total) cot_config {
     }
     cfg
 }
+
 func (cot_config* cfg) clone() cot_config {
     cot_config {
         enabled: cfg.enabled,

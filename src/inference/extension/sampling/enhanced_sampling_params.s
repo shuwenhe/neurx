@@ -55,6 +55,7 @@ struct sampling_params {
 	encoder_no_repeat_ngram_size int32
 	remove_invalid_values bool
 }
+
 func create_sampling_params() sampling_params* {
 	return *sampling_params{
 		method: sampling_greedy,
@@ -98,6 +99,7 @@ func create_sampling_params() sampling_params* {
 		remove_invalid_values: true,
 	}
 }
+
 func (p* sampling_params) set_temperature(t float32) {
 	if t < 0.0 {
 		t = 0.0
@@ -107,12 +109,14 @@ func (p* sampling_params) set_temperature(t float32) {
 	}
 	p.temperature = t
 }
+
 func (p* sampling_params) set_top_k(k int32) {
 	if k < 0 {
 		k = 0
 	}
 	p.top_k = k
 }
+
 func (p* sampling_params) set_top_p(p_val float32) {
 	if p_val < 0.0 {
 		p_val = 0.0
@@ -122,6 +126,7 @@ func (p* sampling_params) set_top_p(p_val float32) {
 	}
 	p.top_p = p_val
 }
+
 func (p* sampling_params) set_min_p(min_val float32) {
 	if min_val < 0.0 {
 		min_val = 0.0
@@ -131,6 +136,7 @@ func (p* sampling_params) set_min_p(min_val float32) {
 	}
 	p.min_p = min_val
 }
+
 func (p* sampling_params) set_frequency_penalty(pen float32) {
 	if pen < -2.0 {
 		pen = -2.0
@@ -140,6 +146,7 @@ func (p* sampling_params) set_frequency_penalty(pen float32) {
 	}
 	p.frequency_penalty = pen
 }
+
 func (p* sampling_params) set_presence_penalty(pen float32) {
 	if pen < -2.0 {
 		pen = -2.0
@@ -149,6 +156,7 @@ func (p* sampling_params) set_presence_penalty(pen float32) {
 	}
 	p.presence_penalty = pen
 }
+
 func (p* sampling_params) set_repetition_penalty(pen float32) {
 	if pen < 0.0 {
 		pen = 1.0
@@ -158,6 +166,7 @@ func (p* sampling_params) set_repetition_penalty(pen float32) {
 	}
 	p.repetition_penalty = pen
 }
+
 func (p* sampling_params) set_length_penalty(pen float32) {
 	if pen < 0.0 {
 		pen = 1.0
@@ -167,6 +176,7 @@ func (p* sampling_params) set_length_penalty(pen float32) {
 	}
 	p.length_penalty = pen
 }
+
 func (p* sampling_params) set_diversity_penalty(pen float32) {
 	if pen < 0.0 {
 		pen = 0.0
@@ -176,6 +186,7 @@ func (p* sampling_params) set_diversity_penalty(pen float32) {
 	}
 	p.diversity_penalty = pen
 }
+
 func (p* sampling_params) set_beam_search(width int32, num_groups int32, div_pen float32) {
 	if width < 1 {
 		width = 1
@@ -192,6 +203,7 @@ func (p* sampling_params) set_beam_search(width int32, num_groups int32, div_pen
 		p.diversity_penalty_in_beam = div_pen
 	}
 }
+
 func (p* sampling_params) set_contrastive_search(alpha float32, k int32, degenerate bool) {
 	if alpha < 0.0 {
 		alpha = 0.0
@@ -210,16 +222,19 @@ func (p* sampling_params) set_contrastive_search(alpha float32, k int32, degener
 	p.contrastive_degenerate_to_greedy = degenerate
 	p.method = sampling_contrastive
 }
+
 func (p* sampling_params) add_stop_token(token_id int32) {
 	if len(p.stop_token_ids) < 10 {
 		p.stop_token_ids = append(p.stop_token_ids, token_id)
 	}
 }
+
 func (p* sampling_params) add_bad_token(token_id int32) {
 	if len(p.bad_token_ids) < 100 {
 		p.bad_token_ids = append(p.bad_token_ids, token_id)
 	}
 }
+
 func (p* sampling_params) validate() bool {
 	if p.temperature < 0.0 {
 		return false
@@ -253,6 +268,7 @@ func (p* sampling_params) validate() bool {
 	}
 	return true
 }
+
 func (p* sampling_params) to_dict() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["method"] = int32(p.method)
@@ -271,6 +287,7 @@ func (p* sampling_params) to_dict() map[string]interface{} {
 	result["seed"] = p.seed
 	return result
 }
+
 func (p* sampling_params) clone() sampling_params* {
 	new_params := create_sampling_params()
 	new_params.method = p.method

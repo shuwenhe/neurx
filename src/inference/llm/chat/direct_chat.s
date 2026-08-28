@@ -27,6 +27,7 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
+
 func generate_response(string prompt) string {
     string model_path = neurx.inference.runtime.real_text_engine.resolve_model_path_from_env()
     real_text_engine_state state = neurx.inference.runtime.real_text_engine.load_real_text_engine(model_path)
@@ -42,6 +43,7 @@ func generate_response(string prompt) string {
     }
     return result.text
 }
+
 func trim(string s) string {
     int i = 0
     for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -56,6 +58,7 @@ func trim(string s) string {
     }
     return __host_slice(s, i, j + 1)
 }
+
 func main() {
     print("╔════════════════════════════════════════════════════════════════╗\n")
     print("║                                                                ║\n")

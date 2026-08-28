@@ -11,6 +11,7 @@ struct control_state {
     string[] branches
     string[] params
 }
+
 func join_strings(string[] values) string {
     string out = ""
     int i = 0
@@ -23,6 +24,7 @@ func join_strings(string[] values) string {
     }
     out
 }
+
 func new_control_state(string name, int iterations) control_state {
     control_state {
         name: name,
@@ -34,27 +36,35 @@ func new_control_state(string name, int iterations) control_state {
         params: [],
     }
 }
+
 func control_name(control_state state) string {
     state.name
 }
+
 func control_cond_enabled(control_state state) bool {
     state.cond_enabled
 }
+
 func control_loop_enabled(control_state state) bool {
     state.loop_enabled
 }
+
 func control_scan_enabled(control_state state) bool {
     state.scan_enabled
 }
+
 func control_iterations(control_state state) int {
     state.iterations
 }
+
 func control_branch_count(control_state state) int {
     len(state.branches)
 }
+
 func control_param_count(control_state state) int {
     len(state.params)
 }
+
 func control_has_branch(control_state state, string branch) bool {
     int i = 0
     for i < len(state.branches) {
@@ -65,6 +75,7 @@ func control_has_branch(control_state state, string branch) bool {
     }
     false
 }
+
 func control_has_param(control_state state, string param) bool {
     int i = 0
     for i < len(state.params) {
@@ -75,6 +86,7 @@ func control_has_param(control_state state, string param) bool {
     }
     false
 }
+
 func control_add_branch(control_state state, string branch) control_state {
     string[] branches = copy_strings(state.branches)
     branches = append(branches, branch)
@@ -88,6 +100,7 @@ func control_add_branch(control_state state, string branch) control_state {
         params: copy_strings(state.params),
     }
 }
+
 func control_add_param(control_state state, string param) control_state {
     string[] params = copy_strings(state.params)
     params = append(params, param)
@@ -101,6 +114,7 @@ func control_add_param(control_state state, string param) control_state {
         params: params,
     }
 }
+
 func control_set_cond_enabled(control_state state, bool enabled) control_state {
     control_state {
         name: state.name,
@@ -112,6 +126,7 @@ func control_set_cond_enabled(control_state state, bool enabled) control_state {
         params: copy_strings(state.params),
     }
 }
+
 func control_set_loop_enabled(control_state state, bool enabled) control_state {
     control_state {
         name: state.name,
@@ -123,6 +138,7 @@ func control_set_loop_enabled(control_state state, bool enabled) control_state {
         params: copy_strings(state.params),
     }
 }
+
 func control_set_scan_enabled(control_state state, bool enabled) control_state {
     control_state {
         name: state.name,
@@ -134,6 +150,7 @@ func control_set_scan_enabled(control_state state, bool enabled) control_state {
         params: copy_strings(state.params),
     }
 }
+
 func control_set_iterations(control_state state, int iterations) control_state {
     control_state {
         name: state.name,
@@ -145,6 +162,7 @@ func control_set_iterations(control_state state, int iterations) control_state {
         params: copy_strings(state.params),
     }
 }
+
 func control_clear_branches(control_state state) control_state {
     control_state {
         name: state.name,
@@ -156,6 +174,7 @@ func control_clear_branches(control_state state) control_state {
         params: copy_strings(state.params),
     }
 }
+
 func control_clear_params(control_state state) control_state {
     control_state {
         name: state.name,
@@ -167,6 +186,7 @@ func control_clear_params(control_state state) control_state {
         params: [],
     }
 }
+
 func control_state_dict(control_state state) control_state {
     control_state {
         name: state.name,
@@ -178,9 +198,11 @@ func control_state_dict(control_state state) control_state {
         params: copy_strings(state.params),
     }
 }
+
 func control_load_state_dict(control_state state, control_state other) control_state {
     other
 }
+
 func cond(control_state state, bool predicate, tensor on_true, tensor on_false) tensor {
     del state
     if predicate {
@@ -189,9 +211,11 @@ func cond(control_state state, bool predicate, tensor on_true, tensor on_false) 
         on_false
     }
 }
+
 func control_select(control_state state, bool predicate, tensor on_true, tensor on_false) tensor {
     cond(state, predicate, on_true, on_false)
 }
+
 func while_loop(control_state state, tensor value, int steps, string op) tensor {
     del state
     tensor current = value
@@ -216,6 +240,7 @@ func while_loop(control_state state, tensor value, int steps, string op) tensor 
     }
     current
 }
+
 func scan_sum(control_state state, tensor value) tensor {
     del state
     int n = len(value.data)
@@ -229,6 +254,7 @@ func scan_sum(control_state state, tensor value) tensor {
     }
     neurx.tensor.tensor.new(out, value.shape, value.requires_grad)
 }
+
 func scan_prod(control_state state, tensor value) tensor {
     del state
     int n = len(value.data)
@@ -242,6 +268,7 @@ func scan_prod(control_state state, tensor value) tensor {
     }
     neurx.tensor.tensor.new(out, value.shape, value.requires_grad)
 }
+
 func control_to_transform_chain(control_state state) transform_chain {
     transform_chain chain = neurx.autograd.function.new_transform_chain()
     int i = 0
@@ -258,6 +285,7 @@ func control_to_transform_chain(control_state state) transform_chain {
     chain = neurx.autograd.function.transform_chain_set_linearized(chain, state.loop_enabled || state.scan_enabled)
     chain
 }
+
 func transform_chain_to_control(transform_chain chain, string name, int iterations) control_state {
     string[] branches = copy_strings(chain.steps)
     string[] params = copy_strings(chain.params)

@@ -6,6 +6,7 @@ struct denoiser_state {
     int hidden_dim
     bool conditioned
 }
+
 func new_denoiser_state(string name, int channels, int hidden_dim, bool conditioned) denoiser_state {
     denoiser_state {
         name: name,
@@ -14,6 +15,7 @@ func new_denoiser_state(string name, int channels, int hidden_dim, bool conditio
         conditioned: conditioned,
     }
 }
+
 func denoiser_forward_stub(denoiser_state model, float[] noisy_sample, int t) float[] {
     float scale = 1.0
     if model.conditioned {
@@ -21,9 +23,11 @@ func denoiser_forward_stub(denoiser_state model, float[] noisy_sample, int t) fl
     }
     neurx.ops.diffusion_denoise_stub(noisy_sample, t, scale)
 }
+
 func denoiser_state_dict(denoiser_state state) denoiser_state {
     state
 }
+
 func denoiser_load_state_dict(denoiser_state state, denoiser_state other) denoiser_state {
     other
 }

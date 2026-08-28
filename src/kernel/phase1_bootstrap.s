@@ -54,6 +54,7 @@ func init_phase1_subsystems() (int, string) {
     println("")
     0, ""
 }
+
 func verify_phase1_health() bool {
     println("Verifying Phase 1 subsystem health...")
     if !rcu_is_gp_in_progress() {
@@ -72,6 +73,7 @@ func verify_phase1_health() bool {
     println("Phase 1 Health Check: PASSED")
     true
 }
+
 func int_to_string(int val) string {
     if val == 0 {
         return "0"

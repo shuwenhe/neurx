@@ -13,6 +13,7 @@ struct linear {
     bool has_bias
     bool training
 }
+
 func copy_float(float[] data) float[] {
     int n = len(data)
     float[] out = float[]{cap: n}
@@ -23,6 +24,7 @@ func copy_float(float[] data) float[] {
     }
     return out
 }
+
 func copy_int(int[] data) int[] {
     int n = len(data)
     int[] out = int[]{cap: n}
@@ -33,17 +35,20 @@ func copy_int(int[] data) int[] {
     }
     return out
 }
+
 func shape1(int n) int[] {
     int[] shape = int[]{cap: 1}
     shape[0] = n
     return shape
 }
+
 func shape2(int m, int n) int[] {
     int[] shape = int[]{cap: 2}
     shape[0] = m
     shape[1] = n
     return shape
 }
+
 func shape3(int a, int b, int c) int[] {
     int[] shape = int[]{cap: 3}
     shape[0] = a
@@ -51,6 +56,7 @@ func shape3(int a, int b, int c) int[] {
     shape[2] = c
     return shape
 }
+
 func numel(int[] shape) int {
     int n = 1
     int i = 0
@@ -60,6 +66,7 @@ func numel(int[] shape) int {
     }
     return n
 }
+
 func exp_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x
@@ -67,6 +74,7 @@ func exp_approx(float x) float {
     float x5 = x4 * x
     return 1.0 + x + (x2 / 2.0) + (x3 / 6.0) + (x4 / 24.0) + (x5 / 120.0)
 }
+
 func sqrt_approx(float x) float {
     float v = x
     if v < 0.0 {
@@ -83,9 +91,11 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+
 func clone_tensor(tensor a) tensor {
     neurx.tensor.new(copy_float(a.data), copy_int(a.shape), a.requires_grad)
 }
+
 func matmul2d(tensor a, tensor b) tensor {
     int rows = a.shape[0]
     int inner = a.shape[1]
@@ -108,6 +118,7 @@ func matmul2d(tensor a, tensor b) tensor {
     }
     neurx.tensor.new(out, shape2(rows, cols), a.requires_grad || b.requires_grad)
 }
+
 func softmax_1d(float[] values) float[] {
     int n = len(values)
     float[] out = float[]{cap: n}
@@ -146,6 +157,7 @@ func softmax_1d(float[] values) float[] {
     }
     return out
 }
+
 func layer_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
     int ndim = len(input.shape)
     int start = ndim - normalized_dims
@@ -192,6 +204,7 @@ func layer_norm_impl(tensor input, tensor weight, tensor bias, int normalized_di
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad || weight.requires_grad || bias.requires_grad)
 }
+
 func rms_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
     int ndim = len(input.shape)
     int start = ndim - normalized_dims
@@ -232,6 +245,7 @@ func rms_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad || weight.requires_grad || bias.requires_grad)
 }
+
 func mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias) tensor {
     int batch = input.shape[0]
     int in_features = input.shape[1]
@@ -272,6 +286,7 @@ func mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2
     }
     neurx.tensor.new(out, shape2(batch, out_features), input.requires_grad || fc1_weight.requires_grad || fc1_bias.requires_grad || fc2_weight.requires_grad || fc2_bias.requires_grad)
 }
+
 func qkv_projection_impl(tensor input, tensor weight, tensor bias, int n_heads) tensor {
     int batch = input.shape[0]
     int seq_len = input.shape[1]
@@ -300,6 +315,7 @@ func qkv_projection_impl(tensor input, tensor weight, tensor bias, int n_heads) 
     }
     neurx.tensor.new(out, shape3(batch, seq_len, proj_channels), input.requires_grad || weight.requires_grad || bias.requires_grad)
 }
+
 func rope_apply_impl(tensor input, tensor cos, tensor sin) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -315,6 +331,7 @@ func rope_apply_impl(tensor input, tensor cos, tensor sin) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad || cos.requires_grad || sin.requires_grad)
 }
+
 func embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) tensor {
     int vocab = weight.shape[0]
     int dim = weight.shape[1]
@@ -341,6 +358,7 @@ func embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) ten
     }
     neurx.tensor.new(out, shape2(n, dim), weight.requires_grad || input_ids.requires_grad)
 }
+
 func new_linear(int in_features, int out_features) linear {
     int weight_size = in_features * out_features
     float[] weight = float[]{cap: weight_size}
@@ -364,6 +382,7 @@ func new_linear(int in_features, int out_features) linear {
         training: true,
     }
 }
+
 func linear_train(linear layer) linear {
     return linear {
         in_features: layer.in_features,
@@ -374,6 +393,7 @@ func linear_train(linear layer) linear {
         training: true,
     }
 }
+
 func linear_eval(linear layer) linear {
     return linear {
         in_features: layer.in_features,
@@ -384,6 +404,7 @@ func linear_eval(linear layer) linear {
         training: false,
     }
 }
+
 func linear_state_dict(linear layer) linear {
     return linear {
         in_features: layer.in_features,
@@ -394,6 +415,7 @@ func linear_state_dict(linear layer) linear {
         training: layer.training,
     }
 }
+
 func linear_load_state_dict(linear layer, linear other) linear {
     return linear {
         in_features: other.in_features,
@@ -404,19 +426,23 @@ func linear_load_state_dict(linear layer, linear other) linear {
         training: other.training,
     }
 }
+
 func linear_parameters(linear layer) []tensor {
     []tensor params = []tensor{cap: 2}
     params[0] = neurx.tensor.new(copy_float(layer.weight), shape2(layer.in_features, layer.out_features), true)
     params[1] = neurx.tensor.new(copy_float(layer.bias), shape1(layer.out_features), true)
     return params
 }
+
 func linear_module(linear layer) module {
     return linear_as_module(layer)
 }
+
 func linear_forward(linear layer, tensor input) tensor {
     compute_context ctx = resolve_compute_context("", "")
     return linear_forward_backend(layer, input, ctx)
 }
+
 func linear_forward_backend(linear layer, tensor input, compute_context ctx) tensor {
     tensor weight = neurx.tensor.new(copy_float(layer.weight), shape2(layer.in_features, layer.out_features), false)
     int rows = input.shape[0]
@@ -430,15 +456,19 @@ func linear_forward_backend(linear layer, tensor input, compute_context ctx) ten
     }
     return out
 }
+
 func layer_norm(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
     return layer_norm_impl(input, weight, bias, normalized_dims, eps)
 }
+
 func rms_norm(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
     return rms_norm_impl(input, weight, bias, normalized_dims, eps)
 }
+
 func mlp_block(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias) tensor {
     return mlp_block_impl(input, fc1_weight, fc1_bias, fc2_weight, fc2_bias)
 }
+
 func transformer_block_forward(tensor input, tensor ln1_weight, tensor ln1_bias, tensor qkv_weight, tensor qkv_bias, tensor out_weight, tensor out_bias, tensor ln2_weight, tensor ln2_bias, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias, float eps, int n_heads) tensor {
     tensor norm1 = layer_norm_impl(input, ln1_weight, ln1_bias, 1, eps)
     tensor qkv = qkv_projection_impl(norm1, qkv_weight, qkv_bias, n_heads)
@@ -471,15 +501,19 @@ func transformer_block_forward(tensor input, tensor ln1_weight, tensor ln1_bias,
     }
     return out
 }
+
 func qkv_projection(tensor input, tensor weight, tensor bias, int n_heads) tensor {
     return qkv_projection_impl(input, weight, bias, n_heads)
 }
+
 func rope_apply(tensor input, tensor cos, tensor sin) tensor {
     return rope_apply_impl(input, cos, sin)
 }
+
 func embedding_lookup(tensor weight, tensor input_ids, int padding_idx) tensor {
     return embedding_lookup_impl(weight, input_ids, padding_idx)
 }
+
 func embedding_bag(tensor weight, tensor input_ids, tensor offsets, int padding_idx, bool mean) tensor {
     tensor embedded = embedding_lookup_impl(weight, input_ids, padding_idx)
     int bag_count = len(offsets.data)
@@ -524,57 +558,75 @@ func embedding_bag(tensor weight, tensor input_ids, tensor offsets, int padding_
     }
     neurx.tensor.new(out, shape2(bag_count, dim), embedded.requires_grad)
 }
+
 func relu(tensor input) tensor {
     return neurx.tensor.relu(input)
 }
+
 func sigmoid(tensor input) tensor {
     return neurx.tensor.sigmoid(input)
 }
+
 func tanh(tensor input) tensor {
     return neurx.tensor.tanh(input)
 }
+
 func softmax(tensor input, int dim) tensor {
     return neurx.tensor.softmax(input, dim)
 }
+
 func log_softmax(tensor input, int dim) tensor {
     return neurx.tensor.log_softmax(input, dim)
 }
+
 func gelu(tensor input) tensor {
     return neurx.nn.activations.gelu(input)
 }
+
 func leaky_relu(tensor input, float negative_slope) tensor {
     return neurx.nn.activations.leaky_relu(input, negative_slope)
 }
+
 func elu(tensor input, float alpha) tensor {
     return neurx.nn.activations.elu(input, alpha)
 }
+
 func silu(tensor input) tensor {
     return neurx.nn.activations.silu(input)
 }
+
 func softplus(tensor input) tensor {
     return neurx.nn.activations.softplus(input)
 }
+
 func mish(tensor input) tensor {
     return neurx.nn.activations.mish(input)
 }
+
 func relu6(tensor input) tensor {
     return neurx.nn.activations.relu6(input)
 }
+
 func hardtanh(tensor input, float min_value, float max_value) tensor {
     return neurx.nn.activations.hardtanh(input, min_value, max_value)
 }
+
 func hardsigmoid(tensor input) tensor {
     return neurx.nn.activations.hardsigmoid(input)
 }
+
 func hardswish(tensor input) tensor {
     return neurx.nn.activations.hardswish(input)
 }
+
 func threshold(tensor input, float threshold_value, float value) tensor {
     return neurx.nn.activations.threshold(input, threshold_value, value)
 }
+
 func softsign(tensor input) tensor {
     return neurx.nn.activations.softsign(input)
 }
+
 func dropout(tensor input, float p, bool training) tensor {
     if !training || p <= 0.0 {
         return neurx.tensor.clone(input)
@@ -597,15 +649,19 @@ func dropout(tensor input, float p, bool training) tensor {
     }
     return neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
+
 func dropout1d(tensor input, float p, bool training) tensor {
     return dropout(input, p, training)
 }
+
 func dropout2d(tensor input, float p, bool training) tensor {
     return dropout(input, p, training)
 }
+
 func dropout3d(tensor input, float p, bool training) tensor {
     return dropout(input, p, training)
 }
+
 func alpha_dropout(tensor input, float p, bool training) tensor {
     if !training || p <= 0.0 {
         return neurx.tensor.clone(input)
@@ -629,6 +685,7 @@ func alpha_dropout(tensor input, float p, bool training) tensor {
     }
     return neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
+
 func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, tensor running_var, bool training, float eps) tensor {
     int ndim = len(input.shape)
     if ndim < 2 {
@@ -804,12 +861,14 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
     }
     return neurx.tensor.new(out, copy_int(input.shape), input.requires_grad || weight.requires_grad || bias.requires_grad)
 }
+
 func sync_batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, tensor running_var, bool training, float eps, int world_size, int rank) tensor {
     if world_size <= 1 {
         return batch_norm(input, weight, bias, running_mean, running_var, training, eps)
     }
     return batch_norm(input, weight, bias, running_mean, running_var, training, eps)
 }
+
 func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float eps) tensor {
     int ndim = len(input.shape)
     if ndim < 2 || num_groups <= 0 {
@@ -930,6 +989,7 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
     }
     return neurx.tensor.new(out, copy_int(input.shape), input.requires_grad || weight.requires_grad || bias.requires_grad)
 }
+
 func instance_norm(tensor input, tensor weight, tensor bias, float eps) tensor {
     int channels = 1
     if len(input.shape) >= 2 {
@@ -937,90 +997,119 @@ func instance_norm(tensor input, tensor weight, tensor bias, float eps) tensor {
     }
     return group_norm(input, weight, bias, channels, eps)
 }
+
 func identity(tensor input) tensor {
     return neurx.tensor.clone(input)
 }
+
 func flatten(tensor input, int start_dim, int end_dim) tensor {
     return neurx.tensor.flatten(input, start_dim, end_dim)
 }
+
 func new_conv1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int dilation, bool use_bias) conv1d_state {
     return neurx.nn.conv.new_conv1d(in_channels, out_channels, kernel_size, stride, padding, dilation, use_bias)
 }
+
 func conv1d_forward(conv1d_state layer, tensor input) tensor {
     return neurx.nn.conv.conv1d_forward(layer, input)
 }
+
 func new_conv2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int dil_h, int dil_w, bool use_bias) conv2d_state {
     return neurx.nn.conv.new_conv2d(in_channels, out_channels, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w, dil_h, dil_w, use_bias)
 }
+
 func conv2d_forward(conv2d_state layer, tensor input) tensor {
     return neurx.nn.conv.conv2d_forward(layer, input)
 }
+
 func new_convtranspose1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int output_padding, int dilation, bool use_bias) convtranspose1d_state {
     return neurx.nn.conv.new_convtranspose1d(in_channels, out_channels, kernel_size, stride, padding, output_padding, dilation, use_bias)
 }
+
 func convtranspose1d_forward(convtranspose1d_state layer, tensor input) tensor {
     return neurx.nn.conv.convtranspose1d_forward(layer, input)
 }
+
 func new_convtranspose2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int output_pad_h, int output_pad_w, int dil_h, int dil_w, bool use_bias) convtranspose2d_state {
     return neurx.nn.conv.new_convtranspose2d(in_channels, out_channels, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w, output_pad_h, output_pad_w, dil_h, dil_w, use_bias)
 }
+
 func convtranspose2d_forward(convtranspose2d_state layer, tensor input) tensor {
     return neurx.nn.conv.convtranspose2d_forward(layer, input)
 }
+
 func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     return neurx.nn.pooling.max_pool1d(input, kernel_size, stride, padding)
 }
+
 func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     return neurx.nn.pooling.avg_pool1d(input, kernel_size, stride, padding)
 }
+
 func adaptive_avg_pool1d(tensor input, int out_len) tensor {
     return neurx.nn.pooling.adaptive_avg_pool1d(input, out_len)
 }
+
 func adaptive_max_pool1d(tensor input, int out_len) tensor {
     return neurx.nn.pooling.adaptive_max_pool1d(input, out_len)
 }
+
 func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w) tensor {
     return neurx.nn.pooling.max_pool2d(input, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w)
 }
+
 func avg_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w) tensor {
     return neurx.nn.pooling.avg_pool2d(input, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w)
 }
+
 func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
     return neurx.nn.pooling.adaptive_avg_pool2d(input, out_h, out_w)
 }
+
 func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
     return neurx.nn.pooling.adaptive_max_pool2d(input, out_h, out_w)
 }
+
 func interpolate1d(tensor input, int out_len) tensor {
     return neurx.nn.pooling.interpolate1d(input, out_len)
 }
+
 func interpolate2d(tensor input, int out_h, int out_w) tensor {
     return neurx.nn.pooling.interpolate2d(input, out_h, out_w)
 }
+
 func new_rnn_cell(int input_size, int hidden_size) rnn_cell_state {
     return neurx.nn.rnn.new_rnn_cell(input_size, hidden_size)
 }
+
 func rnn_cell_forward(rnn_cell_state cell, float[] x, float[] h_prev) float[] {
     return neurx.nn.rnn.rnn_cell_forward(cell, x, h_prev)
 }
+
 func rnn_forward(rnn_cell_state cell, float[] input, int seq_len, float[] h0) rnn_output {
     return neurx.nn.rnn.rnn_forward(cell, input, seq_len, h0)
 }
+
 func new_lstm_cell(int input_size, int hidden_size) lstm_cell_state {
     return neurx.nn.rnn.new_lstm_cell(input_size, hidden_size)
 }
+
 func lstm_cell_forward(lstm_cell_state cell, float[] x, float[] h_prev, float[] c_prev) lstm_cell_output {
     return neurx.nn.rnn.lstm_cell_forward(cell, x, h_prev, c_prev)
 }
+
 func lstm_forward(lstm_cell_state cell, float[] input, int seq_len, float[] h0, float[] c0) lstm_output {
     return neurx.nn.rnn.lstm_forward(cell, input, seq_len, h0, c0)
 }
+
 func new_gru_cell(int input_size, int hidden_size) gru_cell_state {
     return neurx.nn.rnn.new_gru_cell(input_size, hidden_size)
 }
+
 func gru_cell_forward(gru_cell_state cell, float[] x, float[] h_prev) float[] {
     return neurx.nn.rnn.gru_cell_forward(cell, x, h_prev)
 }
+
 func gru_forward(gru_cell_state cell, float[] input, int seq_len, float[] h0) gru_output {
     return neurx.nn.rnn.gru_forward(cell, input, seq_len, h0)
 }

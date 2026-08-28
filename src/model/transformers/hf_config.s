@@ -23,6 +23,7 @@ struct hf_model_config {
     string quantization_config
     string[] supported_prompt_formats
 }
+
 func create_llama_config() hf_model_config {
     hf_model_config {
         model_id: "meta-llama/Llama-2-7b",
@@ -49,6 +50,7 @@ func create_llama_config() hf_model_config {
         supported_prompt_formats: ["default"],
     }
 }
+
 func create_qwen_config() hf_model_config {
     hf_model_config {
         model_id: "Qwen/Qwen2-7B",
@@ -75,6 +77,7 @@ func create_qwen_config() hf_model_config {
         supported_prompt_formats: ["qwen", "chatml"],
     }
 }
+
 func create_mistral_config() hf_model_config {
     hf_model_config {
         model_id: "mistralai/Mistral-7B-v0.1",
@@ -101,6 +104,7 @@ func create_mistral_config() hf_model_config {
         supported_prompt_formats: ["default"],
     }
 }
+
 func create_deepseek_config() hf_model_config {
     hf_model_config {
         model_id: "deepseek-ai/deepseek-7b",
@@ -127,6 +131,7 @@ func create_deepseek_config() hf_model_config {
         supported_prompt_formats: ["default"],
     }
 }
+
 func get_hf_config_by_model_id(string model_id) hf_model_config {
     if model_id == "meta-llama/Llama-2-7b" || model_id == "meta-llama/Llama-3-8b" {
         return create_llama_config()
@@ -142,6 +147,7 @@ func get_hf_config_by_model_id(string model_id) hf_model_config {
     }
     create_llama_config()
 }
+
 func get_hf_config_by_type(string model_type) hf_model_config {
     if model_type == "llama" {
         return create_llama_config()

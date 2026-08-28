@@ -12,10 +12,12 @@ use neurx.serving.runtime.production_service.{
     production_service_render_error,
     production_service_active_requests,
 }
+
 func fail(string message) int {
     println("production-service FAIL " + message)
     1
 }
+
 func main() {
     production_runtime_config config = new_production_runtime_config(8, 128, 128, 8, 1, 4)
     state := new_production_service_state(config, "neurx")

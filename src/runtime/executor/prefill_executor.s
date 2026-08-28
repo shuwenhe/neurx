@@ -9,6 +9,7 @@ struct PrefillExecutor {
     current_batch       string[]
     batch_count         i32
 }
+
 func NewPrefillExecutor(config ExecutorConfig, prefill_config PrefillConfig) *PrefillExecutor {
     executor := *PrefillExecutor{
         base: *NewBaseExecutor(config),
@@ -19,9 +20,11 @@ func NewPrefillExecutor(config ExecutorConfig, prefill_config PrefillConfig) *Pr
     }
     return executor
 }
+
 func (PrefillExecutor* pe) Initialize() ExecutionResult {
     return pe.base.Initialize()
 }
+
 func (PrefillExecutor* pe) ProcessPrefill(sequences string[], prompt_tokens []i32) ExecutionResult {
     if pe.base.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
@@ -71,6 +74,7 @@ func (PrefillExecutor* pe) ProcessPrefill(sequences string[], prompt_tokens []i3
         throughput: f64(total_tokens) / (f64(latency) / 1000.0),
     }
 }
+
 func (PrefillExecutor* pe) allocate_kv_cache(sequence_id string, num_tokens i32) ExecutionResult {
     memory_needed := num_tokens * 100
     cache_block := KVCacheBlock{
@@ -95,6 +99,7 @@ func (PrefillExecutor* pe) allocate_kv_cache(sequence_id string, num_tokens i32)
     }
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (PrefillExecutor* pe) compute_attention(sequences string[], token_counts []i32) ExecutionResult {
     total_ops := i32(0)
     for i := 0; i < len(token_counts); i++ {
@@ -105,12 +110,14 @@ func (PrefillExecutor* pe) compute_attention(sequences string[], token_counts []
         error_code: ERROR_SUCCESS,
     }
 }
+
 func (PrefillExecutor* pe) compute_logits(sequences string[]) ExecutionResult {
     return ExecutionResult{
         success: 1,
         error_code: ERROR_SUCCESS,
     }
 }
+
 func (PrefillExecutor* pe) CreateBatch(num_sequences i32) string[] {
     batch := make(string[], 0)
     for seq_id, _ := range pe.base.sequences {
@@ -120,12 +127,15 @@ func (PrefillExecutor* pe) CreateBatch(num_sequences i32) string[] {
     }
     return batch
 }
+
 func (PrefillExecutor* pe) EstimatePrefillTime(total_tokens i32) i32 {
     return (total_tokens * 10) / 1000
 }
+
 func (PrefillExecutor* pe) Shutdown() ExecutionResult {
     return pe.base.Shutdown()
 }
+
 func get_time_ms() i64 {
     return 0
 }

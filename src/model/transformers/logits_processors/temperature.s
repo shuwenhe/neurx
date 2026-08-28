@@ -4,6 +4,7 @@ struct temperature_processor {
     float temperature
     bool preserve_extremes
 }
+
 func create_temperature_processor(float temperature) temperature_processor {
     temp := temperature
     if temp < 0.01 {
@@ -17,6 +18,7 @@ func create_temperature_processor(float temperature) temperature_processor {
         preserve_extremes: false,
     }
 }
+
 func apply_temperature(
     logits: float[],
     temperature_processor processor
@@ -28,6 +30,7 @@ func apply_temperature(
     }
     scaled_logits
 }
+
 func apply_temperature_minmax(
     logits: float[],
     float temperature
@@ -60,6 +63,7 @@ func apply_temperature_minmax(
     }
     scaled
 }
+
 func apply_temperature_batch(
     logits_batch: float[][],
     temperature_processor processor
@@ -71,6 +75,7 @@ func apply_temperature_batch(
     }
     scaled_batch
 }
+
 func sample_with_temperature(
     logits: float[],
     temperature_processor processor
@@ -87,6 +92,7 @@ func sample_with_temperature(
     }
     best_token
 }
+
 func adaptive_temperature_by_entropy(
     logits: float[],
     base_temperature: float,
@@ -115,6 +121,7 @@ func adaptive_temperature_by_entropy(
     }
     adaptive_temp
 }
+
 func measure_distribution_diversity(
     logits: float[],
     float temperature
@@ -133,6 +140,7 @@ func measure_distribution_diversity(
     float max_entropy = log(float(len(logits)))
     entropy / max_entropy
 }
+
 func apply_temperature_top_k(
     logits: float[],
     temperature: float,
@@ -170,12 +178,14 @@ func apply_temperature_top_k(
     }
     processor_utils.apply_token_mask(scaled_logits, mask)
 }
+
 struct temperature_stats {
     float temperature
     float entropy_before
     float entropy_after
     float[] prob_top_5
 }
+
 func analyze_temperature_effect(
     logits: float[],
     float temperature
@@ -215,6 +225,7 @@ func analyze_temperature_effect(
         prob_top_5: top_5_probs,
     }
 }
+
 func temperature_stats_to_string(temperature_stats stats) string {
     string s = ""
     s = s + "Temperature Effect Analysis\n"

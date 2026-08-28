@@ -11,6 +11,7 @@ struct diversity_control_config {
     bool enable_cooling
     float cooling_factor
 }
+
 struct diversity_processor {
     diversity_control_config config
     int vocab_size
@@ -18,6 +19,7 @@ struct diversity_processor {
     int[] generation_history
     int max_history_length
 }
+
 func new_diversity_processor(int vocab_size) diversity_processor {
     diversity_processor{
         config: diversity_control_config{
@@ -37,18 +39,21 @@ func new_diversity_processor(int vocab_size) diversity_processor {
         max_history_length: 1000,
     }
 }
+
 func (diversity_processor* processor) set_temperature(float temp) {
     if temp <= 0.0 {
         temp = 0.1
     }
     processor.config.temperature = temp
 }
+
 func (diversity_processor* processor) set_top_k(int k) {
     if k <= 0 {
         k = 40
     }
     processor.config.top_k = k
 }
+
 func (diversity_processor* processor) set_top_p(float p) {
     if p <= 0.0 {
         p = 0.1
@@ -58,16 +63,20 @@ func (diversity_processor* processor) set_top_p(float p) {
     }
     processor.config.top_p = p
 }
+
 func (diversity_processor* processor) set_frequency_penalty(float penalty) {
     processor.config.frequency_penalty = penalty
 }
+
 func (diversity_processor* processor) set_presence_penalty(float penalty) {
     processor.config.presence_penalty = penalty
 }
+
 func (diversity_processor* processor) enable_cooling(bool enable, float factor) {
     processor.config.enable_cooling = enable
     processor.config.cooling_factor = factor
 }
+
 func (diversity_processor* processor) process_logits(
     float[] logits
 ) float[] {
@@ -99,6 +108,7 @@ func (diversity_processor* processor) process_logits(
     }
     return result
 }
+
 func apply_penalties(
     float[] logits,
     map[int]int frequency,
@@ -117,6 +127,7 @@ func apply_penalties(
         i = i + 1
     }
 }
+
 func apply_temperature(float[] logits, float temperature) {
     int i = 0
     for i < len(logits) {
@@ -124,6 +135,7 @@ func apply_temperature(float[] logits, float temperature) {
         i = i + 1
     }
 }
+
 func apply_top_k_filter(float[] logits, int k) {
     if k >= len(logits) {
         return
@@ -144,6 +156,7 @@ func apply_top_k_filter(float[] logits, int k) {
         i = i + 1
     }
 }
+
 func apply_top_p_filter(float[] logits, float p) {
     float[] probs = compute_softmax(logits)
     int[] indices = get_sorted_indices(probs, true)
@@ -172,6 +185,7 @@ func apply_top_p_filter(float[] logits, float p) {
         i = i + 1
     }
 }
+
 func apply_cooling(float[] logits, float factor) {
     float mean = 0.0
     int i = 0
@@ -187,6 +201,7 @@ func apply_cooling(float[] logits, float factor) {
         i = i + 1
     }
 }
+
 func (diversity_processor* processor) apply_contrastive_search(
     float[] logits,
     float[][] embedding_history,
@@ -212,6 +227,7 @@ func (diversity_processor* processor) apply_contrastive_search(
     }
     return result
 }
+
 func (diversity_processor* processor) apply_mutual_information(
     float[] logits,
     float[][] past_embeddings,
@@ -241,11 +257,13 @@ func (diversity_processor* processor) apply_mutual_information(
     }
     return result
 }
+
 struct beam_search_state {
     float[][] top_candidates
     float[] top_scores
     int beam_width
 }
+
 func (diversity_processor* processor) create_beam_search(
     int beam_width
 ) beam_search_state {
@@ -255,6 +273,7 @@ func (diversity_processor* processor) create_beam_search(
         beam_width: beam_width,
     }
 }
+
 func (diversity_processor* processor) add_token_to_history(int token_id) {
     processor.token_frequency[token_id] = processor.token_frequency[token_id] + 1
     processor.generation_history = append_int(processor.generation_history, token_id)
@@ -270,10 +289,12 @@ func (diversity_processor* processor) add_token_to_history(int token_id) {
         processor.generation_history = new_history
     }
 }
+
 func (diversity_processor* processor) reset_history() {
     processor.token_frequency = map[int]int{}
     processor.generation_history = make(int[], 0)
 }
+
 func (diversity_processor* processor) get_unique_token_ratio() float {
     if len(processor.generation_history) == 0 {
         return 0.0
@@ -286,6 +307,7 @@ func (diversity_processor* processor) get_unique_token_ratio() float {
     }
     return float(unique_count) / float(len(processor.generation_history))
 }
+
 func (diversity_processor* processor) get_entropy() float {
     if len(processor.token_frequency) == 0 {
         return 0.0
@@ -305,6 +327,7 @@ func (diversity_processor* processor) get_entropy() float {
     }
     return entropy
 }
+
 func append_int(int[] arr, int val) int[] {
     int[] new_arr = make(int[], len(arr) + 1)
     int i = 0
@@ -315,6 +338,7 @@ func append_int(int[] arr, int val) int[] {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func sort_array_descending(float[] arr) {
     int n = len(arr)
     int i = 0
@@ -331,6 +355,7 @@ func sort_array_descending(float[] arr) {
         i = i + 1
     }
 }
+
 func compute_softmax(float[] logits) float[] {
     float max_logit = logits[0]
     int i = 1
@@ -360,6 +385,7 @@ func compute_softmax(float[] logits) float[] {
     }
     return probs
 }
+
 func get_sorted_indices(float[] arr, bool descending) int[] {
     int[] indices = make(int[], len(arr))
     int i = 0
@@ -389,6 +415,7 @@ func get_sorted_indices(float[] arr, bool descending) int[] {
     }
     return indices
 }
+
 func compute_similarity_with_history(
     float[] current,
     float[][] history
@@ -396,6 +423,7 @@ func compute_similarity_with_history(
     float[] similarities = make(float[], len(current))
     return similarities
 }
+
 func compute_distance(float[] a, float[] b) float {
     float sum = 0.0
     int i = 0
@@ -406,6 +434,7 @@ func compute_distance(float[] a, float[] b) float {
     }
     return sqrt_f(sum)
 }
+
 func exp_f(float x) float {
     if x > 50.0 {
         return 1000000.0
@@ -423,6 +452,7 @@ func exp_f(float x) float {
     }
     return result
 }
+
 func log_f(float x) float {
     if x <= 0.0 {
         return -10.0
@@ -439,6 +469,7 @@ func log_f(float x) float {
     }
     return 2.0 * y
 }
+
 func sqrt_f(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -451,6 +482,7 @@ func sqrt_f(float x) float {
     }
     return guess
 }
+
 func main() {
     print("✓ Diversity Control Processor")
     print("  - Temperature scaling")

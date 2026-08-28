@@ -14,12 +14,14 @@ struct audio_metadata {
     audio_format format
     int32 bitrate_kbps
 }
+
 struct audio_data {
     float32[] samples
     audio_metadata* metadata
     int32 num_samples
     string source_url
 }
+
 struct spectrogram_data {
     float32[][]] spectrogram
     int32 num_freq_bins
@@ -27,6 +29,7 @@ struct spectrogram_data {
     int32 hop_length
     int32 window_size
 }
+
 struct audio_processor {
     int32 target_sample_rate
     int32 fft_size
@@ -36,6 +39,7 @@ struct audio_processor {
     bool enable_spectrogram
     float32 noise_threshold
 }
+
 func create_audio_processor() audio_processor* {
     return *audio_processor{
         target_sample_rate: 16000,
@@ -47,6 +51,7 @@ func create_audio_processor() audio_processor* {
         noise_threshold: 0.01,
     }
 }
+
 func (audio_processor* proc) resample_audio(audio_data* audio, int32 new_sample_rate) audio_data* {
     if audio == nil || audio.metadata == nil {
         return nil
@@ -71,6 +76,7 @@ func (audio_processor* proc) resample_audio(audio_data* audio, int32 new_sample_
     }
     return resampled
 }
+
 func (audio_processor* proc) normalize_audio(audio_data* audio) audio_data* {
     if audio == nil || audio.metadata == nil {
         return nil
@@ -95,6 +101,7 @@ func (audio_processor* proc) normalize_audio(audio_data* audio) audio_data* {
     }
     return normalized
 }
+
 func (audio_processor* proc) compute_spectrogram(audio_data* audio) spectrogram_data {
     spec := spectrogram_data{
         spectrogram: make(float32[][]]),
@@ -112,6 +119,7 @@ func (audio_processor* proc) compute_spectrogram(audio_data* audio) spectrogram_
     }
     return spec
 }
+
 func (audio_processor* proc) compute_mfcc(audio_data* audio) float32[][]] {
     mfcc_features := make(float32[][]])
     spec := proc.compute_spectrogram(audio)
@@ -124,6 +132,7 @@ func (audio_processor* proc) compute_mfcc(audio_data* audio) float32[][]] {
     }
     return mfcc_features
 }
+
 func (audio_processor* proc) remove_silence(audio_data* audio) audio_data* {
     if audio == nil || audio.metadata == nil {
         return audio
@@ -142,6 +151,7 @@ func (audio_processor* proc) remove_silence(audio_data* audio) audio_data* {
     }
     return trimmed
 }
+
 func (audio_processor* proc) get_audio_stats(audio_data* audio) map[string]interface{} {
     stats := make(map[string]interface{})
     if audio == nil || audio.metadata == nil {

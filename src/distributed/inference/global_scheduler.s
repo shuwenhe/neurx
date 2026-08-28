@@ -10,6 +10,7 @@ struct request_metadata {
     int64 arrival_time_ns
     int priority_level
 }
+
 struct batch_slot {
     int slot_id
     int request_id
@@ -24,6 +25,7 @@ struct batch_slot {
     int kv_block_start
     int kv_block_size
 }
+
 struct continuous_batch {
     int batch_id
     int64 creation_time_ns
@@ -36,6 +38,7 @@ struct continuous_batch {
     float[] kv_cache_read_indices
     bool is_full
 }
+
 struct global_scheduler_config {
     int max_batch_size
     int max_prefill_batch_size
@@ -46,6 +49,7 @@ struct global_scheduler_config {
     float admission_control_threshold
     int num_gpu_replicas
 }
+
 struct global_inference_scheduler {
     int scheduler_id
     int world_size
@@ -59,6 +63,7 @@ struct global_inference_scheduler {
     float avg_ttft_ms
     float avg_tpot_ms
 }
+
 func new_global_inference_scheduler(
     int scheduler_id,
     int world_size,
@@ -90,6 +95,7 @@ func new_global_inference_scheduler(
     }
     return scheduler
 }
+
 func (global_inference_scheduler* scheduler) admit_request(
     request_metadata req
 ) (bool, string) {
@@ -107,6 +113,7 @@ func (global_inference_scheduler* scheduler) admit_request(
     scheduler.pending_requests = append(scheduler.pending_requests, req)
     return true, "Request admitted"
 }
+
 func (global_inference_scheduler* scheduler) continuous_batch_iteration() (continuous_batch, bool) {
     if len(scheduler.pending_requests) == 0 {
         return continuous_batch{}, false
@@ -162,6 +169,7 @@ func (global_inference_scheduler* scheduler) continuous_batch_iteration() (conti
     }
     return continuous_batch{}, false
 }
+
 func (global_inference_scheduler* scheduler) update_batch_prefill_status(
     continuous_batch* batch
 ) {
@@ -178,6 +186,7 @@ func (global_inference_scheduler* scheduler) update_batch_prefill_status(
         i = i + 1
     }
 }
+
 func (global_inference_scheduler* scheduler) decode_one_token_batch(
     continuous_batch* batch
 ) (float[], bool) {
@@ -200,6 +209,7 @@ func (global_inference_scheduler* scheduler) decode_one_token_batch(
     }
     return logits, true
 }
+
 func (global_inference_scheduler* scheduler) get_completed_batches() continuous_batch[] {
     completed := continuous_batch[]{cap: len(scheduler.active_batches)}
     int i = 0
@@ -220,8 +230,10 @@ func (global_inference_scheduler* scheduler) get_completed_batches() continuous_
     }
     return completed
 }
+
 func (global_inference_scheduler* scheduler) remove_completed_batch(int batch_id) {
 }
+
 func (global_inference_scheduler* scheduler) get_load_metrics() (int, int, float) {
     total_prefill := 0
     total_decode := 0
@@ -242,18 +254,22 @@ func (global_inference_scheduler* scheduler) get_load_metrics() (int, int, float
     }
     return total_prefill, total_decode, avg_batch_utilization
 }
+
 func (global_inference_scheduler* scheduler) get_request_queue_length() int {
     return len(scheduler.pending_requests)
 }
+
 func (global_inference_scheduler* scheduler) get_active_batch_count() int {
     return len(scheduler.active_batches)
 }
+
 func (global_inference_scheduler* scheduler) get_scheduler_stats() (int, int, float, float) {
     return scheduler.total_requests_processed,
            scheduler.total_tokens_generated,
            scheduler.avg_ttft_ms,
            scheduler.avg_tpot_ms
 }
+
 func (global_inference_scheduler* scheduler) update_metrics(
     int tokens_generated,
     float ttft_ms,
@@ -263,6 +279,7 @@ func (global_inference_scheduler* scheduler) update_metrics(
     scheduler.avg_ttft_ms = (scheduler.avg_ttft_ms * 0.9) + (ttft_ms * 0.1)
     scheduler.avg_tpot_ms = (scheduler.avg_tpot_ms * 0.9) + (tpot_ms * 0.1)
 }
+
 func (global_inference_scheduler* scheduler) should_admit_new_request() bool {
     if len(scheduler.pending_requests) >= 1000 {
         return false

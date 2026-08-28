@@ -23,10 +23,12 @@ func int_to_string(int value) string {
     if negative { out = "-" + out }
     return out
 }
+
 func read_line() string {
     string result = __sys_read_string(0, 4096)
     trim(result)
 }
+
 func json_escape(string value) string {
     string output = ""
     int i = 0
@@ -42,6 +44,7 @@ func json_escape(string value) string {
     }
     return output
 }
+
 func send_request(int sockfd, string prompt, int max_tokens) {
     string request = "POST /v1/generate HTTP/1.1\r\n"
     request = request + "Host: localhost\r\n"
@@ -53,6 +56,7 @@ func send_request(int sockfd, string prompt, int max_tokens) {
     request = request + body
     _ = __sys_write_string(sockfd, request)
 }
+
 func main() {
     _ = __sys_write_string(1, "\n")
     _ = __sys_write_string(1, "========================================\n")

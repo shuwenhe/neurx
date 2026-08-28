@@ -11,6 +11,7 @@ struct recovery_checkpoint {
     int dp_size
     int64 timestamp_ns
 }
+
 struct recovery_state {
     bool is_recovering
     int failed_rank
@@ -20,6 +21,7 @@ struct recovery_state {
     float recovery_start_time_ms
     float recovery_end_time_ms
 }
+
 struct automatic_recovery_manager {
     int my_rank
     int world_size
@@ -30,6 +32,7 @@ struct automatic_recovery_manager {
     bool enable_incremental_checkpoint
     float recovery_timeout_ms
 }
+
 func new_automatic_recovery_manager(
     int my_rank,
     int world_size,
@@ -56,6 +59,7 @@ func new_automatic_recovery_manager(
     }
     return manager
 }
+
 func (automatic_recovery_manager* manager) save_checkpoint(
     int global_step,
     int epoch,
@@ -98,6 +102,7 @@ func (automatic_recovery_manager* manager) save_checkpoint(
     }
     manager.checkpoints = append(manager.checkpoints, checkpoint)
 }
+
 func (automatic_recovery_manager* manager) remove_oldest_checkpoint() {
     if len(manager.checkpoints) == 0 {
         return
@@ -111,6 +116,7 @@ func (automatic_recovery_manager* manager) remove_oldest_checkpoint() {
     }
     manager.checkpoints = new_checkpoints
 }
+
 func (automatic_recovery_manager* manager) get_latest_checkpoint() recovery_checkpoint {
     if len(manager.checkpoints) == 0 {
         return recovery_checkpoint {
@@ -128,6 +134,7 @@ func (automatic_recovery_manager* manager) get_latest_checkpoint() recovery_chec
     }
     return manager.checkpoints[len(manager.checkpoints) - 1]
 }
+
 func (automatic_recovery_manager* manager) initiate_recovery(
     int failed_rank,
     int new_world_size,
@@ -158,6 +165,7 @@ func (automatic_recovery_manager* manager) initiate_recovery(
     manager.current_recovery.ranks_to_recover = ranks_to_keep
     return true, "Recovery initiated for rank " + str(failed_rank)
 }
+
 func (automatic_recovery_manager* manager) execute_recovery_steps(
     float[] model_params,
     float[] optimizer_state,
@@ -234,9 +242,11 @@ func (automatic_recovery_manager* manager) execute_recovery_steps(
     }
     return false, "Unknown recovery step"
 }
+
 func (automatic_recovery_manager* manager) pause_all_computation() bool {
     return true
 }
+
 func (automatic_recovery_manager* manager) update_world_size_metadata(
     int new_world_size,
     int tp_size,
@@ -248,6 +258,7 @@ func (automatic_recovery_manager* manager) update_world_size_metadata(
     }
     return true
 }
+
 func (automatic_recovery_manager* manager) remap_parameters(
     float[] dst_params,
     float[] src_params,
@@ -279,6 +290,7 @@ func (automatic_recovery_manager* manager) remap_parameters(
     }
     return true
 }
+
 func (automatic_recovery_manager* manager) synchronize_to_all_ranks(
     float[] model_params
 ) bool {
@@ -293,23 +305,28 @@ func (automatic_recovery_manager* manager) synchronize_to_all_ranks(
     }
     return true
 }
+
 func (automatic_recovery_manager* manager) resume_computation_from_checkpoint(
     int global_step
 ) bool {
     return true
 }
+
 func (automatic_recovery_manager* manager) is_recovering() bool {
     return manager.current_recovery.is_recovering
 }
+
 func (automatic_recovery_manager* manager) get_recovery_progress() (int, int) {
     return manager.current_recovery.recovery_step, 6
 }
+
 func (automatic_recovery_manager* manager) get_last_checkpoint_step() int {
     if len(manager.checkpoints) == 0 {
         return 0
     }
     return manager.checkpoints[len(manager.checkpoints) - 1].global_step
 }
+
 func (automatic_recovery_manager* manager) save_async_checkpoint(
     int global_step,
     float[] model_params,
@@ -329,6 +346,7 @@ func (automatic_recovery_manager* manager) save_async_checkpoint(
         dp_size
     )
 }
+
 func (automatic_recovery_manager* manager) async_checkpoint_worker(
     int global_step,
     float[] model_params,
@@ -349,6 +367,7 @@ func (automatic_recovery_manager* manager) async_checkpoint_worker(
         dp_size
     )
 }
+
 func (automatic_recovery_manager* manager) get_checkpoint_count() int {
     return len(manager.checkpoints)
 }

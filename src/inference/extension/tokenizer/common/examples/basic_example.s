@@ -28,6 +28,7 @@ func BasicTokenizationExample() {
     println("Success:", result.success)
     println("Error code:", result.error_code)
 }
+
 func HuggingFaceTokenizerExample() {
     println("\n=== HuggingFace Tokenizer Example ===\n")
     config := types.TokenizerConfig{
@@ -54,6 +55,7 @@ func HuggingFaceTokenizerExample() {
     decoded := hf_tokenizer.Decode(result.tokens)
     println("Decoded:", decoded)
 }
+
 func SpecialTokensExample() {
     println("\n=== Special Tokens Management Example ===\n")
     mgr := special_tokens.NewSpecialTokenManager()
@@ -72,6 +74,7 @@ func SpecialTokensExample() {
     all_special := mgr.GetAllSpecialTokens()
     println("Total special token types:", len(all_special))
 }
+
 func TokenCachingExample() {
     println("\n=== Token Caching Example ===\n")
     cache_inst := cache.NewTokenCache(100000, "lru")
@@ -97,6 +100,7 @@ func TokenCachingExample() {
     println("  Utilization:", cache_inst.GetUtilization(), "%")
     println("  Entries:", cache_inst.GetEntryCount())
 }
+
 func BatchProcessingExample() {
     println("\n=== Batch Processing Example ===\n")
     config := types.TokenizerConfig{
@@ -120,6 +124,7 @@ func BatchProcessingExample() {
         println("  Text", i, "tokens:", len(results[i].tokens))
     }
 }
+
 func UtilityFunctionsExample() {
     println("\n=== Utility Functions Example ===\n")
     tokens := make(i32[], 0)
@@ -141,6 +146,7 @@ func UtilityFunctionsExample() {
     println("Original length:", len(tokens))
     println("Padded length:", len(padded))
 }
+
 func main() {
     println("╔════════════════════════════════════════════════════════════╗")
     println("║         NeurX Tokenizers - Basic Examples                 ║")

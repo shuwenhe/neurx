@@ -1,5 +1,6 @@
 package neurx.runtime.device.vendor_lowering
 use neurx.runtime.device.device_ops.{device_op}
+
 struct lowered_op {
     string backend
     string vendor_op
@@ -7,6 +8,7 @@ struct lowered_op {
     bool valid
     string error_message
 }
+
 func lower_vendor_name(string backend, string kind) string {
     if backend == "cuda" {
         if kind == "linear" { return "cublaslt_matmul" }
@@ -26,14 +28,17 @@ func lower_vendor_name(string backend, string kind) string {
     }
     kind
 }
+
 func lower_cuda(device_op operation) lowered_op {
     string vendor = lower_vendor_name("cuda", operation.kind)
     lowered_op {backend: "cuda", vendor_op: vendor, descriptor: operation.descriptor + ";lowering=" + vendor, valid: operation.valid, error_message: operation.error_message}
 }
+
 func lower_cann(device_op operation) lowered_op {
     string vendor = lower_vendor_name("cann", operation.kind)
     lowered_op {backend: "cann", vendor_op: vendor, descriptor: operation.descriptor + ";lowering=" + vendor, valid: operation.valid, error_message: operation.error_message}
 }
+
 func lower_device_op(string backend, bool available, device_op operation) lowered_op {
     if !available { return lowered_op {backend: backend, vendor_op: "", descriptor: "", valid: false, error_message: "backend_unavailable"} }
     if backend == "cuda" { return lower_cuda(operation) }

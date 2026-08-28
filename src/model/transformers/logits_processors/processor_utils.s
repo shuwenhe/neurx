@@ -4,12 +4,14 @@ struct logits_processor {
     float[] logits
     int vocab_size
 }
+
 struct processor_result {
     float[] processed_logits
     float[] probabilities
     int[] top_token_ids
     float[] top_token_probs
 }
+
 func softmax(float[] logits) float[] {
     float max_logit = logits[0]
     for i = 1; i < len(logits); i = i + 1 {
@@ -30,6 +32,7 @@ func softmax(float[] logits) float[] {
     }
     probs
 }
+
 func log_softmax(float[] logits) float[] {
     float max_logit = logits[0]
     for i = 1; i < len(logits); i = i + 1 {
@@ -49,6 +52,7 @@ func log_softmax(float[] logits) float[] {
     }
     log_probs
 }
+
 func get_top_k_tokens(
     logits: float[],
     int k
@@ -79,6 +83,7 @@ func get_top_k_tokens(
     }
     (top_indices, top_scores)
 }
+
 func apply_token_mask(
     logits: float[],
     mask: bool[]
@@ -93,12 +98,14 @@ func apply_token_mask(
     }
     masked_logits
 }
+
 func find_token_index(int token_id, int vocab_size) int {
     if token_id < 0 || token_id >= vocab_size {
         return -1
     }
     token_id
 }
+
 func cumulative_softmax(float[] probs) float[] {
     float[] cum_probs
     float cumsum = 0.0
@@ -108,11 +115,13 @@ func cumulative_softmax(float[] probs) float[] {
     }
     cum_probs
 }
+
 struct batch_processor_state {
     int batch_size
     float[][] batch_logits
     []processor_result results
 }
+
 func create_batch_processor(int batch_size, int vocab_size) batch_processor_state {
     batch_processor_state {
         batch_size: batch_size,
@@ -120,6 +129,7 @@ func create_batch_processor(int batch_size, int vocab_size) batch_processor_stat
         results: [],
     }
 }
+
 func logits_processor_to_string(logits_processor processor) string {
     string s = ""
     s = s + "Processor: " + processor.processor_type + "\n"

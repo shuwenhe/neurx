@@ -23,6 +23,7 @@ struct moe_config {
     apply_residual: bool = true
     expert_pruning_threshold: float = 0.001
 }
+
 struct moe_forward_output {
     tensor output
     tensor aux_loss
@@ -33,6 +34,7 @@ struct moe_forward_output {
     dispatch_pattern dispatch_pattern
     list<tensor> perexpert_output
 }
+
 struct dispatch_pattern {
     int total_tokens
     list<int> tokens_per_expert
@@ -43,6 +45,7 @@ struct dispatch_pattern {
     float entropy
     int dropped_tokens
 }
+
 struct moe_expert {
     int id
     linear up_proj
@@ -52,6 +55,7 @@ struct moe_expert {
     importance_weight: float = 1.0
     is_active: bool = true
 }
+
 struct moe_router {
     linear gate_layer
     Parameter bias
@@ -66,6 +70,7 @@ struct moe_router {
             this.noise = new normal(mean=0.0, std=config.jitter_noise)
     }
 }
+
 struct load_balance_loss_computer {
     moe_config config
     init(config: moe_config) {
@@ -86,6 +91,7 @@ struct load_balance_loss_computer {
         return load_balance_loss * this.config.loss_coef, aux_loss * this.config.aux_loss_coef
     }
 }
+
 struct mo_effn_layer {
     moe_config config
     list<moe_expert> experts
@@ -307,6 +313,7 @@ struct mo_effn_layer {
         }
     }
 }
+
 struct expert_specializer {
     moe_config config
     MoEFFNLayer moe_layer
@@ -406,6 +413,7 @@ struct expert_specializer {
         return cv < 0.1
     }
 }
+
 struct expert_analysis_report {
     int num_total_experts
     int num_active_experts
@@ -414,6 +422,7 @@ struct expert_analysis_report {
     importance_range: tuple<float, float>
     bool redundancy_detected
 }
+
 struct individual_expert_report {
     int expert_id
     bool is_active
@@ -423,6 +432,7 @@ struct individual_expert_report {
     float specialization_score
     float importance_weight
 }
+
 struct expert_manager {
     list<mo_effn_layer> moe_layers
     ExpertSpecializer specializer
@@ -507,17 +517,20 @@ struct expert_manager {
         }
     }
 }
+
 struct pruning_report {
     int experts_pruned
     list<int> pruned_expert_ids
     float threshold_used
     int remaining_active
 }
+
 struct merging_report {
     int merges_performed
     list<merge_operation> operations
     float estimated_memory_savings_pct
 }
+
 struct merge_operation {
     int layer_index
     int expert_a_id
@@ -525,6 +538,7 @@ struct merge_operation {
     float similarity
     string action
 }
+
 struct moe_efficiency_report {
     int total_experts_per_layer
     int total_moe_layers
@@ -532,9 +546,11 @@ struct moe_efficiency_report {
     float parameter_sparsity
     string theoretical_flops_reduction
 }
+
 function create_moe_ffn_layer(config: moe_config) {
     return new mo_effn_layer(config=config  new moe_config())
 }
+
 function test_moe_system() {
     print("🧪 Testing NEURX MOE Optimization System...")
     cfg = moe_config(

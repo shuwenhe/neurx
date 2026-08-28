@@ -14,6 +14,7 @@ struct hf_model_loader {
     bool load_in_8bit
     bool load_in_4bit
 }
+
 struct loaded_hf_model {
     string model_id
     string model_type
@@ -23,6 +24,7 @@ struct loaded_hf_model {
     string dtype
     string device
 }
+
 struct hf_load_options {
     string device
     string dtype
@@ -31,6 +33,7 @@ struct hf_load_options {
     bool low_cpu_mem_usage
     int max_memory_mb
 }
+
 func default_hf_load_options() hf_load_options {
     hf_load_options {
         device: "cpu",
@@ -41,6 +44,7 @@ func default_hf_load_options() hf_load_options {
         max_memory_mb: 8192,
     }
 }
+
 func create_hf_model_loader(string model_id) hf_model_loader {
     hf_model_loader {
         model_id: model_id,
@@ -51,6 +55,7 @@ func create_hf_model_loader(string model_id) hf_model_loader {
         load_in_4bit: false,
     }
 }
+
 func load_hf_model(
     model_id: string,
     hf_load_options options
@@ -114,6 +119,7 @@ func load_hf_model(
         device: options.device,
     }
 }
+
 struct hf_inference_config {
     float temperature
     int max_new_tokens
@@ -122,6 +128,7 @@ struct hf_inference_config {
     bool do_sample
     string generation_mode
 }
+
 func default_inference_config() hf_inference_config {
     hf_inference_config {
         temperature: 0.7,
@@ -132,6 +139,7 @@ func default_inference_config() hf_inference_config {
         generation_mode: "sampling",
     }
 }
+
 func generate_text(
     model: loaded_hf_model,
     prompt: string,
@@ -160,6 +168,7 @@ func generate_text(
     print(generated + "\n")
     generated
 }
+
 func print_hf_model_summary(loaded_hf_model model) {
     print("\n╔════════════════════════════════════════════════╗\n")
     print("║  📊 HuggingFace Model Summary                ║\n")

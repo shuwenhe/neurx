@@ -9,6 +9,7 @@ import "time"
 	TASK_CANCELLED     = 5
 	TASK_TIMED_OUT     = 6
 }
+
 struct async_task {
 	task_id             string
 	request_id          string
@@ -29,6 +30,7 @@ struct async_task {
 	cancel_signal       bool
 	paused_signal       bool
 }
+
 struct task_result {
 	task_id             string
 	request_id          string
@@ -40,6 +42,7 @@ struct task_result {
 	error_message       string
 	completed_at        int64
 }
+
 struct executor_stats {
 	total_tasks         int64
 	completed_tasks     int64
@@ -53,6 +56,7 @@ struct executor_stats {
 	max_concurrent_tasks int32
 	last_update_time    int64
 }
+
 struct async_executor {
 	task_queue          async_task*[]
 	running_tasks       map[string]async_task*
@@ -66,6 +70,7 @@ struct async_executor {
 	is_shutdown         bool
 	shutdown_timeout    int64
 }
+
 func create_executor(max_concurrent int32, worker_pool_size int32) async_executor {
 	return async_executor{
 		task_queue:      make(async_task*[], 0, 1024),
@@ -78,6 +83,7 @@ func create_executor(max_concurrent int32, worker_pool_size int32) async_executo
 		shutdown_timeout: 30000000000,
 	}
 }
+
 func (e async_executor*) submit_task(
 	task_id string,
 	request_id string,
@@ -110,6 +116,7 @@ func (e async_executor*) submit_task(
 	}
 	return true
 }
+
 func (e async_executor*) try_execute_task() bool {
 	e.mu.Lock()
 	if len(e.task_queue) == 0 {
@@ -135,6 +142,7 @@ func (e async_executor*) try_execute_task() bool {
 	go e.execute_task_impl(task)
 	return true
 }
+
 func (e async_executor*) execute_task_impl(task async_task*) {
 	defer func() {
 		e.mu.Lock()
@@ -189,9 +197,11 @@ func (e async_executor*) execute_task_impl(task async_task*) {
 	task.execution_time_ms = (task.completed_at - task.started_at) / 1000000
 	e.add_completed_result(task, TASK_FAILED)
 }
+
 func (e async_executor*) execute_sync(task async_task*) bool {
 	return true
 }
+
 func (e async_executor*) add_completed_result(task async_task*, final_state int32) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -217,6 +227,7 @@ func (e async_executor*) add_completed_result(task async_task*, final_state int3
 	e.stats.total_execution_time += task.execution_time_ms
 	e.stats.avg_execution_time_ms = float32(e.stats.total_execution_time) / float32(e.stats.completed_tasks+e.stats.failed_tasks)
 }
+
 func (e async_executor*) cancel_task(task_id string) bool {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -227,6 +238,7 @@ func (e async_executor*) cancel_task(task_id string) bool {
 	task.cancel_signal = true
 	return true
 }
+
 func (e async_executor*) pause_task(task_id string) bool {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -237,6 +249,7 @@ func (e async_executor*) pause_task(task_id string) bool {
 	task.paused_signal = true
 	return true
 }
+
 func (e async_executor*) resume_task(task_id string) bool {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -247,6 +260,7 @@ func (e async_executor*) resume_task(task_id string) bool {
 	task.paused_signal = false
 	return true
 }
+
 func (e async_executor*) get_task_result(task_id string) (task_result, bool) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -257,6 +271,7 @@ func (e async_executor*) get_task_result(task_id string) (task_result, bool) {
 	}
 	return task_result{}, false
 }
+
 func (e async_executor*) get_task_state(task_id string) int32 {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -271,6 +286,7 @@ func (e async_executor*) get_task_state(task_id string) int32 {
 	}
 	return TASK_PENDING
 }
+
 func (e async_executor*) get_statistics() executor_stats {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -279,6 +295,7 @@ func (e async_executor*) get_statistics() executor_stats {
 	e.stats.queued_tasks = int32(len(e.task_queue))
 	return e.stats
 }
+
 func (e async_executor*) wait_for_completion(timeout_ms int64) bool {
 	deadline := time.Now().Add(time.Duration(timeout_ms) * time.Millisecond)
 	for time.Now().Before(deadline) {
@@ -293,6 +310,7 @@ func (e async_executor*) wait_for_completion(timeout_ms int64) bool {
 	}
 	return false
 }
+
 func (e async_executor*) shutdown(timeout_ms int64) {
 	e.mu.Lock()
 	e.is_shutdown = true
@@ -302,6 +320,7 @@ func (e async_executor*) shutdown(timeout_ms int64) {
 	e.mu.Unlock()
 	e.wait_for_completion(timeout_ms)
 }
+
 func (e async_executor*) get_pending_results() task_result[] {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -312,6 +331,7 @@ func (e async_executor*) get_pending_results() task_result[] {
 	e.completed_tasks = make(task_result[], 0, 1024)
 	return results
 }
+
 func sort_tasks_by_priority(tasks async_task*[]) {
 	for i := int32(0); i < int32(len(tasks)); i++ {
 		for j := i + 1; j < int32(len(tasks)); j++ {

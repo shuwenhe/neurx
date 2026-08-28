@@ -20,6 +20,7 @@ struct sync_result {
 	string sync_status
 	time.Time sync_time
 }
+
 struct audio_video_pair {
 	*audio_data audio
 	*video_data video
@@ -28,6 +29,7 @@ struct audio_video_pair {
 	bool manually_aligned
 	time.Time created_at
 }
+
 struct temporal_alignment {
 	int32 audio_frame_index
 	int32 video_frame_index
@@ -36,6 +38,7 @@ struct temporal_alignment {
 	float32 confidence
 	bool is_keypoint
 }
+
 struct sync_statistics {
 	int32 num_alignment_points
 	float64 max_time_offset_ms
@@ -45,6 +48,7 @@ struct sync_statistics {
 	int64 successful_syncs
 	time.Time last_sync_time
 }
+
 struct audio_video_aligner {
 	sync.Mutex mu
 	map[string]*audio_video_pair pair_cache
@@ -56,6 +60,7 @@ struct audio_video_aligner {
 	int32 search_window_ms
 	time.Time created_at
 }
+
 func create_audio_video_aligner() *audio_video_aligner {
 	ava := *audio_video_aligner{
 		pair_cache:            make(map[string]*audio_video_pair),
@@ -77,6 +82,7 @@ func create_audio_video_aligner() *audio_video_aligner {
 	}
 	return ava
 }
+
 func (audio_video_aligner* ava) create_pair(audio_id string, video_id string, audio *audio_data, video *video_data) (string, error) {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
@@ -95,6 +101,7 @@ func (audio_video_aligner* ava) create_pair(audio_id string, video_id string, au
 	ava.pair_cache[pair_id] = pair
 	return pair_id, nil
 }
+
 func (audio_video_aligner* ava) sync_cross_correlation(pair_id string) (*sync_result, error) {
 	ava.mu.Lock()
 	pair, exists := ava.pair_cache[pair_id]
@@ -157,6 +164,7 @@ func (audio_video_aligner* ava) sync_cross_correlation(pair_id string) (*sync_re
 	ava.mu.Unlock()
 	return result, nil
 }
+
 func (audio_video_aligner* ava) sync_dtw(pair_id string) (*sync_result, error) {
 	ava.mu.Lock()
 	pair, exists := ava.pair_cache[pair_id]
@@ -232,6 +240,7 @@ func (audio_video_aligner* ava) sync_dtw(pair_id string) (*sync_result, error) {
 	ava.mu.Unlock()
 	return result, nil
 }
+
 func (audio_video_aligner* ava) detect_sync_points(pair_id string) ([]temporal_alignment, error) {
 	ava.mu.Lock()
 	pair, exists := ava.pair_cache[pair_id]
@@ -260,6 +269,7 @@ func (audio_video_aligner* ava) detect_sync_points(pair_id string) ([]temporal_a
 	ava.mu.Unlock()
 	return alignment_points, nil
 }
+
 func (audio_video_aligner* ava) auto_sync(pair_id string) (*sync_result, error) {
 	methods := []sync_method{
 		SYNC_CROSS_CORRELATION,
@@ -291,6 +301,7 @@ func (audio_video_aligner* ava) auto_sync(pair_id string) (*sync_result, error) 
 	}
 	return best_result, nil
 }
+
 func (audio_video_aligner* ava) manually_align(pair_id string, time_offset_ms float64) error {
 	ava.mu.Lock()
 	pair, exists := ava.pair_cache[pair_id]
@@ -311,6 +322,7 @@ func (audio_video_aligner* ava) manually_align(pair_id string, time_offset_ms fl
 	ava.mu.Unlock()
 	return nil
 }
+
 func (audio_video_aligner* ava) get_sync_result(pair_id string) (*sync_result, error) {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
@@ -320,17 +332,20 @@ func (audio_video_aligner* ava) get_sync_result(pair_id string) (*sync_result, e
 	}
 	return result, nil
 }
+
 func (audio_video_aligner* ava) get_alignment_points(pair_id string) []temporal_alignment {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 	points, _ := ava.alignments[pair_id]
 	return points
 }
+
 func (audio_video_aligner* ava) get_aligner_stats() *sync_statistics {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 	return ava.stats
 }
+
 func (audio_video_aligner* ava) set_confidence_threshold(threshold float32) error {
 	if threshold < 0 || threshold > 1 {
 		return fmt.Errorf("threshold must be between 0 and 1")
@@ -340,11 +355,13 @@ func (audio_video_aligner* ava) set_confidence_threshold(threshold float32) erro
 	ava.confidence_threshold = threshold
 	return nil
 }
+
 func (audio_video_aligner* ava) set_sync_method(method sync_method) {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 	ava.default_method = method
 }
+
 func (audio_video_aligner* ava) clear_pair(pair_id string) error {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()

@@ -31,6 +31,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func health_response() string {
     string body = "{\"status\":\"healthy\",\"service\":\"neurx-inference\",\"version\":\"1.0.0-s\"}"
     string result = "HTTP/1.1 200 OK\r\n"
@@ -41,6 +42,7 @@ func health_response() string {
     result = result + "\r\n" + body
     return result
 }
+
 func models_response() string {
     string body = "{\"object\":\"list\",\"data\":[{\"id\":\"Qwen2.5-0.5B-Instruct\",\"object\":\"model\"}]}"
     string result = "HTTP/1.1 200 OK\r\n"
@@ -51,6 +53,7 @@ func models_response() string {
     result = result + "\r\n" + body
     return result
 }
+
 func chat_response(string model) string {
     int prompt_tokens = 5
     int completion_tokens = 25
@@ -64,6 +67,7 @@ func chat_response(string model) string {
     result = result + "\r\n" + body
     return result
 }
+
 func not_found_response() string {
     string body = "{\"error\":\"endpoint not found\"}"
     string result = "HTTP/1.1 404 Not Found\r\n"
@@ -74,6 +78,7 @@ func not_found_response() string {
     result = result + "\r\n" + body
     return result
 }
+
 func route_request(string path) string {
     if path == "/health" {
         return health_response()
@@ -88,6 +93,7 @@ func route_request(string path) string {
         return not_found_response()
     }
 }
+
 func print_header() {
     print("\n")
     print("╔════════════════════════════════════════════════════════════╗\n")
@@ -96,16 +102,19 @@ func print_header() {
     print("╚════════════════════════════════════════════════════════════╝\n")
     print("\n")
 }
+
 func print_server_info() {
     print("🔧 serverconfiguration:\n")
     print("   主机: 0.0.0.0\n")
     print("   端口: 8888\n")
     print("   status: alreadystart\n\n")
 }
+
 func print_api_endpoint(string method, string path, string response) {
     print("📍 " + method + " " + path + "\n")
     print("   " + response + "\n\n")
 }
+
 func print_footer() {
     print("✅ pure S HTTP serveralready准备gooddeployment！\n")
     print("📊 特ity:\n")
@@ -114,6 +123,7 @@ func print_footer() {
     print("   - JSON 序列ization无依赖\n")
     print("   - production readyof架构\n\n")
 }
+
 func main() {
     print_header()
     print_server_info()

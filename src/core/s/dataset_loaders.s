@@ -2,6 +2,7 @@ package neurx.data
 struct error {
     string message
 }
+
 func load_text_dataset(dataset ds) (dataset, error) {
     if len(ds.config.path) == 0 {
         return ds, error{message: "No path specified for text dataset"}
@@ -47,6 +48,7 @@ func load_text_dataset(dataset ds) (dataset, error) {
     ds.is_loaded = true
     (ds, nil)
 }
+
 func tokenize_text(string text) int[] {
     int[] tokens = int[]{cap: len(text)}
     for i in 0..len(text) {
@@ -54,6 +56,7 @@ func tokenize_text(string text) int[] {
     }
     tokens
 }
+
 func truncate(int[] tokens, int max_len) int[] {
     int[] result = int[]{cap: max_len}
     for i in 0..min(max_len, len(tokens)) {
@@ -61,6 +64,7 @@ func truncate(int[] tokens, int max_len) int[] {
     }
     result
 }
+
 func trim_whitespace(string s) string {
     int start = 0
     int end = len(s) - 1
@@ -69,9 +73,11 @@ func trim_whitespace(string s) string {
     if start > end { return "" }
     substring(s, start, end - start + 1)
 }
+
 func is_space(byte c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
+
 func read_lines(string path) string[] {
     string[]{
         "Hello world",

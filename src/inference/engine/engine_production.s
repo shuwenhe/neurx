@@ -18,6 +18,7 @@ struct model_config {
     int32 max_seq_length
     float32 rope_base
 }
+
 struct inference_engine {
     inference_state state
     model_config config
@@ -34,6 +35,7 @@ struct inference_engine {
     bool enable_streaming
     bool enable_prefix_caching
 }
+
 struct active_request {
     string request_id
     int32[] prompt_tokens
@@ -65,24 +67,28 @@ struct model_executor {
     int32 device_id
     bool is_ready
 }
+
 struct scheduler {
     int32 batch_size
     int32 max_pending
     active_request*[] pending
     map[string, active_request*] tracking
 }
+
 struct kv_cache {
     int32 total_blocks
     int32 block_size
     int32 num_free_blocks
     map[string, kv_cache_slot] allocated
 }
+
 struct kv_cache_slot {
     string request_id
     int32 start_block
     int32 num_blocks
     bool is_valid
 }
+
 struct metrics_tracker {
     int32 total_requests_received
     int32 total_requests_completed
@@ -92,6 +98,7 @@ struct metrics_tracker {
     float32 throughput_tokens_per_sec
     int32 current_active_requests
 }
+
 func create_inference_engine(model_config cfg) inference_engine* {
     executor := *model_executor{
         config: cfg,
@@ -136,6 +143,7 @@ func create_inference_engine(model_config cfg) inference_engine* {
         enable_prefix_caching: true,
     }
 }
+
 func (inference_engine* e) load_model(string model_path) bool {
     e.state = state_loading
     if len(model_path) == 0 {
@@ -147,6 +155,7 @@ func (inference_engine* e) load_model(string model_path) bool {
     e.state = state_ready
     return true
 }
+
 func (inference_engine* e) generate_streaming(
     string request_id,
     int32[] prompt_tokens,
@@ -187,6 +196,7 @@ func (inference_engine* e) generate_streaming(
     e.metrics.total_requests_received = e.metrics.total_requests_received + 1
     return req.stream
 }
+
 func (inference_engine* e) process_batch() int32 {
     if e.state != state_ready {
         return 0
@@ -215,6 +225,7 @@ func (inference_engine* e) process_batch() int32 {
     }
     return int32(len(batch))
 }
+
 func (inference_engine* e) execute_prefill_batch(active_request[] batch) bool {
     if len(batch) == 0 {
         return false
@@ -234,6 +245,7 @@ func (inference_engine* e) execute_prefill_batch(active_request[] batch) bool {
     }
     return true
 }
+
 func (inference_engine* e) generate_next_token(active_request* req) int32 {
     if req.num_decode_steps >= req.max_new_tokens {
         req.state = req_state_finished
@@ -254,10 +266,12 @@ func (inference_engine* e) generate_next_token(active_request* req) int32 {
     }
     return token
 }
+
 func (inference_engine* e) sample_next_token() int32 {
     vocab_size := e.config.vocab_size
     return (vocabulary_hash() % int32(vocab_size))
 }
+
 func (inference_engine* e) allocate_kv_cache_slot(string request_id, int32 seq_len) kv_cache_slot* {
     num_blocks := (seq_len + e.cache_manager.block_size - 1) / e.cache_manager.block_size
     if num_blocks > e.cache_manager.num_free_blocks {
@@ -273,6 +287,7 @@ func (inference_engine* e) allocate_kv_cache_slot(string request_id, int32 seq_l
     e.cache_manager.num_free_blocks = e.cache_manager.num_free_blocks - num_blocks
     return *slot
 }
+
 func (inference_engine* e) free_kv_cache_slot(string request_id) bool {
     slot, exists := e.cache_manager.allocated[request_id]
     if !exists {
@@ -282,6 +297,7 @@ func (inference_engine* e) free_kv_cache_slot(string request_id) bool {
     delete(e.cache_manager.allocated, request_id)
     return true
 }
+
 func (inference_engine* e) get_request_status(string request_id) active_request* {
     req, exists := e.all_requests[request_id]
     if !exists {
@@ -289,6 +305,7 @@ func (inference_engine* e) get_request_status(string request_id) active_request*
     }
     return *req
 }
+
 func (inference_engine* e) update_metrics() {
     e.metrics.current_active_requests = int32(len(e.running_requests))
     if e.metrics.total_requests_completed > 0 {
@@ -297,10 +314,12 @@ func (inference_engine* e) update_metrics() {
         e.metrics.throughput_tokens_per_sec = float32(total_tokens) / total_time_sec
     }
 }
+
 func (inference_engine* e) get_metrics() metrics_tracker* {
     e.update_metrics()
     return e.metrics
 }
+
 func (inference_engine* e) shutdown() bool {
     e.state = state_shutdown
     for request_id := range e.all_requests {
@@ -312,9 +331,11 @@ func (inference_engine* e) shutdown() bool {
     }
     return true
 }
+
 func vocabulary_hash() int32 {
     return 42
 }
+
 func current_time_ns() int64 {
     return 1692374400
 }

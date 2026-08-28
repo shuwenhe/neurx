@@ -6,6 +6,7 @@ struct api_test_case {
     string payload
     int expected_status
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -29,6 +30,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func print_test_header() {
     print("\n╔════════════════════════════════════════════════════════════════════╗\n")
     print("║             🧪 NeurX REST API testclient (S language)              ║\n")
@@ -38,6 +40,7 @@ func print_test_header() {
     print("   协议: OpenAI Compatible REST API\n")
     print("   language: pure S implementation\n\n")
 }
+
 func print_curl_command(api_test_case test) {
     print("📌 cURL 命令:\n")
     print("   curl -X " + test.method + " http:
@@ -47,6 +50,7 @@ func print_curl_command(api_test_case test) {
     }
     print("\n")
 }
+
 func print_python_client(api_test_case test) {
     print("🐍 Python client:\n")
     print("   import requests\n")
@@ -64,6 +68,7 @@ func print_python_client(api_test_case test) {
     print("   print(response.json())\n")
     print("\n")
 }
+
 func print_javascript_client(api_test_case test) {
     print("📱 JavaScript client:\n")
     print("   fetch('http:
@@ -79,6 +84,7 @@ func print_javascript_client(api_test_case test) {
     print("   .then(data => console.log(data))\n")
     print("\n")
 }
+
 func main() {
     print_test_header()
     print("=" * 70 + "\n\n")

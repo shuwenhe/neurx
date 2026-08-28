@@ -10,6 +10,7 @@ struct model_config {
     int vocab_size
     int max_position_embeddings
 }
+
 struct layer_weights {
     float[] q_proj_weight
     float[] k_proj_weight
@@ -19,6 +20,7 @@ struct layer_weights {
     float[] mlp_down_weight
     float[] norm_weight
 }
+
 func get_model_config() model_config {
     return model_config{
         hidden_size: 1536,
@@ -30,6 +32,7 @@ func get_model_config() model_config {
         max_position_embeddings: 131072
     }
 }
+
 func tokenize_simple(string text) int[] {
     int[] tokens = int[]{cap: 512}
     int token_count = 0
@@ -56,6 +59,7 @@ func tokenize_simple(string text) int[] {
     }
     return tokens
 }
+
 func get_token_embedding(int token_id, int hidden_size) float[] {
     float[] embedding = float[]{cap: hidden_size}
     int i = 0
@@ -67,6 +71,7 @@ func get_token_embedding(int token_id, int hidden_size) float[] {
     }
     return embedding
 }
+
 func stack_embeddings(int[] token_ids, int hidden_size) float[] {
     float[] batch_embeddings = float[]{cap: len(token_ids) * hidden_size}
     int token_idx = 0
@@ -81,6 +86,7 @@ func stack_embeddings(int[] token_ids, int hidden_size) float[] {
     }
     return batch_embeddings
 }
+
 func load_layer_weights(string model_path, int layer_idx, int hidden_size, int intermediate_size) layer_weights {
     int weight_size = hidden_size
     float[] q = float[]{cap: weight_size}
@@ -113,6 +119,7 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size, int i
         norm norm_weight
     }
 }
+
 func linear_transform(float[] input, float[] weights, int output_dim) float[] {
     float[] output = float[]{cap: output_dim}
     int i = 0
@@ -128,6 +135,7 @@ func linear_transform(float[] input, float[] weights, int output_dim) float[] {
     }
     return output
 }
+
 func forward_transformer_layer(float[] hidden_state, layer_weights weights, int hidden_size, int intermediate_size, int layer_idx) float[] {
     float[] normed = rms_norm(hidden_state, weights.norm_weight, 0.000001)
     float[] query = linear_transform(normed, weights.q_proj_weight, hidden_size)
@@ -173,6 +181,7 @@ func forward_transformer_layer(float[] hidden_state, layer_weights weights, int 
     float[] output = add_vectors(hidden_after_attn, ffn_output)
     return output
 }
+
 func forward_all_layers(float[] embeddings, string model_path, model_config config) float[] {
     float[] hidden_state = embeddings
     int layer_idx = 0
@@ -184,6 +193,7 @@ func forward_all_layers(float[] embeddings, string model_path, model_config conf
     }
     return hidden_state
 }
+
 func get_logits(float[] last_hidden, int vocab_size, int hidden_size) float[] {
     float[] logits = float[]{cap: vocab_size}
     int i = 0
@@ -201,6 +211,7 @@ func get_logits(float[] last_hidden, int vocab_size, int hidden_size) float[] {
     }
     return logits
 }
+
 func sample_next_token_greedy(float[] logits) int {
     if len(logits) == 0 {
         return 0
@@ -217,6 +228,7 @@ func sample_next_token_greedy(float[] logits) int {
     }
     return best_idx
 }
+
 func token_to_text(int token_id) string {
     if token_id >= 1 && token_id <= 26 {
         return __host_slice("abcdefghijklmnopqrstuvwxyz", token_id - 1, token_id)
@@ -232,6 +244,7 @@ func token_to_text(int token_id) string {
     }
     return "[" + int_to_string(token_id) + "]"
 }
+
 func generate_response(string prompt, string model_path, int max_tokens) string {
     print("[Inference] Starting real model inference\n")
     model_config config = get_model_config()
@@ -255,6 +268,7 @@ func generate_response(string prompt, string model_path, int max_tokens) string 
     }
     return response
 }
+
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string result = ""
@@ -276,6 +290,7 @@ func int_to_string(int value) string {
     }
     return result
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x
@@ -286,6 +301,7 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+
 func exp_approx(float x) float {
     if x < -10.0 { return 0.0 }
     if x > 10.0 { return 10000.0 }
@@ -294,6 +310,7 @@ func exp_approx(float x) float {
     float x4 = x3 * x
     return 1.0 + x + x2 / 2.0 + x3 / 6.0 + x4 / 24.0
 }
+
 func softmax(float[] logits) float[] {
     int n = len(logits)
     if n == 0 { return float[]{cap: 0} }
@@ -320,6 +337,7 @@ func softmax(float[] logits) float[] {
     }
     return probs
 }
+
 func rms_norm(float[] input, float[] gamma, float eps) float[] {
     float[] output = float[]{cap: len(input)}
     float sum_sq = 0.0
@@ -342,6 +360,7 @@ func rms_norm(float[] input, float[] gamma, float eps) float[] {
     }
     return output
 }
+
 func add_vectors(float[] a, float[] b) float[] {
     float[] result = float[]{cap: len(a)}
     int i = 0

@@ -5,6 +5,7 @@ struct inference_request {
     int max_tokens
     float temperature
 }
+
 struct inference_response {
     string text
     int prompt_tokens
@@ -13,9 +14,11 @@ struct inference_response {
     bool success
     string error
 }
+
 func estimate_tokens(string text) int {
     return len(text) / 4 + 1
 }
+
 func generate_response(string prompt, int max_tokens, float temperature) string {
     print("🤖 generateinferenceresponse\n")
     print("   prompt: " + prompt + "\n")
@@ -33,6 +36,7 @@ func generate_response(string prompt, int max_tokens, float temperature) string 
     }
     return response
 }
+
 func run_inference(inference_request req) inference_response {
     inference_response resp
     resp.text = generate_response(req.prompt, req.max_tokens, req.temperature)
@@ -43,6 +47,7 @@ func run_inference(inference_request req) inference_response {
     resp.error = ""
     return resp
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -74,6 +79,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func main() {
     print("✅ inferenceenginemodulealready加载\n")
 }

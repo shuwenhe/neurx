@@ -15,6 +15,7 @@ interface operator_impl {
     func backward(tensor grad_output, []tensor inputs) . []tensor
     func supports_device(device device) . bool
 }
+
 struct dispatch_context {
     device preferred_device
     bool enable_autograd

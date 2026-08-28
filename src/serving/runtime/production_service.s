@@ -13,6 +13,7 @@ use neurx.serving.runtime.production_runtime.{
     production_release_kv,
     production_active_requests,
 }
+
 struct production_service_state {
     production_runtime_state runtime
     string default_model
@@ -22,6 +23,7 @@ struct production_service_state {
     int total_batches
     int total_chunks
 }
+
 struct production_service_request {
     string request_id
     string model
@@ -32,6 +34,7 @@ struct production_service_request {
     int max_new_tokens
     bool stream
 }
+
 struct production_service_result {
     production_service_state state
     string request_id
@@ -40,6 +43,7 @@ struct production_service_result {
     string message
     string sse_frame
 }
+
 func new_production_service_state(production_runtime_config config, string default_model) production_service_state {
     production_service_state {
         runtime: new_production_runtime_state(config),
@@ -51,6 +55,7 @@ func new_production_service_state(production_runtime_config config, string defau
         total_chunks: 0,
     }
 }
+
 func normalize_service_model(string model, string default_model) string {
     if model != "" {
         return model
@@ -60,6 +65,7 @@ func normalize_service_model(string model, string default_model) string {
     }
     "neurx"
 }
+
 func new_production_service_request(
     string request_id,
     string model,
@@ -81,6 +87,7 @@ func new_production_service_request(
         stream: stream,
     }
 }
+
 func production_service_submit_request(
     production_service_state state,
     production_service_request request
@@ -130,9 +137,11 @@ func production_service_submit_request(
         sse_frame: frame,
     }
 }
+
 func production_service_next_batch(production_service_state state) production_schedule_result {
     production_schedule(state.runtime)
 }
+
 func production_service_complete_prefill(
     production_service_state state,
     production_batch batch,
@@ -148,6 +157,7 @@ func production_service_complete_prefill(
         total_chunks: state.total_chunks,
     }
 }
+
 func production_service_complete_decode(
     production_service_state state,
     production_batch batch,
@@ -164,6 +174,7 @@ func production_service_complete_decode(
         total_chunks: state.total_chunks + len(batch.request_ids),
     }
 }
+
 func production_service_release_kv(production_service_state state, int tokens) production_service_state {
     production_service_state {
         runtime: production_release_kv(state.runtime, tokens),
@@ -175,15 +186,19 @@ func production_service_release_kv(production_service_state state, int tokens) p
         total_chunks: state.total_chunks,
     }
 }
+
 func production_service_render_done() string {
     openai_sse_done()
 }
+
 func production_service_render_error(string message, string error_type, int status) string {
     openai_error_json(message, error_type, status)
 }
+
 func production_service_render_chunk(string request_id, string model, int created, string content, string finish_reason) string {
     openai_chat_sse_chunk(request_id, model, created, content, finish_reason)
 }
+
 func production_service_active_requests(production_service_state state) int {
     production_active_requests(state.runtime)
 }

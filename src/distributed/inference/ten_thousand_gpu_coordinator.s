@@ -18,6 +18,7 @@ struct ten_thousand_gpu_config {
     float phi_threshold
     int checkpoint_interval_steps
 }
+
 struct ten_thousand_gpu_coordinator {
     int my_rank
     int my_node_id
@@ -34,6 +35,7 @@ struct ten_thousand_gpu_coordinator {
     bool is_running
     int64 start_time_ns
 }
+
 func new_ten_thousand_gpu_coordinator(
     int my_rank,
     int my_node_id,
@@ -57,6 +59,7 @@ func new_ten_thousand_gpu_coordinator(
     }
     return coordinator
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) initialize_distributed_system() (bool, string) {
     coordinator.start_time_ns = 0
     success, msg := coordinator.synchronize_initial_parameters()
@@ -73,6 +76,7 @@ func (ten_thousand_gpu_coordinator* coordinator) initialize_distributed_system()
     }
     return true, "Distributed system initialized successfully"
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) synchronize_initial_parameters() (bool, string) {
     float[] init_params = make(float[], coordinator.config.model_hidden_dim * 100)
     int i = 0
@@ -86,13 +90,16 @@ func (ten_thousand_gpu_coordinator* coordinator) synchronize_initial_parameters(
     }
     return false, "Failed to synchronize parameters"
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) initialize_allreduce_topology() (bool, string) {
     ring_topo := coordinator.allreduce_engine.get_topology()
     return true, "Allreduce topology initialized: rank " + str(ring_topo.rank) + " of " + str(ring_topo.world_size)
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) start_failure_detector() (bool, string) {
     return true, "Failure detector started with phi threshold " + str(coordinator.config.phi_threshold)
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) training_loop_iteration(
     float[] batch_input,
     float[][] layer_weights,
@@ -128,6 +135,7 @@ func (ten_thousand_gpu_coordinator* coordinator) training_loop_iteration(
     }
     return loss, true
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) check_failures_and_recover() (bool, string) {
     suspected_ranks := coordinator.failure_detector.check_and_detect_failures(0)
     if len(suspected_ranks) > 0 {
@@ -147,6 +155,7 @@ func (ten_thousand_gpu_coordinator* coordinator) check_failures_and_recover() (b
     }
     return true, "No failures detected"
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) handle_dynamic_node_join(
     int new_rank,
     string ip_address,
@@ -177,6 +186,7 @@ func (ten_thousand_gpu_coordinator* coordinator) handle_dynamic_node_join(
     coordinator.config.dp_size = new_dp
     return true, "Node join handled: new parallelism TP=" + str(new_tp) + " PP=" + str(new_pp) + " DP=" + str(new_dp)
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) handle_dynamic_node_removal(int removed_rank) (bool, string) {
     success, msg := coordinator.elastic_manager.handle_node_removal(removed_rank)
     if !success {
@@ -194,6 +204,7 @@ func (ten_thousand_gpu_coordinator* coordinator) handle_dynamic_node_removal(int
     coordinator.config.dp_size = new_dp
     return true, "Node removal handled: new parallelism TP=" + str(new_tp) + " PP=" + str(new_pp) + " DP=" + str(new_dp)
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) update_load_metrics(
     int gpu_id,
     float utilization,
@@ -208,6 +219,7 @@ func (ten_thousand_gpu_coordinator* coordinator) update_load_metrics(
         0.1
     )
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) select_gpu_for_inference_request(
     int kv_cache_size_mb
 ) int {
@@ -215,6 +227,7 @@ func (ten_thousand_gpu_coordinator* coordinator) select_gpu_for_inference_reques
     coordinator.load_balancer.record_assignment(best_gpu)
     return best_gpu
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) get_system_status() string {
     world_size := coordinator.elastic_manager.get_current_world_size()
     suspected := coordinator.failure_detector.get_suspected_ranks()
@@ -230,6 +243,7 @@ func (ten_thousand_gpu_coordinator* coordinator) get_system_status() string {
            + ", loss=" + str(coordinator.current_loss)
     return status
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) run_inference_iteration() (bool, string) {
     failure_success, failure_msg := coordinator.check_failures_and_recover()
     if !failure_success {
@@ -245,15 +259,19 @@ func (ten_thousand_gpu_coordinator* coordinator) run_inference_iteration() (bool
     coordinator.current_loss = loss
     return true, "Iteration complete: loss=" + str(loss)
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) get_current_global_step() int {
     return coordinator.current_global_step
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) get_current_loss() float {
     return coordinator.current_loss
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) broadcast_parameters(float[] params) bool {
     return true
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) is_system_healthy() bool {
     suspected := coordinator.failure_detector.get_suspected_ranks()
     if len(suspected) > 0 {
@@ -264,9 +282,11 @@ func (ten_thousand_gpu_coordinator* coordinator) is_system_healthy() bool {
     }
     return true
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) stop() {
     coordinator.is_running = false
 }
+
 func (ten_thousand_gpu_coordinator* coordinator) get_config() ten_thousand_gpu_config {
     return coordinator.config
 }

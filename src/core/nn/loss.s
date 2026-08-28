@@ -3,12 +3,14 @@ struct cross_entropy_loss {
     reduction string
     label_smoothing f64
 }
+
 func cross_entropy_new(string reduction, f64 label_smoothing) cross_entropy_loss {
     return cross_entropy_loss{
         reduction: reduction,
         label_smoothing: label_smoothing,
     }
 }
+
 func cross_entropy_forward(loss_fn cross_entropy_loss, logits [][]f64, targets []i64) f64 {
     batch_size := len(logits)
     num_classes := len(logits[0])
@@ -59,12 +61,15 @@ func cross_entropy_forward(loss_fn cross_entropy_loss, logits [][]f64, targets [
     }
     return total_loss
 }
+
 struct mse_loss {
     reduction string
 }
+
 func mse_new(string reduction) mse_loss {
     return mse_loss{reduction: reduction}
 }
+
 func mse_forward(loss_fn mse_loss, pred []f64, target []f64) f64 {
     if len(pred) != len(target) {
         return 0.0
@@ -81,12 +86,15 @@ func mse_forward(loss_fn mse_loss, pred []f64, target []f64) f64 {
     }
     return total_loss
 }
+
 struct bce_loss {
     reduction string
 }
+
 func bce_new(string reduction) bce_loss {
     return bce_loss{reduction: reduction}
 }
+
 func bce_forward(loss_fn bce_loss, pred []f64, target []f64) f64 {
     if len(pred) != len(target) {
         return 0.0
@@ -108,12 +116,15 @@ func bce_forward(loss_fn bce_loss, pred []f64, target []f64) f64 {
     }
     return total_loss
 }
+
 struct kldiv_loss {
     reduction string
 }
+
 func kldiv_new(string reduction) kldiv_loss {
     return kldiv_loss{reduction: reduction}
 }
+
 func kldiv_forward(loss_fn kldiv_loss, log_pred []f64, target []f64) f64 {
     if len(log_pred) != len(target) {
         return 0.0
@@ -129,12 +140,15 @@ func kldiv_forward(loss_fn kldiv_loss, log_pred []f64, target []f64) f64 {
     }
     return total_loss
 }
+
 struct l1_loss {
     reduction string
 }
+
 func l1_new(string reduction) l1_loss {
     return l1_loss{reduction: reduction}
 }
+
 func l1_forward(loss_fn l1_loss, pred []f64, target []f64) f64 {
     if len(pred) != len(target) {
         return 0.0
@@ -152,6 +166,7 @@ func l1_forward(loss_fn l1_loss, pred []f64, target []f64) f64 {
     }
     return total_loss
 }
+
 func exp_approx(f64 x) f64 {
     if x > 100.0 {
         return 1e10
@@ -170,6 +185,7 @@ func exp_approx(f64 x) f64 {
     }
     return result
 }
+
 func ln_approx(f64 x) f64 {
     if x <= 0.0 {
         return -100.0

@@ -7,6 +7,7 @@ use neurx.reasoning.reasoning_step.{reasoning_step, step_type, step_state}
     failed
     cancelled
 }
+
 struct reasoning_chain {
     string chain_id
     cot_config config
@@ -20,6 +21,7 @@ struct reasoning_chain {
     string error_message
     string execution_summary
 }
+
 func new_reasoning_chain(string chain_id, string prompt, cot_config config) reasoning_chain {
     reasoning_chain {
         chain_id: chain_id,
@@ -35,6 +37,7 @@ func new_reasoning_chain(string chain_id, string prompt, cot_config config) reas
         execution_summary: "",
     }
 }
+
 func (reasoning_chain* chain) add_step(reasoning_step step) reasoning_chain {
     if chain.state != chain_state.running && chain.state != chain_state.initialized {
         return chain
@@ -49,6 +52,7 @@ func (reasoning_chain* chain) add_step(reasoning_step step) reasoning_chain {
     chain.steps = steps
     chain
 }
+
 func (reasoning_chain* chain) start() reasoning_chain {
     if chain.state != chain_state.initialized {
         chain.error_message = "Chain is not in initialized state"
@@ -58,24 +62,29 @@ func (reasoning_chain* chain) start() reasoning_chain {
     chain.current_step_index = 0
     chain
 }
+
 func (reasoning_chain* chain) complete(string answer) reasoning_chain {
     chain.state = chain_state.completed
     chain.final_answer = answer
     chain.overall_confidence = chain.calculate_overall_confidence()
     chain
 }
+
 func (reasoning_chain* chain) fail(string error) reasoning_chain {
     chain.state = chain_state.failed
     chain.error_message = error
     chain
 }
+
 func (reasoning_chain* chain) cancel() reasoning_chain {
     chain.state = chain_state.cancelled
     chain
 }
+
 func (reasoning_chain* chain) get_step_count() int {
     len(chain.steps)
 }
+
 func (reasoning_chain* chain) get_current_step() reasoning_step {
     if chain.current_step_index >= 0 && chain.current_step_index < len(chain.steps) {
         return chain.steps[chain.current_step_index]
@@ -98,12 +107,14 @@ func (reasoning_chain* chain) get_current_step() reasoning_step {
         validation_message: "",
     }
 }
+
 func (reasoning_chain* chain) next_step() reasoning_chain {
     if chain.current_step_index + 1 < len(chain.steps) {
         chain.current_step_index = chain.current_step_index + 1
     }
     chain
 }
+
 func (reasoning_chain* chain) get_state_string() string {
     match chain.state {
         chain_state.initialized: "initialized",
@@ -114,12 +125,15 @@ func (reasoning_chain* chain) get_state_string() string {
         default: "unknown",
     }
 }
+
 func (reasoning_chain* chain) is_completed() bool {
     chain.state == chain_state.completed
 }
+
 func (reasoning_chain* chain) is_failed() bool {
     chain.state == chain_state.failed
 }
+
 func (reasoning_chain* chain) calculate_overall_confidence() float {
     if len(chain.steps) == 0 {
         return 0.0
@@ -134,19 +148,24 @@ func (reasoning_chain* chain) calculate_overall_confidence() float {
     }
     sum / float(len(chain.steps))
 }
+
 func (reasoning_chain* chain) has_exceeded_max_steps() bool {
     len(chain.steps) >= chain.config.max_steps
 }
+
 func (reasoning_chain* chain) has_exceeded_token_limit() bool {
     chain.total_token_count >= chain.config.max_tokens_total
 }
+
 func (reasoning_chain* chain) update_token_count(int count) reasoning_chain {
     chain.total_token_count = chain.total_token_count + count
     chain
 }
+
 func (reasoning_chain* chain) can_backtrack() bool {
     chain.config.enable_backtracking && chain.current_step_index > 0
 }
+
 func (reasoning_chain* chain) backtrack(int depth) reasoning_chain {
     if !chain.can_backtrack() {
         return chain
@@ -165,9 +184,11 @@ func (reasoning_chain* chain) backtrack(int depth) reasoning_chain {
     chain.current_step_index = target
     chain
 }
+
 func (reasoning_chain* chain) can_branch() bool {
     chain.config.enable_branching
 }
+
 func (reasoning_chain* chain) get_reasoning_text() string {
     string text = "# Reasoning Chain: " + chain.chain_id + "\n"
     text = text + "Original Prompt: " + chain.original_prompt + "\n\n"
@@ -181,6 +202,7 @@ func (reasoning_chain* chain) get_reasoning_text() string {
     text = text + "Overall Confidence: " + string(chain.overall_confidence) + "\n"
     text
 }
+
 func (reasoning_chain* chain) clone() reasoning_chain {
     steps := []reasoning_step{cap: len(chain.steps)}
     i := 0

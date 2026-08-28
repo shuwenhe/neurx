@@ -2,11 +2,13 @@ package neurx.inference.qwen_tokenizer
 struct tokenizer {
     int vocab_size
 }
+
 func init_tokenizer() tokenizer {
     tokenizer {
         vocab_size: 151936,
     }
 }
+
 func hash_word(string word) int {
     int hash = 0
     int i = 0
@@ -17,6 +19,7 @@ func hash_word(string word) int {
     if hash < 0 { hash = 0 - hash }
     return hash % 151936
 }
+
 func find_token_id(tokenizer tok, string word) int {
     if word == "hello" { return 4 }
     else if word == "world" { return 5 }
@@ -36,6 +39,7 @@ func find_token_id(tokenizer tok, string word) int {
     else if word == "print" { return 26 }
     return hash_word(word)
 }
+
 func tokenize(tokenizer tok, string text) int[] {
     int[] tokens = int[]{cap: len(text) + 10}
     int token_count = 0
@@ -76,6 +80,7 @@ func tokenize(tokenizer tok, string text) int[] {
     }
     return result
 }
+
 func decode_tokens(tokenizer tok, int[] token_ids) string {
     string result = ""
     int i = 0
@@ -92,6 +97,7 @@ func decode_tokens(tokenizer tok, int[] token_ids) string {
     }
     return result
 }
+
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string result = ""

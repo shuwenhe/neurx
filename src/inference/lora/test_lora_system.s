@@ -16,6 +16,7 @@ func test_adapter_manager_creation() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_lora_config_creation() {
     print("🧪 Test: LoRA Config Creation")
     config := create_lora_config("adapter_1", "/path/to/adapter", 8, 16, 768, 768)
@@ -33,6 +34,7 @@ func test_lora_config_creation() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_lora_weights_initialization() {
     print("🧪 Test: LoRA Weights Initialization")
     config := lora_adapter_config{
@@ -60,6 +62,7 @@ func test_lora_weights_initialization() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_adapter_load_and_unload() {
     print("🧪 Test: Adapter Load and Unload")
     mgr := new_lora_adapter_manager(512)
@@ -76,6 +79,7 @@ func test_adapter_load_and_unload() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_adapter_switching() {
     print("🧪 Test: Adapter Switching")
     mgr := new_lora_adapter_manager(1024)
@@ -97,6 +101,7 @@ func test_adapter_switching() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_adapter_pinning() {
     print("🧪 Test: Adapter Pinning")
     mgr := new_lora_adapter_manager(1024)
@@ -120,6 +125,7 @@ func test_adapter_pinning() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_weight_merging() {
     print("🧪 Test: Weight Merging")
     mgr := new_lora_adapter_manager(1024)
@@ -156,6 +162,7 @@ func test_weight_merging() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_request_router_creation() {
     print("🧪 Test: Request Router Creation")
     mgr := new_lora_adapter_manager(1024)
@@ -168,6 +175,7 @@ func test_request_router_creation() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_request_submission() {
     print("🧪 Test: Request Submission")
     mgr := new_lora_adapter_manager(1024)
@@ -193,6 +201,7 @@ func test_request_submission() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_lora_model_creation() {
     print("🧪 Test: LoRA Model Creation")
     config := lora_model_config{
@@ -217,6 +226,7 @@ func test_lora_model_creation() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_model_adapter_registration() {
     print("🧪 Test: Model Adapter Registration")
     config := lora_model_config{
@@ -239,6 +249,7 @@ func test_model_adapter_registration() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_model_adapter_switching() {
     print("🧪 Test: Model Adapter Switching")
     config := lora_model_config{
@@ -268,6 +279,7 @@ func test_model_adapter_switching() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_memory_stats() {
     print("🧪 Test: Memory Statistics")
     mgr := new_lora_adapter_manager(1024)
@@ -285,6 +297,7 @@ func test_memory_stats() {
     }
     print("  ✓ PASSED\n")
 }
+
 func run_all_tests() {
     print("═" * 70)
     print("🧪 Complete LoRA System - Unit Test Suite")
@@ -307,6 +320,7 @@ func run_all_tests() {
     print("✅ All tests completed successfully!")
     print("═" * 70)
 }
+
 func main() {
     run_all_tests()
 }

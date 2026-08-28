@@ -8,6 +8,7 @@ struct pipeline_parallel_config {
     bool use_activation_checkpointing
     int microbatch_size
 }
+
 struct pipeline_stage_config {
     int stage_id
     int start_layer
@@ -15,6 +16,7 @@ struct pipeline_stage_config {
     int input_size
     int output_size
 }
+
 struct pipeline_parallel_state {
     pipeline_parallel_config config
     pipeline_stage_config stage_config
@@ -22,6 +24,7 @@ struct pipeline_parallel_state {
     [][]double activation_cache
     int microbatch_count
 }
+
 func pp_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
         return 0
@@ -35,6 +38,7 @@ func pp_mod_nonneg(int value, int divisor) int {
     }
     current
 }
+
 func new_pipeline_parallel_config(
     int pp_degree,
     int pp_rank,
@@ -51,6 +55,7 @@ func new_pipeline_parallel_config(
     cfg.microbatch_size = 1
     return cfg
 }
+
 func new_pipeline_stage_config(
     int stage_id,
     int pp_degree,
@@ -71,6 +76,7 @@ func new_pipeline_stage_config(
     stage_cfg.output_size = hidden_dim
     return stage_cfg
 }
+
 func new_pipeline_parallel_state(
     pipeline_parallel_config cfg,
     pipeline_stage_config stage_cfg) pipeline_parallel_state {
@@ -80,11 +86,13 @@ func new_pipeline_parallel_state(
     state.microbatch_count = 0
     return state
 }
+
 struct gpipe_state {
     [][][]double microbatch_activations
     [][]double stage_gradients
     int completed_microbatches
 }
+
 func gpipe_forward_stage(
     [][]double microbatch_input,
     [][]double stage_weights,
@@ -100,12 +108,14 @@ func gpipe_forward_stage(
     }
     return output
 }
+
 struct f1b1_state {
     [][]double forward_queue
     [][]double backward_queue
     int f_counter
     int b_counter
 }
+
 func f1b1_forward_stage(
     [][]double microbatch_input,
     [][]double stage_weights,
@@ -119,6 +129,7 @@ func f1b1_forward_stage(
     schedule_state.f_counter = schedule_state.f_counter + 1
     return output
 }
+
 func f1b1_backward_stage(
     [][]double output_grad,
     [][]double stage_weights,
@@ -133,11 +144,13 @@ func f1b1_backward_stage(
     schedule_state.b_counter = schedule_state.b_counter + 1
     return input_grad
 }
+
 struct interleaved_pipeline_state {
     int num_model_copies
     []f1b1_state model_schedules
     int next_model_id
 }
+
 func interleaved_forward_stage(
     [][]double microbatch_input,
     [][]double stage_weights,
@@ -149,11 +162,13 @@ func interleaved_forward_stage(
     schedule_state.next_model_id = schedule_state.next_model_id + 1
     return output
 }
+
 func send_activation_to_next_stage(
     [][]double activation,
     int next_stage_rank,
     int microbatch_id) {
 }
+
 func recv_activation_from_prev_stage(
     int prev_stage_rank,
     int microbatch_id,
@@ -163,11 +178,13 @@ func recv_activation_from_prev_stage(
     [][]double activation
     return activation
 }
+
 func send_gradient_to_prev_stage(
     [][]double gradient,
     int prev_stage_rank,
     int microbatch_id) {
 }
+
 func recv_gradient_from_next_stage(
     int next_stage_rank,
     int microbatch_id,
@@ -177,6 +194,7 @@ func recv_gradient_from_next_stage(
     [][]double gradient
     return gradient
 }
+
 func recompute_activation_for_backward(
     [][]double input_activation,
     [][]double layer_weights,
@@ -185,6 +203,7 @@ func recompute_activation_for_backward(
     [][]double recomputed = input_activation
     return recomputed
 }
+
 struct pipeline_metrics {
     double utilization
     double bubble_time
@@ -192,6 +211,7 @@ struct pipeline_metrics {
     double theoretical_speedup
     double actual_speedup
 }
+
 func calculate_pipeline_efficiency(
     pipeline_parallel_config config,
     pipeline_metrics metrics) double {
@@ -201,6 +221,7 @@ func calculate_pipeline_efficiency(
     metrics.utilization = 1.0 - (metrics.bubble_time / metrics.total_time)
     return metrics.utilization
 }
+
 func recommended_2t_pipeline_config() pipeline_parallel_config {
     pipeline_parallel_config cfg
     cfg.pp_degree = 16
@@ -209,6 +230,7 @@ func recommended_2t_pipeline_config() pipeline_parallel_config {
     cfg.microbatch_size = 4
     return cfg
 }
+
 func recommended_2t_ultra_pipeline_config() pipeline_parallel_config {
     pipeline_parallel_config cfg
     cfg.pp_degree = 32

@@ -2,6 +2,7 @@ package neurx.reasoning.reasoning_validator
 use neurx.reasoning.cot_config.{cot_config, validation_strategy}
 use neurx.reasoning.reasoning_chain.reasoning_chain
 use neurx.reasoning.reasoning_step.{reasoning_step, step_state}
+
 struct validation_result {
     bool is_valid
     string message
@@ -9,16 +10,19 @@ struct validation_result {
     float confidence_score
     int severity_level
 }
+
 struct reasoning_validator {
     cot_config config
     int max_issues
 }
+
 func new_reasoning_validator(cot_config config) reasoning_validator {
     reasoning_validator {
         config: config,
         max_issues: 100,
     }
 }
+
 func (reasoning_validator* validator) validate_chain(reasoning_chain chain) validation_result {
     match validator.config.validation {
         validation_strategy.none: {
@@ -50,6 +54,7 @@ func (reasoning_validator* validator) validate_chain(reasoning_chain chain) vali
         },
     }
 }
+
 func (reasoning_validator* validator) validate_consistency(reasoning_chain chain) validation_result {
     string[] issues = string[]{}
     float min_confidence = 1.0
@@ -81,6 +86,7 @@ func (reasoning_validator* validator) validate_consistency(reasoning_chain chain
         severity_level: if is_valid { 0 } else { 1 },
     }
 }
+
 func (reasoning_validator* validator) validate_logical_flow(reasoning_chain chain) validation_result {
     result := validator.validate_consistency(chain)
     string[] additional_issues = string[]{}
@@ -102,6 +108,7 @@ func (reasoning_validator* validator) validate_logical_flow(reasoning_chain chai
     result.is_valid = result.is_valid && len(additional_issues) == 0
     result
 }
+
 func (reasoning_validator* validator) validate_semantic(reasoning_chain chain) validation_result {
     result := validator.validate_logical_flow(chain)
     if !validator.is_reasoning_complete(chain) {
@@ -114,6 +121,7 @@ func (reasoning_validator* validator) validate_semantic(reasoning_chain chain) v
     }
     result
 }
+
 func (reasoning_validator* validator) has_circular_reasoning(reasoning_chain chain) bool {
     seen_results := map[string]int{}
     i := 0
@@ -133,6 +141,7 @@ func (reasoning_validator* validator) has_circular_reasoning(reasoning_chain cha
     }
     false
 }
+
 func (reasoning_validator* validator) is_reasoning_complete(reasoning_chain chain) bool {
     if len(chain.steps) == 0 {
         return false
@@ -143,6 +152,7 @@ func (reasoning_validator* validator) is_reasoning_complete(reasoning_chain chai
     }
     true
 }
+
 func (reasoning_validator* validator) validate_step(reasoning_step step) validation_result {
     string[] issues = string[]{}
     if step.reasoning == "" {
@@ -166,6 +176,7 @@ func (reasoning_validator* validator) validate_step(reasoning_step step) validat
         severity_level: if is_valid { 0 } else { 1 },
     }
 }
+
 func (reasoning_validator* validator) check_limits(reasoning_chain chain) validation_result {
     string[] issues = string[]{}
     if chain.has_exceeded_max_steps() {
@@ -183,6 +194,7 @@ func (reasoning_validator* validator) check_limits(reasoning_chain chain) valida
         severity_level: if is_valid { 0 } else { 2 },
     }
 }
+
 func (reasoning_validator* validator) generate_report(reasoning_chain chain) string {
     result := validator.validate_chain(chain)
     string report = "=== Reasoning Chain Validation Report ===\n"
@@ -200,6 +212,7 @@ func (reasoning_validator* validator) generate_report(reasoning_chain chain) str
     }
     report
 }
+
 func (reasoning_validator* validator) auto_fix_issues(reasoning_chain chain) reasoning_chain {
     valid_steps := []reasoning_step{}
     i := 0
@@ -212,6 +225,7 @@ func (reasoning_validator* validator) auto_fix_issues(reasoning_chain chain) rea
     chain.steps = valid_steps
     chain
 }
+
 func (chain_state state) to_string() string {
     "unknown"
 }

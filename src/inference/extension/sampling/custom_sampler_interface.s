@@ -17,14 +17,17 @@ interface sampler {
 	get_type() sampler_type
 	validate() bool
 }
+
 struct greedy_sampler {
 	seed int32
 }
+
 func create_greedy_sampler(int32 seed) greedy_sampler* {
 	return *greedy_sampler{
 		seed: seed,
 	}
 }
+
 func (g* greedy_sampler) sample(float32[] logits) int32 {
 	if len(logits) == 0 {
 		return 0
@@ -39,6 +42,7 @@ func (g* greedy_sampler) sample(float32[] logits) int32 {
 	}
 	return int32(max_idx)
 }
+
 func (g* greedy_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
@@ -47,20 +51,25 @@ func (g* greedy_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	}
 	return results
 }
+
 func (g* greedy_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) float32[] {
 	return logits
 }
+
 func (g* greedy_sampler) get_type() sampler_type {
 	return sampler_type_greedy
 }
+
 func (g* greedy_sampler) validate() bool {
 	return true
 }
+
 struct top_k_sampler {
 	k int32
 	seed int32
 	temperature float32
 }
+
 func create_top_k_sampler(int32 k, float32 temperature, int32 seed) top_k_sampler* {
 	if k < 0 {
 		k = 0
@@ -74,6 +83,7 @@ func create_top_k_sampler(int32 k, float32 temperature, int32 seed) top_k_sample
 		temperature: temperature,
 	}
 }
+
 func (t* top_k_sampler) sample(float32[] logits) int32 {
 	if len(logits) == 0 {
 		return 0
@@ -121,6 +131,7 @@ func (t* top_k_sampler) sample(float32[] logits) int32 {
 	}
 	return 0
 }
+
 func (t* top_k_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
@@ -129,12 +140,15 @@ func (t* top_k_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	}
 	return results
 }
+
 func (t* top_k_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) float32[] {
 	return logits
 }
+
 func (t* top_k_sampler) get_type() sampler_type {
 	return sampler_type_top_k
 }
+
 func (t* top_k_sampler) validate() bool {
 	if t.k < 0 {
 		return false
@@ -144,11 +158,13 @@ func (t* top_k_sampler) validate() bool {
 	}
 	return true
 }
+
 struct top_p_sampler {
 	p float32
 	seed int32
 	temperature float32
 }
+
 func create_top_p_sampler(float32 p_val, float32 temperature, int32 seed) top_p_sampler* {
 	if p_val < 0.0 {
 		p_val = 0.0
@@ -165,6 +181,7 @@ func create_top_p_sampler(float32 p_val, float32 temperature, int32 seed) top_p_
 		temperature: temperature,
 	}
 }
+
 func (t* top_p_sampler) sample(float32[] logits) int32 {
 	if len(logits) == 0 {
 		return 0
@@ -223,6 +240,7 @@ func (t* top_p_sampler) sample(float32[] logits) int32 {
 	}
 	return 0
 }
+
 func (t* top_p_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
@@ -231,12 +249,15 @@ func (t* top_p_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	}
 	return results
 }
+
 func (t* top_p_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) float32[] {
 	return logits
 }
+
 func (t* top_p_sampler) get_type() sampler_type {
 	return sampler_type_top_p
 }
+
 func (t* top_p_sampler) validate() bool {
 	if t.p < 0.0 || t.p > 1.0 {
 		return false
@@ -246,19 +267,23 @@ func (t* top_p_sampler) validate() bool {
 	}
 	return true
 }
+
 struct sampler_factory {
 	samplers map[sampler_type]interface{}
 }
+
 func create_sampler_factory() sampler_factory* {
 	return *sampler_factory{
 		samplers: make(map[sampler_type]interface{}),
 	}
 }
+
 func (f* sampler_factory) register_sampler(sampler_type stype, interface{} sampler) {
 	if f.samplers != nil {
 		f.samplers[stype] = sampler
 	}
 }
+
 func (f* sampler_factory) get_sampler(sampler_type stype) interface{} {
 	if f.samplers == nil {
 		return nil
@@ -269,6 +294,7 @@ func (f* sampler_factory) get_sampler(sampler_type stype) interface{} {
 	}
 	return nil
 }
+
 func (f* sampler_factory) create_default_samplers() {
 	f.register_sampler(sampler_type_greedy, create_greedy_sampler(42))
 	f.register_sampler(sampler_type_top_k, create_top_k_sampler(40, 1.0, 42))

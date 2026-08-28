@@ -48,6 +48,7 @@ func example_create_basic_adapter() ((), string) {
     println("  Modules: " + adapter.get_module_names().len().to_string())
     return (), ""
 }
+
 func example_apply_lora() ((), string) {
     config := default()
     config.lora_rank = 4
@@ -93,6 +94,7 @@ func example_apply_lora() ((), string) {
     println("  Output size: " + len(output).to_string())
     return (), ""
 }
+
 func example_adapter_manager() ((), string) {
     manager := new()
     config1 := default()
@@ -120,6 +122,7 @@ func example_adapter_manager() ((), string) {
     println("  Active after deactivation: " + manager.get_active_adapters().len().to_string())
     return (), ""
 }
+
 func example_batch_apply_lora() ((), string) {
     config := default()
     config.lora_rank = 4
@@ -172,6 +175,7 @@ func example_batch_apply_lora() ((), string) {
     println("  Output count: " + len(outputs).to_string())
     return (), ""
 }
+
 func main() {
     println("=== LoRA foundation使useexample ===\n")
     switch example_create_basic_adapter() {

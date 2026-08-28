@@ -12,6 +12,7 @@ struct api_streaming_adapter {
 	int32                       total_api_errors
 	sync.Mutex                  mu
 }
+
 struct api_request {
 	string                      request_id
 	string                      request_type
@@ -27,6 +28,7 @@ struct api_request {
 	string                      stop_reason
 	bool                        streaming_enabled
 }
+
 struct api_chat_request {
 	string                      model
 	string[]                messages
@@ -36,6 +38,7 @@ struct api_chat_request {
 	string                      request_id
 	bool                        stream
 }
+
 struct api_completion_request {
 	string                      model
 	string                      prompt
@@ -45,6 +48,7 @@ struct api_completion_request {
 	string                      request_id
 	bool                        stream
 }
+
 struct api_response_adapter {
 	string                      response_id
 	int32                       status_code
@@ -56,6 +60,7 @@ struct api_response_adapter {
 	int64                       created_timestamp
 	string                      model
 }
+
 struct api_embedding_stream {
 	string                      embedding_request_id
 	int32                       embedding_dimension
@@ -64,6 +69,7 @@ struct api_embedding_stream {
 	int64                       embedding_start_time
 	int64                       embedding_end_time
 }
+
 func create_api_streaming_adapter(server sse_server, max_concurrent int32) api_streaming_adapter {
 	return api_streaming_adapter{
 		server:                          server,
@@ -77,6 +83,7 @@ func create_api_streaming_adapter(server sse_server, max_concurrent int32) api_s
 		mu:                              sync.Mutex{},
 	}
 }
+
 func (api_streaming_adapter* a) handle_streaming_chat_request(request api_chat_request) (api_response_adapter, bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -125,6 +132,7 @@ func (api_streaming_adapter* a) handle_streaming_chat_request(request api_chat_r
 	}
 	return response, true
 }
+
 func (api_streaming_adapter* a) handle_streaming_completion_request(request api_completion_request) (api_response_adapter, bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -159,6 +167,7 @@ func (api_streaming_adapter* a) handle_streaming_completion_request(request api_
 	}
 	return response, true
 }
+
 func (api_streaming_adapter* a) write_completion_chunk(request_id string, chunk string) bool {
 	a.mu.Lock()
 	api_req, exists := a.active_requests[request_id]
@@ -171,6 +180,7 @@ func (api_streaming_adapter* a) write_completion_chunk(request_id string, chunk 
 	a.mu.Unlock()
 	return a.pipeline.stream_content_delta(request_id, chunk)
 }
+
 func (api_streaming_adapter* a) write_reasoning_trace(request_id string, trace_data string, reasoning_type string) bool {
 	a.mu.Lock()
 	api_req, exists := a.active_requests[request_id]
@@ -182,6 +192,7 @@ func (api_streaming_adapter* a) write_reasoning_trace(request_id string, trace_d
 	trace_event_data := "reasoning:" + reasoning_type + ":" + trace_data
 	return a.pipeline.handler.log_reasoning_step(request_id, 1, trace_event_data)
 }
+
 func (api_streaming_adapter* a) finalize_completion(request_id string, finish_reason string) (api_response_adapter, bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -206,6 +217,7 @@ func (api_streaming_adapter* a) finalize_completion(request_id string, finish_re
 	}
 	return response, true
 }
+
 func (api_streaming_adapter* a) handle_api_error(request_id string, error_code int32, error_message string) bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -218,6 +230,7 @@ func (api_streaming_adapter* a) handle_api_error(request_id string, error_code i
 	a.total_api_errors++
 	return a.pipeline.handler.fail_stream(request_id, error_message)
 }
+
 func (api_streaming_adapter* a) get_adapter_stats() map[string]interface{} {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -230,6 +243,7 @@ func (api_streaming_adapter* a) get_adapter_stats() map[string]interface{} {
 	stats["pipeline_stats"] = pipeline_stats
 	return stats
 }
+
 func (api_streaming_adapter* a) log_api_event(request_id string, event_type string, event_data string) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -247,6 +261,7 @@ func (api_streaming_adapter* a) log_api_event(request_id string, event_type stri
 		a.pipeline.event_logs = append(a.pipeline.event_logs, log_entry)
 	}
 }
+
 struct api_endpoint_handler {
 	api_streaming_adapter       adapter
 	string                      endpoint_base_path
@@ -254,6 +269,7 @@ struct api_endpoint_handler {
 	int32                       current_request_count
 	int64                       current_minute_start
 }
+
 func create_api_endpoint_handler(adapter api_streaming_adapter) api_endpoint_handler {
 	return api_endpoint_handler{
 		adapter:                          adapter,
@@ -263,6 +279,7 @@ func create_api_endpoint_handler(adapter api_streaming_adapter) api_endpoint_han
 		current_minute_start:             time.Now().UnixNano(),
 	}
 }
+
 func (api_endpoint_handler* h) check_rate_limit() bool {
 	now := time.Now().UnixNano()
 	elapsed := (now - h.current_minute_start) / 1000000000
@@ -276,6 +293,7 @@ func (api_endpoint_handler* h) check_rate_limit() bool {
 	h.current_request_count++
 	return true
 }
+
 func (api_endpoint_handler* h) handle_chat_completions_stream(request api_chat_request) (api_response_adapter, bool) {
 	if !h.check_rate_limit() {
 		return api_response_adapter{
@@ -285,6 +303,7 @@ func (api_endpoint_handler* h) handle_chat_completions_stream(request api_chat_r
 	}
 	return h.adapter.handle_streaming_chat_request(request)
 }
+
 func (api_endpoint_handler* h) handle_completions_stream(request api_completion_request) (api_response_adapter, bool) {
 	if !h.check_rate_limit() {
 		return api_response_adapter{

@@ -4,6 +4,7 @@ package neurx.amp.optimizer
     FP16,
     INT8,
 }
+
 structure loss_scale_config {
     float initial_scale
     float max_scale
@@ -13,6 +14,7 @@ structure loss_scale_config {
     int update_interval
     int consecutive_overflows
 }
+
 structure mixed_precision_state {
     precision_type compute_precision
     precision_type accumulator_precision
@@ -26,12 +28,14 @@ structure mixed_precision_state {
     int num_total_steps
     float average_loss_scale
 }
+
 structure gradient_overflow_info {
     bool has_overflow
     int overflow_rank
     float overflow_value
     int num_overflowing_params
 }
+
 func new_mixed_precision_state(loss_scale_config config): mixed_precision_state {
     state := mixed_precision_state
     state.compute_precision = BF16
@@ -47,6 +51,7 @@ func new_mixed_precision_state(loss_scale_config config): mixed_precision_state 
     state.average_loss_scale = config.initial_scale
     return state
 }
+
 func mixed_precision_forward(
         min_scale: 1.0,
         scale_growth_factor: 2.0,
@@ -55,6 +60,7 @@ func mixed_precision_forward(
         consecutive_overflows: 2
     }
 }
+
 func mixed_precision_forward(
     func(vector): vector layer_fn,
     vector inputs,
@@ -66,12 +72,14 @@ func mixed_precision_forward(
     fp32_output := convert_to_precision(bf16_output, FP32)
     return fp32_output
 }
+
 func compute_scaled_loss(
     float loss,
     mixed_precision_state state
 ): float {
     return loss * state.current_loss_scale
 }
+
 func backward_pass_with_unscaling(
     float grad_loss,
     vector gradients,
@@ -84,6 +92,7 @@ func backward_pass_with_unscaling(
     }
     return unscaled_gradients
 }
+
 func check_gradient_overflow(vector gradients, int num_ranks, int rank): gradient_overflow_info {
     info := gradient_overflow_info
     info.has_overflow = false
@@ -104,6 +113,7 @@ func check_gradient_overflow(vector gradients, int num_ranks, int rank): gradien
     }
     return info
 }
+
 func update_loss_scale(
     mixed_precision_state state,
     gradient_overflow_info overflow_info,
@@ -130,6 +140,7 @@ func update_loss_scale(
     state.num_total_steps = state.num_total_steps + 1
     state.average_loss_scale = (state.average_loss_scale * (state.num_total_steps - 1) + state.current_loss_scale) / float(state.num_total_steps)
 }
+
 func mixed_precision_optimizer_step(
     vector optimizer,
     vector params,
@@ -147,6 +158,7 @@ func mixed_precision_optimizer_step(
     bf16_params := convert_to_precision(updated_params, state.weight_precision)
     return convert_to_precision(bf16_params, FP32)
 }
+
 func mixed_precision_training_step(
     func(vector): vector model_forward,
     func(vector, vector): float compute_loss_func,
@@ -181,6 +193,7 @@ func mixed_precision_training_step(
     }
     return updated_params, loss, overflow_info.has_overflow
 }
+
 func distributed_gradient_sync(
     vector gradients,
     int num_ranks,
@@ -200,6 +213,7 @@ func distributed_gradient_sync(
     }
     return synced_gradients
 }
+
 func convert_to_precision(vector tensor, precision_type target_precision): vector {
     result := allocate_vector(length(tensor), 0.0)
     if target_precision == FP32 {
@@ -215,16 +229,19 @@ func convert_to_precision(vector tensor, precision_type target_precision): vecto
     }
     return result
 }
+
 func round_to_bf16(float val): float {
     bf16_bits := float_to_bits(val)
     rounded_bits := bf16_bits >> 16
     return bits_to_float(rounded_bits << 16)
 }
+
 func round_to_fp16(float val): float {
     fp32_bits := float_to_bits(val)
     rounded_bits := fp32_bits >> 16
     return bits_to_float(rounded_bits << 16)
 }
+
 func compute_mixed_precision_memory_savings(
     int param_count,
     int optimizer_state_count,
@@ -246,6 +263,7 @@ func compute_mixed_precision_memory_savings(
     speedup := fp32_total / mixed_total
     return memory_saved, speedup
 }
+
 func estimate_throughput_improvement(
     float fp32_throughput,
     bool use_bf16,
@@ -260,6 +278,7 @@ func estimate_throughput_improvement(
     }
     return fp32_throughput * throughput_multiplier
 }
+
 func clip_gradients_by_norm(vector gradients, float max_norm): vector {
     norm_sq := 0.0
     for i in range(0, length(gradients)) {
@@ -276,6 +295,7 @@ func clip_gradients_by_norm(vector gradients, float max_norm): vector {
     }
     return clipped
 }
+
 func adamw_step(
     vector params, vector gradients, vector optimizer_state,
     float learning_rate,
@@ -297,21 +317,27 @@ func adamw_step(
     }
     return updated_params
 }
+
 func has_global_overflow(bool local_overflow, int num_ranks, int rank): bool {
     return local_overflow
 }
+
 func find_overflow_rank(int rank): int {
     return rank
 }
+
 func all_reduce_avg(vector gradients, int num_ranks, int rank): vector {
     return gradients
 }
+
 func is_nan(float val): bool {
     return val != val
 }
+
 func is_inf(float val): bool {
     return abs(val) > 1e10
 }
+
 func mixed_precision_backward_pass(float loss, vector params): vector {
     gradients := allocate_vector(length(params), 0.0)
     if length(params) == 0 {
@@ -331,6 +357,7 @@ func mixed_precision_backward_pass(float loss, vector params): vector {
     }
     gradients
 }
+
 func get_first_half(vector v): vector {
     mid := length(v) / 2
     result := allocate_vector(mid, 0.0)
@@ -339,6 +366,7 @@ func get_first_half(vector v): vector {
     }
     return result
 }
+
 func get_second_half(vector v): vector {
     mid := length(v) / 2
     result := allocate_vector(length(v) - mid, 0.0)
@@ -347,6 +375,7 @@ func get_second_half(vector v): vector {
     }
     return result
 }
+
 func float_to_bits(float val): int {
     scaled := val * 1000000.0
     if scaled < 0.0 {
@@ -354,9 +383,11 @@ func float_to_bits(float val): int {
     }
     return int(scaled)
 }
+
 func bits_to_float(int bits): float {
     return float(bits) / 1000000.0
 }
+
 func int_to_string(int n): string {
     if n == 0 {
         return "0"
@@ -378,6 +409,7 @@ func int_to_string(int n): string {
     }
     return result
 }
+
 func float_to_string(float value): string {
     whole := int(value)
     frac := value - float(whole)
@@ -391,6 +423,7 @@ func float_to_string(float value): string {
     }
     return int_to_string(whole) + "." + frac_str
 }
+
 func recommended_mixed_precision_config_2t(): loss_scale_config {
     return loss_scale_config {
         initial_scale: 65536.0,
@@ -402,6 +435,7 @@ func recommended_mixed_precision_config_2t(): loss_scale_config {
         consecutive_overflows: 2
     }
 }
+
 func print_mixed_precision_status(mixed_precision_state state): void {
     println("Mixed precision state:")
     println("  loss_scale=" + float_to_string(state.current_loss_scale))

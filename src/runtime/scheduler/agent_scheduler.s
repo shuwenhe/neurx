@@ -5,6 +5,7 @@ struct agent_scheduler_state {
     string[] statuses
     int count
 }
+
 func new_agent_scheduler_state() agent_scheduler_state {
     agent_scheduler_state {
         tasks: [],
@@ -13,15 +14,19 @@ func new_agent_scheduler_state() agent_scheduler_state {
         count: 0,
     }
 }
+
 func get_task(agent_scheduler_state state, int index) string {
     state.tasks[index]
 }
+
 func get_priority(agent_scheduler_state state, int index) int {
     state.priorities[index]
 }
+
 func get_status(agent_scheduler_state state, int index) string {
     state.statuses[index]
 }
+
 func agent_scheduler_enqueue(agent_scheduler_state state, string task, int priority) agent_scheduler_state {
     int n = state.count
     string[] new_tasks = string[]{cap: n + 1}
@@ -44,6 +49,7 @@ func agent_scheduler_enqueue(agent_scheduler_state state, string task, int prior
         count: n + 1,
     }
 }
+
 func agent_scheduler_find_task(agent_scheduler_state state, string task) int {
     int i = 0
     bool found = false
@@ -58,6 +64,7 @@ func agent_scheduler_find_task(agent_scheduler_state state, string task) int {
     }
     idx
 }
+
 func agent_scheduler_mark_status(agent_scheduler_state state, string task, string status) agent_scheduler_state {
     int idx = agent_scheduler_find_task(state, task)
     string[] new_statuses = string[]{cap: state.count}
@@ -76,12 +83,15 @@ func agent_scheduler_mark_status(agent_scheduler_state state, string task, strin
         count: state.count,
     }
 }
+
 func agent_scheduler_mark_done(agent_scheduler_state state, string task) agent_scheduler_state {
     agent_scheduler_mark_status(state, task, "done")
 }
+
 func agent_scheduler_mark_failed(agent_scheduler_state state, string task) agent_scheduler_state {
     agent_scheduler_mark_status(state, task, "failed")
 }
+
 func agent_scheduler_next_task(agent_scheduler_state state) string {
     string best = ""
     int best_pri = -999999
@@ -97,6 +107,7 @@ func agent_scheduler_next_task(agent_scheduler_state state) string {
     }
     best
 }
+
 func agent_scheduler_has_pending(agent_scheduler_state state) bool {
     int i = 0
     for i < state.count {
@@ -107,6 +118,7 @@ func agent_scheduler_has_pending(agent_scheduler_state state) bool {
     }
     false
 }
+
 func agent_scheduler_pending_count(agent_scheduler_state state) int {
     int total = 0
     int i = 0
@@ -118,6 +130,7 @@ func agent_scheduler_pending_count(agent_scheduler_state state) int {
     }
     total
 }
+
 func agent_scheduler_export(agent_scheduler_state state) string {
     string out = "scheduler;count=" + string(state.count) + "\n"
     int i = 0
@@ -127,6 +140,7 @@ func agent_scheduler_export(agent_scheduler_state state) string {
     }
     out
 }
+
 func agent_scheduler_summary(agent_scheduler_state state) string {
     "scheduler;total=" + string(state.count) + ";pending=" + string(agent_scheduler_pending_count(state)) + ";next=" + agent_scheduler_next_task(state)
 }

@@ -21,9 +21,11 @@ func shell_escape(string value) string {
     }
     output + "'"
 }
+
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -45,6 +47,7 @@ func int_to_string(int value) string {
     }
     return out
 }
+
 func decimal_digit_value(string text) int {
     if text == "0" { return 0 }
     if text == "1" { return 1 }
@@ -58,6 +61,7 @@ func decimal_digit_value(string text) int {
     if text == "9" { return 9 }
     -1
 }
+
 func parse_int_or_default(string text, int fallback) int {
     if len(text) == 0 {
         return fallback
@@ -82,6 +86,7 @@ func parse_int_or_default(string text, int fallback) int {
     }
     value * sign
 }
+
 func parse_positive_int(string text, int fallback) int {
     int value = parse_int_or_default(text, fallback)
     if value <= 0 {
@@ -89,6 +94,7 @@ func parse_positive_int(string text, int fallback) int {
     }
     value
 }
+
 func index_of(string text, string needle) int {
     if len(needle) == 0 || len(needle) > len(text) {
         return -1
@@ -108,12 +114,14 @@ func index_of(string text, string needle) int {
     }
     -1
 }
+
 func starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) {
         return false
     }
     __host_slice(text, 0, len(prefix)) == prefix
 }
+
 func http_request(string host, int port, string method, string path, string body, string extra_headers) string {
     int conn_fd = __sys_socket(2, 1, 6)
     if conn_fd < 0 {
@@ -153,6 +161,7 @@ func http_request(string host, int port, string method, string path, string body
     _ = __sys_close(conn_fd)
     response
 }
+
 func http_body(string response) string {
     if !starts_with(response, "HTTP/1.1 200") {
         return ""
@@ -163,6 +172,7 @@ func http_body(string response) string {
     }
     __host_slice(response, separator + 4, len(response))
 }
+
 func backend_ready(string host, int port) bool {
     string response = http_request(host, port, "GET", "/health", "", "")
     string body = http_body(response)
@@ -180,6 +190,7 @@ func backend_ready(string host, int port) bool {
     }
     false
 }
+
 func stop_owned_backend(bool owned, string pid_file) int {
     if !owned {
         return 0
@@ -191,30 +202,36 @@ func stop_owned_backend(bool owned, string pid_file) int {
     )
     0
 }
+
 func backend_signature(string model, string threads) string {
     model + "\n" + threads
 }
+
 func read_text_file(string path) string {
     trim(runtime_run_command_output("cat " + shell_escape(path) + " 2>/dev/null || true"))
 }
+
 func backend_matches_requested_model(string meta_file, string model, string threads) bool {
     if !runtime_file_exists(meta_file) {
         return false
     }
     read_text_file(meta_file) == backend_signature(model, threads)
 }
+
 func backend_failed_to_bind(string log_file) bool {
     if !runtime_file_exists(log_file) {
         return false
     }
     index_of(read_text_file(log_file), "Socket bind failed") >= 0
 }
+
 func stop_backend_for_restart(string pid_file, string backend, string port) int {
     _ = runtime_run_command_output("fuser -k " + shell_escape(port + "/tcp") + " 2>/dev/null || true")
     _ = runtime_run_command_output("pkill -f " + shell_escape(backend) + " 2>/dev/null || true")
     runtime_run_command_output("sleep 1")
     0
 }
+
 func ends_with(string text, string suffix) bool {
     int text_len = len(text)
     int suffix_len = len(suffix)
@@ -231,6 +248,7 @@ func ends_with(string text, string suffix) bool {
     }
     return true
 }
+
 func extract_json_string(string json, string key) string {
     string search = "\"" + key + "\":"
     int start_pos = index_of(json, search)
@@ -276,6 +294,7 @@ func extract_json_string(string json, string key) string {
     }
     return result
 }
+
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")

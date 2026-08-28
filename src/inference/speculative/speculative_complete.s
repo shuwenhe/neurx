@@ -8,6 +8,7 @@ struct speculative_decoding_config {
     bool enable_caching
     int cache_size
 }
+
 struct speculative_decoding_output {
     int[] output_tokens
     int[] draft_tokens
@@ -17,28 +18,33 @@ struct speculative_decoding_output {
     float acceptance_rate
     float speedup
 }
+
 struct speculative_draft_model {
     float[][] weights
     int hidden_dim
     int num_layers
     int vocab_size
 }
+
 struct medusa_config {
     int num_speculative_heads
     int num_tokens_per_head
     int head_dim
     int hidden_dim
 }
+
 struct medusa_head {
     float[][] weights
     int output_dim
     int num_tokens
 }
+
 struct medusa_model {
     medusa_config config
     []medusa_head heads
     float[][] base_model_weights
 }
+
 func new_medusa_model(medusa_config cfg) medusa_model {
     medusa_model model
     model.config = cfg
@@ -53,6 +59,7 @@ func new_medusa_model(medusa_config cfg) medusa_model {
     }
     model
 }
+
 func medusa_generate_draft_tokens(
     float[] input_hidden_state,
     medusa_model model,
@@ -70,6 +77,7 @@ func medusa_generate_draft_tokens(
     }
     draft_tokens
 }
+
 func medusa_verify_and_accept(
     int[][] draft_tokens,
     float[] main_model_logits,
@@ -99,17 +107,20 @@ func medusa_verify_and_accept(
     }
     output
 }
+
 struct eagle_config {
     int num_layers
     int hidden_dim
     int vocab_size
     bool use_input_dependent_head
 }
+
 struct eagle_model {
     eagle_config config
     float[][] layer_weights
     float[][] vocabulary_projection
 }
+
 func new_eagle_model(eagle_config cfg) eagle_model {
     eagle_model model
     model.config = cfg
@@ -121,6 +132,7 @@ func new_eagle_model(eagle_config cfg) eagle_model {
     }
     model
 }
+
 func eagle_generate_draft_tokens(
     float[] input_hidden_state,
     eagle_model model,
@@ -136,6 +148,7 @@ func eagle_generate_draft_tokens(
     }
     draft_tokens
 }
+
 func eagle_verify(
     int[] draft_tokens,
     float[][] main_model_logits_sequence,
@@ -167,26 +180,31 @@ func eagle_verify(
     }
     output
 }
+
 struct lookahead_config {
     int window_size
     int num_branches
     int num_steps_per_branch
 }
+
 struct lookahead_branch {
     int[] tokens
     float[] scores
     float branch_score
 }
+
 struct lookahead_decoder {
     lookahead_config config
     [][]lookahead_branch branches
 }
+
 func new_lookahead_decoder(lookahead_config cfg) lookahead_decoder {
     lookahead_decoder decoder
     decoder.config = cfg
     decoder.branches = [][]lookahead_branch{}
     decoder
 }
+
 func lookahead_decode(
     float[] input_hidden_state,
     lookahead_decoder decoder,
@@ -221,6 +239,7 @@ func lookahead_decode(
     }
     final_tokens
 }
+
 func speculative_decoding_step(
     float[] current_hidden,
     speculative_decoding_config cfg,
@@ -240,11 +259,13 @@ func speculative_decoding_step(
     }
     output
 }
+
 struct speculative_cache {
     map<string, speculative_decoding_output> cache
     int max_size
     int current_size
 }
+
 func new_speculative_cache(int max_size) speculative_cache {
     speculative_cache cache
     cache.cache = map<string, speculative_decoding_output>{}
@@ -252,12 +273,14 @@ func new_speculative_cache(int max_size) speculative_cache {
     cache.current_size = 0
     cache
 }
+
 func cache_speculative_output(
     speculative_cache cache,
     string key,
     speculative_decoding_output output
 ) {
 }
+
 func get_cached_output(
     speculative_cache cache,
     string key
@@ -272,6 +295,7 @@ func get_cached_output(
     output.speedup = 1.0
     output
 }
+
 struct speculative_decoding_metrics {
     float total_speedup
     float average_acceptance_rate
@@ -279,6 +303,7 @@ struct speculative_decoding_metrics {
     float latency_reduction
     int num_calls
 }
+
 func initialize_metrics() speculative_decoding_metrics {
     speculative_decoding_metrics metrics
     metrics.total_speedup = 0.0
@@ -288,6 +313,7 @@ func initialize_metrics() speculative_decoding_metrics {
     metrics.num_calls = 0
     metrics
 }
+
 func update_metrics(
     speculative_decoding_metrics metrics,
     speculative_decoding_output output
@@ -298,6 +324,7 @@ func update_metrics(
     metrics.num_calls = metrics.num_calls + 1
     metrics
 }
+
 func print_metrics(speculative_decoding_metrics metrics) {
     println("=== Speculative Decoding Metrics ===")
     println("Total Speedup: ", metrics.total_speedup)
@@ -305,6 +332,7 @@ func print_metrics(speculative_decoding_metrics metrics) {
     println("Draft Tokens per Step: ", metrics.draft_tokens_per_step)
     println("Number of Calls: ", metrics.num_calls)
 }
+
 struct adaptive_speculative_config {
     bool enable_adaptive_speculation
     float min_acceptance_threshold
@@ -312,6 +340,7 @@ struct adaptive_speculative_config {
     int min_speculative_tokens
     int max_speculative_tokens
 }
+
 func adaptive_speculative_decoding(
     float[] hidden_state,
     speculative_decoding_output last_output,
@@ -325,6 +354,7 @@ func adaptive_speculative_decoding(
     }
     num_speculative_tokens
 }
+
 func joint_speculative_decoding(
     float[] hidden_state,
     medusa_model medusa,
@@ -341,6 +371,7 @@ func joint_speculative_decoding(
     output.speedup = 0.0
     output
 }
+
 func print_speculative_config(speculative_decoding_config cfg) {
     println("=== Speculative Decoding Config ===")
     println("Method: ", cfg.method)
@@ -348,6 +379,7 @@ func print_speculative_config(speculative_decoding_config cfg) {
     println("Acceptance Threshold: ", cfg.acceptance_threshold)
     println("Enable Caching: ", cfg.enable_caching)
 }
+
 func validate_speculative_config(speculative_decoding_config cfg) bool {
     if cfg.num_speculative_tokens <= 0 {
         false
@@ -357,6 +389,7 @@ func validate_speculative_config(speculative_decoding_config cfg) bool {
     }
     true
 }
+
 func main() {
     println("=== Complete Speculative Decoding System ===")
     speculative_decoding_config cfg

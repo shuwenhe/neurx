@@ -19,6 +19,7 @@ func runtime_parse_int(string text, int fallback) int {
     }
     value * sign
 }
+
 func runtime_shell_escape(string value) string {
     string out = "'"
     int i = 0

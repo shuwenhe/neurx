@@ -55,6 +55,7 @@ struct ExecutorConfig {
     pipeline_parallel   i32
     timeout_ms          i32
 }
+
 struct ExecutionIteration {
     iteration_id    i64
     phase           i32
@@ -67,6 +68,7 @@ struct ExecutionIteration {
     output_tokens   i32
     error_code      i32
 }
+
 struct SequenceStatus {
     sequence_id     string
     phase           i32
@@ -78,6 +80,7 @@ struct SequenceStatus {
     arrival_time    i64
     estimated_finish i64
 }
+
 struct KVCacheBlock {
     block_id        i32
     sequence_id     string
@@ -88,6 +91,7 @@ struct KVCacheBlock {
     last_access     i64
     access_count    i64
 }
+
 struct KVCacheManager {
     total_size_gb   f64
     allocated_mb    i32
@@ -97,6 +101,7 @@ struct KVCacheManager {
     eviction_policy i32
     max_blocks      i32
 }
+
 struct ExecutionResult {
     iteration_id    i64
     success         i32
@@ -108,6 +113,7 @@ struct ExecutionResult {
     throughput      f64
     cache_hit_rate  f64
 }
+
 struct ExecutorStatistics {
     total_iterations    i64
     completed_iterations i64
@@ -122,6 +128,7 @@ struct ExecutorStatistics {
     throughput          f64
     memory_peak         i32
 }
+
 struct PrefillConfig {
     max_batch_size  i32
     max_tokens      i32
@@ -129,6 +136,7 @@ struct PrefillConfig {
     enable_swap     i32
     block_size      i32
 }
+
 struct DecodeConfig {
     max_batch_size  i32
     beam_width      i32
@@ -136,6 +144,7 @@ struct DecodeConfig {
     enable_swap     i32
     num_beams       i32
 }
+
 struct DistributedConfig {
     rank            i32
     world_size      i32
@@ -143,6 +152,7 @@ struct DistributedConfig {
     pipeline_parallel i32
     sync_timeout_ms i32
 }
+
 struct IterationSchedule {
     iteration_id    i64
     prefill_batch   string[]
@@ -153,6 +163,7 @@ struct IterationSchedule {
     mixed_count     i32
     priority_order  []i32
 }
+
 struct ExecutorMetrics {
     current_state   i32
     active_sequences i32
@@ -165,6 +176,7 @@ struct ExecutorMetrics {
     gpu_memory_mb   i32
     gpu_util        f64
 }
+
 struct AttentionMask {
     sequence_id     string
     mask_data       []u8
@@ -172,6 +184,7 @@ struct AttentionMask {
     is_causal       i32
     enable_prefix   i32
 }
+
 struct CacheEvictionPolicy {
     policy_type     i32
     max_block_age   i64

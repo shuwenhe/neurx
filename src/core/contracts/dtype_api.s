@@ -31,6 +31,7 @@ interface id_type {
     is_signed() . bool
     equals(other: DType) . bool
 }
+
 struct dtype_promotion_rule {
     DType from_dtype
     DType to_dtype

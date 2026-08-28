@@ -10,6 +10,7 @@ struct vm_config {
     int memory_mb
     int disk_size_gb
 }
+
 struct vcpu {
     int vcpu_id
     int vm_id
@@ -18,6 +19,7 @@ struct vcpu {
     int context_switches
     int cpu_cycles
 }
+
 struct vm_memory_region {
     int region_id
     int guest_phys_addr
@@ -25,6 +27,7 @@ struct vm_memory_region {
     int size
     int access_flags  
 }
+
 struct vm_device {
     int device_id
     int device_type
@@ -32,6 +35,7 @@ struct vm_device {
     int irq_number
     int device_state
 }
+
 struct virtual_machine {
     int vm_id
     string vm_name
@@ -44,6 +48,7 @@ struct virtual_machine {
     int boot_time_ms
     int total_exec_time_ms
 }
+
 struct virtualizer {
     vec vms
     int vm_counter
@@ -53,6 +58,7 @@ struct virtualizer {
     int total_vm_exits
     int total_mmio_operations
 }
+
 func (virt* virtualizer) create_vm(name string, vcpu_count int, memory_mb int, disk_size_gb int) (int, string) {
     vm := virtual_machine{
         vm_id: virt.vm_counter,
@@ -85,6 +91,7 @@ func (virt* virtualizer) create_vm(name string, vcpu_count int, memory_mb int, d
     virt.total_vms = virt.total_vms + 1
     return vm_id, ""
 }
+
 func (virt* virtualizer) start_vm(vm_id int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -96,6 +103,7 @@ func (virt* virtualizer) start_vm(vm_id int) (int, string) {
     virt.vms[vm_id] = vm
     return vm_id, ""
 }
+
 func (virt* virtualizer) stop_vm(vm_id int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -108,6 +116,7 @@ func (virt* virtualizer) stop_vm(vm_id int) (int, string) {
     virt.vms[vm_id] = vm
     return vm_id, ""
 }
+
 func (virt* virtualizer) pause_vm(vm_id int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -120,6 +129,7 @@ func (virt* virtualizer) pause_vm(vm_id int) (int, string) {
     virt.vms[vm_id] = vm
     return vm_id, ""
 }
+
 func (virt* virtualizer) resume_vm(vm_id int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -132,6 +142,7 @@ func (virt* virtualizer) resume_vm(vm_id int) (int, string) {
     virt.vms[vm_id] = vm
     return vm_id, ""
 }
+
 func (virt* virtualizer) add_memory_region(vm_id int, guest_addr int, host_addr int, size int, flags int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -148,6 +159,7 @@ func (virt* virtualizer) add_memory_region(vm_id int, guest_addr int, host_addr 
     virt.vms[vm_id] = vm
     return region.region_id, ""
 }
+
 func (virt* virtualizer) add_device(vm_id int, device_type int, irq_nr int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -164,10 +176,12 @@ func (virt* virtualizer) add_device(vm_id int, device_type int, irq_nr int) (int
     virt.vms[vm_id] = vm
     return device.device_id, ""
 }
+
 func (virt* virtualizer) handle_vm_exit(vm_id int, exit_reason int) (int, string) {
     virt.total_vm_exits = virt.total_vm_exits + 1
     return 0, ""
 }
+
 func create_virtualizer() (virtualizer, string) {
     virt := virtualizer{
         vms: {},
@@ -180,6 +194,7 @@ func create_virtualizer() (virtualizer, string) {
     }
     return virt, ""
 }
+
 func (virt* virtualizer) get_stats() (virtualizer, string) {
     return virt, ""
 }

@@ -31,6 +31,7 @@ struct multimodal_input {
 	map[string]interface{} input_metadata
 	time.Time created_at
 }
+
 struct multimodal_inference_request {
 	string request_id
 	string model_id
@@ -42,6 +43,7 @@ struct multimodal_inference_request {
 	map[string]interface{} generation_config
 	time.Time created_at
 }
+
 struct multimodal_inference_response {
 	string response_id
 	string request_id
@@ -54,6 +56,7 @@ struct multimodal_inference_response {
 	map[string]interface{} modality_stats
 	time.Time created_at
 }
+
 struct cross_modal_reasoning_result {
 	string reasoning_text
 	map[string]string modality_reasoning
@@ -61,6 +64,7 @@ struct cross_modal_reasoning_result {
 	float32 reasoning_confidence
 	time.Time created_at
 }
+
 struct multimodal_inference_engine {
 	sync.Mutex mu
 	*model_system model_system
@@ -75,6 +79,7 @@ struct multimodal_inference_engine {
 	float64 total_inference_time_ms
 	time.Time created_at
 }
+
 func create_multimodal_inference_engine(model_sys *model_system, encoder *multimodal_encoder, fusion_eng *multimodal_fusion_engine) *multimodal_inference_engine {
 	mie := *multimodal_inference_engine{
 		model_system:            model_sys,
@@ -91,6 +96,7 @@ func create_multimodal_inference_engine(model_sys *model_system, encoder *multim
 	}
 	return mie
 }
+
 func (multimodal_inference_engine* mie) create_multimodal_input(input_id string, text *string, image *image_data, video *video_data, audio *audio_data) (*multimodal_input, error) {
 	if text == nil && image == nil && video == nil && audio == nil {
 		return nil, fmt.Errorf("at least one input modality must be provided")
@@ -137,6 +143,7 @@ func (multimodal_inference_engine* mie) create_multimodal_input(input_id string,
 	}
 	return input, nil
 }
+
 func (multimodal_inference_engine* mie) process_multimodal_input(multimodal_input* input) (map[string]*encoded_features, error) {
 	if input == nil {
 		return nil, fmt.Errorf("input cannot be nil")
@@ -171,6 +178,7 @@ func (multimodal_inference_engine* mie) process_multimodal_input(multimodal_inpu
 	}
 	return modality_features, nil
 }
+
 func (multimodal_inference_engine* mie) perform_cross_modal_alignment(multimodal_input* input) error {
 	if input.audio_input == nil || input.video_input == nil {
 		return nil
@@ -185,6 +193,7 @@ func (multimodal_inference_engine* mie) perform_cross_modal_alignment(multimodal
 	}
 	return nil
 }
+
 func (multimodal_inference_engine* mie) reason_cross_modalities(modality_features map[string]*encoded_features) (*cross_modal_reasoning_result, error) {
 	if len(modality_features) == 0 {
 		return nil, fmt.Errorf("no modality features provided")
@@ -232,6 +241,7 @@ func (multimodal_inference_engine* mie) reason_cross_modalities(modality_feature
 	}
 	return result, nil
 }
+
 func (multimodal_inference_engine* mie) submit_inference(multimodal_inference_request* request) (*multimodal_inference_response, error) {
 	mie.mu.Lock()
 	defer mie.mu.Unlock()
@@ -289,6 +299,7 @@ func (multimodal_inference_engine* mie) submit_inference(multimodal_inference_re
 	mie.total_inference_time_ms += float64(inference_time)
 	return response, nil
 }
+
 func (multimodal_inference_engine* mie) get_inference_response(response_id string) (*multimodal_inference_response, error) {
 	mie.mu.Lock()
 	defer mie.mu.Unlock()
@@ -298,6 +309,7 @@ func (multimodal_inference_engine* mie) get_inference_response(response_id strin
 	}
 	return response, nil
 }
+
 func (multimodal_inference_engine* mie) get_inference_stats() map[string]interface{} {
 	mie.mu.Lock()
 	defer mie.mu.Unlock()
@@ -314,11 +326,13 @@ func (multimodal_inference_engine* mie) get_inference_stats() map[string]interfa
 		"created_at":            mie.created_at,
 	}
 }
+
 func (multimodal_inference_engine* mie) clear_responses() {
 	mie.mu.Lock()
 	defer mie.mu.Unlock()
 	mie.responses = make(map[string]*multimodal_inference_response)
 }
+
 func (multimodal_inference_engine* mie) set_max_output_tokens(max_tokens int32) {
 	mie.mu.Lock()
 	defer mie.mu.Unlock()

@@ -6,6 +6,7 @@ struct MessageQueue {
     send_count      i64
     recv_count      i64
 }
+
 struct CommunicationHandler {
     config              CommunicationConfig
     message_queues      []MessageQueue
@@ -15,6 +16,7 @@ struct CommunicationHandler {
     failed_messages     i64
     last_error          string
 }
+
 func NewCommunicationHandler(config CommunicationConfig, worker_count i32) *CommunicationHandler {
     handler := *CommunicationHandler{
         config: config,
@@ -32,6 +34,7 @@ func NewCommunicationHandler(config CommunicationConfig, worker_count i32) *Comm
     }
     return handler
 }
+
 func (CommunicationHandler* h) SendMessage(msg WorkerMessage) WorkerResult {
     if msg.receiver_id < 0 || msg.receiver_id >= h.queue_count {
         return WorkerResult{
@@ -62,6 +65,7 @@ func (CommunicationHandler* h) SendMessage(msg WorkerMessage) WorkerResult {
     h.total_messages_sent++
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (CommunicationHandler* h) ReceiveMessage(worker_id i32) WorkerMessage {
     if worker_id < 0 || worker_id >= h.queue_count {
         return WorkerMessage{message_id: -1}
@@ -77,6 +81,7 @@ func (CommunicationHandler* h) ReceiveMessage(worker_id i32) WorkerMessage {
     h.total_messages_recv++
     return msg
 }
+
 func (CommunicationHandler* h) BroadcastMessage(msg WorkerMessage, target_ids []i32) i32 {
     success_count := i32(0)
     for i := 0; i < len(target_ids); i++ {
@@ -92,6 +97,7 @@ func (CommunicationHandler* h) BroadcastMessage(msg WorkerMessage, target_ids []
     }
     return success_count
 }
+
 func (CommunicationHandler* h) ReceiveAck(worker_id i32, message_id i64) i32 {
     queue := *h.message_queues[worker_id]
     for i := 0; i < queue.queue_size; i++ {
@@ -103,6 +109,7 @@ func (CommunicationHandler* h) ReceiveAck(worker_id i32, message_id i64) i32 {
     }
     return 0
 }
+
 func (CommunicationHandler* h) SyncBarrier(worker_ids []i32, timeout_ms i32) WorkerResult {
     barrier_id := get_barrier_id()
     ack_count := i32(0)
@@ -130,6 +137,7 @@ func (CommunicationHandler* h) SyncBarrier(worker_ids []i32, timeout_ms i32) Wor
     }
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (CommunicationHandler* h) AllReduce(data []f32, worker_ids []i32) WorkerResult {
     reduce_msg := WorkerMessage{
         message_id: get_message_id(),
@@ -142,6 +150,7 @@ func (CommunicationHandler* h) AllReduce(data []f32, worker_ids []i32) WorkerRes
     }
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (CommunicationHandler* h) AllGather(local_data []f32, worker_ids []i32) []f32 {
     total_size := len(local_data) * len(worker_ids)
     gathered := make([]f32, total_size)
@@ -159,6 +168,7 @@ func (CommunicationHandler* h) AllGather(local_data []f32, worker_ids []i32) []f
     }
     return gathered
 }
+
 func (CommunicationHandler* h) GetMessageQueueStats(worker_id i32) map[string]i64 {
     stats := make(map[string]i64)
     if worker_id >= 0 && worker_id < h.queue_count {
@@ -170,6 +180,7 @@ func (CommunicationHandler* h) GetMessageQueueStats(worker_id i32) map[string]i6
     }
     return stats
 }
+
 func (CommunicationHandler* h) PurgeQueue(worker_id i32) WorkerResult {
     if worker_id < 0 || worker_id >= h.queue_count {
         return WorkerResult{
@@ -182,22 +193,26 @@ func (CommunicationHandler* h) PurgeQueue(worker_id i32) WorkerResult {
     h.message_queues[worker_id].queue_size = 0
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (CommunicationHandler* h) Shutdown() WorkerResult {
     h.queue_count = 0
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 struct SynchronizationManager {
     sync_state          SyncState
     pending_syncs       []SyncState
     completed_syncs     i64
     failed_syncs        i64
 }
+
 func NewSynchronizationManager() *SynchronizationManager {
     return *SynchronizationManager{
         completed_syncs: 0,
         failed_syncs: 0,
     }
 }
+
 func (SynchronizationManager* s) InitiateSync(source_worker i32,
                                               target_workers []i32) WorkerResult {
     sync := SyncState{
@@ -212,6 +227,7 @@ func (SynchronizationManager* s) InitiateSync(source_worker i32,
     s.pending_syncs = append(s.pending_syncs, sync)
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (SynchronizationManager* s) WaitForSync(sync_id i64, timeout_ms i32) WorkerResult {
     start_time := get_current_time_us()
     for {
@@ -231,15 +247,19 @@ func (SynchronizationManager* s) WaitForSync(sync_id i64, timeout_ms i32) Worker
         }
     }
 }
+
 func get_barrier_id() i64 {
     return 0
 }
+
 func get_message_id() i64 {
     return 0
 }
+
 func get_sync_id() i64 {
     return 0
 }
+
 func get_current_time_us() i64 {
     return 0
 }

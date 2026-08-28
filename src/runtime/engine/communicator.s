@@ -23,6 +23,7 @@ struct collective_op_config {
     float32 compression_ratio
     int32 timeout_ms
 }
+
 struct all_reduce_request {
     int32 request_id
     interface{} input_tensor
@@ -31,12 +32,14 @@ struct all_reduce_request {
     int64 tensor_size_bytes
     int32 timeout_ms
 }
+
 struct all_gather_request {
     int32 request_id
     interface{} input_tensor
     int[]erface{} output_tensors
     int64 tensor_size_bytes
 }
+
 struct reduce_scatter_request {
     int32 request_id
     int[]erface{} input_tensors
@@ -44,12 +47,14 @@ struct reduce_scatter_request {
     reduction_op op
     int64 tensor_size_bytes
 }
+
 struct broadcast_request {
     int32 request_id
     interface{} tensor
     int32 root_rank
     int64 tensor_size_bytes
 }
+
 struct point_to_point_request {
     int32 request_id
     interface{} tensor
@@ -58,6 +63,7 @@ struct point_to_point_request {
     int32 tag
     int64 tensor_size_bytes
 }
+
 struct collective_stats {
     string op_name
     int64 num_calls
@@ -66,6 +72,7 @@ struct collective_stats {
     int64 total_bytes
     float32 bandwidth_gb_per_sec
 }
+
 struct communicator {
     communication_backend backend
     int32 world_rank
@@ -74,6 +81,7 @@ struct communicator {
     map[string]collective_stats* stats
     bool initialized
 }
+
 func create_communicator(communication_backend backend, int32 world_rank, int32 world_size) communicator* {
     return *communicator{
         backend: backend,
@@ -84,41 +92,53 @@ func create_communicator(communication_backend backend, int32 world_rank, int32 
         initialized: false,
     }
 }
+
 func (communicator* comm) initialize() error {
     comm.initialized = true
     return nil
 }
+
 func (communicator* comm) finalize() error {
     comm.initialized = false
     return nil
 }
+
 func (communicator* comm) all_reduce(interface{} input_tensor, interface{} output_tensor, reduction_op op) error {
     return nil
 }
+
 func (communicator* comm) all_gather(interface{} input_tensor, int[]erface{} output_tensors) error {
     return nil
 }
+
 func (communicator* comm) reduce_scatter(int[]erface{} input_tensors, interface{} output_tensor, reduction_op op) error {
     return nil
 }
+
 func (communicator* comm) broadcast(interface{} tensor, int32 root_rank) error {
     return nil
 }
+
 func (communicator* comm) send(interface{} tensor, int32 dst_rank, int32 tag) error {
     return nil
 }
+
 func (communicator* comm) recv(interface{} tensor, int32 src_rank, int32 tag) error {
     return nil
 }
+
 func (communicator* comm) barrier() error {
     return nil
 }
+
 func (communicator* comm) all_reduce_async(interface{} input_tensor, interface{} output_tensor, reduction_op op) (int32, error) {
     return 0, nil
 }
+
 func (communicator* comm) wait_async(int32 request_id) error {
     return nil
 }
+
 func (communicator* comm) get_stats(string op_name) collective_stats* {
     stats, ok := comm.stats[op_name]
     if ok {
@@ -126,15 +146,19 @@ func (communicator* comm) get_stats(string op_name) collective_stats* {
     }
     return nil
 }
+
 func (communicator* comm) reset_stats() {
     comm.stats = make(map[string]collective_stats*)
 }
+
 func (communicator* comm) compress_tensor(interface{} tensor, float32 compression_ratio) (interface{}, error) {
     return tensor, nil
 }
+
 func (communicator* comm) decompress_tensor(interface{} tensor) (interface{}, error) {
     return tensor, nil
 }
+
 func apply_reduction(reduction_op op, float32 x, float32 y) float32 {
     switch op {
         case reduction_op_sum:

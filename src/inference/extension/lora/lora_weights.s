@@ -17,12 +17,14 @@ struct weight_config {
     bool use_gradient_checkpointing
     bool use_weight_decay
 }
+
 struct weight_buffer {
     float32[] data
     int32 size
     weight_dtype dtype
     string buffer_id
 }
+
 struct lora_weights {
     map[string]weight_buffer* buffers
     weight_config config
@@ -30,6 +32,7 @@ struct lora_weights {
     float32 memory_usage_mb
     bool is_quantized
 }
+
 func create_lora_weights(weight_config config) lora_weights* {
     weights := lora_weights{
         buffers: make(map[string]weight_buffer*),
@@ -40,6 +43,7 @@ func create_lora_weights(weight_config config) lora_weights* {
     }
     return *weights
 }
+
 func (lora_weights* weights) allocate_buffer(string buffer_id, int32 size, weight_dtype dtype) bool {
     if _, exists := weights.buffers[buffer_id]; exists {
         return false
@@ -64,6 +68,7 @@ func (lora_weights* weights) allocate_buffer(string buffer_id, int32 size, weigh
     weights.memory_usage_mb = weights.memory_usage_mb + (float32(size) * memory_per_elem / 1024.0 / 1024.0)
     return true
 }
+
 func (lora_weights* weights) free_buffer(string buffer_id) bool {
     if buffer, exists := weights.buffers[buffer_id]; exists {
         memory_per_elem := 4.0
@@ -79,6 +84,7 @@ func (lora_weights* weights) free_buffer(string buffer_id) bool {
     }
     return false
 }
+
 func (lora_weights* weights) load_weights(string buffer_id, float32[] data) bool {
     if buffer, exists := weights.buffers[buffer_id]; exists {
         if len(data) != buffer.size {
@@ -89,12 +95,14 @@ func (lora_weights* weights) load_weights(string buffer_id, float32[] data) bool
     }
     return false
 }
+
 func (lora_weights* weights) get_buffer(string buffer_id) weight_buffer* {
     if buffer, exists := weights.buffers[buffer_id]; exists {
         return buffer
     }
     return nil
 }
+
 func (lora_weights* weights) quantize_weights(string buffer_id, int32 bits) bool {
     if buffer, exists := weights.buffers[buffer_id]; exists {
         scale := float32((1 << uint32(bits - 1)) - 1)
@@ -109,6 +117,7 @@ func (lora_weights* weights) quantize_weights(string buffer_id, int32 bits) bool
     }
     return false
 }
+
 func (lora_weights* weights) convert_dtype(string buffer_id, weight_dtype target_dtype) bool {
     if buffer, exists := weights.buffers[buffer_id]; exists {
         old_dtype := buffer.dtype
@@ -131,6 +140,7 @@ func (lora_weights* weights) convert_dtype(string buffer_id, weight_dtype target
     }
     return false
 }
+
 func (lora_weights* weights) apply_weight_decay(float32 decay_factor) {
     for buffer_id := range weights.buffers {
         buffer := weights.buffers[buffer_id]
@@ -139,6 +149,7 @@ func (lora_weights* weights) apply_weight_decay(float32 decay_factor) {
         }
     }
 }
+
 func (lora_weights* weights) get_weight_norm(string buffer_id) float32 {
     if buffer, exists := weights.buffers[buffer_id]; exists {
         norm := 0.0
@@ -149,6 +160,7 @@ func (lora_weights* weights) get_weight_norm(string buffer_id) float32 {
     }
     return 0.0
 }
+
 func (lora_weights* weights) get_weights_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["dtype"] = weights.config.dtype
@@ -166,6 +178,7 @@ func (lora_weights* weights) get_weights_stats() map[string]interface{} {
     stats["total_elements"] = total_elements
     return stats
 }
+
 func (lora_weights* weights) verify_buffer_integrity(string buffer_id) bool {
     if buffer, exists := weights.buffers[buffer_id]; exists {
         if len(buffer.data) != buffer.size {

@@ -9,6 +9,7 @@ struct kv_block {
     int64 last_access_time_ns
     int device_id
 }
+
 struct block_manager {
     int num_blocks
     int block_size_tokens
@@ -17,6 +18,7 @@ struct block_manager {
     int[] free_block_list
     int64 current_time_ns
 }
+
 struct paged_kv_cache {
     int cache_id
     block_manager block_mgr
@@ -27,6 +29,7 @@ struct paged_kv_cache {
     int64 total_hits
     int64 total_misses
 }
+
 struct prefix_cache_entry {
     int prefix_id
     string prefix_hash
@@ -37,12 +40,14 @@ struct prefix_cache_entry {
     int access_count
     bool is_evictable
 }
+
 struct prefix_cache_manager {
     int cache_capacity
     prefix_cache_entry[] entries
     string[] prefix_hashes
     int total_prefixes_cached
 }
+
 func new_block_manager(
     int num_blocks,
     int block_size_tokens,
@@ -74,6 +79,7 @@ func new_block_manager(
     }
     return mgr
 }
+
 func (block_manager* mgr) allocate_block(int seq_start_idx) (int, bool) {
     if len(mgr.free_block_list) == 0 {
         return -1, false
@@ -88,6 +94,7 @@ func (block_manager* mgr) allocate_block(int seq_start_idx) (int, bool) {
     block.last_access_time_ns = mgr.current_time_ns
     return block_id, true
 }
+
 func (block_manager* mgr) free_block(int block_id) {
     if block_id < 0 || block_id >= len(mgr.blocks) {
         return
@@ -102,6 +109,7 @@ func (block_manager* mgr) free_block(int block_id) {
         mgr.free_block_list = append(mgr.free_block_list, block_id)
     }
 }
+
 func (block_manager* mgr) reference_block(int block_id) {
     if block_id < 0 || block_id >= len(mgr.blocks) {
         return
@@ -110,6 +118,7 @@ func (block_manager* mgr) reference_block(int block_id) {
     block.ref_count = block.ref_count + 1
     block.last_access_time_ns = mgr.current_time_ns
 }
+
 func (block_manager* mgr) get_memory_usage_percent() float {
     int allocated_blocks = 0
     int i = 0
@@ -125,9 +134,11 @@ func (block_manager* mgr) get_memory_usage_percent() float {
     }
     return usage
 }
+
 func (block_manager* mgr) get_free_block_count() int {
     return len(mgr.free_block_list)
 }
+
 func new_paged_kv_cache(
     int cache_id,
     int max_seq_length,
@@ -154,6 +165,7 @@ func new_paged_kv_cache(
     }
     return cache
 }
+
 func (paged_kv_cache* cache) allocate_kv_cache(
     int request_id,
     int seq_length
@@ -181,6 +193,7 @@ func (paged_kv_cache* cache) allocate_kv_cache(
     cache.total_hits = cache.total_hits + 1
     return blocks, true
 }
+
 func (paged_kv_cache* cache) free_kv_cache(int request_id) {
     if request_id < 0 || request_id >= len(cache.block_tables) {
         return
@@ -193,6 +206,7 @@ func (paged_kv_cache* cache) free_kv_cache(int request_id) {
     }
     cache.block_tables[request_id] = int[]{cap: cache.max_seq_length}
 }
+
 func (paged_kv_cache* cache) get_hit_rate() float {
     total := cache.total_hits + cache.total_misses
     if total == 0 {
@@ -200,12 +214,15 @@ func (paged_kv_cache* cache) get_hit_rate() float {
     }
     return float(cache.total_hits) / float(total)
 }
+
 func (paged_kv_cache* cache) get_memory_usage_percent() float {
     return cache.block_mgr.get_memory_usage_percent()
 }
+
 func (paged_kv_cache* cache) get_available_blocks() int {
     return cache.block_mgr.get_free_block_count()
 }
+
 func new_prefix_cache_manager(int cache_capacity) prefix_cache_manager {
     mgr := prefix_cache_manager {
         cache_capacity: cache_capacity,
@@ -215,6 +232,7 @@ func new_prefix_cache_manager(int cache_capacity) prefix_cache_manager {
     }
     return mgr
 }
+
 func (prefix_cache_manager* mgr) add_prefix_cache(
     string prefix_text,
     int block_start,
@@ -239,6 +257,7 @@ func (prefix_cache_manager* mgr) add_prefix_cache(
     mgr.total_prefixes_cached = mgr.total_prefixes_cached + 1
     return prefix_id, true
 }
+
 func (prefix_cache_manager* mgr) lookup_prefix_cache(string prefix_text) (int, int, bool) {
     int i = 0
     for i < len(mgr.prefix_hashes) {
@@ -252,6 +271,7 @@ func (prefix_cache_manager* mgr) lookup_prefix_cache(string prefix_text) (int, i
     }
     return -1, 0, false
 }
+
 func (prefix_cache_manager* mgr) get_cache_hit_count() int {
     int hits = 0
     int i = 0
@@ -261,9 +281,11 @@ func (prefix_cache_manager* mgr) get_cache_hit_count() int {
     }
     return hits
 }
+
 func (prefix_cache_manager* mgr) get_cache_utilization() float {
     return float(len(mgr.entries)) / float(mgr.cache_capacity)
 }
+
 func (prefix_cache_manager* mgr) evict_lru_prefix() {
     if len(mgr.entries) == 0 {
         return

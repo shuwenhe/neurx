@@ -42,6 +42,7 @@ func top_p_sample(
     int selected_token = filtered_indices[sampled_idx] if sampled_idx < len(filtered_indices) else filtered_indices[0]
     (selected_token, advance_rng(rng_state))
 }
+
 func beam_search_decode(
     float[][] all_logits,
     sampling_config config,

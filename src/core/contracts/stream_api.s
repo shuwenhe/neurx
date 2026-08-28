@@ -9,6 +9,7 @@ import "event_api"
     communication
     default
 }
+
 struct stream {
     i64 id
     device device

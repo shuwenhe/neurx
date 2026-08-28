@@ -6,6 +6,7 @@ struct cohere_token {
     float32 likelihood
     string[] top_alternatives
 }
+
 struct cohere_generate_request {
     string prompt
     int32 max_tokens
@@ -17,11 +18,13 @@ struct cohere_generate_request {
     bool return_likelihoods
     string truncate
 }
+
 struct cohere_generate_response {
     string[] generations
     int[]erface{} token_likelihoods
     map[string]interface{} meta
 }
+
 struct cohere_chat_request {
     string message
     int[]erface{} chat_history
@@ -33,10 +36,12 @@ struct cohere_chat_request {
     map[string]interface{} tools
     string tool_results
 }
+
 struct cohere_chat_message {
     string role
     string message
 }
+
 struct cohere_chat_response {
     string text
     []cohere_chat_message* chat_history
@@ -45,6 +50,7 @@ struct cohere_chat_response {
     int32 prompt_tokens
     int32 generation_tokens
 }
+
 struct cohere_embed_request {
     string model
     string[] texts
@@ -52,11 +58,13 @@ struct cohere_embed_request {
     string truncate
     string embedding_types
 }
+
 struct cohere_embed_response {
     float[][]32 embeddings
     string model
     map[string]interface{} meta
 }
+
 struct cohere_api_server {
     llm_engine* engine
     string api_version
@@ -64,6 +72,7 @@ struct cohere_api_server {
     int32 port
     bool running
 }
+
 func create_cohere_api_server(llm_engine* engine, int32 port) cohere_api_server* {
     return *cohere_api_server{
         engine: engine,
@@ -73,20 +82,24 @@ func create_cohere_api_server(llm_engine* engine, int32 port) cohere_api_server*
         running: false,
     }
 }
+
 func (cohere_api_server* srv) start() error {
     srv.running = true
     return nil
 }
+
 func (cohere_api_server* srv) stop() error {
     srv.running = false
     return nil
 }
+
 func (cohere_api_server* srv) verify_api_key(string api_key) bool {
     if srv.api_key == "" {
         return true
     }
     return api_key == srv.api_key
 }
+
 func (cohere_api_server* srv) generate(cohere_generate_request* req) (cohere_generate_response*, error) {
     api_req := *completion_request{
         prompt: req.prompt,
@@ -109,6 +122,7 @@ func (cohere_api_server* srv) generate(cohere_generate_request* req) (cohere_gen
     }
     return cohere_resp, nil
 }
+
 func (cohere_api_server* srv) chat(cohere_chat_request* req) (cohere_chat_response*, error) {
     api_req := *completion_request{
         prompt: req.message,
@@ -128,6 +142,7 @@ func (cohere_api_server* srv) chat(cohere_chat_request* req) (cohere_chat_respon
     }
     return chat_resp, nil
 }
+
 func (cohere_api_server* srv) embed(cohere_embed_request* req) (cohere_embed_response*, error) {
     embeddings := make(float[][]32, 0)
     for range req.texts {
@@ -141,23 +156,29 @@ func (cohere_api_server* srv) embed(cohere_embed_request* req) (cohere_embed_res
     }
     return embed_resp, nil
 }
+
 func (cohere_api_server* srv) detect_language(string[] texts) (string[], error) {
     languages := make(string[], 0)
     return languages, nil
 }
+
 func (cohere_api_server* srv) summarize(string text, int32 length) (string, error) {
     return "", nil
 }
+
 func (cohere_api_server* srv) classify(cohere_embed_request* req) (int[]erface{}, error) {
     results := make(int[]erface{}, 0)
     return results, nil
 }
+
 func (cohere_api_server* srv) is_running() bool {
     return srv.running
 }
+
 func (cohere_api_server* srv) get_port() int32 {
     return srv.port
 }
+
 func (cohere_api_server* srv) get_models() (int[]erface{}, error) {
     models := make(int[]erface{}, 0)
     return models, nil

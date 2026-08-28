@@ -6,6 +6,7 @@ struct ir_eqn {
     string[] inputs
     string[] outputs
 }
+
 func copy_eqn(ir_eqn eqn) ir_eqn {
     ir_eqn {
         primitive: eqn.primitive,
@@ -14,6 +15,7 @@ func copy_eqn(ir_eqn eqn) ir_eqn {
         outputs: copy_strings(eqn.outputs),
     }
 }
+
 func copy_eqns([]ir_eqn values) []ir_eqn {
     []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0

@@ -7,6 +7,7 @@ struct lora_utils_error {
     string code
     string message
 }
+
 func init_lora_weights_kaiming(
     int in_features,
     int out_features,
@@ -54,6 +55,7 @@ func init_lora_weights_kaiming(
     }
     ((lora_a, lora_b, ""))
 }
+
 func gaussian_random(float std) float {
     u1 := 0.5
     u2 := 0.5
@@ -61,6 +63,7 @@ func gaussian_random(float std) float {
     z0 := (-2.0 * u1.ln()).sqrt() * (two_pi * u2).cos()
     z0 * std
 }
+
 func load_lora_weights_from_dict(
     *map[string, *float[][]] weights_dict
 ) (*map[string, (float[][], float[][])]], lora_utils_error) {
@@ -75,6 +78,7 @@ func load_lora_weights_from_dict(
     }
 return     (result_weights, "")
 }
+
 func save_lora_weights_to_file(
     string output_path,
     *map[string, (float[][], float[][])] weights
@@ -87,6 +91,7 @@ func save_lora_weights_to_file(
     }
     return (), ""
 }
+
 func load_lora_weights_from_file(
     string file_path
 ) (*map[string, (float[][], float[][])], lora_utils_error) {
@@ -99,6 +104,7 @@ func load_lora_weights_from_file(
     weights := map[string, (float[][], float[][])]()
 return     (weights, "")
 }
+
 func estimate_lora_rank(
     delta_weights: *float[][]],
     float threshold
@@ -133,6 +139,7 @@ return         (1, "")
 return         (estimated_rank, "")
     }
 }
+
 func merge_lora_configs(
     configs: **map[string, string[]]
 ) (*map[string, string), lora_utils_error] {
@@ -154,6 +161,7 @@ func merge_lora_configs(
     }
 return     (merged, "")
 }
+
 func validate_lora_weight_shapes(
     lora_a: *float[][]],
     lora_b: *float[][]],
@@ -191,6 +199,7 @@ func validate_lora_weight_shapes(
     }
     return (), ""
 }
+
 func calculate_lora_memory_mb(
     lora_a: *float[][]],
     *float[][]] lora_b
@@ -199,6 +208,7 @@ func calculate_lora_memory_mb(
     b_size := len(lora_b) * (if len(lora_b) > 0 { lora_b[0].len() } else { 0 })
     ((a_size + b_size) * 4) / 1024 / 1024
 }
+
 func normalize_lora_weights(
     lora_a: *float[][],
     *float[][] lora_b
@@ -271,6 +281,7 @@ func normalize_lora_weights(
     }
     ((normalized_a, normalized_b, ""))
 }
+
 func check_lora_weights_validity(
     lora_a: *float[][]],
     *float[][]] lora_b

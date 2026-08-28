@@ -23,6 +23,7 @@ func apply_repetition_penalty(
     }
     penalized
 }
+
 func copy_float_array(float[] arr) float[] {
     float[] copy = float[]{cap: len(arr)}
     for i in 0..len(arr) {
@@ -30,6 +31,7 @@ func copy_float_array(float[] arr) float[] {
     }
     copy
 }
+
 func compute_length_penalty(int length, float alpha) float {
     float lp = (float(5 + length) / 6.0)
     if abs_float(alpha - 1.0) < 1e-6 {

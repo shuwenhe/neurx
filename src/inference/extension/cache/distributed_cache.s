@@ -8,6 +8,7 @@ struct remote_cache_node {
     int64 available_blocks
     string status
 }
+
 struct distributed_cache {
     []remote_cache_node peers
     int num_peers
@@ -18,6 +19,7 @@ struct distributed_cache {
     int64 current_time
     int64 partition_id
 }
+
 func create_distributed_cache(string node_id, int64 replication, int64 consistency) distributed_cache {
     distributed_cache dc = distributed_cache{}
     dc.local_node_id = node_id
@@ -31,6 +33,7 @@ func create_distributed_cache(string node_id, int64 replication, int64 consisten
     print("[DistributedCache] Initialized node: " + node_id + ", replication=" + int_to_string(replication) + "\n")
     return dc
 }
+
 func distributed_cache_add_peer(distributed_cache dc, string peer_id, string host, int port) int {
     if dc.num_peers >= dc.max_peers {
         print("[DistributedCache] Max peers reached\n")
@@ -50,6 +53,7 @@ func distributed_cache_add_peer(distributed_cache dc, string peer_id, string hos
     print("[DistributedCache] Added peer: " + peer_id + " (" + host + ":" + int_to_string(port) + ")\n")
     return 1
 }
+
 func distributed_cache_compute_replica_nodes(distributed_cache dc, string cache_key) string[] {
     string[] replicas = string[]{cap: 8}
     int hash = 0
@@ -73,6 +77,7 @@ func distributed_cache_compute_replica_nodes(distributed_cache dc, string cache_
     }
     return replicas
 }
+
 func distributed_cache_get_responsible_node(distributed_cache dc, string cache_key) string {
     if dc.num_peers == 0 {
         return dc.local_node_id
@@ -88,6 +93,7 @@ func distributed_cache_get_responsible_node(distributed_cache dc, string cache_k
     if peer_idx < 0 { peer_idx = 0 }
     return dc.peers[peer_idx].node_id
 }
+
 func distributed_cache_check_peer_health(distributed_cache dc) {
     int i = 0
     for i < dc.num_peers {
@@ -107,6 +113,7 @@ func distributed_cache_check_peer_health(distributed_cache dc) {
         i = i + 1
     }
 }
+
 func distributed_cache_record_heartbeat(distributed_cache dc, string peer_id) {
     int i = 0
     for i < dc.num_peers {
@@ -119,6 +126,7 @@ func distributed_cache_record_heartbeat(distributed_cache dc, string peer_id) {
         i = i + 1
     }
 }
+
 func distributed_cache_update_peer_capacity(distributed_cache dc, string peer_id, int64 total, int64 available) {
     int i = 0
     for i < dc.num_peers {
@@ -130,6 +138,7 @@ func distributed_cache_update_peer_capacity(distributed_cache dc, string peer_id
         i = i + 1
     }
 }
+
 func distributed_cache_find_best_replica_node(distributed_cache dc, string[] replicas) string {
     if len(replicas) == 0 {
         return dc.local_node_id
@@ -153,6 +162,7 @@ func distributed_cache_find_best_replica_node(distributed_cache dc, string[] rep
     }
     return best_node
 }
+
 func distributed_cache_get_stats(distributed_cache dc) string {
     int healthy_peers = 0
     int64 total_blocks = 0
@@ -173,6 +183,7 @@ func distributed_cache_get_stats(distributed_cache dc) string {
                    ", Available=" + int_to_string(available_blocks)
     return stats
 }
+
 func distributed_cache_handle_node_failure(distributed_cache dc, string failed_node_id) {
     int i = 0
     for i < dc.num_peers {
@@ -185,17 +196,20 @@ func distributed_cache_handle_node_failure(distributed_cache dc, string failed_n
         i = i + 1
     }
 }
+
 func distributed_cache_get_consensus_count(distributed_cache dc) int64 {
     int64 consensus = (dc.num_peers / 2) + 1
     if consensus < 1 { consensus = 1 }
     return consensus
 }
+
 func distributed_cache_tick(distributed_cache dc, int64 time_increment) {
     dc.current_time = dc.current_time + time_increment
     if dc.current_time % 10000 == 0 {
         distributed_cache_check_peer_health(dc)
     }
 }
+
 func distributed_cache_set_partition_id(distributed_cache dc, int64 partition) {
     dc.partition_id = partition
     print("[DistributedCache] Partition ID set to " + int_to_string(partition) + "\n")

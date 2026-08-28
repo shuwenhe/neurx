@@ -2,6 +2,7 @@ package neurx.inference.engine.v1_api_engine
 import "core"
 import "engine"
 use neurx.inference.reasoning.reasoning_parser_registry.{reasoning_parser_none, reasoning_config_for, parse_reasoning_text, reasoning_parser_deepseek_r1, reasoning_parser_deepseek_v3, reasoning_parser_qwen3, reasoning_parser_kimi, reasoning_parser_mistral, reasoning_parser_gpt_oss, reasoning_parser_granite, reasoning_parser_step3}
+
 struct v1_request {
     request_id         string
     model             string
@@ -17,6 +18,7 @@ struct v1_request {
     tools             int[]erface{}
     tool_choice        interface{}
 }
+
 struct v1_response {
     id                string
     object            string
@@ -26,6 +28,7 @@ struct v1_response {
     stop_reason        string
     usage             map[string]int32
 }
+
 struct v1_stream_response {
     id                string
     object            string
@@ -46,6 +49,7 @@ struct reasoning_candidate {
     score     int32
     seed      int64
 }
+
 func lower_ascii(text string) string {
     out := ""
     for i := 0; i < len(text); i++ {
@@ -57,6 +61,7 @@ func lower_ascii(text string) string {
     }
     return out
 }
+
 func contains_text(text string, needle string) bool {
     if len(needle) == 0 {
         return true
@@ -78,6 +83,7 @@ func contains_text(text string, needle string) bool {
     }
     return false
 }
+
 func trim_text(text string) string {
     start := 0
     end := len(text)
@@ -97,6 +103,7 @@ func trim_text(text string) string {
     }
     return text[start:end]
 }
+
 func hash_text(text string) int64 {
     hash := int64(1469598103934665603)
     for i := 0; i < len(text); i++ {
@@ -111,6 +118,7 @@ func hash_text(text string) int64 {
     }
     return hash
 }
+
 func estimate_tokens(text string) int32 {
     count := int32(len(text) / 4)
     if count < 1 {
@@ -118,6 +126,7 @@ func estimate_tokens(text string) int32 {
     }
     return count
 }
+
 func model_is_reasoning_focused(model string) bool {
     lower := lower_ascii(model)
     return contains_text(lower, "qwen3") ||
@@ -130,6 +139,7 @@ func model_is_reasoning_focused(model string) bool {
         contains_text(lower, "step3") ||
         contains_text(lower, "reasoning")
 }
+
 func model_uses_qwen_style(model string) bool {
     lower := lower_ascii(model)
     return contains_text(lower, "qwen") ||
@@ -138,13 +148,16 @@ func model_uses_qwen_style(model string) bool {
         contains_text(lower, "granite") ||
         contains_text(lower, "step3")
 }
+
 func model_uses_mistral_style(model string) bool {
     return contains_text(lower_ascii(model), "mistral")
 }
+
 func model_uses_gpt_oss_style(model string) bool {
     lower := lower_ascii(model)
     return contains_text(lower, "gpt-oss") || contains_text(lower, "gpt_oss")
 }
+
 func reasoning_backend_for_model(model string) int {
     lower := lower_ascii(model)
     if contains_text(lower, "deepseek-r1") {
@@ -173,6 +186,7 @@ func reasoning_backend_for_model(model string) int {
     }
     return reasoning_parser_none()
 }
+
 func reasoning_markers_for_model(model string) (string, string) {
     if model_uses_mistral_style(model) {
         return "[THINK]", "[/THINK]"
@@ -185,6 +199,7 @@ func reasoning_markers_for_model(model string) (string, string) {
     }
     return "<think>", "</think>"
 }
+
 func prompt_needs_reasoning(text string) bool {
     lower := lower_ascii(text)
     return contains_text(lower, "step by step") ||
@@ -201,6 +216,7 @@ func prompt_needs_reasoning(text string) bool {
         contains_text(lower, "one步one步") ||
         contains_text(lower, "为什么")
 }
+
 func build_system_prompt(model string, request_reasoning bool) string {
     system_prompt := "You are a helpful assistant."
     if request_reasoning {
@@ -211,6 +227,7 @@ func build_system_prompt(model string, request_reasoning bool) string {
     }
     return system_prompt
 }
+
 func build_chat_prompt(req *v1_request) string {
     request_reasoning := false
     system_prompt := ""
@@ -290,6 +307,7 @@ func build_chat_prompt(req *v1_request) string {
     }
     return prompt + "assistant: "
 }
+
 func split_reasoning_output(model string, text string) (string, string, bool) {
     backend := reasoning_backend_for_model(model)
     if backend == reasoning_parser_none() {
@@ -303,6 +321,7 @@ func split_reasoning_output(model string, text string) (string, string, bool) {
     }
     return reasoning, answer, parsed.valid
 }
+
 func index_text(text string, needle string, start int) int {
     if len(needle) == 0 {
         return start
@@ -327,6 +346,7 @@ func index_text(text string, needle string, start int) int {
     }
     return -1
 }
+
 func score_reasoned_candidate(prompt string, answer string, reasoning string) int32 {
     cleaned_answer := trim_text(answer)
     cleaned_reasoning := trim_text(reasoning)
@@ -358,6 +378,7 @@ func score_reasoned_candidate(prompt string, answer string, reasoning string) in
     }
     return score
 }
+
 func build_sampling_params(req *v1_request, seed int64) engine.sampling_params {
     temperature := req.temperature
     if temperature < 0 {
@@ -399,6 +420,7 @@ func build_sampling_params(req *v1_request, seed int64) engine.sampling_params {
         seed:              seed,
     }
 }
+
 func run_reasoned_generation(ve *v1_engine, req *v1_request, prompt string) (string, string, error) {
     base_seed := hash_text(req.request_id + "|" + req.model + "|" + prompt)
     profile := reasoning_mode_direct
@@ -468,17 +490,20 @@ func run_reasoned_generation(ve *v1_engine, req *v1_request, prompt string) (str
     }
     return best_text, best_reasoning, nil
 }
+
 struct request_pool {
     max_size           int32
     requests          []*v1_request
     indices           map[string]int32
 }
+
 struct v1_engine {
     engine            *engine.llm_engine
     async_engine       *engine.async_llm_engine
     request_pool       *request_pool
     is_initialized     bool
 }
+
 func new_request_pool(max_size int32) *request_pool {
     return *request_pool{
         max_size:  max_size,
@@ -486,6 +511,7 @@ func new_request_pool(max_size int32) *request_pool {
         indices:  make(map[string]int32),
     }
 }
+
 func (request_pool* rp) add(v1_request* req) error {
     if int32(len(rp.requests)) >= rp.max_size {
         return core.Errorf("request pool full")
@@ -494,6 +520,7 @@ func (request_pool* rp) add(v1_request* req) error {
     rp.requests = append(rp.requests, req)
     return nil
 }
+
 func (request_pool* rp) get(request_id string) *v1_request {
     if idx, exists := rp.indices[request_id]; exists {
         if idx >= 0 && idx < int32(len(rp.requests)) {
@@ -502,6 +529,7 @@ func (request_pool* rp) get(request_id string) *v1_request {
     }
     return nil
 }
+
 func (request_pool* rp) remove(request_id string) {
     if idx, exists := rp.indices[request_id]; exists {
         if idx >= 0 && idx < int32(len(rp.requests)) {
@@ -510,9 +538,11 @@ func (request_pool* rp) remove(request_id string) {
         delete(rp.indices, request_id)
     }
 }
+
 func (request_pool* rp) size() int32 {
     return int32(len(rp.requests))
 }
+
 func new_v1_engine(eng *engine.llm_engine) *v1_engine {
     return *v1_engine{
         engine:        eng,
@@ -520,9 +550,11 @@ func new_v1_engine(eng *engine.llm_engine) *v1_engine {
         is_initialized: false,
     }
 }
+
 func (v1_engine* ve) set_async_engine(async_eng *engine.async_llm_engine) {
     ve.async_engine = async_eng
 }
+
 func (v1_engine* ve) initialize() error {
     if ve.engine == nil {
         return core.Errorf("base engine not set")
@@ -531,6 +563,7 @@ func (v1_engine* ve) initialize() error {
     core.Println("V1Engine initialized")
     return nil
 }
+
 func (v1_engine* ve) prepare_request(v1_request* req) error {
     if !ve.is_initialized {
         return core.Errorf("engine not initialized")
@@ -549,6 +582,7 @@ func (v1_engine* ve) prepare_request(v1_request* req) error {
     }
     return ve.request_pool.add(req)
 }
+
 func (v1_engine* ve) execute(v1_request* req) (*v1_response, error) {
     if !ve.is_initialized {
         return nil, core.Errorf("engine not initialized")
@@ -580,6 +614,7 @@ func (v1_engine* ve) execute(v1_request* req) (*v1_response, error) {
     ve.request_pool.remove(req.request_id)
     return response, nil
 }
+
 func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, error) {
     if !ve.is_initialized {
         resp_chan := make(v1_stream_response* chan)
@@ -648,6 +683,7 @@ func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, 
     }()
     return resp_chan, nil
 }
+
 func (v1_engine* ve) execute_async(req *v1_request, callback func(*v1_response, error)) error {
     if !ve.is_initialized {
         return core.Errorf("engine not initialized")
@@ -682,6 +718,7 @@ func (v1_engine* ve) execute_async(req *v1_request, callback func(*v1_response, 
     ve.request_pool.remove(req.request_id)
     return nil
 }
+
 func (v1_engine* ve) get_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     if ve.engine != nil {

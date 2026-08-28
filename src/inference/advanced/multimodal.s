@@ -12,6 +12,7 @@ package neurx.inference.advanced.multimodal
     MP3
     FLAC
 }
+
 struct image_data {
     format image_format
     width int
@@ -20,6 +21,7 @@ struct image_data {
     data []uint8
     processed_tensor float[][]
 }
+
 struct audio_data {
     format audio_format
     sample_rate int
@@ -28,6 +30,7 @@ struct audio_data {
     samples float[]
     mel_spectrogram float[][]
 }
+
 struct video_data {
     fps int
     num_frames int
@@ -36,6 +39,7 @@ struct video_data {
     frames []image_data
     temporal_features float[][]
 }
+
 struct multimodal_input {
     text string
     images []image_data
@@ -45,6 +49,7 @@ struct multimodal_input {
     image_weight float
     audio_weight float
 }
+
 struct vision_encoder_config {
     encoder_name string
     model_path string
@@ -55,6 +60,7 @@ struct vision_encoder_config {
     normalize_mean float[]
     normalize_std float[]
 }
+
 struct audio_encoder_config {
     encoder_name string
     model_path string
@@ -63,11 +69,13 @@ struct audio_encoder_config {
     frame_length_ms int
     hop_length_ms int
 }
+
 struct vision_encoder {
     config vision_encoder_config
     weights map[string]float[][]
     is_loaded bool
 }
+
 func LoadVisionEncoder(config vision_encoder_config) vision_encoder {
     encoder := vision_encoder {
         config: config,
@@ -77,6 +85,7 @@ func LoadVisionEncoder(config vision_encoder_config) vision_encoder {
     encoder.is_loaded = true
     return encoder
 }
+
 func (encoder vision_encoder) EncodeImage(
     image image_data,
 ) float[][] {
@@ -90,11 +99,13 @@ func (encoder vision_encoder) EncodeImage(
     }
     return features
 }
+
 struct audio_encoder {
     config audio_encoder_config
     weights map[string]float[][]
     is_loaded bool
 }
+
 func LoadAudioEncoder(config audio_encoder_config) audio_encoder {
     encoder := audio_encoder {
         config: config,
@@ -104,6 +115,7 @@ func LoadAudioEncoder(config audio_encoder_config) audio_encoder {
     encoder.is_loaded = true
     return encoder
 }
+
 func (encoder audio_encoder) EncodeAudio(
     audio audio_data,
 ) float[][] {
@@ -117,6 +129,7 @@ func (encoder audio_encoder) EncodeAudio(
     }
     return features
 }
+
 struct multimodal_processor {
     vision_encoder vision_encoder
     audio_encoder audio_encoder
@@ -124,6 +137,7 @@ struct multimodal_processor {
     max_image_tokens int
     max_audio_tokens int
 }
+
 func NewMultimodalProcessor(
     vision_config vision_encoder_config,
     audio_config audio_encoder_config,
@@ -136,6 +150,7 @@ func NewMultimodalProcessor(
         max_audio_tokens: 256,
     }
 }
+
 func (processor multimodal_processor) ProcessInput(
     input multimodal_input,
 ) (int[], float[][], string[]) {
@@ -176,11 +191,13 @@ func (processor multimodal_processor) ProcessInput(
     )
     return text_tokens, all_features, special_tokens
 }
+
 struct image_preprocessor {
     target_size int
     normalize_mean float[]
     normalize_std float[]
 }
+
 func preprocess_image(
     image image_data,
     config vision_encoder_config,
@@ -191,6 +208,7 @@ func preprocess_image(
     }
     return result
 }
+
 func extract_mel_spectrogram(
     audio audio_data,
     config audio_encoder_config,
@@ -203,6 +221,7 @@ func extract_mel_spectrogram(
     }
     return result
 }
+
 func tokenize(string text) int[] {
     tokens := make(int[], 0)
     words := split_string(text, " ")
@@ -211,6 +230,7 @@ func tokenize(string text) int[] {
     }
     return tokens
 }
+
 func split_string(string s, string sep) string[] {
     result := make(string[], 0)
     current := ""
@@ -229,9 +249,11 @@ func split_string(string s, string sep) string[] {
     }
     return result
 }
+
 func substring(string s, int start, int end) string {
     return ""
 }
+
 func hash_string(string s) int {
     hash := 0
     for i := 0; i < len(s); i++ {
@@ -239,6 +261,7 @@ func hash_string(string s) int {
     }
     return hash
 }
+
 func merge_multimodal_features(
     image_features float[][],
     audio_features float[][],
@@ -259,6 +282,7 @@ func merge_multimodal_features(
     }
     return result
 }
+
 func scale_vector(float[] vec, float scale) float[] {
     result := make(float[], len(vec))
     for i := 0; i < len(vec); i++ {
@@ -266,6 +290,7 @@ func scale_vector(float[] vec, float scale) float[] {
     }
     return result
 }
+
 func main() {
     vision_config := vision_encoder_config {
         encoder_name: "clip",

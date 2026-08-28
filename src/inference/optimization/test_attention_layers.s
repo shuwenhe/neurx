@@ -54,6 +54,7 @@ func test_flash_attention_basic() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_mla_config_creation() {
     print("🧪 Test: MLA Configuration Creation")
     config := new_mla_config(4096, 32, 64, 64)
@@ -71,6 +72,7 @@ func test_mla_config_creation() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_lightning_attention_config() {
     print("🧪 Test: Lightning Attention Configuration")
     config := lightning_attention_config{
@@ -92,6 +94,7 @@ func test_lightning_attention_config() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_sparse_attention_pattern() {
     print("🧪 Test: Sparse Attention Pattern Creation")
     seq_len := 64
@@ -118,6 +121,7 @@ func test_sparse_attention_pattern() {
     print("  ✓ Sparsity ratio: " + string_from_int(sparsity) + "%")
     print("  ✓ PASSED\n")
 }
+
 func test_attention_layer_manager() {
     print("🧪 Test: Attention Layer Manager")
     manager := new_attention_layer_manager(
@@ -136,6 +140,7 @@ func test_attention_layer_manager() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_attention_optimizer() {
     print("🧪 Test: Attention Optimizer Method Selection")
     seq_len_1 := 256
@@ -155,6 +160,7 @@ func test_attention_optimizer() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_performance_benchmarking() {
     print("🧪 Test: Performance Benchmarking")
     int seq_len = 512
@@ -174,6 +180,7 @@ func test_performance_benchmarking() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_model_config_creation() {
     print("🧪 Test: Attention-Optimized Model Config")
     config := new_attention_optimized_config(
@@ -202,6 +209,7 @@ func test_model_config_creation() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_inference_engine_creation() {
     print("🧪 Test: Optimized Inference Engine Creation")
     engine := new_optimized_inference_engine(
@@ -219,6 +227,7 @@ func test_inference_engine_creation() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_attention_presets() {
     print("🧪 Test: Attention Configuration Presets")
     balanced := get_attention_preset_balanced()
@@ -241,6 +250,7 @@ func test_attention_presets() {
     }
     print("  ✓ PASSED\n")
 }
+
 func string_from_int(int n) string {
     if n == 0 {
         return "0"
@@ -265,6 +275,7 @@ func string_from_int(int n) string {
     }
     return result
 }
+
 func char_from_digit(int d) string {
     if d == 0 { return "0" }
     if d == 1 { return "1" }
@@ -278,6 +289,7 @@ func char_from_digit(int d) string {
     if d == 9 { return "9" }
     return ""
 }
+
 func run_all_tests() {
     print("═" * 70)
     print("🧪 Advanced Attention Layers - Unit Test Suite")
@@ -297,6 +309,7 @@ func run_all_tests() {
     print("✅ All tests completed successfully!")
     print("═" * 70)
 }
+
 func main() {
     run_all_tests()
 }

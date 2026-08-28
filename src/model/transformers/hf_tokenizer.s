@@ -18,6 +18,7 @@ struct hf_tokenizer {
     bool do_lower_case
     string model_max_length
 }
+
 func create_llama_tokenizer() hf_tokenizer {
     hf_tokenizer {
         tokenizer_class: "LlamaTokenizer",
@@ -39,6 +40,7 @@ func create_llama_tokenizer() hf_tokenizer {
         model_max_length: "4096",
     }
 }
+
 func create_qwen_tokenizer() hf_tokenizer {
     hf_tokenizer {
         tokenizer_class: "Qwen2Tokenizer",
@@ -60,6 +62,7 @@ func create_qwen_tokenizer() hf_tokenizer {
         model_max_length: "32768",
     }
 }
+
 func create_mistral_tokenizer() hf_tokenizer {
     hf_tokenizer {
         tokenizer_class: "MistralTokenizer",
@@ -81,6 +84,7 @@ func create_mistral_tokenizer() hf_tokenizer {
         model_max_length: "32768",
     }
 }
+
 func create_deepseek_tokenizer() hf_tokenizer {
     hf_tokenizer {
         tokenizer_class: "DeepSeekTokenizer",
@@ -102,11 +106,13 @@ func create_deepseek_tokenizer() hf_tokenizer {
         model_max_length: "4096",
     }
 }
+
 struct token_ids {
     int[] ids
     int[] attention_mask
     int[] token_type_ids
 }
+
 func tokenize_text(string text, hf_tokenizer tokenizer) string[] {
     string[] tokens
     string current_token = ""
@@ -131,6 +137,7 @@ func tokenize_text(string text, hf_tokenizer tokenizer) string[] {
     }
     tokens
 }
+
 func apply_chat_template(
     messages: string[],
     tokenizer: hf_tokenizer,
@@ -145,6 +152,7 @@ func apply_chat_template(
     }
     formatted
 }
+
 func get_token_from_tokenizer(string tokenizer_class, string model_id) hf_tokenizer {
     if tokenizer_class == "LlamaTokenizer" {
         return create_llama_tokenizer()

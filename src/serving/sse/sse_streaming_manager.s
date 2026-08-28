@@ -16,6 +16,7 @@ struct streaming_context {
 	string                  reasoning_type
 	bool                    streaming_enabled
 }
+
 struct streaming_handler {
 	map[string]streaming_context]  active_contexts
 	map[string]sse_connection]     connection_pool
@@ -37,6 +38,7 @@ struct streaming_handler {
 	STREAM_ERROR = 6
 	STREAM_RESUMED = 7
 }
+
 struct stream_event_log {
 	stream_event_type       event_type
 	int64                   event_timestamp
@@ -47,6 +49,7 @@ struct stream_event_log {
 	string                  source_component
 	map[string]interface{}  event_metadata
 }
+
 struct streaming_pipeline {
 	streaming_handler              handler
 	stream_event_log[]         event_logs
@@ -55,6 +58,7 @@ struct streaming_pipeline {
 	int32                         total_stream_chunks_sent
 	int64                         pipeline_start_time
 }
+
 func create_streaming_context(request_id string, trace_id string, model string) streaming_context {
 	return streaming_context{
 		request_id:              request_id,
@@ -72,6 +76,7 @@ func create_streaming_context(request_id string, trace_id string, model string) 
 		streaming_enabled:       true,
 	}
 }
+
 func create_streaming_handler(max_concurrent int32, max_buffer int32) streaming_handler {
 	return streaming_handler{
 		active_contexts:        make(map[string]streaming_context),
@@ -86,6 +91,7 @@ func create_streaming_handler(max_concurrent int32, max_buffer int32) streaming_
 		mu:                     sync.Mutex{},
 	}
 }
+
 func (streaming_handler* h) begin_stream(request_id string, trace_id string, model string, connection_id string) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -98,6 +104,7 @@ func (streaming_handler* h) begin_stream(request_id string, trace_id string, mod
 	h.total_streams_created++
 	return true
 }
+
 func (streaming_handler* h) send_stream_chunk(request_id string, chunk_data string) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -116,6 +123,7 @@ func (streaming_handler* h) send_stream_chunk(request_id string, chunk_data stri
 	h.active_contexts[request_id] = context
 	return true
 }
+
 func (streaming_handler* h) log_reasoning_step(request_id string, step_number int32, step_data string) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -129,6 +137,7 @@ func (streaming_handler* h) log_reasoning_step(request_id string, step_number in
 	h.active_contexts[request_id] = context
 	return true
 }
+
 func (streaming_handler* h) log_sampling_event(request_id string, sampling_method string, sample_data string) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -142,6 +151,7 @@ func (streaming_handler* h) log_sampling_event(request_id string, sampling_metho
 	h.active_contexts[request_id] = context
 	return true
 }
+
 func (streaming_handler* h) send_progress(request_id string, progress_percent int32, status_message string) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -155,6 +165,7 @@ func (streaming_handler* h) send_progress(request_id string, progress_percent in
 	h.active_contexts[request_id] = context
 	return true
 }
+
 func (streaming_handler* h) complete_stream(request_id string, reason string) map[string]interface{} {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -174,6 +185,7 @@ func (streaming_handler* h) complete_stream(request_id string, reason string) ma
 	h.total_streams_completed++
 	return stats
 }
+
 func (streaming_handler* h) fail_stream(request_id string, error_message string) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -187,6 +199,7 @@ func (streaming_handler* h) fail_stream(request_id string, error_message string)
 	h.total_streams_failed++
 	return true
 }
+
 func (streaming_handler* h) get_stream_stats() map[string]interface{} {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -197,6 +210,7 @@ func (streaming_handler* h) get_stream_stats() map[string]interface{} {
 	stats["total_streams_failed"] = h.total_streams_failed
 	return stats
 }
+
 func create_streaming_pipeline(max_concurrent int32, max_buffer int32) streaming_pipeline {
 	return streaming_pipeline{
 		handler:                  create_streaming_handler(max_concurrent, max_buffer),
@@ -207,9 +221,11 @@ func create_streaming_pipeline(max_concurrent int32, max_buffer int32) streaming
 		pipeline_start_time:     time.Now().UnixNano(),
 	}
 }
+
 func (streaming_pipeline* p) begin_streaming_request(request_id string, trace_id string, model string) bool {
 	return p.handler.begin_stream(request_id, trace_id, model, "")
 }
+
 func (streaming_pipeline* p) stream_content_delta(request_id string, chunk_data string) bool {
 	success := p.handler.send_stream_chunk(request_id, chunk_data)
 	if success {
@@ -231,6 +247,7 @@ func (streaming_pipeline* p) stream_content_delta(request_id string, chunk_data 
 	}
 	return success
 }
+
 func (streaming_pipeline* p) stream_reasoning_output(request_id string, step int32, step_data string) bool {
 	success := p.handler.log_reasoning_step(request_id, step, step_data)
 	if success {
@@ -250,6 +267,7 @@ func (streaming_pipeline* p) stream_reasoning_output(request_id string, step int
 	}
 	return success
 }
+
 func (streaming_pipeline* p) stream_sampling_telemetry(request_id string, method string, data string) bool {
 	success := p.handler.log_sampling_event(request_id, method, data)
 	if success {
@@ -269,6 +287,7 @@ func (streaming_pipeline* p) stream_sampling_telemetry(request_id string, method
 	}
 	return success
 }
+
 func (streaming_pipeline* p) finish_stream(request_id string, finish_reason string) map[string]interface{} {
 	stats := p.handler.complete_stream(request_id, finish_reason)
 	log_entry := stream_event_log{
@@ -286,6 +305,7 @@ func (streaming_pipeline* p) finish_stream(request_id string, finish_reason stri
 	}
 	return stats
 }
+
 func (streaming_pipeline* p) get_pipeline_stats() map[string]interface{} {
 	handler_stats := p.handler.get_stream_stats()
 	pipeline_stats := make(map[string]interface{})
@@ -297,9 +317,11 @@ func (streaming_pipeline* p) get_pipeline_stats() map[string]interface{} {
 	pipeline_stats["uptime_ms"] = uptime_ms
 	return pipeline_stats
 }
+
 func (streaming_pipeline* p) get_event_logs() stream_event_log[] {
 	return p.event_logs
 }
+
 func (streaming_pipeline* p) clear_event_logs() {
 	p.event_logs = make(stream_event_log[], 0, 1000)
 }

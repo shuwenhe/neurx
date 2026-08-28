@@ -42,6 +42,7 @@ func tokenize(string input) string[] {
     }
     return tokens
 }
+
 func split_lines(string text) string[] {
     lines := string[]{}
     current_line := ""
@@ -70,6 +71,7 @@ func split_lines(string text) string[] {
     }
     return lines
 }
+
 func split_paragraphs(string text) string[] {
     lines := split_lines(text)
     paragraphs := string[]{}
@@ -95,6 +97,7 @@ func split_paragraphs(string text) string[] {
     }
     return paragraphs
 }
+
 func trim_string(string s) string {
     start := 0
     end := len(s) - 1
@@ -111,6 +114,7 @@ func trim_string(string s) string {
     }
     return s[start:end + 1]
 }
+
 func extract_between(string text, string open_delim, string close_delim) string {
     open_pos := find_substring(text, open_delim, 0)
     if open_pos < 0 {
@@ -123,6 +127,7 @@ func extract_between(string text, string open_delim, string close_delim) string 
     }
     return text[open_pos:close_pos]
 }
+
 func find_all_substring(string text, string pattern) int[] {
     positions := int[]{}
     pos := 0
@@ -136,6 +141,7 @@ func find_all_substring(string text, string pattern) int[] {
     }
     return positions
 }
+
 func find_substring(string text, string substring, int start_pos) int {
     if len(substring) == 0 || len(text) == 0 {
         return -1
@@ -153,6 +159,7 @@ func find_substring(string text, string substring, int start_pos) int {
     }
     return -1
 }
+
 func replace_all(string text, string pattern, string replacement) string {
     positions := find_all_substring(text, pattern)
     result := ""
@@ -167,18 +174,21 @@ func replace_all(string text, string pattern, string replacement) string {
     result = result + text[last_pos:]
     return result
 }
+
 func starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) {
         return false
     }
     return text[0:len(prefix)] == prefix
 }
+
 func ends_with(string text, string suffix) bool {
     if len(suffix) > len(text) {
         return false
     }
     return text[len(text) - len(suffix):] == suffix
 }
+
 func normalize_whitespace(string text) string {
     text = trim_string(text)
     result := ""
@@ -199,6 +209,7 @@ func normalize_whitespace(string text) string {
     }
     return result
 }
+
 func to_lowercase(string text) string {
     result := ""
     i := 0
@@ -213,6 +224,7 @@ func to_lowercase(string text) string {
     }
     return result
 }
+
 func to_uppercase(string text) string {
     result := ""
     i := 0
@@ -227,6 +239,7 @@ func to_uppercase(string text) string {
     }
     return result
 }
+
 func is_alphanumeric(string ch) bool {
     if len(ch) != 1 {
         return false
@@ -234,6 +247,7 @@ func is_alphanumeric(string ch) bool {
     c := ch[0]
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
 }
+
 func is_digit(string ch) bool {
     if len(ch) != 1 {
         return false
@@ -241,6 +255,7 @@ func is_digit(string ch) bool {
     c := ch[0]
     return c >= '0' && c <= '9'
 }
+
 func is_whitespace(string ch) bool {
     if len(ch) != 1 {
         return false
@@ -248,6 +263,7 @@ func is_whitespace(string ch) bool {
     c := ch[0]
     return c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
+
 func extract_words(string text) string[] {
     words := string[]{}
     current_word := ""
@@ -269,10 +285,12 @@ func extract_words(string text) string[] {
     }
     return words
 }
+
 func count_occurrences(string text, string substring) int {
     positions := find_all_substring(text, substring)
     return len(positions)
 }
+
 func substring(string text, int start, int length) string {
     if start < 0 || start >= len(text) || length <= 0 {
         return ""
@@ -283,6 +301,7 @@ func substring(string text, int start, int length) string {
     }
     return text[start:end]
 }
+
 func split_string(string text, string delimiter) string[] {
     if len(delimiter) == 0 {
         chars := string[]{}
@@ -309,6 +328,7 @@ func split_string(string text, string delimiter) string[] {
     parts = append(parts, current_part)
     return parts
 }
+
 func join_strings(string[] strings, string separator) string {
     result := ""
     i := 0

@@ -14,6 +14,7 @@ struct block_request {
     int status          
     int result
 }
+
 struct block_device {
     int device_id
     int device_type
@@ -26,6 +27,7 @@ struct block_device {
     int pending_count
     int completed_count
 }
+
 struct driver_module {
     int module_id
     int type            
@@ -34,6 +36,7 @@ struct driver_module {
     int state           
     int ref_count       
 }
+
 struct block_manager {
     vec devices         
     vec request_queue   
@@ -41,12 +44,14 @@ struct block_manager {
     int req_counter
     int scheduler_type  
 }
+
 struct driver_manager {
     vec modules
     vec devices
     int module_counter
     int device_counter
 }
+
 func block_init(queue_depth int) (block_manager, string) {
     manager := block_manager{
         devices: {},
@@ -57,6 +62,7 @@ func block_init(queue_depth int) (block_manager, string) {
     }
     return manager, ""
 }
+
 func (manager* block_manager) register_device(device_type int, total_sectors int) (int, string) {
     device := block_device{
         device_id: manager.device_counter,
@@ -74,6 +80,7 @@ func (manager* block_manager) register_device(device_type int, total_sectors int
     manager.device_counter = manager.device_counter + 1
     return device.device_id, ""
 }
+
 func (manager* block_manager) submit_request(device_id int, op_type int, sector int, count int, data vec) (int, string) {
     if device_id >= len(manager.devices) {
         return -1, "device not found"
@@ -100,6 +107,7 @@ func (manager* block_manager) submit_request(device_id int, op_type int, sector 
     manager.devices[device_id] = device
     return req.req_id, ""
 }
+
 func (manager* block_manager) complete_request(device_id int, req_id int, result int) (int, string) {
     if device_id >= len(manager.devices) {
         return -1, "device not found"
@@ -121,6 +129,7 @@ func (manager* block_manager) complete_request(device_id int, req_id int, result
     manager.devices[device_id] = device
     return result, ""
 }
+
 func (manager* block_manager) read_blocks(device_id int, sector int, count int) (vec, string) {
     if device_id >= len(manager.devices) {
         return {}, "device not found"
@@ -133,6 +142,7 @@ func (manager* block_manager) read_blocks(device_id int, sector int, count int) 
     }
     return data, ""
 }
+
 func (manager* block_manager) write_blocks(device_id int, sector int, data vec) (int, string) {
     if device_id >= len(manager.devices) {
         return -1, "device not found"
@@ -143,12 +153,14 @@ func (manager* block_manager) write_blocks(device_id int, sector int, data vec) 
     }
     return count, ""
 }
+
 func (manager* block_manager) flush_cache(device_id int) (int, string) {
     if device_id >= len(manager.devices) {
         return -1, "device not found"
     }
     return 0, ""
 }
+
 struct block_info {
     int device_id
     int device_type
@@ -158,6 +170,7 @@ struct block_info {
     int pending_requests
     int completed_requests
 }
+
 func (manager* block_manager) get_device_info(device_id int) (block_info, string) {
     if device_id >= len(manager.devices) {
         return block_info{}, "device not found"
@@ -174,6 +187,7 @@ func (manager* block_manager) get_device_info(device_id int) (block_info, string
     }
     return info, ""
 }
+
 func driver_init() (driver_manager, string) {
     manager := driver_manager{
         modules: {},
@@ -183,6 +197,7 @@ func driver_init() (driver_manager, string) {
     }
     return manager, ""
 }
+
 func (manager* driver_manager) load_module(module_type int, vendor_id int, device_id int) (int, string) {
     module := driver_module{
         module_id: manager.module_counter,
@@ -196,6 +211,7 @@ func (manager* driver_manager) load_module(module_type int, vendor_id int, devic
     manager.module_counter = manager.module_counter + 1
     return module.module_id, ""
 }
+
 func (manager* driver_manager) unload_module(module_id int) (int, string) {
     if module_id >= len(manager.modules) {
         return -1, "module not found"
@@ -208,6 +224,7 @@ func (manager* driver_manager) unload_module(module_id int) (int, string) {
     manager.modules[module_id] = module
     return 0, ""
 }
+
 func (manager* driver_manager) register_device(module_id int, device_name int) (int, string) {
     if module_id >= len(manager.modules) {
         return -1, "module not found"
@@ -217,6 +234,7 @@ func (manager* driver_manager) register_device(module_id int, device_name int) (
     manager.modules[module_id] = module
     return manager.device_counter, ""
 }
+
 func (manager* driver_manager) probe_device(device_id int) (int, string) {
     found := 0
     i := 0
@@ -235,17 +253,20 @@ func (manager* driver_manager) probe_device(device_id int) (int, string) {
     }
     return -1, "device not supported"
 }
+
 func (manager* driver_manager) bind_irq_handler(module_id int, irq_num int) (int, string) {
     if module_id >= len(manager.modules) {
         return -1, "module not found"
     }
     return 0, ""
 }
+
 struct driver_stats {
     int total_modules
     int loaded_modules
     int total_devices
 }
+
 func (manager* driver_manager) get_stats() (driver_stats, string) {
     loaded := 0
     i := 0

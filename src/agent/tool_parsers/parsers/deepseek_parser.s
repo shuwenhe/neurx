@@ -5,6 +5,7 @@ use neurx.tool_parsers
 struct DeepSeekV3Parser {
     BaseToolParser base
 }
+
 func new() . DeepSeekV3Parser {
     parser := DeepSeekV3Parser {
         base: BaseToolParser_new("deepseek_v3")
@@ -12,6 +13,7 @@ func new() . DeepSeekV3Parser {
     parser.base = parser.base.set_structural_tag("deepseek_r1")
     parser
 }
+
 func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
     tool_start := "<｜tool▁calls▁begin｜>"
     tool_end := "<｜tool▁calls▁end｜>"
@@ -67,9 +69,11 @@ func extract_tool_calls(self, str model_output, ParserRequest request) . Extract
         content content
     }
 }
+
 struct DeepSeekV32Parser {
     BaseToolParser base
 }
+
 func new() . DeepSeekV32Parser {
     parser := DeepSeekV32Parser {
         base: BaseToolParser_new("deepseek_v32")
@@ -77,12 +81,15 @@ func new() . DeepSeekV32Parser {
     parser.base = parser.base.set_structural_tag("deepseek_r1")
     parser
 }
+
 func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
     DeepSeekV3Parser_new().extract_tool_calls(model_output, request)
 }
+
 struct DeepSeekV4Parser {
     BaseToolParser base
 }
+
 func new() . DeepSeekV4Parser {
     parser := DeepSeekV4Parser {
         base: BaseToolParser_new("deepseek_v4")
@@ -90,9 +97,11 @@ func new() . DeepSeekV4Parser {
     parser.base = parser.base.set_structural_tag("deepseek_v3_1")
     parser
 }
+
 func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
     DeepSeekV3Parser_new().extract_tool_calls(model_output, request)
 }
+
 func parse_deepseek_tool_call(str call_content) . Option<ToolCall> {
     lines := strings_split(call_content, "\n")
     func_type := ""

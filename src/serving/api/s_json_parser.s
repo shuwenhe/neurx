@@ -51,6 +51,7 @@ func extract_json_string(string json, string key) string {
     }
     return result
 }
+
 func extract_json_number(string json, string key) int {
     string search = "\"" + key + "\":"
     int start_pos = -1
@@ -104,6 +105,7 @@ func extract_json_number(string json, string key) int {
     }
     return result
 }
+
 func escape_json_string(string s) string {
     string result = ""
     int i = 0
@@ -126,6 +128,7 @@ func escape_json_string(string s) string {
     }
     return result
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -157,6 +160,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func main() {
     print("✅ JSON parsingmodulealready加载\n")
 }

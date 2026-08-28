@@ -9,6 +9,7 @@ struct enhanced_sampler {
 	current_sampler interface{}
 	statistics map[string]interface{}
 }
+
 func create_enhanced_sampler() enhanced_sampler* {
 	factory := create_sampler_factory()
 	factory.create_default_samplers()
@@ -19,6 +20,7 @@ func create_enhanced_sampler() enhanced_sampler* {
 		statistics: make(map[string]interface{}),
 	}
 }
+
 func (e* enhanced_sampler) set_sampling_params(p* sampling_params) bool {
 	if p == nil {
 		return false
@@ -29,11 +31,13 @@ func (e* enhanced_sampler) set_sampling_params(p* sampling_params) bool {
 	e.params = p
 	return true
 }
+
 func (e* enhanced_sampler) set_penalty_config(pc* penalty_params) {
 	if pc != nil {
 		e.penalty_config = pc
 	}
 }
+
 func (e* enhanced_sampler) prepare_for_method(sampling_type method) bool {
 	switch method {
 	case sampling_greedy:
@@ -66,6 +70,7 @@ func (e* enhanced_sampler) prepare_for_method(sampling_type method) bool {
 		return true
 	}
 }
+
 func (e* enhanced_sampler) sample(float32[] logits) int32 {
 	if len(logits) == 0 {
 		return 0
@@ -117,6 +122,7 @@ func (e* enhanced_sampler) sample(float32[] logits) int32 {
 		return int32(max_idx)
 	}
 }
+
 func (e* enhanced_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
@@ -125,6 +131,7 @@ func (e* enhanced_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	}
 	return results
 }
+
 func (e* enhanced_sampler) sample_with_penalties(float32[] logits, int32[] generated_tokens) int32 {
 	if e.penalty_config == nil {
 		return e.sample(logits)
@@ -140,25 +147,30 @@ func (e* enhanced_sampler) sample_with_penalties(float32[] logits, int32[] gener
 	}
 	return int32(max_idx)
 }
+
 func (e* enhanced_sampler) enable_top_k(int32 k) {
 	e.params.method = sampling_random
 	e.params.top_k = k
 }
+
 func (e* enhanced_sampler) enable_top_p(float32 p_val) {
 	e.params.method = sampling_random
 	e.params.top_p = p_val
 }
+
 func (e* enhanced_sampler) enable_beam_search(int32 width) {
 	e.params.method = sampling_beam
 	e.params.beam_width = width
 	e.prepare_for_method(sampling_beam)
 }
+
 func (e* enhanced_sampler) enable_contrastive_search(float32 alpha, int32 k) {
 	e.params.method = sampling_contrastive
 	e.params.contrastive_alpha = alpha
 	e.params.contrastive_k = k
 	e.prepare_for_method(sampling_contrastive)
 }
+
 func (e* enhanced_sampler) get_statistics() map[string]interface{} {
 	stats := make(map[string]interface{})
 	stats["sampling_method"] = int32(e.params.method)
@@ -169,6 +181,7 @@ func (e* enhanced_sampler) get_statistics() map[string]interface{} {
 	stats["max_tokens"] = e.params.max_tokens
 	return stats
 }
+
 func (e* enhanced_sampler) validate_config() bool {
 	if e.params == nil {
 		return false
@@ -178,6 +191,7 @@ func (e* enhanced_sampler) validate_config() bool {
 	}
 	return true
 }
+
 func (e* enhanced_sampler) clone() enhanced_sampler* {
 	new_sampler := create_enhanced_sampler()
 	if e.params != nil {
@@ -191,6 +205,7 @@ func (e* enhanced_sampler) clone() enhanced_sampler* {
 	}
 	return new_sampler
 }
+
 func integrate_with_v1_engine() enhanced_sampler* {
 	sampler := create_enhanced_sampler()
 	params := create_sampling_params()
@@ -209,6 +224,7 @@ func integrate_with_v1_engine() enhanced_sampler* {
 	sampler.set_penalty_config(penalty_config)
 	return sampler
 }
+
 func export_sampling_config(e* enhanced_sampler) map[string]interface{} {
 	config := make(map[string]interface{})
 	if e.params != nil {

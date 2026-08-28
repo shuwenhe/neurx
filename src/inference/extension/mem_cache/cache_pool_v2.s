@@ -3,6 +3,7 @@ package mem_cache
     fragmented
     hybrid
 }
+
 struct memory_block {
     int64 ptr
     int64 size
@@ -11,6 +12,7 @@ struct memory_block {
     int64 allocation_time
     int64 last_access_time
 }
+
 struct pool_stats {
     int64 total_size
     int64 used_size
@@ -20,6 +22,7 @@ struct pool_stats {
     int32 fragmentation_ratio
     int64 largest_free_block
 }
+
 struct cache_pool_v2 {
     memory_block[] blocks
     prefix_cache* prefix_cache_mgr
@@ -30,6 +33,7 @@ struct cache_pool_v2 {
     int32 fragmentation_threshold
     bool enable_compaction
 }
+
 func new_cache_pool_v2(int64 pool_size, int32 initial_blocks, eviction_policy policy) cache_pool_v2 {
     prefix_cache := new_prefix_cache(pool_size, policy)
     blocks := memory_block[]{}
@@ -56,6 +60,7 @@ func new_cache_pool_v2(int64 pool_size, int32 initial_blocks, eviction_policy po
         enable_compaction: true,
     }
 }
+
 func (cache_pool_v2* pool) allocate(string owner_id, int64 size) int64 {
     if size > pool.pool_size - pool.allocated_size {
         -1
@@ -79,6 +84,7 @@ func (cache_pool_v2* pool) allocate(string owner_id, int64 size) int64 {
     pool.allocation_map[owner_id] = ptr
     ptr
 }
+
 func (cache_pool_v2* pool) deallocate(string owner_id) bool {
     if !(owner_id in pool.allocation_map) {
         false
@@ -96,6 +102,7 @@ func (cache_pool_v2* pool) deallocate(string owner_id) bool {
     }
     false
 }
+
 func find_free_block(cache_pool_v2* pool, int64 size) int32 {
     best_idx := -1
     best_size := 9223372036854775807
@@ -110,6 +117,7 @@ func find_free_block(cache_pool_v2* pool, int64 size) int32 {
     }
     best_idx
 }
+
 func should_compact(cache_pool_v2* pool) bool {
     total_free := 0
     for block in pool.blocks {
@@ -120,6 +128,7 @@ func should_compact(cache_pool_v2* pool) bool {
     frag_ratio := int32((total_free * 100) / pool.pool_size)
     frag_ratio > pool.fragmentation_threshold
 }
+
 func (cache_pool_v2* pool) compact_memory() bool {
     free_offset := 0
     for i in len(0..pool.blocks) {
@@ -145,11 +154,13 @@ func (cache_pool_v2* pool) compact_memory() bool {
     }
     true
 }
+
 func delete_block_at(cache_pool_v2* pool, int32 idx) {
     if idx >= 0 && idx < len(pool.blocks) {
         pool.blocks = vec_remove_at(pool.blocks, idx)
     }
 }
+
 func vec_remove_at(memory_block[] v, int32 idx) memory_block[] {
     result := memory_block[]{}
     for i in len(0..v) {
@@ -159,6 +170,7 @@ func vec_remove_at(memory_block[] v, int32 idx) memory_block[] {
     }
     result
 }
+
 func (cache_pool_v2* pool) add_cached_sequence(string cache_key, int32[] tokens, int64 kv_ptr, int32 kv_size) bool {
     allocation_id := "cache_" + cache_key
     allocated_ptr := pool.allocate(allocation_id, int64(kv_size))
@@ -168,6 +180,7 @@ func (cache_pool_v2* pool) add_cached_sequence(string cache_key, int32[] tokens,
     result := pool.prefix_cache_mgr.insert(tokens, allocated_ptr, kv_size)
     result.success
 }
+
 func (cache_pool_v2* pool) query_cache(int32[] query_tokens) int64 {
     result := pool.prefix_cache_mgr.lookup(query_tokens)
     if result.success {
@@ -176,6 +189,7 @@ func (cache_pool_v2* pool) query_cache(int32[] query_tokens) int64 {
         -1
     }
 }
+
 func (cache_pool_v2* pool) get_pool_stats() pool_stats {
     used := 0
     block_count := 0
@@ -207,15 +221,19 @@ func (cache_pool_v2* pool) get_pool_stats() pool_stats {
         largest_free_block: int64(largest_free),
     }
 }
+
 func (cache_pool_v2* pool) prefetch_sequence(string cache_key, int32[] tokens) bool {
     pool.add_cached_sequence(cache_key, tokens, 0, len(tokens))
 }
+
 func (cache_pool_v2* pool) enable_smart_eviction(bool enable) {
     pool.enable_compaction = enable
 }
+
 func (cache_pool_v2* pool) set_fragmentation_threshold(int32 threshold) {
     pool.fragmentation_threshold = threshold
 }
+
 func (cache_pool_v2* pool) reset_pool() {
     for i in len(0..pool.blocks) {
         pool.blocks[i].in_use = false
@@ -224,6 +242,7 @@ func (cache_pool_v2* pool) reset_pool() {
     pool.allocated_size = 0
     pool.allocation_map = map[string, int64]{}
 }
+
 func (cache_pool_v2* pool) get_memory_layout() string {
     switch pool.layout_strategy {
         memory_layout_contiguous : "contiguous",
@@ -231,6 +250,7 @@ func (cache_pool_v2* pool) get_memory_layout() string {
         memory_layout_hybrid : "hybrid",
     }
 }
+
 func (cache_pool_v2* pool) optimize_layout() {
     if should_compact(pool) {
         pool.compact_memory()
@@ -243,6 +263,7 @@ func (cache_pool_v2* pool) optimize_layout() {
         }
     }
 }
+
 func (cache_pool_v2* pool) get_allocation_info(string owner_id) map[string, int64] {
     info := map[string, int64]{}
     if owner_id in pool.allocation_map {
@@ -257,6 +278,7 @@ func (cache_pool_v2* pool) get_allocation_info(string owner_id) map[string, int6
     }
     info
 }
+
 func (cache_pool_v2* pool) estimate_cache_efficiency() float {
     savings := pool.prefix_cache_mgr.estimate_memory_savings()
     if pool.allocated_size == 0 {

@@ -8,6 +8,7 @@ import "time"
 	FAILED = 4
 	CANCELLED = 5
 }
+
 struct state_checkpoint {
 	int32           checkpoint_id
 	int64           timestamp
@@ -16,6 +17,7 @@ struct state_checkpoint {
 	string          state_snapshot
 	map[string]interface{} context
 }
+
 struct state_transition {
 	reasoning_state_enum from_state
 	reasoning_state_enum to_state
@@ -23,6 +25,7 @@ struct state_transition {
 	string          reason
 	int32           step_number
 }
+
 struct reasoning_history_entry {
 	int32           entry_id
 	int64           timestamp
@@ -32,6 +35,7 @@ struct reasoning_history_entry {
 	float32         confidence
 	map[string]string metadata
 }
+
 struct reasoning_state_manager {
 	reasoning_state_enum current_state
 	state_transition[] transitions
@@ -49,6 +53,7 @@ struct reasoning_state_manager {
 	bool            pause_on_error
 	sync.Mutex      mu
 }
+
 func create_reasoning_state_manager() reasoning_state_manager {
 	return reasoning_state_manager{
 		current_state:       INITIAL,
@@ -68,6 +73,7 @@ func create_reasoning_state_manager() reasoning_state_manager {
 		mu:                  sync.Mutex{},
 	}
 }
+
 func (reasoning_state_manager* m) transition_to(
 	new_state reasoning_state_enum,
 	reason string,
@@ -94,11 +100,13 @@ func (reasoning_state_manager* m) transition_to(
 	}
 	return true
 }
+
 func (reasoning_state_manager* m) get_current_state() reasoning_state_enum {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.current_state
 }
+
 func (reasoning_state_manager* m) add_history_entry(
 	action_type string,
 	description string,
@@ -123,6 +131,7 @@ func (reasoning_state_manager* m) add_history_entry(
 	}
 	m.total_steps++
 }
+
 func (reasoning_state_manager* m) create_checkpoint() int32 {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -146,6 +155,7 @@ func (reasoning_state_manager* m) create_checkpoint() int32 {
 	m.checkpoints = append(m.checkpoints, checkpoint)
 	return checkpoint_id
 }
+
 func (reasoning_state_manager* m) restore_from_checkpoint(
 	checkpoint_id int32,
 ) bool {
@@ -158,6 +168,7 @@ func (reasoning_state_manager* m) restore_from_checkpoint(
 	m.current_problem = checkpoint.state_snapshot
 	return true
 }
+
 func (reasoning_state_manager* m) set_state_variable(
 	key string,
 	value interface{},
@@ -166,12 +177,14 @@ func (reasoning_state_manager* m) set_state_variable(
 	defer m.mu.Unlock()
 	m.state_variables[key] = value
 }
+
 func (reasoning_state_manager* m) get_state_variable(key string) (interface{}, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	value, exists := m.state_variables[key]
 	return value, exists
 }
+
 func (reasoning_state_manager* m) add_error(error_msg string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -184,6 +197,7 @@ func (reasoning_state_manager* m) add_error(error_msg string) {
 		m.error_messages = m.error_messages[remove_count:]
 	}
 }
+
 func (reasoning_state_manager* m) get_errors() string[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -193,11 +207,13 @@ func (reasoning_state_manager* m) get_errors() string[] {
 	}
 	return errors
 }
+
 func (reasoning_state_manager* m) clear_errors() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.error_messages = make(string[], 0, 50)
 }
+
 func (reasoning_state_manager* m) get_history() reasoning_history_entry[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -207,6 +223,7 @@ func (reasoning_state_manager* m) get_history() reasoning_history_entry[] {
 	}
 	return history
 }
+
 func (reasoning_state_manager* m) get_history_by_type(action_type string) reasoning_history_entry[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -218,6 +235,7 @@ func (reasoning_state_manager* m) get_history_by_type(action_type string) reason
 	}
 	return filtered
 }
+
 func (reasoning_state_manager* m) get_state_summary() map[string]interface{} {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -234,6 +252,7 @@ func (reasoning_state_manager* m) get_state_summary() map[string]interface{} {
 	}
 	return summary
 }
+
 func (reasoning_state_manager* m) get_transition_history() state_transition[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -243,6 +262,7 @@ func (reasoning_state_manager* m) get_transition_history() state_transition[] {
 	}
 	return transitions
 }
+
 func (reasoning_state_manager* m) set_problem_context(
 	problem string,
 	context string,
@@ -252,14 +272,17 @@ func (reasoning_state_manager* m) set_problem_context(
 	m.current_problem = problem
 	m.current_context = context
 }
+
 func (reasoning_state_manager* m) get_problem_context() (string, string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.current_problem, m.current_context
 }
+
 func (reasoning_state_manager* m) pause_reasoning() bool {
 	return m.transition_to(PAUSED, "manual_pause")
 }
+
 func (reasoning_state_manager* m) resume_reasoning() bool {
 	m.mu.Lock()
 	current := m.current_state
@@ -269,9 +292,11 @@ func (reasoning_state_manager* m) resume_reasoning() bool {
 	}
 	return false
 }
+
 func (reasoning_state_manager* m) complete_reasoning() bool {
 	return m.transition_to(COMPLETED, "reasoning_complete")
 }
+
 func (reasoning_state_manager* m) fail_reasoning(reason string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -279,9 +304,11 @@ func (reasoning_state_manager* m) fail_reasoning(reason string) bool {
 	m.mu.Unlock()
 	return m.transition_to(FAILED, reason)
 }
+
 func (reasoning_state_manager* m) cancel_reasoning() bool {
 	return m.transition_to(CANCELLED, "user_cancelled")
 }
+
 func (reasoning_state_manager* m) get_average_confidence() float32 {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -294,11 +321,13 @@ func (reasoning_state_manager* m) get_average_confidence() float32 {
 	}
 	return total / float32(len(m.history))
 }
+
 func (reasoning_state_manager* m) get_step_count() int32 {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.total_steps
 }
+
 func (reasoning_state_manager* m) reset() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -314,11 +343,13 @@ func (reasoning_state_manager* m) reset() {
 	m.state_variables = make(map[string]interface{})
 	m.error_messages = make(string[], 0, 50)
 }
+
 func (reasoning_state_manager* m) is_active() bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.current_state == PROCESSING
 }
+
 func (reasoning_state_manager* m) is_terminal() bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()

@@ -12,6 +12,7 @@ struct layer_profile {
     num_parameters   int64
     flops           int64
 }
+
 struct request_profile {
     request_id       string
     prefill_time_ms   float32
@@ -22,6 +23,7 @@ struct request_profile {
     total_tokens     int32
     throughput_tps   float32
 }
+
 struct engine_profile {
     timestamp       int64
     total_requests   int64
@@ -36,6 +38,7 @@ struct engine_profile {
     gpu_memory_usage  int64
     cpu_memory_usage  int64
 }
+
 struct profiler {
     is_enabled       bool
     profiles        []*engine_profile
@@ -44,6 +47,7 @@ struct profiler {
     start_time       int64
     output_dir       string
 }
+
 func new_profiler() *profiler {
     return *profiler{
         is_enabled:       false,
@@ -52,21 +56,26 @@ func new_profiler() *profiler {
         layer_profiles:   make(map[string]*layer_profile),
     }
 }
+
 func (profiler* p) enable() {
     p.is_enabled = true
     p.start_time = core.CurrentTimeMs()
     core.Println("Profiler enabled")
 }
+
 func (profiler* p) disable() {
     p.is_enabled = false
     core.Println("Profiler disabled")
 }
+
 func (profiler* p) is_enabled_check() bool {
     return p.is_enabled
 }
+
 func (profiler* p) set_output_dir(dir string) {
     p.output_dir = dir
 }
+
 func (profiler* p) record_engine_stats(eng *engine.llm_engine) {
     if !p.is_enabled {
         return
@@ -84,6 +93,7 @@ func (profiler* p) record_engine_stats(eng *engine.llm_engine) {
         core.Printf("Profiler: recorded %d engine profiles\n", len(p.profiles))
     }
 }
+
 func (profiler* p) record_request_profile(request_id string, prefill_time_ms, decode_time_ms float32, prefill_tokens, decode_tokens int32) {
     if !p.is_enabled {
         return
@@ -102,6 +112,7 @@ func (profiler* p) record_request_profile(request_id string, prefill_time_ms, de
     }
     p.request_profiles[request_id] = profile
 }
+
 func (profiler* p) record_layer_profile(layer_id, layer_name, layer_type string, time_ms float32, memory_bytes int64, input_shape, output_shape int[]32, num_params, flops int64) {
     if !p.is_enabled {
         return
@@ -119,6 +130,7 @@ func (profiler* p) record_layer_profile(layer_id, layer_name, layer_type string,
     }
     p.layer_profiles[layer_id] = profile
 }
+
 func (profiler* p) get_engine_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     if len(p.profiles) == 0 {
@@ -149,6 +161,7 @@ func (profiler* p) get_engine_stats() map[string]interface{} {
     stats["avg_throughput_tps"] = p.profiles[len(p.profiles)-1].throughput_tps
     return stats
 }
+
 func (profiler* p) get_request_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     if len(p.request_profiles) == 0 {
@@ -168,6 +181,7 @@ func (profiler* p) get_request_stats() map[string]interface{} {
     stats["avg_throughput_tps"] = float32(total_tokens) / (total_time_ms / 1000.0)
     return stats
 }
+
 func (profiler* p) get_layer_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     if len(p.layer_profiles) == 0 {
@@ -201,6 +215,7 @@ func (profiler* p) get_layer_stats() map[string]interface{} {
     stats["layers"] = layer_stats
     return stats
 }
+
 func (profiler* p) save_profile(filename string) error {
     if len(p.profiles) == 0 {
         return core.Errorf("no profiles to save")
@@ -212,6 +227,7 @@ func (profiler* p) save_profile(filename string) error {
     core.Printf("Saving profiles to %s/%s\n", profile_dir, filename)
     return nil
 }
+
 func (profiler* p) print_summary() {
     core.Println("=" * 50)
     core.Println("Profiler Summary")
@@ -233,6 +249,7 @@ func (profiler* p) print_summary() {
     }
     core.Println("=" * 50)
 }
+
 func (profiler* p) reset() {
     p.profiles = make([]*engine_profile, 0)
     p.request_profiles = make(map[string]*request_profile)

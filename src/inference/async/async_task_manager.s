@@ -30,6 +30,7 @@ struct AsyncTask {
     user_id         string[]
     request_metadata map[string]string
 }
+
 struct AsyncTaskManager {
     tasks           map[string]AsyncTask
     task_queue      string[]
@@ -41,6 +42,7 @@ struct AsyncTaskManager {
     mutex           sync.Mutex
     callbacks       map[string]string
 }
+
 func new_async_task_manager(max_concurrent int) AsyncTaskManager {
     return AsyncTaskManager{
         tasks:          make(map[string]AsyncTask),
@@ -54,6 +56,7 @@ func new_async_task_manager(max_concurrent int) AsyncTaskManager {
         callbacks:      make(map[string]string),
     }
 }
+
 func (AsyncTaskManager* manager) submit_task(input_ids int[], max_tokens int,
         temperature float64, top_k int, top_p float64) string[] {
     manager.mutex.Lock()
@@ -77,6 +80,7 @@ func (AsyncTaskManager* manager) submit_task(input_ids int[], max_tokens int,
     manager.task_queue = append(manager.task_queue, task_id[0])
     return task_id
 }
+
 func (AsyncTaskManager* manager) submit_task_streaming(input_ids int[], max_tokens int,
         temperature float64, top_k int, top_p float64, callback string) string[] {
     task_id := manager.submit_task(input_ids, max_tokens, temperature, top_k, top_p)
@@ -91,6 +95,7 @@ func (AsyncTaskManager* manager) submit_task_streaming(input_ids int[], max_toke
     }
     return task_id
 }
+
 func (AsyncTaskManager* manager) get_task_status(task_id string[]) int {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -100,6 +105,7 @@ func (AsyncTaskManager* manager) get_task_status(task_id string[]) int {
     task := manager.tasks[task_id[0]]
     return task.status
 }
+
 func (AsyncTaskManager* manager) get_task_result(task_id string[]) AsyncTask {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -108,6 +114,7 @@ func (AsyncTaskManager* manager) get_task_result(task_id string[]) AsyncTask {
     }
     return manager.tasks[task_id[0]]
 }
+
 func (AsyncTaskManager* manager) update_task_status(task_id string[], status int) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -131,6 +138,7 @@ func (AsyncTaskManager* manager) update_task_status(task_id string[], status int
     }
     manager.tasks[task_id[0]] = task
 }
+
 func (AsyncTaskManager* manager) set_task_output(task_id string[], output_ids int[], output_text string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -142,6 +150,7 @@ func (AsyncTaskManager* manager) set_task_output(task_id string[], output_ids in
     task.output_text = output_text
     manager.tasks[task_id[0]] = task
 }
+
 func (AsyncTaskManager* manager) set_task_error(task_id string[], error_msg string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -153,6 +162,7 @@ func (AsyncTaskManager* manager) set_task_error(task_id string[], error_msg stri
     task.status = TASK_FAILED
     manager.tasks[task_id[0]] = task
 }
+
 func (AsyncTaskManager* manager) get_next_task() string[] {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -181,6 +191,7 @@ func (AsyncTaskManager* manager) get_next_task() string[] {
     result[0] = task_id
     return result
 }
+
 func (AsyncTaskManager* manager) get_statistics() map[string]int {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -200,6 +211,7 @@ func (AsyncTaskManager* manager) get_statistics() map[string]int {
     }
     return stats
 }
+
 func (AsyncTaskManager* manager) cancel_task(task_id string[]) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -214,6 +226,7 @@ func (AsyncTaskManager* manager) cancel_task(task_id string[]) bool {
     }
     return false
 }
+
 func (AsyncTaskManager* manager) clear_completed_tasks() int {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -225,12 +238,15 @@ func (AsyncTaskManager* manager) clear_completed_tasks() int {
     manager.completed_tasks = make(string[], 0)
     return cleared
 }
+
 func time_ms() int64 {
     return 0
 }
+
 func format_string(format string[], args... interface{}) string[] {
     return make(string[], 1)
 }
+
 func main() {
     manager := new_async_task_manager(10)
     input_ids := make(int[], 3)

@@ -106,6 +106,7 @@ func char_to_string(int ch) string {
     }
     return result
 }
+
 func extract_json_value(string json_body, string key) string {
     int i = 0
     int key_len = len(key)
@@ -184,6 +185,7 @@ func extract_json_value(string json_body, string key) string {
     }
     return ""
 }
+
 func validate_json_braces(string json_body) bool {
     int i = 0
     int brace_count = 0
@@ -199,6 +201,7 @@ func validate_json_braces(string json_body) bool {
     }
     return brace_count == 0
 }
+
 func format_error_response(int status, string error_msg) string {
     string body = "{\"error\":\"" + error_msg + "\"}"
     string response = "HTTP/1.1 "
@@ -211,6 +214,7 @@ func format_error_response(int status, string error_msg) string {
     response = response + body
     return response
 }
+
 func main() {
     print("✅ pure S 请求validationmodulealready编译\n")
 }

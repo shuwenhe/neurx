@@ -6,6 +6,7 @@ struct swap_page {
     int swap_offset
     int flags  
 }
+
 struct swap_device {
     int device_id
     int size  
@@ -13,12 +14,14 @@ struct swap_device {
     int free_space  
     swap_page[] swap_pages
 }
+
 struct swap_manager {
     swap_device[] swap_devices
     int total_swap_space
     int used_swap_space
     int swap_operations
 }
+
 func (swap_manager* swm) init(int total_swap_mb) (int, string) {
     swm.swap_devices = swap_device[]{}
     swm.total_swap_space = total_swap_mb
@@ -26,6 +29,7 @@ func (swap_manager* swm) init(int total_swap_mb) (int, string) {
     swm.swap_operations = 0
     return 0, ""
 }
+
 func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
     if swm.used_swap_space + size_mb > swm.total_swap_space {
         return swap_device{}, "Not enough swap space"
@@ -41,6 +45,7 @@ func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
     swm.used_swap_space = swm.used_swap_space + size_mb
     return device, ""
 }
+
 func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string) {
     if device_id >= len(swm.swap_devices) {
         return -1, "Invalid device"
@@ -62,6 +67,7 @@ func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string)
     swm.swap_operations = swm.swap_operations + 1
     return swap_pg.swap_offset, ""
 }
+
 func (swap_manager* swm) swap_in_page(int page_id, int device_id) (int, string) {
     if device_id >= len(swm.swap_devices) {
         return -1, "Invalid device"
@@ -87,9 +93,11 @@ func (swap_manager* swm) swap_in_page(int page_id, int device_id) (int, string) 
     }
     return -1, "Page not found in swap"
 }
+
 func (swap_manager swm) get_swap_stats() (int, int, int) {
     return swm.total_swap_space, swm.used_swap_space, swm.swap_operations
 }
+
 struct numa_node {
     int node_id
     int total_memory  
@@ -97,10 +105,12 @@ struct numa_node {
     int cpu_count
     int distance_to_other_nodes  
 }
+
 struct numa_manager {
     vec nodes
     int num_nodes
 }
+
 func (numa_manager* nm) init(int num_nodes) (int, string) {
     nm.nodes = numa_node[]{}
     nm.num_nodes = num_nodes
@@ -118,6 +128,7 @@ func (numa_manager* nm) init(int num_nodes) (int, string) {
     }
     return 0, ""
 }
+
 func (numa_manager* nm) allocate_local(int node_id, int size_mb) (int, string) {
     if node_id >= nm.num_nodes {
         return -1, "Invalid node"
@@ -130,6 +141,7 @@ func (numa_manager* nm) allocate_local(int node_id, int size_mb) (int, string) {
     nm.nodes[node_id] = node
     return node_id, ""
 }
+
 func (numa_manager* nm) migrate_page(int from_node, int to_node) (int, string) {
     if from_node >= nm.num_nodes || to_node >= nm.num_nodes {
         return -1, "Invalid node"
@@ -145,6 +157,7 @@ func (numa_manager* nm) migrate_page(int from_node, int to_node) (int, string) {
     nm.nodes[to_node] = to
     return 0, ""
 }
+
 func (numa_manager nm) get_node_stats(int node_id) (int, int, int) {
     if node_id >= nm.num_nodes {
         return 0, 0, 0
@@ -152,23 +165,27 @@ func (numa_manager nm) get_node_stats(int node_id) (int, int, int) {
     node := nm.nodes[node_id]
     return node.total_memory, node.free_memory, node.cpu_count
 }
+
 struct oom_victim {
     int pid
     int memory_usage  
     int priority
     int oom_score
 }
+
 struct oom_manager {
     vec processes
     int memory_threshold  
     int killed_processes
 }
+
 func (oom_manager* om) init(int memory_threshold_mb) (int, string) {
     om.processes = process[]{}"
     om.memory_threshold = memory_threshold_mb
     om.killed_processes = 0
     return 0, ""
 }
+
 func (oom_manager* om) register_process(int pid, int memory_usage) (int, string) {
     victim := oom_victim{
         pid: pid,
@@ -179,6 +196,7 @@ func (oom_manager* om) register_process(int pid, int memory_usage) (int, string)
     om.processes = append(om.processes, victim)
     return 0, ""
 }
+
 func (oom_manager* om) calculate_oom_score(int pid) (int, string) {
     i := 0
     for i < len(om.processes) {
@@ -193,6 +211,7 @@ func (oom_manager* om) calculate_oom_score(int pid) (int, string) {
     }
     return -1, "Process not found"
 }
+
 func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string) {
     if total_memory_used < om.memory_threshold {
         return -1, "No OOM"
@@ -220,6 +239,7 @@ func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string
     }
     return -1, "No victim found"
 }
+
 func (oom_manager om) get_oom_stats() (int, int) {
     return len(om.processes), om.killed_processes
 }

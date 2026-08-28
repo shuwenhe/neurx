@@ -10,6 +10,7 @@ struct flash_attention_config {
     bool use_flash_v3
     string backend
 }
+
 struct flash_attention_state {
     float[][] query_blocks
     float[][] key_blocks
@@ -21,6 +22,7 @@ struct flash_attention_state {
     int num_blocks_k
     int seq_len
 }
+
 func new_flash_attention_config(
     int head_dim,
     int num_heads,
@@ -44,6 +46,7 @@ func new_flash_attention_config(
         backend: backend,
     }
 }
+
 func flash_attention_forward(
     float[] queries,
     float[] keys,
@@ -170,6 +173,7 @@ func flash_attention_forward(
     }
     return output
 }
+
 func sqrt_f(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -182,6 +186,7 @@ func sqrt_f(float x) float {
     }
     return y
 }
+
 func exp_f(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -199,6 +204,7 @@ func exp_f(float x) float {
     }
     return result
 }
+
 struct mla_config {
     int hidden_dim
     int num_q_heads
@@ -210,12 +216,14 @@ struct mla_config {
     float softmax_scale
     bool causal
 }
+
 struct mla_cache {
     float[] compressed_kv
     float[] position_embeddings
     int cache_len
     int max_cache_len
 }
+
 func new_mla_config(
     int hidden_dim,
     int num_heads,
@@ -236,6 +244,7 @@ func new_mla_config(
         causal: true,
     }
 }
+
 struct mla_weights {
     mla_config config
     float[] w_dq
@@ -249,6 +258,7 @@ struct mla_weights {
     float[] w_kr
     float[] w_o
 }
+
 func mla_forward(
     float[] hidden,
     mla_weights weights,
@@ -326,6 +336,7 @@ func mla_forward(
     )
     return output
 }
+
 func standard_attention(
     float[] queries,
     float[] keys,
@@ -364,6 +375,7 @@ func standard_attention(
     }
     return output
 }
+
 func apply_rope(
     float[] x,
     float[] freqs,
@@ -392,6 +404,7 @@ func apply_rope(
     }
     return output
 }
+
 func cos_f(float x) float {
     float x2 = x * x
     float result = 1.0
@@ -404,6 +417,7 @@ func cos_f(float x) float {
     }
     return result
 }
+
 func sin_f(float x) float {
     float x2 = x * x
     float result = x
@@ -416,6 +430,7 @@ func sin_f(float x) float {
     }
     return result
 }
+
 func layer_norm(
     float[] x,
     float[] gamma,
@@ -451,6 +466,7 @@ func layer_norm(
     }
     return output
 }
+
 func matrix_mult(
     float[] a,
     float[] b,
@@ -476,6 +492,7 @@ func matrix_mult(
     }
     return result
 }
+
 struct lightning_attention_config {
     int block_size
     int head_dim
@@ -484,11 +501,13 @@ struct lightning_attention_config {
     bool use_cache
     string precision
 }
+
 struct lightning_cache {
     float[] kv_cache
     int cache_pos
     int max_cache_len
 }
+
 func lightning_attention_forward(
     float[] queries,
     float[] keys,
@@ -556,6 +575,7 @@ func lightning_attention_forward(
     }
     return output
 }
+
 func compute_local_attention(
     float[] queries,
     float[] keys,
@@ -602,6 +622,7 @@ func compute_local_attention(
     }
     return output
 }
+
 struct sparse_attention_config {
     int block_size
     int head_dim
@@ -610,11 +631,13 @@ struct sparse_attention_config {
     int sparsity_ratio
     bool use_token_budget
 }
+
 struct sparse_attention_mask {
     bool[] mask
     int[] block_indices
     int num_blocks
 }
+
 func create_sparse_pattern(
     int seq_len,
     sparse_attention_config config
@@ -689,6 +712,7 @@ func create_sparse_pattern(
         num_blocks: num_blocks,
     }
 }
+
 func sparse_attention_forward(
     float[] queries,
     float[] keys,
@@ -744,6 +768,7 @@ func sparse_attention_forward(
     }
     return output
 }
+
 func append_int(int[] arr, int val) int[] {
     int[] new_arr = make(int[], len(arr) + 1)
     int i = 0
@@ -754,6 +779,7 @@ func append_int(int[] arr, int val) int[] {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 struct attention_optimizer_config {
     int head_dim
     int num_heads
@@ -764,6 +790,7 @@ struct attention_optimizer_config {
     bool use_sparse
     string prefer_method
 }
+
 func get_best_attention_method(
     int seq_len,
     int head_dim,
@@ -779,12 +806,14 @@ func get_best_attention_method(
         return "lightning"
     }
 }
+
 func benchmark_attention_methods(
     float[] queries,
     float[] keys,
     float[] values,
     int num_iterations
 ) {}
+
 func main() {
     print("🚀 Advanced Attention Layers Implementation")
     print("✓ Flash Attention v3 - Memory-efficient with I/O awareness")

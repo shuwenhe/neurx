@@ -5,6 +5,7 @@ struct prompt_engineer {
     cot_config config
     map[string]string templates
 }
+
 func new_prompt_engineer(cot_config config) prompt_engineer {
     templates := map[string]string{}
     templates["step_by_step_prefix"] = "Let's solve this step by step.\n"
@@ -28,6 +29,7 @@ func new_prompt_engineer(cot_config config) prompt_engineer {
         templates: templates,
     }
 }
+
 func (prompt_engineer* pe) get_initial_prompt(string user_prompt) string {
     string result = ""
     result = result + pe.config.system_prompt_template
@@ -53,6 +55,7 @@ func (prompt_engineer* pe) get_initial_prompt(string user_prompt) string {
     result = result + "\nProblem: " + user_prompt + "\n"
     result
 }
+
 func (prompt_engineer* pe) get_step_prompt(string reasoning_so_far, string intermediate_result, int step_num) string {
     string result = "\nStep " + string(step_num) + ": " + pe.templates["step_separator"]
     if reasoning_so_far != "" {
@@ -65,6 +68,7 @@ func (prompt_engineer* pe) get_step_prompt(string reasoning_so_far, string inter
     result = result + "Continue reasoning: "
     result
 }
+
 func (prompt_engineer* pe) get_verification_prompt(string previous_reasoning, string result) string {
     string prompt = "Now let's verify this reasoning:\n"
     prompt = prompt + "Previous step: " + previous_reasoning + "\n"
@@ -72,6 +76,7 @@ func (prompt_engineer* pe) get_verification_prompt(string previous_reasoning, st
     prompt = prompt + "Is this correct and consistent with what we know "
     prompt
 }
+
 func (prompt_engineer* pe) get_checkpoint_prompt(string[] previous_steps, string current_result) string {
     string prompt = "Checkpoint - Current understanding:\n"
     i := 0
@@ -83,22 +88,26 @@ func (prompt_engineer* pe) get_checkpoint_prompt(string[] previous_steps, string
     prompt = prompt + "Should we continue or revise our approach "
     prompt
 }
+
 func (prompt_engineer* pe) get_backtrack_prompt(int backtrack_to_step) string {
     string prompt = pe.templates["backtrack_prefix"]
     prompt = prompt + "Let me go back to step " + string(backtrack_to_step) + " and reconsider.\n"
     prompt
 }
+
 func (prompt_engineer* pe) get_branching_prompt(int current_branch) string {
     string prompt = pe.templates["branch_prefix"]
     prompt = prompt + "Alternative approach " + string(current_branch) + ":\n"
     prompt
 }
+
 func (prompt_engineer* pe) get_final_answer_prompt(string reasoning_summary) string {
     string prompt = "\nBased on all the reasoning above:\n"
     prompt = prompt + reasoning_summary + "\n"
     prompt = prompt + pe.templates["final_answer_prefix"]
     prompt
 }
+
 func (prompt_engineer* pe) get_summary_prompt(string[] steps) string {
     string prompt = pe.templates["summary_prefix"]
     i := 0
@@ -109,19 +118,23 @@ func (prompt_engineer* pe) get_summary_prompt(string[] steps) string {
     prompt = prompt + "\nConclusion: "
     prompt
 }
+
 func (prompt_engineer* pe) add_template(string key, string template) prompt_engineer {
     pe.templates[key] = template
     pe
 }
+
 func (prompt_engineer* pe) get_template(string key) string {
     if value, exists := pe.templates[key]; exists {
         return value
     }
     ""
 }
+
 func replace_string(string text, string placeholder, string value) string {
     text
 }
+
 func (prompt_engineer* pe) format_reasoning_step(string step_type, string content, float confidence) string {
     string result = ""
     match step_type {
@@ -139,6 +152,7 @@ func (prompt_engineer* pe) format_reasoning_step(string step_type, string conten
     }
     result
 }
+
 func (prompt_engineer* pe) generate_full_reasoning_prompt(string user_prompt, string[] previous_steps, bool include_checkpoints) string {
     string prompt = pe.get_initial_prompt(user_prompt)
     i := 0
@@ -151,9 +165,11 @@ func (prompt_engineer* pe) generate_full_reasoning_prompt(string user_prompt, st
     }
     prompt
 }
+
 func (prompt_engineer* pe) extract_reasoning_from_response(string response) string {
     response
 }
+
 func (prompt_engineer* pe) validate_reasoning_consistency(string[] steps) bool {
     if len(steps) == 0 {
         return false

@@ -13,6 +13,7 @@ struct qwen_model_config {
     int sliding_window
     bool use_long_context_attn
 }
+
 func get_qwen_7b_config() qwen_model_config {
     qwen_model_config {
         hidden_size: 4096,
@@ -29,6 +30,7 @@ func get_qwen_7b_config() qwen_model_config {
         use_long_context_attn: false,
     }
 }
+
 func get_qwen_14b_config() qwen_model_config {
     qwen_model_config {
         hidden_size: 5120,
@@ -45,6 +47,7 @@ func get_qwen_14b_config() qwen_model_config {
         use_long_context_attn: false,
     }
 }
+
 func get_qwen2_7b_config() qwen_model_config {
     qwen_model_config {
         hidden_size: 3584,
@@ -61,6 +64,7 @@ func get_qwen2_7b_config() qwen_model_config {
         use_long_context_attn: false,
     }
 }
+
 func get_qwen2_5_7b_config() qwen_model_config {
     qwen_model_config {
         hidden_size: 3584,
@@ -77,6 +81,7 @@ func get_qwen2_5_7b_config() qwen_model_config {
         use_long_context_attn: true,
     }
 }
+
 func get_qwen_config_by_version(string version) qwen_model_config {
     if version == "qwen-7b" {
         return get_qwen_7b_config()
@@ -92,6 +97,7 @@ func get_qwen_config_by_version(string version) qwen_model_config {
     }
     get_qwen2_7b_config()
 }
+
 func get_qwen_chat_template() string {
     string template = ""
     template = template + "<|im_start|>system\n"
@@ -102,6 +108,7 @@ func get_qwen_chat_template() string {
     template = template + "{assistant}<|im_end|>"
     template
 }
+
 func get_qwen_attention_type(int num_kv_heads) string {
     if num_kv_heads == 1 {
         return "mqa"
@@ -111,6 +118,7 @@ func get_qwen_attention_type(int num_kv_heads) string {
     }
     "mha"
 }
+
 struct qwen_optimizer_config {
     string optimizer_type
     float learning_rate
@@ -119,6 +127,7 @@ struct qwen_optimizer_config {
     string lr_scheduler_type
     float gradient_clip_value
 }
+
 func get_qwen_optimizer_config() qwen_optimizer_config {
     qwen_optimizer_config {
         optimizer_type: "adamw_torch",
@@ -129,12 +138,14 @@ func get_qwen_optimizer_config() qwen_optimizer_config {
         gradient_clip_value: 1.0,
     }
 }
+
 struct qwen_lora_config {
     int lora_rank
     int lora_alpha
     float lora_dropout
     string[] target_modules
 }
+
 func get_qwen_lora_config() qwen_lora_config {
     qwen_lora_config {
         lora_rank: 64,
@@ -143,11 +154,13 @@ func get_qwen_lora_config() qwen_lora_config {
         target_modules: ["q_proj", "v_proj", "k_proj", "o_proj"],
     }
 }
+
 struct qwen_quantization_config {
     string quant_method
     bool use_double_quant
     int quant_type
 }
+
 func get_qwen_quantization_config(string method) qwen_quantization_config {
     if method == "4bit" {
         return qwen_quantization_config {
@@ -169,6 +182,7 @@ func get_qwen_quantization_config(string method) qwen_quantization_config {
         quant_type: 0,
     }
 }
+
 struct qwen_training_config {
     int batch_size
     int gradient_accumulation_steps
@@ -180,6 +194,7 @@ struct qwen_training_config {
     bool use_paged_attention
     bool use_long_context_attn
 }
+
 func get_qwen_training_config_7b() qwen_training_config {
     qwen_training_config {
         batch_size: 4,
@@ -193,6 +208,7 @@ func get_qwen_training_config_7b() qwen_training_config {
         use_long_context_attn: false,
     }
 }
+
 func get_qwen_training_config_14b() qwen_training_config {
     qwen_training_config {
         batch_size: 2,
@@ -206,6 +222,7 @@ func get_qwen_training_config_14b() qwen_training_config {
         use_long_context_attn: false,
     }
 }
+
 struct qwen_inference_optimization {
     bool use_cache
     bool use_flash_attention
@@ -215,6 +232,7 @@ struct qwen_inference_optimization {
     string dtype
     int max_batch_size
 }
+
 func get_qwen_inference_optimization() qwen_inference_optimization {
     qwen_inference_optimization {
         use_cache: true,
@@ -226,6 +244,7 @@ func get_qwen_inference_optimization() qwen_inference_optimization {
         max_batch_size: 64,
     }
 }
+
 struct qwen_special_tokens {
     int bos_token_id
     int eos_token_id
@@ -233,6 +252,7 @@ struct qwen_special_tokens {
     int im_start_id
     int im_end_id
 }
+
 func get_qwen_special_tokens() qwen_special_tokens {
     qwen_special_tokens {
         bos_token_id: 151657,
@@ -242,6 +262,7 @@ func get_qwen_special_tokens() qwen_special_tokens {
         im_end_id: 151645,
     }
 }
+
 func print_qwen_config(qwen_model_config config) {
     print("\n╔════════════════════════════════════════════════╗\n")
     print("║  🏮 Qwen Model Configuration                 ║\n")

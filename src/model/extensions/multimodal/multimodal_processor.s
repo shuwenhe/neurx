@@ -17,6 +17,7 @@ struct processing_result {
     int32 tokens_used
     map[string]interface{} metadata
 }
+
 struct multimodal_processor {
     image_processor* img_proc
     video_processor* vid_proc
@@ -29,6 +30,7 @@ struct multimodal_processor {
     int32 total_cached_hits
     map[string]interface{} pipeline_stats
 }
+
 func create_multimodal_processor() multimodal_processor* {
     return *multimodal_processor{
         img_proc: create_image_processor(),
@@ -43,6 +45,7 @@ func create_multimodal_processor() multimodal_processor* {
         pipeline_stats: make(map[string]interface{}),
     }
 }
+
 func (multimodal_processor* proc) process_image(string content_id, image_data* img) processing_result {
     result := processing_result{
         content_id: content_id,
@@ -72,6 +75,7 @@ func (multimodal_processor* proc) process_image(string content_id, image_data* i
     proc.total_processed = proc.total_processed + 1
     return result
 }
+
 func (multimodal_processor* proc) process_video(string content_id, video_data* vid) processing_result {
     result := processing_result{
         content_id: content_id,
@@ -106,6 +110,7 @@ func (multimodal_processor* proc) process_video(string content_id, video_data* v
     proc.total_processed = proc.total_processed + 1
     return result
 }
+
 func (multimodal_processor* proc) process_audio(string content_id, audio_data* audio) processing_result {
     result := processing_result{
         content_id: content_id,
@@ -135,6 +140,7 @@ func (multimodal_processor* proc) process_audio(string content_id, audio_data* a
     proc.total_processed = proc.total_processed + 1
     return result
 }
+
 func (multimodal_processor* proc) process_multimodal(string content_id, interface{}[] modalities) processing_result[] {
     results := make(processing_result[])
     proc.budget_mgr.allocate_budgets()
@@ -143,6 +149,7 @@ func (multimodal_processor* proc) process_multimodal(string content_id, interfac
     }
     return results
 }
+
 func (multimodal_processor* proc) check_deduplication(string content_id, uint8[] data) bool {
     hash_value := proc.hasher.add_content(content_id, data, modality_image)
     duplicates := proc.hasher.find_duplicates(content_id)
@@ -152,6 +159,7 @@ func (multimodal_processor* proc) check_deduplication(string content_id, uint8[]
     _ = hash_value
     return false
 }
+
 func (multimodal_processor* proc) get_processor_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["total_processed"] = proc.total_processed

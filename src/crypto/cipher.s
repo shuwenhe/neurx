@@ -10,26 +10,31 @@ struct aes_context {
     int num_rounds
     int key_size
 }
+
 struct pbkdf2_context {
     vec derived_key
     int iterations
     int output_len
 }
+
 struct cbc_context {
     aes_context aes_ctx
     vec iv
     int mode  
 }
+
 struct ctr_context {
     aes_context aes_ctx
     vec nonce
     int counter
     int mode  
 }
+
 struct ecb_context {
     aes_context aes_ctx
     int mode  
 }
+
 func aes128_init(key vec, key_len int) (aes_context, string) {
     if key_len != 16 {
         return aes_context{}, "Invalid key length for AES-128, must be 16 bytes"
@@ -47,6 +52,7 @@ func aes128_init(key vec, key_len int) (aes_context, string) {
     }
     return ctx, ""
 }
+
 func aes256_init(key vec, key_len int) (aes_context, string) {
     if key_len != 32 {
         return aes_context{}, "Invalid key length for AES-256, must be 32 bytes"
@@ -64,6 +70,7 @@ func aes256_init(key vec, key_len int) (aes_context, string) {
     }
     return ctx, ""
 }
+
 func (ctx* aes_context) encrypt_block(plaintext vec, ciphertext* vec) (int, string) {
     if len(plaintext) != 16 {
         return -1, "Plaintext block must be 16 bytes"
@@ -75,6 +82,7 @@ func (ctx* aes_context) encrypt_block(plaintext vec, ciphertext* vec) (int, stri
     }
     return 16, ""
 }
+
 func (ctx* aes_context) decrypt_block(ciphertext vec, plaintext* vec) (int, string) {
     if len(ciphertext) != 16 {
         return -1, "Ciphertext block must be 16 bytes"
@@ -86,6 +94,7 @@ func (ctx* aes_context) decrypt_block(ciphertext vec, plaintext* vec) (int, stri
     }
     return 16, ""
 }
+
 func cbc_init(key vec, key_len int, iv vec, iv_len int) (cbc_context, string) {
     aes_ctx, err := aes128_init(key, key_len)
     if err != "" {
@@ -101,6 +110,7 @@ func cbc_init(key vec, key_len int, iv vec, iv_len int) (cbc_context, string) {
     }
     return ctx, ""
 }
+
 func (ctx* cbc_context) encrypt(plaintext vec, plaintext_len int, ciphertext* vec) (int, string) {
     if plaintext_len % 16 != 0 {
         return -1, "Plaintext length must be multiple of 16 bytes"
@@ -120,6 +130,7 @@ func (ctx* cbc_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     }
     return encrypted_len, ""
 }
+
 func (ctx* cbc_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* vec) (int, string) {
     if ciphertext_len % 16 != 0 {
         return -1, "Ciphertext length must be multiple of 16 bytes"
@@ -139,6 +150,7 @@ func (ctx* cbc_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* v
     }
     return decrypted_len, ""
 }
+
 func ctr_init(key vec, key_len int, nonce vec, nonce_len int) (ctr_context, string) {
     aes_ctx, err := aes128_init(key, key_len)
     if err != "" {
@@ -155,6 +167,7 @@ func ctr_init(key vec, key_len int, nonce vec, nonce_len int) (ctr_context, stri
     }
     return ctx, ""
 }
+
 func (ctx* ctr_context) encrypt(plaintext vec, plaintext_len int, ciphertext* vec) (int, string) {
     encrypted_len := 0
     i := 0
@@ -172,6 +185,7 @@ func (ctx* ctr_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     }
     return encrypted_len, ""
 }
+
 func ecb_init(key vec, key_len int) (ecb_context, string) {
     aes_ctx, err := aes128_init(key, key_len)
     if err != "" {
@@ -186,6 +200,7 @@ func ecb_init(key vec, key_len int) (ecb_context, string) {
     }
     return ctx, ""
 }
+
 func (ctx* ecb_context) encrypt(plaintext vec, plaintext_len int, ciphertext* vec) (int, string) {
     if plaintext_len % 16 != 0 {
         return -1, "Plaintext length must be multiple of 16 bytes"
@@ -205,6 +220,7 @@ func (ctx* ecb_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     }
     return encrypted_len, ""
 }
+
 func (ctx* ecb_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* vec) (int, string) {
     if ciphertext_len % 16 != 0 {
         return -1, "Ciphertext length must be multiple of 16 bytes"
@@ -224,6 +240,7 @@ func (ctx* ecb_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* v
     }
     return decrypted_len, ""
 }
+
 func pbkdf2(password vec, password_len int, salt vec, salt_len int, 
             iterations int, output_len int) (pbkdf2_context, string) {
     ctx := pbkdf2_context{
@@ -238,6 +255,7 @@ func pbkdf2(password vec, password_len int, salt vec, salt_len int,
     }
     return ctx, ""
 }
+
 struct crypto_engine {
     int total_encrypt_operations
     int total_decrypt_operations
@@ -245,6 +263,7 @@ struct crypto_engine {
     int total_bytes_encrypted
     int total_bytes_decrypted
 }
+
 func create_crypto_engine() (crypto_engine, string) {
     engine := crypto_engine{
         total_encrypt_operations: 0,
@@ -255,6 +274,7 @@ func create_crypto_engine() (crypto_engine, string) {
     }
     return engine, ""
 }
+
 func (engine* crypto_engine) get_stats() (crypto_engine, string) {
     return engine, ""
 }

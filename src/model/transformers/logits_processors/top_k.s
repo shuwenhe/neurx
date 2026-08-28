@@ -5,6 +5,7 @@ struct top_k_processor {
     float min_tokens_to_keep
     bool filter_value
 }
+
 func create_top_k_processor(int k) top_k_processor {
     top_k_processor {
         k: k,
@@ -12,6 +13,7 @@ func create_top_k_processor(int k) top_k_processor {
         filter_value: -1000000.0,
     }
 }
+
 func apply_top_k(
     logits: float[],
     top_k_processor processor
@@ -33,6 +35,7 @@ func apply_top_k(
     }
     processor_utils.apply_token_mask(logits, mask)
 }
+
 func apply_top_k_batch(
     logits_batch: float[][],
     top_k_processor processor
@@ -44,6 +47,7 @@ func apply_top_k_batch(
     }
     filtered_batch
 }
+
 func apply_adaptive_top_k(
     logits: float[],
     base_k: int,
@@ -63,6 +67,7 @@ func apply_adaptive_top_k(
     processor := create_top_k_processor(adaptive_k)
     apply_top_k(logits, processor)
 }
+
 func apply_top_k_with_threshold(
     logits: float[],
     k: int,
@@ -98,6 +103,7 @@ func apply_top_k_with_threshold(
     }
     processor_utils.apply_token_mask(logits, mask)
 }
+
 func sample_from_top_k(
     logits: float[],
     processor: top_k_processor,
@@ -119,6 +125,7 @@ func sample_from_top_k(
     }
     best_token
 }
+
 struct top_k_stats {
     int vocab_size
     int k
@@ -126,6 +133,7 @@ struct top_k_stats {
     float[] top_k_probs
     float cumulative_prob
 }
+
 func analyze_top_k_filtering(
     logits: float[],
     int k
@@ -148,6 +156,7 @@ func analyze_top_k_filtering(
         cumulative_prob: cum_prob,
     }
 }
+
 func top_k_stats_to_string(top_k_stats stats) string {
     string s = ""
     s = s + "Top-K Filtering Statistics\n"

@@ -1,5 +1,6 @@
 package v1
 use neurx.inference.runtime.model_manifest.{hf_model_manifest, load_hf_model_manifest}
+
 struct runtime_config {
     string model_path
     string model_name
@@ -13,6 +14,7 @@ struct runtime_config {
     bool enable_prefix_caching
     int32 max_batch_size
 }
+
 func load_config_from_env() runtime_config {
     return runtime_config{
         model_path: "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct",
@@ -28,6 +30,7 @@ func load_config_from_env() runtime_config {
         max_batch_size: 32,
     }
 }
+
 struct neurx_runtime {
     runtime_config config
     inference_engine* engine
@@ -36,6 +39,7 @@ struct neurx_runtime {
     bool is_initialized
     bool is_running
 }
+
 func create_neurx_runtime(runtime_config cfg) neurx_runtime* {
     runtime := *neurx_runtime{
         config: cfg,
@@ -53,6 +57,7 @@ func create_neurx_runtime(runtime_config cfg) neurx_runtime* {
     }
     return runtime
 }
+
 func (neurx_runtime* rt) initialize() bool {
     manifest := load_hf_model_manifest(rt.config.model_path)
     model_cfg := model_config{
@@ -90,6 +95,7 @@ func (neurx_runtime* rt) initialize() bool {
     rt.is_initialized = true
     return true
 }
+
 func (neurx_runtime* rt) start_serving() bool {
     if !rt.is_initialized {
         return false
@@ -101,6 +107,7 @@ func (neurx_runtime* rt) start_serving() bool {
     rt.is_running = true
     return true
 }
+
 func (neurx_runtime* rt) process_batches() bool {
     if !rt.is_running {
         return false
@@ -108,6 +115,7 @@ func (neurx_runtime* rt) process_batches() bool {
     batch_count := rt.engine.process_batch()
     return batch_count > 0
 }
+
 func (neurx_runtime* rt) shutdown() bool {
     if rt.http_server != nil {
         rt.http_server.stop()
@@ -118,6 +126,7 @@ func (neurx_runtime* rt) shutdown() bool {
     rt.is_running = false
     return true
 }
+
 func (neurx_runtime* rt) serve_loop(int32 max_iterations) bool {
     iteration := 0
     for iteration < max_iterations {
@@ -130,6 +139,7 @@ func (neurx_runtime* rt) serve_loop(int32 max_iterations) bool {
     }
     return true
 }
+
 func main_test_flow() bool {
     cfg := load_config_from_env()
     rt := create_neurx_runtime(cfg)

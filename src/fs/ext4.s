@@ -13,11 +13,13 @@ struct inode {
     int block_count
     int[] block_pointers
 }
+
 struct dentry {
     string name
     int inode_num
     int type  
 }
+
 struct ext4_fs {
     int block_size  
     int total_blocks
@@ -25,6 +27,7 @@ struct ext4_fs {
     inode[] inode_table
     vec dentries
 }
+
 func (ext4_fs* fs) init(int total_size) (int, string) {
     fs.block_size = 4096
     fs.total_blocks = total_size / fs.block_size
@@ -33,6 +36,7 @@ func (ext4_fs* fs) init(int total_size) (int, string) {
     fs.dentries = {}
     return 0, ""
 }
+
 func (ext4_fs* fs) create_file(string filename, int mode) (inode, string) {
     inode_num := 0
     i := 0
@@ -64,6 +68,7 @@ func (ext4_fs* fs) create_file(string filename, int mode) (inode, string) {
     fs.dentries = append(fs.dentries, dentry)
     return new_inode, ""
 }
+
 func (ext4_fs* fs) create_directory(string dirname) (inode, string) {
     inode_num := 0
     i := 0
@@ -95,6 +100,7 @@ func (ext4_fs* fs) create_directory(string dirname) (inode, string) {
     fs.dentries = append(fs.dentries, dentry)
     return new_inode, ""
 }
+
 func (ext4_fs* fs) allocate_block() (int, string) {
     if fs.free_blocks <= 0 {
         return -1, "No free blocks"
@@ -103,10 +109,12 @@ func (ext4_fs* fs) allocate_block() (int, string) {
     fs.free_blocks = fs.free_blocks - 1
     return block_num, ""
 }
+
 func (ext4_fs* fs) free_block(int block_num) (int, string) {
     fs.free_blocks = fs.free_blocks + 1
     return 0, ""
 }
+
 func (ext4_fs* fs) write_file(int inode_num, int* data, int size) (int, string) {
     if inode_num >= len(fs.inode_table) {
         return -1, "Invalid inode"
@@ -130,6 +138,7 @@ func (ext4_fs* fs) write_file(int inode_num, int* data, int size) (int, string) 
     inode_ptr.file_size = size
     return size, ""
 }
+
 func (ext4_fs fs) read_file(int inode_num) (int, string) {
     if inode_num >= len(fs.inode_table) {
         return -1, "Invalid inode"
@@ -137,6 +146,7 @@ func (ext4_fs fs) read_file(int inode_num) (int, string) {
     inode_data := fs.inode_table[inode_num]
     return inode_data.file_size, ""
 }
+
 func (ext4_fs* fs) delete_file(int inode_num) (int, string) {
     if inode_num >= len(fs.inode_table) {
         return -1, "Invalid inode"
@@ -152,6 +162,7 @@ func (ext4_fs* fs) delete_file(int inode_num) (int, string) {
     inode_ptr.inode_num = 0
     return 0, ""
 }
+
 func (ext4_fs fs) get_stats() (int, int, int) {
     used_blocks := fs.total_blocks - fs.free_blocks
     inode_count := len(fs.inode_table)

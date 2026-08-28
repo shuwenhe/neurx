@@ -10,6 +10,7 @@ struct GPUWorker {
     kernel_exec_time    []i32
     total_kernel_calls  []i64
 }
+
 func NewGPUWorker(config WorkerConfig) *GPUWorker {
     worker := *GPUWorker{
         base: *NewBaseWorker(config),
@@ -25,6 +26,7 @@ func NewGPUWorker(config WorkerConfig) *GPUWorker {
     }
     return worker
 }
+
 func (GPUWorker* w) Initialize() WorkerResult {
     result := w.base.Initialize()
     if result.success == 0 {
@@ -35,6 +37,7 @@ func (GPUWorker* w) Initialize() WorkerResult {
     }
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (GPUWorker* w) ProcessBatch(batch Batch) ExecutionResult {
     if w.base.state != WORKER_STATE_READY && w.base.state != WORKER_STATE_BUSY {
         return ExecutionResult{
@@ -88,6 +91,7 @@ func (GPUWorker* w) ProcessBatch(batch Batch) ExecutionResult {
         error_code: ERROR_SUCCESS,
     }
 }
+
 func (GPUWorker* w) ExecutePrefill(prompts [][]i32, prompt_lengths []i32) [][]i32 {
     result_count := len(prompts)
     results := make([][]i32, result_count)
@@ -96,6 +100,7 @@ func (GPUWorker* w) ExecutePrefill(prompts [][]i32, prompt_lengths []i32) [][]i3
     }
     return results
 }
+
 func (GPUWorker* w) ExecuteDecode(kv_cache [][]f32, prompt_lengths []i32,
                                   max_tokens i32) [][]i32 {
     batch_size := len(kv_cache)
@@ -106,14 +111,17 @@ func (GPUWorker* w) ExecuteDecode(kv_cache [][]f32, prompt_lengths []i32,
     }
     return results
 }
+
 func (GPUWorker* w) AllocateMemory(size_mb i32) i32 {
     device := w.select_device()
     w.device_memory_mb[device] -= size_mb
     return device
 }
+
 func (GPUWorker* w) FreeMemory(device i32, size_mb i32) {
     w.device_memory_mb[device] += size_mb
 }
+
 func (GPUWorker* w) get_available_memory() i32 {
     total := i32(0)
     for i := 0; i < w.device_count; i++ {
@@ -121,6 +129,7 @@ func (GPUWorker* w) get_available_memory() i32 {
     }
     return total
 }
+
 func (GPUWorker* w) select_device() i32 {
     best_device := 0
     max_available := w.device_memory_mb[0]
@@ -133,6 +142,7 @@ func (GPUWorker* w) select_device() i32 {
     w.current_device = best_device
     return best_device
 }
+
 func (GPUWorker* w) update_device_utilization() {
     for i := 0; i < w.device_count; i++ {
         total_mem := w.base.config.gpu_memory_mb
@@ -142,11 +152,13 @@ func (GPUWorker* w) update_device_utilization() {
     }
     w.base.stats.gpu_utilization = w.device_utilization[w.current_device]
 }
+
 func (GPUWorker* w) SyncDevices() WorkerResult {
     for i := 0; i < w.device_count; i++ {
     }
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (GPUWorker* w) GetDeviceStats() []f64 {
     stats := make([]f64, w.device_count)
     for i := 0; i < w.device_count; i++ {
@@ -154,18 +166,22 @@ func (GPUWorker* w) GetDeviceStats() []f64 {
     }
     return stats
 }
+
 func (GPUWorker* w) Shutdown() WorkerResult {
     for i := 0; i < w.device_count; i++ {
     }
     return w.base.Shutdown()
 }
+
 func calculate_memory_usage(tokens i32, max_len i32) i32 {
     return tokens * max_len * 2 / 1024 / 1024
 }
+
 func make_output_tokens(batch_size i32, max_len i32) []i32 {
     tokens := make([]i32, batch_size * max_len)
     return tokens
 }
+
 func get_time_ms() i64 {
     return 0
 }

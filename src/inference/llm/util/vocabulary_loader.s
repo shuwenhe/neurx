@@ -12,6 +12,7 @@ vocabulary_cache global_vocab = vocabulary_cache{
     loaded: false,
     num_tokens: 0,
 }
+
 func load_qwen_vocabulary() bool {
     if global_vocab.loaded {
         return global_vocab.num_tokens > 0
@@ -31,6 +32,7 @@ func load_qwen_vocabulary() bool {
     global_vocab.loaded = true
     global_vocab.num_tokens > 0
 }
+
 func get_token_text(int token_id) string {
     if !global_vocab.loaded {
         load_qwen_vocabulary()
@@ -40,6 +42,7 @@ func get_token_text(int token_id) string {
     if token_id == 151644 { return "<|im_end|>" }
     fallback_token_representation(token_id)
 }
+
 func fallback_token_representation(int token_id) string {
     if token_id == 151643 { return "<|im_start|>" }
     if token_id == 151645 { return "<|im_end|>" }
@@ -58,15 +61,18 @@ func fallback_token_representation(int token_id) string {
     }
     "<unk_" + int_to_string(token_id) + ">"
 }
+
 func vocabulary_size() int {
     if !global_vocab.loaded {
         load_qwen_vocabulary()
     }
     global_vocab.num_tokens
 }
+
 func vocabulary_get_or_fallback(int token_id) string {
     get_token_text(token_id)
 }
+
 func preload_common_tokens() bool {
     load_qwen_vocabulary()
 }

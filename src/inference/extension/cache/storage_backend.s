@@ -8,6 +8,7 @@ struct storage_tier {
     int max_blocks
     int current_blocks
 }
+
 struct tiered_storage {
     []storage_tier tiers
     int num_tiers
@@ -17,6 +18,7 @@ struct tiered_storage {
     int64 total_capacity
     int64 total_used
 }
+
 func create_tiered_storage() tiered_storage {
     tiered_storage ts = tiered_storage{}
     ts.tiers = []storage_tier{cap: 3}
@@ -29,6 +31,7 @@ func create_tiered_storage() tiered_storage {
     print("[TieredStorage] Initialized\n")
     return ts
 }
+
 func add_storage_tier(tiered_storage ts, string tier_name, int64 capacity_mb, int max_blocks_val) int {
     if ts.num_tiers >= 3 {
         print("[TieredStorage] Maximum 3 tiers supported\n")
@@ -56,6 +59,7 @@ func add_storage_tier(tiered_storage ts, string tier_name, int64 capacity_mb, in
     print("[TieredStorage] Added tier: " + tier_name + " (" + int_to_string(capacity_mb) + " MB)\n")
     return tier.tier_id
 }
+
 func tiered_storage_can_fit(tiered_storage ts, int tier_id, int64 size_bytes) int {
     if tier_id < 0 || tier_id >= ts.num_tiers {
         return 0
@@ -66,6 +70,7 @@ func tiered_storage_can_fit(tiered_storage ts, int tier_id, int64 size_bytes) in
     }
     return 0
 }
+
 func tiered_storage_allocate(tiered_storage ts, int tier_id, int64 size_bytes) int {
     if tier_id < 0 || tier_id >= ts.num_tiers {
         print("[TieredStorage] Invalid tier ID: " + int_to_string(tier_id) + "\n")
@@ -86,6 +91,7 @@ func tiered_storage_allocate(tiered_storage ts, int tier_id, int64 size_bytes) i
     print("[TieredStorage] Allocated " + int_to_string(size_bytes) + " bytes in " + tier.tier_name + "\n")
     return 1
 }
+
 func tiered_storage_promote(tiered_storage ts, int from_tier_id, int to_tier_id, int64 size_bytes) int {
     if from_tier_id == to_tier_id {
         return 1
@@ -103,6 +109,7 @@ func tiered_storage_promote(tiered_storage ts, int from_tier_id, int to_tier_id,
     print("[TieredStorage] Promoted from " + from_tier.tier_name + " to " + to_tier.tier_name + "\n")
     return 1
 }
+
 func tiered_storage_evict(tiered_storage ts, int tier_id) int {
     if tier_id < 0 || tier_id >= ts.num_tiers {
         return 0
@@ -118,6 +125,7 @@ func tiered_storage_evict(tiered_storage ts, int tier_id) int {
     print("[TieredStorage] Evicted from " + tier.tier_name + "\n")
     return 1
 }
+
 func tiered_storage_get_best_tier_for_read(tiered_storage ts) int {
     int best_tier = ts.l1_tier_idx
     if best_tier >= 0 && ts.tiers[best_tier].current_blocks > 0 {
@@ -133,6 +141,7 @@ func tiered_storage_get_best_tier_for_read(tiered_storage ts) int {
     }
     return -1
 }
+
 func tiered_storage_find_space(tiered_storage ts, int64 size_bytes) int {
     int tier_idx = ts.l1_tier_idx
     if tier_idx >= 0 && tiered_storage_can_fit(ts, tier_idx, size_bytes) == 1 {
@@ -148,6 +157,7 @@ func tiered_storage_find_space(tiered_storage ts, int64 size_bytes) int {
     }
     return -1
 }
+
 func tiered_storage_get_stats(tiered_storage ts) string {
     string stats = "[TieredStorage] Total=" + int_to_string(ts.total_used) + "/" + int_to_string(ts.total_capacity) + " bytes\n"
     int i = 0
@@ -160,6 +170,7 @@ func tiered_storage_get_stats(tiered_storage ts) string {
     }
     return stats
 }
+
 func tiered_storage_clear(tiered_storage ts) {
     int i = 0
     for i < ts.num_tiers {
@@ -172,11 +183,13 @@ func tiered_storage_clear(tiered_storage ts) {
     ts.total_used = 0
     print("[TieredStorage] Cleared all tiers\n")
 }
+
 func tiered_storage_record_hit(tiered_storage ts, int tier_id) {
     if tier_id >= 0 && tier_id < ts.num_tiers {
         ts.tiers[tier_id].hit_count = ts.tiers[tier_id].hit_count + 1
     }
 }
+
 func tiered_storage_record_miss(tiered_storage ts, int tier_id) {
     if tier_id >= 0 && tier_id < ts.num_tiers {
         ts.tiers[tier_id].miss_count = ts.tiers[tier_id].miss_count + 1

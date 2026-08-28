@@ -15,6 +15,7 @@ struct sampling_params {
 	temperature float32
 	do_sample bool
 }
+
 struct sampler {
 	enhanced_sampler* sampling.enhanced_sampler
 	enable_top_k bool
@@ -22,6 +23,7 @@ struct sampler {
 	enable_temperature bool
 	int32 random_seed
 }
+
 func create_sampler(int32 seed) sampler* {
 	enhanced := sampling.integrate_with_v1_engine()
 	return *sampler{
@@ -32,6 +34,7 @@ func create_sampler(int32 seed) sampler* {
 		random_seed: seed,
 	}
 }
+
 func (sampler* s) greedy_sample(float32[] logits) int32 {
 	if len(logits) == 0 {
 		return 0
@@ -46,6 +49,7 @@ func (sampler* s) greedy_sample(float32[] logits) int32 {
 	}
 	return int32(max_idx)
 }
+
 func (sampler* s) top_k_sample(float32[] logits, int32 k) int32 {
 	if k <= 0 || len(logits) == 0 {
 		return s.greedy_sample(logits)
@@ -84,6 +88,7 @@ func (sampler* s) top_k_sample(float32[] logits, int32 k) int32 {
 	}
 	return 0
 }
+
 func (sampler* s) top_p_sample(float32[] logits, float32 p_val) int32 {
 	if p_val <= 0.0 || len(logits) == 0 {
 		return s.greedy_sample(logits)
@@ -134,6 +139,7 @@ func (sampler* s) top_p_sample(float32[] logits, float32 p_val) int32 {
 	}
 	return 0
 }
+
 func (sampler* s) temperature_sample(float32[] logits, float32 temperature) float32[] {
 	if temperature <= 0.0 {
 		return logits
@@ -144,6 +150,7 @@ func (sampler* s) temperature_sample(float32[] logits, float32 temperature) floa
 	}
 	return adjusted
 }
+
 func (sampler* s) sample_with_params(float32[] logits, sampling_params* params) int32 {
 	if params == nil {
 		return s.greedy_sample(logits)
@@ -164,6 +171,7 @@ func (sampler* s) sample_with_params(float32[] logits, sampling_params* params) 
 		return s.greedy_sample(logits)
 	}
 }
+
 func (sampler* s) sample_enhanced(float32[] logits, sampling.sampling_params* params) int32 {
 	if s.enhanced_sampler == nil {
 		return s.greedy_sample(logits)
@@ -173,6 +181,7 @@ func (sampler* s) sample_enhanced(float32[] logits, sampling.sampling_params* pa
 	}
 	return s.enhanced_sampler.sample(logits)
 }
+
 func (sampler* s) batch_sample(float32[][]] batch_logits, sampling_params* params) int32[] {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
@@ -181,12 +190,14 @@ func (sampler* s) batch_sample(float32[][]] batch_logits, sampling_params* param
 	}
 	return results
 }
+
 func (sampler* s) batch_sample_enhanced(float32[][]] batch_logits) int32[] {
 	if s.enhanced_sampler == nil {
 		return s.batch_sample(batch_logits, nil)
 	}
 	return s.enhanced_sampler.batch_sample(batch_logits)
 }
+
 func (sampler* s) apply_frequency_penalty(float32[] logits, int32[] token_ids, float32 penalty) float32[] {
 	if penalty == 0.0 {
 		return logits
@@ -203,6 +214,7 @@ func (sampler* s) apply_frequency_penalty(float32[] logits, int32[] token_ids, f
 	}
 	return adjusted
 }
+
 func (sampler* s) apply_presence_penalty(float32[] logits, int32[] token_ids, float32 penalty) float32[] {
 	if penalty == 0.0 {
 		return logits
@@ -225,16 +237,19 @@ func (sampler* s) apply_presence_penalty(float32[] logits, int32[] token_ids, fl
 	}
 	return adjusted
 }
+
 func (sampler* s) enable_beam_search(int32 beam_width) {
 	if s.enhanced_sampler != nil {
 		s.enhanced_sampler.enable_beam_search(beam_width)
 	}
 }
+
 func (sampler* s) enable_contrastive_search(float32 alpha, int32 k) {
 	if s.enhanced_sampler != nil {
 		s.enhanced_sampler.enable_contrastive_search(alpha, k)
 	}
 }
+
 func (sampler* s) get_statistics() map[string]interface{} {
 	if s.enhanced_sampler != nil {
 		return s.enhanced_sampler.get_statistics()

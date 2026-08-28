@@ -6,6 +6,7 @@ struct compression_config {
     int64 bytes_saved
     int64 compression_count
 }
+
 struct cache_warmup_strategy {
     int enable_warmup
     string warmup_policy
@@ -14,6 +15,7 @@ struct cache_warmup_strategy {
     int64 total_preloaded
     int64 last_warmup_time
 }
+
 struct adaptive_eviction_policy {
     string policy_type
     int adaptive_level
@@ -22,6 +24,7 @@ struct adaptive_eviction_policy {
     int64 policy_decision_count
     int64 policy_accuracy
 }
+
 struct performance_cache {
     compression_config compression
     cache_warmup_strategy warmup
@@ -29,6 +32,7 @@ struct performance_cache {
     int64 ttl_seconds
     int64 cache_coherence_delay_ms
 }
+
 func create_performance_cache() performance_cache {
     performance_cache pc = performance_cache{}
     pc.compression.enable_compression = 1
@@ -54,6 +58,7 @@ func create_performance_cache() performance_cache {
     print("[PerformanceCache] Initialized with compression and adaptive strategies\n")
     return pc
 }
+
 func compression_should_compress(performance_cache pc, int64 size_bytes) int {
     if pc.compression.enable_compression == 0 {
         return 0
@@ -63,6 +68,7 @@ func compression_should_compress(performance_cache pc, int64 size_bytes) int {
     }
     return 1
 }
+
 func compression_estimate_ratio(string compression_type, int64 original_size) float {
     if compression_type == "snappy" {
         return 0.65
@@ -73,6 +79,7 @@ func compression_estimate_ratio(string compression_type, int64 original_size) fl
     }
     return 0.80
 }
+
 func compression_apply(performance_cache pc, int64 original_size) int64 {
     float ratio = compression_estimate_ratio(pc.compression.compression_type, original_size)
     int64 compressed_size = int64(float(original_size) * ratio)
@@ -82,6 +89,7 @@ func compression_apply(performance_cache pc, int64 original_size) int64 {
     print("[Compression] Compressed " + int_to_string(original_size) + " → " + int_to_string(compressed_size) + " bytes\n")
     return compressed_size
 }
+
 func compression_get_stats(performance_cache pc) string {
     int64 total_input = pc.compression.bytes_saved + 
                         (pc.compression.compression_count * 8000)
@@ -93,6 +101,7 @@ func compression_get_stats(performance_cache pc) string {
                    " bytes, ratio=" + int_to_string(int(ratio * 100)) + "%"
     return stats
 }
+
 func warmup_should_warmup(performance_cache pc, int64 current_time) int {
     if pc.warmup.enable_warmup == 0 {
         return 0
@@ -102,6 +111,7 @@ func warmup_should_warmup(performance_cache pc, int64 current_time) int {
     }
     return 0
 }
+
 func warmup_preload_batch(performance_cache pc, string[] cache_keys, int batch_size) int {
     int preloaded = 0
     int i = 0
@@ -113,15 +123,18 @@ func warmup_preload_batch(performance_cache pc, string[] cache_keys, int batch_s
     print("[CacheWarmup] Preloaded " + int_to_string(preloaded) + " entries\n")
     return preloaded
 }
+
 func warmup_update_time(performance_cache pc, int64 current_time) {
     pc.warmup.last_warmup_time = current_time
 }
+
 func warmup_get_stats(performance_cache pc) string {
     string stats = "[CacheWarmup] Policy=" + pc.warmup.warmup_policy + 
                    ", Total Preloaded=" + int_to_string(pc.warmup.total_preloaded) +
                    ", Batch Size=" + int_to_string(pc.warmup.warmup_batch_size)
     return stats
 }
+
 func eviction_classify_block(performance_cache pc, int access_count, int64 last_access_time, int64 current_time) string {
     int64 age = current_time - last_access_time
     if access_count > 50 && age < 5000 {
@@ -134,6 +147,7 @@ func eviction_classify_block(performance_cache pc, int access_count, int64 last_
         return "unused"
     }
 }
+
 func eviction_should_evict(performance_cache pc, string block_class) int {
     if block_class == "hot" {
         return 0
@@ -145,6 +159,7 @@ func eviction_should_evict(performance_cache pc, string block_class) int {
         return 1
     }
 }
+
 func eviction_get_priority_score(performance_cache pc, int access_count, int64 age_ms, int64 size_bytes) float {
     float score = 0.0
     if access_count > 0 {
@@ -158,6 +173,7 @@ func eviction_get_priority_score(performance_cache pc, int access_count, int64 a
     score = score - float(size_bytes) / 10000.0
     return score
 }
+
 func eviction_get_stats(performance_cache pc) string {
     string stats = "[AdaptiveEviction] Policy=" + pc.eviction.policy_type +
                    ", Level=" + int_to_string(pc.eviction.adaptive_level) +
@@ -165,9 +181,11 @@ func eviction_get_stats(performance_cache pc) string {
                    ", Accuracy=" + int_to_string(pc.eviction.policy_accuracy) + "%"
     return stats
 }
+
 func performance_cache_tick(performance_cache pc, int64 time_increment) {
     pc.warmup.last_warmup_time = pc.warmup.last_warmup_time + time_increment
 }
+
 func performance_cache_get_comprehensive_stats(performance_cache pc) string {
     string stats = "\n=== Performance Cache Optimization ===\n"
     stats = stats + compression_get_stats(pc) + "\n"
@@ -178,6 +196,7 @@ func performance_cache_get_comprehensive_stats(performance_cache pc) string {
     stats = stats + "=====================================\n"
     return stats
 }
+
 func enable_compression(performance_cache pc, int enable) {
     pc.compression.enable_compression = enable
     if enable == 1 {
@@ -186,6 +205,7 @@ func enable_compression(performance_cache pc, int enable) {
         print("[PerformanceCache] Compression disabled\n")
     }
 }
+
 func enable_warmup(performance_cache pc, int enable) {
     pc.warmup.enable_warmup = enable
     if enable == 1 {
@@ -194,10 +214,12 @@ func enable_warmup(performance_cache pc, int enable) {
         print("[PerformanceCache] Warmup disabled\n")
     }
 }
+
 func set_adaptive_level(performance_cache pc, int level) {
     pc.eviction.adaptive_level = level
     print("[PerformanceCache] Adaptive level set to " + int_to_string(level) + "\n")
 }
+
 func set_ttl(performance_cache pc, int64 seconds) {
     pc.ttl_seconds = seconds
     print("[PerformanceCache] TTL set to " + int_to_string(seconds) + " seconds\n")

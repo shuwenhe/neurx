@@ -10,6 +10,7 @@ struct grpo_config {
     float temperature
     float top_p
 }
+
 func new_grpo_config() grpo_config {
     grpo_config {
         group_size: 4,
@@ -23,6 +24,7 @@ func new_grpo_config() grpo_config {
         top_p: 0.95,
     }
 }
+
 struct generation_output {
     string text
     int[] token_ids
@@ -31,6 +33,7 @@ struct generation_output {
     float format_reward
     float accuracy_reward
 }
+
 struct generation_group {
     string prompt
     int[] prompt_token_ids
@@ -39,6 +42,7 @@ struct generation_group {
     float group_std_reward
     float[] advantages
 }
+
 struct grpo_training_state {
     grpo_config config
     int global_step
@@ -52,6 +56,7 @@ struct grpo_training_state {
     float[] format_reward_history
     float[] accuracy_reward_history
 }
+
 func compute_format_reward(string text) float {
     float reward = 0.0
     if contains_substring(text, "<think>") {
@@ -67,12 +72,14 @@ func compute_format_reward(string text) float {
     }
     reward
 }
+
 func compute_accuracy_reward(string output, string expected_answer) float {
     if contains_substring(output, expected_answer) {
         return 1.0
     }
     0.0
 }
+
 func compute_math_reward(string output, string ground_truth) float {
     float format_r = compute_format_reward(output)
     float accuracy_r = 0.0
@@ -82,6 +89,7 @@ func compute_math_reward(string output, string ground_truth) float {
     }
     format_r + accuracy_r
 }
+
 func compute_code_reward(string output, string[] test_cases, string[] expected_outputs) float {
     float format_r = compute_format_reward(output)
     string code = extract_code_block(output)
@@ -101,6 +109,7 @@ func compute_code_reward(string output, string[] test_cases, string[] expected_o
     }
     format_r + pass_rate
 }
+
 func contains_substring(string s, string substr) bool {
     int s_len = len(s)
     int sub_len = len(substr)
@@ -122,6 +131,7 @@ func contains_substring(string s, string substr) bool {
     }
     false
 }
+
 func find_substring(string s, string substr) int {
     int s_len = len(s)
     int sub_len = len(substr)
@@ -143,6 +153,7 @@ func find_substring(string s, string substr) int {
     }
     -1
 }
+
 func extract_boxed_answer(string text) string {
     string marker = "\\boxed{"
     int start = find_substring(text, marker)
@@ -160,6 +171,7 @@ func extract_boxed_answer(string text) string {
     }
     ""
 }
+
 func extract_code_block(string text) string {
     string marker = "```"
     int start = find_substring(text, marker)
@@ -173,6 +185,7 @@ func extract_code_block(string text) string {
     if end < 0 { return "" }
     slice(text, start, end)
 }
+
 func find_substring_from(string s, string substr, int from) int {
     int s_len = len(s)
     int sub_len = len(substr)
@@ -193,6 +206,7 @@ func find_substring_from(string s, string substr, int from) int {
     }
     -1
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -200,6 +214,7 @@ func sqrt_approx(float x) float {
     for i < 10 { y = 0.5 * (y + x / y); i = i + 1 }
     y
 }
+
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -213,6 +228,7 @@ func exp_approx(float x) float {
     }
     result
 }
+
 func compute_group_advantages([]generation_output outputs, int G) (float[], float, float) {
     float sum_r = 0.0
     int i = 0
@@ -245,6 +261,7 @@ func compute_group_advantages([]generation_output outputs, int G) (float[], floa
     }
     (advantages, mean_r, std_r)
 }
+
 func compute_grpo_loss(
     float[] advantages, float[] new_log_probs, float[] old_log_probs,
     float[] ref_log_probs, int G, float clip_eps, float beta
@@ -277,6 +294,7 @@ func compute_grpo_loss(
     float total_loss = policy_loss + beta * total_kl
     (total_loss, policy_loss, total_kl)
 }
+
 struct grpo_step_result {
     float total_loss
     float policy_loss
@@ -286,6 +304,7 @@ struct grpo_step_result {
     float mean_accuracy_reward
     grpo_training_state updated_state
 }
+
 func grpo_training_step(
     grpo_training_state state, generation_group group
 ) grpo_step_result {
@@ -334,6 +353,7 @@ func grpo_training_step(
         updated_state: new_state,
     }
 }
+
 func sum_float(float[] arr) float {
     float s = 0.0
     int i = 0
@@ -343,11 +363,13 @@ func sum_float(float[] arr) float {
     }
     s
 }
+
 struct cold_start_data {
     string prompt
     string chain_of_thought
     string final_answer
 }
+
 func grpo_training_init(grpo_config cfg) grpo_training_state {
     grpo_training_state {
         config: cfg,
@@ -363,6 +385,7 @@ func grpo_training_init(grpo_config cfg) grpo_training_state {
         accuracy_reward_history: float[]{cap: 0},
     }
 }
+
 struct grpo_monitor {
     int step
     float total_loss
@@ -373,6 +396,7 @@ struct grpo_monitor {
     float accuracy_reward
     float running_reward
 }
+
 func grpo_get_monitor(grpo_training_state state, grpo_step_result result) grpo_monitor {
     grpo_monitor {
         step: state.global_step,
@@ -385,6 +409,7 @@ func grpo_get_monitor(grpo_training_state state, grpo_step_result result) grpo_m
         running_reward: state.running_mean_reward,
     }
 }
+
 func detect_reward_hacking(
     float kl_div, float format_r, float accuracy_r,
     float normal_kl, int normal_length, int current_length
@@ -394,9 +419,11 @@ func detect_reward_hacking(
     if current_length > normal_length * 3 { return true }
     false
 }
+
 func unit_name() string {
     "neurx/alignment/neurx_r1_grpo"
 }
+
 func unit_ready() int {
     1
 }

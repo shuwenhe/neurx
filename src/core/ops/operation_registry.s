@@ -17,6 +17,7 @@ package ops
     mi200
     cpu
 }
+
 struct operation_metadata {
     string op_name
     operation_type op_type
@@ -26,6 +27,7 @@ struct operation_metadata {
     compute_capability[] supported_hardware
     int estimated_flops
 }
+
 struct operation_kernel {
     string kernel_id
     string kernel_name
@@ -35,6 +37,7 @@ struct operation_kernel {
     int shared_memory_size
     int num_threads_per_block
 }
+
 struct fused_operation {
     string fused_op_id
     string[] component_ops
@@ -42,6 +45,7 @@ struct fused_operation {
     int estimated_flops_saved
     int estimated_memory_saved
 }
+
 struct custom_operation {
     string op_id
     string op_name
@@ -51,6 +55,7 @@ struct custom_operation {
     bool is_registered
     int64 registration_time
 }
+
 struct operation_registry {
     map[string, custom_operation] operations
     map[string, fused_operation] fused_ops
@@ -58,6 +63,7 @@ struct operation_registry {
     int fused_op_count
     string default_hardware
 }
+
 func new_operation_metadata(string name, operation_type op_type) operation_metadata {
     operation_metadata {
         op_name: name,
@@ -69,6 +75,7 @@ func new_operation_metadata(string name, operation_type op_type) operation_metad
         estimated_flops: 0,
     }
 }
+
 func new_operation_kernel(string kernel_id, string kernel_name, compute_capability hw) operation_kernel {
     operation_kernel {
         kernel_id: kernel_id,
@@ -80,6 +87,7 @@ func new_operation_kernel(string kernel_id, string kernel_name, compute_capabili
         num_threads_per_block: 256,
     }
 }
+
 func new_custom_operation(string op_id, string op_name, operation_type op_type) custom_operation {
     custom_operation {
         op_id: op_id,
@@ -91,6 +99,7 @@ func new_custom_operation(string op_id, string op_name, operation_type op_type) 
         registration_time: 0,
     }
 }
+
 func new_operation_registry(string default_hw) operation_registry {
     operation_registry {
         operations: map[string, custom_operation]{},
@@ -100,22 +109,28 @@ func new_operation_registry(string default_hw) operation_registry {
         default_hardware: default_hw,
     }
 }
+
 func (custom_operation* op) add_kernel(operation_kernel kernel) bool {
     op.kernels = append(op.kernels, kernel)
     true
 }
+
 func (custom_operation* op) add_input_type(string input_type) () {
     op.metadata.input_types = append(op.metadata.input_types, input_type)
 }
+
 func (custom_operation* op) add_output_type(string output_type) () {
     op.metadata.output_types = append(op.metadata.output_types, output_type)
 }
+
 func (custom_operation* op) add_supported_hardware(compute_capability hw) () {
     op.metadata.supported_hardware = append(op.metadata.supported_hardware, hw)
 }
+
 func (custom_operation* op) set_metadata(operation_metadata meta) () {
     op.metadata = meta
 }
+
 func (custom_operation* op) get_kernel_for_hardware(compute_capability hw) operation_kernel {
     i := 0
     for i < len(op.kernels) {
@@ -126,6 +141,7 @@ func (custom_operation* op) get_kernel_for_hardware(compute_capability hw) opera
     }
     new_operation_kernel("", "", hw)
 }
+
 func (operation_registry* reg) register_operation(custom_operation op) bool {
     if op.op_id in reg.operations {
         false
@@ -134,6 +150,7 @@ func (operation_registry* reg) register_operation(custom_operation op) bool {
     reg.operation_count = reg.operation_count + 1
     true
 }
+
 func (operation_registry* reg) unregister_operation(string op_id) bool {
     if op_id in reg.operations {
         del reg.operations[op_id]
@@ -142,15 +159,18 @@ func (operation_registry* reg) unregister_operation(string op_id) bool {
     }
     false
 }
+
 func (operation_registry* reg) has_operation(string op_id) bool {
     op_id in reg.operations
 }
+
 func (operation_registry* reg) get_operation(string op_id) custom_operation {
     if op_id in reg.operations {
         reg.operations[op_id]
     }
     new_custom_operation("", "", operation_type_custom)
 }
+
 func (operation_registry* reg) register_fused_operation(string fused_id, string[] component_ops, string fusion_name) bool {
     if fused_id in reg.fused_ops {
         false
@@ -166,9 +186,11 @@ func (operation_registry* reg) register_fused_operation(string fused_id, string[
     reg.fused_op_count = reg.fused_op_count + 1
     true
 }
+
 func (operation_registry* reg) has_fused_operation(string fused_id) bool {
     fused_id in reg.fused_ops
 }
+
 func (operation_registry* reg) get_fused_operation(string fused_id) fused_operation {
     if fused_id in reg.fused_ops {
         reg.fused_ops[fused_id]
@@ -181,6 +203,7 @@ func (operation_registry* reg) get_fused_operation(string fused_id) fused_operat
         estimated_memory_saved: 0,
     }
 }
+
 func (operation_registry* reg) list_operations() string[] {
     result := string[]{}
     for op_id in reg.operations.keys() {
@@ -188,6 +211,7 @@ func (operation_registry* reg) list_operations() string[] {
     }
     result
 }
+
 func (operation_registry* reg) list_fused_operations() string[] {
     result := string[]{}
     for fused_id in reg.fused_ops.keys() {
@@ -195,6 +219,7 @@ func (operation_registry* reg) list_fused_operations() string[] {
     }
     result
 }
+
 func (operation_registry* reg) find_operations_by_type(operation_type op_type) string[] {
     result := string[]{}
     for op_id in reg.operations.keys() {
@@ -205,6 +230,7 @@ func (operation_registry* reg) find_operations_by_type(operation_type op_type) s
     }
     result
 }
+
 func (operation_registry* reg) find_operations_for_hardware(compute_capability hw) string[] {
     result := string[]{}
     for op_id in reg.operations.keys() {
@@ -219,6 +245,7 @@ func (operation_registry* reg) find_operations_for_hardware(compute_capability h
     }
     result
 }
+
 func (operation_registry* reg) get_stats() string {
     stats := "Total Operations: " + string(reg.operation_count) + "\n"
     stats = stats + "Total Fused Operations: " + string(reg.fused_op_count)

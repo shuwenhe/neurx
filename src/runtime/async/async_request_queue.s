@@ -25,6 +25,7 @@ struct async_request {
 	STATUS_FAILED     = 4
 	STATUS_CANCELLED  = 5
 }
+
 struct request_batch {
 	requests    async_request*[]
 	batch_id    string
@@ -32,6 +33,7 @@ struct request_batch {
 	created_at  int64
 	priority    int32
 }
+
 struct backpressure_config {
 	max_queue_size    int32
 	high_watermark    int32
@@ -40,6 +42,7 @@ struct backpressure_config {
 	backoff_factor    float32
 	max_backoff       int64
 }
+
 struct async_request_queue {
 	pending_requests async_request*[]
 	processing_batch request_batch*[]
@@ -53,6 +56,7 @@ struct async_request_queue {
 	is_backpressure bool
 	stats           queue_statistics
 }
+
 struct queue_statistics {
 	total_requests    int64
 	total_processed   int64
@@ -63,6 +67,7 @@ struct queue_statistics {
 	backpressure_hits int64
 	dropped_requests  int64
 }
+
 func create_queue(capacity int32, batch_size int32) async_request_queue {
 	queue := async_request_queue{
 		capacity:       capacity,
@@ -72,6 +77,7 @@ func create_queue(capacity int32, batch_size int32) async_request_queue {
 	queue.backpressure = create_backpressure_config(capacity)
 	return queue
 }
+
 func create_backpressure_config(capacity int32) backpressure_config {
 	return backpressure_config{
 		max_queue_size:   capacity,
@@ -82,6 +88,7 @@ func create_backpressure_config(capacity int32) backpressure_config {
 		max_backoff:      1000,
 	}
 }
+
 func (q async_request_queue*) create_request(
 	request_id string,
 	prompt string,
@@ -102,6 +109,7 @@ func (q async_request_queue*) create_request(
 	}
 	return *req
 }
+
 func (q async_request_queue*) enqueue(req async_request*) (bool, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -126,6 +134,7 @@ func (q async_request_queue*) enqueue(req async_request*) (bool, error) {
 	q.stats.total_requests++
 	return true, nil
 }
+
 func (q async_request_queue*) dequeue_batch() request_batch {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -158,6 +167,7 @@ func (q async_request_queue*) dequeue_batch() request_batch {
 	}
 	return batch
 }
+
 func (q async_request_queue*) mark_completed(request_id string, latency_ms int64) error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -173,6 +183,7 @@ func (q async_request_queue*) mark_completed(request_id string, latency_ms int64
 	}
 	return "request_not_found"
 }
+
 func (q async_request_queue*) mark_failed(request_id string, error_msg string) error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -187,6 +198,7 @@ func (q async_request_queue*) mark_failed(request_id string, error_msg string) e
 	}
 	return "request_not_found"
 }
+
 func (q async_request_queue*) cancel_request(request_id string) bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -210,21 +222,25 @@ func (q async_request_queue*) cancel_request(request_id string) bool {
 	}
 	return false
 }
+
 func (q async_request_queue*) is_backpressured() bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	return q.is_backpressure
 }
+
 func (q async_request_queue*) get_queue_size() int32 {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	return q.current_load
 }
+
 func (q async_request_queue*) get_statistics() queue_statistics {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	return q.stats
 }
+
 func (q async_request_queue*) update_latency(latency_ms int64) {
 	if q.stats.total_processed == 0 {
 		q.stats.avg_latency_ms = float32(latency_ms)
@@ -233,6 +249,7 @@ func (q async_request_queue*) update_latency(latency_ms int64) {
 		q.stats.avg_latency_ms = (total + float32(latency_ms)) / float32(q.stats.total_processed+1)
 	}
 }
+
 func (q async_request_queue*) drain_queue(timeout_ms int64) async_request*[] {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -245,6 +262,7 @@ func (q async_request_queue*) drain_queue(timeout_ms int64) async_request*[] {
 	}
 	return result
 }
+
 func (q async_request_queue*) flush_batch(batch request_batch) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -255,6 +273,7 @@ func (q async_request_queue*) flush_batch(batch request_batch) {
 		}
 	}
 }
+
 func sort_by_priority(requests async_request*[]) {
 	for i := int32(0); i < int32(len(requests)); i++ {
 		for j := i + 1; j < int32(len(requests)); j++ {
@@ -264,15 +283,18 @@ func sort_by_priority(requests async_request*[]) {
 		}
 	}
 }
+
 func is_expired(req async_request*) bool {
 	if req.deadline <= 0 {
 		return false
 	}
 	return current_timestamp_ns() > req.deadline
 }
+
 func generate_batch_id() string {
 	return format("batch_%d", current_timestamp_ns())
 }
+
 func current_timestamp_ns() int64 {
 	return time.Now().UnixNano()
 }

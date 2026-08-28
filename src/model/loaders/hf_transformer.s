@@ -16,6 +16,7 @@ struct hf_layer_weights {
     float[] down_proj
     string error_code
 }
+
 struct hf_model_weights {
     bool valid
     hf_model_config config
@@ -33,6 +34,7 @@ struct hf_model_weights {
     float[] lm_head
     string error_code
 }
+
 func hf_int_string(int value) string {
     if value == 0 { return "0" }
     string output = ""
@@ -40,16 +42,19 @@ func hf_int_string(int value) string {
     for current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
     output
 }
+
 func hf_load_values(string path, string name) f32_tensor_result {
     safetensors_embedding tensor = load_f32_tensor(path, name)
     read_f32_tensor(tensor)
 }
+
 func hf_bytes_string(int[] bytes) string {
     string output = ""
     int i = 0
     for i < len(bytes) { output = output + string(bytes[i]); i = i + 1 }
     output
 }
+
 func hf_find(string text, string pattern, int start) int {
     int i = start
     for i + len(pattern) <= len(text) {
@@ -61,6 +66,7 @@ func hf_find(string text, string pattern, int start) int {
     }
     -1
 }
+
 func hf_resolve_tensor_path(string model_dir, string name) string {
     string single = model_dir + "/model.safetensors"
     if __host_file_exists(single) { return single }
@@ -78,14 +84,17 @@ func hf_resolve_tensor_path(string model_dir, string name) string {
     for i < end { shard = shard + string(index[i]); i = i + 1 }
     model_dir + "/" + shard
 }
+
 func hf_load_model_values(string model_dir, string name) f32_tensor_result {
     string path = hf_resolve_tensor_path(model_dir, name)
     if path == "" { return hf_load_values(model_dir + "/model.safetensors", name) }
     hf_load_values(path, name)
 }
+
 func load_hf_layer_zero(string path) hf_layer_weights {
     load_hf_layer(path, 0)
 }
+
 func load_hf_layer(string path, int layer) hf_layer_weights {
     string prefix = "model.layers." + hf_int_string(layer) + "."
     f32_tensor_result input_norm = hf_load_values(path, prefix + "input_layernorm.weight")
@@ -102,6 +111,7 @@ func load_hf_layer(string path, int layer) hf_layer_weights {
     }
     hf_layer_weights { valid: true, input_norm: input_norm.values, q_proj: q.values, k_proj: k.values, v_proj: v.values, o_proj: o.values, post_norm: post_norm.values, gate_proj: gate.values, up_proj: up.values, down_proj: down.values, error_code: "" }
 }
+
 func load_hf_model_layer(string model_dir, int layer) hf_layer_weights {
     string prefix = "model.layers." + hf_int_string(layer) + "."
     f32_tensor_result input_norm = hf_load_model_values(model_dir, prefix + "input_layernorm.weight")
@@ -116,14 +126,17 @@ func load_hf_model_layer(string model_dir, int layer) hf_layer_weights {
     if !input_norm.ok || !q.ok || !k.ok || !v.ok || !o.ok || !post_norm.ok || !gate.ok || !up.ok || !down.ok { return hf_layer_weights { valid: false, input_norm: [], q_proj: [], k_proj: [], v_proj: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], error_code: "missing_hf_layer_weight" } }
     hf_layer_weights { valid: true, input_norm: input_norm.values, q_proj: q.values, k_proj: k.values, v_proj: v.values, o_proj: o.values, post_norm: post_norm.values, gate_proj: gate.values, up_proj: up.values, down_proj: down.values, error_code: "" }
 }
+
 func invalid_hf_model(hf_model_config config, string code) hf_model_weights {
     safetensors_embedding empty = safetensors_embedding { valid: false, path: "", rows: 0, columns: 0, data_offset: 0, data_bytes: 0, dtype: "", element_bytes: 0, error_code: code }
     hf_model_weights { valid: false, config: config, embedding: empty, input_norm: [], q_proj: [], k_proj: [], v_proj: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], final_norm: [], lm_head: [], error_code: code }
 }
+
 func hf_copy_layer(float[] target, int offset, float[] source) {
     int i = 0
     for i < len(source) { target[offset + i] = source[i]; i = i + 1 }
 }
+
 func load_hf_model(string model_dir) hf_model_weights {
     hf_model_config config = load_hf_config(model_dir)
     if !config.valid { return invalid_hf_model(config, config.error_code) }

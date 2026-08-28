@@ -15,6 +15,7 @@ struct openai_api_server {
 	bool                            is_running
 	sync.Mutex                      mu
 }
+
 func create_openai_api_server(
 	v1_engine interface{},
 	async_engine interface{},
@@ -43,6 +44,7 @@ func create_openai_api_server(
 		mu:                      sync.Mutex{},
 	}
 }
+
 func (s openai_api_server*) start() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -71,11 +73,13 @@ func (s openai_api_server*) start() bool {
 	})
 	return true
 }
+
 func (s openai_api_server*) shutdown() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.is_running = false
 }
+
 func (s openai_api_server*) handle_chat_completion_request(
 	req chat_completion_request,
 ) (chat_completion_response, api_error) {
@@ -113,6 +117,7 @@ func (s openai_api_server*) handle_chat_completion_request(
 	)
 	return response, api_error{}
 }
+
 func (s openai_api_server*) handle_text_completion_request(
 	req completion_request,
 ) (completion_response, api_error) {
@@ -150,6 +155,7 @@ func (s openai_api_server*) handle_text_completion_request(
 	)
 	return response, api_error{}
 }
+
 func (s openai_api_server*) handle_embeddings_request(
 	req embedding_request,
 ) (embedding_response, api_error) {
@@ -187,9 +193,11 @@ func (s openai_api_server*) handle_embeddings_request(
 	)
 	return response, api_error{}
 }
+
 func (s openai_api_server*) handle_list_models_request() model_list_response {
 	return s.model_list_handler_.list_models()
 }
+
 func (s openai_api_server*) handle_get_model_request(model_id string) (model_info, api_error) {
 	model, exists := s.model_list_handler_.get_model(model_id)
 	if !exists {
@@ -201,6 +209,7 @@ func (s openai_api_server*) handle_get_model_request(model_id string) (model_inf
 	}
 	return model, api_error{}
 }
+
 func (s openai_api_server*) register_model(model_id string, model model_info) api_error {
 	success := s.model_list_handler_.register_model(model_id, model)
 	if !success {
@@ -212,6 +221,7 @@ func (s openai_api_server*) register_model(model_id string, model model_info) ap
 	}
 	return api_error{}
 }
+
 func (s openai_api_server*) delete_model(model_id string) api_error {
 	success := s.model_list_handler_.delete_model(model_id)
 	if !success {
@@ -223,12 +233,15 @@ func (s openai_api_server*) delete_model(model_id string) api_error {
 	}
 	return api_error{}
 }
+
 func (s openai_api_server*) get_usage_stats() map[string]interface{} {
 	return s.usage_tracker_.get_usage_report()
 }
+
 func (s openai_api_server*) get_error_stats() map[string]int32 {
 	return s.error_handler_.get_error_stats()
 }
+
 func (s openai_api_server*) get_server_status() map[string]interface{} {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -240,20 +253,24 @@ func (s openai_api_server*) get_server_status() map[string]interface{} {
 	}
 	return status
 }
+
 func (s openai_api_server*) set_rate_limit(max_requests int32, max_tokens int32) {
 	limiter := create_usage_limiter(max_requests, max_tokens)
 	_ = limiter
 }
+
 func (s openai_api_server*) enable_content_filter() {
 	filter := create_content_filter()
 	_ = filter
 }
+
 struct openai_api_client {
 	base_url    string
 	api_key     string
 	timeout_ms  int64
 	mu          sync.Mutex
 }
+
 func create_openai_api_client(base_url string, api_key string) openai_api_client {
 	return openai_api_client{
 		base_url:   base_url,
@@ -262,6 +279,7 @@ func create_openai_api_client(base_url string, api_key string) openai_api_client
 		mu:         sync.Mutex{},
 	}
 }
+
 func (c openai_api_client*) chat_complete(
 	model string,
 	messages chat_message[],
@@ -276,6 +294,7 @@ func (c openai_api_client*) chat_complete(
 	}
 	return chat_completion_response{}, nil
 }
+
 func (c openai_api_client*) text_complete(
 	model string,
 	prompt string,
@@ -290,6 +309,7 @@ func (c openai_api_client*) text_complete(
 	}
 	return completion_response{}, nil
 }
+
 func (c openai_api_client*) embed_text(
 	model string,
 	input string[],
@@ -300,9 +320,11 @@ func (c openai_api_client*) embed_text(
 	}
 	return embedding_response{}, nil
 }
+
 func (c openai_api_client*) list_models() (model_list_response, error) {
 	return model_list_response{}, nil
 }
+
 struct openai_api_middleware {
 	validator        request_validator*
 	error_handler    error_handler*
@@ -310,6 +332,7 @@ struct openai_api_middleware {
 	error_recovery   error_recovery*
 	mu               sync.Mutex
 }
+
 func create_openai_api_middleware() openai_api_middleware {
 	return openai_api_middleware{
 		validator:      *create_default_validator(),
@@ -319,11 +342,13 @@ func create_openai_api_middleware() openai_api_middleware {
 		mu:             sync.Mutex{},
 	}
 }
+
 func (m openai_api_middleware*) validate_request(req interface{}) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return true
 }
+
 func (m openai_api_middleware*) handle_error_with_recovery(
 	err api_error,
 	retry_count int32,
@@ -338,6 +363,7 @@ func (m openai_api_middleware*) handle_error_with_recovery(
 	}
 	return err, true
 }
+
 func (m openai_api_middleware*) record_usage(
 	request_id string,
 	user_id string,

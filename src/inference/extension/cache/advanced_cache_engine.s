@@ -10,6 +10,7 @@ struct advanced_kv_cache_engine {
     int64 total_writes
     int64 current_time_ms
 }
+
 func create_advanced_kv_cache_engine(string node_id) advanced_kv_cache_engine {
     advanced_kv_cache_engine engine = advanced_kv_cache_engine{}
     engine.index = create_hash_table(256, 4096)
@@ -28,6 +29,7 @@ func create_advanced_kv_cache_engine(string node_id) advanced_kv_cache_engine {
     print("[AdvancedKVCacheEngine] Initialized node: " + node_id + "\n")
     return engine
 }
+
 func advanced_cache_query(advanced_kv_cache_engine engine, string prefix_hash) int[] {
     engine.total_reads = engine.total_reads + 1
     int[] cached_blocks = hash_table_lookup(engine.index, prefix_hash)
@@ -55,6 +57,7 @@ func advanced_cache_query(advanced_kv_cache_engine engine, string prefix_hash) i
     print("[AdvancedCache] MISS: " + prefix_hash + "\n")
     return int[]{cap: 0}
 }
+
 func advanced_cache_store(advanced_kv_cache_engine engine, string prefix_hash, int[] block_ids) int {
     engine.total_writes = engine.total_writes + 1
     hash_table_insert(engine.index, prefix_hash, block_ids)
@@ -87,6 +90,7 @@ func advanced_cache_store(advanced_kv_cache_engine engine, string prefix_hash, i
     }
     return 1
 }
+
 func advanced_cache_get_hit_rate(advanced_kv_cache_engine engine) float {
     if engine.total_reads == 0 {
         return 0.0
@@ -94,12 +98,15 @@ func advanced_cache_get_hit_rate(advanced_kv_cache_engine engine) float {
     float hit_rate = float(engine.total_hits) / float(engine.total_reads)
     return hit_rate
 }
+
 func advanced_cache_get_tier_utilization(advanced_kv_cache_engine engine) string {
     return tiered_storage_get_stats(engine.storage)
 }
+
 func advanced_cache_add_peer(advanced_kv_cache_engine engine, string peer_id, string host, int port) {
     distributed_cache_add_peer(engine.peers, peer_id, host, port)
 }
+
 func advanced_cache_promote_block(advanced_kv_cache_engine engine, string key, int from_tier, int to_tier) {
     int64 block_size = 7200
     if tiered_storage_promote(engine.storage, from_tier, to_tier, block_size) == 1 {
@@ -107,12 +114,15 @@ func advanced_cache_promote_block(advanced_kv_cache_engine engine, string key, i
               " to tier " + int_to_string(to_tier) + "\n")
     }
 }
+
 func advanced_cache_enable_compression(advanced_kv_cache_engine engine) {
     enable_compression(engine.optimization, 1)
 }
+
 func advanced_cache_enable_warmup(advanced_kv_cache_engine engine) {
     enable_warmup(engine.optimization, 1)
 }
+
 func advanced_cache_tick(advanced_kv_cache_engine engine, int64 time_increment_ms) {
     engine.current_time_ms = engine.current_time_ms + time_increment_ms
     hash_table_update_time(engine.index, engine.current_time_ms)
@@ -123,6 +133,7 @@ func advanced_cache_tick(advanced_kv_cache_engine engine, int64 time_increment_m
         distributed_cache_check_peer_health(engine.peers)
     }
 }
+
 func advanced_cache_get_comprehensive_stats(advanced_kv_cache_engine engine) string {
     float hit_rate = advanced_cache_get_hit_rate(engine)
     string stats = "\n╔════════════════════════════════════════════════════╗\n"
@@ -146,12 +157,14 @@ func advanced_cache_get_comprehensive_stats(advanced_kv_cache_engine engine) str
     stats = stats + performance_cache_get_comprehensive_stats(engine.optimization)
     return stats
 }
+
 func advanced_cache_enable_all_optimizations(advanced_kv_cache_engine engine) {
     advanced_cache_enable_compression(engine)
     advanced_cache_enable_warmup(engine)
     set_adaptive_level(engine.optimization, 3)
     print("[AdvancedCache] All optimizations enabled\n")
 }
+
 func advanced_cache_get_effective_cache_size(advanced_kv_cache_engine engine) int64 {
     int64 l1_size = engine.storage.tiers[0].capacity_bytes
     int64 l2_size = engine.storage.tiers[1].capacity_bytes

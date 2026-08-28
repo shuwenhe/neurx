@@ -10,43 +10,52 @@ struct model_adapter_base {
 	*tokenizer_interface tokenizer
 	*inference_engine inference_engine
 }
+
 struct qwen_adapter {
 	*model_adapter_base base
 	string version
 	string instruction_format
 }
+
 struct llama_adapter {
 	*model_adapter_base base
 	int32 context_length
 	bool flash_attention_enabled
 }
+
 struct mixtral_adapter {
 	*model_adapter_base base
 	int32 num_experts
 	int32 expert_capacity
 }
+
 struct chatglm_adapter {
 	*model_adapter_base base
 	string generation_mode
 }
+
 struct baichuan_adapter {
 	*model_adapter_base base
 	string layer_norm_variant
 }
+
 struct internlm_adapter {
 	*model_adapter_base base
 	float32 rope_scaling_factor
 }
+
 struct falcon_adapter {
 	*model_adapter_base base
 	int32 num_heads
 	int32 head_dim
 }
+
 struct mpt_adapter {
 	*model_adapter_base base
 	int32 n_layers
 	bool alibi_enabled
 }
+
 struct model_adapter_registry {
 	sync.Mutex mu
 	map[string]interface{} adapters
@@ -54,6 +63,7 @@ struct model_adapter_registry {
 	map[string]*model_metadata adapter_metadata
 	int32 total_registered
 }
+
 func create_model_adapter_registry() *model_adapter_registry {
 	return *model_adapter_registry{
 		adapters: make(map[string]interface{}),
@@ -61,6 +71,7 @@ func create_model_adapter_registry() *model_adapter_registry {
 		adapter_metadata: make(map[string]*model_metadata),
 	}
 }
+
 func create_qwen_adapter(model_id string, model_name string, version string) *qwen_adapter {
 	return *qwen_adapter{
 		base: *model_adapter_base{
@@ -74,6 +85,7 @@ func create_qwen_adapter(model_id string, model_name string, version string) *qw
 		instruction_format: "Qwen",
 	}
 }
+
 func create_llama_adapter(model_id string, model_name string, context_length int32) *llama_adapter {
 	return *llama_adapter{
 		base: *model_adapter_base{
@@ -87,6 +99,7 @@ func create_llama_adapter(model_id string, model_name string, context_length int
 		flash_attention_enabled: true,
 	}
 }
+
 func create_mixtral_adapter(model_id string, model_name string, num_experts int32) *mixtral_adapter {
 	return *mixtral_adapter{
 		base: *model_adapter_base{
@@ -100,6 +113,7 @@ func create_mixtral_adapter(model_id string, model_name string, num_experts int3
 		expert_capacity: 16,
 	}
 }
+
 func create_chatglm_adapter(model_id string, model_name string, generation_mode string) *chatglm_adapter {
 	return *chatglm_adapter{
 		base: *model_adapter_base{
@@ -112,6 +126,7 @@ func create_chatglm_adapter(model_id string, model_name string, generation_mode 
 		generation_mode: generation_mode,
 	}
 }
+
 func create_baichuan_adapter(model_id string, model_name string) *baichuan_adapter {
 	return *baichuan_adapter{
 		base: *model_adapter_base{
@@ -124,6 +139,7 @@ func create_baichuan_adapter(model_id string, model_name string) *baichuan_adapt
 		layer_norm_variant: "RMSNorm",
 	}
 }
+
 func create_internlm_adapter(model_id string, model_name string) *internlm_adapter {
 	return *internlm_adapter{
 		base: *model_adapter_base{
@@ -136,6 +152,7 @@ func create_internlm_adapter(model_id string, model_name string) *internlm_adapt
 		rope_scaling_factor: 1.0,
 	}
 }
+
 func create_falcon_adapter(model_id string, model_name string, num_heads int32) *falcon_adapter {
 	return *falcon_adapter{
 		base: *model_adapter_base{
@@ -149,6 +166,7 @@ func create_falcon_adapter(model_id string, model_name string, num_heads int32) 
 		head_dim: 64,
 	}
 }
+
 func create_mpt_adapter(model_id string, model_name string, n_layers int32) *mpt_adapter {
 	return *mpt_adapter{
 		base: *model_adapter_base{
@@ -162,6 +180,7 @@ func create_mpt_adapter(model_id string, model_name string, n_layers int32) *mpt
 		alibi_enabled: true,
 	}
 }
+
 func (model_adapter_registry* registry) register_adapter(model_type model_type, adapter interface{}, metadata *model_metadata) error {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
@@ -171,30 +190,35 @@ func (model_adapter_registry* registry) register_adapter(model_type model_type, 
 	registry.total_registered++
 	return nil
 }
+
 func (model_adapter_registry* registry) get_adapter(model_type model_type) interface{} {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	type_str := fmt.Sprintf("%v", model_type)
 	return registry.adapters[type_str]
 }
+
 func (model_adapter_registry* registry) set_adapter_config(model_type model_type, config map[string]interface{}) {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	type_str := fmt.Sprintf("%v", model_type)
 	registry.adapter_configs[type_str] = config
 }
+
 func (model_adapter_registry* registry) get_adapter_config(model_type model_type) map[string]interface{} {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	type_str := fmt.Sprintf("%v", model_type)
 	return registry.adapter_configs[type_str]
 }
+
 func (model_adapter_registry* registry) get_adapter_metadata(model_type model_type) *model_metadata {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	type_str := fmt.Sprintf("%v", model_type)
 	return registry.adapter_metadata[type_str]
 }
+
 func (model_adapter_registry* registry) list_registered_adapters() string[] {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
@@ -204,6 +228,7 @@ func (model_adapter_registry* registry) list_registered_adapters() string[] {
 	}
 	return adapters
 }
+
 func (model_adapter_registry* registry) get_registry_stats() map[string]interface{} {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
@@ -213,54 +238,71 @@ func (model_adapter_registry* registry) get_registry_stats() map[string]interfac
 	stats["configured_adapters"] = len(registry.adapter_configs)
 	return stats
 }
+
 func (qwen_adapter* adapter) get_instruction_format() string {
 	return adapter.instruction_format
 }
+
 func (qwen_adapter* adapter) set_instruction_format(format string) {
 	adapter.instruction_format = format
 }
+
 func (qwen_adapter* adapter) get_model_type() model_type {
 	return adapter.base.model_type
 }
+
 func (llama_adapter* adapter) get_context_length() int32 {
 	return adapter.context_length
 }
+
 func (llama_adapter* adapter) set_context_length(length int32) {
 	adapter.context_length = length
 }
+
 func (llama_adapter* adapter) enable_flash_attention(enabled bool) {
 	adapter.flash_attention_enabled = enabled
 }
+
 func (mixtral_adapter* adapter) get_num_experts() int32 {
 	return adapter.num_experts
 }
+
 func (mixtral_adapter* adapter) set_expert_capacity(capacity int32) {
 	adapter.expert_capacity = capacity
 }
+
 func (chatglm_adapter* adapter) get_generation_mode() string {
 	return adapter.generation_mode
 }
+
 func (chatglm_adapter* adapter) set_generation_mode(mode string) {
 	adapter.generation_mode = mode
 }
+
 func (baichuan_adapter* adapter) get_layer_norm_variant() string {
 	return adapter.layer_norm_variant
 }
+
 func (internlm_adapter* adapter) set_rope_scaling_factor(factor float32) {
 	adapter.rope_scaling_factor = factor
 }
+
 func (falcon_adapter* adapter) get_num_heads() int32 {
 	return adapter.num_heads
 }
+
 func (falcon_adapter* adapter) get_head_dim() int32 {
 	return adapter.head_dim
 }
+
 func (mpt_adapter* adapter) get_num_layers() int32 {
 	return adapter.n_layers
 }
+
 func (mpt_adapter* adapter) enable_alibi(enabled bool) {
 	adapter.alibi_enabled = enabled
 }
+
 func register_all_standard_adapters(model_adapter_registry* registry) {
 	qwen_metadata := *model_metadata{
 		model_type: TYPE_QWEN,

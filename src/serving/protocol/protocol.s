@@ -38,16 +38,19 @@ struct sampling_params {
     use_beam_search         bool
     top_n_tokens_per_prompt int32
 }
+
 struct log_prob_result {
     token_id        int32
     token_str       string
     logprob         float32
     rank            int32
 }
+
 struct usage_log_probs_result {
     prompt_log_probs    []log_prob_result
     output_log_probs    []log_prob_result
 }
+
 struct request_output {
     request_id              string
     prompt                  string
@@ -66,6 +69,7 @@ struct request_output {
     latency_ms              float32
     priority                int32
 }
+
 struct request_metadata {
     request_id              string
     prompt_tokens           int32
@@ -73,6 +77,7 @@ struct request_metadata {
     estimated_latency_ms    float32
     arrival_time            int64
 }
+
 struct request {
     request_id              string
     prompt                  string
@@ -94,12 +99,14 @@ struct request {
     guided_decode_params    interface{}
     stream_interval         int32
 }
+
 struct protocol_version {
     major                   int32
     minor                   int32
     patch                   int32
     version_string          string
 }
+
 func get_protocol_version() protocol_version {
     return protocol_version{
         major: 1,
@@ -108,6 +115,7 @@ func get_protocol_version() protocol_version {
         version_string: "1.0.0",
     }
 }
+
 func new_sampling_params() sampling_params {
     return sampling_params{
         temperature: 0.7,
@@ -130,6 +138,7 @@ func new_sampling_params() sampling_params {
         top_n_tokens_per_prompt: 5,
     }
 }
+
 func new_request_output(request_id string) request_output {
     return request_output{
         request_id: request_id,
@@ -153,6 +162,7 @@ func new_request_output(request_id string) request_output {
         priority: 0,
     }
 }
+
 func new_request(request_id string, prompt string) request {
     return request{
         request_id: request_id,
@@ -176,6 +186,7 @@ func new_request(request_id string, prompt string) request {
         stream_interval: 0,
     }
 }
+
 func new_request_metadata(request_id string) request_metadata {
     return request_metadata{
         request_id: request_id,
@@ -185,6 +196,7 @@ func new_request_metadata(request_id string) request_metadata {
         arrival_time: 0,
     }
 }
+
 func new_log_prob_result(token_id int32, token_str string, logprob float32, rank int32) log_prob_result {
     return log_prob_result{
         token_id: token_id,
@@ -193,24 +205,29 @@ func new_log_prob_result(token_id int32, token_str string, logprob float32, rank
         rank: rank,
     }
 }
+
 func new_usage_log_probs_result() usage_log_probs_result {
     return usage_log_probs_result{
         prompt_log_probs: []log_prob_result{},
         output_log_probs: []log_prob_result{},
     }
 }
+
 func is_request_completed(request* req) bool {
     return req.status == request_status_completed ||
            req.status == request_status_failed ||
            req.status == request_status_cancelled ||
            req.status == request_status_aborted
 }
+
 func is_request_running(request* req) bool {
     return req.status == request_status_running
 }
+
 func is_request_pending(request* req) bool {
     return req.status == request_status_pending
 }
+
 func get_request_status_name(status request_status) string {
     switch status {
         case request_status_pending: return "pending"
@@ -222,6 +239,7 @@ func get_request_status_name(status request_status) string {
         default: return "unknown"
     }
 }
+
 func get_finish_reason_name(reason finish_reason) string {
     if reason == finish_reason_length {
         return "length"
@@ -236,6 +254,7 @@ func get_finish_reason_name(reason finish_reason) string {
     }
     return "unknown"
 }
+
 func validate_sampling_params(sampling_params* params) error {
     if params.temperature < 0.0 {
         return "temperature must be >= 0"
@@ -260,6 +279,7 @@ func validate_sampling_params(sampling_params* params) error {
     }
     nil
 }
+
 func request_output_to_string(request_output* output) string {
     result := ""
     result = result + "RequestOutput("
@@ -270,6 +290,7 @@ func request_output_to_string(request_output* output) string {
     result = result + ")"
     return result
 }
+
 func protocol_info() string {
     version := get_protocol_version()
     info := "NeuRx LLM Protocol v" + version.version_string + "\n"

@@ -29,6 +29,7 @@ struct cache_entry {
 	int32 ttl_seconds
 	int32 priority
 }
+
 struct model_cache {
 	sync.RWMutex mu
 	string cache_id
@@ -43,6 +44,7 @@ struct model_cache {
 	int64 miss_count
 	int64 eviction_count
 }
+
 struct cache_statistics {
 	int64 total_entries
 	float64 hit_rate
@@ -55,6 +57,7 @@ struct cache_statistics {
 	time.Time last_eviction_time
 	float64 cache_efficiency
 }
+
 struct cache_config {
 	string cache_id
 	int64 max_size_bytes
@@ -64,6 +67,7 @@ struct cache_config {
 	bool enable_persistence
 	string persistence_dir
 }
+
 func create_model_cache(cache_config* config) *model_cache {
 	if config == nil {
 		config = *cache_config{
@@ -82,6 +86,7 @@ func create_model_cache(cache_config* config) *model_cache {
 		stats: *cache_statistics{},
 	}
 }
+
 func (model_cache* cache) put(key string, value interface{}, entry_type cache_entry_type, size_bytes int64) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
@@ -106,6 +111,7 @@ func (model_cache* cache) put(key string, value interface{}, entry_type cache_en
 	cache.current_size_bytes += size_bytes
 	cache.stats.total_entries++
 }
+
 func (model_cache* cache) get(key string) (interface{}, bool) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
@@ -134,6 +140,7 @@ func (model_cache* cache) get(key string) (interface{}, bool) {
 	cache.update_cache_stats()
 	return entry.value, true
 }
+
 func (model_cache* cache) remove(key string) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
@@ -151,6 +158,7 @@ func (model_cache* cache) remove(key string) {
 	}
 	cache.entry_order = new_order
 }
+
 func (model_cache* cache) clear() {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
@@ -160,6 +168,7 @@ func (model_cache* cache) clear() {
 	cache.hit_count = 0
 	cache.miss_count = 0
 }
+
 func (model_cache* cache) evict_entries(required_space int64) {
 	needed := required_space
 	evicted_space := int64(0)
@@ -209,6 +218,7 @@ func (model_cache* cache) evict_entries(required_space int64) {
 		cache.entry_order = filtered
 	}
 }
+
 func (model_cache* cache) sort_by_access_count() {
 	for i := 0; i < len(cache.entry_order); i++ {
 		for j := i + 1; j < len(cache.entry_order); j++ {
@@ -218,6 +228,7 @@ func (model_cache* cache) sort_by_access_count() {
 		}
 	}
 }
+
 func (model_cache* cache) update_cache_stats() {
 	total_accesses := cache.hit_count + cache.miss_count
 	if total_accesses > 0 {
@@ -233,11 +244,13 @@ func (model_cache* cache) update_cache_stats() {
 		cache.stats.cache_efficiency = float64(cache.hit_count) / float64(total_accesses)
 	}
 }
+
 func (model_cache* cache) get_stats() *cache_statistics {
 	cache.mu.RLock()
 	defer cache.mu.RUnlock()
 	return cache.stats
 }
+
 func (model_cache* cache) set_max_size(max_size_bytes int64) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
@@ -246,32 +259,38 @@ func (model_cache* cache) set_max_size(max_size_bytes int64) {
 		cache.evict_entries(cache.current_size_bytes - cache.max_size_bytes)
 	}
 }
+
 func (model_cache* cache) set_eviction_policy(policy cache_eviction_policy) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 	cache.eviction_policy = policy
 }
+
 func (model_cache* cache) set_ttl(ttl_seconds int32) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 	cache.ttl_seconds = ttl_seconds
 }
+
 func (model_cache* cache) contains(key string) bool {
 	cache.mu.RLock()
 	defer cache.mu.RUnlock()
 	_, exists := cache.entries[key]
 	return exists
 }
+
 func (model_cache* cache) get_cache_size() int64 {
 	cache.mu.RLock()
 	defer cache.mu.RUnlock()
 	return cache.current_size_bytes
 }
+
 func (model_cache* cache) get_entry_count() int64 {
 	cache.mu.RLock()
 	defer cache.mu.RUnlock()
 	return int64(len(cache.entries))
 }
+
 func (model_cache* cache) cleanup_expired_entries() int32 {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()

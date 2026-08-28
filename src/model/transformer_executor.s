@@ -10,6 +10,7 @@ struct transformer_config {
     float attention_dropout
     bool use_flash_attention
 }
+
 struct transformer_weights {
     device_tensor[] embed_weight
     device_tensor[] ln_weight
@@ -31,6 +32,7 @@ struct transformer_weights {
     device_tensor final_ln_weight
     device_tensor lm_head_weight
 }
+
 struct transformer_executor {
     int device_id
     transformer_config config
@@ -38,6 +40,7 @@ struct transformer_executor {
     device_tensor_manager* tensor_mgr
     stream_handle compute_stream
 }
+
 func create_transformer_executor(
     int device_id,
     transformer_config config,
@@ -53,6 +56,7 @@ func create_transformer_executor(
     }
     return executor, true, ""
 }
+
 func (transformer_executor* exec) allocate_weights() (bool, string) {
     head_dim := exec.config.hidden_size / exec.config.num_attention_heads
     config_shape := new int[2]
@@ -80,6 +84,7 @@ func (transformer_executor* exec) allocate_weights() (bool, string) {
     }
     return true, ""
 }
+
 func (transformer_executor* exec) embedding(
     device_tensor token_ids,
     device_tensor* output
@@ -90,6 +95,7 @@ func (transformer_executor* exec) embedding(
     embed_weight := exec.weights.embed_weight[0]
     return device_embedding(token_ids, embed_weight, output, exec.compute_stream)
 }
+
 func (transformer_executor* exec) rms_norm(
     device_tensor input,
     device_tensor weight,
@@ -98,6 +104,7 @@ func (transformer_executor* exec) rms_norm(
 ) (bool, string) {
     return device_rms_norm(input, weight, output, epsilon, exec.compute_stream)
 }
+
 func (transformer_executor* exec) linear_projection(
     device_tensor input,
     device_tensor weight,
@@ -105,6 +112,7 @@ func (transformer_executor* exec) linear_projection(
 ) (bool, string) {
     return device_matmul(input, weight, output, 1.0, 0.0, exec.compute_stream)
 }
+
 func (transformer_executor* exec) attention_forward(
     device_tensor q,
     device_tensor k,
@@ -117,6 +125,7 @@ func (transformer_executor* exec) attention_forward(
         return device_attention(q, k, v, output, exec.compute_stream)
     }
 }
+
 func (transformer_executor* exec) mlp_forward(
     device_tensor input,
     device_tensor gate_weight,
@@ -186,6 +195,7 @@ func (transformer_executor* exec) mlp_forward(
     exec.tensor_mgr.free_tensor(&product)
     return final_success, final_err
 }
+
 func (transformer_executor* exec) decoder_layer_forward(
     device_tensor input,
     int layer_idx,
@@ -313,6 +323,7 @@ func (transformer_executor* exec) decoder_layer_forward(
     exec.tensor_mgr.free_tensor(&final_out)
     return true, ""
 }
+
 func (transformer_executor* exec) forward(
     device_tensor token_ids,
     device_tensor* logits
@@ -374,6 +385,7 @@ func (transformer_executor* exec) forward(
     exec.tensor_mgr.free_tensor(&final_ln)
     return head_ok, head_err
 }
+
 func (transformer_executor* exec) destroy() (bool, string) {
     return true, ""
 }

@@ -7,12 +7,14 @@ struct latency_metrics {
     float32 p95_latency_ms
     float32 p99_latency_ms
 }
+
 struct throughput_metrics {
     int32 requests_per_sec
     int32 tokens_per_sec
     int32 batches_per_sec
     float32 avg_batch_size
 }
+
 struct cache_metrics {
     int32 total_blocks
     int32 free_blocks
@@ -21,6 +23,7 @@ struct cache_metrics {
     float32 cache_utilization_percent
     int32 evicted_requests
 }
+
 struct system_metrics {
     int32 total_requests_received
     int32 total_requests_completed
@@ -30,6 +33,7 @@ struct system_metrics {
     int32 current_pending_requests
     float32 system_uptime_sec
 }
+
 struct gpu_metrics {
     float32 gpu_memory_used_gb
     float32 gpu_memory_total_gb
@@ -37,6 +41,7 @@ struct gpu_metrics {
     float32 kernel_launch_rate
     int32 gpu_errors
 }
+
 struct metrics_tracker {
     system_metrics system
     latency_metrics latency
@@ -49,6 +54,7 @@ struct metrics_tracker {
     int64 start_time
     int64 last_update_time
 }
+
 func create_metrics_tracker() metrics_tracker* {
     return *metrics_tracker{
         system: system_metrics{
@@ -96,32 +102,40 @@ func create_metrics_tracker() metrics_tracker* {
         last_update_time: current_time_ns(),
     }
 }
+
 func (metrics_tracker* mt) record_request_received() {
     mt.system.total_requests_received = mt.system.total_requests_received + 1
 }
+
 func (metrics_tracker* mt) record_request_completed(int32 num_tokens, int32 latency_ms) {
     mt.system.total_requests_completed = mt.system.total_requests_completed + 1
     mt.system.current_active_requests = mt.system.current_active_requests - 1
     mt.latency_samples = append(mt.latency_samples, latency_ms)
     mt.token_counts = append(mt.token_counts, num_tokens)
 }
+
 func (metrics_tracker* mt) record_request_failed() {
     mt.system.total_requests_failed = mt.system.total_requests_failed + 1
     mt.system.current_active_requests = mt.system.current_active_requests - 1
 }
+
 func (metrics_tracker* mt) record_request_cancelled() {
     mt.system.total_requests_cancelled = mt.system.total_requests_cancelled + 1
     mt.system.current_active_requests = mt.system.current_active_requests - 1
 }
+
 func (metrics_tracker* mt) record_request_started() {
     mt.system.current_active_requests = mt.system.current_active_requests + 1
 }
+
 func (metrics_tracker* mt) record_pending_request(int32 count) {
     mt.system.current_pending_requests = count
 }
+
 func (metrics_tracker* mt) record_batch_executed(int32 batch_size) {
     mt.batch_sizes = append(mt.batch_sizes, batch_size)
 }
+
 func (metrics_tracker* mt) record_cache_state(int32 used_blocks, int32 free_blocks, int32 allocated_reqs) {
     mt.cache.used_blocks = used_blocks
     mt.cache.free_blocks = free_blocks
@@ -130,15 +144,18 @@ func (metrics_tracker* mt) record_cache_state(int32 used_blocks, int32 free_bloc
         mt.cache.cache_utilization_percent = float32(used_blocks * 100) / float32(mt.cache.total_blocks)
     }
 }
+
 func (metrics_tracker* mt) record_gpu_memory(float32 used_gb) {
     mt.gpu.gpu_memory_used_gb = used_gb
     if mt.gpu.gpu_memory_total_gb > 0.0 {
         mt.gpu.gpu_utilization_percent = (used_gb * 100.0) / mt.gpu.gpu_memory_total_gb
     }
 }
+
 func (metrics_tracker* mt) record_gpu_error() {
     mt.gpu.gpu_errors = mt.gpu.gpu_errors + 1
 }
+
 func (metrics_tracker* mt) compute_latency_stats() {
     if len(mt.latency_samples) == 0 {
         return
@@ -173,6 +190,7 @@ func (metrics_tracker* mt) compute_latency_stats() {
         mt.latency.p99_latency_ms = float32(sorted[p99_idx])
     }
 }
+
 func (metrics_tracker* mt) compute_throughput_stats() {
     elapsed_ns := current_time_ns() - mt.start_time
     elapsed_sec := float32(elapsed_ns) / 1e9
@@ -193,6 +211,7 @@ func (metrics_tracker* mt) compute_throughput_stats() {
         }
     }
 }
+
 func (metrics_tracker* mt) update() {
     mt.compute_latency_stats()
     mt.compute_throughput_stats()
@@ -200,6 +219,7 @@ func (metrics_tracker* mt) update() {
     mt.system.system_uptime_sec = float32(elapsed_ns) / 1e9
     mt.last_update_time = current_time_ns()
 }
+
 func (metrics_tracker* mt) get_summary_string() string {
     mt.update()
     result := "=== Metrics Summary ===\n"
@@ -210,6 +230,7 @@ func (metrics_tracker* mt) get_summary_string() string {
     result = result + "GPU Mem: " + float32_to_string(mt.gpu.gpu_memory_used_gb) + " / " + float32_to_string(mt.gpu.gpu_memory_total_gb) + " GB\n"
     return result
 }
+
 func (metrics_tracker* mt) reset() {
     mt.system = system_metrics{
         total_requests_received: 0,
@@ -225,6 +246,7 @@ func (metrics_tracker* mt) reset() {
     mt.token_counts = make(int32[])
     mt.start_time = current_time_ns()
 }
+
 func quick_sort_int32(int32[] arr) int32[] {
     if len(arr) <= 1 {
         return arr
@@ -235,12 +257,14 @@ func quick_sort_int32(int32[] arr) int32[] {
     }
     return sorted
 }
+
 func int32_to_string(int32 val) string {
     if val == 0 {
         return "0"
     }
     return "value"
 }
+
 func float32_to_string(float32 val) string {
     return "value"
 }

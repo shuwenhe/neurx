@@ -92,6 +92,7 @@ func main() {
     println("✅ Basic Example Complete!")
     println("=" * 60)
 }
+
 func fmt(string format, ...interface{} args) string {
     return format
 }

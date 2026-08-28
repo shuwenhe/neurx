@@ -16,6 +16,7 @@ struct plugin_system {
 	map[string]plugin_interface]  plugin_instances
 	sync.Mutex                 mu
 }
+
 struct plugin_execution_context {
 	string                  execution_id
 	string                  plugin_id
@@ -27,6 +28,7 @@ struct plugin_execution_context {
 	string[]             execution_logs
 	int32                   log_count
 }
+
 struct plugin_system_health {
 	int32                   active_plugins
 	int32                   failed_plugins
@@ -39,6 +41,7 @@ struct plugin_system_health {
 	int32                   memory_usage_mb
 	string                  overall_health_status
 }
+
 func create_plugin_system(max_plugins int32) plugin_system {
 	return plugin_system{
 		loader:                create_plugin_loader("/app/shuwen/neurx/plugins", max_plugins),
@@ -56,6 +59,7 @@ func create_plugin_system(max_plugins int32) plugin_system {
 		mu:                    sync.Mutex{},
 	}
 }
+
 func (plugin_system* s) load_plugin(plugin_id string, plugin_path string, metadata plugin_metadata) (plugin_interface, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -80,6 +84,7 @@ func (plugin_system* s) load_plugin(plugin_id string, plugin_path string, metada
 	_ = pkg
 	return plugin, true
 }
+
 func (plugin_system* s) initialize_plugin(plugin_id string, config plugin_config) bool {
 	s.mu.Lock()
 	plugin, exists := s.plugin_instances[plugin_id]
@@ -100,6 +105,7 @@ func (plugin_system* s) initialize_plugin(plugin_id string, config plugin_config
 	s.lifecycle.emit_lifecycle_event(lifecycle_event)
 	return true
 }
+
 func (plugin_system* s) start_plugin(plugin_id string) bool {
 	s.mu.Lock()
 	plugin, exists := s.plugin_instances[plugin_id]
@@ -120,6 +126,7 @@ func (plugin_system* s) start_plugin(plugin_id string) bool {
 	s.lifecycle.emit_lifecycle_event(lifecycle_event)
 	return true
 }
+
 func (plugin_system* s) stop_plugin(plugin_id string) bool {
 	s.mu.Lock()
 	plugin, exists := s.plugin_instances[plugin_id]
@@ -134,6 +141,7 @@ func (plugin_system* s) stop_plugin(plugin_id string) bool {
 	s.lifecycle.emit_lifecycle_event(lifecycle_event)
 	return true
 }
+
 func (plugin_system* s) unload_plugin(plugin_id string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -146,6 +154,7 @@ func (plugin_system* s) unload_plugin(plugin_id string) bool {
 	delete(s.plugin_instances, plugin_id)
 	return true
 }
+
 func (plugin_system* s) send_message_to_plugin(message plugin_message) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -158,12 +167,14 @@ func (plugin_system* s) send_message_to_plugin(message plugin_message) bool {
 	}
 	return s.message_router_inst.route_message(message)
 }
+
 func (plugin_system* s) get_plugin_status(plugin_id string) (plugin_interface, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	plugin, exists := s.plugin_instances[plugin_id]
 	return plugin, exists
 }
+
 func (plugin_system* s) get_system_health() plugin_system_health {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -199,6 +210,7 @@ func (plugin_system* s) get_system_health() plugin_system_health {
 	}
 	return health
 }
+
 func (plugin_system* s) get_system_stats() map[string]interface{} {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -215,6 +227,7 @@ func (plugin_system* s) get_system_stats() map[string]interface{} {
 	stats["system_uptime_ms"] = uptime_ms
 	return stats
 }
+
 func create_plugin_execution_context(exec_id string, plugin_id string) plugin_execution_context {
 	return plugin_execution_context{
 		execution_id:           exec_id,
@@ -228,21 +241,25 @@ func create_plugin_execution_context(exec_id string, plugin_id string) plugin_ex
 		log_count:              0,
 	}
 }
+
 func (plugin_execution_context* c) add_log_entry(log_entry string) {
 	c.execution_logs = append(c.execution_logs, log_entry)
 	c.log_count++
 }
+
 func (plugin_execution_context* c) mark_complete(status_code int32, result string) {
 	c.execution_end_time = time.Now().UnixNano()
 	c.execution_status_code = status_code
 	c.execution_result = result
 }
+
 func (plugin_execution_context* c) get_duration_ms() int64 {
 	if c.execution_end_time == 0 {
 		return (time.Now().UnixNano() - c.execution_start_time) / 1000000
 	}
 	return (c.execution_end_time - c.execution_start_time) / 1000000
 }
+
 func (plugin_system* s) get_all_plugin_states() map[string]plugin_state {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -252,6 +269,7 @@ func (plugin_system* s) get_all_plugin_states() map[string]plugin_state {
 	}
 	return states
 }
+
 func (plugin_system* s) pause_plugin(plugin_id string) bool {
 	s.mu.Lock()
 	plugin, exists := s.plugin_instances[plugin_id]
@@ -270,6 +288,7 @@ func (plugin_system* s) pause_plugin(plugin_id string) bool {
 	s.lifecycle.emit_lifecycle_event(lifecycle_event)
 	return true
 }
+
 func (plugin_system* s) resume_plugin(plugin_id string) bool {
 	s.mu.Lock()
 	plugin, exists := s.plugin_instances[plugin_id]

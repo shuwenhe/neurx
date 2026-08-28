@@ -11,6 +11,7 @@ struct DynamicResolutionProcessor {
     max_resolution: i32,
     strategy: types.ResolutionStrategy
 }
+
 func NewDynamicResolutionProcessor(
     base_resolution: i32,
     patch_size: i32,
@@ -25,6 +26,7 @@ func NewDynamicResolutionProcessor(
         strategy: types.ResolutionStrategy.dynamic
     }
 }
+
 func (DynamicResolutionProcessor* p) CalculateTargetResolution(
     height: i32,
     i32 width
@@ -56,6 +58,7 @@ func (DynamicResolutionProcessor* p) CalculateTargetResolution(
     }
     return target_h, target_w
 }
+
 func (DynamicResolutionProcessor* p) GetPatchCount(
     height: i32,
     i32 width
@@ -64,6 +67,7 @@ func (DynamicResolutionProcessor* p) GetPatchCount(
     patch_w := width / p.patch_size
     return patch_h * patch_w + 1
 }
+
 func (DynamicResolutionProcessor* p) CreateVariableResolutionPatches(
     image_tensor: *types.Tensor
 ) []ResolutionPatch {
@@ -105,12 +109,14 @@ func (DynamicResolutionProcessor* p) CreateVariableResolutionPatches(
     }
     return patches
 }
+
 struct ResolutionPatch {
     data: []f32,
     position: (i32, i32),
     resolution: (i32, i32),
     f32 scale_factor
 }
+
 func (DynamicResolutionProcessor* p) MultiCropProcess(
     image_tensor: *types.Tensor,
     i32 num_crops
@@ -170,6 +176,7 @@ func (DynamicResolutionProcessor* p) MultiCropProcess(
     }
     return crops
 }
+
 struct ResolutionInfo {
     original_height: i32,
     original_width: i32,
@@ -178,6 +185,7 @@ struct ResolutionInfo {
     num_patches: i32,
     f32 scale_factor
 }
+
 func (DynamicResolutionProcessor* p) GetInfo(
     height: i32,
     i32 width
@@ -194,6 +202,7 @@ func (DynamicResolutionProcessor* p) GetInfo(
         scale scale_factor
     }
 }
+
 func (DynamicResolutionProcessor* p) CanProcessImage(
     height: i32,
     i32 width
@@ -202,6 +211,7 @@ func (DynamicResolutionProcessor* p) CanProcessImage(
     num_patches := p.GetPatchCount(target_h, target_w)
     return num_patches <= p.max_patches
 }
+
 struct ResolutionStats {
     processed_images: i32,
     avg_patches: f32,
@@ -214,6 +224,7 @@ resolution_stats := ResolutionStats{
     max_patches_used: 0,
     min_patches_used: 999999
 }
+
 func RecordResolution(i32 num_patches) {
     resolution_stats.processed_images += 1
     resolution_stats.avg_patches = (resolution_stats.avg_patches * f32(resolution_stats.processed_images - 1) + f32(num_patches)) / f32(resolution_stats.processed_images)
@@ -224,9 +235,11 @@ func RecordResolution(i32 num_patches) {
         resolution_stats.min_patches_used = num_patches
     }
 }
+
 func GetResolutionStats() ResolutionStats {
     return resolution_stats
 }
+
 func main() {
     println("Dynamic Resolution Processor")
     println("✅ Variable resolution handling ready")

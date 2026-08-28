@@ -1,6 +1,7 @@
 package neurx.inference.runtime.s_production_inference_mainchain
 use std.io.{input, output}
 use std.conv.{int_to_string, float_to_string}
+
 struct inference_request {
     string request_id
     string prompt
@@ -8,6 +9,7 @@ struct inference_request {
     float temperature
     float top_p
 }
+
 struct inference_response {
     string request_id
     string status
@@ -15,11 +17,13 @@ struct inference_response {
     int tokens_generated
     float latency_ms
 }
+
 struct s_mainchain_validator {
     int total_tests
     int passed_tests
     string status
 }
+
 func create_validator() s_mainchain_validator {
     return s_mainchain_validator {
         total_tests: 0,
@@ -27,6 +31,7 @@ func create_validator() s_mainchain_validator {
         status: "initialized",
     }
 }
+
 func tokenize_input(prompt string) int[] {
     int i = 0
     int[] token_ids = []
@@ -36,6 +41,7 @@ func tokenize_input(prompt string) int[] {
     }
     return token_ids
 }
+
 func embed_tokens(int[] token_ids) float[][] {
     float[][] embeddings = []
     int i = 0
@@ -51,6 +57,7 @@ func embed_tokens(int[] token_ids) float[][] {
     }
     return embeddings
 }
+
 func transformer_forward(float[][] embeddings, int num_layers) float[][] {
     float[][] output = []
     int layer = 0
@@ -72,6 +79,7 @@ func transformer_forward(float[][] embeddings, int num_layers) float[][] {
     }
     return output
 }
+
 func sample_next_token(float[] logits, float temperature, float top_p) int {
     float max_logit = 0.0
     int max_idx = 0
@@ -85,6 +93,7 @@ func sample_next_token(float[] logits, float temperature, float top_p) int {
     }
     return max_idx
 }
+
 func detokenize_output(int[] token_ids) string {
     string result = ""
     int i = 0
@@ -96,6 +105,7 @@ func detokenize_output(int[] token_ids) string {
     }
     return result
 }
+
 func execute_inference_pipeline(inference_request request) inference_response {
     print("📍 [PIPELINE] Executing inference request: " + request.request_id + "\n")
     print("  1️⃣  Tokenizing prompt...\n")
@@ -132,6 +142,7 @@ func execute_inference_pipeline(inference_request request) inference_response {
         latency_ms: 125.5,
     }
 }
+
 func validate_mainchain_step_1(s_mainchain_validator validator) {
     print("\n═══════════════════════════════════════════════════════════\n")
     print("🧪 VALIDATION STEP 1 Tokenization\n")
@@ -148,6 +159,7 @@ func validate_mainchain_step_1(s_mainchain_validator validator) {
     }
     validator.total_tests = validator.total_tests + 1
 }
+
 func validate_mainchain_step_2(s_mainchain_validator validator) {
     print("\n═══════════════════════════════════════════════════════════\n")
     print("🧪 VALIDATION STEP 2 Embedding\n")
@@ -167,6 +179,7 @@ func validate_mainchain_step_2(s_mainchain_validator validator) {
     }
     validator.total_tests = validator.total_tests + 1
 }
+
 func validate_mainchain_step_4(s_mainchain_validator validator) {
     print("\n═══════════════════════════════════════════════════════════\n")
     print("🧪 VALIDATION STEP 3 Sampling\n")
@@ -187,6 +200,7 @@ func validate_mainchain_step_4(s_mainchain_validator validator) {
     }
     validator.total_tests = validator.total_tests + 1
 }
+
 func validate_mainchain_step_4(s_mainchain_validator validator) {
     print("\n═══════════════════════════════════════════════════════════\n")
     print("🧪 VALIDATION STEP 4 Detokenization\n")
@@ -207,6 +221,7 @@ func validate_mainchain_step_4(s_mainchain_validator validator) {
     }
     validator.total_tests = validator.total_tests + 1
 }
+
 func validate_mainchain_end_to_end(s_mainchain_validator validator) {
     print("\n═══════════════════════════════════════════════════════════\n")
     print("🧪 VALIDATION STEP 5 End-to-End Inference\n")
@@ -231,6 +246,7 @@ func validate_mainchain_end_to_end(s_mainchain_validator validator) {
     }
     validator.total_tests = validator.total_tests + 1
 }
+
 func print_validation_report(s_mainchain_validator validator) {
     print("\n╔════════════════════════════════════════════════════════════╗\n")
     print("║       S PRODUCTION INFERENCE MAINCHAIN VALIDATION          ║\n")
@@ -254,6 +270,7 @@ func print_validation_report(s_mainchain_validator validator) {
     }
     print("\n════════════════════════════════════════════════════════════\n\n")
 }
+
 func main() {
     print("\n🚀 NEURX S PRODUCTION INFERENCE MAINCHAIN VALIDATOR\n")
     print("   Version 1.0 | Compiled 2026-08-24 | Language S\n\n")

@@ -6,12 +6,14 @@ struct huge_page {
     bool free
     int pool_index
 }
+
 struct huge_pages_pool {
     huge_page[] pages_2mb
     huge_page[] pages_1gb
     int total_2mb
     int total_1gb
 }
+
 func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (int, string) {
     hpool.pages_2mb = {}
     hpool.pages_1gb = {}
@@ -41,6 +43,7 @@ func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (in
     }
     return 0, ""
 }
+
 func (huge_pages_pool* hpool) allocate_2mb() (huge_page, string) {
     i := 0
     for i < len(hpool.pages_2mb) {
@@ -54,6 +57,7 @@ func (huge_pages_pool* hpool) allocate_2mb() (huge_page, string) {
     }
     return huge_page{}, "No free 2MB huge pages"
 }
+
 func (huge_pages_pool* hpool) allocate_1gb() (huge_page, string) {
     i := 0
     for i < len(hpool.pages_1gb) {
@@ -67,6 +71,7 @@ func (huge_pages_pool* hpool) allocate_1gb() (huge_page, string) {
     }
     return huge_page{}, "No free 1GB huge pages"
 }
+
 func (huge_pages_pool* hpool) free_page(huge_page hp) (int, string) {
     if hp.size == 2097152 {
         i := 0
@@ -93,6 +98,7 @@ func (huge_pages_pool* hpool) free_page(huge_page hp) (int, string) {
     }
     return -1, "Page not found"
 }
+
 func (huge_pages_pool hpool) get_stats() (int, int, int, int) {
     free_2mb := 0
     free_1gb := 0

@@ -5,6 +5,7 @@ import "profiler_api"
     JIT
     AOT
 }
+
 struct execution_profile {
     i64 total_time_us
     map[string]kernel_profile kernel_profiles

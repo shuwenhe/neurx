@@ -11,6 +11,7 @@ func schema_sql(string password) string {
     "ALTER TABLE `user` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(32) DEFAULT NULL, DROP COLUMN IF EXISTS `password`, DROP COLUMN IF EXISTS `email`, DROP COLUMN IF EXISTS `username`, DROP COLUMN IF EXISTS `password_hash`, DROP COLUMN IF EXISTS `remember_token`, DROP COLUMN IF EXISTS `remember_expires`, DROP COLUMN IF EXISTS `last_login`;\n" +
     "ALTER TABLE `user` MODIFY COLUMN `phone` VARCHAR(32) NOT NULL;\n"
 }
+
 func main() {
     string password = runtime_env_get("NEURX_DB_PASSWORD", "")
     if password == "" {

@@ -12,6 +12,7 @@ import "time"
 	BEST_FIRST = 2
 	BEAM_SEARCH = 3
 }
+
 struct tree_node {
 	string          id
 	string          content
@@ -24,6 +25,7 @@ struct tree_node {
 	int64           evaluated_at
 	string[]     metadata
 }
+
 struct tot_branch {
 	int32           branch_id
 	tree_node[]  nodes
@@ -31,6 +33,7 @@ struct tot_branch {
 	int32           best_node_index
 	int64           branch_created
 }
+
 struct tot_framework {
 	tree_node[]          all_nodes
 	tot_branch[]         branches
@@ -47,6 +50,7 @@ struct tot_framework {
 	bool                    solution_found
 	sync.Mutex              mu
 }
+
 func create_tot_framework(
 	problem string,
 	max_depth int32,
@@ -69,6 +73,7 @@ func create_tot_framework(
 		mu:                     sync.Mutex{},
 	}
 }
+
 func (tot_framework* t) add_root_node(content string) string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -89,6 +94,7 @@ func (tot_framework* t) add_root_node(content string) string {
 	t.node_depths[node_id] = 0
 	return node_id
 }
+
 func (tot_framework* t) expand_node(
 	parent_id string,
 	child_contents string[],
@@ -139,6 +145,7 @@ func (tot_framework* t) expand_node(
 	t.all_nodes[parent_index].status = EXPLORING
 	return child_ids
 }
+
 func (tot_framework* t) update_node_score(
 	node_id string,
 	score float32,
@@ -160,6 +167,7 @@ func (tot_framework* t) update_node_score(
 	}
 	return false
 }
+
 func (tot_framework* t) prune_branch(node_id string) bool {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -171,6 +179,7 @@ func (tot_framework* t) prune_branch(node_id string) bool {
 	}
 	return false
 }
+
 func (tot_framework* t) prune_descendants(parent_index int32) bool {
 	if parent_index < 0 || parent_index >= int32(len(t.all_nodes)) {
 		return false
@@ -183,6 +192,7 @@ func (tot_framework* t) prune_descendants(parent_index int32) bool {
 	}
 	return true
 }
+
 func (tot_framework* t) breadth_first_traversal() string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -210,6 +220,7 @@ func (tot_framework* t) breadth_first_traversal() string[] {
 	}
 	return traversal
 }
+
 func (tot_framework* t) depth_first_traversal() string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -238,6 +249,7 @@ func (tot_framework* t) depth_first_traversal() string[] {
 	}
 	return traversal
 }
+
 func (tot_framework* t) best_first_traversal() string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -268,6 +280,7 @@ func (tot_framework* t) best_first_traversal() string[] {
 	}
 	return traversal
 }
+
 func (tot_framework* t) beam_search_traversal(beam_width int32) string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -303,6 +316,7 @@ func (tot_framework* t) beam_search_traversal(beam_width int32) string[] {
 	}
 	return traversal
 }
+
 func (tot_framework* t) sort_by_score(indices int32[]) int32[] {
 	sorted := make(int32[], 0, len(indices))
 	for idx := range indices {
@@ -320,6 +334,7 @@ func (tot_framework* t) sort_by_score(indices int32[]) int32[] {
 	}
 	return sorted
 }
+
 func (tot_framework* t) get_best_path() string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -348,6 +363,7 @@ func (tot_framework* t) get_best_path() string[] {
 	}
 	return reversed
 }
+
 func (tot_framework* t) get_node_by_id(node_id string) (tree_node, bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -358,6 +374,7 @@ func (tot_framework* t) get_node_by_id(node_id string) (tree_node, bool) {
 	}
 	return tree_node{}, false
 }
+
 func (tot_framework* t) get_children(parent_id string) tree_node[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -374,6 +391,7 @@ func (tot_framework* t) get_children(parent_id string) tree_node[] {
 	}
 	return children
 }
+
 func (tot_framework* t) get_solution() (string, float32, bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -387,6 +405,7 @@ func (tot_framework* t) get_solution() (string, float32, bool) {
 	}
 	return "", 0.0, false
 }
+
 func (tot_framework* t) get_tree_stats() map[string]int32 {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -414,6 +433,7 @@ func (tot_framework* t) get_tree_stats() map[string]int32 {
 	stats["current_depth"] = t.current_depth
 	return stats
 }
+
 func (tot_framework* t) reset() {
 	t.mu.Lock()
 	defer t.mu.Unlock()

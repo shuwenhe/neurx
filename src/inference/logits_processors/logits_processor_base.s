@@ -5,12 +5,14 @@ struct logits_processor_config {
     int priority
     map[string]float params
 }
+
 struct logits_processing_result {
     float[] processed_logits
     int[] masked_tokens
     bool modification_applied
     string processor_name
 }
+
 func process_logits(
     float[] logits,
     int vocab_size,
@@ -30,6 +32,7 @@ func process_logits(
     }
     return logits
 }
+
 func apply_temperature(float[] logits, map[string]float params) float[] {
     float temperature = params["temperature"]
     if temperature <= 0.0 {
@@ -43,6 +46,7 @@ func apply_temperature(float[] logits, map[string]float params) float[] {
     }
     return result
 }
+
 func apply_top_k(float[] logits, map[string]float params) float[] {
     int k = int(params["k"])
     if k <= 0 {
@@ -65,6 +69,7 @@ func apply_top_k(float[] logits, map[string]float params) float[] {
     }
     return result
 }
+
 func get_top_k_values(float[] logits, int k) float[] {
     float[] sorted_logits = make(float[], len(logits))
     int i = 0
@@ -81,6 +86,7 @@ func get_top_k_values(float[] logits, int k) float[] {
     }
     return result
 }
+
 func sort_descending(float[] arr) {
     int n = len(arr)
     int i = 0
@@ -97,6 +103,7 @@ func sort_descending(float[] arr) {
         i = i + 1
     }
 }
+
 func apply_top_p(float[] logits, map[string]float params) float[] {
     float p = params["p"]
     if p <= 0.0 || p > 1.0 {
@@ -123,6 +130,7 @@ func apply_top_p(float[] logits, map[string]float params) float[] {
     }
     return result
 }
+
 func softmax(float[] logits) float[] {
     float max_logit = logits[0]
     int i = 1
@@ -152,6 +160,7 @@ func softmax(float[] logits) float[] {
     }
     return probs
 }
+
 func get_sorted_indices_descending(float[] arr) int[] {
     int[] indices = make(int[], len(arr))
     int i = 0
@@ -162,6 +171,7 @@ func get_sorted_indices_descending(float[] arr) int[] {
     sort_indices_by_values(indices, arr, true)
     return indices
 }
+
 func sort_indices_by_values(int[] indices, float[] values, bool descending) {
     int n = len(indices)
     int i = 0
@@ -186,6 +196,7 @@ func sort_indices_by_values(int[] indices, float[] values, bool descending) {
         i = i + 1
     }
 }
+
 func apply_min_p(float[] logits, map[string]float params) float[] {
     float min_p = params["min_p"]
     if min_p <= 0.0 {
@@ -213,6 +224,7 @@ func apply_min_p(float[] logits, map[string]float params) float[] {
     }
     return result
 }
+
 func apply_repetition_penalty(float[] logits, map[string]float params) float[] {
     float penalty = params["penalty"]
     if penalty <= 0.0 {
@@ -234,6 +246,7 @@ func apply_repetition_penalty(float[] logits, map[string]float params) float[] {
     }
     return result
 }
+
 func exp_f(float x) float {
     if x > 50.0 {
         return 1000000.0
@@ -251,11 +264,13 @@ func exp_f(float x) float {
     }
     return result
 }
+
 struct logits_processor_manager {
     []logits_processor_config processors
     int vocab_size
     bool sorting_by_priority
 }
+
 func new_logits_processor_manager(int vocab_size) logits_processor_manager {
     logits_processor_manager{
         processors: make([]logits_processor_config, 0),
@@ -263,10 +278,12 @@ func new_logits_processor_manager(int vocab_size) logits_processor_manager {
         sorting_by_priority: false,
     }
 }
+
 func (logits_processor_manager* mgr) add_processor(config logits_processor_config) {
     mgr.processors = append_processor(mgr.processors, config)
     mgr.sorting_by_priority = true
 }
+
 func (logits_processor_manager* mgr) process(float[] logits) float[] {
     if mgr.sorting_by_priority {
         sort_processors_by_priority(mgr.processors)
@@ -287,6 +304,7 @@ func (logits_processor_manager* mgr) process(float[] logits) float[] {
     }
     return result
 }
+
 func append_processor(
     []logits_processor_config arr,
     logits_processor_config val
@@ -300,6 +318,7 @@ func append_processor(
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func sort_processors_by_priority([]logits_processor_config processors) {
     int n = len(processors)
     int i = 0
@@ -316,6 +335,7 @@ func sort_processors_by_priority([]logits_processor_config processors) {
         i = i + 1
     }
 }
+
 func main() {
     print("✓ Logits Processor Base Framework")
     print("  - Temperature scaling")

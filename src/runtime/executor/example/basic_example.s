@@ -41,6 +41,7 @@ func BasicExecutorExample() {
     executor.Shutdown()
     println("Executor shutdown\n")
 }
+
 func PrefillExecutorExample() {
     println("=== Prefill Executor Example ===")
     config := ExecutorConfig{
@@ -71,6 +72,7 @@ func PrefillExecutorExample() {
     prefill.Shutdown()
     println("Prefill executor shutdown\n")
 }
+
 func DecodeExecutorExample() {
     println("=== Decode Executor Example ===")
     config := ExecutorConfig{
@@ -101,6 +103,7 @@ func DecodeExecutorExample() {
     decoder.Shutdown()
     println("Decode executor shutdown\n")
 }
+
 func ExecutionSchedulerExample() {
     println("=== Execution Scheduler Example ===")
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
@@ -124,6 +127,7 @@ func ExecutionSchedulerExample() {
     println("Total scheduled sequences:", stats["total_scheduled_seqs"])
     println()
 }
+
 func KVCacheExample() {
     println("=== KV Cache Management Example ===")
     cache_manager := NewKVCacheManager(20, EVICTION_LRU)
@@ -146,6 +150,7 @@ func KVCacheExample() {
     println("Allocated blocks:", stats["allocated_blocks"])
     println()
 }
+
 func PrefillDecodeIterationExample() {
     println("=== Prefill + Decode Iteration Example ===")
     config := ExecutorConfig{
@@ -178,6 +183,7 @@ func PrefillDecodeIterationExample() {
     executor.Shutdown()
     println("Prefill-Decode iteration example complete\n")
 }
+
 func DistributedExecutorExample() {
     println("=== Distributed Executor Example ===")
     config := ExecutorConfig{
@@ -221,6 +227,7 @@ func DistributedExecutorExample() {
     dist_executor.Shutdown()
     println("Distributed executor shutdown\n")
 }
+
 func main() {
     println("╔════════════════════════════════════════╗")
     println("║  NeurX Executor Basic Examples         ║")

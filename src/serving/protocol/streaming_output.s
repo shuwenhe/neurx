@@ -5,6 +5,7 @@ struct backpressure_state {
     bool is_saturated
     int32 slowest_consumer_rate
 }
+
 struct token_stream {
     string request_id
     int32[] token_buffer
@@ -15,6 +16,7 @@ struct token_stream {
     int32 tokens_received
     int64 last_send_time
 }
+
 func (token_stream* ts) next_token() (int32, bool) {
     if ts.buffer_cursor >= len(ts.token_buffer) {
         return -1, false
@@ -27,6 +29,7 @@ func (token_stream* ts) next_token() (int32, bool) {
     }
     return token, true
 }
+
 func (token_stream* ts) wait_token(int32 timeout_ms) (int32, bool) {
     start := current_time_ns()
     timeout_ns := int64(timeout_ms) * 1000000
@@ -45,6 +48,7 @@ func (token_stream* ts) wait_token(int32 timeout_ms) (int32, bool) {
     ts.tokens_sent = ts.tokens_sent + 1
     return token, true
 }
+
 func (token_stream* ts) send_token(int32 token_id) bool {
     if ts.bp_state.is_saturated {
         return false
@@ -59,6 +63,7 @@ func (token_stream* ts) send_token(int32 token_id) bool {
     ts.last_send_time = current_time_ns()
     return true
 }
+
 func (token_stream* ts) drain_to_client(int32 count) int32 {
     tokens_drained := 0
     for i := 0; i < count && ts.buffer_cursor < len(ts.token_buffer); i = i + 1 {
@@ -71,39 +76,48 @@ func (token_stream* ts) drain_to_client(int32 count) int32 {
     }
     return tokens_drained
 }
+
 func (token_stream* ts) mark_completed() bool {
     ts.completed = true
     return true
 }
+
 func (token_stream* ts) is_completed() bool {
     return ts.completed && ts.buffer_cursor >= len(ts.token_buffer)
 }
+
 func (token_stream* ts) get_buffer_fill_percent() int32 {
     if ts.bp_state.buffer_capacity == 0 {
         return 0
     }
     return (ts.bp_state.current_buffer_size * 100) / ts.bp_state.buffer_capacity
 }
+
 func (token_stream* ts) get_tokens_sent() int32 {
     return ts.tokens_sent
 }
+
 func (token_stream* ts) get_tokens_pending() int32 {
     return len(ts.token_buffer) - ts.buffer_cursor
 }
+
 func (token_stream* ts) reset_backpressure() bool {
     ts.bp_state.is_saturated = false
     ts.bp_state.current_buffer_size = 0
     return true
 }
+
 struct stream_batch {
     token_stream*[] streams
     int32 batch_id
     int64 created_at
 }
+
 func (stream_batch* sb) add_stream(token_stream* stream) bool {
     sb.streams = append(sb.streams, stream)
     return true
 }
+
 func (stream_batch* sb) remove_stream(string request_id) bool {
     for i := 0; i < len(sb.streams); i = i + 1 {
         if sb.streams[i].request_id == request_id {
@@ -113,6 +127,7 @@ func (stream_batch* sb) remove_stream(string request_id) bool {
     }
     return false
 }
+
 func (stream_batch* sb) get_stream(string request_id) token_stream* {
     for i := 0; i < len(sb.streams); i = i + 1 {
         if sb.streams[i].request_id == request_id {
@@ -121,6 +136,7 @@ func (stream_batch* sb) get_stream(string request_id) token_stream* {
     }
     return nil
 }
+
 func (stream_batch* sb) drain_all(int32 tokens_per_stream) int32 {
     total_drained := 0
     for i := 0; i < len(sb.streams); i = i + 1 {
@@ -129,6 +145,7 @@ func (stream_batch* sb) drain_all(int32 tokens_per_stream) int32 {
     }
     return total_drained
 }
+
 func (stream_batch* sb) count_active_streams() int32 {
     count := 0
     for i := 0; i < len(sb.streams); i = i + 1 {
@@ -138,11 +155,13 @@ func (stream_batch* sb) count_active_streams() int32 {
     }
     return count
 }
+
 struct stream_buffer_manager {
     map[string, token_stream] streams
     int32 max_buffer_size
     int32 total_buffered_tokens
 }
+
 func create_stream_buffer_manager(int32 max_buffer) stream_buffer_manager* {
     return *stream_buffer_manager{
         streams: make(map[string, token_stream]),
@@ -150,6 +169,7 @@ func create_stream_buffer_manager(int32 max_buffer) stream_buffer_manager* {
         total_buffered_tokens: 0,
     }
 }
+
 func (stream_buffer_manager* mgr) register_stream(string request_id) token_stream* {
     stream := token_stream{
         request_id: request_id,
@@ -169,6 +189,7 @@ func (stream_buffer_manager* mgr) register_stream(string request_id) token_strea
     mgr.streams[request_id] = stream
     return *stream
 }
+
 func (stream_buffer_manager* mgr) unregister_stream(string request_id) bool {
     _, exists := mgr.streams[request_id]
     if !exists {
@@ -177,6 +198,7 @@ func (stream_buffer_manager* mgr) unregister_stream(string request_id) bool {
     delete(mgr.streams, request_id)
     return true
 }
+
 func (stream_buffer_manager* mgr) send_token_to_stream(string request_id, int32 token_id) bool {
     stream, exists := mgr.streams[request_id]
     if !exists {
@@ -189,6 +211,7 @@ func (stream_buffer_manager* mgr) send_token_to_stream(string request_id, int32 
     }
     return success
 }
+
 func (stream_buffer_manager* mgr) mark_stream_completed(string request_id) bool {
     stream, exists := mgr.streams[request_id]
     if !exists {
@@ -198,14 +221,17 @@ func (stream_buffer_manager* mgr) mark_stream_completed(string request_id) bool 
     mgr.streams[request_id] = stream
     return true
 }
+
 func (stream_buffer_manager* mgr) get_total_buffered() int32 {
     return mgr.total_buffered_tokens
 }
+
 func (stream_buffer_manager* mgr) get_buffer_pressure() int32 {
     if mgr.max_buffer_size == 0 {
         return 0
     }
     return (mgr.total_buffered_tokens * 100) / mgr.max_buffer_size
 }
+
 func sleep_ms(int32 ms) {
 }

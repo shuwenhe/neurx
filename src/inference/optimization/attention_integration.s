@@ -10,6 +10,7 @@ struct attention_layer_manager {
     int total_skipped_calls
     float[] method_timings
 }
+
 func new_attention_layer_manager(
     int head_dim,
     int num_heads,
@@ -65,6 +66,7 @@ func new_attention_layer_manager(
         method_timings: float[]{},
     }
 }
+
 func (attention_layer_manager* mgr) forward(
     float[] queries,
     float[] keys,
@@ -101,15 +103,18 @@ func (attention_layer_manager* mgr) forward(
         )
     }
 }
+
 func (attention_layer_manager* mgr) set_method(method string) {
     mgr.current_method = method
 }
+
 func (attention_layer_manager* mgr) get_stats() map[string]float {
     stats := map[string]float{}
     stats["total_calls"] = float(mgr.total_forward_calls)
     stats["skipped_calls"] = float(mgr.total_skipped_calls)
     return stats
 }
+
 struct layer_attention_config {
     int layer_id
     string attention_type
@@ -121,6 +126,7 @@ struct layer_attention_config {
     lightning_attention_config lightning_cfg
     sparse_attention_config sparse_cfg
 }
+
 struct transformer_layer_with_optimized_attention {
     layer_attention_config attn_config
     float[] layer_norm_weight
@@ -129,6 +135,7 @@ struct transformer_layer_with_optimized_attention {
     float[] mlp_weight1
     float[] mlp_weight2
 }
+
 func create_layer_with_optimized_attention(
     int layer_id,
     int head_dim,
@@ -187,6 +194,7 @@ func create_layer_with_optimized_attention(
         mlp_weight2: make(float[], 4 * hidden_dim * hidden_dim),
     }
 }
+
 func (transformer_layer_with_optimized_attention* layer) forward(
     float[] hidden_states,
     float[] position_ids
@@ -226,6 +234,7 @@ func (transformer_layer_with_optimized_attention* layer) forward(
     }
     return hidden_states
 }
+
 struct attention_optimized_model_config {
     int hidden_dim
     int num_layers
@@ -237,6 +246,7 @@ struct attention_optimized_model_config {
     string attention_strategy
     string[] per_layer_attention
 }
+
 func new_attention_optimized_config(
     int hidden_dim,
     int num_layers,
@@ -268,6 +278,7 @@ func new_attention_optimized_config(
         per_layer_attention: per_layer,
     }
 }
+
 struct attention_performance_report {
     string method_name
     float memory_usage_mb
@@ -277,6 +288,7 @@ struct attention_performance_report {
     int head_dim
     float speedup_vs_baseline
 }
+
 func benchmark_attention_methods(
     float[] queries,
     float[] keys,
@@ -326,6 +338,7 @@ func benchmark_attention_methods(
     reports = append(reports, sparse_report)
     return reports
 }
+
 func append([]attention_performance_report arr, attention_performance_report val) []attention_performance_report {
     []attention_performance_report new_arr = make([]attention_performance_report, len(arr) + 1)
     int i = 0
@@ -336,6 +349,7 @@ func append([]attention_performance_report arr, attention_performance_report val
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func apply_layer_norm(
     float[] x,
     float[] weight,
@@ -379,6 +393,7 @@ func apply_layer_norm(
     }
     return output
 }
+
 func sqrt_f(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -391,6 +406,7 @@ func sqrt_f(float x) float {
     }
     return y
 }
+
 func main() {
     print("🔄 Attention Layer Integration Module")
     print("✓ Unified attention layer manager")

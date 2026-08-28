@@ -6,12 +6,14 @@ struct attention_state {
     float[] value
     float[] output
 }
+
 struct rope_cache {
     float[] cos_cache
     float[] sin_cache
     int max_pos
     int dim
 }
+
 func rope_init(int max_seq_len, int hidden_dim) rope_cache {
     int num_heads = 12
     int head_dim = hidden_dim / num_heads
@@ -35,6 +37,7 @@ func rope_init(int max_seq_len, int hidden_dim) rope_cache {
     }
     rope_cache{cos_cache: cos_cache, sin_cache: sin_cache, max_pos: max_seq_len, dim: head_dim}
 }
+
 func cos_approx(float x) float {
     for x > 6.28318531 {
         x = x - 6.28318531
@@ -47,6 +50,7 @@ func cos_approx(float x) float {
     float x6 = x4 * x2
     return 1.0 - x2 / 2.0 + x4 / 24.0 - x6 / 720.0
 }
+
 func sin_approx(float x) float {
     for x > 6.28318531 {
         x = x - 6.28318531
@@ -60,6 +64,7 @@ func sin_approx(float x) float {
     float x7 = x5 * x2
     return x - x3 / 6.0 + x5 / 120.0 - x7 / 5040.0
 }
+
 func exp_approx(float x) float {
     if x < -10.0 {
         return 0.0
@@ -72,6 +77,7 @@ func exp_approx(float x) float {
     float x4 = x3 * x
     return 1.0 + x + x2 / 2.0 + x3 / 6.0 + x4 / 24.0
 }
+
 func apply_rope(float[] q, float[] k, rope_cache rope, int position) (float[], float[]) {
     int head_dim = rope.dim
     if position >= rope.max_pos {
@@ -102,6 +108,7 @@ func apply_rope(float[] q, float[] k, rope_cache rope, int position) (float[], f
     }
     return q_rot, k_rot
 }
+
 func multi_head_attention(float[] input, float[] weights_qkv, float[] weights_out, int num_heads, int hidden_dim) float[] {
     int head_dim = hidden_dim / num_heads
     float[] output = float[]{cap: len(input)}
@@ -114,6 +121,7 @@ func multi_head_attention(float[] input, float[] weights_qkv, float[] weights_ou
     output = project_linear(output, weights_out, hidden_dim)
     return output
 }
+
 func project_linear(float[] input, float[] weights, int output_dim) float[] {
     float[] output = float[]{cap: output_dim}
     int i = 0
@@ -129,6 +137,7 @@ func project_linear(float[] input, float[] weights, int output_dim) float[] {
     }
     return output
 }
+
 func compute_attention_scores(float[] query, float[] key, int head_dim, int num_heads) float[] {
     float[] scores = float[]{cap: len(query) * len(key)}
     int i = 0
@@ -149,6 +158,7 @@ func compute_attention_scores(float[] query, float[] key, int head_dim, int num_
     }
     return scores
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -161,6 +171,7 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+
 func matrix_mult_weighted(float[] values, float[] weights, int output_dim) float[] {
     float[] output = float[]{cap: output_dim}
     int i = 0
@@ -176,6 +187,7 @@ func matrix_mult_weighted(float[] values, float[] weights, int output_dim) float
     }
     return output
 }
+
 func softmax(float[] logits) float[] {
     int n = len(logits)
     if n == 0 {
@@ -208,6 +220,7 @@ func softmax(float[] logits) float[] {
     }
     return probs
 }
+
 func feed_forward(float[] input, float[] weights_up, float[] weights_down, int intermediate_size, int hidden_dim) float[] {
     float[] hidden = project_linear(input, weights_up, intermediate_size)
     int i = 0
@@ -220,6 +233,7 @@ func feed_forward(float[] input, float[] weights_up, float[] weights_down, int i
     float[] output = project_linear(hidden, weights_down, hidden_dim)
     return output
 }
+
 func rms_norm(float[] input, float[] gamma, float eps) float[] {
     float[] output = float[]{cap: len(input)}
     float sum_sq = 0.0
@@ -238,6 +252,7 @@ func rms_norm(float[] input, float[] gamma, float eps) float[] {
     }
     return output
 }
+
 func transformer_layer(float[] input, float[] attn_weights, float[] ffn_weights, float[] ln_weights, int num_heads, int hidden_dim, int intermediate_size) float[] {
     float[] norm1 = rms_norm(input, ln_weights, 0.000001)
     float[] attn_out = multi_head_attention(norm1, attn_weights, attn_weights, num_heads, hidden_dim)
@@ -247,6 +262,7 @@ func transformer_layer(float[] input, float[] attn_weights, float[] ffn_weights,
     float[] output = add_vectors(residual1, ffn_out)
     return output
 }
+
 func add_vectors(float[] a, float[] b) float[] {
     float[] result = float[]{cap: len(a)}
     int i = 0
@@ -260,6 +276,7 @@ func add_vectors(float[] a, float[] b) float[] {
     }
     return result
 }
+
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string result = ""

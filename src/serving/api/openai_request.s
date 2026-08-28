@@ -7,6 +7,7 @@ struct chat_message {
 	string          name
 	interface{}     tool_calls
 }
+
 struct chat_completion_request {
 	string              model
 	chat_message[]   messages
@@ -30,6 +31,7 @@ struct chat_completion_request {
 	string              user_id
 	int64               created_at
 }
+
 struct completion_request {
 	string          model
 	string          prompt
@@ -50,6 +52,7 @@ struct completion_request {
 	string          user_id
 	int64           created_at
 }
+
 struct embedding_request {
 	string          model
 	string[]     input
@@ -69,6 +72,7 @@ struct embedding_request {
 	ERR_INVALID_REQUEST       = 7
 	ERR_UNSUPPORTED_MODEL     = 8
 }
+
 struct request_validator {
 	float32         min_temperature
 	float32         max_temperature
@@ -76,6 +80,7 @@ struct request_validator {
 	int32           min_tokens_limit
 	string[]     supported_models
 }
+
 func create_default_validator() request_validator {
 	return request_validator{
 		min_temperature:  0.0,
@@ -85,9 +90,11 @@ func create_default_validator() request_validator {
 		supported_models: make(string[], 0),
 	}
 }
+
 func (v request_validator*) add_supported_model(model string) {
 	v.supported_models = append(v.supported_models, model)
 }
+
 func (v request_validator*) validate_chat_request(req chat_completion_request) (bool, validation_error) {
 	if len(req.model) == 0 {
 		return false, ERR_MISSING_MODEL
@@ -118,6 +125,7 @@ func (v request_validator*) validate_chat_request(req chat_completion_request) (
 	}
 	return true, 0
 }
+
 func (v request_validator*) validate_completion_request(req completion_request) (bool, validation_error) {
 	if len(req.model) == 0 {
 		return false, ERR_MISSING_MODEL
@@ -139,6 +147,7 @@ func (v request_validator*) validate_completion_request(req completion_request) 
 	}
 	return true, 0
 }
+
 func (v request_validator*) validate_embedding_request(req embedding_request) (bool, validation_error) {
 	if len(req.model) == 0 {
 		return false, ERR_MISSING_MODEL
@@ -151,6 +160,7 @@ func (v request_validator*) validate_embedding_request(req embedding_request) (b
 	}
 	return true, 0
 }
+
 func (v request_validator*) is_model_supported(model string) bool {
 	for supported := range v.supported_models {
 		if supported == model {
@@ -159,6 +169,7 @@ func (v request_validator*) is_model_supported(model string) bool {
 	}
 	return len(v.supported_models) == 0
 }
+
 func create_chat_completion_request_from_json(data interface{}) (chat_completion_request, error) {
 	req := chat_completion_request{
 		temperature: 0.7,
@@ -171,6 +182,7 @@ func create_chat_completion_request_from_json(data interface{}) (chat_completion
 	}
 	return req, nil
 }
+
 func create_completion_request_from_json(data interface{}) (completion_request, error) {
 	req := completion_request{
 		temperature: 0.7,
@@ -182,6 +194,7 @@ func create_completion_request_from_json(data interface{}) (completion_request, 
 	}
 	return req, nil
 }
+
 func create_embedding_request_from_json(data interface{}) (embedding_request, error) {
 	req := embedding_request{
 		encoding_format: "float",
@@ -189,6 +202,7 @@ func create_embedding_request_from_json(data interface{}) (embedding_request, er
 	}
 	return req, nil
 }
+
 func (req chat_completion_request) to_json() string {
 	data := map[string]interface{}{
 		"model":             req.model,
@@ -204,6 +218,7 @@ func (req chat_completion_request) to_json() string {
 	}
 	return json.Marshal(data)
 }
+
 func (req completion_request) to_json() string {
 	data := map[string]interface{}{
 		"model":             req.model,
@@ -218,6 +233,7 @@ func (req completion_request) to_json() string {
 	}
 	return json.Marshal(data)
 }
+
 func (req embedding_request) to_json() string {
 	data := map[string]interface{}{
 		"model":           req.model,
@@ -227,6 +243,7 @@ func (req embedding_request) to_json() string {
 	}
 	return json.Marshal(data)
 }
+
 func validation_error_to_string(err validation_error) string {
 	switch err {
 	case ERR_MISSING_MODEL:

@@ -18,6 +18,7 @@ struct MultimodalManager {
     processing_cache: map[string, types.ProcessingState],
     feature_cache: map[string, *types.FusedFeatures]
 }
+
 func NewMultimodalManager(
     config: types.MultimodalConfig
 ) *MultimodalManager {
@@ -53,6 +54,7 @@ func NewMultimodalManager(
         feature_cache: make(map[string, *types.FusedFeatures])
     }
 }
+
 func (MultimodalManager* m) ProcessMultimodalInput(
     input: *types.MultimodalInput
 ) *types.FusedFeatures {
@@ -101,6 +103,7 @@ func (MultimodalManager* m) ProcessMultimodalInput(
     }
     return fused
 }
+
 func (MultimodalManager* m) ProcessImages(
     images: []types.ImageData
 ) *types.Tensor {
@@ -131,6 +134,7 @@ func (MultimodalManager* m) ProcessImages(
         dtype: "float32"
     }
 }
+
 func (MultimodalManager* m) ProcessAudio(
     audios: []types.AudioData
 ) *types.Tensor {
@@ -156,6 +160,7 @@ func (MultimodalManager* m) ProcessAudio(
         dtype: "float32"
     }
 }
+
 func (MultimodalManager* m) ProcessText(
     string text
 ) *types.Tensor {
@@ -174,6 +179,7 @@ func (MultimodalManager* m) ProcessText(
         dtype: "float32"
     }
 }
+
 func (MultimodalManager* m) ProcessBatch(
     inputs: []types.MultimodalInput
 ) []types.FusedFeatures {
@@ -184,6 +190,7 @@ func (MultimodalManager* m) ProcessBatch(
     }
     return results
 }
+
 func (MultimodalManager* m) GetProcessingState(
     string input_id
 ) types.ProcessingState {
@@ -199,11 +206,13 @@ func (MultimodalManager* m) GetProcessingState(
         false is_cached
     }
 }
+
 func (MultimodalManager* m) ClearCache() {
     m.feature_cache = make(map[string, *types.FusedFeatures])
     m.processing_cache = make(map[string, types.ProcessingState])
     m.vision_encoder.ClearCache()
 }
+
 func (MultimodalManager* m) GetCacheSize() i32 {
     size := i32(0)
     size += m.vision_encoder.GetCacheSize()
@@ -212,9 +221,11 @@ func (MultimodalManager* m) GetCacheSize() i32 {
     }
     return size
 }
+
 func (MultimodalManager* m) GetConfig() types.MultimodalConfig {
     return m.config
 }
+
 func (MultimodalManager* m) UpdateConfig(
     new_config: types.MultimodalConfig
 ) {
@@ -237,9 +248,11 @@ func (MultimodalManager* m) UpdateConfig(
         new_config.num_vision_tokens
     )
 }
+
 func GetCurrentTime() i64 {
     return i64(0)
 }
+
 func main() {
     println("Multimodal Manager")
     println("✅ Unified multimodal processing ready")

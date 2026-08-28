@@ -12,6 +12,7 @@ func transfer_native_register(int backend_type, int pointer_low, int byte_count,
     if backend_type == 3 { return neurx_mori_register(pointer_low, byte_count, device_id) }
     404
 }
+
 func transfer_native_execute(int backend_type, int source_ptr_low, int destination_ptr_low, int byte_count, int source_rank, int destination_rank, int room_id, int shard_index) int {
     if source_ptr_low == 0 || destination_ptr_low == 0 || byte_count <= 0 { return 400 }
     if backend_type == 1 { return neurx_mooncake_transfer(source_ptr_low, destination_ptr_low, byte_count, source_rank, destination_rank) }

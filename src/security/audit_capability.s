@@ -10,6 +10,7 @@ struct audit_log_entry {
     string details
     int result  
 }
+
 struct audit_rule {
     int rule_id
     int enabled
@@ -18,10 +19,12 @@ struct audit_rule {
     int action  
     int priority
 }
+
 struct audit_ruleset {
     audit_rule[] rules
     int max_rules
 }
+
 struct audit_manager {
     audit_log_entry[] log_entries
     audit_ruleset ruleset
@@ -29,6 +32,7 @@ struct audit_manager {
     int log_count
     int next_entry_id
 }
+
 func (audit_manager* am) init(int max_log_size) (int, string) {
     am.log_entries = audit_log_entry[]{}
     am.ruleset.rules = audit_rule[]{}
@@ -38,6 +42,7 @@ func (audit_manager* am) init(int max_log_size) (int, string) {
     am.next_entry_id = 0
     return 0, ""
 }
+
 func (audit_manager* am) add_rule(int event_type, string target, int action) (audit_rule, string) {
     if len(am.ruleset.rules) >= am.ruleset.max_rules {
         return audit_rule{}, "Rule limit exceeded"
@@ -53,6 +58,7 @@ func (audit_manager* am) add_rule(int event_type, string target, int action) (au
     am.ruleset.rules = append(am.ruleset.rules, rule)
     return rule, ""
 }
+
 func (audit_manager* am) delete_rule(int rule_id) (int, string) {
     if rule_id >= len(am.ruleset.rules) {
         return -1, "Rule not found"
@@ -62,6 +68,7 @@ func (audit_manager* am) delete_rule(int rule_id) (int, string) {
     am.ruleset.rules[rule_id] = rule
     return 0, ""
 }
+
 func (audit_manager* am) toggle_rule(int rule_id, int enabled) (int, string) {
     if rule_id >= len(am.ruleset.rules) {
         return -1, "Rule not found"
@@ -71,6 +78,7 @@ func (audit_manager* am) toggle_rule(int rule_id, int enabled) (int, string) {
     am.ruleset.rules[rule_id] = rule
     return 0, ""
 }
+
 func (audit_manager* am) log_event(int pid, int uid, int event_type, string event_name, string details, int result) (int, string) {
     if am.log_count >= am.max_log_size {
         return -1, "Log full"
@@ -101,6 +109,7 @@ func (audit_manager* am) log_event(int pid, int uid, int event_type, string even
     am.next_entry_id = am.next_entry_id + 1
     return entry.entry_id, ""
 }
+
 func (audit_manager am) query_logs(int event_type) (audit_log_entry[], string) {
     matching_logs := audit_log_entry[]{}
     i := 0
@@ -113,6 +122,7 @@ func (audit_manager am) query_logs(int event_type) (audit_log_entry[], string) {
     }
     return matching_logs, ""
 }
+
 func (audit_manager am) get_audit_stats() (int, int, int) {
     success_count := 0
     failure_count := 0
@@ -128,26 +138,31 @@ func (audit_manager am) get_audit_stats() (int, int, int) {
     }
     return len(am.log_entries), success_count, failure_count
 }
+
 struct capability {
     int cap_id  
     string cap_name
     int enabled
 }
+
 struct process_capabilities {
     int pid
     capability[] effective_caps  
     capability[] permitted_caps  
     capability[] inheritable_caps  
 }
+
 struct capability_manager {
     process_capabilities[] process_caps
     int next_cap_id
 }
+
 func (capability_manager* capm) init() (int, string) {
     capm.process_caps = process_capabilities[]{}
     capm.next_cap_id = 0
     return 0, ""
 }
+
 func (capability_manager* capm) add_capability_to_process(int pid, int cap_id) (int, string) {
     i := 0
     for i < len(capm.process_caps) {
@@ -179,6 +194,7 @@ func (capability_manager* capm) add_capability_to_process(int pid, int cap_id) (
     capm.process_caps = append(capm.process_caps, new_proc_cap)
     return 0, ""
 }
+
 func (capability_manager* capm) remove_capability_from_process(int pid, int cap_id) (int, string) {
     i := 0
     for i < len(capm.process_caps) {
@@ -201,6 +217,7 @@ func (capability_manager* capm) remove_capability_from_process(int pid, int cap_
     }
     return -1, "Process not found"
 }
+
 func (capability_manager capm) has_capability(int pid, int cap_id) (int, string) {
     i := 0
     for i < len(capm.process_caps) {
@@ -220,6 +237,7 @@ func (capability_manager capm) has_capability(int pid, int cap_id) (int, string)
     }
     return 0, "Process not found"
 }
+
 func (capability_manager capm) get_capabilities(int pid) (int, string) {
     i := 0
     for i < len(capm.process_caps) {

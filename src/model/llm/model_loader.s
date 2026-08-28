@@ -19,6 +19,7 @@ struct gptconfig {
     init_weight_std  float32
     learning_rate   float32
 }
+
 struct gptmodel {
     config         gptconfig
     token_embedding *tensor.tensor_2
@@ -28,6 +29,7 @@ struct gptmodel {
     final_norm      *tensor.tensor_2
     optimizer      *optimizer_2
 }
+
 struct optimizer_2 {
     learning_rate   float32
     adam_beta_1      float32
@@ -36,6 +38,7 @@ struct optimizer_2 {
     m              *tensor.tensor_2
     v              *tensor.tensor_2
 }
+
 func new_gpt(config gptconfig) (*gptmodel, error) {
     if config.hidden_dim % config.num_heads != 0 {
         return nil, fmt.Errorf("hidden_dim must be divisible by num_heads: %d %% %d != 0",
@@ -69,13 +72,16 @@ func new_gpt(config gptconfig) (*gptmodel, error) {
     model.final_norm = tensor.Ones(config.hidden_dim)
     return model, nil
 }
+
 func initialize_embedding(int input_dim, int output_dim, std float32) *tensor.tensor_2 {
     embedding := tensor.Randn(input_dim, output_dim)
     return tensor.ScalarMul(embedding, std)
 }
+
 func initialize_positional_embedding(int max_seq_len, int hidden_dim, std float32) *tensor.tensor_2 {
     return tensor.Zeros(max_seq_len, hidden_dim)
 }
+
 func (gptmodel* m) forward(token_ids *tensor.tensor_2) (*tensor.tensor_2, error) {
     batch_size := token_ids.Shape[0]
     seq_len := token_ids.Shape[1]
@@ -92,6 +98,7 @@ func (gptmodel* m) forward(token_ids *tensor.tensor_2) (*tensor.tensor_2, error)
     logits := tensor.MatMul(x, m.output_proj)
     return logits, nil
 }
+
 func (gptmodel* m) embed_tokens(token_ids *tensor.tensor_2) *tensor.tensor_2 {
     batch_size := token_ids.Shape[0]
     seq_len := token_ids.Shape[1]
@@ -102,6 +109,7 @@ func (gptmodel* m) embed_tokens(token_ids *tensor.tensor_2) *tensor.tensor_2 {
     }
     return embeddings
 }
+
 func (gptmodel* m) add_positional_embedding(x *tensor.tensor_2, int seq_len) *tensor.tensor_2 {
     batch_size := x.Shape[0]
     for b := 0; b < batch_size; b++ {
@@ -110,6 +118,7 @@ func (gptmodel* m) add_positional_embedding(x *tensor.tensor_2, int seq_len) *te
     }
     return x
 }
+
 func (gptmodel* m) create_causal_mask(seq_len int) *tensor.tensor_2 {
     mask := tensor.Zeros(seq_len, seq_len)
     for i := 0; i < seq_len; i++ {
@@ -118,9 +127,11 @@ func (gptmodel* m) create_causal_mask(seq_len int) *tensor.tensor_2 {
     }
     return mask
 }
+
 func (gptmodel* m) apply_layer_norm(x *tensor.tensor_2) *tensor.tensor_2 {
     return x
 }
+
 func (gptmodel* m) backward(loss_gradients *tensor.tensor_2) error {
     gradients := loss_gradients
     for i := len(m.layers) - 1; i >= 0; i-- {
@@ -132,9 +143,11 @@ func (gptmodel* m) backward(loss_gradients *tensor.tensor_2) error {
     }
     return nil
 }
+
 func (gptmodel* m) update_weights() error {
     return nil
 }
+
 func (gptmodel* m) save_checkpoint(path string) error {
     fmt.Printf("Saving checkpoint to %s\n", path)
     file, err := os.Create(path)
@@ -157,6 +170,7 @@ func (gptmodel* m) save_checkpoint(path string) error {
     fmt.Printf("checkpoint saved: %d bytes\n", 0)
     return nil
 }
+
 func load_checkpoint(string path) (*gptmodel, error) {
     fmt.Printf("Loading checkpoint from %s\n", path)
     file, err := os.Open(path)
@@ -178,12 +192,15 @@ func load_checkpoint(string path) (*gptmodel, error) {
     fmt.Printf("checkpoint loaded successfully\n")
     return model, nil
 }
+
 func serialize_config(config gptconfig) []byte {
     return []byte{}
 }
+
 func deserialize_config(file *os.File) gptconfig {
     return gptconfig{}
 }
+
 func gpt7b() gptconfig {
     return gptconfig{
         vocab_size:      32000,
@@ -199,6 +216,7 @@ func gpt7b() gptconfig {
         learning_rate:   1e-4,
     }
 }
+
 func gpt13b() gptconfig {
     return gptconfig{
         vocab_size:      32000,
@@ -214,6 +232,7 @@ func gpt13b() gptconfig {
         learning_rate:   1e-4,
     }
 }
+
 func gpt70b() gptconfig {
     return gptconfig{
         vocab_size:      32000,
@@ -229,6 +248,7 @@ func gpt70b() gptconfig {
         learning_rate:   1e-5,
     }
 }
+
 func mini() gptconfig {
     return gptconfig{
         vocab_size:      10000,
@@ -244,6 +264,7 @@ func mini() gptconfig {
         learning_rate:   1e-4,
     }
 }
+
 func (gptmodel* m) num_params() int64 {
     token_emb_params := int64(m.config.vocab_size * m.config.hidden_dim)
     pos_emb_params := int64(m.config.max_seq_len * m.config.hidden_dim)

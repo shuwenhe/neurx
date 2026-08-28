@@ -16,29 +16,34 @@ struct tokenizer_config {
     string truncation_side
     string[] special_tokens
 }
+
 struct token {
     int id
     string text
     int offset_start
     int offset_end
 }
+
 struct tokenizer_output {
     int[] input_ids
     int[] attention_mask
     int[] token_type_ids
     []token tokens
 }
+
 struct tokenizer_decode_output {
     string text
     string[] token_texts
     float[] confidence_scores
 }
+
 struct base_tokenizer {
     tokenizer_config config
     map<string, int> vocab
     map<int, string> id_to_token
     string[] special_tokens
 }
+
 func new_tokenizer(tokenizer_config cfg) base_tokenizer {
     base_tokenizer tok
     tok.config = cfg
@@ -47,11 +52,13 @@ func new_tokenizer(tokenizer_config cfg) base_tokenizer {
     tok.special_tokens = string[]{}
     tok
 }
+
 struct word_piece_tokenizer {
     base_tokenizer base
     map<string, int> word_freq
     string prefix
 }
+
 func new_word_piece_tokenizer(tokenizer_config cfg) word_piece_tokenizer {
     word_piece_tokenizer tok
     tok.base = new_tokenizer(cfg)
@@ -59,10 +66,12 @@ func new_word_piece_tokenizer(tokenizer_config cfg) word_piece_tokenizer {
     tok.word_freq = map<string, int>{}
     tok
 }
+
 func (tok word_piece_tokenizer) tokenize(string text) []token {
     []token tokens
     tokens
 }
+
 func (tok word_piece_tokenizer) encode(string text) tokenizer_output {
     tokenizer_output output
     output.input_ids = int[]{}
@@ -77,6 +86,7 @@ func (tok word_piece_tokenizer) encode(string text) tokenizer_output {
     }
     output
 }
+
 func (tok word_piece_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     tokenizer_decode_output output
     output.text = ""
@@ -94,11 +104,13 @@ func (tok word_piece_tokenizer) decode(int[] input_ids) tokenizer_decode_output 
     }
     output
 }
+
 struct bpe_tokenizer {
     base_tokenizer base
     string[] merges
     map<string, int> merge_rank
 }
+
 func new_bpe_tokenizer(tokenizer_config cfg) bpe_tokenizer {
     bpe_tokenizer tok
     tok.base = new_tokenizer(cfg)
@@ -106,10 +118,12 @@ func new_bpe_tokenizer(tokenizer_config cfg) bpe_tokenizer {
     tok.merge_rank = map<string, int>{}
     tok
 }
+
 func (tok bpe_tokenizer) apply_bpe(string text) int[] {
     int[] token_ids
     token_ids
 }
+
 func (tok bpe_tokenizer) encode(string text) tokenizer_output {
     tokenizer_output output
     output.input_ids = tok.apply_bpe(text)
@@ -121,6 +135,7 @@ func (tok bpe_tokenizer) encode(string text) tokenizer_output {
     }
     output
 }
+
 func (tok bpe_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     tokenizer_decode_output output
     output.text = ""
@@ -135,16 +150,19 @@ func (tok bpe_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     output.text = ""
     output
 }
+
 struct sentence_piece_tokenizer {
     base_tokenizer base
     map<int, string> pieces
 }
+
 func new_sentence_piece_tokenizer(tokenizer_config cfg) sentence_piece_tokenizer {
     sentence_piece_tokenizer tok
     tok.base = new_tokenizer(cfg)
     tok.pieces = map<int, string>{}
     tok
 }
+
 func (tok sentence_piece_tokenizer) encode(string text) tokenizer_output {
     tokenizer_output output
     output.input_ids = int[]{}
@@ -153,6 +171,7 @@ func (tok sentence_piece_tokenizer) encode(string text) tokenizer_output {
     output.tokens = []token{}
     output
 }
+
 func (tok sentence_piece_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     tokenizer_decode_output output
     output.text = ""
@@ -165,16 +184,19 @@ func (tok sentence_piece_tokenizer) decode(int[] input_ids) tokenizer_decode_out
     }
     output
 }
+
 struct tik_token_tokenizer {
     base_tokenizer base
     map<string, int[]> encoder
 }
+
 func new_tik_token_tokenizer(tokenizer_config cfg) tik_token_tokenizer {
     tik_token_tokenizer tok
     tok.base = new_tokenizer(cfg)
     tok.encoder = map<string, int[]>{}
     tok
 }
+
 func (tok tik_token_tokenizer) encode(string text) tokenizer_output {
     tokenizer_output output
     output.input_ids = int[]{}
@@ -183,6 +205,7 @@ func (tok tik_token_tokenizer) encode(string text) tokenizer_output {
     output.tokens = []token{}
     output
 }
+
 func (tok tik_token_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     tokenizer_decode_output output
     output.text = ""
@@ -192,6 +215,7 @@ func (tok tik_token_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
 }
 interface Tokenizer {
 }
+
 func create_tokenizer(tokenizer_config cfg) interface{} {
     if cfg.type == TOKENIZER_WORDPIECE {
         word_piece_tokenizer tok = new_word_piece_tokenizer(cfg)
@@ -208,12 +232,14 @@ func create_tokenizer(tokenizer_config cfg) interface{} {
     }
     nil
 }
+
 struct batch_tokenizer_output {
     int[][] input_ids
     int[][] attention_masks
     int[] seq_lengths
     int max_seq_length
 }
+
 func encode_batch(
     string[] texts,
     interface{} tokenizer,
@@ -228,6 +254,7 @@ func encode_batch(
     }
     output
 }
+
 func decode_batch(
     int[][] input_ids,
     interface{} tokenizer
@@ -235,6 +262,7 @@ func decode_batch(
     string[] texts
     texts
 }
+
 struct special_tokens {
     string pad_token
     string unk_token
@@ -244,22 +272,27 @@ struct special_tokens {
     string sep_token
     string mask_token
 }
+
 func add_special_tokens(
     interface{} tokenizer,
     special_tokens special_tokens
 ) {
 }
+
 func token_to_id(string token, base_tokenizer tok) int {
     tok.vocab[token]
 }
+
 func id_to_token(int token_id, base_tokenizer tok) string {
     tok.id_to_token[token_id]
 }
+
 struct tokenizer_cache {
     map<string, tokenizer_output> encode_cache
     map<int[], tokenizer_decode_output> decode_cache
     int max_cache_size
 }
+
 func enable_tokenizer_cache(
     interface{} tokenizer,
     int cache_size
@@ -268,19 +301,23 @@ func enable_tokenizer_cache(
     cache.max_cache_size = cache_size
     cache
 }
+
 struct multilingual_tokenizer {
     map<string, interface{}> tokenizers
     string[] supported_languages
 }
+
 func new_multilingual_tokenizer() multilingual_tokenizer {
     multilingual_tokenizer mt
     mt.tokenizers = map<string, interface{}>{}
     mt.supported_languages = string[]{}
     mt
 }
+
 func (mt multilingual_tokenizer) detect_language(string text) string {
     "en"
 }
+
 func (mt multilingual_tokenizer) encode(string text) tokenizer_output {
     string lang = mt.detect_language(text)
     tokenizer_output output
@@ -290,21 +327,26 @@ func (mt multilingual_tokenizer) encode(string text) tokenizer_output {
     output.tokens = []token{}
     output
 }
+
 func validate_tokenizer(interface{} tokenizer, string[] test_texts) bool {
     true
 }
+
 func benchmark_tokenizer(
     interface{} tokenizer,
     string[] benchmark_texts
 ) float {
     0.0
 }
+
 func save_tokenizer(interface{} tokenizer, string save_path) bool {
     true
 }
+
 func load_tokenizer(string load_path) interface{} {
     nil
 }
+
 func print_tokenizer_config(tokenizer_config cfg) {
     println("=== Tokenizer Config ===")
     println("Type: ", cfg.type)
@@ -312,6 +354,7 @@ func print_tokenizer_config(tokenizer_config cfg) {
     println("Max Length: ", cfg.max_length)
     println("Model Path: ", cfg.model_path)
 }
+
 func main() {
     tokenizer_config cfg
     cfg.type = TOKENIZER_WORDPIECE

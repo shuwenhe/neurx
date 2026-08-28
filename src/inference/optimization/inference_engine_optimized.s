@@ -9,6 +9,7 @@ struct optimized_inference_engine {
     int current_seq_pos
     string inference_mode
 }
+
 func new_optimized_inference_engine(
     int hidden_dim,
     int num_layers,
@@ -38,6 +39,7 @@ func new_optimized_inference_engine(
         inference_mode: inference_mode,
     }
 }
+
 func (optimized_inference_engine* engine) forward_with_attention(
     float[] input_ids,
     float[] embeddings
@@ -66,6 +68,7 @@ func (optimized_inference_engine* engine) forward_with_attention(
     }
     return hidden
 }
+
 func (optimized_inference_engine* engine) prefill(
     int[] input_ids,
     float[] embeddings
@@ -80,6 +83,7 @@ func (optimized_inference_engine* engine) prefill(
     }
     return engine.forward_with_attention(token_floats, embeddings)
 }
+
 func (optimized_inference_engine* engine) decode(
     int next_token_id,
     float[] last_embedding
@@ -90,6 +94,7 @@ func (optimized_inference_engine* engine) decode(
     result := engine.forward_with_attention(token_float, last_embedding)
     return result
 }
+
 func add_residual(float[] x, float[] y) float[] {
     float[] result = make(float[], len(x))
     int i = 0
@@ -103,6 +108,7 @@ func add_residual(float[] x, float[] y) float[] {
     }
     return result
 }
+
 func apply_feed_forward(float[] x, int hidden_dim) float[] {
     int ff_dim = hidden_dim * 4
     float[] hidden = make(float[], ff_dim)
@@ -133,6 +139,7 @@ func apply_feed_forward(float[] x, int hidden_dim) float[] {
     }
     return output
 }
+
 struct inference_benchmark {
     string method
     int seq_len
@@ -141,6 +148,7 @@ struct inference_benchmark {
     float peak_memory_mb
     float kv_cache_memory_mb
 }
+
 func benchmark_inference_methods(
     float[] queries,
     float[] keys,
@@ -186,6 +194,7 @@ func benchmark_inference_methods(
     results = append_benchmark(results, sparse_benchmark)
     return results
 }
+
 func append_benchmark(
     []inference_benchmark arr,
     inference_benchmark val
@@ -199,6 +208,7 @@ func append_benchmark(
     new_arr[len(arr)] = val
     return new_arr
 }
+
 struct batching_strategy {
     string strategy_name
     int batch_size
@@ -207,6 +217,7 @@ struct batching_strategy {
     bool enable_kv_reuse
     bool enable_prefix_sharing
 }
+
 func create_adaptive_batching_strategy(
     int num_layers,
     int seq_len
@@ -232,6 +243,7 @@ func create_adaptive_batching_strategy(
         enable_prefix_sharing: true,
     }
 }
+
 struct attention_preset {
     string name
     string description
@@ -240,6 +252,7 @@ struct attention_preset {
     lightning_attention_config lightning_cfg
     sparse_attention_config sparse_cfg
 }
+
 func get_attention_preset_balanced() attention_preset {
     preset := attention_preset{
         name: "balanced",
@@ -285,6 +298,7 @@ func get_attention_preset_balanced() attention_preset {
     }
     return preset
 }
+
 func get_attention_preset_fast() attention_preset {
     preset := attention_preset{
         name: "fast",
@@ -320,6 +334,7 @@ func get_attention_preset_fast() attention_preset {
     }
     return preset
 }
+
 func get_attention_preset_accurate() attention_preset {
     preset := attention_preset{
         name: "accurate",
@@ -365,6 +380,7 @@ func get_attention_preset_accurate() attention_preset {
     }
     return preset
 }
+
 func main() {
     print("⚙️ Optimized Inference Engine with Advanced Attention")
     print("✓ Flash Attention v3 - 2.8x speedup")

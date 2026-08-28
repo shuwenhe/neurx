@@ -9,6 +9,7 @@ struct inference_engine_with_medusa {
     bool enable_medusa
     float medusa_threshold
 }
+
 struct inference_batch_with_medusa {
     int batch_id
     input_ids: int[][]
@@ -18,6 +19,7 @@ struct inference_batch_with_medusa {
     int max_draft_tokens
     int num_sequences
 }
+
 struct inference_output_with_medusa {
     sequence_ids: int[][]
     sequence_scores: float[]
@@ -26,6 +28,7 @@ struct inference_output_with_medusa {
     acceptance_rates: float[]
     latencies_ms: float[]
 }
+
 func initialize_medusa_inference_engine(
     inference_model_handle base_model,
     medusa_heads_config medusa_config,
@@ -44,6 +47,7 @@ func initialize_medusa_inference_engine(
     }
     engine
 }
+
 func prefill_with_medusa(
     inference_engine_with_medusa engine,
     inference_batch_with_medusa batch
@@ -72,12 +76,14 @@ func prefill_with_medusa(
     }
     (updated_engine, hidden_states, attention_cache)
 }
+
 func initialize_medusa_for_sequence(
     medusa_generation_pipeline pipeline,
     float[] hidden_state
 ) medusa_generation_pipeline {
     pipeline
 }
+
 func decode_step_with_medusa(
     inference_engine_with_medusa engine,
     float[] current_hidden,
@@ -153,6 +159,7 @@ func decode_step_with_medusa(
     )
     (updated_engine, output_tokens)
 }
+
 func standard_decode_step(
     inference_engine_with_medusa engine,
     float[] current_hidden
@@ -161,6 +168,7 @@ func standard_decode_step(
     token = append(token, sample_from_distribution(current_hidden, engine.sampling_config))
     (engine, token)
 }
+
 func generate_with_medusa(
     inference_engine_with_medusa engine,
     inference_batch_with_medusa batch,
@@ -202,6 +210,7 @@ func generate_with_medusa(
     output.medusa_tokens_generated = append(output.medusa_tokens_generated, medusa_tokens)
     (updated_engine, output)
 }
+
 func enable_medusa_for_batch(
     inference_engine_with_medusa engine,
     inference_batch_with_medusa batch,
@@ -213,6 +222,7 @@ func enable_medusa_for_batch(
     updated_batch.use_medusa = enable
     (updated_engine, updated_batch)
 }
+
 func adjust_medusa_temperature(
     inference_engine_with_medusa engine,
     float new_temperature
@@ -221,6 +231,7 @@ func adjust_medusa_temperature(
     updated.medusa_pipeline.config.temperature = new_temperature
     updated
 }
+
 func adjust_medusa_threshold(
     inference_engine_with_medusa engine,
     float new_threshold
@@ -229,6 +240,7 @@ func adjust_medusa_threshold(
     updated.medusa_threshold = new_threshold
     updated
 }
+
 func compare_medusa_vs_standard(
     inference_engine_with_medusa engine,
     float standard_latency_ms,
@@ -248,6 +260,7 @@ func compare_medusa_vs_standard(
     }
     result
 }
+
 func disable_medusa_and_retry(
     inference_engine_with_medusa engine,
     inference_batch_with_medusa batch,
@@ -256,6 +269,7 @@ func disable_medusa_and_retry(
     (updated_engine, updated_batch) := enable_medusa_for_batch(engine, batch, false)
     generate_with_medusa(updated_engine, updated_batch, max_new_tokens)
 }
+
 func forward_model(inference_model_handle model, int[] input_ids) float[] {
     output := float[]{}
     i := 0
@@ -265,6 +279,7 @@ func forward_model(inference_model_handle model, int[] input_ids) float[] {
     }
     output
 }
+
 func create_kv_cache_entry(float[] hidden, int seq_len) float[] {
     cache := float[]{}
     i := 0
@@ -274,6 +289,7 @@ func create_kv_cache_entry(float[] hidden, int seq_len) float[] {
     }
     cache
 }
+
 func compute_verifier_logits(
     inference_model_handle model,
     int[] tokens,
@@ -287,6 +303,7 @@ func compute_verifier_logits(
     }
     logits
 }
+
 func sample_from_verifier(float[] logits, sampling_config config) int {
     probs := softmax_stable(logits)
     max_idx := 0
@@ -301,20 +318,25 @@ func sample_from_verifier(float[] logits, sampling_config config) int {
     }
     max_idx
 }
+
 func sample_from_distribution(float[] hidden, sampling_config config) int {
     0
 }
+
 func format_float(float val) string {
     "0.0"
 }
+
 struct inference_model_handle {
     int model_id
     bool is_loaded
 }
+
 struct kv_cache_manager {
     int64 max_cache_size
     int64 current_size
 }
+
 struct sampling_config {
     float temperature
     int top_k

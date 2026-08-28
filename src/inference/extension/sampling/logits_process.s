@@ -23,6 +23,7 @@ struct processor_config {
     float32 threshold
     bool enabled
 }
+
 struct logits_processor {
     processor_config[] processors
     map[string]interface{} processor_params
@@ -30,6 +31,7 @@ struct logits_processor {
     int32 total_calls
     float32 total_process_time_us
 }
+
 func create_logits_processor() logits_processor* {
     processor := logits_processor{
         processors: make(processor_config[]),
@@ -40,6 +42,7 @@ func create_logits_processor() logits_processor* {
     }
     return *processor
 }
+
 func (logits_processor* processor) add_processor(processor_type type, float32 threshold) {
     config := processor_config{
         type: type,
@@ -48,6 +51,7 @@ func (logits_processor* processor) add_processor(processor_type type, float32 th
     }
     processor.processors = append(processor.processors, config)
 }
+
 func (logits_processor* processor) apply_temperature(float32[] logits, float32 temperature) float32[] {
     if temperature <= 0.0 {
         temperature = 1.0
@@ -59,6 +63,7 @@ func (logits_processor* processor) apply_temperature(float32[] logits, float32 t
     }
     return scaled
 }
+
 func (logits_processor* processor) apply_top_k(float32[] logits, int32 k) float32[] {
     if k <= 0 || int32(k) >= int32(len(logits)) {
         return logits
@@ -84,6 +89,7 @@ func (logits_processor* processor) apply_top_k(float32[] logits, int32 k) float3
     }
     return result
 }
+
 func (logits_processor* processor) apply_top_p(float32[] logits, float32 top_p) float32[] {
     if top_p >= 1.0 {
         return logits
@@ -123,6 +129,7 @@ func (logits_processor* processor) apply_top_p(float32[] logits, float32 top_p) 
     }
     return result
 }
+
 func (logits_processor* processor) apply_top_a(float32[] logits, float32 top_a) float32[] {
     if top_a <= 0.0 {
         return logits
@@ -153,6 +160,7 @@ func (logits_processor* processor) apply_top_a(float32[] logits, float32 top_a) 
     }
     return result
 }
+
 func (logits_processor* processor) apply_min_p(float32[] logits, float32 min_p) float32[] {
     if min_p <= 0.0 {
         return logits
@@ -184,6 +192,7 @@ func (logits_processor* processor) apply_min_p(float32[] logits, float32 min_p) 
     }
     return result
 }
+
 func (logits_processor* processor) apply_frequency_penalty(float32[] logits, map[int32]int32 token_counts, float32 penalty) float32[] {
     result := make(float32[])
     for i := 0; i < len(logits); i = i + 1 {
@@ -199,6 +208,7 @@ func (logits_processor* processor) apply_frequency_penalty(float32[] logits, map
     }
     return result
 }
+
 func (logits_processor* processor) apply_presence_penalty(float32[] logits, map[int32]int32 token_counts, float32 penalty) float32[] {
     result := make(float32[])
     for i := 0; i < len(logits); i = i + 1 {
@@ -214,6 +224,7 @@ func (logits_processor* processor) apply_presence_penalty(float32[] logits, map[
     }
     return result
 }
+
 func (logits_processor* processor) apply_logit_bias(float32[] logits, map[int32]float32 bias_map) float32[] {
     result := make(float32[])
     for i := 0; i < len(logits); i = i + 1 {
@@ -225,6 +236,7 @@ func (logits_processor* processor) apply_logit_bias(float32[] logits, map[int32]
     }
     return result
 }
+
 func (logits_processor* processor) apply_all_processors(float32[] logits, sampling_params* params) float32[] {
     processor.status = status_processing
     result := logits
@@ -258,6 +270,7 @@ func (logits_processor* processor) apply_all_processors(float32[] logits, sampli
     processor.total_calls = processor.total_calls + 1
     return result
 }
+
 func (logits_processor* processor) get_processor_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["status"] = processor.status
@@ -273,6 +286,7 @@ func (logits_processor* processor) get_processor_stats() map[string]interface{} 
     stats["active_processors"] = processor_types
     return stats
 }
+
 func (logits_processor* processor) reset() {
     processor.total_calls = 0
     processor.total_process_time_us = 0.0

@@ -13,6 +13,7 @@ struct checkpoint {
     string state_data
     int32 checkpoint_size_mb
 }
+
 struct fault_tolerance_config {
     bool enable_checkpointing
     checkpoint_type checkpoint_type_mode
@@ -20,6 +21,7 @@ struct fault_tolerance_config {
     int32 max_checkpoints
     string checkpoint_dir
 }
+
 struct v1_fault_tolerance {
     fault_tolerance_config config
     checkpoint*[] checkpoints
@@ -28,6 +30,7 @@ struct v1_fault_tolerance {
     int32 total_checkpoints_restored
     int32 last_checkpoint_id
 }
+
 func create_v1_fault_tolerance() v1_fault_tolerance* {
     return *v1_fault_tolerance{
         config: fault_tolerance_config{
@@ -44,6 +47,7 @@ func create_v1_fault_tolerance() v1_fault_tolerance* {
         last_checkpoint_id: 0,
     }
 }
+
 func (v1_fault_tolerance* ft) create_checkpoint(int32 batch_id, string state_data) string {
     if !ft.config.enable_checkpointing {
         return ""
@@ -68,6 +72,7 @@ func (v1_fault_tolerance* ft) create_checkpoint(int32 batch_id, string state_dat
     }
     return checkpoint_id
 }
+
 func (v1_fault_tolerance* ft) restore_checkpoint(string checkpoint_id) option[checkpoint*] {
     if ckpt, exists := ft.checkpoint_map[checkpoint_id]; exists {
         ft.total_checkpoints_restored = ft.total_checkpoints_restored + 1
@@ -75,6 +80,7 @@ func (v1_fault_tolerance* ft) restore_checkpoint(string checkpoint_id) option[ch
     }
     return option[checkpoint*]{}
 }
+
 func (v1_fault_tolerance* ft) get_latest_checkpoint() option[checkpoint*] {
     if len(ft.checkpoints) == 0 {
         return option[checkpoint*]{}
@@ -82,9 +88,11 @@ func (v1_fault_tolerance* ft) get_latest_checkpoint() option[checkpoint*] {
     latest := ft.checkpoints[len(ft.checkpoints) - 1]
     return option[checkpoint*]{value: latest}
 }
+
 func (v1_fault_tolerance* ft) list_checkpoints() checkpoint*[] {
     return ft.checkpoints
 }
+
 func (v1_fault_tolerance* ft) delete_checkpoint(string checkpoint_id) bool {
     if _, exists := ft.checkpoint_map[checkpoint_id]; exists {
         delete(ft.checkpoint_map, checkpoint_id)
@@ -98,12 +106,15 @@ func (v1_fault_tolerance* ft) delete_checkpoint(string checkpoint_id) bool {
     }
     return false
 }
+
 func (v1_fault_tolerance* ft) enable_async_checkpoint() {
     ft.config.checkpoint_type_mode = checkpoint_async
 }
+
 func (v1_fault_tolerance* ft) set_checkpoint_interval(int32 interval) {
     ft.config.checkpoint_interval = interval
 }
+
 func (v1_fault_tolerance* ft) get_fault_tolerance_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["checkpointing_enabled"] = ft.config.enable_checkpointing

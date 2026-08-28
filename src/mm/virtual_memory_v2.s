@@ -8,12 +8,14 @@ struct page_struct {
     int lru_next
     int lru_prev
 }
+
 struct pte_entry {
     int physical_addr
     int flags
     int accessed
     int dirty
 }
+
 struct vma_struct {
     int vm_start
     int vm_end
@@ -22,6 +24,7 @@ struct vma_struct {
     int pg_offset
     pte_entry[] page_table
 }
+
 struct mm_struct {
     vma_struct[] vmas
     int total_vm
@@ -52,6 +55,7 @@ func init_vm(int total_pages) int {
     g_lru_tail = total_pages - 1
     0
 }
+
 func handle_page_fault(int vaddr, int err_code) int {
     var page_num = vaddr / 4096
     if page_num < 0 || page_num >= g_total_pages {
@@ -65,6 +69,7 @@ func handle_page_fault(int vaddr, int err_code) int {
     }
     0
 }
+
 func allocate_page() (int, string) {
     var i = 0
     for i < g_total_pages {
@@ -76,6 +81,7 @@ func allocate_page() (int, string) {
     }
     -1, "No free pages"
 }
+
 func free_page(int page_num) int {
     if page_num >= 0 && page_num < g_total_pages {
         if g_page_structures[page_num].count > 0 {
@@ -85,6 +91,7 @@ func free_page(int page_num) int {
     }
     -1
 }
+
 func shrink_page_list(int[] page_list, int nr_pages) int {
     var reclaimed = 0
     var i = 0
@@ -103,9 +110,11 @@ func shrink_page_list(int[] page_list, int nr_pages) int {
     }
     reclaimed
 }
+
 func write_page_to_disk(int page_num) int {
     0
 }
+
 func kswapd(int order) int {
     var page_list = new int[128]
     var i = 0
@@ -118,6 +127,7 @@ func kswapd(int order) int {
     shrink_page_list(page_list, i)
     0
 }
+
 func get_page(int page_num) int {
     if page_num >= 0 && page_num < g_total_pages {
         g_page_structures[page_num].count = g_page_structures[page_num].count + 1
@@ -126,6 +136,7 @@ func get_page(int page_num) int {
     }
     -1
 }
+
 func put_page(int page_num) int {
     if page_num >= 0 && page_num < g_total_pages {
         if g_page_structures[page_num].count > 0 {
@@ -135,6 +146,7 @@ func put_page(int page_num) int {
     }
     -1
 }
+
 func try_to_free_pages(int nr_pages) int {
     var freed = 0
     var i = 0
@@ -147,9 +159,11 @@ func try_to_free_pages(int nr_pages) int {
     }
     -1
 }
+
 func oom_kill(int min_score) int {
     0
 }
+
 func memory_info() (int, int, int) {
     var total = g_total_pages
     var used = 0
@@ -163,6 +177,7 @@ func memory_info() (int, int, int) {
     var free = total - used
     total, used, free
 }
+
 func copy_on_write(int src_page) (int, string) {
     var dst_page, err_msg := allocate_page()
     if err_msg != "" {
@@ -171,6 +186,7 @@ func copy_on_write(int src_page) (int, string) {
     copy_page_data(src_page, dst_page)
     dst_page, ""
 }
+
 func copy_page_data(int src, int dst) int {
     0
 }

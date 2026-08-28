@@ -6,6 +6,7 @@ struct model_adapter_entry {
     string adapter_module
     int popularity_rank
 }
+
 func get_model_registry() []model_adapter_entry {
     []model_adapter_entry registry
     registry.append(model_adapter_entry {
@@ -82,6 +83,7 @@ func get_model_registry() []model_adapter_entry {
     })
     registry
 }
+
 func get_adapter_by_model_id(string model_id) model_adapter_entry {
     []model_adapter_entry registry = get_model_registry()
     for entry in registry {
@@ -99,6 +101,7 @@ func get_adapter_by_model_id(string model_id) model_adapter_entry {
         popularity_rank: 99,
     }
 }
+
 func get_adapter_by_model_type(string model_type) model_adapter_entry {
     []model_adapter_entry registry = get_model_registry()
     for entry in registry {
@@ -114,6 +117,7 @@ func get_adapter_by_model_type(string model_type) model_adapter_entry {
         popularity_rank: 99,
     }
 }
+
 func list_all_supported_models() string {
     []model_adapter_entry registry = get_model_registry()
     string output = ""
@@ -131,6 +135,7 @@ func list_all_supported_models() string {
     }
     output
 }
+
 func is_model_supported(string model_id) bool {
     []model_adapter_entry registry = get_model_registry()
     for entry in registry {
@@ -142,6 +147,7 @@ func is_model_supported(string model_id) bool {
     }
     false
 }
+
 func count_supported_models() int {
     []model_adapter_entry registry = get_model_registry()
     int total = 0
@@ -150,6 +156,7 @@ func count_supported_models() int {
     }
     total
 }
+
 func get_popular_models() string[] {
     []model_adapter_entry registry = get_model_registry()
     string[] popular

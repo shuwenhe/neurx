@@ -20,6 +20,7 @@ import "time"
 	CHECKPOINT_CREATED = 10
 	METRICS_RECORDED = 11
 }
+
 struct log_entry {
 	string                  entry_id
 	log_level               level
@@ -40,6 +41,7 @@ struct log_entry {
 	float32                 confidence_score
 	int32                   attempt_number
 }
+
 struct log_context {
 	string                  request_id
 	string                  user_id
@@ -48,6 +50,7 @@ struct log_context {
 	int32                   depth
 	map[string]interface{}  metadata
 }
+
 struct log_entry_batch {
 	log_entry[]          entries
 	int64                   batch_timestamp
@@ -56,6 +59,7 @@ struct log_entry_batch {
 	int32                   total_entries
 	int32                   total_size_bytes
 }
+
 func create_log_entry() log_entry {
 	return log_entry{
 		entry_id:        "",
@@ -78,6 +82,7 @@ func create_log_entry() log_entry {
 		attempt_number:  0,
 	}
 }
+
 func create_log_context(request_id string, component string) log_context {
 	return log_context{
 		request_id:   request_id,
@@ -88,6 +93,7 @@ func create_log_context(request_id string, component string) log_context {
 		metadata:     make(map[string]interface{}),
 	}
 }
+
 func create_log_entry_batch() log_entry_batch {
 	return log_entry_batch{
 		entries:           make(log_entry[], 0, 100),
@@ -98,40 +104,51 @@ func create_log_entry_batch() log_entry_batch {
 		total_size_bytes:  0,
 	}
 }
+
 func (log_entry* e) set_message(msg string) {
 	e.message = msg
 }
+
 func (log_entry* e) set_level(level log_level) {
 	e.level = level
 }
+
 func (log_entry* e) set_component(comp string) {
 	e.component = comp
 }
+
 func (log_entry* e) set_trace_context(trace_id string, span_id string) {
 	e.trace_id = trace_id
 	e.span_id = span_id
 }
+
 func (log_entry* e) add_field(key string, value interface{}) {
 	e.fields[key] = value
 }
+
 func (log_entry* e) add_label(key string, value string) {
 	e.labels[key] = value
 }
+
 func (log_entry* e) set_error(code int32, msg string) {
 	e.error_code = code
 	e.error_message = msg
 	e.level = ERROR
 }
+
 func (log_entry* e) set_duration(ms int32) {
 	e.duration_ms = ms
 }
+
 func (log_entry_batch* b) add_entry(entry log_entry) {
 	b.entries = append(b.entries, entry)
 	b.total_entries++
 }
+
 func (log_entry_batch* b) get_entry_count() int32 {
 	return int32(len(b.entries))
 }
+
 func (log_entry_batch* b) clear() {
 	b.entries = make(log_entry[], 0, 100)
 	b.total_entries = 0

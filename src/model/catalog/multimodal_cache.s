@@ -23,6 +23,7 @@ struct mm_cache_entry {
 	time.Time last_accessed
 	time.Time expires_at
 }
+
 struct mm_cache_statistics {
 	int64 total_cache_size
 	int32 num_entries
@@ -34,6 +35,7 @@ struct mm_cache_statistics {
 	string eviction_policy
 	time.Time last_eviction
 }
+
 struct multimodal_cache {
 	sync.Mutex mu
 	map[string]*mm_cache_entry entries
@@ -46,6 +48,7 @@ struct multimodal_cache {
 	float64 ttl_seconds
 	time.Time created_at
 }
+
 func create_multimodal_cache(max_size int64) *multimodal_cache {
 	cache := *multimodal_cache{
 		entries:          make(map[string]*mm_cache_entry),
@@ -75,6 +78,7 @@ func create_multimodal_cache(max_size int64) *multimodal_cache {
 	cache.modality_index["fused"] = make(string[], 0)
 	return cache
 }
+
 func (multimodal_cache* mc) put(entry_id string, content_hash string, data interface{}, modality modality_type, size_bytes int64) error {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
@@ -124,6 +128,7 @@ func (multimodal_cache* mc) put(entry_id string, content_hash string, data inter
 	}
 	return nil
 }
+
 func (multimodal_cache* mc) get(entry_id string) (interface{}, error) {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
@@ -147,6 +152,7 @@ func (multimodal_cache* mc) get(entry_id string) (interface{}, error) {
 	mc.update_hit_rate()
 	return entry.cached_data, nil
 }
+
 func (multimodal_cache* mc) exists(entry_id string) bool {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
@@ -162,6 +168,7 @@ func (multimodal_cache* mc) exists(entry_id string) bool {
 	}
 	return true
 }
+
 func (multimodal_cache* mc) delete(entry_id string) error {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
@@ -174,6 +181,7 @@ func (multimodal_cache* mc) delete(entry_id string) error {
 	mc.stats.num_entries--
 	return nil
 }
+
 func (multimodal_cache* mc) evict_entries_internal(space_needed int64) error {
 	entries_to_remove := make([]*mm_cache_entry, 0)
 	for _, entry := range mc.entries {
@@ -204,6 +212,7 @@ func (multimodal_cache* mc) evict_entries_internal(space_needed int64) error {
 	}
 	return nil
 }
+
 func (multimodal_cache* mc) evict_one_internal() error {
 	if len(mc.entries) == 0 {
 		return fmt.Errorf("cache is empty")
@@ -236,6 +245,7 @@ func (multimodal_cache* mc) evict_one_internal() error {
 	}
 	return nil
 }
+
 func (multimodal_cache* mc) cleanup_expired_entries() int32 {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
@@ -255,6 +265,7 @@ func (multimodal_cache* mc) cleanup_expired_entries() int32 {
 	}
 	return removed_count
 }
+
 func (multimodal_cache* mc) get_entries_by_modality(modality modality_type) string[] {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
@@ -277,11 +288,13 @@ func (multimodal_cache* mc) get_entries_by_modality(modality modality_type) stri
 	}
 	return ids
 }
+
 func (multimodal_cache* mc) get_cache_stats() *mm_cache_statistics {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
 	return mc.stats
 }
+
 func (multimodal_cache* mc) update_hit_rate() {
 	total := mc.stats.cache_hits + mc.stats.cache_misses
 	if total > 0 {
@@ -289,6 +302,7 @@ func (multimodal_cache* mc) update_hit_rate() {
 		mc.stats.miss_rate = float32(mc.stats.cache_misses) / float32(total)
 	}
 }
+
 func (multimodal_cache* mc) clear_cache() {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
@@ -305,6 +319,7 @@ func (multimodal_cache* mc) clear_cache() {
 	mc.modality_index["video"] = make(string[], 0)
 	mc.modality_index["fused"] = make(string[], 0)
 }
+
 func (multimodal_cache* mc) set_eviction_policy(policy mm_cache_policy) {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
@@ -320,6 +335,7 @@ func (multimodal_cache* mc) set_eviction_policy(policy mm_cache_policy) {
 	}
 	mc.stats.eviction_policy = policy_name
 }
+
 func (multimodal_cache* mc) set_ttl(ttl_seconds float64) {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()

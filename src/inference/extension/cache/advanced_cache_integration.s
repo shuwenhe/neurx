@@ -18,6 +18,7 @@ func init_advanced_kv_cache(string node_id) int {
     print("[AdvancedCacheIntegration] - Compression and adaptive policies\n")
     return 1
 }
+
 func advanced_cache_query_kv(int[] prompt_tokens) int[] {
     if g_advanced_cache_enabled == 0 {
         return int[]{cap: 0}
@@ -25,6 +26,7 @@ func advanced_cache_query_kv(int[] prompt_tokens) int[] {
     string prefix_hash = compute_prefix_hash(prompt_tokens, 100)
     return advanced_cache_query(g_advanced_cache_engine, prefix_hash)
 }
+
 func advanced_cache_store_kv(int[] prompt_tokens, float[] kv_data) int {
     if g_advanced_cache_enabled == 0 {
         return -1
@@ -38,40 +40,47 @@ func advanced_cache_store_kv(int[] prompt_tokens, float[] kv_data) int {
     }
     return advanced_cache_store(g_advanced_cache_engine, prefix_hash, block_ids)
 }
+
 func advanced_cache_get_stats() string {
     if g_advanced_cache_enabled == 0 {
         return "[AdvancedCache] Disabled\n"
     }
     return advanced_cache_get_comprehensive_stats(g_advanced_cache_engine)
 }
+
 func advanced_cache_tick(int64 time_ms) {
     if g_advanced_cache_enabled == 0 {
         return
     }
     advanced_cache_tick(g_advanced_cache_engine, time_ms)
 }
+
 func advanced_cache_add_peer_node(string peer_id, string host, int port) {
     if g_advanced_cache_enabled == 0 {
         return
     }
     advanced_cache_add_peer(g_advanced_cache_engine, peer_id, host, port)
 }
+
 func advanced_cache_enable_distributed() {
     if g_advanced_cache_enabled == 0 {
         return
     }
     print("[AdvancedCacheIntegration] Distributed cache enabled\n")
 }
+
 func advanced_cache_get_hit_rate() float {
     if g_advanced_cache_enabled == 0 {
         return 0.0
     }
     return advanced_cache_get_hit_rate(g_advanced_cache_engine)
 }
+
 func advanced_cache_disable() {
     g_advanced_cache_enabled = 0
     print("[AdvancedCacheIntegration] Advanced cache disabled\n")
 }
+
 func advanced_cache_enable() {
     if g_advanced_cache_initialized == 0 {
         print("[AdvancedCacheIntegration] Not initialized\n")
@@ -80,6 +89,7 @@ func advanced_cache_enable() {
     g_advanced_cache_enabled = 1
     print("[AdvancedCacheIntegration] Advanced cache enabled\n")
 }
+
 func advanced_cache_clear() {
     if g_advanced_cache_enabled == 0 {
         return
@@ -89,6 +99,7 @@ func advanced_cache_clear() {
     tiered_storage_clear(g_advanced_cache_engine.storage)
     print("[AdvancedCacheIntegration] All caches cleared\n")
 }
+
 func advanced_cache_get_detailed_report() string {
     string report = advanced_cache_get_stats()
     report = report + "\n[Hash Table Performance Tuning]\n"
@@ -113,14 +124,17 @@ func advanced_cache_get_detailed_report() string {
     }
     return report
 }
+
 func switch_to_legacy_cache() {
     advanced_cache_disable()
     print("[CacheIntegration] Switched back to legacy cache\n")
 }
+
 func switch_to_advanced_cache() {
     advanced_cache_enable()
     print("[CacheIntegration] Switched to advanced cache\n")
 }
+
 func is_advanced_cache_enabled() int {
     return g_advanced_cache_enabled
 }

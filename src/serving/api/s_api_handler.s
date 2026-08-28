@@ -4,11 +4,13 @@ struct api_request {
     string path
     string body
 }
+
 struct api_response {
     int status_code
     string status_message
     string response_body
 }
+
 func extract_json_string(string json, string key) string {
     string search = "\"" + key + "\":"
     int start_pos = -1
@@ -61,6 +63,7 @@ func extract_json_string(string json, string key) string {
     }
     return result
 }
+
 func extract_json_number(string json, string key) int {
     string search = "\"" + key + "\":"
     int start_pos = -1
@@ -114,6 +117,7 @@ func extract_json_number(string json, string key) int {
     }
     return result
 }
+
 func escape_json_string(string s) string {
     string result = ""
     int i = 0
@@ -136,6 +140,7 @@ func escape_json_string(string s) string {
     }
     return result
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -167,6 +172,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func handle_health_check() api_response {
     print("\n💚 processinghealthcheck请求\n")
     string body = "{"
@@ -181,6 +187,7 @@ func handle_health_check() api_response {
     resp.response_body = body
     return resp
 }
+
 func handle_list_models() api_response {
     print("\n📋 processingmodel列table请求\n")
     string body = "{"
@@ -199,6 +206,7 @@ func handle_list_models() api_response {
     resp.response_body = body
     return resp
 }
+
 func handle_chat_completion(api_request req) api_response {
     print("\n🤖 processing聊天complete请求\n")
     string model = extract_json_string(req.body, "model")
@@ -246,6 +254,7 @@ func handle_chat_completion(api_request req) api_response {
     resp.response_body = body
     return resp
 }
+
 func handle_error(int status, string message) api_response {
     print("\n❌ wrong误response: " + int_to_string(status) + " " + message + "\n")
     string body = "{"
@@ -260,6 +269,7 @@ func handle_error(int status, string message) api_response {
     resp.response_body = body
     return resp
 }
+
 func route_request(api_request req) api_response {
     print("\n" + "="*60 + "\n")
     print("📨 路由请求\n")
@@ -276,6 +286,7 @@ func route_request(api_request req) api_response {
         return handle_error(404, "endpoint未找到")
     }
 }
+
 func print_response(api_response resp) {
     print("\n" + "─"*60 + "\n")
     print("✅ API response\n")
@@ -285,6 +296,7 @@ func print_response(api_response resp) {
     print(resp.response_body + "\n")
     print("="*60 + "\n")
 }
+
 func main() {
     print("\n╔════════════════════════════════════════════════════════════╗\n")
     print("║           🌐 NeurX REST API processing器 (pure S)                ║\n")

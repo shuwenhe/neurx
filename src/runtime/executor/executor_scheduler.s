@@ -8,6 +8,7 @@ struct ExecutionScheduler {
     schedule_count      i64
     total_scheduled     i64
 }
+
 func NewExecutionScheduler(policy i32) *ExecutionScheduler {
     return *ExecutionScheduler{
         scheduling_policy: policy,
@@ -15,12 +16,15 @@ func NewExecutionScheduler(policy i32) *ExecutionScheduler {
         total_scheduled: 0,
     }
 }
+
 func (ExecutionScheduler* es) AddPrefillSequence(sequence_id string) {
     es.prefill_sequences = append(es.prefill_sequences, sequence_id)
 }
+
 func (ExecutionScheduler* es) AddDecodeSequence(sequence_id string) {
     es.decode_sequences = append(es.decode_sequences, sequence_id)
 }
+
 func (ExecutionScheduler* es) PlanIteration(max_prefill i32, max_decode i32) IterationSchedule {
     schedule := IterationSchedule{
         iteration_id: es.schedule_count,
@@ -41,6 +45,7 @@ func (ExecutionScheduler* es) PlanIteration(max_prefill i32, max_decode i32) Ite
     es.total_scheduled += i64(schedule.prefill_count + schedule.decode_count)
     return schedule
 }
+
 func (ExecutionScheduler* es) schedule_fcfs(max_prefill i32, max_decode i32) IterationSchedule {
     schedule := IterationSchedule{
         iteration_id: es.schedule_count,
@@ -61,6 +66,7 @@ func (ExecutionScheduler* es) schedule_fcfs(max_prefill i32, max_decode i32) Ite
     }
     return schedule
 }
+
 func (ExecutionScheduler* es) schedule_priority(max_prefill i32, max_decode i32) IterationSchedule {
     schedule := IterationSchedule{
         iteration_id: es.schedule_count,
@@ -71,6 +77,7 @@ func (ExecutionScheduler* es) schedule_priority(max_prefill i32, max_decode i32)
     }
     return schedule
 }
+
 func (ExecutionScheduler* es) schedule_sjf(max_prefill i32, max_decode i32) IterationSchedule {
     schedule := IterationSchedule{
         iteration_id: es.schedule_count,
@@ -81,6 +88,7 @@ func (ExecutionScheduler* es) schedule_sjf(max_prefill i32, max_decode i32) Iter
     }
     return schedule
 }
+
 func (ExecutionScheduler* es) schedule_dynamic(max_prefill i32, max_decode i32) IterationSchedule {
     schedule := IterationSchedule{
         iteration_id: es.schedule_count,
@@ -99,6 +107,7 @@ func (ExecutionScheduler* es) schedule_dynamic(max_prefill i32, max_decode i32) 
     }
     return schedule
 }
+
 func (ExecutionScheduler* es) CombineIterations(max_total i32) IterationSchedule {
     schedule := IterationSchedule{
         iteration_id: es.schedule_count,
@@ -117,9 +126,11 @@ func (ExecutionScheduler* es) CombineIterations(max_total i32) IterationSchedule
     }
     return schedule
 }
+
 func (ExecutionScheduler* es) GetPendingSequenceCount() i32 {
     return i32(len(es.prefill_sequences) + len(es.decode_sequences))
 }
+
 func (ExecutionScheduler* es) GetScheduleStatistics() map[string]i64 {
     stats := make(map[string]i64)
     stats["schedules_created"] = es.schedule_count
@@ -128,6 +139,7 @@ func (ExecutionScheduler* es) GetScheduleStatistics() map[string]i64 {
     stats["pending_decode"] = i64(len(es.decode_sequences))
     return stats
 }
+
 func (ExecutionScheduler* es) ClearCompleted(completed_ids string[]) {
     for i := 0; i < len(completed_ids); i++ {
         completed := completed_ids[i]
@@ -147,6 +159,7 @@ func (ExecutionScheduler* es) ClearCompleted(completed_ids string[]) {
         es.decode_sequences = new_decode
     }
 }
+
 func (ExecutionScheduler* es) EstimateLatency(schedule IterationSchedule) i32 {
     prefill_latency := schedule.prefill_count * 1
     decode_latency := schedule.decode_count * 1
@@ -156,6 +169,7 @@ func (ExecutionScheduler* es) EstimateLatency(schedule IterationSchedule) i32 {
     }
     return total
 }
+
 func (ExecutionScheduler* es) GetNextBatch(batch_type i32, batch_size i32) string[] {
     batch := make(string[], 0)
     if batch_type == PHASE_PREFILL {

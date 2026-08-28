@@ -1,14 +1,21 @@
 package neurx.inference.llm.streaming_session
 func session_ok() int { 0 }
+
 func session_not_found() int { 1 }
+
 func session_duplicate() int { 2 }
+
 func session_busy() int { 3 }
+
 func session_streaming_rewrite_forbidden() int { 4 }
+
 func session_invalid_parent() int { 5 }
+
 struct streaming_session_config {
     int capacity
     int default_timeout_ms
 }
+
 struct streaming_session_state {
     streaming_session_config config
     int[] session_ids
@@ -31,6 +38,7 @@ struct streaming_session_state {
     int timed_out
     int rejected
 }
+
 struct session_update_result {
     streaming_session_state state
     int session_slot
@@ -39,12 +47,14 @@ struct session_update_result {
     bool accepted
     bool released_kv
 }
+
 func session_int_array(int capacity) int[] {
     int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
+
 func new_streaming_session_state(streaming_session_config config) streaming_session_state {
     if config.capacity <= 0 { config.capacity = 1 }
     if config.capacity > 1024 { config.capacity = 1024 }
@@ -55,6 +65,7 @@ func new_streaming_session_state(streaming_session_config config) streaming_sess
         session_count: 0, opened: 0, closed: 0, timed_out: 0, rejected: 0,
     }
 }
+
 func session_find(streaming_session_state state, int session_id) int {
     int i = 0
     for i < state.config.capacity {
@@ -63,9 +74,11 @@ func session_find(streaming_session_state state, int session_id) int {
     }
     0 - 1
 }
+
 func session_result(streaming_session_state state, int slot, int context_tokens, int status, bool accepted, bool released_kv) session_update_result {
     session_update_result {state: state, session_slot: slot, context_tokens: context_tokens, status: status, accepted: accepted, released_kv: released_kv}
 }
+
 func session_open(streaming_session_state state, int session_id, bool streaming, int timeout_ms, int now_ms) session_update_result {
     if session_id <= 0 || session_find(state, session_id) >= 0 { state.rejected = state.rejected + 1; return session_result(state, 0 - 1, 0, session_duplicate(), false, false) }
     int slot = 0 - 1
@@ -86,6 +99,7 @@ func session_open(streaming_session_state state, int session_id, bool streaming,
     state.opened = state.opened + 1
     session_result(state, slot, 0, session_ok(), true, false)
 }
+
 func session_begin_request(streaming_session_state state, int session_id, int request_id, int input_tokens, int parent_request_id, bool replace, bool drop_previous_output, int offset, int now_ms) session_update_result {
     int slot = session_find(state, session_id)
     if slot < 0 { state.rejected = state.rejected + 1; return session_result(state, slot, 0, session_not_found(), false, false) }
@@ -105,6 +119,7 @@ func session_begin_request(streaming_session_state state, int session_id, int re
     state.last_active_ms[slot] = now_ms
     session_result(state, slot, context, session_ok(), true, false)
 }
+
 func session_release_slot(streaming_session_state state, int slot) session_update_result {
     if slot < 0 || slot >= state.config.capacity || state.active[slot] == 0 { return session_result(state, slot, 0, session_not_found(), false, false) }
     bool released = state.kv_pages[slot] > 0 || state.kv_committed_tokens[slot] > 0
@@ -117,6 +132,7 @@ func session_release_slot(streaming_session_state state, int slot) session_updat
     state.closed = state.closed + 1
     session_result(state, slot, 0, session_ok(), true, released)
 }
+
 func session_finish_request(streaming_session_state state, int session_id, int request_id, int output_tokens, int kv_committed_tokens, int kv_pages, int now_ms) session_update_result {
     int slot = session_find(state, session_id)
     if slot < 0 { return session_result(state, slot, 0, session_not_found(), false, false) }
@@ -132,6 +148,7 @@ func session_finish_request(streaming_session_state state, int session_id, int r
     if state.close_on_finish[slot] == 1 { return session_release_slot(state, slot) }
     session_result(state, slot, state.committed_origin_tokens[slot] + state.committed_output_tokens[slot], session_ok(), true, false)
 }
+
 func session_abort_request(streaming_session_state state, int session_id, int request_id, int now_ms) session_update_result {
     int slot = session_find(state, session_id)
     if slot < 0 { return session_result(state, slot, 0, session_not_found(), false, false) }
@@ -143,12 +160,14 @@ func session_abort_request(streaming_session_state state, int session_id, int re
     if state.close_on_finish[slot] == 1 { return session_release_slot(state, slot) }
     session_result(state, slot, state.committed_origin_tokens[slot] + state.committed_output_tokens[slot], session_ok(), true, false)
 }
+
 func session_close(streaming_session_state state, int session_id) session_update_result {
     int slot = session_find(state, session_id)
     if slot < 0 { return session_result(state, slot, 0, session_not_found(), false, false) }
     if state.inflight[slot] == 1 { state.close_on_finish[slot] = 1; return session_result(state, slot, 0, session_busy(), true, false) }
     session_release_slot(state, slot)
 }
+
 func session_reap_timeouts(streaming_session_state state, int now_ms) streaming_session_state {
     streaming_session_state current = state
     int i = 0

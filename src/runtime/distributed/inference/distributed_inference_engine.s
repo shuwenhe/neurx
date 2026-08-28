@@ -14,6 +14,7 @@ struct distributed_inference_config {
     int num_layers
     int hidden_dim
 }
+
 struct distributed_inference_state {
     distributed_inference_config config
     float[][] model_weights
@@ -22,18 +23,21 @@ struct distributed_inference_state {
     float[][] kv_cache_local
     int kv_cache_head_size
 }
+
 struct inference_request {
     int[] input_ids
     int seq_len
     string request_id
     int batch_idx
 }
+
 struct inference_response {
     int[] output_ids
     float[] logits
     int generated_len
     string request_id
 }
+
 func init_distributed_inference_config(
     int world_size,
     int rank,
@@ -68,6 +72,7 @@ func init_distributed_inference_config(
     }
     cfg
 }
+
 func init_distributed_inference_state(
     distributed_inference_config cfg
 ) distributed_inference_state {
@@ -89,6 +94,7 @@ func init_distributed_inference_state(
     state.kv_cache_head_size = cfg.hidden_dim / 8
     state
 }
+
 func forward_tensor_parallel(
     distributed_inference_state state,
     float[] input
@@ -108,6 +114,7 @@ func forward_tensor_parallel(
     }
     local_output
 }
+
 func forward_pipeline_parallel(
     distributed_inference_state state,
     float[] input
@@ -129,6 +136,7 @@ func forward_pipeline_parallel(
     }
     hidden
 }
+
 func forward_hybrid_parallel(
     distributed_inference_state state,
     float[] input
@@ -137,6 +145,7 @@ func forward_hybrid_parallel(
     float[] pp_output = forward_pipeline_parallel(state, tp_output)
     pp_output
 }
+
 func forward_inference(
     distributed_inference_state state,
     inference_request req
@@ -162,6 +171,7 @@ func forward_inference(
     resp.generated_len = 1
     resp
 }
+
 func update_kv_cache(
     distributed_inference_state state,
     int layer_idx,
@@ -175,11 +185,13 @@ func update_kv_cache(
         state.kv_cache_local = append(state.kv_cache_local, key)
     }
 }
+
 func synchronize_inference(
     distributed_inference_state state
 ) {
     println("Synchronizing inference across ranks...")
 }
+
 func log_inference_stats(
     distributed_inference_state state,
     int num_requests,
@@ -194,6 +206,7 @@ func log_inference_stats(
         state.config.hidden_dim)
     printf("  Strategy: %s\n", state.config.sharding_strategy)
 }
+
 func main() {
     println("NeurX Distributed Inference Engine")
     println("====================================")

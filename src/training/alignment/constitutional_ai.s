@@ -3,16 +3,19 @@ use neurx.model.llm.gpt.{
     model_config, language_model,
     gpt_generate_greedy, gpt_generate_topk
 }
+
 struct constitutional_principle {
     string id
     string critique_request
     string revision_request
     int severity
 }
+
 struct constitution {
     []constitutional_principle principles
     int num_principles
 }
+
 func default_constitution() constitution {
     []constitutional_principle ps = []constitutional_principle{cap: 8}
     ps[0] = constitutional_principle {
@@ -65,6 +68,7 @@ func default_constitution() constitution {
     }
     constitution { principles: ps, num_principles: 8 }
 }
+
 struct cai_preference_pair {
     int[] prompt_tokens
     int[] chosen_tokens
@@ -73,16 +77,23 @@ struct cai_preference_pair {
     int severity
     float critique_strength
 }
+
 struct cai_batch {
     []cai_preference_pair pairs
     int num_pairs
     int num_revised
 }
+
 func cai_token_prompt_start() int { 50001 }
+
 func cai_token_response_start() int { 50002 }
+
 func cai_token_critique_start() int { 50003 }
+
 func cai_token_revision_start() int { 50004 }
+
 func cai_token_principle_base() int { 50100 }
+
 func cai_concat(int[] a, int[] b) int[] {
     int n = len(a) + len(b)
     int[] out = int[]{cap: n}
@@ -92,11 +103,13 @@ func cai_concat(int[] a, int[] b) int[] {
     for j < len(b) { out[len(a) + j] = b[j]; j = j + 1 }
     out
 }
+
 func cai_single(int tok) int[] {
     int[] out = int[]{cap: 1}
     out[0] = tok
     out
 }
+
 func cai_critique_revise(
     language_model model,
     int[] prompt_tokens,
@@ -124,6 +137,7 @@ func cai_critique_revise(
         critique_strength: critique_strength,
     }
 }
+
 func cai_estimate_critique_strength(int[] critique, int max_len) float {
     if max_len <= 0 {
         return 0.0
@@ -134,6 +148,7 @@ func cai_estimate_critique_strength(int[] critique, int max_len) float {
     }
     ratio
 }
+
 func cai_generate_preferences(
     language_model model,
     int[][] prompts,
@@ -168,12 +183,14 @@ func cai_generate_preferences(
         num_revised: num_revised,
     }
 }
+
 struct cai_flat_batch {
     int[] chosen_ids
     int[] rejected_ids
     int batch_size
     int seq_len
 }
+
 func cai_pad_sequence(int[] prompt, int[] response, int seq_len, int pad_id) int[] {
     int[] seq = int[]{cap: seq_len}
     int idx = 0
@@ -195,6 +212,7 @@ func cai_pad_sequence(int[] prompt, int[] response, int seq_len, int pad_id) int
     }
     seq
 }
+
 func cai_to_flat_batch(cai_batch batch, int seq_len, int pad_id) cai_flat_batch {
     int n = batch.num_pairs
     int[] chosen_ids = int[]{cap: n * seq_len}
@@ -219,6 +237,7 @@ func cai_to_flat_batch(cai_batch batch, int seq_len, int pad_id) cai_flat_batch 
         seq_len: seq_len,
     }
 }
+
 struct cai_stats {
     int total_prompts
     int revised_count
@@ -226,6 +245,7 @@ struct cai_stats {
     float avg_critique_strength
     float weighted_severity
 }
+
 func cai_compute_stats(cai_batch batch) cai_stats {
     int n = batch.num_pairs
     if n == 0 {

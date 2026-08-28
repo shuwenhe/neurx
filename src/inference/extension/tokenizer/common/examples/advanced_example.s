@@ -28,6 +28,7 @@ func MultiSentenceEncodingExample() {
     println("Encoded tokens (A + [SEP] + B):", result.tokens)
     println("Total sequence length:", len(result.tokens))
 }
+
 func PaddingTruncationExample() {
     println("\n=== Padding and Truncation Example ===\n")
     config := types.TokenizerConfig{
@@ -60,6 +61,7 @@ func PaddingTruncationExample() {
     lengths := utils.GetBatchLengths(batch_padded)
     println("  Lengths after padding:", lengths)
 }
+
 func CachePerformanceExample() {
     println("\n=== Cache Performance Analysis ===\n")
     cache_lru := cache.NewTokenCache(100000, "lru")
@@ -89,6 +91,7 @@ func CachePerformanceExample() {
     println("  Misses:", lru_stats.total_misses)
     println("  Evictions:", lru_stats.total_evictions)
 }
+
 func SpecialTokenProcessingExample() {
     println("\n=== Special Token Processing Example ===\n")
     mgr := special_tokens.NewSpecialTokenManager()
@@ -113,6 +116,7 @@ func SpecialTokenProcessingExample() {
     println("Instruction tokens:", instruction_count)
     println("Boundary tokens:", boundary_count)
 }
+
 func TokenSequenceAnalysisExample() {
     println("\n=== Token Sequence Analysis Example ===\n")
     tokens := make(i32[], 0)
@@ -140,6 +144,7 @@ func TokenSequenceAnalysisExample() {
     println("  Avg token value:", stats["avg_token_value"])
     println("  Diversity ratio:", stats["diversity_ratio"])
 }
+
 func EncodingOptionsExample() {
     println("\n=== Encoding Options Example ===\n")
     config := types.TokenizerConfig{
@@ -171,6 +176,7 @@ func EncodingOptionsExample() {
     println("  Tokens:", result2.tokens)
     println("  Length:", len(result2.tokens))
 }
+
 func PerformanceBenchmarkingExample() {
     println("\n=== Performance Benchmarking Example ===\n")
     config := types.TokenizerConfig{
@@ -196,6 +202,7 @@ func PerformanceBenchmarkingExample() {
     println("  Cache misses:", stats.cache_misses)
     println("  Avg tokens per sequence:", stats.avg_tokens_per_sequence)
 }
+
 func main() {
     println("╔════════════════════════════════════════════════════════════╗")
     println("║         NeurX Tokenizers - Advanced Examples              ║")

@@ -25,6 +25,7 @@ func create_lora_config(
         target_modules: string[]{"q_proj", "v_proj", "k_proj", "o_proj"},
     }
 }
+
 func initialize_lora_weights(
     config lora_adapter_config
 ) lora_weights {
@@ -58,15 +59,18 @@ func initialize_lora_weights(
         use_dropout: false,
     }
 }
+
 func gaussian_random(mean float, std float) float {
     float u1 = frand_approx()
     float u2 = frand_approx()
     float z0 = sqrt_f(-2.0 * log_f(u1)) * cos_f(6.28318530718 * u2)
     return mean + std * z0
 }
+
 func frand_approx() float {
     return 0.5
 }
+
 func sqrt_f(x float) float {
     if x <= 0.0 {
         return 0.0
@@ -79,6 +83,7 @@ func sqrt_f(x float) float {
     }
     return guess
 }
+
 func exp_f(x float) float {
     float result = 1.0
     float term = 1.0
@@ -90,6 +95,7 @@ func exp_f(x float) float {
     }
     return result
 }
+
 func log_f(x float) float {
     if x <= 0.0 {
         return -10.0
@@ -106,6 +112,7 @@ func log_f(x float) float {
     }
     return 2.0 * y
 }
+
 func cos_f(x float) float {
     float result = 1.0
     float term = 1.0
@@ -118,6 +125,7 @@ func cos_f(x float) float {
     }
     return result
 }
+
 func sin_f(x float) float {
     float result = 0.0
     float term = x
@@ -131,6 +139,7 @@ func sin_f(x float) float {
     }
     return result
 }
+
 func create_adaptive_batch_config() adaptive_batch_config {
     adaptive_batch_config{
         target_batch_size: 32,
@@ -141,12 +150,15 @@ func create_adaptive_batch_config() adaptive_batch_config {
         max_batch_size: 128,
     }
 }
+
 func create_empty_stats() map[string]int {
     return map[string]int{}
 }
+
 func create_empty_float_stats() map[string]float {
     return map[string]float{}
 }
+
 func bool_to_str(b bool) string {
     if b {
         return "true"
@@ -154,6 +166,7 @@ func bool_to_str(b bool) string {
         return "false"
     }
 }
+
 func int_to_str(n int) string {
     if n == 0 {
         return "0"
@@ -186,6 +199,7 @@ func int_to_str(n int) string {
     }
     return s
 }
+
 func make_digit_str(d int) string {
     if d == 0 {
         return "0"
@@ -209,6 +223,7 @@ func make_digit_str(d int) string {
         return "9"
     }
 }
+
 func print_array(name string, arr float[], limit int) {
     print(name + " [" + int_to_str(len(arr)) + " elements]:")
     int i = 0
@@ -220,6 +235,7 @@ func print_array(name string, arr float[], limit int) {
         print("  ... (" + int_to_str(len(arr) - limit) + " more)")
     }
 }
+
 func float_to_str(f float) string {
     if f == 0.0 {
         return "0.0"
@@ -234,6 +250,7 @@ func float_to_str(f float) string {
     result = result + ".0"
     return result
 }
+
 struct lora_adapter_config {
     string adapter_id
     string adapter_path
@@ -251,6 +268,7 @@ struct lora_adapter_config {
     string[] modules_to_save
     string[] target_modules
 }
+
 struct lora_weights {
     int rank
     float[] lora_a
@@ -258,6 +276,7 @@ struct lora_weights {
     float scaling
     bool use_dropout
 }
+
 struct lora_cache_entry {
     lora_weights weights
     int64 last_access_time
@@ -265,6 +284,7 @@ struct lora_cache_entry {
     bool is_pinned
     int size_mb
 }
+
 struct adaptive_batch_config {
     int target_batch_size
     int max_adapters_per_batch
@@ -273,6 +293,7 @@ struct adaptive_batch_config {
     int min_batch_size
     int max_batch_size
 }
+
 struct lora_request {
     string request_id
     string adapter_id
@@ -283,18 +304,21 @@ struct lora_request {
     int layer_idx
     float urgency_score
 }
+
 struct lora_inference_result {
     string request_id
     bool success
     float[] output_hidden
     int64 inference_time_ms
 }
+
 struct adapter_queue {
     string adapter_id
     []lora_request requests
     int priority
     int total_processed
 }
+
 struct lora_model_config {
     int hidden_dim
     int num_layers
@@ -305,6 +329,7 @@ struct lora_model_config {
     bool enable_weight_merging
     string inference_mode
 }
+
 func main() {
     print("✓ LoRA Support Functions Library")
     print("  - Config creation helpers")

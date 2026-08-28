@@ -5,6 +5,7 @@ struct anthropic_message {
     role    string
     content string
 }
+
 struct anthropic_request {
     model             string
     messages          []anthropic_message
@@ -16,6 +17,7 @@ struct anthropic_request {
     system_prompt      string
     stream            bool
 }
+
 struct anthropic_response {
     id        string
     type      string
@@ -25,6 +27,7 @@ struct anthropic_response {
     stop_reason string
     usage     map[string]int32
 }
+
 struct cohere_request {
     model             string
     prompt            string
@@ -38,29 +41,35 @@ struct cohere_request {
     return_likelihoods string
     stream            bool
 }
+
 struct cohere_response {
     generations       []map[string]interface{}
     id                string
 }
+
 struct anthropic_api {
     engine            *engine.llm_engine
     api_key            string
     api_version        string
 }
+
 struct cohere_api {
     engine            *engine.llm_engine
     api_key            string
     api_version        string
 }
+
 func new_anthropic_api(eng *engine.llm_engine) *anthropic_api {
     return *anthropic_api{
         engine:     eng,
         api_version: "2023-06-01",
     }
 }
+
 func (anthropic_api* aa) set_api_key(api_key string) {
     aa.api_key = api_key
 }
+
 func (anthropic_api* aa) create_message(req anthropic_request) (*anthropic_response, error) {
     if req.model == "" {
         return nil, core.Errorf("model not specified")
@@ -109,6 +118,7 @@ func (anthropic_api* aa) create_message(req anthropic_request) (*anthropic_respo
     }
     return response, nil
 }
+
 func (anthropic_api* aa) create_message_stream(req anthropic_request) (chan *anthropic_response, error) {
     resp_chan := make(chan *anthropic_response, 100)
     go func() {
@@ -134,15 +144,18 @@ func (anthropic_api* aa) create_message_stream(req anthropic_request) (chan *ant
     }()
     return resp_chan, nil
 }
+
 func new_cohere_api(eng *engine.llm_engine) *cohere_api {
     return *cohere_api{
         engine:     eng,
         api_version: "2024-08-01",
     }
 }
+
 func (cohere_api* ca) set_api_key(api_key string) {
     ca.api_key = api_key
 }
+
 func (cohere_api* ca) generate(req cohere_request) (*cohere_response, error) {
     if req.model == "" {
         return nil, core.Errorf("model not specified")
@@ -176,6 +189,7 @@ func (cohere_api* ca) generate(req cohere_request) (*cohere_response, error) {
     }
     return response, nil
 }
+
 func (cohere_api* ca) generate_stream(req cohere_request) (chan *cohere_response, error) {
     resp_chan := make(chan *cohere_response, 100)
     go func() {
@@ -187,6 +201,7 @@ func (cohere_api* ca) generate_stream(req cohere_request) (chan *cohere_response
     }()
     return resp_chan, nil
 }
+
 func convert_openai_to_anthropic(messages int[]erface{}, model string) anthropic_request {
     anthropic_messages := make([]anthropic_message, 0)
     for _, msg := range messages {
@@ -201,12 +216,14 @@ func convert_openai_to_anthropic(messages int[]erface{}, model string) anthropic
         messages: anthropic_messages,
     }
 }
+
 func convert_openai_to_cohere(prompt string, model string) cohere_request {
     return cohere_request{
         model:  model,
         prompt: prompt,
     }
 }
+
 func convert_anthropic_to_openai(anthropic_response* resp) map[string]interface{} {
     result := make(map[string]interface{})
     result["id"] = resp.id
@@ -228,6 +245,7 @@ func convert_anthropic_to_openai(anthropic_response* resp) map[string]interface{
     result["usage"] = resp.usage
     return result
 }
+
 func convert_cohere_to_openai(resp *cohere_response, model string) map[string]interface{} {
     result := make(map[string]interface{})
     result["id"] = resp.id

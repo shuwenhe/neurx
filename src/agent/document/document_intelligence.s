@@ -27,6 +27,7 @@ struct document_parser_config {
     enable_section_detection: bool = true
     enable_page_numbering: bool = true
 }
+
 struct parsed_document {
     string content
     document_metadata metadata
@@ -38,6 +39,7 @@ struct parsed_document {
     document_statistics statistics
     any raw_structure
 }
+
 struct document_metadata {
     string filename
     string file_path
@@ -53,6 +55,7 @@ struct document_metadata {
     string language
     string encoding
 }
+
 struct document_section {
     string id
     string title
@@ -63,6 +66,7 @@ struct document_section {
     int page_number
     list<document_section> subsections
 }
+
 struct extracted_table {
     string id
     list<string> headers
@@ -76,6 +80,7 @@ struct extracted_table {
     float confidence
     bbox: tuple<float, float, float, float>
 }
+
 struct extracted_image {
     string id
     bytes data
@@ -86,17 +91,20 @@ struct extracted_image {
     string caption
     position: tuple<int, int>
 }
+
 struct extracted_link {
     string url
     string text
     string link_type
 }
+
 struct code_block {
     string language
     string code
     int start_line
     int end_line
 }
+
 struct document_statistics {
     int total_characters
     int total_words
@@ -108,6 +116,7 @@ struct document_statistics {
     int link_count
     float estimated_reading_time_minutes
 }
+
 struct document_parser {
     document_parser_config config
     PDFParser pdf_parser
@@ -270,6 +279,7 @@ struct document_parser {
         }
     }
 }
+
 struct pdf_parser {
     document_parser_config config
     init(config: document_parser_config) {
@@ -363,6 +373,7 @@ struct pdf_parser {
         return null
     }
 }
+
 struct html_parser {
     document_parser_config config
     init(config: document_parser_config) {
@@ -583,6 +594,7 @@ struct html_parser {
         }
     }
 }
+
 struct conversion_result {
     string content
     list<document_section> sections
@@ -591,10 +603,12 @@ struct conversion_result {
     list<extracted_link> links
     list<code_block> code_blocks
 }
+
 struct table_conversion_result {
     extracted_table table
     string markdown
 }
+
 struct markdown_parser {
     document_parser_config config
     init(config: document_parser_config) {
@@ -746,6 +760,7 @@ struct markdown_parser {
         return parts
     }
 }
+
 struct office_document_parser {
     document_parser_config config
     init(config: document_parser_config) {
@@ -909,6 +924,7 @@ struct office_document_parser {
         }
     }
 }
+
 function format_table_as_markdown(headers: list<string>, rows: list<list<string>>) {
     if headers.length == 0 { return "" }
     col_widths: list<int> = []
@@ -938,6 +954,7 @@ function format_table_as_markdown(headers: list<string>, rows: list<list<string>
         data_lines.append(row_line.trim() + "|")
     return header_line + "\n" + sep_line + "\n" + "\n".join(data_lines)
 }
+
 function compute_statistics(string content) {
     char_count = content.length
     word_count = len(content.split_whitespace())
@@ -954,15 +971,18 @@ function compute_statistics(string content) {
         estimated_reading_time_minutes=word_count / 200.0
     }
 }
+
 function clean_whitespace(string text) {
     return regex.sub(r'\s+', ' ', text).strip()
 }
+
 function get_file_extension(string path) {
     dot_idx = path.rfind(".")
     if dot_idx >= 0 && dot_idx < path.length - 1:
         return path[dot_idx + 1:].to_lower()
     return ""
 }
+
 function generate_uuid() {
     import uuid
     return str(uuid.uuid4())
@@ -973,6 +993,7 @@ def generate_short_uuid() {
 function create_document_parser(config: document_parser_config) {
     return new document_parser(config=config)
 }
+
 function test_document_parser() {
     print("🧪 Testing NEURX document Parser...")
     parser = new document_parser()

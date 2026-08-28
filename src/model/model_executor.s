@@ -5,12 +5,14 @@ struct model_executor {
     string current_model
     string device
 }
+
 func new_model_executor(string device) model_executor {
     model_executor {
         current_model: "",
         device: device,
     }
 }
+
 func (model_executor* executor) load_model(string model_name, string device) bool {
     if model_name == "llama-7b" {
         executor.current_model = model_name
@@ -30,11 +32,13 @@ func (model_executor* executor) load_model(string model_name, string device) boo
     }
     return false
 }
+
 struct forward_output {
     logits: []f32
     bool kv_cache_updated
     int compute_time_ms
 }
+
 func (model_executor* executor) forward_pass(
     model_name: string,
     input_ids: *int[],
@@ -59,6 +63,7 @@ struct distributed_config {
     int rank
     string backend
 }
+
 func prepare_distributed_model(
     executor: *model_executor,
     model_name: string,
@@ -69,6 +74,7 @@ func prepare_distributed_model(
     }
     return true
 }
+
 struct execution_stats {
     string model_name
     int total_tokens
@@ -77,6 +83,7 @@ struct execution_stats {
     int peak_memory_mb
     f32 avg_batch_size
 }
+
 func collect_execution_stats(
     executor: *model_executor,
     string model_name
@@ -90,6 +97,7 @@ func collect_execution_stats(
         avg_batch_size: 0.0,
     }
 }
+
 func (model_executor* executor) switch_model(string model_name) bool {
     if model_name == "llama-7b" || model_name == "qwen2-7b" ||
        model_name == "mistral-7b" || model_name == "deepseek-7b" {
@@ -98,15 +106,18 @@ func (model_executor* executor) switch_model(string model_name) bool {
     }
     return false
 }
+
 func (model_executor* executor) get_current_model() string {
     return executor.current_model
 }
+
 func (model_executor* executor) unload_model(string model_name) bool {
     if executor.current_model == model_name {
         executor.current_model = ""
     }
     return true
 }
+
 struct model_info {
     string name
     string model_type
@@ -115,6 +126,7 @@ struct model_info {
     int max_seq_len
     string attention_type
 }
+
 func get_model_info(string model_name) option[model_info] {
     if model_name == "llama-7b" {
         return Some(model_info {
@@ -158,6 +170,7 @@ func get_model_info(string model_name) option[model_info] {
     }
     return None
 }
+
 func main() {
     println("🤖 Model Executor - 30+ typemodelinferenceengine")
     println("=====================================")

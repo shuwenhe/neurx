@@ -18,6 +18,7 @@ struct distributed_inference_config {
     string backend
     int comm_backend_port
 }
+
 struct distributed_model_shards {
     float[][] weights
     float[][] biases
@@ -26,6 +27,7 @@ struct distributed_model_shards {
     int local_num_heads
     int vocab_size_local
 }
+
 struct distributed_kv_cache {
     float[][] key_cache
     float[][] value_cache
@@ -34,6 +36,7 @@ struct distributed_kv_cache {
     int head_size
     int max_cache_len
 }
+
 struct distributed_inference_request {
     int[] input_ids
     int seq_len
@@ -41,6 +44,7 @@ struct distributed_inference_request {
     int batch_idx
     int source_rank
 }
+
 struct distributed_inference_response {
     int[] output_ids
     float[] logits
@@ -48,12 +52,14 @@ struct distributed_inference_response {
     string request_id
     int dest_rank
 }
+
 struct communication_buffer {
     float[][] send_buffer
     float[][] recv_buffer
     int[] buffer_sizes
     int max_buffer_size
 }
+
 func new_distributed_inference_config(
     int world_size,
     int rank,
@@ -96,6 +102,7 @@ func new_distributed_inference_config(
     }
     cfg
 }
+
 func new_distributed_model_shards(
     distributed_inference_config cfg
 ) distributed_model_shards {
@@ -118,6 +125,7 @@ func new_distributed_model_shards(
     shards.biases = float[][]{}
     shards
 }
+
 func new_distributed_kv_cache(
     distributed_inference_config cfg
 ) distributed_kv_cache {
@@ -130,6 +138,7 @@ func new_distributed_kv_cache(
     cache.cache_batch_indices = int[]{}
     cache
 }
+
 func new_communication_buffer(int max_size) communication_buffer {
     communication_buffer buf
     buf.max_buffer_size = max_size
@@ -138,6 +147,7 @@ func new_communication_buffer(int max_size) communication_buffer {
     buf.buffer_sizes = int[]{}
     buf
 }
+
 func all_reduce_sum(
     float[][] local_data,
     distributed_inference_config cfg
@@ -148,6 +158,7 @@ func all_reduce_sum(
         float[][]{}
     }
 }
+
 func broadcast(
     float[][] data,
     int root,
@@ -159,6 +170,7 @@ func broadcast(
         float[][]{}
     }
 }
+
 func all_gather(
     float[] local_data,
     distributed_inference_config cfg
@@ -171,6 +183,7 @@ func all_gather(
     }
     data_from_all_ranks
 }
+
 func reduce_scatter(
     float[][] global_data,
     distributed_inference_config cfg
@@ -179,6 +192,7 @@ func reduce_scatter(
     float[] local_chunk
     local_chunk
 }
+
 func forward_tensor_parallel(
     float[] input_hidden,
     distributed_model_shards shards,
@@ -194,6 +208,7 @@ func forward_tensor_parallel(
     }
     local_output
 }
+
 func attention_tensor_parallel(
     float[] query,
     float[] key,
@@ -204,12 +219,14 @@ func attention_tensor_parallel(
     float[] output
     output
 }
+
 struct pipeline_stage {
     int stage_id
     int[] assigned_layers
     distributed_model_shards shards
     float[] activation_buffer
 }
+
 func forward_pipeline_parallel(
     float[] input_hidden,
     []pipeline_stage stages,
@@ -230,6 +247,7 @@ func forward_pipeline_parallel(
     }
     current_activation
 }
+
 func backward_pipeline_parallel(
     float[] grad_output,
     []pipeline_stage stages,
@@ -238,6 +256,7 @@ func backward_pipeline_parallel(
     float[] grad_input = grad_output
     grad_input
 }
+
 func forward_sequence_parallel(
     float[][] hidden_states,
     distributed_inference_config cfg,
@@ -256,6 +275,7 @@ func forward_sequence_parallel(
     all_gather(local_hidden_states[0], cfg)
     local_hidden_states
 }
+
 func compute_rank_mapping(
     string strategy,
     int world_size,
@@ -281,6 +301,7 @@ func compute_rank_mapping(
     }
     mapping
 }
+
 func run_distributed_inference(
     distributed_inference_request request,
     distributed_model_shards shards,
@@ -310,17 +331,20 @@ func run_distributed_inference(
     }
     response
 }
+
 func enable_overlap_communication(
     distributed_inference_config cfg
 ) bool {
     true
 }
+
 func optimize_gradient_accumulation(
     float[][] gradients,
     distributed_inference_config cfg
 ) float[][] {
     gradients
 }
+
 struct distributed_performance_metrics {
     float compute_time
     float communication_time
@@ -329,6 +353,7 @@ struct distributed_performance_metrics {
     float throughput
     float latency
 }
+
 func get_performance_metrics(
     distributed_inference_config cfg
 ) distributed_performance_metrics {
@@ -341,6 +366,7 @@ func get_performance_metrics(
     metrics.latency = 0.0
     metrics
 }
+
 func print_distributed_config(distributed_inference_config cfg) {
     println("=== Distributed Inference Config ===")
     println("World Size: ", cfg.world_size)
@@ -354,6 +380,7 @@ func print_distributed_config(distributed_inference_config cfg) {
     println("Max Seq Len: ", cfg.max_seq_len)
     println("Backend: ", cfg.backend)
 }
+
 func validate_distributed_config(distributed_inference_config cfg) bool {
     if cfg.world_size <= 0 {
         println("Error: world_size must be > 0")
@@ -373,6 +400,7 @@ func validate_distributed_config(distributed_inference_config cfg) bool {
     }
     true
 }
+
 func main() {
     distributed_inference_config cfg = new_distributed_inference_config(
         8,

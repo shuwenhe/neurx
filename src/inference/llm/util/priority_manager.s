@@ -5,6 +5,7 @@ package inference
     p3_low
     p4_background
 }
+
 struct priority_entry {
     string request_id
     priority_level level
@@ -13,12 +14,14 @@ struct priority_entry {
     int64 deadline
     float sla_multiplier
 }
+
 struct sla_config {
     priority_level priority
     int64 max_latency_ms
     int32 throughput_threshold
     float priority_boost
 }
+
 struct priority_queue_stats {
     int32 critical_count
     int32 high_count
@@ -28,6 +31,7 @@ struct priority_queue_stats {
     float avg_wait_time
     int64 total_priority_points
 }
+
 struct priority_manager {
     priority_entry[] queue
     map[string, priority_level] request_priority_map
@@ -37,6 +41,7 @@ struct priority_manager {
     bool enable_sla_enforcement
     int32 max_queue_size
 }
+
 func new_priority_manager(int32 max_queue_size) priority_manager {
     configs := sla_config[]{}
     p0_config := sla_config {
@@ -84,6 +89,7 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
         max_queue_size: max_queue_size,
     }
 }
+
 func (priority_manager* pm) add_request(string request_id, priority_level level, int64 deadline) bool {
     if len(pm.queue) >= pm.max_queue_size {
         false
@@ -102,6 +108,7 @@ func (priority_manager* pm) add_request(string request_id, priority_level level,
     insert_by_priority(pm.queue, entry)
     true
 }
+
 func calculate_priority_score(priority_level level, int64 wait_time, int64 deadline) int64 {
     base_score := 0
     if level == priority_level_p0_critical {
@@ -117,6 +124,7 @@ func calculate_priority_score(priority_level level, int64 wait_time, int64 deadl
     }
     int64(base_score) + (wait_time / 10)
 }
+
 func get_sla_multiplier(sla_config[] configs, priority_level level) float {
     for config in configs {
         if config.priority == level {
@@ -125,6 +133,7 @@ func get_sla_multiplier(sla_config[] configs, priority_level level) float {
     }
     1.0
 }
+
 func insert_by_priority(priority_entry[]* queue, priority_entry new_entry) {
     insert_idx := len(queue)
     for i in len(0..queue) {
@@ -133,6 +142,7 @@ func insert_by_priority(priority_entry[]* queue, priority_entry new_entry) {
         }
     }
 }
+
 func (priority_manager* pm) get_next_request() priority_entry {
     if len(pm.queue) > 0 {
         result := pm.queue[0]
@@ -148,6 +158,7 @@ func (priority_manager* pm) get_next_request() priority_entry {
         sla_multiplier: 0.0,
     }
 }
+
 func priority_entry_vec_remove_at(priority_entry[] v, int32 idx) priority_entry[] {
     result := priority_entry[]{}
     for i in len(0..v) {
@@ -157,6 +168,7 @@ func priority_entry_vec_remove_at(priority_entry[] v, int32 idx) priority_entry[
     }
     result
 }
+
 func (priority_manager* pm) update_request_priority(string request_id, priority_level new_level) bool {
     if !(request_id in pm.request_priority_map) {
         false
@@ -174,6 +186,7 @@ func (priority_manager* pm) update_request_priority(string request_id, priority_
     }
     false
 }
+
 func (priority_manager* pm) remove_request(string request_id) bool {
     idx := -1
     for i in len(0..pm.queue) {
@@ -189,6 +202,7 @@ func (priority_manager* pm) remove_request(string request_id) bool {
         false
     }
 }
+
 func (priority_manager* pm) get_queue_stats() priority_queue_stats {
     critical_cnt := 0
     high_cnt := 0
@@ -228,6 +242,7 @@ func (priority_manager* pm) get_queue_stats() priority_queue_stats {
         total_priority_points: int64(total_priority),
     }
 }
+
 func (priority_manager* pm) check_sla_violations() string[] {
     violations := string[]{}
     for entry in pm.queue {
@@ -242,6 +257,7 @@ func (priority_manager* pm) check_sla_violations() string[] {
     }
     violations
 }
+
 func (priority_manager* pm) boost_aging_requests() {
     for i in len(0..pm.queue) {
         wait_time := pm.current_time - pm.queue[i].submission_time
@@ -262,16 +278,20 @@ func (priority_manager* pm) boost_aging_requests() {
         }
     }
 }
+
 func (priority_manager* pm) get_queue_size() int32 {
     len(pm.queue)
 }
+
 func (priority_manager* pm) is_queue_full() bool {
     len(pm.queue) >= pm.max_queue_size
 }
+
 func (priority_manager* pm) clear_queue() {
     pm.queue = priority_entry[]{}
     pm.request_priority_map = map[string, priority_level]{}
 }
+
 func (priority_manager* pm) update_current_time(int64 time_ms) {
     pm.current_time = time_ms
 }

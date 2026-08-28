@@ -11,6 +11,7 @@ struct lora_model_config {
     bool enable_weight_merging
     string inference_mode
 }
+
 struct lora_integrated_model {
     lora_model_config config
     lora_adapter_manager adapter_manager
@@ -20,6 +21,7 @@ struct lora_integrated_model {
     string current_adapter_id
     int layer_idx
 }
+
 func new_lora_integrated_model(config lora_model_config) lora_integrated_model {
     if config.adapter_cache_size_mb <= 0 {
         config.adapter_cache_size_mb = 2048
@@ -39,6 +41,7 @@ func new_lora_integrated_model(config lora_model_config) lora_integrated_model {
         layer_idx: 0,
     }
 }
+
 func (lora_integrated_model* model) register_adapter(
     adapter_id string,
     adapter_path string,
@@ -55,15 +58,19 @@ func (lora_integrated_model* model) register_adapter(
     )
     return model.adapter_manager.load_adapter(config)
 }
+
 func (lora_integrated_model* model) unload_adapter(adapter_id string) bool {
     return model.adapter_manager.unload_adapter(adapter_id)
 }
+
 func (lora_integrated_model* model) pin_adapter(adapter_id string) bool {
     return model.adapter_manager.pin_adapter(adapter_id)
 }
+
 func (lora_integrated_model* model) unpin_adapter(adapter_id string) bool {
     return model.adapter_manager.unpin_adapter(adapter_id)
 }
+
 func (lora_integrated_model* model) switch_adapter(adapter_id string) bool {
     if !model.adapter_manager.switch_adapter(adapter_id) {
         return false
@@ -72,9 +79,11 @@ func (lora_integrated_model* model) switch_adapter(adapter_id string) bool {
     model.merged_weights_cache = map[string]float[]{}
     return true
 }
+
 func (lora_integrated_model* model) get_current_adapter() string {
     return model.current_adapter_id
 }
+
 func (lora_integrated_model* model) forward_with_lora(
     float[] hidden_states,
     string adapter_id
@@ -108,12 +117,14 @@ func (lora_integrated_model* model) forward_with_lora(
     }
     return result
 }
+
 struct batch_item {
     float[] hidden_states
     string adapter_id
     int batch_idx
     string request_id
 }
+
 func (lora_integrated_model* model) forward_batch_multi_adapter(
     []batch_item items
 ) float[][] {
@@ -141,6 +152,7 @@ func (lora_integrated_model* model) forward_batch_multi_adapter(
     }
     return results
 }
+
 func (lora_integrated_model* model) forward_with_merged_weights(
     float[] hidden_states,
     string adapter_id
@@ -158,6 +170,7 @@ func (lora_integrated_model* model) forward_with_merged_weights(
     model.merged_weights_cache[adapter_id] = merged
     return compute_with_merged_weights(hidden_states, merged)
 }
+
 func compute_with_merged_weights(
     float[] hidden_states,
     float[] merged_weights
@@ -174,6 +187,7 @@ func compute_with_merged_weights(
     result := matrix_mult(hidden_states, merged_weights, batch_seq_len, input_dim, output_dim)
     return result
 }
+
 func (lora_integrated_model* model) forward_with_adapter_ensemble(
     float[] hidden_states,
     string[] adapter_ids,
@@ -218,6 +232,7 @@ func (lora_integrated_model* model) forward_with_adapter_ensemble(
     }
     return result
 }
+
 func (lora_integrated_model* model) submit_inference_request(
     request_id string,
     adapter_id string,
@@ -237,9 +252,11 @@ func (lora_integrated_model* model) submit_inference_request(
     }
     return model.request_router.submit_request(req)
 }
+
 func (lora_integrated_model* model) process_request_batch() []lora_inference_result {
     return model.request_router.process_request_batch()
 }
+
 func (lora_integrated_model* model) list_loaded_adapters() string[] {
     adapters := string[]{}
     for adapter_id in model.adapter_manager.cache {
@@ -249,14 +266,17 @@ func (lora_integrated_model* model) list_loaded_adapters() string[] {
     }
     return adapters
 }
+
 func (lora_integrated_model* model) get_adapter_stats(adapter_id string) map[string]int {
     return model.adapter_manager.get_adapter_status(adapter_id)
 }
+
 func (lora_integrated_model* model) get_model_stats() map[string]float {
     stats := model.adapter_manager.get_memory_stats()
     stats["adapters_loaded"] = float(len(model.list_loaded_adapters()))
     return stats
 }
+
 struct lora_transformer_layer {
     model *lora_integrated_model
     float[] layer_norm_weight
@@ -265,6 +285,7 @@ struct lora_transformer_layer {
     float[] mlp_up
     float[] mlp_down
 }
+
 func create_lora_transformer_layer(
     model *lora_integrated_model
 ) lora_transformer_layer {
@@ -277,6 +298,7 @@ func create_lora_transformer_layer(
         mlp_down: make(float[], (model.config.hidden_dim * 4) * model.config.hidden_dim),
     }
 }
+
 func (lora_transformer_layer* layer) forward(
     float[] hidden_states,
     string adapter_id
@@ -293,6 +315,7 @@ func (lora_transformer_layer* layer) forward(
     output := add_residual(hidden_after_attn, ff_out)
     return output
 }
+
 func compute_lora_output(
     float[] input,
     lora_weights weights,
@@ -313,6 +336,7 @@ func compute_lora_output(
     }
     return output
 }
+
 func matrix_mult(
     float[] a,
     float[] b,
@@ -338,6 +362,7 @@ func matrix_mult(
     }
     return result
 }
+
 func apply_layer_norm(
     float[] x,
     float[] weight,
@@ -345,6 +370,7 @@ func apply_layer_norm(
 ) float[] {
     return x
 }
+
 func add_residual(float[] x, float[] y) float[] {
     float[] result = make(float[], len(x))
     int i = 0
@@ -358,9 +384,11 @@ func add_residual(float[] x, float[] y) float[] {
     }
     return result
 }
+
 func apply_feed_forward(float[] x, int hidden_dim) float[] {
     return x
 }
+
 func append_hidden(float[][] arr, float[] val) float[][] {
     float[][] new_arr = make(float[][], len(arr) + 1)
     int i = 0
@@ -371,9 +399,11 @@ func append_hidden(float[][] arr, float[] val) float[][] {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func append_float_array(float[][] arr, float[] val) float[][] {
     return append_hidden(arr, val)
 }
+
 func append_str(string[] arr, string val) string[] {
     string[] new_arr = make(string[], len(arr) + 1)
     int i = 0
@@ -384,6 +414,7 @@ func append_str(string[] arr, string val) string[] {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func main() {
     print("🔗 LoRA-Integrated Model - Complete Implementation")
     print("✓ Adapter registration and switching")

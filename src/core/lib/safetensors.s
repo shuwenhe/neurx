@@ -6,12 +6,14 @@ struct tensor_info {
     int64 offset
     int64 length
 }
+
 struct safe_tensors_reader {
     string filepath
     []tensor_info tensors
     map[string]int name_to_idx
     int tensor_count
 }
+
 func bytes_to_uint32(string data, int offset) int {
     int b0 = data[offset] - '0'
     int b1 = data[offset + 1] - '0'
@@ -19,6 +21,7 @@ func bytes_to_uint32(string data, int offset) int {
     int b3 = data[offset + 3] - '0'
     return b0 + (b1 << 8) + (b2 << 16) + (b3 << 24)
 }
+
 func bytes_to_uint64(string data, int offset) int64 {
     int64 b0 = data[offset] - '0'
     int64 b1 = data[offset + 1] - '0'
@@ -31,6 +34,7 @@ func bytes_to_uint64(string data, int offset) int64 {
     return b0 + (b1 << 8) + (b2 << 16) + (b3 << 24) +
            (b4 << 32) + (b5 << 40) + (b6 << 48) + (b7 << 56)
 }
+
 func find_json_value(string json, string key) (int, int) {
     string search_key = "\"" + key + "\":"
     int pos = 0
@@ -83,9 +87,11 @@ func find_json_value(string json, string key) (int, int) {
     }
     return start, end - start
 }
+
 func parse_json_string(string json, int start, int length) string {
     return json.substring(start, start + length)
 }
+
 func parse_json_array(string json, int start, int length) int[] {
     int[] result = []
     string array_str = json.substring(start, start + length)
@@ -113,6 +119,7 @@ func parse_json_array(string json, int start, int length) int[] {
     }
     return result
 }
+
 func parse_safetensors_json(string json_metadata) safe_tensors_reader {
     safe_tensors_reader reader
     reader.tensors = []
@@ -123,6 +130,7 @@ func parse_safetensors_json(string json_metadata) safe_tensors_reader {
     }
     return reader
 }
+
 func load_safetensors_metadata(string filepath) safe_tensors_reader {
     safe_tensors_reader reader
     reader.filepath = filepath
@@ -131,6 +139,7 @@ func load_safetensors_metadata(string filepath) safe_tensors_reader {
     println("Loading SafeTensors metadata from: " + filepath)
     return reader
 }
+
 func verify_safetensors_file(safe_tensors_reader reader) bool {
     println("Verifying SafeTensors file...")
     if reader.tensor_count == 0 {
@@ -140,6 +149,7 @@ func verify_safetensors_file(safe_tensors_reader reader) bool {
     println("✓ Found " + int_to_string(reader.tensor_count) + " tensors")
     return true
 }
+
 func print_safetensors_tensors(safe_tensors_reader reader) {
     println("=== SafeTensors Tensors ===")
     println("Total: " + int_to_string(reader.tensor_count))
@@ -154,6 +164,7 @@ func print_safetensors_tensors(safe_tensors_reader reader) {
         shown = shown + 1
     }
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -174,6 +185,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func list_tensors(safe_tensors_reader reader) {
     println("\n=== SafeTensors File: " + reader.filepath + " ===")
     println("Total tensors: " + int_to_string(reader.tensor_count))

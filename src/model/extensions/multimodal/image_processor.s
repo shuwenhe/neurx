@@ -11,6 +11,7 @@ struct ImageProcessor {
     interpolation: string,
     bool normalize
 }
+
 func NewImageProcessor(
     width: i32,
     height: i32,
@@ -25,6 +26,7 @@ func NewImageProcessor(
         true normalize
     }
 }
+
 func (ImageProcessor* p) Resize(
     img: *types.ImageData
 ) *types.ImageData {
@@ -52,6 +54,7 @@ func (ImageProcessor* p) Resize(
         metadata: img.metadata
     }
 }
+
 func (ImageProcessor* p) Pad(
     img: *types.ImageData
 ) *types.ImageData {
@@ -84,6 +87,7 @@ func (ImageProcessor* p) Pad(
         metadata: img.metadata
     }
 }
+
 func (ImageProcessor* p) Normalize(
     img: *types.ImageData
 ) *types.Tensor {
@@ -104,6 +108,7 @@ func (ImageProcessor* p) Normalize(
         dtype: "float32"
     }
 }
+
 func (ImageProcessor* p) CenterCrop(
     img: *types.ImageData
 ) *types.ImageData {
@@ -133,6 +138,7 @@ func (ImageProcessor* p) CenterCrop(
         metadata: img.metadata
     }
 }
+
 func (ImageProcessor* p) Process(
     img: *types.ImageData
 ) *types.Tensor {
@@ -141,6 +147,7 @@ func (ImageProcessor* p) Process(
     tensor := p.Normalize(cropped)
     return tensor
 }
+
 func (ImageProcessor* p) ProcessBatch(
     images: []types.ImageData
 ) []types.Tensor {
@@ -150,6 +157,7 @@ func (ImageProcessor* p) ProcessBatch(
     }
     return results
 }
+
 func resizeImage(
     data: []i8,
     src_w: i32,
@@ -175,6 +183,7 @@ func resizeImage(
     }
     return result
 }
+
 func GetImageStats(*types.ImageData img) (f32, f32, f32) {
     if len(img.raw_data) == 0 {
         return 0.0, 0.0, 0.0
@@ -195,6 +204,7 @@ func GetImageStats(*types.ImageData img) (f32, f32, f32) {
     mean_val := sum / f32(len(img.raw_data))
     return min_val, max_val, mean_val
 }
+
 func main() {
     println("Image Processor Module")
     println("✅ Ready for image preprocessing operations")

@@ -11,6 +11,7 @@ import "net"
 	STATE_CLOSED         = 6
 	STATE_FAILED         = 7
 }
+
 struct connection_info {
 	connection_id   string
 	client_id       string
@@ -30,6 +31,7 @@ struct connection_info {
 	keep_alive      bool
 	keep_alive_interval int64
 }
+
 struct connection_metrics {
 	total_connections   int64
 	active_connections  int32
@@ -41,6 +43,7 @@ struct connection_metrics {
 	max_idle_time       int64
 	last_update_time    int64
 }
+
 struct heartbeat_config {
 	enabled             bool
 	interval_ms         int64
@@ -48,6 +51,7 @@ struct heartbeat_config {
 	max_missed_pings    int32
 	ping_payload        string
 }
+
 struct connection_pool {
 	active_connections  map[string]connection_info
 	idle_connections    connection_info[]
@@ -60,6 +64,7 @@ struct connection_pool {
 	cleanup_ticker      time.Ticker
 	cleanup_interval    int64
 }
+
 func create_connection_pool(max_size int32) connection_pool {
 	return connection_pool{
 		active_connections: make(map[string]connection_info),
@@ -72,6 +77,7 @@ func create_connection_pool(max_size int32) connection_pool {
 		cleanup_interval:   10000000000,
 	}
 }
+
 func create_heartbeat_config() heartbeat_config {
 	return heartbeat_config{
 		enabled:             true,
@@ -81,6 +87,7 @@ func create_heartbeat_config() heartbeat_config {
 		ping_payload:        "PING",
 	}
 }
+
 func (cp connection_pool*) register_connection(
 	connection_id string,
 	client_id string,
@@ -109,6 +116,7 @@ func (cp connection_pool*) register_connection(
 	cp.metrics.active_connections++
 	return conn_info
 }
+
 func (cp connection_pool*) mark_active(connection_id string) bool {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -121,6 +129,7 @@ func (cp connection_pool*) mark_active(connection_id string) bool {
 	cp.active_connections[connection_id] = conn
 	return true
 }
+
 func (cp connection_pool*) record_bytes_sent(connection_id string, bytes_count int64) bool {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -136,6 +145,7 @@ func (cp connection_pool*) record_bytes_sent(connection_id string, bytes_count i
 	cp.metrics.total_bytes_sent += bytes_count
 	return true
 }
+
 func (cp connection_pool*) record_bytes_received(connection_id string, bytes_count int64) bool {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -150,6 +160,7 @@ func (cp connection_pool*) record_bytes_received(connection_id string, bytes_cou
 	cp.metrics.total_bytes_received += bytes_count
 	return true
 }
+
 func (cp connection_pool*) close_connection(connection_id string) bool {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -165,17 +176,20 @@ func (cp connection_pool*) close_connection(connection_id string) bool {
 	cp.metrics.closed_connections++
 	return true
 }
+
 func (cp connection_pool*) get_connection_info(connection_id string) (connection_info, bool) {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
 	conn, exists := cp.active_connections[connection_id]
 	return conn, exists
 }
+
 func (cp connection_pool*) get_active_connections_count() int32 {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
 	return cp.metrics.active_connections
 }
+
 func (cp connection_pool*) get_idle_connections() connection_info[] {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -185,6 +199,7 @@ func (cp connection_pool*) get_idle_connections() connection_info[] {
 	}
 	return idle_conns
 }
+
 func (cp connection_pool*) cleanup_idle_connections() int32 {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -203,6 +218,7 @@ func (cp connection_pool*) cleanup_idle_connections() int32 {
 	cp.idle_connections = cleaned
 	return count
 }
+
 func (cp connection_pool*) get_connection_state(connection_id string) int32 {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -212,6 +228,7 @@ func (cp connection_pool*) get_connection_state(connection_id string) int32 {
 	}
 	return conn.state
 }
+
 func (cp connection_pool*) set_connection_state(connection_id string, state int32) bool {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -223,6 +240,7 @@ func (cp connection_pool*) set_connection_state(connection_id string, state int3
 	cp.active_connections[connection_id] = conn
 	return true
 }
+
 func (cp connection_pool*) get_metrics() connection_metrics {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -231,11 +249,13 @@ func (cp connection_pool*) get_metrics() connection_metrics {
 	cp.metrics.connection_pool_size = cp.pool_size
 	return cp.metrics
 }
+
 struct connection_monitor {
 	pool            connection_pool*
 	running         bool
 	tick_interval   int64
 }
+
 func create_connection_monitor(pool connection_pool*) connection_monitor {
 	return connection_monitor{
 		pool:          pool,
@@ -243,6 +263,7 @@ func create_connection_monitor(pool connection_pool*) connection_monitor {
 		tick_interval: 10000000000,
 	}
 }
+
 func (cm connection_monitor*) start() {
 	if cm.running {
 		return
@@ -250,9 +271,11 @@ func (cm connection_monitor*) start() {
 	cm.running = true
 	go cm.monitor_loop()
 }
+
 func (cm connection_monitor*) stop() {
 	cm.running = false
 }
+
 func (cm connection_monitor*) monitor_loop() {
 	ticker := time.NewTicker(time.Duration(cm.tick_interval))
 	defer ticker.Stop()
@@ -264,9 +287,11 @@ func (cm connection_monitor*) monitor_loop() {
 		}
 	}
 }
+
 func (cm connection_monitor*) check_idle_connections() int32 {
 	return cm.pool.cleanup_idle_connections()
 }
+
 func (cm connection_monitor*) check_heartbeats() {
 	cm.pool.mu.Lock()
 	conns := make(connection_info[], 0, len(cm.pool.active_connections))
@@ -283,6 +308,7 @@ func (cm connection_monitor*) check_heartbeats() {
 		}
 	}
 }
+
 func (cm connection_monitor*) send_heartbeat(conn connection_info*) bool {
 	if conn.state != STATE_ACTIVE && conn.state != STATE_CONNECTED {
 		return false
@@ -290,22 +316,26 @@ func (cm connection_monitor*) send_heartbeat(conn connection_info*) bool {
 	cm.pool.mark_active(conn.connection_id)
 	return true
 }
+
 struct connection_limiter {
 	max_connections int32
 	active_count    int32
 	mu              sync.Mutex
 }
+
 func create_connection_limiter(max_conn int32) connection_limiter {
 	return connection_limiter{
 		max_connections: max_conn,
 		active_count:    0,
 	}
 }
+
 func (cl connection_limiter*) can_accept_connection() bool {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	return cl.active_count < cl.max_connections
 }
+
 func (cl connection_limiter*) acquire_connection() bool {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
@@ -315,6 +345,7 @@ func (cl connection_limiter*) acquire_connection() bool {
 	cl.active_count++
 	return true
 }
+
 func (cl connection_limiter*) release_connection() {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
@@ -322,6 +353,7 @@ func (cl connection_limiter*) release_connection() {
 		cl.active_count--
 	}
 }
+
 func (cl connection_limiter*) get_available_slots() int32 {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()

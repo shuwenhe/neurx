@@ -3,6 +3,7 @@ struct api_response {
     int status_code
     string response_body
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -35,6 +36,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func escape_string(string s) string {
     string result = ""
     int i = 0
@@ -57,6 +59,7 @@ func escape_string(string s) string {
     }
     return result
 }
+
 func health_endpoint() api_response {
     print("💚 Health check\n")
     string body = "{"
@@ -69,6 +72,7 @@ func health_endpoint() api_response {
     resp.response_body = body
     return resp
 }
+
 func models_endpoint() api_response {
     print("📋 Models list\n")
     string body = "{"
@@ -82,6 +86,7 @@ func models_endpoint() api_response {
     resp.response_body = body
     return resp
 }
+
 func chat_endpoint(string model, string content) api_response {
     print("🤖 Chat completion\n")
     print("   Model: " + model + "\n")
@@ -102,6 +107,7 @@ func chat_endpoint(string model, string content) api_response {
     resp.response_body = body
     return resp
 }
+
 func print_response(api_response resp) {
     print("\n" + "─"*50 + "\n")
     print("Status: " + int_to_string(resp.status_code) + "\n")
@@ -109,6 +115,7 @@ func print_response(api_response resp) {
     print(resp.response_body + "\n")
     print("="*50 + "\n\n")
 }
+
 func main() {
     print("\n╔════════════════════════════════════════════════════╗\n")
     print("║  🚀 NeurX REST API (Pure S Implementation)       ║\n")

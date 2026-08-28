@@ -8,6 +8,7 @@ struct DistributedExecutor {
     pipeline_parallel_size i32
     sync_timeout        i32
 }
+
 func NewDistributedExecutor(config ExecutorConfig,
                            dist_config DistributedConfig) *DistributedExecutor {
     executor := *DistributedExecutor{
@@ -19,6 +20,7 @@ func NewDistributedExecutor(config ExecutorConfig,
     }
     return executor
 }
+
 func (DistributedExecutor* de) Initialize() ExecutionResult {
     result := de.base.Initialize()
     if result.success == 0 {
@@ -31,6 +33,7 @@ func (DistributedExecutor* de) Initialize() ExecutionResult {
     result = de.synchronize_init()
     return result
 }
+
 func (DistributedExecutor* de) discover_peers() ExecutionResult {
     for i := 0; i < de.distributed_config.world_size; i++ {
         if i != de.distributed_config.rank {
@@ -40,9 +43,11 @@ func (DistributedExecutor* de) discover_peers() ExecutionResult {
     }
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) synchronize_init() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) ExecuteDistributedIteration() ExecutionResult {
     if de.base.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
@@ -78,15 +83,19 @@ func (DistributedExecutor* de) ExecuteDistributedIteration() ExecutionResult {
         latency_ms: i32(end_time - start_time),
     }
 }
+
 func (DistributedExecutor* de) gather_inputs() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) all_reduce_gradients() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) synchronize_results() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) SendToRank(rank i32, data []u8) ExecutionResult {
     if rank < 0 || rank >= de.distributed_config.world_size {
         return ExecutionResult{
@@ -97,6 +106,7 @@ func (DistributedExecutor* de) SendToRank(rank i32, data []u8) ExecutionResult {
     }
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) ReceiveFromRank(rank i32) ExecutionResult {
     if rank < 0 || rank >= de.distributed_config.world_size {
         return ExecutionResult{
@@ -107,18 +117,23 @@ func (DistributedExecutor* de) ReceiveFromRank(rank i32) ExecutionResult {
     }
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) BroadcastFromRank(rank i32, data []u8) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) AllGather(local_data []u8) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) TensorParallelForward(input []f32) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) PipelineParallelForward(layers string[]) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) LoadBalance(sequences string[]) string[][] {
     result := make(string[][], de.distributed_config.world_size)
     for i := 0; i < len(sequences); i++ {
@@ -127,9 +142,11 @@ func (DistributedExecutor* de) LoadBalance(sequences string[]) string[][] {
     }
     return result
 }
+
 func (DistributedExecutor* de) CollectResults() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (DistributedExecutor* de) GetDistributedStats() map[string]f64 {
     stats := make(map[string]f64)
     stats["rank"] = f64(de.distributed_config.rank)
@@ -138,9 +155,11 @@ func (DistributedExecutor* de) GetDistributedStats() map[string]f64 {
     stats["pipeline_parallel"] = f64(de.pipeline_parallel_size)
     return stats
 }
+
 func (DistributedExecutor* de) Shutdown() ExecutionResult {
     return de.base.Shutdown()
 }
+
 func get_time_ms() i64 {
     return 0
 }

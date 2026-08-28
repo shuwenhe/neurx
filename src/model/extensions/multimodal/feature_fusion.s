@@ -9,6 +9,7 @@ import (
     transformer,
     gating
 }
+
 struct FeatureFusion {
     fusion_strategy: FusionStrategy,
     hidden_dim: i32,
@@ -17,6 +18,7 @@ struct FeatureFusion {
     use_residual: bool,
     string normalization
 }
+
 func NewFeatureFusion(
     hidden_dim: i32,
     FusionStrategy fusion_strategy
@@ -30,6 +32,7 @@ func NewFeatureFusion(
         normalization: "layer_norm"
     }
 }
+
 func (FeatureFusion* f) FuseConcatenation(
     embeddings: map[types.Modality, *types.Tensor]
 ) *types.Tensor {
@@ -65,6 +68,7 @@ func (FeatureFusion* f) FuseConcatenation(
         dtype: "float32"
     }
 }
+
 func (FeatureFusion* f) FuseAddition(
     embeddings: map[types.Modality, *types.Tensor]
 ) *types.Tensor {
@@ -95,6 +99,7 @@ func (FeatureFusion* f) FuseAddition(
     }
     return fused
 }
+
 func (FeatureFusion* f) FuseAttention(
     embeddings: map[types.Modality, *types.Tensor],
     query_modality: types.Modality
@@ -139,6 +144,7 @@ func (FeatureFusion* f) FuseAttention(
         dtype: "float32"
     }
 }
+
 func (FeatureFusion* f) FuseGating(
     embeddings: map[types.Modality, *types.Tensor]
 ) *types.Tensor {
@@ -169,6 +175,7 @@ func (FeatureFusion* f) FuseGating(
         dtype: "float32"
     }
 }
+
 func (FeatureFusion* f) ApplyLayerNorm(
     tensor: *types.Tensor,
     f32 eps
@@ -199,6 +206,7 @@ func (FeatureFusion* f) ApplyLayerNorm(
         dtype: tensor.dtype
     }
 }
+
 func (FeatureFusion* f) Fuse(
     embeddings: map[types.Modality, *types.Tensor]
 ) *types.FusedFeatures {
@@ -225,6 +233,7 @@ func (FeatureFusion* f) Fuse(
         fusion_type: string(byte(i32(f.fusion_strategy)))
     }
 }
+
 func Sqrt(f64 x) f64 {
     if x == 0.0 {
         return 0.0
@@ -235,6 +244,7 @@ func Sqrt(f64 x) f64 {
     }
     return result
 }
+
 func (FeatureFusion* f) GetFusionDimension(
     input_embeddings: map[types.Modality, *types.Tensor]
 ) i32 {
@@ -247,6 +257,7 @@ func (FeatureFusion* f) GetFusionDimension(
     }
     return f.hidden_dim
 }
+
 func main() {
     println("Feature Fusion Module")
     println("✅ Multimodal fusion ready")

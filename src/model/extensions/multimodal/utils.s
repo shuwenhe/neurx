@@ -10,6 +10,7 @@ struct ImageValidator {
     max_height: i32,
     supported_formats: []types.ImageFormat
 }
+
 func NewImageValidator() *ImageValidator {
     return *ImageValidator{
         min_width: 32,
@@ -23,6 +24,7 @@ func NewImageValidator() *ImageValidator {
         }
     }
 }
+
 func (ImageValidator* v) ValidateImage(
     img: *types.ImageData
 ) bool {
@@ -48,12 +50,14 @@ func (ImageValidator* v) ValidateImage(
     }
     return true
 }
+
 struct AudioValidator {
     min_sample_rate: i32,
     max_sample_rate: i32,
     min_duration_ms: i32,
     i32 max_duration_ms
 }
+
 func NewAudioValidator() *AudioValidator {
     return *AudioValidator{
         min_sample_rate: 8000,
@@ -62,6 +66,7 @@ func NewAudioValidator() *AudioValidator {
         max_duration_ms: 300000
     }
 }
+
 func (AudioValidator* v) ValidateAudio(
     audio: *types.AudioData
 ) bool {
@@ -79,6 +84,7 @@ func (AudioValidator* v) ValidateAudio(
     }
     return true
 }
+
 struct ModalityStatistics {
     modality: types.Modality,
     count: i32,
@@ -88,14 +94,17 @@ struct ModalityStatistics {
     max_value: f32,
     f32 mean_value
 }
+
 struct StatisticsCollector {
     stats: map[types.Modality, ModalityStatistics]
 }
+
 func NewStatisticsCollector() *StatisticsCollector {
     return *StatisticsCollector{
         stats: make(map[types.Modality, ModalityStatistics])
     }
 }
+
 func (StatisticsCollector* s) RecordImageProcessing(
     img: *types.ImageData,
     f32 encoding_time_ms
@@ -120,6 +129,7 @@ func (StatisticsCollector* s) RecordImageProcessing(
     stat.avg_encoding_time_ms = (stat.avg_encoding_time_ms * f32(stat.count - 1) + encoding_time_ms) / f32(stat.count)
     s.stats[types.Modality.image] = stat
 }
+
 func (StatisticsCollector* s) GetStatistics(
     modality: types.Modality
 ) ModalityStatistics {
@@ -136,16 +146,19 @@ func (StatisticsCollector* s) GetStatistics(
         mean_value: 0.0
     }
 }
+
 struct BatchProcessor {
     batch_size: i32,
     i64 max_batch_memory_mb
 }
+
 func NewBatchProcessor(i32 batch_size) *BatchProcessor {
     return *BatchProcessor{
         batch_size: batch_size,
         max_batch_memory_mb: 4096
     }
 }
+
 func (BatchProcessor* b) CanAddToBatch(
     current_size: i32,
     current_memory_mb: i64,
@@ -159,8 +172,10 @@ func (BatchProcessor* b) CanAddToBatch(
     }
     return true
 }
+
 struct TensorUtils {
 }
+
 func TensorStackTensors(
     tensors: []types.Tensor
 ) *types.Tensor {
@@ -183,6 +198,7 @@ func TensorStackTensors(
         dtype: "float32"
     }
 }
+
 func ConcatenateEmbeddings(
     embeddings: []*types.Tensor
 ) *types.Tensor {
@@ -211,6 +227,7 @@ func ConcatenateEmbeddings(
         dtype: "float32"
     }
 }
+
 func ComputeSimilarity(
     emb1: *types.Tensor,
     emb2: *types.Tensor
@@ -231,6 +248,7 @@ func ComputeSimilarity(
     }
     return dot_product / (Sqrt(f64(norm1)) * Sqrt(f64(norm2)))
 }
+
 func Sqrt(f64 x) f64 {
     if x == 0.0 {
         return 0.0
@@ -241,6 +259,7 @@ func Sqrt(f64 x) f64 {
     }
     return result
 }
+
 func NormalizeEmbedding(
     embedding: *types.Tensor
 ) *types.Tensor {
@@ -262,6 +281,7 @@ func NormalizeEmbedding(
         dtype: embedding.dtype
     }
 }
+
 func main() {
     println("Multimodal Utils Module")
     println("✅ Utility functions ready")

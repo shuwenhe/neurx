@@ -72,6 +72,7 @@ func detect_format(string text) FormatDetectionResult {
         metadata: map[string]string{},
     }
 }
+
 func is_valid_json_structure(string text) bool {
     trimmed := trim_string(text)
     if len(trimmed) < 2 {
@@ -105,6 +106,7 @@ func is_valid_json_structure(string text) bool {
     }
     return false
 }
+
 func is_valid_xml_structure(string text) bool {
     trimmed := trim_string(text)
     if len(trimmed) < 3 || trimmed[0] != '<' {
@@ -124,6 +126,7 @@ func is_valid_xml_structure(string text) bool {
     }
     return false
 }
+
 func has_markdown_markers(string text) bool {
     if starts_with(trim_string(text), "#") {
         return true
@@ -145,6 +148,7 @@ func has_markdown_markers(string text) bool {
     }
     return false
 }
+
 func is_yaml_like(string text) bool {
     lines := split_lines(text)
     if len(lines) == 0 {
@@ -166,6 +170,7 @@ func is_yaml_like(string text) bool {
     }
     return yaml_count >= 2
 }
+
 func is_csv_like(string text) bool {
     lines := split_lines(text)
     if len(lines) < 2 {
@@ -185,6 +190,7 @@ func is_csv_like(string text) bool {
     }
     return false
 }
+
 func has_html_tags(string text) bool {
     html_tags := string[]{"<html", "<div", "<span", "<p>", "<h1", "<h2", "<table", "<body"}
     i := 0
@@ -199,6 +205,7 @@ func has_html_tags(string text) bool {
     }
     return false
 }
+
 func parse_json_output(string text) ParseResult {
     result := create_parse_result()
     result.format = 1
@@ -223,6 +230,7 @@ func parse_json_output(string text) ParseResult {
     result.confidence = 0.8
     return result
 }
+
 func parse_xml_output(string text) ParseResult {
     result := create_parse_result()
     result.format = 2
@@ -240,6 +248,7 @@ func parse_xml_output(string text) ParseResult {
     result.parsed_output = trimmed
     return result
 }
+
 func parse_markdown_output(string text) ParseResult {
     result := create_parse_result()
     result.format = 3
@@ -251,6 +260,7 @@ func parse_markdown_output(string text) ParseResult {
     result.confidence = 0.7
     return result
 }
+
 func parse_csv_output(string text) ParseResult {
     result := create_parse_result()
     result.format = 5
@@ -267,6 +277,7 @@ func parse_csv_output(string text) ParseResult {
     result.parsed_output = text
     return result
 }
+
 func extract_tag_name(string xml) string {
     if len(xml) < 2 || xml[0] != '<' {
         return ""
@@ -279,6 +290,7 @@ func extract_tag_name(string xml) string {
     }
     return tag_name
 }
+
 func extract_string_value(string quoted) string {
     if len(quoted) < 2 {
         return ""
@@ -314,6 +326,7 @@ func extract_string_value(string quoted) string {
     }
     return result
 }
+
 func normalize_format(string text, int format) string {
     match format {
         0 => return normalize_text(text)
@@ -326,33 +339,42 @@ func normalize_format(string text, int format) string {
         _ => return text
     }
 }
+
 func normalize_text(string text) string {
     return normalize_whitespace(text)
 }
+
 func normalize_json(string text) string {
     return normalize_whitespace(text)
 }
+
 func normalize_xml(string text) string {
     return normalize_whitespace(text)
 }
+
 func normalize_markdown(string text) string {
     return normalize_whitespace(text)
 }
+
 func normalize_yaml(string text) string {
     return normalize_whitespace(text)
 }
+
 func normalize_csv(string text) string {
     return text
 }
+
 func normalize_html(string text) string {
     return normalize_whitespace(text)
 }
+
 func convert_format(string text, int from_format, int to_format) string {
     if from_format == to_format {
         return text
     }
     return normalize_format(text, to_format)
 }
+
 func validate_format(string text, int format) bool {
     match format {
         0 => return true

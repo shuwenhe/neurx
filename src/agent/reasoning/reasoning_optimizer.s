@@ -13,6 +13,7 @@ import "time"
 	REDUNDANCY_BASED = 3
 	HYBRID = 4
 }
+
 struct optimization_stats {
 	int32           pruned_nodes
 	int32           kept_nodes
@@ -21,6 +22,7 @@ struct optimization_stats {
 	int64           optimization_time
 	float32         memory_saved_percent
 }
+
 struct backtrack_point {
 	int32           backtrack_id
 	string          state_before
@@ -29,6 +31,7 @@ struct backtrack_point {
 	bool            recovery_attempted
 	string          recovery_result
 }
+
 struct resource_allocation {
 	int32           max_nodes_allowed
 	int32           max_depth_allowed
@@ -38,6 +41,7 @@ struct resource_allocation {
 	int64           elapsed_time_ms
 	float32         memory_used_mb
 }
+
 struct reasoning_optimizer {
 	optimization_strategy strategy
 	pruning_strategy      pruning_method
@@ -55,6 +59,7 @@ struct reasoning_optimizer {
 	string[]           backtracked_paths
 	sync.Mutex            mu
 }
+
 func create_reasoning_optimizer() reasoning_optimizer {
 	return reasoning_optimizer{
 		strategy:              ADAPTIVE,
@@ -82,6 +87,7 @@ func create_reasoning_optimizer() reasoning_optimizer {
 		mu:                    sync.Mutex{},
 	}
 }
+
 func (reasoning_optimizer* o) optimize_reasoning_path(
 	node_ids string[],
 	node_scores map[string]float32,
@@ -110,6 +116,7 @@ func (reasoning_optimizer* o) optimize_reasoning_path(
 	}
 	return optimized
 }
+
 func (reasoning_optimizer* o) greedy_optimization(
 	node_ids string[],
 	node_scores map[string]float32,
@@ -132,6 +139,7 @@ func (reasoning_optimizer* o) greedy_optimization(
 	}
 	return result
 }
+
 func (reasoning_optimizer* o) beam_search_optimization(
 	node_ids string[],
 	node_scores map[string]float32,
@@ -159,6 +167,7 @@ func (reasoning_optimizer* o) beam_search_optimization(
 	}
 	return result
 }
+
 func (reasoning_optimizer* o) branch_and_bound_optimization(
 	node_ids string[],
 	node_scores map[string]float32,
@@ -176,6 +185,7 @@ func (reasoning_optimizer* o) branch_and_bound_optimization(
 	}
 	return result
 }
+
 func (reasoning_optimizer* o) adaptive_optimization(
 	node_ids string[],
 	node_scores map[string]float32,
@@ -189,6 +199,7 @@ func (reasoning_optimizer* o) adaptive_optimization(
 		return o.branch_and_bound_optimization(node_ids, node_scores)
 	}
 }
+
 func (reasoning_optimizer* o) evaluate_collection_quality(
 	node_ids string[],
 	node_scores map[string]float32,
@@ -206,6 +217,7 @@ func (reasoning_optimizer* o) evaluate_collection_quality(
 	}
 	return total / float32(len(node_ids))
 }
+
 func (reasoning_optimizer* o) prune_low_scoring_nodes(
 	node_ids string[],
 	node_scores map[string]float32,
@@ -227,6 +239,7 @@ func (reasoning_optimizer* o) prune_low_scoring_nodes(
 	o.resources.current_nodes = int32(len(result))
 	return result
 }
+
 func (reasoning_optimizer* o) create_backtrack_point(
 	state_before string,
 	step_number int32,
@@ -245,6 +258,7 @@ func (reasoning_optimizer* o) create_backtrack_point(
 	o.backtrack_history = append(o.backtrack_history, point)
 	return backtrack_id
 }
+
 func (reasoning_optimizer* o) attempt_recovery(
 	backtrack_id int32,
 	recovery_strategy string,
@@ -258,6 +272,7 @@ func (reasoning_optimizer* o) attempt_recovery(
 	o.backtrack_history[backtrack_id].recovery_result = recovery_strategy
 	return true
 }
+
 func (reasoning_optimizer* o) check_resource_limits() bool {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -272,6 +287,7 @@ func (reasoning_optimizer* o) check_resource_limits() bool {
 	}
 	return true
 }
+
 func (reasoning_optimizer* o) update_resource_usage(
 	nodes_added int32,
 	time_elapsed_ms int64,
@@ -283,6 +299,7 @@ func (reasoning_optimizer* o) update_resource_usage(
 	o.resources.elapsed_time_ms += time_elapsed_ms
 	o.resources.memory_used_mb += memory_used_mb
 }
+
 func (reasoning_optimizer* o) set_optimization_strategy(
 	strategy optimization_strategy,
 ) {
@@ -293,6 +310,7 @@ func (reasoning_optimizer* o) set_optimization_strategy(
 		o.strategy_switch_count++
 	}
 }
+
 func (reasoning_optimizer* o) get_optimization_stats() optimization_stats {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -306,6 +324,7 @@ func (reasoning_optimizer* o) get_optimization_stats() optimization_stats {
 	}
 	return stats
 }
+
 func (reasoning_optimizer* o) set_score_threshold(threshold float32) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -313,6 +332,7 @@ func (reasoning_optimizer* o) set_score_threshold(threshold float32) {
 		o.score_threshold = threshold
 	}
 }
+
 func (reasoning_optimizer* o) set_beam_width(width int32) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -320,6 +340,7 @@ func (reasoning_optimizer* o) set_beam_width(width int32) {
 		o.beam_width = width
 	}
 }
+
 func (reasoning_optimizer* o) get_pruning_percentage() float32 {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -329,6 +350,7 @@ func (reasoning_optimizer* o) get_pruning_percentage() float32 {
 	}
 	return float32(len(o.pruned_node_ids)) / float32(total)
 }
+
 func (reasoning_optimizer* o) get_backtrack_history() backtrack_point[] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -338,6 +360,7 @@ func (reasoning_optimizer* o) get_backtrack_history() backtrack_point[] {
 	}
 	return history
 }
+
 func (reasoning_optimizer* o) get_resource_utilization() map[string]float32 {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -350,6 +373,7 @@ func (reasoning_optimizer* o) get_resource_utilization() map[string]float32 {
 	utilization["memory_utilization"] = memory_util
 	return utilization
 }
+
 func (reasoning_optimizer* o) reset() {
 	o.mu.Lock()
 	defer o.mu.Unlock()

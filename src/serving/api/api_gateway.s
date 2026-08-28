@@ -34,6 +34,7 @@ struct api_gateway_config {
     bool enable_request_logging
     bool enable_response_caching
 }
+
 struct api_server_info {
     api_protocol protocol
     int32 port
@@ -41,6 +42,7 @@ struct api_server_info {
     int64 num_requests
     int64 total_processing_time_ms
 }
+
 struct api_gateway {
     api_gateway_config config
     llm_engine* engine
@@ -55,12 +57,14 @@ struct api_gateway {
     map[api_protocol]api_server_info* server_info
     bool running
 }
+
 struct api_request_wrapper {
     api_protocol protocol
     string request_id
     int64 timestamp_ms
     interface{} request_data
 }
+
 struct api_response_wrapper {
     string request_id
     api_protocol protocol
@@ -68,6 +72,7 @@ struct api_response_wrapper {
     interface{} response_data
     string error_message
 }
+
 struct gateway_stats {
     int64 total_requests
     int64 total_responses
@@ -76,6 +81,7 @@ struct gateway_stats {
     map[string]int64 requests_per_protocol
     map[string]int64 errors_per_protocol
 }
+
 func create_api_gateway(api_gateway_config* config, llm_engine* engine) api_gateway* {
     return *api_gateway{
         config: *config,
@@ -92,6 +98,7 @@ func create_api_gateway(api_gateway_config* config, llm_engine* engine) api_gate
         running: false,
     }
 }
+
 func (api_gateway* gw) initialize() error {
     if gw.config.enable_openai {
         gw.openai_srv = create_openai_api_server(gw.engine, gw.config.base_port + 1000)
@@ -184,6 +191,7 @@ func (api_gateway* gw) initialize() error {
     }
     return nil
 }
+
 func (api_gateway* gw) start() error {
     gw.running = true
     if gw.openai_srv != nil {
@@ -237,6 +245,7 @@ func (api_gateway* gw) start() error {
     }
     return nil
 }
+
 func (api_gateway* gw) stop() error {
     gw.running = false
     if gw.openai_srv != nil {
@@ -262,6 +271,7 @@ func (api_gateway* gw) stop() error {
     }
     return nil
 }
+
 func (api_gateway* gw) route_request(api_request_wrapper* req) (api_response_wrapper*, error) {
     start_time := core.current_time_ms()
     resp := *api_response_wrapper{
@@ -291,13 +301,16 @@ func (api_gateway* gw) route_request(api_request_wrapper* req) (api_response_wra
     resp.processing_time_ms = end_time - start_time
     return resp, nil
 }
+
 func (api_gateway* gw) get_server_info(api_protocol protocol) (api_server_info*, bool) {
     info, exists := gw.server_info[protocol]
     return info, exists
 }
+
 func (api_gateway* gw) get_all_server_info() map[api_protocol]api_server_info* {
     return gw.server_info
 }
+
 func (api_gateway* gw) get_gateway_stats() gateway_stats* {
     stats := *gateway_stats{
         total_requests: 0,
@@ -313,9 +326,11 @@ func (api_gateway* gw) get_gateway_stats() gateway_stats* {
     }
     return stats
 }
+
 func (api_gateway* gw) is_running() bool {
     return gw.running
 }
+
 func (api_gateway* gw) health_check() bool {
     if !gw.running {
         return false
@@ -327,6 +342,7 @@ func (api_gateway* gw) health_check() bool {
     }
     return true
 }
+
 func (api_gateway* gw) list_available_apis() []api_protocol {
     apis := make([]api_protocol, 0)
     for protocol, _ := range gw.server_info {

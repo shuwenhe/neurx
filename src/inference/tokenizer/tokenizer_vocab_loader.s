@@ -6,12 +6,14 @@ struct vocab_entry {
     int token_id
     string text
 }
+
 struct vocab_database {
     []vocab_entry entries
     int total_count
     bool loaded
 }
 vocab_database global_vocab = vocab_database{entries: []vocab_entry{}, total_count: 0, loaded: false}
+
 func binary_search_vocab([]vocab_entry entries, int token_id) vocab_entry {
     int left = 0
     int right = len(entries) - 1
@@ -32,6 +34,7 @@ func binary_search_vocab([]vocab_entry entries, int token_id) vocab_entry {
     empty.text = ""
     empty
 }
+
 func load_vocab_from_file(string vocab_file_path) bool {
     if global_vocab.loaded {
         return len(global_vocab.entries) > 0
@@ -75,6 +78,7 @@ func load_vocab_from_file(string vocab_file_path) bool {
     global_vocab.loaded = true
     global_vocab.total_count > 0
 }
+
 func parse_vocab_line(string line) vocab_entry {
     vocab_entry result
     result.token_id = -1
@@ -89,6 +93,7 @@ func parse_vocab_line(string line) vocab_entry {
     result.text = unescape_string(text_str)
     result
 }
+
 func index_of(string text, string needle) int {
     if len(needle) == 0 || len(needle) > len(text) {
         return -1
@@ -111,6 +116,7 @@ func index_of(string text, string needle) int {
     }
     -1
 }
+
 func parse_int(string text) int {
     int result = 0
     int i = 0
@@ -123,6 +129,7 @@ func parse_int(string text) int {
     }
     result
 }
+
 func unescape_string(string text) string {
     string result = ""
     int i = 0
@@ -155,6 +162,7 @@ func unescape_string(string text) string {
     }
     result
 }
+
 func get_token_text(int token_id) string {
     if !global_vocab.loaded {
         string vocab_path = "/home/shuwen/shuwen/neurx/src/inference/qwen_vocab.txt"
@@ -169,6 +177,7 @@ func get_token_text(int token_id) string {
     }
     "<token_" + int_to_string(token_id) + ">"
 }
+
 func get_vocab_stats() string {
     if !global_vocab.loaded {
         return "Vocabulary not loaded"

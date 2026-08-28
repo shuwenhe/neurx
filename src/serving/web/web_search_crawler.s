@@ -28,6 +28,7 @@ struct web_search_config {
     cache_enabled: bool = true
     cache_ttl_hours: int = 24
 }
+
 struct search_result_item {
     string url
     string title
@@ -40,6 +41,7 @@ struct search_result_item {
     string crawl_status
     string crawl_error
 }
+
 struct crawled_content {
     int raw_html_size
     string text_content
@@ -49,6 +51,7 @@ struct crawled_content {
     float extraction_timestamp
     int word_count
 }
+
 struct page_metadata {
     string title
     string description
@@ -63,11 +66,13 @@ struct page_metadata {
     list<string> keywords
     og_data: map<string, string>
 }
+
 struct page_section {
     string heading
     int level
     string content
 }
+
 struct search_response {
     string query
     string corrected_query
@@ -79,6 +84,7 @@ struct search_response {
     list<string> key_findings
     search_statistics stats
 }
+
 struct search_statistics {
     engine_query_times_ms: map<string, float>
     list<float> crawl_times_ms
@@ -92,6 +98,7 @@ interface search_engine_interface {
     name: string { get }
     search(string query, config: web_search_config)
 }
+
 struct engine_search_result {
     list<search_result_item> items
     int total_estimated
@@ -100,6 +107,7 @@ struct engine_search_result {
     bool has_more
     string error
 }
+
 struct google_search_engine implements search_engine_interface {
     name = "google"
     string api_key
@@ -193,6 +201,7 @@ struct google_search_engine implements search_engine_interface {
         }
     }
 }
+
 struct bing_search_engine implements search_engine_interface {
     name = "bing"
     string api_key
@@ -260,6 +269,7 @@ struct bing_search_engine implements search_engine_interface {
         }
     }
 }
+
 struct web_crawler {
     web_search_config config
     HTTPSession session
@@ -330,6 +340,7 @@ struct web_crawler {
         return age_hours > this.config.cache_ttl_hours
     }
 }
+
 struct main_content_extractor {
     web_search_config config
     init(config: web_search_config) {
@@ -484,6 +495,7 @@ struct main_content_extractor {
         list<page_section> sections
     }
 }
+
 struct html_cleaner {
     web_search_config config
     init(config: web_search_config) {
@@ -504,6 +516,7 @@ struct html_cleaner {
         return text
     }
 }
+
 struct web_search_system {
     web_search_config config
     engines: map<string, search_engine_interface>
@@ -714,12 +727,14 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         return final_output
     }
 }
+
 struct search_options {
     crawl_results: bool = true
     generate_summary: bool = true
     verbose: bool = true
     string corrected_query
 }
+
 struct result_aggregator {
     web_search_config config
     init(config: web_search_config) {
@@ -782,6 +797,7 @@ struct result_aggregator {
         return any(indicator in domain for indicator in quality_indicators)
     }
 }
+
 function create_web_search_system(config: web_search_config, llm_client: any) {
     return new WebSearchSystem(config=config, llm_client=llm_client)
 }

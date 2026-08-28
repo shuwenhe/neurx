@@ -11,6 +11,7 @@ struct chat_completion_handler {
 	sync.Mutex                      mu
 	bool                            processing
 }
+
 func create_chat_completion_handler(
 	v1_engine interface{},
 	async_engine interface{},
@@ -26,6 +27,7 @@ func create_chat_completion_handler(
 		processing:     false,
 	}
 }
+
 func (h chat_completion_handler*) handle_chat_completion(
 	req chat_completion_request,
 	validator request_validator,
@@ -40,6 +42,7 @@ func (h chat_completion_handler*) handle_chat_completion(
 		return h.handle_non_streaming_chat(req)
 	}
 }
+
 func (h chat_completion_handler*) handle_non_streaming_chat(
 	req chat_completion_request,
 ) (chat_completion_response, error) {
@@ -82,6 +85,7 @@ func (h chat_completion_handler*) handle_non_streaming_chat(
 	h.mu.Unlock()
 	return response, nil
 }
+
 func (h chat_completion_handler*) handle_streaming_chat(
 	req chat_completion_request,
 ) (chat_completion_response, error) {
@@ -117,6 +121,7 @@ func (h chat_completion_handler*) handle_streaming_chat(
 	batch_response.choices[int32(len(batch_response.choices))-1].finish_reason = "stop"
 	return batch_response, nil
 }
+
 func (h chat_completion_handler*) build_prompt_from_messages(
 	messages chat_message[],
 ) string {
@@ -133,9 +138,11 @@ func (h chat_completion_handler*) build_prompt_from_messages(
 	}
 	return prompt
 }
+
 func (h chat_completion_handler*) count_tokens(text string) int32 {
 	return int32(len(text) / 4)
 }
+
 func (h chat_completion_handler*) handle_message_with_tools(
 	req chat_completion_request,
 ) (chat_completion_response, error) {
@@ -148,6 +155,7 @@ func (h chat_completion_handler*) handle_message_with_tools(
 	response, err := h.handle_non_streaming_chat(req)
 	return response, err
 }
+
 func (h chat_completion_handler*) build_tool_section(tools interface{}[]) string {
 	section := "\n[AVAILABLE_TOOLS]\n"
 	for i := int32(0); i < int32(len(tools)); i++ {
@@ -157,10 +165,12 @@ func (h chat_completion_handler*) build_tool_section(tools interface{}[]) string
 	}
 	return section
 }
+
 func (h chat_completion_handler*) extract_tool_calls(response_text string) interface{}[] {
 	tool_calls := make(interface{}[], 0)
 	return tool_calls
 }
+
 struct chat_completion_stream {
 	request_id       string
 	model            string
@@ -172,6 +182,7 @@ struct chat_completion_stream {
 	current_position int32
 	mu               sync.Mutex
 }
+
 func create_chat_completion_stream(request_id string, model string) chat_completion_stream {
 	return chat_completion_stream{
 		request_id:    request_id,
@@ -182,6 +193,7 @@ func create_chat_completion_stream(request_id string, model string) chat_complet
 		start_time:    time.Now().UnixNano(),
 	}
 }
+
 func (s chat_completion_stream*) add_token_to_stream(token_text string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -203,6 +215,7 @@ func (s chat_completion_stream*) add_token_to_stream(token_text string) bool {
 	s.stream_buffer = append(s.stream_buffer, chunk)
 	return true
 }
+
 func (s chat_completion_stream*) finish_stream(finish_reason string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -225,6 +238,7 @@ func (s chat_completion_stream*) finish_stream(finish_reason string) bool {
 	s.stream_buffer = append(s.stream_buffer, final_chunk)
 	return true
 }
+
 func (s chat_completion_stream*) get_pending_chunks() chat_completion_response[] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -239,14 +253,17 @@ func (s chat_completion_stream*) get_pending_chunks() chat_completion_response[]
 	s.events_sent += int64(len(chunks))
 	return chunks
 }
+
 func (s chat_completion_stream*) is_complete() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.is_finished
 }
+
 func (s chat_completion_stream*) get_elapsed_time_ms() int64 {
 	return (time.Now().UnixNano() - s.start_time) / 1000000
 }
+
 struct chat_completion_batch_processor {
 	handler       chat_completion_handler*
 	validator     request_validator*
@@ -254,6 +271,7 @@ struct chat_completion_batch_processor {
 	results       map[string]chat_completion_response
 	mu            sync.Mutex
 }
+
 func create_batch_processor(
 	handler chat_completion_handler*,
 	validator request_validator*,
@@ -266,6 +284,7 @@ func create_batch_processor(
 		mu:           sync.Mutex{},
 	}
 }
+
 func (bp chat_completion_batch_processor*) add_request(req chat_completion_request) bool {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
@@ -276,6 +295,7 @@ func (bp chat_completion_batch_processor*) add_request(req chat_completion_reque
 	bp.pending_reqs = append(bp.pending_reqs, req)
 	return true
 }
+
 func (bp chat_completion_batch_processor*) process_batch() int32 {
 	bp.mu.Lock()
 	reqs := make(chat_completion_request[], 0, len(bp.pending_reqs))
@@ -296,6 +316,7 @@ func (bp chat_completion_batch_processor*) process_batch() int32 {
 	}
 	return processed
 }
+
 func (bp chat_completion_batch_processor*) get_results() chat_completion_response[] {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
@@ -306,6 +327,7 @@ func (bp chat_completion_batch_processor*) get_results() chat_completion_respons
 	bp.results = make(map[string]chat_completion_response)
 	return results
 }
+
 func (bp chat_completion_batch_processor*) get_pending_count() int32 {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()

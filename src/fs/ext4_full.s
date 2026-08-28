@@ -14,11 +14,13 @@ struct ext4_inode {
     int flags
     int generation
 }
+
 struct ext4_extent {
     int logical_start
     int physical_start
     int length
 }
+
 struct ext4_block_group {
     int block_bitmap
     int inode_bitmap
@@ -27,6 +29,7 @@ struct ext4_block_group {
     int free_inodes
     int dirs
 }
+
 struct ext4_superblock {
     int total_blocks
     int total_inodes
@@ -78,6 +81,7 @@ func ext4_init_superblock(int total_blocks, int total_inodes) int {
     }
     0
 }
+
 func ext4_read_inode(int ino) (ext4_inode, string) {
     if ino < 0 || ino >= len(g_inode_cache) {
         return ext4_inode {}, "Invalid inode number"
@@ -85,6 +89,7 @@ func ext4_read_inode(int ino) (ext4_inode, string) {
     var inode = g_inode_cache[ino]
     inode, ""
 }
+
 func ext4_write_inode(ext4_inode* inode) int {
     if inode.ino < 0 || inode.ino >= len(g_inode_cache) {
         return -1
@@ -92,6 +97,7 @@ func ext4_write_inode(ext4_inode* inode) int {
     g_inode_cache[inode.ino] = inode[0]
     0
 }
+
 func ext4_create_inode(int mode) (int, string) {
     var i = 0
     for i < len(g_inode_cache) {
@@ -117,6 +123,7 @@ func ext4_create_inode(int mode) (int, string) {
     }
     -1, "No free inodes"
 }
+
 func ext4_delete_inode(int ino) int {
     if ino < 0 || ino >= len(g_inode_cache) {
         return -1
@@ -130,6 +137,7 @@ func ext4_delete_inode(int ino) int {
     }
     0
 }
+
 func ext4_get_block(int ino, int block_num) (int, string) {
     if ino < 0 || ino >= len(g_inode_cache) {
         return -1, "Invalid inode"
@@ -140,6 +148,7 @@ func ext4_get_block(int ino, int block_num) (int, string) {
     }
     block_num, ""
 }
+
 func ext4_allocate_block() (int, string) {
     var i = 0
     for i < g_nr_block_groups {
@@ -151,6 +160,7 @@ func ext4_allocate_block() (int, string) {
     }
     -1, "No free blocks"
 }
+
 func ext4_free_block(int block_num) int {
     var group = block_num / g_superblock.blocks_per_group
     if group < 0 || group >= g_nr_block_groups {
@@ -159,26 +169,33 @@ func ext4_free_block(int block_num) int {
     g_block_groups[group].free_blocks = g_block_groups[group].free_blocks + 1
     0
 }
+
 func ext4_handle_transaction(int tx_id, int tx_type) int {
     0
 }
+
 func ext4_journal_start() (int, string) {
     var tx_id = 0
     tx_id, ""
 }
+
 func ext4_journal_stop(int tx_id) int {
     0
 }
+
 func ext4_orphan_cleanup() int {
     0
 }
+
 func ext4_mount(string dev) (int, string) {
     ext4_init_superblock(1000000, 125000)
     0, ""
 }
+
 func ext4_unmount() int {
     0
 }
+
 func ext4_statfs() (int, int, int) {
     var total_blocks = g_superblock.total_blocks
     var used_blocks = 0
@@ -190,18 +207,21 @@ func ext4_statfs() (int, int, int) {
     var free_blocks = total_blocks - used_blocks
     total_blocks, used_blocks, free_blocks
 }
+
 func ext4_set_bit(int[] bitmap, int bit_num) int {
     var byte_num = bit_num / 8
     var bit_offset = bit_num % 8
     bitmap[byte_num] = bitmap[byte_num] | (1 << bit_offset)
     0
 }
+
 func ext4_clear_bit(int[] bitmap, int bit_num) int {
     var byte_num = bit_num / 8
     var bit_offset = bit_num % 8
     bitmap[byte_num] = bitmap[byte_num] & ~(1 << bit_offset)
     0
 }
+
 func ext4_test_bit(int[] bitmap, int bit_num) bool {
     var byte_num = bit_num / 8
     var bit_offset = bit_num % 8

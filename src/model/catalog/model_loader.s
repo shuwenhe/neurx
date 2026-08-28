@@ -32,6 +32,7 @@ struct model_package {
 	string tokenizer_file
 	map[string]string additional_files
 }
+
 struct model_descriptor {
 	string model_id
 	string model_name
@@ -55,12 +56,14 @@ struct model_descriptor {
 	string[] tags
 	map[string]interface{} metadata
 }
+
 struct load_validation_result {
 	bool valid
 	string[] errors
 	string[] warnings
 	int64 validation_time_ms
 }
+
 struct model_loader {
 	sync.Mutex mu
 	status model_loader_status
@@ -76,6 +79,7 @@ struct model_loader {
 	string cache_dir
 	int32 timeout_seconds
 }
+
 struct model_load_result {
 	bool success
 	string model_id
@@ -85,6 +89,7 @@ struct model_load_result {
 	string error_message
 	string[] warnings
 }
+
 func create_model_loader() *model_loader {
 	return *model_loader{
 		status: LOADER_STATUS_IDLE,
@@ -97,6 +102,7 @@ func create_model_loader() *model_loader {
 		timeout_seconds: 300,
 	}
 }
+
 func (model_loader* loader) register_model_path(path string) error {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
@@ -115,6 +121,7 @@ func (model_loader* loader) register_model_path(path string) error {
 	loader.model_paths = append(loader.model_paths, path)
 	return nil
 }
+
 func (model_loader* loader) load_model(package_id string, model_type model_type, device model_device_type) *model_load_result {
 	loader.mu.Lock()
 	if loader.current_loads >= loader.max_concurrent_loads {
@@ -177,6 +184,7 @@ func (model_loader* loader) load_model(package_id string, model_type model_type,
 		load_time_ms: load_time,
 	}
 }
+
 func (model_loader* loader) find_package_by_id(package_id string) *model_package {
 	for _, path := range loader.model_paths {
 		pkg_path := filepath.Join(path, package_id)
@@ -193,6 +201,7 @@ func (model_loader* loader) find_package_by_id(package_id string) *model_package
 	}
 	return nil
 }
+
 func (model_loader* loader) validate_model_package(model_package* pkg) *load_validation_result {
 	result := *load_validation_result{
 		valid: true,
@@ -232,6 +241,7 @@ func (model_loader* loader) validate_model_package(model_package* pkg) *load_val
 	result.validation_time_ms = int64(time.Since(start_time).Milliseconds())
 	return result
 }
+
 func (model_loader* loader) calculate_checksum(file_path string) (string, error) {
 	data, err := ioutil.ReadFile(file_path)
 	if err != nil {
@@ -240,6 +250,7 @@ func (model_loader* loader) calculate_checksum(file_path string) (string, error)
 	hash := md5.Sum(data)
 	return fmt.Sprintf("%x", hash), nil
 }
+
 func (model_loader* loader) unload_model(package_id string) error {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
@@ -247,10 +258,12 @@ func (model_loader* loader) unload_model(package_id string) error {
 	delete(loader.loading_packages, package_id)
 	return nil
 }
+
 func (model_loader* loader) reload_model(package_id string, device model_device_type) *model_load_result {
 	loader.unload_model(package_id)
 	return loader.load_model(package_id, TYPE_CUSTOM, device)
 }
+
 func (model_loader* loader) get_loaded_models() string[] {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
@@ -260,17 +273,20 @@ func (model_loader* loader) get_loaded_models() string[] {
 	}
 	return models
 }
+
 func (model_loader* loader) has_model(package_id string) bool {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
 	_, exists := loader.loaded_packages[package_id]
 	return exists
 }
+
 func (model_loader* loader) get_model_package(package_id string) *model_package {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
 	return loader.loaded_packages[package_id]
 }
+
 func (model_loader* loader) get_loader_stats() map[string]interface{} {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
@@ -285,16 +301,19 @@ func (model_loader* loader) get_loader_stats() map[string]interface{} {
 	stats["model_paths"] = loader.model_paths
 	return stats
 }
+
 func (model_loader* loader) set_max_concurrent_loads(max_loads int32) {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
 	loader.max_concurrent_loads = max_loads
 }
+
 func (model_loader* loader) set_cache_dir(cache_dir string) {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
 	loader.cache_dir = cache_dir
 }
+
 func (model_loader* loader) enable_cache(enabled bool) {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()

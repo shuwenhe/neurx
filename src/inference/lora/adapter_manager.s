@@ -9,18 +9,21 @@ struct lora_adapter_config {
     bool trainable
     string initialization
 }
+
 struct lora_weights {
     float[] lora_a
     float[] lora_b
     float scaling
     int rank
 }
+
 struct lora_cache_entry {
     lora_weights weights
     long last_access_time
     int access_count
     bool is_pinned
 }
+
 struct lora_adapter_manager {
     map[string]lora_cache_entry cache
     int max_cache_size_mb
@@ -32,6 +35,7 @@ struct lora_adapter_manager {
     int cache_misses
     float total_memory_allocated_mb
 }
+
 func new_lora_adapter_manager(int max_cache_size_mb) lora_adapter_manager {
     if max_cache_size_mb <= 0 {
         max_cache_size_mb = 1024
@@ -48,6 +52,7 @@ func new_lora_adapter_manager(int max_cache_size_mb) lora_adapter_manager {
         total_memory_allocated_mb: 0.0,
     }
 }
+
 func create_lora_config(
     string adapter_id,
     string path,
@@ -73,6 +78,7 @@ func create_lora_config(
         initialization: "random",
     }
 }
+
 func compute_lora_output(
     float[] input,
     lora_weights weights,
@@ -93,6 +99,7 @@ func compute_lora_output(
     }
     return output
 }
+
 func apply_lora_to_output(
     float[] original_output,
     float[] lora_output
@@ -109,6 +116,7 @@ func apply_lora_to_output(
     }
     return result
 }
+
 func matrix_mult(
     float[] a,
     float[] b,
@@ -134,6 +142,7 @@ func matrix_mult(
     }
     return result
 }
+
 func initialize_lora_weights(
     lora_adapter_config config
 ) lora_weights {
@@ -192,12 +201,14 @@ func initialize_lora_weights(
         rank: config.rank,
     }
 }
+
 func random_normal(float mean, float std) float {
     float u1 = 0.5
     float u2 = 0.5
     float pi = 3.14159265
     return mean + std * sqrt_f(2.0 * log_f(1.0 / (1.0 - u1))) * cos_f(2.0 * pi * u2)
 }
+
 func sqrt_f(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -210,6 +221,7 @@ func sqrt_f(float x) float {
     }
     return y
 }
+
 func log_f(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -225,6 +237,7 @@ func log_f(float x) float {
     }
     return result
 }
+
 func cos_f(float x) float {
     float result = 1.0
     float term = 1.0
@@ -236,6 +249,7 @@ func cos_f(float x) float {
     }
     return result
 }
+
 func (lora_adapter_manager* mgr) load_adapter(
     config lora_adapter_config
 ) bool {
@@ -259,6 +273,7 @@ func (lora_adapter_manager* mgr) load_adapter(
     mgr.total_memory_allocated_mb = mgr.total_memory_allocated_mb + memory_mb
     return true
 }
+
 func (lora_adapter_manager* mgr) unload_adapter(adapter_id string) bool {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return false
@@ -277,6 +292,7 @@ func (lora_adapter_manager* mgr) unload_adapter(adapter_id string) bool {
     }
     return true
 }
+
 func (lora_adapter_manager* mgr) evict_lru_adapter() {
     lru_adapter_id := ""
     min_access_time := int64(9223372036854775807)
@@ -291,9 +307,11 @@ func (lora_adapter_manager* mgr) evict_lru_adapter() {
         mgr.unload_adapter(lru_adapter_id)
     }
 }
+
 func get_timestamp() int64 {
     return 0
 }
+
 func remove_string(string[] arr, string val) string[] {
     string[] result = string[]{}
     int i = 0
@@ -305,6 +323,7 @@ func remove_string(string[] arr, string val) string[] {
     }
     return result
 }
+
 func append(string[] arr, string val) string[] {
     string[] new_arr = make(string[], len(arr) + 1)
     int i = 0
@@ -315,6 +334,7 @@ func append(string[] arr, string val) string[] {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func (lora_adapter_manager* mgr) switch_adapter(adapter_id string) bool {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return false
@@ -331,6 +351,7 @@ func (lora_adapter_manager* mgr) switch_adapter(adapter_id string) bool {
     }
     return true
 }
+
 func (lora_adapter_manager* mgr) get_active_adapter() lora_weights {
     if len(mgr.active_adapter_id) == 0 {
         return lora_weights{
@@ -342,6 +363,7 @@ func (lora_adapter_manager* mgr) get_active_adapter() lora_weights {
     }
     return mgr.cache[mgr.active_adapter_id].weights
 }
+
 func (lora_adapter_manager* mgr) merge_adapter_to_base_weights(
     float[] base_weights,
     string adapter_id,
@@ -366,6 +388,7 @@ func (lora_adapter_manager* mgr) merge_adapter_to_base_weights(
     }
     return merged
 }
+
 func transpose(float[] matrix, int rows, int cols) float[] {
     float[] result = make(float[], rows * cols)
     int i = 0
@@ -379,6 +402,7 @@ func transpose(float[] matrix, int rows, int cols) float[] {
     }
     return result
 }
+
 func (lora_adapter_manager* mgr) merge_multiple_adapters(
     float[] base_weights,
     string[] adapter_ids,
@@ -410,6 +434,7 @@ func (lora_adapter_manager* mgr) merge_multiple_adapters(
     }
     return result
 }
+
 func (lora_adapter_manager* mgr) unmerge_adapter_from_weights(
     float[] merged_weights,
     string adapter_id,
@@ -435,6 +460,7 @@ func (lora_adapter_manager* mgr) unmerge_adapter_from_weights(
     }
     return unmerged
 }
+
 func (lora_adapter_manager* mgr) pin_adapter(adapter_id string) bool {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return false
@@ -445,6 +471,7 @@ func (lora_adapter_manager* mgr) pin_adapter(adapter_id string) bool {
     mgr.pinned_adapters = append(mgr.pinned_adapters, adapter_id)
     return true
 }
+
 func (lora_adapter_manager* mgr) unpin_adapter(adapter_id string) bool {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return false
@@ -455,6 +482,7 @@ func (lora_adapter_manager* mgr) unpin_adapter(adapter_id string) bool {
     mgr.pinned_adapters = remove_string(mgr.pinned_adapters, adapter_id)
     return true
 }
+
 func (lora_adapter_manager* mgr) get_memory_stats() map[string]float {
     stats := map[string]float{}
     stats["total_cache_mb"] = float(mgr.current_cache_used_mb)
@@ -466,9 +494,11 @@ func (lora_adapter_manager* mgr) get_memory_stats() map[string]float {
     }
     return stats
 }
+
 func (lora_adapter_manager* mgr) list_loaded_adapters() string[] {
     return mgr.loaded_adapters
 }
+
 func (lora_adapter_manager* mgr) get_adapter_status(adapter_id string) map[string]int {
     status := map[string]int{}
     if mgr.cache[adapter_id].weights.rank <= 0 {
@@ -488,6 +518,7 @@ func (lora_adapter_manager* mgr) get_adapter_status(adapter_id string) map[strin
     }
     return status
 }
+
 func main() {
     print("🔧 LoRA Adapter Manager - Complete Implementation")
     print("✓ Dynamic loading and caching")

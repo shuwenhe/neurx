@@ -24,6 +24,7 @@ struct tcp_connection {
     int ssthresh
     int cwnd
 }
+
 struct udp_endpoint {
     int endpoint_id
     int local_port
@@ -32,6 +33,7 @@ struct udp_endpoint {
     int packets_sent
     int packets_recv
 }
+
 struct route_entry {
     int dest_ip
     int dest_mask
@@ -39,6 +41,7 @@ struct route_entry {
     int metric
     int interface_id
 }
+
 struct tcp_manager {
     tcp_connection[] connections
     int conn_counter
@@ -47,6 +50,7 @@ struct tcp_manager {
     int total_bytes_sent
     int total_bytes_recv
 }
+
 struct udp_manager {
     udp_endpoint[] endpoints
     int endpoint_counter
@@ -55,6 +59,7 @@ struct udp_manager {
     int total_bytes_sent
     int total_bytes_recv
 }
+
 struct route_manager {
     route_entry[] routes
     int route_counter
@@ -62,6 +67,7 @@ struct route_manager {
     int cache_hits
     int cache_misses
 }
+
 struct ip_stats {
     int total_packets_sent
     int total_packets_recv
@@ -69,6 +75,7 @@ struct ip_stats {
     int dropped_packets
     int forwarded_packets
 }
+
 func (mgr* tcp_manager) create_connection(local_port int, remote_port int, remote_ip int) (int, string) {
     conn := tcp_connection{
         conn_id: mgr.conn_counter,
@@ -90,6 +97,7 @@ func (mgr* tcp_manager) create_connection(local_port int, remote_port int, remot
     mgr.total_connections = mgr.total_connections + 1
     return conn_id, ""
 }
+
 func (mgr* tcp_manager) change_state(conn_id int, new_state int) (int, string) {
     if conn_id >= len(mgr.connections) {
         return -1, "connection not found"
@@ -104,6 +112,7 @@ func (mgr* tcp_manager) change_state(conn_id int, new_state int) (int, string) {
     mgr.connections[conn_id] = conn
     return conn_id, ""
 }
+
 func (mgr* tcp_manager) send_data(conn_id int, data byte[], len int) (int, string) {
     if conn_id >= len(mgr.connections) {
         return -1, "connection not found"
@@ -121,6 +130,7 @@ func (mgr* tcp_manager) send_data(conn_id int, data byte[], len int) (int, strin
     mgr.connections[conn_id] = conn
     return len, ""
 }
+
 func (mgr* tcp_manager) recv_data(conn_id int) (byte[], string) {
     if conn_id >= len(mgr.connections) {
         return byte[]{}, "connection not found"
@@ -133,6 +143,7 @@ func (mgr* tcp_manager) recv_data(conn_id int) (byte[], string) {
     mgr.total_bytes_recv = mgr.total_bytes_recv + len(data)
     return data, ""
 }
+
 func create_tcp_manager() (tcp_manager, string) {
     mgr := tcp_manager{
         connections: tcp_connection[]{},
@@ -144,6 +155,7 @@ func create_tcp_manager() (tcp_manager, string) {
     }
     return mgr, ""
 }
+
 func (mgr* udp_manager) create_endpoint(local_port int, remote_port int, remote_ip int) (int, string) {
     endpoint := udp_endpoint{
         endpoint_id: mgr.endpoint_counter,
@@ -158,6 +170,7 @@ func (mgr* udp_manager) create_endpoint(local_port int, remote_port int, remote_
     mgr.endpoint_counter = mgr.endpoint_counter + 1
     return endpoint_id, ""
 }
+
 func (mgr* udp_manager) send_datagram(endpoint_id int, data byte[], len int) (int, string) {
     if endpoint_id >= len(mgr.endpoints) {
         return -1, "endpoint not found"
@@ -169,6 +182,7 @@ func (mgr* udp_manager) send_datagram(endpoint_id int, data byte[], len int) (in
     mgr.endpoints[endpoint_id] = endpoint
     return len, ""
 }
+
 func (mgr* udp_manager) recv_datagram(endpoint_id int) (byte[], string) {
     if endpoint_id >= len(mgr.endpoints) {
         return byte[]{}, "endpoint not found"
@@ -180,6 +194,7 @@ func (mgr* udp_manager) recv_datagram(endpoint_id int) (byte[], string) {
     data := byte[]{}
     return data, ""
 }
+
 func create_udp_manager() (udp_manager, string) {
     mgr := udp_manager{
         endpoints: udp_endpoint[]{},
@@ -191,6 +206,7 @@ func create_udp_manager() (udp_manager, string) {
     }
     return mgr, ""
 }
+
 func (mgr* route_manager) add_route(dest_ip int, dest_mask int, next_hop_ip int, metric int) (int, string) {
     route := route_entry{
         dest_ip: dest_ip,
@@ -204,6 +220,7 @@ func (mgr* route_manager) add_route(dest_ip int, dest_mask int, next_hop_ip int,
     mgr.route_counter = mgr.route_counter + 1
     return route_id, ""
 }
+
 func (mgr* route_manager) lookup_route(dest_ip int) (route_entry, string) {
     mgr.total_lookups = mgr.total_lookups + 1
     i := 0
@@ -218,6 +235,7 @@ func (mgr* route_manager) lookup_route(dest_ip int) (route_entry, string) {
     mgr.cache_misses = mgr.cache_misses + 1
     return route_entry{}, "route not found"
 }
+
 func create_route_manager() (route_manager, string) {
     mgr := route_manager{
         routes: route_entry[]{},
@@ -228,12 +246,14 @@ func create_route_manager() (route_manager, string) {
     }
     return mgr, ""
 }
+
 struct tcp_ip_stack {
     tcp_manager tcp_mgr
     udp_manager udp_mgr
     route_manager route_mgr
     ip_stats ip_stat
 }
+
 func create_tcp_ip_stack() (tcp_ip_stack, string) {
     tcp_mgr, _ := create_tcp_manager()
     udp_mgr, _ := create_udp_manager()
@@ -253,6 +273,7 @@ func create_tcp_ip_stack() (tcp_ip_stack, string) {
     }
     return stack, ""
 }
+
 func (stack* tcp_ip_stack) get_stats() (tcp_ip_stack, string) {
     return stack, ""
 }

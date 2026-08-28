@@ -6,6 +6,7 @@ struct os_tier4_integration {
     int tier4_status
     vec tier4_features
 }
+
 func new_os_tier4_integration() (os_tier4_integration, string) {
     integration := os_tier4_integration{
         tier1_initialized: 1,
@@ -24,12 +25,15 @@ func new_os_tier4_integration() (os_tier4_integration, string) {
     integration.tier4_features = append(integration.tier4_features, 7)  
     return integration, ""
 }
+
 func (ti* os_tier4_integration) get_status() (int, string) {
     return ti.tier4_status, ""
 }
+
 func (ti* os_tier4_integration) list_features() (vec, string) {
     return ti.tier4_features, ""
 }
+
 struct tier4_stats {
     int total_features
     int tier1_ready
@@ -37,6 +41,7 @@ struct tier4_stats {
     int tier3_ready
     int tier4_ready
 }
+
 func (ti* os_tier4_integration) get_tier4_stats() (tier4_stats, string) {
     stats := tier4_stats{
         total_features: len(ti.tier4_features),

@@ -11,6 +11,7 @@ struct speculative_tokens {
     float32[] probabilities
     int32 num_speculated
 }
+
 struct v1_spec_decode {
     speculative_method method
     int32 num_speculative_tokens
@@ -22,6 +23,7 @@ struct v1_spec_decode {
     int32 total_tokens_generated
     speculative_tokens* spec_tokens
 }
+
 func create_v1_spec_decode(int32 num_spec_tokens) v1_spec_decode* {
     return *v1_spec_decode{
         method: method_medusa,
@@ -39,6 +41,7 @@ func create_v1_spec_decode(int32 num_spec_tokens) v1_spec_decode* {
         },
     }
 }
+
 func (v1_spec_decode* spec) speculate(float32[] logits) speculative_tokens {
     result := speculative_tokens{
         tokens: make(int32[]),
@@ -62,6 +65,7 @@ func (v1_spec_decode* spec) speculate(float32[] logits) speculative_tokens {
     }
     return result
 }
+
 func (v1_spec_decode* spec) verify_speculated_tokens(int32[] predicted_tokens, int32[] actual_tokens) int32 {
     accepted := 0
     for i := 0; i < len(predicted_tokens) && i < len(actual_tokens); i = i + 1 {
@@ -75,6 +79,7 @@ func (v1_spec_decode* spec) verify_speculated_tokens(int32[] predicted_tokens, i
     }
     return int32(accepted)
 }
+
 func (v1_spec_decode* spec) batch_speculate(float32[][]] batch_logits) speculative_tokens[] {
     results := make(speculative_tokens[])
     for i := 0; i < len(batch_logits); i = i + 1 {
@@ -83,6 +88,7 @@ func (v1_spec_decode* spec) batch_speculate(float32[][]] batch_logits) speculati
     }
     return results
 }
+
 func (v1_spec_decode* spec) get_expected_speedup() float32 {
     total := spec.accepted_tokens + spec.rejected_tokens
     if total == 0 {
@@ -91,6 +97,7 @@ func (v1_spec_decode* spec) get_expected_speedup() float32 {
     acceptance_rate := float32(spec.accepted_tokens) / float32(total)
     return 1.0 + (acceptance_rate * float32(spec.num_speculative_tokens))
 }
+
 func (v1_spec_decode* spec) get_spec_decode_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["method"] = spec.method
@@ -101,9 +108,11 @@ func (v1_spec_decode* spec) get_spec_decode_stats() map[string]interface{} {
     stats["expected_speedup"] = spec.get_expected_speedup()
     return stats
 }
+
 func (v1_spec_decode* spec) set_speculative_method(speculative_method method) {
     spec.method = method
 }
+
 func (v1_spec_decode* spec) set_num_speculative_tokens(int32 num_tokens) {
     spec.num_speculative_tokens = num_tokens
 }

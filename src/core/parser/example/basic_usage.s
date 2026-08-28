@@ -17,6 +17,7 @@ func main() {
     demo_batch_parsing()
     print("\n✅ All examples completed successfully!\n\n")
 }
+
 func demo_json_parsing() {
     print("="*60 + "\n")
     print("Example 1: JSON Parsing\n")
@@ -32,6 +33,7 @@ func demo_json_parsing() {
     print("  Output: " + result.parsed_output + "\n")
     print("  Quality Score: " + string(estimate_quality_score(result)) + "\n\n")
 }
+
 func demo_format_detection() {
     print("="*60 + "\n")
     print("Example 2: Automatic Format Detection\n")
@@ -53,6 +55,7 @@ func demo_format_detection() {
         i = i + 1
     }
 }
+
 func demo_error_recovery() {
     print("="*60 + "\n")
     print("Example 3: Error Recovery\n")
@@ -70,6 +73,7 @@ func demo_error_recovery() {
     }
     print("  Confidence: " + string(result.confidence) + "\n\n")
 }
+
 func demo_stream_parsing() {
     print("="*60 + "\n")
     print("Example 4: Stream Parsing\n")
@@ -96,6 +100,7 @@ func demo_stream_parsing() {
         print("  Complete Output: " + final_result.parsed_output + "\n\n")
     }
 }
+
 func demo_batch_parsing() {
     print("="*60 + "\n")
     print("Example 5: Batch Parsing\n")
@@ -125,6 +130,7 @@ func demo_batch_parsing() {
     print("  Failed: " + string(stats.failed_parses) + "\n")
     print("  Total Bytes: " + string(stats.total_bytes_parsed) + "\n\n")
 }
+
 func status_to_string(int status) string {
     match status {
         0 => return "SUCCESS"
@@ -135,6 +141,7 @@ func status_to_string(int status) string {
         _ => return "UNKNOWN"
     }
 }
+
 func format_to_string(int format) string {
     match format {
         0 => return "TEXT"

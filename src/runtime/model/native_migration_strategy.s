@@ -8,6 +8,7 @@ struct json_value {
     bool bool_value
     []json_value array_value
 }
+
 func parse_json(string input) option[json_value] {
     some(json_value {
         type_name: "null",
@@ -17,6 +18,7 @@ func parse_json(string input) option[json_value] {
         array_value: json_value[](),
     })
 }
+
 struct native_tokenizer_handle {
     int handle_id
     bool initialized
@@ -32,23 +34,27 @@ func new_tokenizer(string vocab_file) native_tokenizer_handle {
         initialized: handle_id > 0,
     }
 }
+
 func (native_tokenizer_handle* t) encode(string text) int[] {
     if !t.initialized {
         return int[]()
     }
     __tokenizer_encode(t.handle_id, text)
 }
+
 func (native_tokenizer_handle* t) decode(int[] tokens) string {    if !t.initialized {
         return ""
     }
     __tokenizer_decode(t.handle_id, tokens)
 }
+
 func (native_tokenizer_handle* t) cleanup() {
     if t.initialized {
         __tokenizer_free(t.handle_id)
         t.initialized = false
     }
 }
+
 struct compilation_strategy {
     string name
     string[] pure_s_modules     
@@ -56,6 +62,7 @@ struct compilation_strategy {
     string[] external_modules    
     int estimated_compile_time_sec
 }
+
 func get_current_compilation_strategy() compilation_strategy {
     return compilation_strategy {
         name: "hybrid_modular",
@@ -78,6 +85,7 @@ func get_current_compilation_strategy() compilation_strategy {
         estimated_compile_time_sec: 120,  
     }
 }
+
 struct code_quality_metrics {
     int total_s_lines
     int total_native_lines
@@ -86,6 +94,7 @@ struct code_quality_metrics {
     int test_coverage_percent
     string maintainability_index  
 }
+
 func get_quality_targets() code_quality_metrics {
     return code_quality_metrics {
         total_s_lines: 50000,            
@@ -96,6 +105,7 @@ func get_quality_targets() code_quality_metrics {
         maintainability_index: "Good",
     }
 }
+
 struct evolution_roadmap {
     string phase_name
     int target_phase
@@ -104,6 +114,7 @@ struct evolution_roadmap {
     int months_duration
     string[] migration_targets
 }
+
 func get_pure_s_evolution_roadmap() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")

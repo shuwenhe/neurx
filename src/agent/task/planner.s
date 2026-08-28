@@ -15,9 +15,11 @@ struct agent_plan_state {
     int replan_count
     int code_attempts
 }
+
 func agent_plan_max_replan_count() int {
     3
 }
+
 func new_agent_plan_state(string goal, string current_task, int step_budget) agent_plan_state {
     int budget = step_budget
     if budget <= 0 {
@@ -37,9 +39,11 @@ func new_agent_plan_state(string goal, string current_task, int step_budget) age
         code_attempts: 0,
     }
 }
+
 func agent_plan_max_code_attempts() int {
     3
 }
+
 func agent_plan_set_task(agent_plan_state state, string current_task) agent_plan_state {
     agent_plan_state {
         goal: state.goal,
@@ -55,6 +59,7 @@ func agent_plan_set_task(agent_plan_state state, string current_task) agent_plan
         code_attempts: state.code_attempts,
     }
 }
+
 func agent_plan_enqueue_task(agent_plan_state state, string task) agent_plan_state {
     int size = len(state.task_queue)
     string[] queue = string[]{cap: size + 1}
@@ -78,6 +83,7 @@ func agent_plan_enqueue_task(agent_plan_state state, string task) agent_plan_sta
         code_attempts: state.code_attempts,
     }
 }
+
 func agent_plan_enqueue_tasks(agent_plan_state state, string[] tasks) agent_plan_state {
     int old_size = len(state.task_queue)
     int add_size = len(tasks)
@@ -105,6 +111,7 @@ func agent_plan_enqueue_tasks(agent_plan_state state, string[] tasks) agent_plan
         code_attempts: state.code_attempts,
     }
 }
+
 func agent_plan_dequeue_to_current(agent_plan_state state) agent_plan_state {
     if len(state.task_queue) == 0 {
         return state
@@ -131,6 +138,7 @@ func agent_plan_dequeue_to_current(agent_plan_state state) agent_plan_state {
         code_attempts: state.code_attempts,
     }
 }
+
 func agent_plan_route(agent_memory_state memory) string {
     agent_memory_lookup_result inferred = agent_memory_lookup_long(memory, "inferred_route")
     if inferred.found && inferred.value != "" {
@@ -142,6 +150,7 @@ func agent_plan_route(agent_memory_state memory) string {
     }
     "general"
 }
+
 func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, agent_memory_state memory, string observation) agent_plan_state {
     if state.finished {
         return state
@@ -507,9 +516,11 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
         code_attempts: next_code_attempts,
     }
 }
+
 func agent_plan_state_dict(agent_plan_state state) agent_plan_state {
     state
 }
+
 func agent_plan_update_goal(agent_plan_state state, string new_goal) agent_plan_state {
     agent_plan_state {
         goal: new_goal,
@@ -525,9 +536,11 @@ func agent_plan_update_goal(agent_plan_state state, string new_goal) agent_plan_
         code_attempts: 0,
     }
 }
+
 func agent_plan_load_state_dict(agent_plan_state state, agent_plan_state other) agent_plan_state {
     other
 }
+
 func agent_plan_set_budget(agent_plan_state state, int budget) agent_plan_state {
     int b = budget
     if b <= 0 {

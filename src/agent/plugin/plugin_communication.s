@@ -13,6 +13,7 @@ import "time"
 	PRIORITY_HIGH = 2
 	PRIORITY_CRITICAL = 3
 }
+
 struct plugin_message {
 	string                  message_id
 	message_type            msg_type
@@ -30,6 +31,7 @@ struct plugin_message {
 	int32                   max_retries
 	int64                   expiry_time
 }
+
 struct message_handler {
 	string                  handler_id
 	string                  handler_name
@@ -39,6 +41,7 @@ struct message_handler {
 	int32                   messages_failed
 	int64                   created_at
 }
+
 struct plugin_communication_channel {
 	map[string]plugin_message[]]  message_queue
 	message_handler[]            handlers
@@ -49,6 +52,7 @@ struct plugin_communication_channel {
 	int32                           max_queue_size
 	sync.Mutex                      mu
 }
+
 struct message_router {
 	plugin_communication_channel    channel
 	map[string]string]              plugin_address_map
@@ -57,6 +61,7 @@ struct message_router {
 	int32                           total_subscriptions
 	sync.Mutex                      mu
 }
+
 struct message_response {
 	string                  response_id
 	string                  request_message_id
@@ -65,6 +70,7 @@ struct message_response {
 	map[string]interface{}  response_data
 	int64                   response_time
 }
+
 func create_plugin_message(msg_id string, msg_type message_type, sender string, receiver string) plugin_message {
 	return plugin_message{
 		message_id:            msg_id,
@@ -84,6 +90,7 @@ func create_plugin_message(msg_id string, msg_type message_type, sender string, 
 		expiry_time:           time.Now().UnixNano() + 60000000000,
 	}
 }
+
 func create_plugin_communication_channel() plugin_communication_channel {
 	return plugin_communication_channel{
 		message_queue:           make(map[string]plugin_message[]),
@@ -96,6 +103,7 @@ func create_plugin_communication_channel() plugin_communication_channel {
 		mu:                      sync.Mutex{},
 	}
 }
+
 func create_message_handler(handler_id string, name string) message_handler {
 	return message_handler{
 		handler_id:              handler_id,
@@ -107,6 +115,7 @@ func create_message_handler(handler_id string, name string) message_handler {
 		created_at:              time.Now().UnixNano(),
 	}
 }
+
 func create_message_router() message_router {
 	return message_router{
 		channel:                 create_plugin_communication_channel(),
@@ -117,6 +126,7 @@ func create_message_router() message_router {
 		mu:                      sync.Mutex{},
 	}
 }
+
 func (plugin_communication_channel* c) send_message(message plugin_message) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -133,6 +143,7 @@ func (plugin_communication_channel* c) send_message(message plugin_message) bool
 	c.total_messages_sent++
 	return true
 }
+
 func (plugin_communication_channel* c) receive_message(plugin_id string) (plugin_message, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -150,6 +161,7 @@ func (plugin_communication_channel* c) receive_message(plugin_id string) (plugin
 	c.total_messages_received++
 	return message, true
 }
+
 func (plugin_communication_channel* c) get_pending_message_count(plugin_id string) int32 {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -159,6 +171,7 @@ func (plugin_communication_channel* c) get_pending_message_count(plugin_id strin
 	}
 	return 0
 }
+
 func (plugin_communication_channel* c) register_handler(handler message_handler) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -166,6 +179,7 @@ func (plugin_communication_channel* c) register_handler(handler message_handler)
 	c.handler_count++
 	return true
 }
+
 func (plugin_communication_channel* c) handle_message(plugin_id string) int32 {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -186,6 +200,7 @@ func (plugin_communication_channel* c) handle_message(plugin_id string) int32 {
 	}
 	return processed
 }
+
 func (plugin_communication_channel* c) get_channel_stats() map[string]interface{} {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -197,6 +212,7 @@ func (plugin_communication_channel* c) get_channel_stats() map[string]interface{
 	stats["queue_size"] = int32(len(c.message_queue))
 	return stats
 }
+
 func (message_router* r) register_plugin(plugin_id string, address string) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -208,6 +224,7 @@ func (message_router* r) register_plugin(plugin_id string, address string) bool 
 	r.total_routes++
 	return true
 }
+
 func (message_router* r) subscribe_to_event(plugin_id string, event_topic string) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -225,6 +242,7 @@ func (message_router* r) subscribe_to_event(plugin_id string, event_topic string
 	r.total_subscriptions++
 	return true
 }
+
 func (message_router* r) publish_event(event_topic string, message plugin_message) int32 {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -241,6 +259,7 @@ func (message_router* r) publish_event(event_topic string, message plugin_messag
 	}
 	return published
 }
+
 func (message_router* r) route_message(message plugin_message) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -250,16 +269,20 @@ func (message_router* r) route_message(message plugin_message) bool {
 	}
 	return r.channel.send_message(message)
 }
+
 func (plugin_message* m) set_payload(key string, value interface{}) {
 	m.message_payload[key] = value
 }
+
 func (plugin_message* m) get_payload(key string) (interface{}, bool) {
 	value, exists := m.message_payload[key]
 	return value, exists
 }
+
 func (plugin_message* m) is_expired() bool {
 	return time.Now().UnixNano() > m.expiry_time
 }
+
 func (plugin_message* m) get_latency_ms() int64 {
 	if m.received_time == 0 {
 		return 0

@@ -3,21 +3,26 @@ import io
 struct trace_id {
     value []byte
 }
+
 struct span_id {
     value []byte
 }
+
 struct trace_flags {
     sampled bool
 }
+
 struct span_context {
     trace_id    trace_id
     span_id     span_id
     trace_flags trace_flags
     trace_state []map[string]string
 }
+
 struct baggage {
     items []map[string]string
 }
+
 func new_trace_id() trace_id {
     id := trace_id{}
     id.value = make([]byte, 16)
@@ -26,6 +31,7 @@ func new_trace_id() trace_id {
     }
     return id
 }
+
 func new_span_id() span_id {
     id := span_id{}
     id.value = make([]byte, 8)
@@ -34,6 +40,7 @@ func new_span_id() span_id {
     }
     return id
 }
+
 func (trace_id* t) to_hex() string[] {
     hex := ""
     hex_chars := string[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
@@ -44,6 +51,7 @@ func (trace_id* t) to_hex() string[] {
     }
     return append(string[]{}, hex)
 }
+
 func (span_id* s) to_hex() string[] {
     hex := ""
     hex_chars := string[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
@@ -54,6 +62,7 @@ func (span_id* s) to_hex() string[] {
     }
     return append(string[]{}, hex)
 }
+
 func new_span_context() span_context {
     ctx := span_context{}
     ctx.trace_id = new_trace_id()
@@ -62,6 +71,7 @@ func new_span_context() span_context {
     ctx.trace_state = make([]map[string]string, 0)
     return ctx
 }
+
 func new_child_span_context(span_context* parent_ctx) span_context {
     ctx := span_context{}
     ctx.trace_id = parent_ctx.trace_id
@@ -70,18 +80,23 @@ func new_child_span_context(span_context* parent_ctx) span_context {
     ctx.trace_state = parent_ctx.trace_state
     return ctx
 }
+
 func (span_context* c) get_trace_id() trace_id {
     return c.trace_id
 }
+
 func (span_context* c) get_span_id() span_id {
     return c.span_id
 }
+
 func (span_context* c) is_sampled() bool {
     return c.trace_flags.sampled
 }
+
 func (span_context* c) set_sampled(sampled bool) {
     c.trace_flags.sampled = sampled
 }
+
 func (span_context* c) w3c_format() string[] {
     trace_id_hex := c.trace_id.to_hex()
     span_id_hex := c.span_id.to_hex()
@@ -92,6 +107,7 @@ func (span_context* c) w3c_format() string[] {
     result := "00-" + trace_id_hex[0] + "-" + span_id_hex[0] + "-" + flags
     return append(string[]{}, result)
 }
+
 func parse_w3c_format(header string[]) span_context {
     ctx := span_context{}
     if len(header) > 0 {
@@ -102,17 +118,20 @@ func parse_w3c_format(header string[]) span_context {
     }
     return ctx
 }
+
 func new_baggage() baggage {
     b := baggage{}
     b.items = make([]map[string]string, 1)
     b.items[0] = make(map[string]string)
     return b
 }
+
 func (baggage* b) set(key string[], value string[]) {
     if len(key) > 0 && len(value) > 0 && len(b.items) > 0 {
         b.items[0][key[0]] = value[0]
     }
 }
+
 func (baggage* b) get(key string[]) string[] {
     if len(key) > 0 && len(b.items) > 0 {
         if val, ok := b.items[0][key[0]]; ok {
@@ -121,6 +140,7 @@ func (baggage* b) get(key string[]) string[] {
     }
     return string[]{}
 }
+
 func (baggage* b) merge(baggage* other) {
     if len(other.items) > 0 {
         for k, v := range other.items[0] {
@@ -128,6 +148,7 @@ func (baggage* b) merge(baggage* other) {
         }
     }
 }
+
 func main() {
     io.Println("Span Context Module - OpenTelemetry Tracing Foundation")
     root_ctx := new_span_context()

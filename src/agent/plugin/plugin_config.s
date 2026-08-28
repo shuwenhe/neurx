@@ -12,6 +12,7 @@ struct plugin_config {
 	int32                   version
 	bool                    is_active
 }
+
 struct config_validation_rule {
 	string                  rule_id
 	string                  field_name
@@ -23,6 +24,7 @@ struct config_validation_rule {
 	interface{}[]        allowed_values
 	string                  error_message
 }
+
 struct config_schema {
 	string                  schema_id
 	config_validation_rule[]  rules
@@ -30,6 +32,7 @@ struct config_schema {
 	bool                    strict_mode
 	int32                   schema_version
 }
+
 struct config_manager {
 	map[string]plugin_config]     configs
 	int32                         config_count
@@ -42,6 +45,7 @@ struct config_manager {
 	int32                         validation_failures
 	sync.Mutex                    mu
 }
+
 struct config_change_log {
 	string                  change_id
 	string                  config_id
@@ -52,6 +56,7 @@ struct config_change_log {
 	map[string]interface{}  new_value
 	string                  change_reason
 }
+
 func create_plugin_config(config_id string, plugin_id string) plugin_config {
 	return plugin_config{
 		config_id:         config_id,
@@ -65,6 +70,7 @@ func create_plugin_config(config_id string, plugin_id string) plugin_config {
 		is_active:         false,
 	}
 }
+
 func create_config_manager() config_manager {
 	return config_manager{
 		configs:                  make(map[string]plugin_config),
@@ -79,6 +85,7 @@ func create_config_manager() config_manager {
 		mu:                       sync.Mutex{},
 	}
 }
+
 func create_config_schema(schema_id string) config_schema {
 	return config_schema{
 		schema_id:        schema_id,
@@ -88,6 +95,7 @@ func create_config_schema(schema_id string) config_schema {
 		schema_version:   1,
 	}
 }
+
 func create_validation_rule(rule_id string, field_name string, rule_type string) config_validation_rule {
 	return config_validation_rule{
 		rule_id:          rule_id,
@@ -101,6 +109,7 @@ func create_validation_rule(rule_id string, field_name string, rule_type string)
 		error_message:    "",
 	}
 }
+
 func (config_manager* m) create_config(config_id string, plugin_id string) (plugin_config, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -115,6 +124,7 @@ func (config_manager* m) create_config(config_id string, plugin_id string) (plug
 	m.total_configs_created++
 	return config, true
 }
+
 func (config_manager* m) set_config_value(config_id string, key string, value interface{}) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -129,6 +139,7 @@ func (config_manager* m) set_config_value(config_id string, key string, value in
 	m.total_configs_updated++
 	return true
 }
+
 func (config_manager* m) get_config_value(config_id string, key string) (interface{}, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -139,6 +150,7 @@ func (config_manager* m) get_config_value(config_id string, key string) (interfa
 	value, value_exists := config.config_data[key]
 	return value, value_exists
 }
+
 func (config_manager* m) get_all_config_values(config_id string) (map[string]interface{}, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -148,6 +160,7 @@ func (config_manager* m) get_all_config_values(config_id string) (map[string]int
 	}
 	return config.config_data, true
 }
+
 func (config_manager* m) delete_config(config_id string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -161,6 +174,7 @@ func (config_manager* m) delete_config(config_id string) bool {
 	m.total_configs_deleted++
 	return true
 }
+
 func (config_manager* m) register_schema(schema config_schema) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -172,6 +186,7 @@ func (config_manager* m) register_schema(schema config_schema) bool {
 	m.schema_count++
 	return true
 }
+
 func (config_manager* m) validate_config(config_id string, schema_id string) (bool, string[]) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -203,6 +218,7 @@ func (config_manager* m) validate_config(config_id string, schema_id string) (bo
 	m.configs[config_id] = config
 	return true, errors
 }
+
 func (config_manager* m) activate_config(config_id string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -214,6 +230,7 @@ func (config_manager* m) activate_config(config_id string) bool {
 	m.configs[config_id] = config
 	return true
 }
+
 func (config_manager* m) deactivate_config(config_id string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -225,6 +242,7 @@ func (config_manager* m) deactivate_config(config_id string) bool {
 	m.configs[config_id] = config
 	return true
 }
+
 func (config_manager* m) get_config_version(config_id string) int32 {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -234,6 +252,7 @@ func (config_manager* m) get_config_version(config_id string) int32 {
 	}
 	return 0
 }
+
 func (config_manager* m) get_config_stats() map[string]interface{} {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -246,25 +265,32 @@ func (config_manager* m) get_config_stats() map[string]interface{} {
 	stats["validation_failures"] = m.validation_failures
 	return stats
 }
+
 func (config_schema* s) add_rule(rule config_validation_rule) {
 	s.rules = append(s.rules, rule)
 	s.rule_count++
 }
+
 func (config_schema* s) get_rules() config_validation_rule[] {
 	return s.rules
 }
+
 func (config_validation_rule* r) set_required(required bool) {
 	r.is_required = required
 }
+
 func (config_validation_rule* r) add_allowed_value(value interface{}) {
 	r.allowed_values = append(r.allowed_values, value)
 }
+
 func (plugin_config* c) is_valid() bool {
 	return c.schema_validated
 }
+
 func (plugin_config* c) get_config_data() map[string]interface{} {
 	return c.config_data
 }
+
 func (plugin_config* c) merge_config(other plugin_config) bool {
 	if c.plugin_id != other.plugin_id {
 		return false

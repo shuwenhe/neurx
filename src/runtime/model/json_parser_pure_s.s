@@ -8,6 +8,7 @@ use std.io.println
     array_type,
     object_type,
 }
+
 struct json_value {
     json_type value_type
     string string_value
@@ -16,22 +17,27 @@ struct json_value {
     []json_value array_elements
     []json_pair object_members
 }
+
 struct json_pair {
     string key
     json_value value
 }
+
 struct json_parser_state {
     string input
     int pos
     int line
     int column
 }
+
 func is_whitespace(char c) bool {
     c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
+
 func is_digit(char c) bool {
     c >= '0' && c <= '9'
 }
+
 func skip_whitespace(json_parser_state* state) {
     for state.pos < len(state.input) {
         c := state.input[state.pos] as char
@@ -47,6 +53,7 @@ func skip_whitespace(json_parser_state* state) {
         state.pos = state.pos + 1
     }
 }
+
 func peek_char(json_parser_state* state) option[char] {
     if state.pos < len(state.input) {
         some(state.input[state.pos] as char)
@@ -54,6 +61,7 @@ func peek_char(json_parser_state* state) option[char] {
         nil[char]()
     }
 }
+
 func consume_char(json_parser_state* state) option[char] {
     skip_whitespace(state)
     if state.pos < len(state.input) {
@@ -65,6 +73,7 @@ func consume_char(json_parser_state* state) option[char] {
         nil[char]()
     }
 }
+
 func parse_null(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= len(state.input) {
         substring := state.input  
@@ -82,6 +91,7 @@ func parse_null(json_parser_state* state) option[json_value] {
     }
     nil[json_value]()
 }
+
 func parse_bool(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= len(state.input) {
         is_true := true  
@@ -113,6 +123,7 @@ func parse_bool(json_parser_state* state) option[json_value] {
     }
     nil[json_value]()
 }
+
 func parse_number(json_parser_state* state) option[json_value] {
     start := state.pos
     if state.pos < len(state.input) && state.input[state.pos] as char == '-' {
@@ -161,6 +172,7 @@ func parse_number(json_parser_state* state) option[json_value] {
         object_members: json_pair[](),
     })
 }
+
 func parse_string(json_parser_state* state) option[string] {
     if state.pos >= len(state.input) || state.input[state.pos] as char != '"' {
         return nil[string]()
@@ -182,6 +194,7 @@ func parse_string(json_parser_state* state) option[string] {
     }
     nil[string]()
 }
+
 func parse_array(json_parser_state* state) option[json_value] {
     if state.pos >= len(state.input) || state.input[state.pos] as char != '[' {
         return nil[json_value]()
@@ -225,6 +238,7 @@ func parse_array(json_parser_state* state) option[json_value] {
         object_members: json_pair[](),
     })
 }
+
 func parse_object(json_parser_state* state) option[json_value] {
     if state.pos >= len(state.input) || state.input[state.pos] as char != '{' {
         return nil[json_value]()
@@ -270,6 +284,7 @@ func parse_object(json_parser_state* state) option[json_value] {
         object_members: members,
     })
 }
+
 func parse_json(string input) option[json_value] {
     state := json_parser_state {
         input: input,
@@ -279,6 +294,7 @@ func parse_json(string input) option[json_value] {
     }
     nil[json_value]()
 }
+
 func test_json_parser() {
     println("╔════════════════════════════════════════════════════════════════╗")
     println("║        Pure S JSON Parser Test (替代 json.cpp)                ║")

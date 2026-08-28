@@ -19,6 +19,7 @@ struct async_engine_config {
 	timeout_ms              int64
 	max_retries             int32
 }
+
 struct async_generation_result {
 	request_id          string
 	generated_text      string
@@ -31,6 +32,7 @@ struct async_generation_result {
 	error_code          int32
 	error_message       string
 }
+
 struct async_engine {
 	config              async_engine_config
 	request_queue       async_request_queue*
@@ -45,6 +47,7 @@ struct async_engine {
 	shutdown_signal     bool
 	stats               engine_statistics
 }
+
 struct engine_statistics {
 	total_requests          int64
 	successful_requests     int64
@@ -57,6 +60,7 @@ struct engine_statistics {
 	active_streams          int32
 	last_update_time        int64
 }
+
 func create_async_engine() async_engine {
 	config := async_engine_config{
 		max_queue_capacity:      1024,
@@ -85,6 +89,7 @@ func create_async_engine() async_engine {
 		stats:        engine_statistics{},
 	}
 }
+
 func (ae async_engine*) initialize(v1_engine interface{}, sampler interface{}) bool {
 	ae.v1_engine = v1_engine
 	ae.sampler = sampler
@@ -93,6 +98,7 @@ func (ae async_engine*) initialize(v1_engine interface{}, sampler interface{}) b
 	ae.is_running = true
 	return true
 }
+
 func (ae async_engine*) submit_generation_request(
 	request_id string,
 	prompt string,
@@ -106,6 +112,7 @@ func (ae async_engine*) submit_generation_request(
 	}
 	return success, err
 }
+
 func (ae async_engine*) generate_async(request_id string) bool {
 	req := ae.request_queue.create_request(request_id, "", nil, 0, ae.config.timeout_ms)
 	task_id := format("task_%s", request_id)
@@ -115,6 +122,7 @@ func (ae async_engine*) generate_async(request_id string) bool {
 	}
 	return success
 }
+
 func (ae async_engine*) try_process_batches() {
 	for ae.executor.try_execute_task() {
 		batch := ae.request_queue.dequeue_batch()
@@ -124,6 +132,7 @@ func (ae async_engine*) try_process_batches() {
 		go ae.process_batch(*batch)
 	}
 }
+
 func (ae async_engine*) process_batch(batch request_batch*) {
 	batch_start := time.Now().UnixNano()
 	for req := range batch.requests {
@@ -136,6 +145,7 @@ func (ae async_engine*) process_batch(batch request_batch*) {
 	ae.request_queue.mark_completed(batch.batch_id, batch_latency)
 	ae.request_queue.flush_batch(*batch)
 }
+
 func (ae async_engine*) process_single_request(req async_request*) {
 	request_start := time.Now().UnixNano()
 	stream := ae.get_or_create_stream(req.request_id)
@@ -170,6 +180,7 @@ func (ae async_engine*) process_single_request(req async_request*) {
 	}
 	ae.update_statistics(result)
 }
+
 func (ae async_engine*) get_or_create_stream(request_id string) stream_state* {
 	ae.stream_mu.Lock()
 	defer ae.stream_mu.Unlock()
@@ -180,6 +191,7 @@ func (ae async_engine*) get_or_create_stream(request_id string) stream_state* {
 	}
 	return *stream
 }
+
 func (ae async_engine*) get_stream_events(request_id string) stream_event[] {
 	ae.stream_mu.Lock()
 	defer ae.stream_mu.Unlock()
@@ -189,6 +201,7 @@ func (ae async_engine*) get_stream_events(request_id string) stream_event[] {
 	}
 	return stream.get_pending_events()
 }
+
 func (ae async_engine*) get_generation_output(request_id string) (stream_output, bool) {
 	ae.stream_mu.Lock()
 	defer ae.stream_mu.Unlock()
@@ -198,6 +211,7 @@ func (ae async_engine*) get_generation_output(request_id string) (stream_output,
 	}
 	return stream.get_output(), true
 }
+
 func (ae async_engine*) cancel_request(request_id string) bool {
 	success := ae.request_queue.cancel_request(request_id)
 	if success {
@@ -209,6 +223,7 @@ func (ae async_engine*) cancel_request(request_id string) bool {
 	}
 	return success
 }
+
 func (ae async_engine*) pause_request(request_id string) bool {
 	ae.stream_mu.Lock()
 	defer ae.stream_mu.Unlock()
@@ -219,6 +234,7 @@ func (ae async_engine*) pause_request(request_id string) bool {
 	stream.pause()
 	return true
 }
+
 func (ae async_engine*) resume_request(request_id string) bool {
 	ae.stream_mu.Lock()
 	defer ae.stream_mu.Unlock()
@@ -229,12 +245,15 @@ func (ae async_engine*) resume_request(request_id string) bool {
 	stream.resume()
 	return true
 }
+
 func (ae async_engine*) get_backpressure_status() bool {
 	return ae.request_queue.is_backpressured()
 }
+
 func (ae async_engine*) get_queue_size() int32 {
 	return ae.request_queue.get_queue_size()
 }
+
 func (ae async_engine*) update_statistics(result async_generation_result) {
 	ae.stats.total_requests++
 	if result.error_code == 0 {
@@ -245,17 +264,21 @@ func (ae async_engine*) update_statistics(result async_generation_result) {
 	ae.stats.total_generation_time += result.latency_ms
 	ae.stats.avg_generation_time_ms = float32(ae.stats.total_generation_time) / float32(ae.stats.total_requests)
 }
+
 func (ae async_engine*) get_statistics() engine_statistics {
 	ae.stats.last_update_time = time.Now().UnixNano()
 	ae.stats.active_streams = int32(len(ae.stream_states))
 	return ae.stats
 }
+
 func (ae async_engine*) is_backpressured() bool {
 	return ae.request_queue.is_backpressured()
 }
+
 func (ae async_engine*) get_connection_metrics() connection_metrics {
 	return ae.connection_pool.get_metrics()
 }
+
 func (ae async_engine*) register_connection(
 	connection_id string,
 	client_id string,
@@ -266,9 +289,11 @@ func (ae async_engine*) register_connection(
 		connection_id, client_id, remote_addr, local_addr,
 	)
 }
+
 func (ae async_engine*) close_connection(connection_id string) bool {
 	return ae.connection_pool.close_connection(connection_id)
 }
+
 func (ae async_engine*) shutdown(timeout_ms int64) {
 	ae.shutdown_signal = true
 	ae.is_running = false
@@ -277,9 +302,11 @@ func (ae async_engine*) shutdown(timeout_ms int64) {
 	}
 	ae.executor.shutdown(timeout_ms)
 }
+
 func (ae async_engine*) get_engine_config() async_engine_config {
 	return ae.config
 }
+
 func (ae async_engine*) update_config(new_config async_engine_config) bool {
 	if ae.is_running {
 		ae.request_queue.capacity = new_config.max_queue_capacity
@@ -288,6 +315,7 @@ func (ae async_engine*) update_config(new_config async_engine_config) bool {
 	ae.config = new_config
 	return true
 }
+
 func (ae async_engine*) export_metrics_json() string {
 	stats := ae.get_statistics()
 	queue_stats := ae.request_queue.get_statistics()

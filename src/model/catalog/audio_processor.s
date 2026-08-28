@@ -35,6 +35,7 @@ struct audio_metadata {
 	string encoding
 	time.Time created_at
 }
+
 struct audio_data {
 	sync.Mutex mu
 	float[]32 samples
@@ -45,6 +46,7 @@ struct audio_data {
 	float32 peak_amplitude
 	float32 rms_level
 }
+
 struct audio_frame {
 	float[]32 frame_samples
 	int32 frame_index
@@ -53,6 +55,7 @@ struct audio_frame {
 	float32 zero_crossing_rate
 	float[]32 spectrum
 }
+
 struct spectrogram_data {
 	float[][]32 spectrogram
 	int32 num_frames
@@ -63,6 +66,7 @@ struct spectrogram_data {
 	float64 sample_rate
 	time.Time computed_at
 }
+
 struct mfcc_features {
 	float[][]32 coefficients
 	int32 num_frames
@@ -71,6 +75,7 @@ struct mfcc_features {
 	float64 sample_rate
 	time.Time computed_at
 }
+
 struct audio_stats {
 	float32 mean_amplitude
 	float32 std_deviation
@@ -83,6 +88,7 @@ struct audio_stats {
 	int64 num_silence_frames
 	int64 num_voiced_frames
 }
+
 struct audio_processor {
 	sync.Mutex mu
 	*audio_data current_audio
@@ -97,6 +103,7 @@ struct audio_processor {
 	int32 num_mfcc_coefficients
 	time.Time created_at
 }
+
 func create_audio_processor() *audio_processor {
 	ap := *audio_processor{
 		loaded_audios:           make(map[string]*audio_data),
@@ -112,6 +119,7 @@ func create_audio_processor() *audio_processor {
 	}
 	return ap
 }
+
 func (audio_processor* ap) load_audio(audio_id string, samples float[]32, metadata *audio_metadata) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
@@ -132,6 +140,7 @@ func (audio_processor* ap) load_audio(audio_id string, samples float[]32, metada
 	ap.current_cache_size += int64(len(samples)) * 4
 	return nil
 }
+
 func (audio_processor* ap) unload_audio(audio_id string) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
@@ -146,6 +155,7 @@ func (audio_processor* ap) unload_audio(audio_id string) error {
 	}
 	return nil
 }
+
 func (audio_processor* ap) normalize_audio(audio_id string) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
@@ -175,6 +185,7 @@ func (audio_processor* ap) normalize_audio(audio_id string) error {
 	audio.is_normalized = true
 	return nil
 }
+
 func (audio_processor* ap) resample_audio(audio_id string, target_rate int32) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
@@ -203,6 +214,7 @@ func (audio_processor* ap) resample_audio(audio_id string, target_rate int32) er
 	audio.metadata.total_samples = int64(len(new_samples))
 	return nil
 }
+
 func (audio_processor* ap) compute_spectrogram(audio_id string) (*spectrogram_data, error) {
 	ap.mu.Lock()
 	audio, exists := ap.loaded_audios[audio_id]
@@ -243,6 +255,7 @@ func (audio_processor* ap) compute_spectrogram(audio_id string) (*spectrogram_da
 	}
 	return spec_data, nil
 }
+
 func (audio_processor* ap) compute_mfcc(audio_id string) (*mfcc_features, error) {
 	spectrogram, err := ap.compute_spectrogram(audio_id)
 	if err != nil {
@@ -277,6 +290,7 @@ func (audio_processor* ap) compute_mfcc(audio_id string) (*mfcc_features, error)
 	}
 	return mfcc, nil
 }
+
 func (audio_processor* ap) get_audio_stats(audio_id string) (*audio_stats, error) {
 	ap.mu.Lock()
 	audio, exists := ap.loaded_audios[audio_id]
@@ -356,6 +370,7 @@ func (audio_processor* ap) get_audio_stats(audio_id string) (*audio_stats, error
 	}
 	return stats, nil
 }
+
 func (audio_processor* ap) get_audio(audio_id string) (*audio_data, error) {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
@@ -365,6 +380,7 @@ func (audio_processor* ap) get_audio(audio_id string) (*audio_data, error) {
 	}
 	return audio, nil
 }
+
 func (audio_processor* ap) list_loaded_audios() string[] {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
@@ -374,6 +390,7 @@ func (audio_processor* ap) list_loaded_audios() string[] {
 	}
 	return ids
 }
+
 func (audio_processor* ap) clear_cache() error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
@@ -382,6 +399,7 @@ func (audio_processor* ap) clear_cache() error {
 	ap.current_cache_size = 0
 	return nil
 }
+
 func (audio_processor* ap) get_processor_stats() map[string]interface{} {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
@@ -395,16 +413,19 @@ func (audio_processor* ap) get_processor_stats() map[string]interface{} {
 		"created_at":          ap.created_at,
 	}
 }
+
 func (audio_processor* ap) set_target_sample_rate(sample_rate int32) {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 	ap.target_sample_rate = sample_rate
 }
+
 func (audio_processor* ap) set_fft_size(size int32) {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 	ap.fft_size = size
 }
+
 func (audio_processor* ap) set_mfcc_coefficients(num_coefficients int32) {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()

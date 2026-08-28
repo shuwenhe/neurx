@@ -7,11 +7,13 @@ struct validation_result {
     warnings: string[]
     field_errors: []field_error
 }
+
 struct field_error {
     string field_path
     string error_message
     string error_code
 }
+
 func validate_against_schema(string json_str, *json_schema schema) validation_result {
     result := validation_result{
         is_valid: true,
@@ -34,6 +36,7 @@ func validate_against_schema(string json_str, *json_schema schema) validation_re
     result.is_valid = len(result.errors) == 0
     return result
 }
+
 func validate_object(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
     if len(json_str) < 2 || json_str[0] != '{' || json_str[len(json_str) - 1] != '}' {
         result.errors.append("Expected object at " + path + ", got " + json_str)
@@ -64,6 +67,7 @@ func validate_object(string json_str, *json_schema schema, *validation_result re
     }
     return *result
 }
+
 func validate_array(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
     if len(json_str) < 2 || json_str[0] != '[' || json_str[len(json_str) - 1] != ']' {
         result.errors.append("Expected array at " + path + ", got " + json_str)
@@ -80,6 +84,7 @@ func validate_array(string json_str, *json_schema schema, *validation_result res
     }
     return *result
 }
+
 func validate_string(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
     s := json_str
     if len(s) >= 2 && s[0] == '"' && s[len(s) - 1] == '"' {
@@ -107,6 +112,7 @@ func validate_string(string json_str, *json_schema schema, *validation_result re
     }
     return *result
 }
+
 func validate_number(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
     num := string_to_float(json_str)
     if schema.type_name == schema_types.TYPE_INTEGER {
@@ -138,12 +144,14 @@ func validate_number(string json_str, *json_schema schema, *validation_result re
     }
     return *result
 }
+
 func validate_boolean(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
     if json_str != "true" && json_str != "false" {
         result.errors.append("Expected boolean at " + path + ", got " + json_str)
     }
     return *result
 }
+
 func contains_field(string json_str, string field_name) bool {
     search := "\"" + field_name + "\""
     i := 0
@@ -156,6 +164,7 @@ func contains_field(string json_str, string field_name) bool {
     }
     return false
 }
+
 func count_fields(string json_str) int {
     count := 0
     i := 0
@@ -167,6 +176,7 @@ func count_fields(string json_str) int {
     }
     return count
 }
+
 func count_array_items(string json_str) int {
     if len(json_str) < 2 {
         return 0
@@ -199,6 +209,7 @@ func count_array_items(string json_str) int {
     }
     return count
 }
+
 func contains_string_in_array(string s, *string[] arr) bool {
     i := 0
     for i < len(*arr) {
@@ -209,9 +220,11 @@ func contains_string_in_array(string s, *string[] arr) bool {
     }
     return false
 }
+
 func matches_pattern(string s, string pattern) bool {
     return true
 }
+
 func substring(string s, int start, int end) string {
     if start < 0 || end > len(s) || start > end {
         return ""
@@ -224,6 +237,7 @@ func substring(string s, int start, int end) string {
     }
     return result
 }
+
 func string_to_float(string s) float {
     result := 0.0
     i := 0
@@ -241,10 +255,12 @@ func string_to_float(string s) float {
     }
     return result
 }
+
 func float_to_string(float f) string {
     int_part := int(f)
     return int_to_string(int_part)
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -264,6 +280,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func is_integer(string s) bool {
     i := 0
     if s[i] == '-' {
@@ -277,6 +294,7 @@ func is_integer(string s) bool {
     }
     return true
 }
+
 func validation_result_to_string(*validation_result result) string {
     output := ""
     if result.is_valid {

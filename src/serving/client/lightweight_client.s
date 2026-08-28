@@ -6,6 +6,7 @@ use std.io.println
     hybrid,
     offline_cache,
 }
+
 struct lightweight_client_config {
     string server_addr
     int server_port
@@ -16,12 +17,14 @@ struct lightweight_client_config {
     bool local_cache_enabled
     string cache_dir
 }
+
 struct inference_request {
     string prompt
     int max_tokens
     float temperature
     float[] logits_bias
 }
+
 struct inference_response {
     string result
     int tokens_generated
@@ -29,6 +32,7 @@ struct inference_response {
     string model_used
     bool from_cache
 }
+
 struct distribution_strategy {
     deployment_mode mode
     int central_nodes
@@ -36,9 +40,11 @@ struct distribution_strategy {
     int client_nodes
     float edge_traffic_percent
 }
+
 func new_lightweight_client(lightweight_client_config cfg) lightweight_client_config {
     cfg
 }
+
 func (lightweight_client_config* cfg) infer(inference_request req) inference_response {    response := inference_response {
         result: "",
         tokens_generated: 0,
@@ -48,6 +54,7 @@ func (lightweight_client_config* cfg) infer(inference_request req) inference_res
     }
     response
 }
+
 func deployment_plan_1m_machines() distribution_strategy {
     distribution_strategy {
         mode: deployment_mode_hybrid,
@@ -57,6 +64,7 @@ func deployment_plan_1m_machines() distribution_strategy {
         edge_traffic_percent: 0.7,    
     }
 }
+
 func phased_deployment_schedule() {
     println("=== NeurX 1M 机器分stagedeployment计划 ===")
     println("")
@@ -81,12 +89,14 @@ func phased_deployment_schedule() {
     println("  inference: 80% edge + 20% central (failover)")
     println("")
 }
+
 struct shared_model_cache {
     string cache_dir
     string[] cached_models
     int total_size_gb
     int shared_replicas
 }
+
 func new_shared_model_cache(string cache_dir, int replicas) shared_model_cache {
     shared_model_cache {
         cache_dir: cache_dir,
@@ -95,6 +105,7 @@ func new_shared_model_cache(string cache_dir, int replicas) shared_model_cache {
         shared_replicas: replicas,
     }
 }
+
 func calculate_storage_requirement(
     int central_nodes,
     int edge_nodes,
@@ -105,6 +116,7 @@ func calculate_storage_requirement(
     edge_storage := edge_nodes * avg_model_size_gb * cache_replicas / 100
     central_storage + edge_storage
 }
+
 func estimate_network_traffic(
     int total_qps,
     int central_nodes,

@@ -10,6 +10,7 @@ struct kv_cache_config {
     float cache_hit_threshold
     string eviction_policy
 }
+
 struct kv_cache_page {
     int page_id
     int used_tokens
@@ -19,6 +20,7 @@ struct kv_cache_page {
     int last_accessed_step
     int access_count
 }
+
 struct kv_cache_statistics {
     int total_pages
     int active_pages
@@ -29,6 +31,7 @@ struct kv_cache_statistics {
     int total_evictions
     float avg_page_age
 }
+
 struct kv_cache_optimizer {
     []kv_cache_page pages
     kv_cache_config config
@@ -37,6 +40,7 @@ struct kv_cache_optimizer {
     int[] lru_order
     int current_step
 }
+
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start
@@ -46,11 +50,13 @@ func string_slice(string text, int start, int end) string {
     }
     result
 }
+
 func string_char(int code) string {
     if code == 10 { return "\n" }
     if code == 32 { return " " }
     ""
 }
+
 func create_default_kv_config() kv_cache_config {
     kv_cache_config{
         page_size_tokens: 16,
@@ -62,6 +68,7 @@ func create_default_kv_config() kv_cache_config {
         eviction_policy: "lru"
     }
 }
+
 func create_kv_cache_optimizer(kv_cache_config config) kv_cache_optimizer {
     kv_cache_optimizer opt = kv_cache_optimizer{
         pages: []kv_cache_page{cap: config.max_pages},
@@ -87,6 +94,7 @@ func create_kv_cache_optimizer(kv_cache_config config) kv_cache_optimizer {
     }
     opt
 }
+
 func allocate_kv_page(kv_cache_optimizer* opt) int {
     if len(opt.free_page_list) == 0 {
         return -1
@@ -111,6 +119,7 @@ func allocate_kv_page(kv_cache_optimizer* opt) int {
     opt.stats.free_pages = len(opt.free_page_list)
     page_id
 }
+
 func free_kv_page(kv_cache_optimizer* opt, int page_id) bool {
     if page_id < 0 || page_id >= len(opt.pages) {
         return false
@@ -121,6 +130,7 @@ func free_kv_page(kv_cache_optimizer* opt, int page_id) bool {
     opt.stats.total_evictions = opt.stats.total_evictions + 1
     true
 }
+
 func find_lru_page(kv_cache_optimizer opt) int {
     if len(opt.pages) == 0 {
         return -1
@@ -137,6 +147,7 @@ func find_lru_page(kv_cache_optimizer opt) int {
     }
     lru_page
 }
+
 func evict_page_if_needed(kv_cache_optimizer* opt) bool {
     if opt.stats.free_pages > 0 {
         return true
@@ -149,6 +160,7 @@ func evict_page_if_needed(kv_cache_optimizer* opt) bool {
     }
     false
 }
+
 func add_kv_tokens(
     kv_cache_optimizer* opt,
     float[] key_tokens,
@@ -173,6 +185,7 @@ func add_kv_tokens(
     opt.stats.total_tokens_cached = opt.stats.total_tokens_cached + num_tokens
     true
 }
+
 func access_kv_page(kv_cache_optimizer* opt, int page_id) bool {
     if page_id < 0 || page_id >= len(opt.pages) {
         return false
@@ -181,6 +194,7 @@ func access_kv_page(kv_cache_optimizer* opt, int page_id) bool {
     opt.pages[page_id].access_count = opt.pages[page_id].access_count + 1
     true
 }
+
 func update_cache_statistics(kv_cache_optimizer* opt) {
     opt.stats.total_pages = len(opt.pages)
     int total_tokens = 0
@@ -203,11 +217,13 @@ func update_cache_statistics(kv_cache_optimizer* opt) {
         opt.stats.memory_utilization = float(total_tokens) / float(max_tokens)
     }
 }
+
 func estimate_memory_usage(kv_cache_optimizer opt) int {
     int bytes_per_token = opt.config.token_dim * 2
     int total_bytes = opt.stats.total_tokens_cached * bytes_per_token
     total_bytes / 1024 / 1024
 }
+
 func optimize_cache_layout(kv_cache_optimizer* opt) {
     update_cache_statistics(opt)
     if opt.stats.memory_utilization > 0.9 {
@@ -225,6 +241,7 @@ func optimize_cache_layout(kv_cache_optimizer* opt) {
         println("ℹ️  Enabling page fusion optimization")
     }
 }
+
 func reset_cache(kv_cache_optimizer* opt) {
     opt.pages = []kv_cache_page{cap: opt.config.max_pages}
     opt.free_page_list = int[]{cap: opt.config.max_pages}
@@ -240,6 +257,7 @@ func reset_cache(kv_cache_optimizer* opt) {
         i = i + 1
     }
 }
+
 func float_to_string(float value) string {
     return float_to_string_precision(value, 2)
 func print_cache_statistics(kv_cache_optimizer opt) {
@@ -265,6 +283,7 @@ func print_cache_statistics(kv_cache_optimizer opt) {
     println("  Total Evictions: " + int_to_string(opt.stats.total_evictions))
     println("")
 }
+
 func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════╗")

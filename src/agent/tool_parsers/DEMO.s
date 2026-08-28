@@ -235,6 +235,7 @@ func main() {
     print("║  🚀 Schema-Constrained Generation Fully Implemented           ║\n")
     print("╚════════════════════════════════════════════════════════════════╝\n\n")
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -254,6 +255,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func vec_new() string[] {
     v := vec_new()
     return v

@@ -46,6 +46,7 @@ func LoadBalancingExample() {
     manager.Shutdown()
     println("Load balancing complete\n")
 }
+
 func FailureRecoveryExample() {
     println("=== Failure Recovery Example ===")
     manager := NewWorkerManager(4, SchedulingPolicy{policy_type: 1})
@@ -76,6 +77,7 @@ func FailureRecoveryExample() {
     manager.Shutdown()
     println("Failure recovery complete\n")
 }
+
 func DynamicBatchSizingExample() {
     println("=== Dynamic Batch Sizing Example ===")
     processor := NewBatchProcessor(512, SchedulingPolicy{
@@ -119,6 +121,7 @@ func DynamicBatchSizingExample() {
     println("Total batches processed:", stats["total_batches"])
     println()
 }
+
 func DistributedCommPatternsExample() {
     println("=== Distributed Communication Patterns Example ===")
     comm_config := CommunicationConfig{
@@ -164,6 +167,7 @@ func DistributedCommPatternsExample() {
     handler.Shutdown()
     println("Communication patterns complete\n")
 }
+
 func PipelineParallelismExample() {
     println("=== Pipeline Parallelism Example ===")
     policy := SchedulingPolicy{
@@ -224,6 +228,7 @@ func PipelineParallelismExample() {
     manager.Shutdown()
     println("Pipeline parallelism example complete\n")
 }
+
 func AdaptiveBatchingExample() {
     println("=== Adaptive Batching Example ===")
     processor := NewBatchProcessor(256, SchedulingPolicy{
@@ -267,6 +272,7 @@ func AdaptiveBatchingExample() {
     println("Total tokens:", stats["total_tokens"])
     println()
 }
+
 func main() {
     println("╔════════════════════════════════════════════╗")
     println("║  NeurX Worker Advanced Examples            ║")

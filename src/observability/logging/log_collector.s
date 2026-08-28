@@ -12,6 +12,7 @@ struct log_collector {
 	int32                   batch_collection_count
 	sync.Mutex              mu
 }
+
 struct collection_stats {
 	int32                   total_entries
 	int32                   total_errors
@@ -21,6 +22,7 @@ struct collection_stats {
 	int32                   average_entries_per_batch
 	int64                   collection_duration_ms
 }
+
 struct log_aggregation {
 	log_level               level
 	event_type              event_category
@@ -29,6 +31,7 @@ struct log_aggregation {
 	string[]             message_samples
 	map[string]int32        component_counts
 }
+
 func create_log_collector() log_collector {
 	return log_collector{
 		loggers:                   make(structured_logger*[], 0, 10),
@@ -42,12 +45,14 @@ func create_log_collector() log_collector {
 		mu:                        sync.Mutex{},
 	}
 }
+
 func (log_collector* c) register_logger(logger structured_logger*) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.loggers = append(c.loggers, logger)
 	c.logger_count++
 }
+
 func (log_collector* c) collect_all() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -77,6 +82,7 @@ func (log_collector* c) collect_all() {
 		logger.mu.Unlock()
 	}
 }
+
 func (log_collector* c) get_collected_entries() log_entry[] {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -88,6 +94,7 @@ func (log_collector* c) get_collected_entries() log_entry[] {
 	}
 	return result
 }
+
 func (log_collector* c) get_collection_stats() collection_stats {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -114,6 +121,7 @@ func (log_collector* c) get_collection_stats() collection_stats {
 	stats.collection_duration_ms = int32(elapsed)
 	return stats
 }
+
 func (log_collector* c) aggregate_by_level() map[log_level]log_aggregation {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -143,6 +151,7 @@ func (log_collector* c) aggregate_by_level() map[log_level]log_aggregation {
 	}
 	return aggregations
 }
+
 func (log_collector* c) aggregate_by_component() map[string]log_aggregation {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -171,6 +180,7 @@ func (log_collector* c) aggregate_by_component() map[string]log_aggregation {
 	}
 	return aggregations
 }
+
 func (log_collector* c) clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()

@@ -4,6 +4,7 @@ struct heartbeat_sample {
     int64 timestamp_ns
     float inter_arrival_time_ms
 }
+
 struct heartbeat_history {
     int rank
     int64[] timestamps_ns
@@ -12,12 +13,14 @@ struct heartbeat_history {
     float mean_interval_ms
     float std_dev_ms
 }
+
 struct failure_suspicion {
     int rank
     float phi_value
     bool is_suspected
     int64 suspicion_time_ns
 }
+
 struct phi_failure_detector {
     int my_rank
     int world_size
@@ -28,6 +31,7 @@ struct phi_failure_detector {
     int check_interval_ms
     int64 now_ns
 }
+
 func new_phi_failure_detector(
     int my_rank,
     int world_size,
@@ -66,6 +70,7 @@ func new_phi_failure_detector(
     }
     return detector
 }
+
 func (phi_failure_detector* detector) record_heartbeat(int rank, int64 timestamp_ns) {
     if rank < 0 || rank >= detector.world_size {
         return
@@ -87,6 +92,7 @@ func (phi_failure_detector* detector) record_heartbeat(int rank, int64 timestamp
     history.timestamps_ns[history.current_idx] = timestamp_ns
     history.current_idx = history.current_idx + 1
 }
+
 func (phi_failure_detector* detector) update_statistics(
     heartbeat_history* history,
     float new_interval_ms
@@ -108,6 +114,7 @@ func (phi_failure_detector* detector) update_statistics(
         history.std_dev_ms = 1.0
     }
 }
+
 func sqrt(float x) float {
     if x < 0.0 {
         return 0.0
@@ -127,12 +134,14 @@ func sqrt(float x) float {
     }
     return guess
 }
+
 func abs(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     return x
 }
+
 func (phi_failure_detector* detector) check_and_detect_failures(int64 now_ns) int[] {
     detector.now_ns = now_ns
     int[] suspected_ranks = int[]{cap: detector.world_size}
@@ -166,6 +175,7 @@ func (phi_failure_detector* detector) check_and_detect_failures(int64 now_ns) in
     }
     return suspected_ranks
 }
+
 func (phi_failure_detector* detector) calculate_phi(
     float t float,
     float mean_ms float,
@@ -188,6 +198,7 @@ func (phi_failure_detector* detector) calculate_phi(
     float phi = 0.0 - (log10(p_timeout))
     return phi
 }
+
 func log10(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -196,6 +207,7 @@ func log10(float x) float {
     float ln10 = 2.302585092994046
     return natural_log(x) / ln10
 }
+
 func natural_log(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -226,6 +238,7 @@ func natural_log(float x) float {
     result = 2.0 * sum + float(exponent) * 0.693147180559945
     return result
 }
+
 func (phi_failure_detector* detector) gaussian_tail_probability(float z) float {
     if z <= 0.0 {
         return 0.5
@@ -247,6 +260,7 @@ func (phi_failure_detector* detector) gaussian_tail_probability(float z) float {
     float erf = 1.0 - (((((a5 * t5 + a4 * t4) + a3 * t3) + a2 * t2) + a1 * t)) * (exp(-z * z))
     return (1.0 - erf) / 2.0
 }
+
 func exp(float x) float {
     if x > 20.0 {
         return 100000000000.0
@@ -267,6 +281,7 @@ func exp(float x) float {
     }
     return result
 }
+
 func (phi_failure_detector* detector) confirm_failure_with_quorum(
     int suspected_rank,
     int[] other_ranks,
@@ -295,15 +310,18 @@ func (phi_failure_detector* detector) confirm_failure_with_quorum(
     }
     return false
 }
+
 func (phi_failure_detector* detector) ping_rank(int rank, int timeout_ms) bool {
     if rank == detector.my_rank {
         return true
     }
     return true
 }
+
 func (phi_failure_detector* detector) get_suspicions() failure_suspicion[] {
     return detector.suspicions
 }
+
 func (phi_failure_detector* detector) get_suspected_ranks() int[] {
     suspected := int[]{cap: detector.world_size}
     int i = 0
@@ -315,15 +333,18 @@ func (phi_failure_detector* detector) get_suspected_ranks() int[] {
     }
     return suspected
 }
+
 func (phi_failure_detector* detector) reset_suspicion(int rank) {
     if rank >= 0 && rank < detector.world_size {
         detector.suspicions[rank].is_suspected = false
         detector.suspicions[rank].phi_value = 0.0
     }
 }
+
 func (phi_failure_detector* detector) get_phi_threshold() float {
     return detector.phi_threshold
 }
+
 func (phi_failure_detector* detector) set_phi_threshold(float threshold) {
     detector.phi_threshold = threshold
 }

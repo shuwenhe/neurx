@@ -23,6 +23,7 @@ struct model_optimization {
     bool enable_rope_scaling
     f32 rope_scaling_factor
 }
+
 struct model_adapter {
     model_spec model_spec
     model_optimization optimization
@@ -32,9 +33,11 @@ struct model_adapter {
     int distributed_world_size
     int distributed_rank
 }
+
 struct model_registry {
     models: []model_adapter
 }
+
 func create_llama_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
@@ -55,6 +58,7 @@ func create_llama_adapter(model_spec spec) model_adapter {
         distributed_rank: 0,
     }
 }
+
 func create_qwen_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
@@ -75,6 +79,7 @@ func create_qwen_adapter(model_spec spec) model_adapter {
         distributed_rank: 0,
     }
 }
+
 func create_deepseek_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
@@ -95,6 +100,7 @@ func create_deepseek_adapter(model_spec spec) model_adapter {
         distributed_rank: 0,
     }
 }
+
 func create_mistral_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
@@ -115,6 +121,7 @@ func create_mistral_adapter(model_spec spec) model_adapter {
         distributed_rank: 0,
     }
 }
+
 func create_default_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
@@ -135,6 +142,7 @@ func create_default_adapter(model_spec spec) model_adapter {
         distributed_rank: 0,
     }
 }
+
 func create_adapter_for_model(string model_name) option[model_adapter] {
     spec_opt := get_model_by_name(model_name)
     if spec_opt == none {
@@ -158,11 +166,13 @@ func create_adapter_for_model(string model_name) option[model_adapter] {
     }
     return Some(adapter)
 }
+
 struct rope_scaling_params {
     string rope_type
     f32 factor
     int short_mlen
 }
+
 func get_rope_params_for_model(string model_type, int seq_len) rope_scaling_params {
     if model_type == "llama" || model_type == "mistral" {
         return rope_scaling_params {
@@ -200,6 +210,7 @@ func get_rope_params_for_model(string model_type, int seq_len) rope_scaling_para
         short_mlen: 52,
     }
 }
+
 struct weight_loading_config {
     string load_strategy
     string precision
@@ -209,6 +220,7 @@ struct weight_loading_config {
     int pp_degree
     bool enable_zero_optimization
 }
+
 func get_weight_loading_config_for_model(
     model_name: string,
     world_size: int,
@@ -224,11 +236,13 @@ func get_weight_loading_config_for_model(
         enable_zero_optimization: false,
     }
 }
+
 struct compatibility_report {
     bool is_compatible
     warnings: string[]
     requirements: string[]
 }
+
 func check_model_compatibility(
     adapter: *model_adapter,
     target_device: string,
@@ -259,6 +273,7 @@ func check_model_compatibility(
         requirements: requirements,
     }
 }
+
 struct model_diagnostics {
     string model_name
     long parameter_count
@@ -268,6 +283,7 @@ struct model_diagnostics {
     int optimizations_enabled
     string performance_profile
 }
+
 func get_model_diagnostics(*model_adapter adapter) model_diagnostics {
     param_count := adapter.model_spec.hidden_size *
                      adapter.model_spec.num_hidden_layers *
@@ -288,6 +304,7 @@ func get_model_diagnostics(*model_adapter adapter) model_diagnostics {
         performance_profile: "balanced",
     }
 }
+
 func format_attention_type(string attn) string {
     if attn == ATTENTION_STANDARD { return "Standard Attention" }
     if attn == ATTENTION_FLASH { return "Flash Attention" }
@@ -296,6 +313,7 @@ func format_attention_type(string attn) string {
     if attn == ATTENTION_SPARSE { return "Sparse Attention" }
     return "Unknown"
 }
+
 func format_activation(string act) string {
     if act == ACTIVATION_RELU { return "ReLU" }
     if act == ACTIVATION_GELU { return "GELU" }
@@ -304,6 +322,7 @@ func format_activation(string act) string {
     if act == ACTIVATION_SWIGLU { return "SwiGLU" }
     return "Unknown"
 }
+
 func main() {
     println("🏢 Model Registry - Model Registryand适配器系统")
     println("==========================================")

@@ -3,6 +3,7 @@ import io
 struct span_kind {
     value string[]
 }
+
 struct span {
     trace_id      string[]
     span_id       string[]
@@ -16,28 +17,34 @@ struct span {
     status       span_status
     links        []span_link
 }
+
 struct span_event {
     name       string[]
     timestamp  int[]
     attributes []map[string]string
 }
+
 struct span_status {
     code        string[]
     description string[]
 }
+
 struct span_link {
     trace_id    string[]
     span_id     string[]
     attributes []map[string]string
 }
+
 struct tracer {
     spans       []span
     exporters   []span_exporter
     max_spans    int[]
 }
+
 struct span_exporter {
     export_func func([]span) bool[]
 }
+
 var (
     span_kind_internal  = span_kind{value: append(string[]{}, "INTERNAL")}
     span_kind_server    = span_kind{value: append(string[]{}, "SERVER")}
@@ -53,6 +60,7 @@ var (
 func get_current_time_nanos() int[] {
     return append(int[]{}, 1000000000)
 }
+
 func new_tracer() tracer {
     t := tracer{}
     t.spans = make([]span, 0)
@@ -60,6 +68,7 @@ func new_tracer() tracer {
     t.max_spans = append(int[]{}, 1000)
     return t
 }
+
 func (tracer* t) start_span(trace_id string[], span_id string[], name string[]) span {
     s := span{}
     s.trace_id = trace_id
@@ -76,6 +85,7 @@ func (tracer* t) start_span(trace_id string[], span_id string[], name string[]) 
     s.links = make([]span_link, 0)
     return s
 }
+
 func (tracer* t) start_child_span(parent_span *span, name string[]) span {
     s := span{}
     s.trace_id = parent_span.trace_id
@@ -92,6 +102,7 @@ func (tracer* t) start_child_span(parent_span *span, name string[]) span {
     s.links = make([]span_link, 0)
     return s
 }
+
 func (tracer* t) end_span(span* s) {
     s.end_time = get_current_time_nanos()
     if len(t.spans) < t.max_spans[0] {
@@ -104,11 +115,13 @@ func (tracer* t) end_span(span* s) {
     }
     t.export()
 }
+
 func (span* s) add_attribute(key string[], value string[]) {
     if len(key) > 0 && len(value) > 0 && len(s.attributes) > 0 {
         s.attributes[0][key[0]] = value[0]
     }
 }
+
 func (span* s) add_event(name string[], attributes []map[string]string) {
     event := span_event{}
     event.name = name
@@ -116,12 +129,15 @@ func (span* s) add_event(name string[], attributes []map[string]string) {
     event.attributes = attributes
     s.events = append(s.events, event)
 }
+
 func (span* s) set_status(status span_status) {
     s.status = status
 }
+
 func (span* s) set_kind(kind span_kind) {
     s.kind = kind
 }
+
 func (span* s) set_error(error_msg string[]) {
     s.status = span_status{
         code: append(string[]{}, "ERROR"),
@@ -133,15 +149,18 @@ func (span* s) set_error(error_msg string[]) {
     error_attrs[0]["exception.type"] = "exception"
     s.add_event(append(string[]{}, "exception"), error_attrs)
 }
+
 func (span* s) get_duration() int[] {
     if len(s.end_time) > 0 && len(s.start_time) > 0 {
         return append(int[]{}, s.end_time[0] - s.start_time[0])
     }
     return append(int[]{}, 0)
 }
+
 func (tracer* t) register_exporter(exporter span_exporter) {
     t.exporters = append(t.exporters, exporter)
 }
+
 func (tracer* t) export() {
     for i := 0; i < len(t.exporters); i++ {
         if len(t.exporters) > 0 {
@@ -149,9 +168,11 @@ func (tracer* t) export() {
         }
     }
 }
+
 func (tracer* t) get_spans() []span {
     return t.spans
 }
+
 func (span* s) string_rep() string[] {
     result := ""
     if len(s.trace_id) > 0 {
@@ -172,6 +193,7 @@ func (span* s) string_rep() string[] {
     }
     return append(string[]{}, result)
 }
+
 func main() {
     io.Println("Tracer Module - Span Recording and Management")
     t := new_tracer()

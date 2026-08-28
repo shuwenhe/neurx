@@ -14,6 +14,7 @@ struct cache_entry {
     int32 size_bytes
     modality_type modality
 }
+
 struct multimodal_cache {
     cache_policy policy
     int32 max_cache_size
@@ -24,6 +25,7 @@ struct multimodal_cache {
     int32 miss_count
     bool enable_compression
 }
+
 func create_multimodal_cache(int32 max_size) multimodal_cache* {
     return *multimodal_cache{
         policy: policy_hybrid,
@@ -36,6 +38,7 @@ func create_multimodal_cache(int32 max_size) multimodal_cache* {
         enable_compression: true,
     }
 }
+
 func (multimodal_cache* cache) put(string key, uint8[] data, modality_type modality) bool {
     if len(key) == 0 {
         return false
@@ -73,6 +76,7 @@ func (multimodal_cache* cache) put(string key, uint8[] data, modality_type modal
     cache.current_cache_size = cache.current_cache_size + data_size
     return true
 }
+
 func (multimodal_cache* cache) get(string key) option[uint8[]] {
     if entry, exists := cache.cache_data[key]; exists {
         entry.access_count = entry.access_count + 1
@@ -83,6 +87,7 @@ func (multimodal_cache* cache) get(string key) option[uint8[]] {
     cache.miss_count = cache.miss_count + 1
     return option[uint8[]]{}
 }
+
 func (multimodal_cache* cache) evict_one() string {
     if len(cache.cache_data) == 0 {
         return ""
@@ -122,10 +127,12 @@ func (multimodal_cache* cache) evict_one() string {
     }
     return evict_key
 }
+
 func (multimodal_cache* cache) exists(string key) bool {
     _, exists := cache.cache_data[key]
     return exists
 }
+
 func (multimodal_cache* cache) delete(string key) bool {
     if entry, exists := cache.cache_data[key]; exists {
         cache.current_cache_size = cache.current_cache_size - entry.size_bytes
@@ -140,11 +147,13 @@ func (multimodal_cache* cache) delete(string key) bool {
     }
     return false
 }
+
 func (multimodal_cache* cache) clear() {
     cache.cache_data = make(map[string]cache_entry*)
     cache.access_order = make(string[])
     cache.current_cache_size = 0
 }
+
 func (multimodal_cache* cache) get_hit_rate() float32 {
     total := cache.hit_count + cache.miss_count
     if total == 0 {
@@ -152,6 +161,7 @@ func (multimodal_cache* cache) get_hit_rate() float32 {
     }
     return float32(cache.hit_count) / float32(total)
 }
+
 func (multimodal_cache* cache) get_cache_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["policy"] = cache.policy

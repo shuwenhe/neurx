@@ -1,14 +1,17 @@
 package neurx.posttrain.tools.data_preprocess
 use neurx.tensor.{tensor}
+
 struct conversation {
     []message messages
     string conversation_id
 }
+
 struct message {
     string role
     string content
     string[] tool_calls
 }
+
 struct rl_sample {
     string prompt
     string[] completions
@@ -16,12 +19,14 @@ struct rl_sample {
     int group_id
     string task_type
 }
+
 struct preference_pair {
     string prompt
     string chosen
     string rejected
     float margin
 }
+
 func convert_conversation_to_prompt(conversation conv) string {
     string prompt = ""
     int i = 0
@@ -38,6 +43,7 @@ func convert_conversation_to_prompt(conversation conv) string {
     }
     prompt
 }
+
 func create_grpo_groups(
     string[] prompts,
     string[][] completions,
@@ -60,6 +66,7 @@ func create_grpo_groups(
     }
     samples
 }
+
 func create_preference_pairs_from_rankings(
     string prompt,
     string[] completions,
@@ -86,6 +93,7 @@ func create_preference_pairs_from_rankings(
     }
     pairs
 }
+
 func format_prompt_with_examples(
     string instruction,
     string[] examples,
@@ -102,6 +110,7 @@ func format_prompt_with_examples(
     prompt = prompt + "Response:\n"
     prompt
 }
+
 func extract_code_from_response(string response) string {
     if contains(response, "```") {
         int start = index_of(response, "```")
@@ -117,6 +126,7 @@ func extract_code_from_response(string response) string {
     }
     response
 }
+
 func tokenize_with_padding(
     string[] texts,
     int max_length,
@@ -143,6 +153,7 @@ func tokenize_with_padding(
     }
     tokenized
 }
+
 func create_attention_masks(
     int[][] token_ids,
     int pad_token_id
@@ -165,6 +176,7 @@ func create_attention_masks(
     }
     masks
 }
+
 func batch_samples(
     []rl_sample samples,
     int batch_size
@@ -189,10 +201,17 @@ func batch_samples(
     }
     batches
 }
+
 func argsort_descending(float[] arr) int[] { int[]{} }
+
 func int_to_string(int n) string { "" }
+
 func contains(string s, string sub) bool { false }
+
 func index_of(string s, string sub) int { 0 }
+
 func index_of_from(string s, string sub, int from) int { 0 }
+
 func substring(string s, int start, int end) string { s }
+
 func tokenize_text(string text) int[] { int[]{} }

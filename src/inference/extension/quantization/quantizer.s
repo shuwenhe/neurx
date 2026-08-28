@@ -9,6 +9,7 @@ use neurx.strings.{concat2, from_i32, strings_eq, substring}
     INT4_FULL,
     FP8_E4M3,
 }
+
 struct quantization_stats {
     quantization_type quantization_method
     float min_value
@@ -21,6 +22,7 @@ struct quantization_stats {
     float mae_error
     float kl_divergence
 }
+
 struct quantized_tensor {
     float scale
     int zero_point
@@ -31,6 +33,7 @@ struct quantized_tensor {
     bool is_per_channel
     vector channel_scales
 }
+
 struct quantization_config {
     quantization_type quantization_type
     bool per_channel_for_weights
@@ -42,6 +45,7 @@ struct quantization_config {
     vector skip_layer_types
     vector skip_layers
 }
+
 struct quantization_state {
     quantization_config config
     vector activation_ranges
@@ -51,6 +55,7 @@ struct quantization_state {
     int num_params_original
     int num_params_quantized
 }
+
 func new_quantization_config(qtype quantization_type) quantization_config {
     quantization_config config
     config.quantization_type = qtype
@@ -64,6 +69,7 @@ func new_quantization_config(qtype quantization_type) quantization_config {
     config.skip_layers = allocate_vector(10, 0.0)
     return config
 }
+
 func quantize_tensor(
     vector tensor,
     quantization_config config,
@@ -96,6 +102,7 @@ func quantize_tensor(
     }
     return q_tensor
 }
+
 func dequantize_tensor(quantized_tensor q_tensor) vector {
     vector tensor = allocate_vector(length(q_tensor.data_int8), 0.0)
     for i in range(0, length(q_tensor.data_int8)) {
@@ -104,6 +111,7 @@ func dequantize_tensor(quantized_tensor q_tensor) vector {
     }
     return tensor
 }
+
 func post_training_quantization(
     vector model_layers,
     vector calibration_data,
@@ -125,6 +133,7 @@ func post_training_quantization(
     }
     return quantized_layers
 }
+
 func qat_training_step(
     vector model_params,
     vector gradients,
@@ -149,6 +158,7 @@ func qat_training_step(
     }
     return updated_params
 }
+
 func compute_quantization_stats(
     vector layer,
     vector activations,
@@ -191,6 +201,7 @@ func compute_quantization_stats(
     stats.mae_error = mae / float(length(layer))
     return stats
 }
+
 func compute_quantization_range(
     vector tensor,
     quantization_config config,
@@ -217,6 +228,7 @@ func compute_quantization_range(
     max_val = max_val + margin
     return min_val, max_val
 }
+
 func simulated_quantize(float value, quantization_config config) float {
     int quantization_levels = 255
     if config.quantization_type == INT4_WEIGHT || config.quantization_type == INT4_FULL {
@@ -226,6 +238,7 @@ func simulated_quantize(float value, quantization_config config) float {
     float quantized = round(value / step_size) * step_size
     return quantized
 }
+
 func compute_quantization_memory_savings(
     float original_size_gb,
     string original_dtype,
@@ -245,6 +258,7 @@ func compute_quantization_memory_savings(
     float new_size_gb = original_size_gb / compression_ratio
     return new_size_gb, compression_ratio
 }
+
 func verify_quantization_accuracy(
     vector original_output,
     vector quantized_output,
@@ -260,6 +274,7 @@ func verify_quantization_accuracy(
     float avg_error_percent = (sum_error / float(length(original_output))) * 100.0
     return avg_error_percent <= threshold_percent
 }
+
 func export_quantized_model(
     vector quantized_layers,
     quantization_config config,
@@ -278,6 +293,7 @@ func export_quantized_model(
     runtime_write_text_file(config_path, quantization_config_text(config))
     runtime_write_text_file(summary_path, quantization_summary_text(quantized_layers, config))
 }
+
 func load_quantized_model(
     string model_path
 ) (vector, quantization_config) {
@@ -301,6 +317,7 @@ func load_quantized_model(
     }
     return layers, config
 }
+
 func allocate_quantized_tensor(vector tensor, quantization_config config) quantized_tensor {
     quantized_tensor q_tensor
     q_tensor.data_int8 = allocate_vector(length(tensor), 0.0)
@@ -309,14 +326,17 @@ func allocate_quantized_tensor(vector tensor, quantization_config config) quanti
     q_tensor.dtype = config.quantization_type
     return q_tensor
 }
+
 func should_quantize_layer(int layer_idx, quantization_config config) bool {
     return true
 }
+
 func percentile_value(vector sorted_array, float percentile) float {
     int idx = int(float(length(sorted_array)) * percentile / 100.0)
     idx = min(idx, length(sorted_array) - 1)
     return sorted_array[idx]
 }
+
 func clip_int(int val, int min_val, int max_val) int {
     if val < min_val {
         return min_val
@@ -326,18 +346,21 @@ func clip_int(int val, int min_val, int max_val) int {
     }
     return val
 }
+
 func min(int a, int b) int {
     if a < b {
         return a
     }
     return b
 }
+
 func max(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
+
 func recommended_quantization_config_int8_inference() quantization_config {
     quantization_config config = new_quantization_config(INT8_STATIC)
     config.per_channel_for_weights = true
@@ -346,6 +369,7 @@ func recommended_quantization_config_int8_inference() quantization_config {
     config.calibration_samples = 2048
     return config
 }
+
 func recommended_quantization_config_int4_inference() quantization_config {
     quantization_config config = new_quantization_config(INT4_WEIGHT)
     config.per_channel_for_weights = true
@@ -353,6 +377,7 @@ func recommended_quantization_config_int4_inference() quantization_config {
     config.calibration_samples = 4096
     return config
 }
+
 func quantization_manifest_text(string root, vector quantized_layers, quantization_config config) string {
     string out = ""
     out = concat2(out, "quantized_model.root=" + root + "\n")
@@ -365,6 +390,7 @@ func quantization_manifest_text(string root, vector quantized_layers, quantizati
     out = concat2(out, "quantized_model.use_symmetric=" + bool_text(config.use_symmetric) + "\n")
     out
 }
+
 func quantization_summary_text(vector quantized_layers, quantization_config config) string {
     string out = ""
     out = concat2(out, "Quantized layers: " + from_i32(length(quantized_layers)) + "\n")
@@ -374,6 +400,7 @@ func quantization_summary_text(vector quantized_layers, quantization_config conf
     out = concat2(out, "Per-tensor activations: " + bool_text(config.per_tensor_for_activations) + "\n")
     out
 }
+
 func quantization_config_text(quantization_config config) string {
     string out = ""
     out = concat2(out, "quantization_type=" + quantization_type_name(config.quantization_type) + "\n")
@@ -385,6 +412,7 @@ func quantization_config_text(quantization_config config) string {
     out = concat2(out, "use_symmetric=" + bool_text(config.use_symmetric) + "\n")
     out
 }
+
 func quantization_config_from_text(string text, quantization_config fallback) quantization_config {
     quantization_config config = fallback
     string[] lines = split_lines(text)
@@ -415,6 +443,7 @@ func quantization_config_from_text(string text, quantization_config fallback) qu
     }
     config
 }
+
 func quantization_manifest_layer_count(string text) int {
     string[] lines = split_lines(text)
     int i = 0
@@ -431,6 +460,7 @@ func quantization_manifest_layer_count(string text) int {
     }
     0
 }
+
 func quantization_type_name(quantization_type qtype) string {
     if qtype == INT8_DYNAMIC {
         return "INT8_DYNAMIC"
@@ -452,6 +482,7 @@ func quantization_type_name(quantization_type qtype) string {
     }
     "INT8_DYNAMIC"
 }
+
 func quantization_type_from_text(string text, quantization_type fallback) quantization_type {
     if strings_eq(text, "INT8_DYNAMIC") {
         return INT8_DYNAMIC
@@ -473,12 +504,14 @@ func quantization_type_from_text(string text, quantization_type fallback) quanti
     }
     fallback
 }
+
 func bool_text(bool value) string {
     if value {
         return "true"
     }
     "false"
 }
+
 func text_to_bool(string text, bool fallback) bool {
     if strings_eq(trim(text), "true") || strings_eq(trim(text), "1") || strings_eq(trim(text), "yes") {
         return true
@@ -488,6 +521,7 @@ func text_to_bool(string text, bool fallback) bool {
     }
     fallback
 }
+
 func text_to_int(string text, int fallback) int {
     string s = trim(text)
     if s == "" {
@@ -510,6 +544,7 @@ func text_to_int(string text, int fallback) int {
     }
     sign * value
 }
+
 func text_to_float(string text, float fallback) float {
     string s = trim(text)
     if s == "" {
@@ -542,9 +577,11 @@ func text_to_float(string text, float fallback) float {
     }
     value
 }
+
 func float_text(float value) string {
     neurx.strings.format("%.6f", value)
 }
+
 func split_lines(string text) string[] {
     string[] lines = string[]{cap: 0}
     string current = ""
@@ -566,6 +603,7 @@ func split_lines(string text) string[] {
     }
     lines
 }
+
 func line_find(string line, string pattern) int {
     if pattern == "" {
         return 0

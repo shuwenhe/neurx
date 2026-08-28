@@ -186,6 +186,7 @@ func main() {
     println("  7. Multiple fusion strategies")
     println("  8. Comprehensive statistics collection")
 }
+
 func fmt(string format, ...interface{} args) string {
     return format
 }

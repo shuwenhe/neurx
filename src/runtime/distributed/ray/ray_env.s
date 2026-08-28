@@ -71,6 +71,7 @@ type ray_env struct {
     statistics map[string]interface{}
     shutdown_flag bool
 }
+
 func create_ray_config() ray_config* {
     config := new(ray_config)
     config.runtime_env = make(map[string]interface{})
@@ -86,6 +87,7 @@ func create_ray_config() ray_config* {
     config.plasma_directory = ""
     return config
 }
+
 func create_ray_env() ray_env* {
     env := new(ray_env)
     env.status = ray_status_not_started
@@ -102,6 +104,7 @@ func create_ray_env() ray_env* {
     env.shutdown_flag = false
     return env
 }
+
 func (env ray_env*) initialize_ray(config ray_config*) bool {
     if env.status == ray_status_initialized {
         return true
@@ -125,6 +128,7 @@ func (env ray_env*) initialize_ray(config ray_config*) bool {
     env.statistics["init_count"] = count + 1
     return true
 }
+
 func (env ray_env*) create_placement_group(
     name string,
     strategy string,
@@ -146,6 +150,7 @@ func (env ray_env*) create_placement_group(
     env.placement_groups[name] = pg
     return pg
 }
+
 func (env ray_env*) prepare_placement_group(name string) bool {
     pg, exists := env.placement_groups[name]
     if !exists {
@@ -155,6 +160,7 @@ func (env ray_env*) prepare_placement_group(name string) bool {
     pg.state = "ready"
     return true
 }
+
 func (env ray_env*) remove_placement_group(name string) bool {
     pg, exists := env.placement_groups[name]
     if !exists {
@@ -164,6 +170,7 @@ func (env ray_env*) remove_placement_group(name string) bool {
     delete(env.placement_groups, name)
     return true
 }
+
 func (env ray_env*) register_actor(name string, actor interface{}) bool {
     if actor == nil {
         return false
@@ -173,6 +180,7 @@ func (env ray_env*) register_actor(name string, actor interface{}) bool {
     env.statistics["actor_created"] = count + 1
     return true
 }
+
 func (env ray_env*) get_actor(name string) interface{} {
     actor, exists := env.actors[name]
     if !exists {
@@ -180,6 +188,7 @@ func (env ray_env*) get_actor(name string) interface{} {
     }
     return actor
 }
+
 func (env ray_env*) list_actors() string[] {
     names := make(string[], 0)
     for name := range env.actors {
@@ -187,6 +196,7 @@ func (env ray_env*) list_actors() string[] {
     }
     return names
 }
+
 func (env ray_env*) submit_task(task interface{}) bool {
     if env.status != ray_status_initialized {
         return false
@@ -196,6 +206,7 @@ func (env ray_env*) submit_task(task interface{}) bool {
     env.statistics["task_submitted"] = count + 1
     return true
 }
+
 func (env ray_env*) get_placement_group(name string) placement_group* {
     pg, exists := env.placement_groups[name]
     if !exists {
@@ -203,6 +214,7 @@ func (env ray_env*) get_placement_group(name string) placement_group* {
     }
     return pg
 }
+
 func (env ray_env*) list_placement_groups() string[] {
     names := make(string[], 0)
     for name := range env.placement_groups {
@@ -210,6 +222,7 @@ func (env ray_env*) list_placement_groups() string[] {
     }
     return names
 }
+
 func (env ray_env*) configure_runtime_env(key string, value interface{}) bool {
     if env.status == ray_status_initialized {
         return false
@@ -217,9 +230,11 @@ func (env ray_env*) configure_runtime_env(key string, value interface{}) bool {
     env.config.runtime_env[key] = value
     return true
 }
+
 func (env ray_env*) get_runtime_env() map[string]interface{} {
     return env.config.runtime_env
 }
+
 func (env ray_env*) wait_for_actors(timeout_seconds uint32) bool {
     count := len(env.actors)
     if count == 0 {
@@ -227,6 +242,7 @@ func (env ray_env*) wait_for_actors(timeout_seconds uint32) bool {
     }
     return true
 }
+
 func (env ray_env*) shutdown() bool {
     if env.shutdown_flag {
         return true
@@ -244,15 +260,19 @@ func (env ray_env*) shutdown() bool {
     env.statistics["shutdown_count"] = count + 1
     return true
 }
+
 func (env ray_env*) is_initialized() bool {
     return env.status == ray_status_initialized
 }
+
 func (env ray_env*) get_status() ray_status {
     return env.status
 }
+
 func (env ray_env*) set_status(status ray_status) {
     env.status = status
 }
+
 func (env ray_env*) get_resource_usage() map[string]interface{} {
     usage := make(map[string]interface{})
     usage["num_gpus"] = env.config.num_gpus
@@ -261,6 +281,7 @@ func (env ray_env*) get_resource_usage() map[string]interface{} {
     usage["object_store_memory"] = env.config.object_store_memory
     return usage
 }
+
 func (env ray_env*) get_env_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["status"] = uint8(env.status)
@@ -274,12 +295,14 @@ func (env ray_env*) get_env_stats() map[string]interface{} {
     stats["task_submitted"] = env.statistics["task_submitted"]
     return stats
 }
+
 func (env ray_env*) get_dashboard_url() string {
     if env.config.include_dashboard {
         return env.config.webui_url
     }
     return ""
 }
+
 func (env ray_env*) set_temp_dir(path string) bool {
     if env.status == ray_status_initialized {
         return false
@@ -287,9 +310,11 @@ func (env ray_env*) set_temp_dir(path string) bool {
     env.config.temp_dir = path
     return true
 }
+
 func (env ray_env*) get_temp_dir() string {
     return env.config.temp_dir
 }
+
 func (env ray_env*) set_memory(memory uint64) bool {
     if env.status == ray_status_initialized {
         return false
@@ -297,6 +322,7 @@ func (env ray_env*) set_memory(memory uint64) bool {
     env.config.memory = memory
     return true
 }
+
 func (env ray_env*) get_memory() uint64 {
     return env.config.memory
 }

@@ -11,6 +11,7 @@ func test_base_processor_temperature() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_top_k_filtering() {
     print("🧪 Test: Top-K Filtering")
     float[] logits = float[]{5.0, 2.0, 8.0, 1.0, 6.0}
@@ -22,6 +23,7 @@ func test_top_k_filtering() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_top_p_filtering() {
     print("🧪 Test: Top-P (Nucleus) Filtering")
     float[] logits = float[]{5.0, 4.0, 3.0, 2.0, 1.0}
@@ -33,6 +35,7 @@ func test_top_p_filtering() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_repetition_penalty() {
     print("🧪 Test: Repetition Penalty")
     float[] logits = float[]{2.0, 3.0, 4.0, 3.5}
@@ -44,6 +47,7 @@ func test_repetition_penalty() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_grammar_constraint_processor() {
     print("🧪 Test: Grammar Constraint Processor")
     grammar_constraint_processor processor = new_grammar_constraint_processor(1000)
@@ -60,6 +64,7 @@ func test_grammar_constraint_processor() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_json_grammar() {
     print("🧪 Test: JSON Grammar Constraint")
     grammar_constraint_set json_grammar = create_json_grammar()
@@ -71,6 +76,7 @@ func test_json_grammar() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_banned_tokens_processor() {
     print("🧪 Test: Banned Tokens Processor")
     banned_tokens_processor processor = new_banned_tokens_processor(256)
@@ -85,6 +91,7 @@ func test_banned_tokens_processor() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_ban_word() {
     print("🧪 Test: Ban by Word")
     banned_tokens_processor processor = new_banned_tokens_processor(256)
@@ -95,6 +102,7 @@ func test_ban_word() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_unban_token() {
     print("🧪 Test: Unban Token")
     banned_tokens_processor processor = new_banned_tokens_processor(256)
@@ -105,6 +113,7 @@ func test_unban_token() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_adaptive_ban() {
     print("🧪 Test: Adaptive Ban")
     banned_tokens_processor processor = new_banned_tokens_processor(256)
@@ -115,6 +124,7 @@ func test_adaptive_ban() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_diversity_processor() {
     print("🧪 Test: Diversity Processor")
     diversity_processor processor = new_diversity_processor(256)
@@ -133,6 +143,7 @@ func test_diversity_processor() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_frequency_penalty() {
     print("🧪 Test: Frequency Penalty")
     diversity_processor processor = new_diversity_processor(256)
@@ -146,6 +157,7 @@ func test_frequency_penalty() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_entropy_calculation() {
     print("🧪 Test: Entropy Calculation")
     diversity_processor processor = new_diversity_processor(256)
@@ -158,6 +170,7 @@ func test_entropy_calculation() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_processor_manager() {
     print("🧪 Test: Processor Manager")
     logits_processor_manager mgr = new_logits_processor_manager(256)
@@ -169,6 +182,7 @@ func test_processor_manager() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_processor_pipeline() {
     print("🧪 Test: Processor Pipeline")
     logits_processor_manager mgr = new_logits_processor_manager(256)
@@ -190,6 +204,7 @@ func test_processor_pipeline() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_disable_processor() {
     print("🧪 Test: Disable Processor")
     logits_processor_manager mgr = new_logits_processor_manager(256)
@@ -202,6 +217,7 @@ func test_disable_processor() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_conservative_preset() {
     print("🧪 Test: Conservative Preset")
     processor_pipeline_config config = create_conservative_config()
@@ -210,6 +226,7 @@ func test_conservative_preset() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_creative_preset() {
     print("🧪 Test: Creative Preset")
     processor_pipeline_config config = create_creative_config()
@@ -218,6 +235,7 @@ func test_creative_preset() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_inference_pipeline() {
     print("🧪 Test: Inference Pipeline")
     inference_with_logits_processing pipeline = create_inference_pipeline(256)
@@ -233,6 +251,7 @@ func test_inference_pipeline() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_token_selection() {
     print("🧪 Test: Token Selection Methods")
     float[] logits = float[]{1.0, 5.0, 3.0, 2.0}
@@ -242,6 +261,7 @@ func test_token_selection() {
     }
     print("  ✓ PASSED\n")
 }
+
 func test_statistics() {
     print("🧪 Test: Statistics Tracking")
     logits_processor_manager mgr = new_logits_processor_manager(256)
@@ -261,6 +281,7 @@ func test_statistics() {
     }
     print("  ✓ PASSED\n")
 }
+
 func run_all_tests() {
     print("═" * 70)
     print("🧪 Logits Processor System - Complete Unit Test Suite")
@@ -291,6 +312,7 @@ func run_all_tests() {
     print("✅ All tests completed successfully!")
     print("═" * 70)
 }
+
 func main() {
     run_all_tests()
 }

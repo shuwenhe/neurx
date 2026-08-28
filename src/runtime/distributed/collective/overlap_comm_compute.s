@@ -6,6 +6,7 @@ struct gradient_buffer {
     bool is_ready
     bool allreduce_pending
 }
+
 struct overlap_schedule {
     int num_layers
     int pipeline_depth
@@ -13,6 +14,7 @@ struct overlap_schedule {
     int[] allreduce_order
     bool initialized
 }
+
 struct overlapped_training_config {
     int num_layers
     int hidden_dim
@@ -21,6 +23,7 @@ struct overlapped_training_config {
     bool enable_gradient_accumulation
     int gradient_accumulation_steps
 }
+
 struct overlapped_training_loop {
     int my_rank
     int world_size
@@ -31,6 +34,7 @@ struct overlapped_training_loop {
     int total_tokens_processed
     bool training_active
 }
+
 func new_overlap_schedule(int num_layers, int pipeline_depth) overlap_schedule {
     schedule := overlap_schedule {
         num_layers: num_layers,
@@ -47,6 +51,7 @@ func new_overlap_schedule(int num_layers, int pipeline_depth) overlap_schedule {
     }
     return schedule
 }
+
 func new_overlapped_training_loop(
     int my_rank,
     int world_size,
@@ -86,6 +91,7 @@ func new_overlapped_training_loop(
     }
     return loop
 }
+
 func (overlapped_training_loop* loop) forward_pass(
     float[] input,
     float[][] layer_weights,
@@ -107,6 +113,7 @@ func (overlapped_training_loop* loop) forward_pass(
     }
     return output
 }
+
 func (overlapped_training_loop* loop) backward_pass_with_overlap(
     float[] output_grad,
     float[][] layer_weights,
@@ -139,6 +146,7 @@ func (overlapped_training_loop* loop) backward_pass_with_overlap(
     }
     return activation_grad, weight_gradients
 }
+
 func (overlapped_training_loop* loop) launch_allreduce_async(int layer_id) {
     if layer_id < 0 || layer_id >= len(loop.buffers) {
         return
@@ -149,12 +157,14 @@ func (overlapped_training_loop* loop) launch_allreduce_async(int layer_id) {
         buffer.allreduce_pending = true
     }
 }
+
 func (overlapped_training_loop* loop) async_allreduce_worker(int layer_id) {
     gradient_buffer* buffer = &loop.buffers[layer_id]
     float[] reduced_grads = loop.perform_allreduce(buffer.gradients)
     buffer.gradients = reduced_grads
     buffer.allreduce_pending = false
 }
+
 func (overlapped_training_loop* loop) wait_allreduce_if_ready(int layer_id) {
     if layer_id < 0 || layer_id >= len(loop.buffers) {
         return
@@ -165,6 +175,7 @@ func (overlapped_training_loop* loop) wait_allreduce_if_ready(int layer_id) {
         wait_count = wait_count + 1
     }
 }
+
 func (overlapped_training_loop* loop) compute_layer_forward(
     float[] input,
     float[] weights,
@@ -181,6 +192,7 @@ func (overlapped_training_loop* loop) compute_layer_forward(
     }
     return output
 }
+
 func (overlapped_training_loop* loop) compute_layer_backward(
     float[] output_grad,
     float[] weights,
@@ -197,6 +209,7 @@ func (overlapped_training_loop* loop) compute_layer_backward(
     }
     return input_grad
 }
+
 func (overlapped_training_loop* loop) perform_allreduce(float[] gradients) float[] {
     if len(gradients) == 0 {
         return float[]{cap: len(gradients)}
@@ -215,6 +228,7 @@ func (overlapped_training_loop* loop) perform_allreduce(float[] gradients) float
     }
     return reduced
 }
+
 func (overlapped_training_loop* loop) training_step(
     float[] batch_input,
     float[][] layer_weights,
@@ -231,6 +245,7 @@ func (overlapped_training_loop* loop) training_step(
     )
     return loss, weight_grads
 }
+
 func (overlapped_training_loop* loop) compute_loss(float[] logits, float[] targets) float {
     if len(logits) == 0 || len(targets) == 0 {
         return 0.0
@@ -244,6 +259,7 @@ func (overlapped_training_loop* loop) compute_loss(float[] logits, float[] targe
     }
     return loss / float(len(logits))
 }
+
 func (overlapped_training_loop* loop) compute_loss_gradient(float[] logits, float[] targets) float[] {
     if len(logits) == 0 || len(targets) == 0 {
         return float[]{cap: len(logits)}
@@ -256,6 +272,7 @@ func (overlapped_training_loop* loop) compute_loss_gradient(float[] logits, floa
     }
     return grad
 }
+
 func (overlapped_training_loop* loop) optimizer_step(
     float[][] layer_weights,
     float[][] weight_gradients,
@@ -273,12 +290,15 @@ func (overlapped_training_loop* loop) optimizer_step(
         layer = layer + 1
     }
 }
+
 func (overlapped_training_loop* loop) get_config() overlapped_training_config {
     return loop.config
 }
+
 func (overlapped_training_loop* loop) get_schedule() overlap_schedule {
     return loop.schedule
 }
+
 func (overlapped_training_loop* loop) get_buffer_status() (int, int, int) {
     int ready_count = 0
     int pending_count = 0
@@ -294,12 +314,15 @@ func (overlapped_training_loop* loop) get_buffer_status() (int, int, int) {
     }
     return ready_count, pending_count, len(loop.buffers)
 }
+
 func (overlapped_training_loop* loop) stop_training() {
     loop.training_active = false
 }
+
 func (overlapped_training_loop* loop) is_training_active() bool {
     return loop.training_active
 }
+
 func (overlapped_training_loop* loop) get_total_tokens_processed() int {
     return loop.total_tokens_processed
 }

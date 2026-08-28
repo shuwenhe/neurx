@@ -15,6 +15,7 @@ struct sapo_config {
     bool use_value_loss
     f32 value_loss_coeff
 }
+
 struct sapo_trainer {
     sapo_config config
     *model policy_model
@@ -24,12 +25,14 @@ struct sapo_trainer {
     i64 step_count
     AdvantageStats advantage_stats
 }
+
 struct advantage_stats {
     f32 mean
     f32 std
     f32 max_abs
     history: []f32
 }
+
 func new_sapo_trainer(
     sapo_config config,
     *model policy,
@@ -56,6 +59,7 @@ func new_sapo_trainer(
         },
     }
 }
+
 func (sapo_trainer* trainer) smooth_clip(Tensor x, f32 lower, f32 upper) . Tensor {
     tau := trainer.config.tau
     lower_weight := sigmoid((x - lower) / tau)
@@ -65,6 +69,7 @@ func (sapo_trainer* trainer) smooth_clip(Tensor x, f32 lower, f32 upper) . Tenso
                          upper * (1.0 - upper_weight)
     return smooth_clipped
 }
+
 func (sapo_trainer* trainer) compute_smooth_surrogate(
     Tensor ratio,
     Tensor advantage
@@ -81,6 +86,7 @@ func (sapo_trainer* trainer) compute_smooth_surrogate(
         return smooth_obj
     }
 }
+
 func (sapo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
@@ -110,6 +116,7 @@ func (sapo_trainer* trainer) compute_gae(
     }
     return advantages, returns
 }
+
 func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) . []tensor {
     if !trainer.config.normalize_advantages {
         return advantages
@@ -137,6 +144,7 @@ func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) . []tenso
     }
     return normalized
 }
+
 func (sapo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
@@ -218,6 +226,7 @@ func (sapo_trainer* trainer) train_step(
         total_kl / f32(num_updates)
     )
 }
+
 func (sapo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     value_losses := []
@@ -241,9 +250,11 @@ func (sapo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
+
 func sigmoid(Tensor x) . Tensor {
     return 1.0 / (1.0 + exp(-x))
 }
+
 func compute_mean([]f32 values) . f32 {
     if len(values) == 0 {
         return 0.0
@@ -254,6 +265,7 @@ func compute_mean([]f32 values) . f32 {
     }
     return sum / f32(len(values))
 }
+
 func compute_std([]f32 values, f32 mean) . f32 {
     if len(values) == 0 {
         return 1.0

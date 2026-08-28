@@ -7,17 +7,20 @@ struct fusion_error {
     string code
     string message
 }
+
 struct weight_update {
     string module_name
     *float[][] delta
     float scale
 }
+
 struct weight_fusion_engine {
     int lora_rank
     float lora_alpha
     float scaling_factor
     map[string, *float[][]] fused
 }
+
 func new(int lora_rank, float lora_alpha) weight_fusion_engine {
     weight_fusion_engine {
         lora_rank: lora_rank,
@@ -26,6 +29,7 @@ func new(int lora_rank, float lora_alpha) weight_fusion_engine {
         fused: map[string, *float[][]]](),
     }
 }
+
 func compute_lora_delta(
     *float[][] lora_a,
     *float[][] lora_b,
@@ -72,6 +76,7 @@ func compute_lora_delta(
     }
 return     (delta, "")
 }
+
 func (weight_fusion_engine* engine) fuse_weights(
     module_name: string,
     original_weights: *float[][]],
@@ -106,6 +111,7 @@ func (weight_fusion_engine* engine) fuse_weights(
     engine.fused.insert(module_name, fused)
     return (), ""
 }
+
 func (weight_fusion_engine* engine) unfuse_weights(
     module_name: string,
     fused_weights: *float[][],
@@ -134,14 +140,17 @@ func (weight_fusion_engine* engine) unfuse_weights(
     engine.fused.remove(module_name)
 return     (original, "")
 }
+
 func (weight_fusion_engine* engine) get_fused_weights(
     string module_name
 ) option[*float[][]]] {
     engine.fused.get(module_name)
 }
+
 func (weight_fusion_engine* engine) is_fused(string module_name) bool {
     engine.fused.contains(module_name)
 }
+
 func (weight_fusion_engine* engine) get_fused_modules() *string[] {
     modules := string[]()
     for name in engine.fused.keys() {
@@ -149,9 +158,11 @@ func (weight_fusion_engine* engine) get_fused_modules() *string[] {
     }
     modules
 }
+
 func (weight_fusion_engine* engine) clear_fused_weights() {
     engine.fused.clear()
 }
+
 func (weight_fusion_engine* engine) get_fused_weights_size_mb() int {
     total_size := 0
     for name in engine.fused.keys() {
@@ -166,6 +177,7 @@ func (weight_fusion_engine* engine) get_fused_weights_size_mb() int {
     }
     total_size / 1024 / 1024
 }
+
 func fuse_multiple_adapters(
     original_weights: *map[string, *float[][]]],
     lora_deltas: **map[string, *float[[][]]]],

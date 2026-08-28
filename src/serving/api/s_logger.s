@@ -29,20 +29,25 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func format_log_entry(string log_level, string method, string path, int status) string {
     string timestamp = "[2026-08-16 21:00:00]"
     string log_entry = timestamp + " " + log_level + " " + method + " " + path + " " + int_to_string(status)
     return log_entry
 }
+
 func log_request(string method, string path) string {
     return format_log_entry("INFO", method, path, 0)
 }
+
 func log_response(string method, string path, int status) string {
     return format_log_entry("INFO", method, path, status)
 }
+
 func log_error(string error_msg) string {
     return "[2026-08-16 21:00:00] ERROR " + error_msg
 }
+
 func format_metrics(int total_requests, int successful_requests, int failed_requests) string {
     string metrics = "{"
     metrics = metrics + "\"total\":" + int_to_string(total_requests)
@@ -51,6 +56,7 @@ func format_metrics(int total_requests, int successful_requests, int failed_requ
     metrics = metrics + "}"
     return metrics
 }
+
 func main() {
     print("✅ pure S 日志系统already编译\n")
     string log1 = log_request("GET", "/health")

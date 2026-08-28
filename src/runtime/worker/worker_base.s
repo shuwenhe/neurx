@@ -14,6 +14,7 @@ struct BaseWorker {
     failed_batches      i64
     cache_stats         map[string]i64
 }
+
 func NewBaseWorker(config WorkerConfig) *BaseWorker {
     worker := *BaseWorker{
         config: config,
@@ -29,6 +30,7 @@ func NewBaseWorker(config WorkerConfig) *BaseWorker {
     }
     return worker
 }
+
 func (BaseWorker* w) Initialize() WorkerResult {
     if w.initialized == 1 {
         return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
@@ -50,6 +52,7 @@ func (BaseWorker* w) Initialize() WorkerResult {
     w.last_heartbeat = system_time_ms()
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (BaseWorker* w) SubmitRequest(request RequestMetadata) WorkerResult {
     if w.state != WORKER_STATE_READY && w.state != WORKER_STATE_BUSY {
         return WorkerResult{
@@ -73,6 +76,7 @@ func (BaseWorker* w) SubmitRequest(request RequestMetadata) WorkerResult {
     }
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (BaseWorker* w) GetNextBatch(max_size i32) Batch {
     batch_size := max_size
     if w.queue_size < max_size {
@@ -105,6 +109,7 @@ func (BaseWorker* w) GetNextBatch(max_size i32) Batch {
     w.current_batch_id++
     return batch
 }
+
 func (BaseWorker* w) CompleteBatch(batch_id i32, result_count i32,
                                    total_tokens i32, error_code i32) WorkerResult {
     if error_code == ERROR_SUCCESS {
@@ -129,6 +134,7 @@ func (BaseWorker* w) CompleteBatch(batch_id i32, result_count i32,
     }
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (BaseWorker* w) ProcessBatch(batch Batch) ExecutionResult {
     return ExecutionResult{
         batch_id: batch.batch_id,
@@ -138,6 +144,7 @@ func (BaseWorker* w) ProcessBatch(batch Batch) ExecutionResult {
         error_message: "ProcessBatch not implemented in base worker",
     }
 }
+
 func (BaseWorker* w) GetWorkerState() WorkerState {
     return WorkerState{
         worker_id: w.config.worker_id,
@@ -154,9 +161,11 @@ func (BaseWorker* w) GetWorkerState() WorkerState {
         last_update: system_time_ms(),
     }
 }
+
 func (BaseWorker* w) GetStatistics() WorkerStats {
     return w.stats
 }
+
 func (BaseWorker* w) ResetStatistics() {
     w.stats.total_requests = 0
     w.stats.completed_requests = 0
@@ -164,6 +173,7 @@ func (BaseWorker* w) ResetStatistics() {
     w.stats.total_tokens = 0
     w.stats.queue_length = 0
 }
+
 func (BaseWorker* w) IsHealthy() i32 {
     if w.state == WORKER_STATE_ERROR || w.state == WORKER_STATE_SHUTDOWN {
         return 0
@@ -175,9 +185,11 @@ func (BaseWorker* w) IsHealthy() i32 {
     }
     return 1
 }
+
 func (BaseWorker* w) SendHeartbeat() {
     w.last_heartbeat = system_time_ms()
 }
+
 func (BaseWorker* w) Shutdown() WorkerResult {
     if w.state == WORKER_STATE_SHUTDOWN {
         return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
@@ -189,15 +201,19 @@ func (BaseWorker* w) Shutdown() WorkerResult {
     w.initialized = 0
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (BaseWorker* w) SetState(new_state i32) {
     w.state = new_state
 }
+
 func (BaseWorker* w) GetState() i32 {
     return w.state
 }
+
 func (BaseWorker* w) GetQueueSize() i32 {
     return w.queue_size
 }
+
 func (BaseWorker* w) state_to_string(state i32) string {
     match state {
     case WORKER_STATE_IDLE:
@@ -218,6 +234,7 @@ func (BaseWorker* w) state_to_string(state i32) string {
         return "UNKNOWN"
     }
 }
+
 func system_time_ms() i64 {
     return 0
 }

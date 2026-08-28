@@ -6,9 +6,11 @@ struct sampling_params {
     int seed
     bool greedy
 }
+
 struct rng_state {
     int state
 }
+
 func new_sampling_params(float temperature, int top_k, float top_p, int seed) sampling_params {
     float t = temperature
     if t <= 0.0 {
@@ -33,6 +35,7 @@ func new_sampling_params(float temperature, int top_k, float top_p, int seed) sa
         greedy: t == 1.0 && k <= 0 && p >= 1.0,
     }
 }
+
 func new_rng(int seed) rng_state {
     int s = seed
     if s == 0 {
@@ -40,6 +43,7 @@ func new_rng(int seed) rng_state {
     }
     rng_state{state: s}
 }
+
 func next_uint(rng_state rng) (int, rng_state) {
     int x = rng.state
     x = x ^ (x * 2048)
@@ -53,11 +57,13 @@ func next_uint(rng_state rng) (int, rng_state) {
     }
     (x, rng_state{state: x})
 }
+
 func next_float(rng_state rng) (float, rng_state) {
     (int u, rng_state r) = next_uint(rng)
     float f = float(u % 1000000) / 1000000.0
     (f, r)
 }
+
 func math_exp(float x) float {
     if x > 88.0 {
         return 6.5623733e37
@@ -81,6 +87,7 @@ func math_exp(float x) float {
     }
     result
 }
+
 func apply_temperature(float[] logits, float temp, int vocab_size) float[] {
     float[] out = make(float[], vocab_size)
     float inv = 1.0 / temp
@@ -91,6 +98,7 @@ func apply_temperature(float[] logits, float temp, int vocab_size) float[] {
     }
     out
 }
+
 func softmax(float[] logits, int size) float[] {
     float[] probs = make(float[], size)
     if size == 0 {
@@ -121,6 +129,7 @@ func softmax(float[] logits, int size) float[] {
     }
     probs
 }
+
 func argmax(float[] arr, int size) int {
     if size == 0 {
         return 0
@@ -137,10 +146,12 @@ func argmax(float[] arr, int size) int {
     }
     best
 }
+
 struct index_score {
     int idx
     float score
 }
+
 func argsort_desc(float[] arr, int size) []index_score {
     []index_score items = []index_score{}
     int i = 0
@@ -164,6 +175,7 @@ func argsort_desc(float[] arr, int size) []index_score {
     }
     items
 }
+
 func top_k_filter(float[] logits, int vocab_size, int k) float[] {
     if k <= 0 || k >= vocab_size {
         return logits
@@ -182,6 +194,7 @@ func top_k_filter(float[] logits, int vocab_size, int k) float[] {
     }
     filtered
 }
+
 func top_p_filter(float[] logits, int vocab_size, float p) float[] {
     if p >= 1.0 {
         return logits
@@ -211,6 +224,7 @@ func top_p_filter(float[] logits, int vocab_size, float p) float[] {
     }
     filtered
 }
+
 func sample_from_probs(float[] probs, int size, rng_state rng) (int, rng_state) {
     (float r, rng_state r2) = next_float(rng)
     float cum = 0.0
@@ -224,6 +238,7 @@ func sample_from_probs(float[] probs, int size, rng_state rng) (int, rng_state) 
     }
     (size - 1, r2)
 }
+
 func sample(float[] logits, int vocab_size, sampling_params params, rng_state rng) (int, rng_state) {
     if params.greedy || params.temperature == 0.0 {
         return (argmax(logits, vocab_size), rng)
@@ -239,6 +254,7 @@ func sample(float[] logits, int vocab_size, sampling_params params, rng_state rn
     (int tok, rng_state r) = sample_from_probs(probs, vocab_size, rng)
     (tok, r)
 }
+
 func greedy_sample(float[] logits, int vocab_size) int {
     argmax(logits, vocab_size)
 }

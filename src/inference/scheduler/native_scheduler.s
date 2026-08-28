@@ -5,6 +5,7 @@ struct native_schedule_decision {
     int token_budget
     string error_code
 }
+
 func schedule_native_request(string request_id, int max_tokens, int capacity, int active_requests) native_schedule_decision {
     if active_requests >= capacity {
         return native_schedule_decision { accepted: false, request_id: request_id, token_budget: 0, error_code: "capacity_exhausted" }

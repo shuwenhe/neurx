@@ -12,12 +12,14 @@ struct encoder_config {
     float32 compression_ratio
     bool enable_dynamic_allocation
 }
+
 struct modality_budget {
     modality_type modality
     int32 total_tokens
     int32 used_tokens
     int32 remaining_tokens
 }
+
 struct encoder_budget_manager {
     int32 max_total_tokens
     int32 reserved_text_tokens
@@ -26,6 +28,7 @@ struct encoder_budget_manager {
     bool enable_budget_sharing
     bool enable_priority_allocation
 }
+
 func create_encoder_budget_manager(int32 max_tokens, int32 text_reserved) encoder_budget_manager* {
     mgr := encoder_budget_manager{
         max_total_tokens: max_tokens,
@@ -58,6 +61,7 @@ func create_encoder_budget_manager(int32 max_tokens, int32 text_reserved) encode
     mgr.modality_priorities["audio"] = 3
     return *mgr
 }
+
 func (encoder_budget_manager* mgr) allocate_budgets() {
     available_tokens := mgr.max_total_tokens - mgr.reserved_text_tokens
     if mgr.enable_priority_allocation {
@@ -72,6 +76,7 @@ func (encoder_budget_manager* mgr) allocate_budgets() {
         mgr.budgets["audio"].remaining_tokens = audio_budget
     }
 }
+
 func (encoder_budget_manager* mgr) estimate_tokens(modality_type modality, int32 content_size) int32 {
     tokens := 0
     if modality == modality_image {
@@ -86,6 +91,7 @@ func (encoder_budget_manager* mgr) estimate_tokens(modality_type modality, int32
     }
     return tokens
 }
+
 func (encoder_budget_manager* mgr) can_allocate(string modality_key, int32 num_tokens) bool {
     if budget, exists := mgr.budgets[modality_key]; exists {
         if num_tokens <= budget.remaining_tokens {
@@ -103,6 +109,7 @@ func (encoder_budget_manager* mgr) can_allocate(string modality_key, int32 num_t
     }
     return false
 }
+
 func (encoder_budget_manager* mgr) allocate_tokens(string modality_key, int32 num_tokens) bool {
     if budget, exists := mgr.budgets[modality_key]; exists {
         if num_tokens > budget.remaining_tokens {
@@ -133,6 +140,7 @@ func (encoder_budget_manager* mgr) allocate_tokens(string modality_key, int32 nu
     }
     return false
 }
+
 func (encoder_budget_manager* mgr) release_tokens(string modality_key, int32 num_tokens) {
     if budget, exists := mgr.budgets[modality_key]; exists {
         budget.used_tokens = budget.used_tokens - num_tokens
@@ -142,6 +150,7 @@ func (encoder_budget_manager* mgr) release_tokens(string modality_key, int32 num
         }
     }
 }
+
 func (encoder_budget_manager* mgr) get_budget_status() map[string]interface{} {
     status := make(map[string]interface{})
     total_used := 0
@@ -161,6 +170,7 @@ func (encoder_budget_manager* mgr) get_budget_status() map[string]interface{} {
     status["total_remaining"] = total_remaining
     return status
 }
+
 func (encoder_budget_manager* mgr) set_modality_priority(string modality_key, int32 priority) {
     mgr.modality_priorities[modality_key] = priority
 }

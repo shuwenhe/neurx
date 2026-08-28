@@ -10,6 +10,7 @@ import "time"
 	COMPRESSION_GZIP = 1
 	COMPRESSION_DEFLATE = 2
 }
+
 struct sse_event {
 	string                  event_id
 	string                  event_type
@@ -24,11 +25,13 @@ struct sse_event {
 	string                  trace_id
 	string                  span_id
 }
+
 struct sse_field {
 	event_field_type        field_type
 	string                  field_name
 	string                  field_value
 }
+
 struct sse_frame {
 	sse_field[]          fields
 	int32                   field_count
@@ -37,6 +40,7 @@ struct sse_frame {
 	int64                   created_at
 	int32                   checksum
 }
+
 struct sse_stream {
 	sse_event[]          events
 	int32                   event_count
@@ -51,6 +55,7 @@ struct sse_stream {
 	bool                    compression_enabled
 	compression_type        active_compression
 }
+
 func create_sse_event(event_type string, data string) sse_event {
 	return sse_event{
 		event_id:              "",
@@ -67,6 +72,7 @@ func create_sse_event(event_type string, data string) sse_event {
 		span_id:               "",
 	}
 }
+
 func create_sse_field(ftype event_field_type, name string, value string) sse_field {
 	return sse_field{
 		field_type:  ftype,
@@ -74,6 +80,7 @@ func create_sse_field(ftype event_field_type, name string, value string) sse_fie
 		field_value: value,
 	}
 }
+
 func create_sse_frame() sse_frame {
 	return sse_frame{
 		fields:       make(sse_field[], 0, 10),
@@ -84,6 +91,7 @@ func create_sse_frame() sse_frame {
 		checksum:     0,
 	}
 }
+
 func create_sse_stream(stream_id string, client_id string) sse_stream {
 	return sse_stream{
 		events:                  make(sse_event[], 0, 1000),
@@ -100,65 +108,82 @@ func create_sse_stream(stream_id string, client_id string) sse_stream {
 		active_compression:      COMPRESSION_NONE,
 	}
 }
+
 func (sse_event* e) set_event_id(id string) {
 	e.event_id = id
 }
+
 func (sse_event* e) set_event_type(etype string) {
 	e.event_type = etype
 }
+
 func (sse_event* e) set_event_data(data string) {
 	e.event_data = data
 	e.data_size_bytes = int32(len(data))
 }
+
 func (sse_event* e) set_retry(ms int32) {
 	e.retry_ms = ms
 }
+
 func (sse_event* e) add_header(key string, value string) {
 	e.headers[key] = value
 }
+
 func (sse_event* e) get_header(key string) (string, bool) {
 	value, exists := e.headers[key]
 	return value, exists
 }
+
 func (sse_event* e) set_compression(ctype compression_type, compressed bool) {
 	e.compression_method = ctype
 	e.compressed = compressed
 }
+
 func (sse_event* e) set_trace_context(trace_id string, span_id string) {
 	e.trace_id = trace_id
 	e.span_id = span_id
 }
+
 func (sse_frame* f) add_field(field sse_field) {
 	f.fields = append(f.fields, field)
 	f.field_count++
 }
+
 func (sse_frame* f) add_event_field(name string, value string) {
 	field := create_sse_field(FIELD_EVENT, "event", name)
 	f.add_field(field)
 }
+
 func (sse_frame* f) add_data_field(data string) {
 	field := create_sse_field(FIELD_DATA, "data", data)
 	f.add_field(field)
 }
+
 func (sse_frame* f) add_id_field(id string) {
 	field := create_sse_field(FIELD_ID, "id", id)
 	f.add_field(field)
 }
+
 func (sse_frame* f) add_retry_field(ms int32) {
 	field := create_sse_field(FIELD_RETRY, "retry", string(ms))
 	f.add_field(field)
 }
+
 func (sse_frame* f) add_comment_field(comment string) {
 	field := create_sse_field(FIELD_COMMENT, "", comment)
 	f.add_field(field)
 }
+
 func (sse_frame* f) get_field_count() int32 {
 	return f.field_count
 }
+
 func (sse_frame* f) set_raw_data(data string) {
 	f.raw_data = data
 	f.raw_size_bytes = int32(len(data))
 }
+
 func (sse_stream* s) add_event(event sse_event) bool {
 	if s.event_count >= s.max_events_buffered {
 		return false
@@ -170,24 +195,30 @@ func (sse_stream* s) add_event(event sse_event) bool {
 	s.total_bytes_sent = s.total_bytes_sent + event.data_size_bytes
 	return true
 }
+
 func (sse_stream* s) get_events() sse_event[] {
 	return s.events
 }
+
 func (sse_stream* s) clear_events() {
 	s.events = make(sse_event[], 0, 1000)
 	s.event_count = 0
 }
+
 func (sse_stream* s) enable_compression(ctype compression_type) {
 	s.compression_enabled = true
 	s.active_compression = ctype
 }
+
 func (sse_stream* s) disable_compression() {
 	s.compression_enabled = false
 	s.active_compression = COMPRESSION_NONE
 }
+
 func (sse_stream* s) set_active(active bool) {
 	s.is_active = active
 }
+
 func (sse_stream* s) get_stream_stats() map[string]interface{} {
 	stats := make(map[string]interface{})
 	stats["stream_id"] = s.stream_id
@@ -201,9 +232,11 @@ func (sse_stream* s) get_stream_stats() map[string]interface{} {
 	stats["stream_duration_ms"] = elapsed
 	return stats
 }
+
 func (sse_stream* s) get_stream_uptime_ms() int64 {
 	return (time.Now().UnixNano() - s.stream_start_time) / 1000000
 }
+
 func (sse_stream* s) close_stream() {
 	s.is_active = false
 	s.events = make(sse_event[], 0, 1000)

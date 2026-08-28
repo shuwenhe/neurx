@@ -16,6 +16,7 @@ struct training_config {
     int lora_alpha
     float lora_dropout
 }
+
 struct model_state {
     float[] base_weights
     float[] lora_a
@@ -25,6 +26,7 @@ struct model_state {
     int rank
     float alpha
 }
+
 struct training_metrics {
     float total_loss
     float avg_loss
@@ -32,6 +34,7 @@ struct training_metrics {
     int current_epoch
     int current_step
 }
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -60,6 +63,7 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -96,6 +100,7 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
+
 func load_config() training_config {
     training_config cfg
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/base-model"
@@ -114,6 +119,7 @@ func load_config() training_config {
     cfg.lora_dropout = 0.05
     cfg
 }
+
 func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) model_state {
     model_state state
     state.input_dim = input_dim
@@ -143,9 +149,11 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) mod
     state.base_weights = base_weights
     state
 }
+
 func count_training_samples(string filepath) int {
     100
 }
+
 func run_training(training_config cfg) training_metrics {
     println("🚀 Start LoRA SFT afterTraining")
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
@@ -212,6 +220,7 @@ func run_training(training_config cfg) training_metrics {
     save_model(model, cfg.output_dir)
     metrics
 }
+
 func save_model(model_state model, string output_dir) int {
     println("  write adapter_model.safetensors...")
     println("  location: " + output_dir + "/adapter_model.safetensors")
@@ -226,6 +235,7 @@ func save_model(model_state model, string output_dir) int {
     println("")
     0
 }
+
 func export_merged_model(model_state model, string base_model_dir, string output_dir) int {
     println("🔗 merge LoRA weights to basemodel...")
     println("")
@@ -240,6 +250,7 @@ func export_merged_model(model_state model, string base_model_dir, string output
     println("")
     0
 }
+
 func main() {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")

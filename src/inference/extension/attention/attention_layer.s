@@ -2,6 +2,7 @@ package attention
     training
     inference
 }
+
 struct attention_layer {
     string layer_id
     int layer_index
@@ -12,6 +13,7 @@ struct attention_layer {
     bool use_kv_cache
     int64 layer_creation_time
 }
+
 struct attention_forward_input {
     string layer_id
     int batch_size
@@ -22,6 +24,7 @@ struct attention_forward_input {
     int cache_seq_length
     string precision
 }
+
 struct attention_output {
     bool success
     string error_msg
@@ -29,6 +32,7 @@ struct attention_output {
     int64 memory_used_bytes
     bool cache_updated
 }
+
 func new_attention_layer(string layer_id, int layer_index, int num_heads, int head_dim) attention_layer {
     backend_mgr := new_attention_backend_manager()
     config := new_attention_config(num_heads, head_dim)
@@ -53,18 +57,23 @@ func new_attention_layer(string layer_id, int layer_index, int num_heads, int he
         layer_creation_time: 0,
     }
 }
+
 func (attention_layer* layer) initialize() bool {
     layer.backend_manager.initialize_all()
 }
+
 func (attention_layer* layer) finalize() bool {
     layer.backend_manager.finalize_all()
 }
+
 func (attention_layer* layer) set_active_backend(string backend_name) bool {
     layer.backend_manager.set_current_backend(backend_name)
 }
+
 func (attention_layer* layer) get_active_backend_name() string {
     layer.backend_manager.current_backend
 }
+
 func (attention_layer* layer) forward(attention_forward_input input) attention_output {
     if !layer.backend_manager.has_backend(layer.active_backend) {
         attention_output {
@@ -104,31 +113,38 @@ func (attention_layer* layer) forward(attention_forward_input input) attention_o
         cache_updated: input.use_cache,
     }
 }
+
 func (attention_layer* layer) auto_tune_backend(int seq_length, string precision) string {
     selected := layer.backend_manager.auto_select_backend(seq_length, precision)
     layer.set_active_backend(selected)
     selected
 }
+
 func (attention_layer* layer) get_kv_cache() key_value_cache {
     layer.kv_cache
 }
+
 func (attention_layer* layer) clear_cache() bool {
     layer.use_kv_cache = false
     true
 }
+
 func (attention_layer* layer) enable_cache() bool {
     layer.use_kv_cache = true
     true
 }
+
 func (attention_layer* layer) list_available_backends() string[] {
     layer.backend_manager.list_backends()
 }
+
 struct attention_layer_stack {
     attention_layer[] layers
     int num_layers
     int num_heads
     int head_dim
 }
+
 func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) attention_layer_stack {
     layers := attention_layer[]{}
     i := 0
@@ -145,6 +161,7 @@ func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) atte
         head_dim: head_dim,
     }
 }
+
 func (attention_layer_stack* stack) initialize_all() bool {
     i := 0
     for i < len(stack.layers) {
@@ -155,6 +172,7 @@ func (attention_layer_stack* stack) initialize_all() bool {
     }
     true
 }
+
 func (attention_layer_stack* stack) finalize_all() bool {
     i := 0
     for i < len(stack.layers) {
@@ -165,6 +183,7 @@ func (attention_layer_stack* stack) finalize_all() bool {
     }
     true
 }
+
 func (attention_layer_stack* stack) set_all_backend(string backend_name) bool {
     i := 0
     for i < len(stack.layers) {
@@ -175,6 +194,7 @@ func (attention_layer_stack* stack) set_all_backend(string backend_name) bool {
     }
     true
 }
+
 func (attention_layer_stack* stack) get_layer(int index) attention_layer {
     if index >= 0 && index < len(stack.layers) {
         stack.layers[index]

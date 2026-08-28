@@ -10,6 +10,7 @@ struct TestResult {
     message: string,
     execution_time_ms: f32,
 }
+
 func LogTest(string name, bool passed, string message, f32 time_ms) TestResult {
     status := "✓"
     if !passed {
@@ -23,6 +24,7 @@ func LogTest(string name, bool passed, string message, f32 time_ms) TestResult {
         execution_time_ms: time_ms,
     }
 }
+
 func PrintTestReport(TestResult[] results) {
     passed := 0
     failed := 0
@@ -45,6 +47,7 @@ func PrintTestReport(TestResult[] results) {
     println("Total Time:", total_time, "ms")
     println("")
 }
+
 func TestTokenizerInitialization() TestResult {
     config := types.TokenizerConfig{
         model_name: "test-model",
@@ -58,6 +61,7 @@ func TestTokenizerInitialization() TestResult {
         "Tokenizer created successfully",
         1.0)
 }
+
 func TestBasicEncoding() TestResult {
     config := types.TokenizerConfig{
         model_name: "test-model",
@@ -73,6 +77,7 @@ func TestBasicEncoding() TestResult {
         "Text encoded to tokens successfully",
         1.5)
 }
+
 func TestGetTokenId() TestResult {
     config := types.TokenizerConfig{
         vocab_size: 30000,
@@ -89,6 +94,7 @@ func TestGetTokenId() TestResult {
         "Token IDs retrieved correctly",
         0.5)
 }
+
 func TestSpecialTokens() TestResult {
     mgr := special_tokens.NewSpecialTokenManager()
     success := mgr.RegisterSpecialToken("[CUSTOM]", 100, "Custom")
@@ -100,6 +106,7 @@ func TestSpecialTokens() TestResult {
         "Special tokens registered and retrieved",
         1.0)
 }
+
 func TestTokenCache() TestResult {
     cache_inst := cache.NewTokenCache(100000, "lru")
     tokens := make(i32[], 0)
@@ -113,6 +120,7 @@ func TestTokenCache() TestResult {
         "Tokens stored and retrieved from cache",
         1.2)
 }
+
 func TestCacheEviction() TestResult {
     cache_inst := cache.NewTokenCache(100, "lru")
     for i := 0; i < 5; i += 1 {
@@ -127,6 +135,7 @@ func TestCacheEviction() TestResult {
         "Cache eviction working correctly",
         2.0)
 }
+
 func TestPadding() TestResult {
     tokens := make(i32[], 0)
     tokens = append(tokens, 1)
@@ -138,6 +147,7 @@ func TestPadding() TestResult {
         "Token sequence padded correctly",
         0.8)
 }
+
 func TestTruncation() TestResult {
     tokens := make(i32[], 0)
     for i := 0; i < 10; i += 1 {
@@ -150,6 +160,7 @@ func TestTruncation() TestResult {
         "Token sequence truncated correctly",
         0.7)
 }
+
 func TestTokenFrequency() TestResult {
     tokens := make(i32[], 0)
     tokens = append(tokens, 1)
@@ -163,6 +174,7 @@ func TestTokenFrequency() TestResult {
         "Token frequency calculated correctly",
         0.9)
 }
+
 func TestUniqueTokenCount() TestResult {
     tokens := make(i32[], 0)
     tokens = append(tokens, 1)
@@ -176,6 +188,7 @@ func TestUniqueTokenCount() TestResult {
         "Unique token count correct",
         0.6)
 }
+
 func TestBatchPadding() TestResult {
     seq1 := make(i32[], 0)
     seq1 = append(seq1, 1)
@@ -195,6 +208,7 @@ func TestBatchPadding() TestResult {
         "Batch padding applied correctly",
         1.3)
 }
+
 func TestSpecialTokenMask() TestResult {
     mgr := special_tokens.NewSpecialTokenManager()
     tokens := make(i32[], 0)
@@ -208,6 +222,7 @@ func TestSpecialTokenMask() TestResult {
         "Special token mask created correctly",
         1.0)
 }
+
 func TestTokenCacheHitRate() TestResult {
     cache_inst := cache.NewTokenCache(100000, "lru")
     tokens := make(i32[], 0)
@@ -223,6 +238,7 @@ func TestTokenCacheHitRate() TestResult {
         "Cache hit rate calculated correctly",
         1.1)
 }
+
 func TestHFTokenizer() TestResult {
     config := types.TokenizerConfig{
         model_name: "bert-base",
@@ -238,6 +254,7 @@ func TestHFTokenizer() TestResult {
         "HuggingFace tokenizer working",
         1.5)
 }
+
 func main() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║       NeurX Tokenizers - Test Suite                   ║")
@@ -259,6 +276,7 @@ func main() {
     results = append(results, TestHFTokenizer())
     PrintTestReport(results)
 }
+
 func string_from_i32(i32 n) string {
     if n == 0 {
         return "0"

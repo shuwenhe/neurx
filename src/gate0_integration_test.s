@@ -7,6 +7,7 @@ struct vector_add_test_config {
     float tolerance
     bool verbose
 }
+
 func vector_add_test_config_default() vector_add_test_config {
     config := vector_add_test_config {
         vector_size: 100000,
@@ -15,6 +16,7 @@ func vector_add_test_config_default() vector_add_test_config {
     }
     return config
 }
+
 func test_basic_workflow(config: vector_add_test_config) (bool, string) {
     device_bridge.device_bridge_init()
     shape := vec[int]()
@@ -40,6 +42,7 @@ func test_basic_workflow(config: vector_add_test_config) (bool, string) {
     }
     return true, "Basic workflow test passed"
 }
+
 func test_memory_management(config: vector_add_test_config) (bool, string) {
     free_before, total_before, ok_before, err_before := abi.device_get_memory_info(0)
     if !ok_before {
@@ -79,6 +82,7 @@ func test_memory_management(config: vector_add_test_config) (bool, string) {
     }
     return true, "Memory management test passed"
 }
+
 func test_tensor_operations(config: vector_add_test_config) (bool, string) {
     shape := vec[int]()
     shape.push(config.vector_size)
@@ -111,6 +115,7 @@ func test_tensor_operations(config: vector_add_test_config) (bool, string) {
     }
     return true, "Tensor operations test passed"
 }
+
 func test_scale_and_performance(config: vector_add_test_config) (bool, string) {
     sizes := vec[int]()
     sizes.push(1000)
@@ -149,6 +154,7 @@ func test_scale_and_performance(config: vector_add_test_config) (bool, string) {
     }
     return true, "Scale and performance test passed"
 }
+
 func run_all_tests() (int, int, string) {
     config := vector_add_test_config_default()
     tests_passed := 0
@@ -194,6 +200,7 @@ func run_all_tests() (int, int, string) {
     }
     return tests_passed, tests_failed, summary
 }
+
 func main() {
     passed, failed, summary := run_all_tests()
 }

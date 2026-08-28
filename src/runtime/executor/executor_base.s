@@ -10,6 +10,7 @@ struct BaseExecutor {
     initialized         i32
     last_iteration      ExecutionIteration
 }
+
 func NewBaseExecutor(config ExecutorConfig) *BaseExecutor {
     executor := *BaseExecutor{
         config: config,
@@ -20,6 +21,7 @@ func NewBaseExecutor(config ExecutorConfig) *BaseExecutor {
     }
     return executor
 }
+
 func (BaseExecutor* e) Initialize() ExecutionResult {
     if e.initialized == 1 {
         return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
@@ -40,6 +42,7 @@ func (BaseExecutor* e) Initialize() ExecutionResult {
     e.state = EXECUTOR_STATE_RUNNING
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (BaseExecutor* e) AddSequence(sequence_id string, priority i32) ExecutionResult {
     if e.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
@@ -59,6 +62,7 @@ func (BaseExecutor* e) AddSequence(sequence_id string, priority i32) ExecutionRe
     e.sequence_count++
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (BaseExecutor* e) RemoveSequence(sequence_id string) ExecutionResult {
     if _, exists := e.sequences[sequence_id]; !exists {
         return ExecutionResult{
@@ -72,6 +76,7 @@ func (BaseExecutor* e) RemoveSequence(sequence_id string) ExecutionResult {
     e.sequence_count--
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (BaseExecutor* e) ExecuteIteration() ExecutionResult {
     if e.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
@@ -107,6 +112,7 @@ func (BaseExecutor* e) ExecuteIteration() ExecutionResult {
         latency_ms: i32(duration),
     }
 }
+
 func (BaseExecutor* e) execute_prefill_phase(sequences string[]) ExecutionResult {
     if len(sequences) == 0 {
         return ExecutionResult{
@@ -133,6 +139,7 @@ func (BaseExecutor* e) execute_prefill_phase(sequences string[]) ExecutionResult
         phase: PHASE_PREFILL,
     }
 }
+
 func (BaseExecutor* e) execute_decode_phase(sequences string[]) ExecutionResult {
     if len(sequences) == 0 {
         return ExecutionResult{
@@ -155,6 +162,7 @@ func (BaseExecutor* e) execute_decode_phase(sequences string[]) ExecutionResult 
         phase: PHASE_DECODE,
     }
 }
+
 func (BaseExecutor* e) select_prefill_sequences() string[] {
     result := make(string[], 0)
     count := i32(0)
@@ -166,6 +174,7 @@ func (BaseExecutor* e) select_prefill_sequences() string[] {
     }
     return result
 }
+
 func (BaseExecutor* e) select_decode_sequences() string[] {
     result := make(string[], 0)
     count := i32(0)
@@ -177,15 +186,18 @@ func (BaseExecutor* e) select_decode_sequences() string[] {
     }
     return result
 }
+
 func (BaseExecutor* e) GetSequenceStatus(sequence_id string) SequenceStatus {
     if status, exists := e.sequences[sequence_id]; exists {
         return status
     }
     return SequenceStatus{sequence_id: sequence_id, error_code: ERROR_INVALID_SEQUENCE}
 }
+
 func (BaseExecutor* e) GetStatistics() ExecutorStatistics {
     return e.statistics
 }
+
 func (BaseExecutor* e) ResetStatistics() {
     e.statistics.total_iterations = 0
     e.statistics.completed_iterations = 0
@@ -193,6 +205,7 @@ func (BaseExecutor* e) ResetStatistics() {
     e.statistics.total_tokens = 0
     e.statistics.avg_latency = 0.0
 }
+
 func (BaseExecutor* e) GetMetrics() ExecutorMetrics {
     cache_usage := i32(e.cache_manager.allocated_mb)
     return ExecutorMetrics{
@@ -203,6 +216,7 @@ func (BaseExecutor* e) GetMetrics() ExecutorMetrics {
         latency_p50: i32(e.statistics.avg_latency),
     }
 }
+
 func (BaseExecutor* e) Drain() ExecutionResult {
     if e.state == EXECUTOR_STATE_SHUTDOWN {
         return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
@@ -214,6 +228,7 @@ func (BaseExecutor* e) Drain() ExecutionResult {
     e.state = EXECUTOR_STATE_READY
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (BaseExecutor* e) Shutdown() ExecutionResult {
     e.Drain()
     e.state = EXECUTOR_STATE_SHUTDOWN
@@ -221,6 +236,7 @@ func (BaseExecutor* e) Shutdown() ExecutionResult {
     e.sequence_count = 0
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
+
 func (KVCacheManager* km) free_blocks_for_sequence(seq_id string) {
     for i := 0; i < km.block_count; i++ {
         if km.blocks[i].sequence_id == seq_id {
@@ -230,9 +246,11 @@ func (KVCacheManager* km) free_blocks_for_sequence(seq_id string) {
         }
     }
 }
+
 func get_current_time() i64 {
     return 0
 }
+
 func get_current_time_ms() i64 {
     return 0
 }

@@ -8,17 +8,20 @@ struct timer {
     int enabled
     int fired_count
 }
+
 struct timer_manager {
     timer[] timers
     int current_time  
     int next_timer_id
 }
+
 func (timer_manager* tm) init() (int, string) {
     tm.timers = timer[]{}
     tm.current_time = 0
     tm.next_timer_id = 0
     return 0, ""
 }
+
 func (timer_manager* tm) create_timer(int owner_pid, int expire_time, int interval) (timer, string) {
     if expire_time <= 0 {
         return timer{}, "Invalid expiration time"
@@ -35,6 +38,7 @@ func (timer_manager* tm) create_timer(int owner_pid, int expire_time, int interv
     tm.next_timer_id = tm.next_timer_id + 1
     return t, ""
 }
+
 func (timer_manager* tm) delete_timer(int timer_id) (int, string) {
     i := 0
     for i < len(tm.timers) {
@@ -48,6 +52,7 @@ func (timer_manager* tm) delete_timer(int timer_id) (int, string) {
     }
     return -1, "Timer not found"
 }
+
 func (timer_manager* tm) tick(int delta_time) (vec, string) {
     tm.current_time = tm.current_time + delta_time
     expired_timers := {}
@@ -68,6 +73,7 @@ func (timer_manager* tm) tick(int delta_time) (vec, string) {
     }
     return expired_timers, ""
 }
+
 func (timer_manager tm) get_timer_stats() (int, int) {
     active_timers := 0
     total_fired := 0
@@ -82,6 +88,7 @@ func (timer_manager tm) get_timer_stats() (int, int) {
     }
     return active_timers, total_fired
 }
+
 struct work_item {
     int work_id
     int worker_pid
@@ -89,21 +96,25 @@ struct work_item {
     int priority
     int status  
 }
+
 struct workqueue {
     int queue_id
     work_item[] work_items
     int max_workers
     int active_workers
 }
+
 struct workqueue_manager {
     workqueue[] workqueues
     int next_queue_id
 }
+
 func (workqueue_manager* wqm) init() (int, string) {
     wqm.workqueues = {}
     wqm.next_queue_id = 0
     return 0, ""
 }
+
 func (workqueue_manager* wqm) create_workqueue(int max_workers) (workqueue, string) {
     wq := workqueue{
         queue_id: wqm.next_queue_id,
@@ -115,6 +126,7 @@ func (workqueue_manager* wqm) create_workqueue(int max_workers) (workqueue, stri
     wqm.next_queue_id = wqm.next_queue_id + 1
     return wq, ""
 }
+
 func (workqueue_manager* wqm) queue_work(int queue_id, int priority) (int, string) {
     if queue_id >= len(wqm.workqueues) {
         return -1, "Invalid queue"
@@ -131,6 +143,7 @@ func (workqueue_manager* wqm) queue_work(int queue_id, int priority) (int, strin
     wqm.workqueues[queue_id] = wq
     return work.work_id, ""
 }
+
 func (workqueue_manager* wqm) get_work(int queue_id) (work_item, string) {
     if queue_id >= len(wqm.workqueues) {
         return work_item{}, "Invalid queue"
@@ -149,12 +162,14 @@ func (workqueue_manager* wqm) get_work(int queue_id) (work_item, string) {
     wqm.workqueues[queue_id] = wq
     return work, ""
 }
+
 func (workqueue_manager* wqm) complete_work(int queue_id, int work_id) (int, string) {
     if queue_id >= len(wqm.workqueues) {
         return -1, "Invalid queue"
     }
     return 0, ""
 }
+
 func (workqueue_manager wqm) get_workqueue_stats(int queue_id) (int, int) {
     if queue_id >= len(wqm.workqueues) {
         return 0, 0

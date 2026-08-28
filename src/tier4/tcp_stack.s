@@ -21,6 +21,7 @@ struct tcp_header {
     int checksum        
     int urgent_ptr      
 }
+
 struct tcp_connection {
     int state           
     int src_port
@@ -35,6 +36,7 @@ struct tcp_connection {
     int retransmit_count
     int timeout_ms
 }
+
 struct udp_packet {
     int src_port
     int dst_port
@@ -42,6 +44,7 @@ struct udp_packet {
     int checksum
     vec data
 }
+
 struct ip_header {
     int version         
     int header_len      
@@ -56,6 +59,7 @@ struct ip_header {
     int src_ip
     int dst_ip
 }
+
 struct route_entry {
     int dest_ip         
     int netmask         
@@ -63,6 +67,7 @@ struct route_entry {
     int metric          
     int interface_id    
 }
+
 struct tcp_ip_stack {
     vec connections     
     vec routes          
@@ -73,6 +78,7 @@ struct tcp_ip_stack {
     vec recv_packets    
     int pkt_count
 }
+
 func tcp_ip_init(local_ip int, netmask int) (tcp_ip_stack, string) {
     stack := tcp_ip_stack{
         connections: {},
@@ -86,6 +92,7 @@ func tcp_ip_init(local_ip int, netmask int) (tcp_ip_stack, string) {
     }
     return stack, ""
 }
+
 func (stack* tcp_ip_stack) tcp_connect(src_port int, dst_ip int, dst_port int) (int, string) {
     conn := tcp_connection{
         state: TCP_LISTEN,
@@ -105,6 +112,7 @@ func (stack* tcp_ip_stack) tcp_connect(src_port int, dst_ip int, dst_port int) (
     stack.connections = append(stack.connections, conn)
     return len(stack.connections) - 1, ""
 }
+
 func (stack* tcp_ip_stack) tcp_established(conn_id int) (int, string) {
     if conn_id < 0 || conn_id >= len(stack.connections) {
         return -1, "invalid connection id"
@@ -114,6 +122,7 @@ func (stack* tcp_ip_stack) tcp_established(conn_id int) (int, string) {
     stack.connections[conn_id] = conn
     return 0, ""
 }
+
 func (stack* tcp_ip_stack) tcp_send(conn_id int, data vec, len int) (int, string) {
     if conn_id < 0 || conn_id >= len(stack.connections) {
         return -1, "invalid connection id"
@@ -131,6 +140,7 @@ func (stack* tcp_ip_stack) tcp_send(conn_id int, data vec, len int) (int, string
     stack.connections[conn_id] = conn
     return len, ""
 }
+
 func (stack* tcp_ip_stack) tcp_recv(conn_id int) (vec, string) {
     if conn_id < 0 || conn_id >= len(stack.connections) {
         return {}, "invalid connection id"
@@ -141,6 +151,7 @@ func (stack* tcp_ip_stack) tcp_recv(conn_id int) (vec, string) {
     stack.connections[conn_id] = conn
     return data, ""
 }
+
 func (stack* tcp_ip_stack) tcp_close(conn_id int) (int, string) {
     if conn_id < 0 || conn_id >= len(stack.connections) {
         return -1, "invalid connection id"
@@ -150,6 +161,7 @@ func (stack* tcp_ip_stack) tcp_close(conn_id int) (int, string) {
     stack.connections[conn_id] = conn
     return 0, ""
 }
+
 func (stack* tcp_ip_stack) tcp_get_state(conn_id int) (int, string) {
     if conn_id < 0 || conn_id >= len(stack.connections) {
         return -1, "invalid connection id"
@@ -157,6 +169,7 @@ func (stack* tcp_ip_stack) tcp_get_state(conn_id int) (int, string) {
     conn := stack.connections[conn_id]
     return conn.state, ""
 }
+
 func (stack* tcp_ip_stack) udp_send(src_port int, dst_ip int, dst_port int, data vec) (int, string) {
     pkt := udp_packet{
         src_port: src_port,
@@ -174,6 +187,7 @@ func (stack* tcp_ip_stack) udp_send(src_port int, dst_ip int, dst_port int, data
     pkt.checksum = checksum & 0xffff
     return pkt.length, ""
 }
+
 func (stack* tcp_ip_stack) add_route(dest_ip int, netmask int, gateway int, metric int) (int, string) {
     route := route_entry{
         dest_ip: dest_ip,
@@ -185,6 +199,7 @@ func (stack* tcp_ip_stack) add_route(dest_ip int, netmask int, gateway int, metr
     stack.routes = append(stack.routes, route)
     return len(stack.routes) - 1, ""
 }
+
 func (stack* tcp_ip_stack) lookup_route(dst_ip int) (route_entry, string) {
     best_route := route_entry{}
     best_metric := 999999
@@ -204,10 +219,12 @@ func (stack* tcp_ip_stack) lookup_route(dst_ip int) (route_entry, string) {
     }
     return best_route, ""
 }
+
 func (stack* tcp_ip_stack) set_default_gateway(gateway_ip int) (int, string) {
     stack.gateway_ip = gateway_ip
     return 0, ""
 }
+
 struct tcp_ip_stats {
     int local_ip
     int netmask
@@ -216,6 +233,7 @@ struct tcp_ip_stats {
     int routes
     int packets_received
 }
+
 func (stack* tcp_ip_stack) get_stats() (tcp_ip_stats, string) {
     stats := tcp_ip_stats{
         local_ip: stack.local_ip,
@@ -227,6 +245,7 @@ func (stack* tcp_ip_stack) get_stats() (tcp_ip_stats, string) {
     }
     return stats, ""
 }
+
 func (stack* tcp_ip_stack) arp_lookup(ip int) (int, string) {
     i := 0
     for i < len(stack.arp_cache) {
@@ -234,11 +253,13 @@ func (stack* tcp_ip_stack) arp_lookup(ip int) (int, string) {
     }
     return -1, "arp entry not found"
 }
+
 func (stack* tcp_ip_stack) arp_add(ip int, mac int) (int, string) {
     stack.arp_cache = append(stack.arp_cache, ip)
     stack.arp_cache = append(stack.arp_cache, mac)
     return 0, ""
 }
+
 func ip_checksum(header ip_header) int {
     sum := 0
     sum = sum + (header.src_ip >> 16 & 0xffff) + (header.src_ip & 0xffff)

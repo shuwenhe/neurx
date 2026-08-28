@@ -7,6 +7,7 @@ import neurx.amp.scaler.*
     MLM
     PREFIX_LM
 }
+
 struct pretrain_config {
     string model_name
     neurx_config model_config
@@ -44,6 +45,7 @@ struct pretrain_config {
     string precision
     bool enable_gradient_checkpointing
 }
+
 func create_neurx_200b_pretrain_config() pretrain_config {
     neurx_config model_cfg = create_neurx_200b_config_200b()
     return pretrain_config {
@@ -90,6 +92,7 @@ func create_neurx_200b_pretrain_config() pretrain_config {
         enable_gradient_checkpointing: true,
     }
 }
+
 func create_test_pretrain_config() pretrain_config {
     neurx_config model_cfg = create_custom_neurx_config(
         vocab_size=32000,
@@ -142,6 +145,7 @@ func create_test_pretrain_config() pretrain_config {
     FINE_TUNING_PHASE
     COMPLETED
 }
+
 struct pretrain_state {
     pretrain_config config
     int current_step
@@ -176,6 +180,7 @@ struct pretrain_state {
         int samples_per_step
     } performance
 }
+
 func create_pretrain_state(pretrain_config config) pretrain_state {
     print("\n" + "="*70)
     print("Initializing NEURX Pretraining State")
@@ -226,6 +231,7 @@ func create_pretrain_state(pretrain_config config) pretrain_state {
         },
     }
 }
+
 func get_learning_rate(
     pretrain_state state,
     int step
@@ -248,6 +254,7 @@ func get_learning_rate(
             case _:
                 return cfg.peak_lr * (1.0 - progress)
 }
+
 func sample_training_task(
     pretrain_state state
 ) {
@@ -264,6 +271,7 @@ func sample_training_task(
         return PREFIX_LM
     return PREFIX_LM
 }
+
 func prepare_clm_batch(
     tokenizer_state tokenizer,
     string[] batch_texts,
@@ -294,6 +302,7 @@ func prepare_clm_batch(
         "labels": labels,
         "task_type": CLM,
     }
+
 func prepare_mlm_batch(
     tokenizer_state tokenizer,
     string[] batch_texts,
@@ -336,6 +345,7 @@ func prepare_mlm_batch(
         "mask_positions": should_mask,
         "task_type": MLM,
     }
+
 func prepare_prefix_lm_batch(
     tokenizer_state tokenizer,
     string[] batch_prefixes,
@@ -381,6 +391,7 @@ func prepare_prefix_lm_batch(
         "eop_positions": eop_positions,
         "task_type": PREFIX_LM,
     }
+
 func train_step(
     ref pretrain_state state,
     neurx_model model,
@@ -690,6 +701,7 @@ func log_training_progress(
         f"ETA: {eta_str:>8}"
     )
 }
+
 func log_evaluation_results(
     pretrain_state state,
     dict[str, float] metrics) {
@@ -757,6 +769,7 @@ func get_gpu_memory_usage() {
     float gpu_mem_mb = 18400.0
     return gpu_mem_mb
 }
+
 func test_pretrain_framework() {
     print("\n" + "="*60)
     print("Testing NEURX Pretraining Framework")

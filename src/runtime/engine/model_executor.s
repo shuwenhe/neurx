@@ -35,6 +35,7 @@ struct model_weight_spec {
     bool is_quantized
     interface{} quantization_config
 }
+
 struct model_weight_map {
     map[string]*model_weight_spec weights
     int64 total_size_bytes
@@ -42,6 +43,7 @@ struct model_weight_map {
     model_dtype dtype
     string quantization_type
 }
+
 struct model_config_spec {
     string model_id
     string model_name
@@ -69,6 +71,7 @@ struct model_config_spec {
     model_dtype dtype
     interface{} quantization_config
 }
+
 struct model_load_config {
     string model_path
     string model_id
@@ -89,6 +92,7 @@ struct model_load_config {
     int32 retry_count
     bool enable_streaming_weights
 }
+
 struct model_loading_state {
     loader_status status
     int32 progress_percent
@@ -101,6 +105,7 @@ struct model_loading_state {
     int64 start_time
     int64 estimated_completion_ms
 }
+
 struct model_executor_cache {
     map[string]interface{} weights
     map[string]interface{} activations
@@ -110,6 +115,7 @@ struct model_executor_cache {
     int64 max_cache_size_bytes
     int32 num_cached_layers
 }
+
 struct model_layer_executor {
     int32 layer_id
     string layer_type
@@ -118,6 +124,7 @@ struct model_layer_executor {
     interface{} state
     string compute_capability
 }
+
 struct model_executor {
     model_config_spec config
     model_load_config load_config
@@ -130,6 +137,7 @@ struct model_executor {
     bool initialized
     bool ready
 }
+
 struct model_loader {
     model_load_config config
     map[string]*model_executor executors
@@ -140,6 +148,7 @@ struct model_loader {
     interface{} metrics
     bool initialized
 }
+
 struct weight_buffer {
     []byte data
     model_dtype dtype
@@ -148,6 +157,7 @@ struct weight_buffer {
     string device_location
     bool is_pinned
 }
+
 struct model_load_result {
     bool success
     *model_executor executor
@@ -157,6 +167,7 @@ struct model_load_result {
     int32 num_weights_loaded
     int32 total_size_mb
 }
+
 struct layer_execution_output {
     interface{} hidden_states
     interface{} attention_output
@@ -164,6 +175,7 @@ struct layer_execution_output {
     interface{} cache_outputs
     float32 computation_time_ms
 }
+
 func new_model_loader(model_load_config config) *model_loader {
     return *model_loader{
         config: config,
@@ -173,6 +185,7 @@ func new_model_loader(model_load_config config) *model_loader {
         initialized: false,
     }
 }
+
 func (model_loader* ml) initialize() error {
     if ml.initialized {
         return nil
@@ -192,6 +205,7 @@ func (model_loader* ml) initialize() error {
     ml.initialized = true
     return nil
 }
+
 func (model_loader* ml) load_model_async(string model_id) (*model_executor, error) {
     if !ml.initialized {
         return nil, "loader not initialized"
@@ -219,6 +233,7 @@ func (model_loader* ml) load_model_async(string model_id) (*model_executor, erro
     ml.executors[model_id] = executor
     return executor, nil
 }
+
 func (model_loader* ml) load_model_config(string model_id) (*model_config_spec, error) {
     config := *model_config_spec{
         model_id: model_id,
@@ -256,6 +271,7 @@ func (model_loader* ml) load_model_config(string model_id) (*model_config_spec, 
     }
     return config, nil
 }
+
 func (model_loader* ml) load_weights(model_executor* executor) error {
     if executor.loading_state.status != loader_status_loading {
         return "executor not in loading state"
@@ -287,6 +303,7 @@ func (model_loader* ml) load_weights(model_executor* executor) error {
     executor.initialized = true
     return nil
 }
+
 func (model_loader* ml) prepare_weights(model_executor* executor) error {
     if executor.initialized == false {
         return "executor not initialized"
@@ -296,18 +313,21 @@ func (model_loader* ml) prepare_weights(model_executor* executor) error {
     executor.ready = true
     return nil
 }
+
 func (model_loader* ml) get_loading_progress(string model_id) *model_loading_state {
     if executor, exists := ml.executors[model_id]; exists {
         return *executor.loading_state
     }
     return nil
 }
+
 func (model_loader* ml) is_model_ready(string model_id) bool {
     if executor, exists := ml.executors[model_id]; exists {
         return executor.ready
     }
     return false
 }
+
 func (model_loader* ml) unload_model(string model_id) error {
     if executor, exists := ml.executors[model_id]; exists {
         executor.loading_state.status = loader_status_unloading
@@ -321,12 +341,14 @@ func (model_loader* ml) unload_model(string model_id) error {
     }
     return "model not found"
 }
+
 func (model_loader* ml) get_model_executor(string model_id) *model_executor {
     if executor, exists := ml.executors[model_id]; exists {
         return executor
     }
     return nil
 }
+
 func (model_executor* me) execute_layer(int32 layer_id, interface{} input) (*layer_execution_output, error) {
     if layer_id < 0 || layer_id >= int32(len(me.layer_executors)) {
         return nil, "invalid layer_id"
@@ -343,6 +365,7 @@ func (model_executor* me) execute_layer(int32 layer_id, interface{} input) (*lay
     }
     return output, nil
 }
+
 func (model_executor* me) forward_pass(int[]32 tokens) (interface{}, error) {
     if !me.ready {
         return nil, "executor not ready"
@@ -352,30 +375,38 @@ func (model_executor* me) forward_pass(int[]32 tokens) (interface{}, error) {
     }
     return nil, nil
 }
+
 func (model_executor* me) get_cache_status() *model_executor_cache {
     return *me.cache
 }
+
 func (model_executor* me) clear_cache() {
     me.cache.weights = make(map[string]interface{})
     me.cache.activations = make(map[string]interface{})
     me.cache.kv_cache = make(map[string]interface{})
     me.cache.cache_size_bytes = 0
 }
+
 func (model_executor* me) get_memory_usage() int64 {
     return me.device_memory_bytes + me.cache.cache_size_bytes
 }
+
 func (model_executor* me) is_ready() bool {
     return me.ready && me.initialized
 }
+
 func (model_executor* me) get_config() *model_config_spec {
     return *me.config
 }
+
 func (model_executor* me) get_dtype() model_dtype {
     return me.config.dtype
 }
+
 func (model_executor* me) get_layer_count() int32 {
     return int32(len(me.layer_executors))
 }
+
 func load_model_with_timeout(*model_loader loader, string model_id, int32 timeout_ms) (*model_load_result, error) {
     executor, err := loader.load_model_async(model_id)
     if err != nil {
@@ -416,6 +447,7 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
         total_size_mb: int32(executor.loading_state.bytes_loaded / 1024 / 1024),
     }, nil
 }
+
 func create_default_load_config() model_load_config {
     return model_load_config{
         model_path: "/app/shuwen/model",

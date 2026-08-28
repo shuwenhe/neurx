@@ -17,6 +17,7 @@ struct token_logprob {
     float32 logprob
     float32 rank
 }
+
 struct logprob_output {
     token_logprob[] top_tokens
     float32 selected_token_logprob
@@ -24,6 +25,7 @@ struct logprob_output {
     float32 most_likely_logprob
     int32 most_likely_token_id
 }
+
 struct logprobs_config {
     logprob_method method
     logprob_dtype dtype
@@ -32,6 +34,7 @@ struct logprobs_config {
     bool include_output_token
     bool normalize
 }
+
 struct logprobs_manager {
     logprobs_config config
     logprob_output[] token_outputs
@@ -40,6 +43,7 @@ struct logprobs_manager {
     int32 cache_hits
     int32 cache_misses
 }
+
 func create_logprobs_config(logprob_method method, int32 top_k) logprobs_config {
     return logprobs_config{
         method: method,
@@ -50,6 +54,7 @@ func create_logprobs_config(logprob_method method, int32 top_k) logprobs_config 
         normalize: true,
     }
 }
+
 func create_logprobs_manager(logprobs_config config) logprobs_manager* {
     mgr := logprobs_manager{
         config: config,
@@ -61,6 +66,7 @@ func create_logprobs_manager(logprobs_config config) logprobs_manager* {
     }
     return *mgr
 }
+
 func (logprobs_manager* mgr) compute_logprobs(float32[] logits, int32[] selected_token_ids) logprob_output[] {
     outputs := make(logprob_output[])
     max_logit := logits[0]
@@ -135,9 +141,11 @@ func (logprobs_manager* mgr) compute_logprobs(float32[] logits, int32[] selected
     }
     return outputs
 }
+
 func (logprobs_manager* mgr) cache_logprob(int32 token_id, float32 logprob) {
     mgr.token_to_logprob_cache[token_id] = logprob
 }
+
 func (logprobs_manager* mgr) get_cached_logprob(int32 token_id) float32 {
     if logprob, exists := mgr.token_to_logprob_cache[token_id]; exists {
         mgr.cache_hits = mgr.cache_hits + 1
@@ -146,12 +154,15 @@ func (logprobs_manager* mgr) get_cached_logprob(int32 token_id) float32 {
     mgr.cache_misses = mgr.cache_misses + 1
     return 0.0
 }
+
 func (logprobs_manager* mgr) clear_cache() {
     mgr.token_to_logprob_cache = make(map[int32]float32)
 }
+
 func (logprobs_manager* mgr) add_token_output(logprob_output output) {
     mgr.token_outputs = append(mgr.token_outputs, output)
 }
+
 func (logprobs_manager* mgr) get_token_outputs(int32 start, int32 end) logprob_output[] {
     result := make(logprob_output[])
     for i := start; i < end && int32(i) < int32(len(mgr.token_outputs)); i = i + 1 {
@@ -159,6 +170,7 @@ func (logprobs_manager* mgr) get_token_outputs(int32 start, int32 end) logprob_o
     }
     return result
 }
+
 func (logprobs_manager* mgr) get_last_token_logprobs() logprob_output {
     if len(mgr.token_outputs) > 0 {
         return mgr.token_outputs[len(mgr.token_outputs) - 1]
@@ -171,6 +183,7 @@ func (logprobs_manager* mgr) get_last_token_logprobs() logprob_output {
         most_likely_token_id: -1,
     }
 }
+
 func (logprobs_manager* mgr) filter_top_k_logprobs(logprob_output* output, int32 k) {
     if k <= 0 || len(output.top_tokens) <= int32(k) {
         return
@@ -181,6 +194,7 @@ func (logprobs_manager* mgr) filter_top_k_logprobs(logprob_output* output, int32
     }
     output.top_tokens = filtered
 }
+
 func (logprobs_manager* mgr) normalize_logprobs(logprob_output* output) {
     if len(output.top_tokens) == 0 {
         return
@@ -202,6 +216,7 @@ func (logprobs_manager* mgr) normalize_logprobs(logprob_output* output) {
         }
     }
 }
+
 func (logprobs_manager* mgr) get_logprobs_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["method"] = mgr.config.method
@@ -219,6 +234,7 @@ func (logprobs_manager* mgr) get_logprobs_stats() map[string]interface{} {
     stats["cache_size"] = len(mgr.token_to_logprob_cache)
     return stats
 }
+
 func (logprobs_manager* mgr) export_to_json_format() map[string]interface{} {
     export_data := make(map[string]interface{})
     token_sequences := make(interface{}[])

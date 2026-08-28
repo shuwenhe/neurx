@@ -28,6 +28,7 @@ struct fusion_config {
 	bool residual_connections
 	map[string]interface{} extra_params
 }
+
 struct attention_head {
 	int32 head_index
 	int32 key_dim
@@ -35,6 +36,7 @@ struct attention_head {
 	float[][]32 attention_weights
 	float32 attention_score
 }
+
 struct cross_modal_attention {
 	attention_type attention_type
 	int32 num_heads
@@ -42,6 +44,7 @@ struct cross_modal_attention {
 	float32 temperature
 	bool scaled_dot_product
 }
+
 struct fused_features {
 	float[]32 fused_vector
 	int32 feature_dim
@@ -51,12 +54,14 @@ struct fused_features {
 	fusion_strategy strategy_used
 	time.Time created_at
 }
+
 struct early_fusion {
 	sync.Mutex mu
 	int32 output_dim
 	map[string]float[]32 modality_projections
 	time.Time created_at
 }
+
 struct late_fusion {
 	sync.Mutex mu
 	int32 output_dim
@@ -64,6 +69,7 @@ struct late_fusion {
 	map[string]float32 modality_weights
 	time.Time created_at
 }
+
 struct hybrid_fusion {
 	sync.Mutex mu
 	*early_fusion early_stage
@@ -73,6 +79,7 @@ struct hybrid_fusion {
 	float32 late_weight
 	time.Time created_at
 }
+
 struct multimodal_fusion_engine {
 	sync.Mutex mu
 	fusion_strategy strategy
@@ -85,6 +92,7 @@ struct multimodal_fusion_engine {
 	int32 num_fusions_performed
 	time.Time created_at
 }
+
 func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32) *multimodal_fusion_engine {
 	mfe := *multimodal_fusion_engine{
 		strategy:                 strategy,
@@ -138,6 +146,7 @@ func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32)
 	}
 	return mfe
 }
+
 func (multimodal_fusion_engine* mfe) fuse_early(modality_features map[string]*encoded_features) (*fused_features, error) {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -176,6 +185,7 @@ func (multimodal_fusion_engine* mfe) fuse_early(modality_features map[string]*en
 	mfe.num_fusions_performed++
 	return fused, nil
 }
+
 func (multimodal_fusion_engine* mfe) fuse_late(modality_features map[string]*encoded_features) (*fused_features, error) {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -222,6 +232,7 @@ func (multimodal_fusion_engine* mfe) fuse_late(modality_features map[string]*enc
 	mfe.num_fusions_performed++
 	return fused, nil
 }
+
 func (multimodal_fusion_engine* mfe) fuse_hybrid(modality_features map[string]*encoded_features) (*fused_features, error) {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -263,6 +274,7 @@ func (multimodal_fusion_engine* mfe) fuse_hybrid(modality_features map[string]*e
 	mfe.num_fusions_performed++
 	return fused, nil
 }
+
 func (multimodal_fusion_engine* mfe) compute_cross_modal_attention(modality_features map[string]*encoded_features) (map[string]map[string]float32, error) {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -302,11 +314,13 @@ func (multimodal_fusion_engine* mfe) compute_cross_modal_attention(modality_feat
 	}
 	return attention_matrix, nil
 }
+
 func (multimodal_fusion_engine* mfe) get_fusion_strategy() fusion_strategy {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
 	return mfe.strategy
 }
+
 func (multimodal_fusion_engine* mfe) set_fusion_strategy(strategy fusion_strategy) error {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -316,6 +330,7 @@ func (multimodal_fusion_engine* mfe) set_fusion_strategy(strategy fusion_strateg
 	mfe.strategy = strategy
 	return nil
 }
+
 func (multimodal_fusion_engine* mfe) get_fusion_stats() map[string]interface{} {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -326,6 +341,7 @@ func (multimodal_fusion_engine* mfe) get_fusion_stats() map[string]interface{} {
 		"created_at":            mfe.created_at,
 	}
 }
+
 func (multimodal_fusion_engine* mfe) set_modality_weight(modality string, weight float32) error {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -335,6 +351,7 @@ func (multimodal_fusion_engine* mfe) set_modality_weight(modality string, weight
 	mfe.late_fuser.modality_weights[modality] = weight
 	return nil
 }
+
 func (multimodal_fusion_engine* mfe) get_modality_weights() map[string]float32 {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -344,6 +361,7 @@ func (multimodal_fusion_engine* mfe) get_modality_weights() map[string]float32 {
 	}
 	return weights
 }
+
 func (multimodal_fusion_engine* mfe) set_early_late_weight(early_weight float32) error {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()
@@ -354,6 +372,7 @@ func (multimodal_fusion_engine* mfe) set_early_late_weight(early_weight float32)
 	mfe.hybrid_fuser.late_weight = 1.0 - early_weight
 	return nil
 }
+
 func (multimodal_fusion_engine* mfe) reset_fusion_stats() {
 	mfe.mu.Lock()
 	defer mfe.mu.Unlock()

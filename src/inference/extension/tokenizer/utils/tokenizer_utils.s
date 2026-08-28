@@ -6,6 +6,7 @@ func NormalizeText(string text) string {
     text = normalize_unicode(text)
     return text
 }
+
 func TokensToString(i32[] tokens, map[i32]string vocab) string {
     result := ""
     for i := 0; i < len(tokens); i += 1 {
@@ -20,6 +21,7 @@ func TokensToString(i32[] tokens, map[i32]string vocab) string {
     }
     return result
 }
+
 func StringToTokens(string text, map[string]i32 vocab) i32[] {
     tokens := make(i32[], 0)
     parts := split_by_space(text)
@@ -34,9 +36,11 @@ func StringToTokens(string text, map[string]i32 vocab) i32[] {
     }
     return tokens
 }
+
 func GetSequenceLength(i32[] tokens) i32 {
     return i32(len(tokens))
 }
+
 func GetTokenFrequency(i32[] tokens) map[i32]i32 {
     freq := make(map[i32]i32)
     for i := 0; i < len(tokens); i += 1 {
@@ -44,6 +48,7 @@ func GetTokenFrequency(i32[] tokens) map[i32]i32 {
     }
     return freq
 }
+
 func GetMostFrequentTokens(i32[] tokens, i32 top_n) i32[] {
     freq := GetTokenFrequency(tokens)
     token_ids := make(i32[], 0)
@@ -64,6 +69,7 @@ func GetMostFrequentTokens(i32[] tokens, i32 top_n) i32[] {
     }
     return token_ids
 }
+
 func GetTokenEntropy(i32[] tokens) f32 {
     if len(tokens) == 0 {
         return 0.0
@@ -79,6 +85,7 @@ func GetTokenEntropy(i32[] tokens) f32 {
     }
     return entropy
 }
+
 func GetUniqueTokenCount(i32[] tokens) i32 {
     unique := make(map[i32]bool)
     for i := 0; i < len(tokens); i += 1 {
@@ -86,6 +93,7 @@ func GetUniqueTokenCount(i32[] tokens) i32 {
     }
     return i32(len(unique))
 }
+
 func PadSequence(i32[] tokens, i32 target_length, i32 pad_token_id) i32[] {
     current_len := i32(len(tokens))
     if current_len >= target_length {
@@ -100,12 +108,14 @@ func PadSequence(i32[] tokens, i32 target_length, i32 pad_token_id) i32[] {
     }
     return result
 }
+
 func TruncateSequence(i32[] tokens, i32 max_length) i32[] {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
     return tokens[0:max_length]
 }
+
 func TruncateSequenceFromLeft(i32[] tokens, i32 max_length) i32[] {
     if i32(len(tokens)) <= max_length {
         return tokens
@@ -113,6 +123,7 @@ func TruncateSequenceFromLeft(i32[] tokens, i32 max_length) i32[] {
     start := len(tokens) - int(max_length)
     return tokens[start:]
 }
+
 func AreTokensEqual(i32[] seq1, i32[] seq2) bool {
     if len(seq1) != len(seq2) {
         return false
@@ -124,6 +135,7 @@ func AreTokensEqual(i32[] seq1, i32[] seq2) bool {
     }
     return true
 }
+
 func FindSubsequence(i32[] haystack, i32[] needle) i32 {
     if len(needle) == 0 || len(needle) > len(haystack) {
         return -1
@@ -142,6 +154,7 @@ func FindSubsequence(i32[] haystack, i32[] needle) i32 {
     }
     return -1
 }
+
 func CountOccurrences(i32[] haystack, i32[] needle) i32 {
     count := i32(0)
     pos := i32(0)
@@ -155,6 +168,7 @@ func CountOccurrences(i32[] haystack, i32[] needle) i32 {
     }
     return count
 }
+
 func GetSequenceStats(i32[] tokens) map[string]f32 {
     stats := make(map[string]f32)
     if len(tokens) == 0 {
@@ -181,6 +195,7 @@ func GetSequenceStats(i32[] tokens) map[string]f32 {
     stats["entropy"] = GetTokenEntropy(tokens)
     return stats
 }
+
 func PadBatch(i32[][]] sequences, i32 pad_token_id) i32[][]] {
     max_len := i32(0)
     for i := 0; i < len(sequences); i += 1 {
@@ -194,6 +209,7 @@ func PadBatch(i32[][]] sequences, i32 pad_token_id) i32[][]] {
     }
     return result
 }
+
 func GetBatchLengths(i32[][]] sequences) i32[] {
     lengths := make(i32[], len(sequences))
     for i := 0; i < len(sequences); i += 1 {
@@ -201,6 +217,7 @@ func GetBatchLengths(i32[][]] sequences) i32[] {
     }
     return lengths
 }
+
 func trim_whitespace(string s) string {
     start := 0
     end := len(s)
@@ -212,9 +229,11 @@ func trim_whitespace(string s) string {
     }
     return s[start:end]
 }
+
 func normalize_unicode(string s) string {
     return s
 }
+
 func split_by_space(string s) string[] {
     parts := make(string[], 0)
     current := ""
@@ -233,9 +252,11 @@ func split_by_space(string s) string[] {
     }
     return parts
 }
+
 func is_whitespace(string char) bool {
     return char == " " || char == "\t" || char == "\n" || char == "\r"
 }
+
 func string_from_i32(i32 n) string {
     if n == 0 {
         return "0"
@@ -254,6 +275,7 @@ func string_from_i32(i32 n) string {
     }
     return result + digits
 }
+
 func log2(f32 x) f32 {
     if x <= 0.0 {
         return 0.0

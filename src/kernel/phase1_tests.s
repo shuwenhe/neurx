@@ -22,6 +22,7 @@ func test_rcu_basic() bool {
     println("✓ RCU Basic tests passed")
     true
 }
+
 func test_scheduler_basic() bool {
     println("[TEST] Scheduler Basic Functionality")
     var err1 = init_scheduler(4)
@@ -32,6 +33,7 @@ func test_scheduler_basic() bool {
     println("✓ Scheduler Basic tests passed")
     true
 }
+
 func test_vm_basic() bool {
     println("[TEST] Virtual Memory Basic Functionality")
     var err1 = init_vm(65536)
@@ -52,6 +54,7 @@ func test_vm_basic() bool {
     println("✓ Virtual Memory Basic tests passed")
     true
 }
+
 func test_irq_basic() bool {
     println("[TEST] IRQ System Basic Functionality")
     var err1 = init_irq_system(256)
@@ -72,6 +75,7 @@ func test_irq_basic() bool {
     println("✓ IRQ System Basic tests passed")
     true
 }
+
 func test_ext4_basic() bool {
     println("[TEST] ext4 FileSystem Basic Functionality")
     var err1 = ext4_init_superblock(1000000, 125000)
@@ -92,6 +96,7 @@ func test_ext4_basic() bool {
     println("✓ ext4 FileSystem Basic tests passed")
     true
 }
+
 func test_all() bool {
     println("")
     println("===== PHASE 1: Core Kernel Completion Tests =====")

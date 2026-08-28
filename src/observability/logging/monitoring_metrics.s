@@ -6,6 +6,7 @@ import "time"
 	HISTOGRAM = 2
 	SUMMARY = 3
 }
+
 struct metric_point {
 	string              metric_name
 	metric_type         metric_category
@@ -17,6 +18,7 @@ struct metric_point {
 	float32             max_value
 	float32             sum_value
 }
+
 struct metric_series {
 	string              metric_name
 	metric_type         metric_category
@@ -26,6 +28,7 @@ struct metric_series {
 	int32               retention_hours
 	int64               created_at
 }
+
 struct metrics_registry {
 	map[string]metric_series] metrics
 	int32                   metric_count
@@ -35,6 +38,7 @@ struct metrics_registry {
 	int32                   collection_interval_ms
 	sync.Mutex              mu
 }
+
 func create_metric_series(name string, category metric_type) metric_series {
 	return metric_series{
 		metric_name:     name,
@@ -46,6 +50,7 @@ func create_metric_series(name string, category metric_type) metric_series {
 		created_at:      time.Now().UnixNano(),
 	}
 }
+
 func create_metrics_registry() metrics_registry {
 	return metrics_registry{
 		metrics:                   make(map[string]metric_series),
@@ -57,12 +62,14 @@ func create_metrics_registry() metrics_registry {
 		mu:                        sync.Mutex{},
 	}
 }
+
 func (metrics_registry* r) register_metric(series metric_series) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.metrics[series.metric_name] = series
 	r.metric_count++
 }
+
 func (metrics_registry* r) record_metric(metric_name string, value float32) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -83,6 +90,7 @@ func (metrics_registry* r) record_metric(metric_name string, value float32) {
 		r.metrics[metric_name] = series
 	}
 }
+
 func (metrics_registry* r) record_observation(metric_name string, value float32, labels map[string]string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -103,24 +111,30 @@ func (metrics_registry* r) record_observation(metric_name string, value float32,
 		r.metrics[metric_name] = series
 	}
 }
+
 func (metrics_registry* r) increment_counter(metric_name string) {
 	r.record_metric(metric_name, 1.0)
 }
+
 func (metrics_registry* r) add_to_counter(metric_name string, value float32) {
 	r.record_metric(metric_name, value)
 }
+
 func (metrics_registry* r) set_gauge(metric_name string, value float32) {
 	r.record_metric(metric_name, value)
 }
+
 func (metrics_registry* r) record_histogram_value(metric_name string, value float32) {
 	r.record_metric(metric_name, value)
 }
+
 func (metrics_registry* r) get_metric(metric_name string) (metric_series, bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	series, exists := r.metrics[metric_name]
 	return series, exists
 }
+
 func (metrics_registry* r) get_all_metrics() metric_series[] {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -130,6 +144,7 @@ func (metrics_registry* r) get_all_metrics() metric_series[] {
 	}
 	return result
 }
+
 func (metrics_registry* r) collect_metrics() map[string]interface{} {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -151,6 +166,7 @@ func (metrics_registry* r) collect_metrics() map[string]interface{} {
 	r.last_collection_time = time.Now().UnixNano()
 	return collection
 }
+
 func (metrics_registry* r) clear_old_points(retention_hours int32) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -167,6 +183,7 @@ func (metrics_registry* r) clear_old_points(retention_hours int32) {
 		r.metrics[name] = series
 	}
 }
+
 func (metrics_registry* r) get_statistics() map[string]interface{} {
 	r.mu.Lock()
 	defer r.mu.Unlock()

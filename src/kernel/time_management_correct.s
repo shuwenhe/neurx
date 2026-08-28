@@ -3,10 +3,12 @@ use std.slices
 struct clock_type {
     int value  
 }
+
 struct timespec {
     int sec    
     int nsec   
 }
+
 struct high_res_timer {
     int timer_id
     int clock_type
@@ -15,17 +17,20 @@ struct high_res_timer {
     int enabled
     int fired_count
 }
+
 struct posix_clock {
     int clock_type
     timespec current_time
     int frequency  
 }
+
 struct time_management_engine {
     vec clocks
     vec timers
     int timer_counter
     int ntp_offset_ns
 }
+
 func new_time_management_engine() (time_management_engine, string) {
     engine := time_management_engine{
         clocks: {},
@@ -47,6 +52,7 @@ func new_time_management_engine() (time_management_engine, string) {
     engine.clocks = append(engine.clocks, monotonic_clock)
     return engine, ""
 }
+
 func (engine* time_management_engine) get_time(clock_type int) (timespec, string) {
     i := 0
     for i < len(engine.clocks) {
@@ -58,6 +64,7 @@ func (engine* time_management_engine) get_time(clock_type int) (timespec, string
     }
     return timespec{}, "clock type not found"
 }
+
 func (engine* time_management_engine) set_time(clock_type int, new_time timespec) (int, string) {
     i := 0
     for i < len(engine.clocks) {
@@ -71,6 +78,7 @@ func (engine* time_management_engine) set_time(clock_type int, new_time timespec
     }
     return -1, "clock type not found"
 }
+
 func (engine* time_management_engine) create_timer(clock_type int, expire_time timespec, interval timespec) (int, string) {
     timer_id := engine.timer_counter
     engine.timer_counter = engine.timer_counter + 1
@@ -85,6 +93,7 @@ func (engine* time_management_engine) create_timer(clock_type int, expire_time t
     engine.timers = append(engine.timers, timer)
     return timer_id, ""
 }
+
 func (engine* time_management_engine) cancel_timer(timer_id int) (int, string) {
     i := 0
     for i < len(engine.timers) {
@@ -98,9 +107,11 @@ func (engine* time_management_engine) cancel_timer(timer_id int) (int, string) {
     }
     return -1, "timer not found"
 }
+
 func (engine* time_management_engine) nanosleep(clock_type int, duration timespec) (int, string) {
     return 0, ""
 }
+
 func (engine* time_management_engine) clock_getres(clock_type int) (timespec, string) {
     i := 0
     for i < len(engine.clocks) {
@@ -113,6 +124,7 @@ func (engine* time_management_engine) clock_getres(clock_type int) (timespec, st
     }
     return timespec{}, "clock type not found"
 }
+
 func (engine* time_management_engine) clock_settime(clock_type int, new_time timespec) (int, string) {
     i := 0
     for i < len(engine.clocks) {
@@ -126,10 +138,12 @@ func (engine* time_management_engine) clock_settime(clock_type int, new_time tim
     }
     return -1, "clock type not found"
 }
+
 func (engine* time_management_engine) clock_nanosleep(clock_type int, flags int, request timespec) (timespec, string) {
     remain := timespec{ sec: 0, nsec: 0 }
     return remain, ""
 }
+
 struct timer_statistics {
     int total_timers_created
     int active_timers
@@ -137,6 +151,7 @@ struct timer_statistics {
     int oneshot_timers
     int total_timer_fires
 }
+
 func (engine* time_management_engine) get_timer_statistics() (timer_statistics, string) {
     periodic_count := 0
     oneshot_count := 0
@@ -163,6 +178,7 @@ func (engine* time_management_engine) get_timer_statistics() (timer_statistics, 
     }
     return stats, ""
 }
+
 func (engine* time_management_engine) adjust_clock(clock_type int, offset_ns int) (int, string) {
     i := 0
     for i < len(engine.clocks) {
@@ -183,10 +199,12 @@ func (engine* time_management_engine) adjust_clock(clock_type int, offset_ns int
     }
     return -1, "clock type not found"
 }
+
 func (engine* time_management_engine) ntp_adjust_clock(offset_ppm int) (int, string) {
     engine.ntp_offset_ns = offset_ppm * 1000
     return 0, ""
 }
+
 func (engine* time_management_engine) check_timers_and_fire() (int, string) {
     fired_count := 0
     i := 0
@@ -212,9 +230,11 @@ func (engine* time_management_engine) check_timers_and_fire() (int, string) {
     }
     return fired_count, ""
 }
+
 func timespec_to_nanoseconds(ts timespec) int {
     return ts.sec * 1000000000 + ts.nsec
 }
+
 func nanoseconds_to_timespec(ns int) timespec {
     return timespec{
         sec: ns / 1000000000,

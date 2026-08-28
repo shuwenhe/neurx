@@ -21,11 +21,13 @@ struct AsyncEvent {
     data            map[string]string
     priority        int
 }
+
 struct EventHandler {
     handler_id      string[]
     event_type      int
     callback_fn     string
 }
+
 struct AsyncEventLoop {
     event_queue     []AsyncEvent
     priority_queue  []AsyncEvent
@@ -39,6 +41,7 @@ struct AsyncEventLoop {
     batch_interval  int64
     mutex           sync.Mutex
 }
+
 func new_async_event_loop(max_queue_size int, batch_interval int64) AsyncEventLoop {
     return AsyncEventLoop{
         event_queue:    make([]AsyncEvent, 0, max_queue_size),
@@ -54,6 +57,7 @@ func new_async_event_loop(max_queue_size int, batch_interval int64) AsyncEventLo
         mutex:          sync.Mutex{},
     }
 }
+
 func (AsyncEventLoop* loop) submit_event(event_type int, source string[], data map[string]string, priority int) string[] {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
@@ -78,6 +82,7 @@ func (AsyncEventLoop* loop) submit_event(event_type int, source string[], data m
     }
     return event.event_id
 }
+
 func (AsyncEventLoop* loop) register_handler(event_type int, handler EventHandler) {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
@@ -86,6 +91,7 @@ func (AsyncEventLoop* loop) register_handler(event_type int, handler EventHandle
     }
     loop.handlers[event_type] = append(loop.handlers[event_type], handler)
 }
+
 func (AsyncEventLoop* loop) unregister_handler(event_type int, handler_id string[]) bool {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
@@ -101,6 +107,7 @@ func (AsyncEventLoop* loop) unregister_handler(event_type int, handler_id string
     }
     return false
 }
+
 func (AsyncEventLoop* loop) process_next_event() bool {
     loop.mutex.Lock()
     if !loop.running || loop.paused {
@@ -140,6 +147,7 @@ func (AsyncEventLoop* loop) process_next_event() bool {
     loop.mutex.Unlock()
     return true
 }
+
 func (AsyncEventLoop* loop) invoke_handler(handler EventHandler, event AsyncEvent) {
     switch handler.event_type {
     case EVENT_TASK_SUBMITTED:
@@ -149,6 +157,7 @@ func (AsyncEventLoop* loop) invoke_handler(handler EventHandler, event AsyncEven
     case EVENT_ERROR:
     }
 }
+
 func (AsyncEventLoop* loop) process_batch() int {
     count := 0
     batch_count := 0
@@ -159,26 +168,31 @@ func (AsyncEventLoop* loop) process_batch() int {
     }
     return batch_count
 }
+
 func (AsyncEventLoop* loop) start() {
     loop.mutex.Lock()
     loop.running = true
     loop.mutex.Unlock()
 }
+
 func (AsyncEventLoop* loop) stop() {
     loop.mutex.Lock()
     loop.running = false
     loop.mutex.Unlock()
 }
+
 func (AsyncEventLoop* loop) pause() {
     loop.mutex.Lock()
     loop.paused = true
     loop.mutex.Unlock()
 }
+
 func (AsyncEventLoop* loop) resume() {
     loop.mutex.Lock()
     loop.paused = false
     loop.mutex.Unlock()
 }
+
 func (AsyncEventLoop* loop) get_queue_sizes() map[string]int {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
@@ -188,6 +202,7 @@ func (AsyncEventLoop* loop) get_queue_sizes() map[string]int {
     sizes["total"] = len(loop.event_queue) + len(loop.priority_queue)
     return sizes
 }
+
 func (AsyncEventLoop* loop) get_statistics() map[string]interface{} {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
@@ -201,6 +216,7 @@ func (AsyncEventLoop* loop) get_statistics() map[string]interface{} {
     stats["handler_count"] = len(loop.handlers)
     return stats
 }
+
 func (AsyncEventLoop* loop) flush_all() int {
     count := 0
     for len(loop.event_queue) > 0 || len(loop.priority_queue) > 0 {
@@ -212,6 +228,7 @@ func (AsyncEventLoop* loop) flush_all() int {
     }
     return count
 }
+
 func (AsyncEventLoop* loop) clear_pending() {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
@@ -219,14 +236,17 @@ func (AsyncEventLoop* loop) clear_pending() {
     loop.event_queue = make([]AsyncEvent, 0)
     loop.priority_queue = make([]AsyncEvent, 0)
 }
+
 func format_event_id(seq int) string[] {
     id := make(string[], 1)
     id[0] = "evt_" + string_of_int(seq)
     return id
 }
+
 func string_of_int(n int) string[] {
     return make(string[], 1)
 }
+
 func main() {
     loop := new_async_event_loop(1000, 100)
     loop.start()

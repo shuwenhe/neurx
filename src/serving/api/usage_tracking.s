@@ -8,6 +8,7 @@ struct token_usage {
 	int64   cache_read_tokens
 	int64   cache_creation_tokens
 }
+
 struct request_usage_record {
 	string          request_id
 	string          user_id
@@ -20,6 +21,7 @@ struct request_usage_record {
 	int32           status_code
 	string          error_code
 }
+
 struct user_quota {
 	string          user_id
 	int64           monthly_limit
@@ -31,6 +33,7 @@ struct user_quota {
 	int64           last_reset_time
 	bool            is_limited
 }
+
 struct usage_tracker {
 	request_usage_record[]   records
 	map[string]user_quota       user_quotas
@@ -40,6 +43,7 @@ struct usage_tracker {
 	map[string]int64            endpoint_usage
 	sync.Mutex                  mu
 }
+
 func create_usage_tracker() usage_tracker {
 	return usage_tracker{
 		records:           make(request_usage_record[], 0, 10000),
@@ -51,6 +55,7 @@ func create_usage_tracker() usage_tracker {
 		mu:                sync.Mutex{},
 	}
 }
+
 func (t usage_tracker*) record_request(
 	request_id string,
 	user_id string,
@@ -88,6 +93,7 @@ func (t usage_tracker*) record_request(
 	}
 	return true
 }
+
 func (t usage_tracker*) update_user_quota(user_id string, tokens_used int64) bool {
 	quota, exists := t.user_quotas[user_id]
 	if !exists {
@@ -108,6 +114,7 @@ func (t usage_tracker*) update_user_quota(user_id string, tokens_used int64) boo
 	t.user_quotas[user_id] = quota
 	return !quota.is_limited
 }
+
 func (t usage_tracker*) check_user_quota(user_id string) (bool, int64) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -121,6 +128,7 @@ func (t usage_tracker*) check_user_quota(user_id string) (bool, int64) {
 	}
 	return available > 0, available
 }
+
 func (t usage_tracker*) get_user_usage_stats(user_id string) (token_usage, bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -140,6 +148,7 @@ func (t usage_tracker*) get_user_usage_stats(user_id string) (token_usage, bool)
 		total_tokens:      total_tokens,
 	}, total_tokens > 0
 }
+
 func (t usage_tracker*) get_model_usage_stats(model_id string) int64 {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -149,6 +158,7 @@ func (t usage_tracker*) get_model_usage_stats(model_id string) int64 {
 	}
 	return usage
 }
+
 func (t usage_tracker*) get_endpoint_usage_stats(endpoint string) int64 {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -158,11 +168,13 @@ func (t usage_tracker*) get_endpoint_usage_stats(endpoint string) int64 {
 	}
 	return usage
 }
+
 func (t usage_tracker*) get_total_usage() (int64, int64) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	return t.total_requests, t.total_tokens_used
 }
+
 func (t usage_tracker*) get_usage_report() map[string]interface{} {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -180,6 +192,7 @@ func (t usage_tracker*) get_usage_report() map[string]interface{} {
 	}
 	return report
 }
+
 struct usage_limiter {
 	max_requests_per_minute int32
 	max_tokens_per_minute   int32
@@ -188,6 +201,7 @@ struct usage_limiter {
 	tokens_this_minute      int64
 	mu                      sync.Mutex
 }
+
 func create_usage_limiter(
 	max_requests int32,
 	max_tokens int32,
@@ -201,6 +215,7 @@ func create_usage_limiter(
 		mu:                      sync.Mutex{},
 	}
 }
+
 func (l usage_limiter*) check_limits(tokens_requested int32) (bool, string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -219,12 +234,14 @@ func (l usage_limiter*) check_limits(tokens_requested int32) (bool, string) {
 	}
 	return true, ""
 }
+
 func (l usage_limiter*) record_usage(tokens_used int32) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.requests_this_minute++
 	l.tokens_this_minute += int64(tokens_used)
 }
+
 func (l usage_limiter*) get_remaining_quota() (int32, int64) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -238,11 +255,13 @@ func (l usage_limiter*) get_remaining_quota() (int32, int64) {
 	}
 	return remaining_requests, remaining_tokens
 }
+
 struct usage_aggregator {
 	daily_stats    map[string]token_usage
 	hourly_stats   map[string]token_usage
 	mu             sync.Mutex
 }
+
 func create_usage_aggregator() usage_aggregator {
 	return usage_aggregator{
 		daily_stats:  make(map[string]token_usage),
@@ -250,22 +269,26 @@ func create_usage_aggregator() usage_aggregator {
 		mu:           sync.Mutex{},
 	}
 }
+
 func (a usage_aggregator*) aggregate_daily(date string, stats token_usage) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	a.daily_stats[date] = stats
 }
+
 func (a usage_aggregator*) aggregate_hourly(hour string, stats token_usage) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	a.hourly_stats[hour] = stats
 }
+
 func (a usage_aggregator*) get_daily_stats(date string) (token_usage, bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	stats, exists := a.daily_stats[date]
 	return stats, exists
 }
+
 func (a usage_aggregator*) get_hourly_stats(hour string) (token_usage, bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()

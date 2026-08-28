@@ -4,6 +4,7 @@ package mem_cache
     lru_with_time_decay
     two_tier
 }
+
 struct cache_entry {
     int32[] token_sequence
     int64 kv_cache_ptr
@@ -13,6 +14,7 @@ struct cache_entry {
     int64 creation_time
     string entry_id
 }
+
 struct prefix_cache {
     radix_tree* tree
     map[string, cache_entry] entries
@@ -24,6 +26,7 @@ struct prefix_cache {
     int32 eviction_count
     int64 creation_timestamp
 }
+
 struct cache_stats {
     int32 hit_count
     int32 miss_count
@@ -34,6 +37,7 @@ struct cache_stats {
     float hit_rate
     int32 compression_ratio
 }
+
 struct cache_operation_result {
     bool success
     string cache_key
@@ -41,6 +45,7 @@ struct cache_operation_result {
     int32 kv_cache_size
     string message
 }
+
 func new_prefix_cache(int64 max_size, eviction_policy policy) prefix_cache {
     tree := new_radix_tree()
     prefix_cache {
@@ -55,6 +60,7 @@ func new_prefix_cache(int64 max_size, eviction_policy policy) prefix_cache {
         creation_timestamp: 0,
     }
 }
+
 func (prefix_cache* cache) insert(int32[] token_sequence, int64 kv_cache_ptr, int32 kv_cache_size) cache_operation_result {
     if len(token_sequence) == 0 {
         cache_operation_result {
@@ -89,6 +95,7 @@ func (prefix_cache* cache) insert(int32[] token_sequence, int64 kv_cache_ptr, in
         message: "inserted",
     }
 }
+
 func (prefix_cache* cache) lookup(int32[] query_tokens) cache_operation_result {
     if len(query_tokens) == 0 {
         cache_operation_result {
@@ -121,6 +128,7 @@ func (prefix_cache* cache) lookup(int32[] query_tokens) cache_operation_result {
         }
     }
 }
+
 func (prefix_cache* cache) evict_entries(int64 required_space) {
     evicted := 0
     if cache.policy == eviction_policy_lru {
@@ -132,6 +140,7 @@ func (prefix_cache* cache) evict_entries(int64 required_space) {
     }
     cache.eviction_count = cache.eviction_count + evicted
 }
+
 func evict_by_lru(prefix_cache* cache, int64 required_space, int32* evicted) {
     least_recent := nil
     least_time := 9223372036854775807
@@ -153,6 +162,7 @@ func evict_by_lru(prefix_cache* cache, int64 required_space, int32* evicted) {
         }
     }
 }
+
 func evict_by_lfu(prefix_cache* cache, int64 required_space, int32* evicted) {
     least_used := nil
     least_count := 9223372036854775807
@@ -174,6 +184,7 @@ func evict_by_lfu(prefix_cache* cache, int64 required_space, int32* evicted) {
         }
     }
 }
+
 func evict_by_lru_with_decay(prefix_cache* cache, int64 required_space, int32* evicted) {
     decay_factor := 0.9
     best_candidate := nil
@@ -198,6 +209,7 @@ func evict_by_lru_with_decay(prefix_cache* cache, int64 required_space, int32* e
         }
     }
 }
+
 func (prefix_cache* cache) get_stats() cache_stats {
     total_hit_miss := cache.hit_count + cache.miss_count
     hit_rate := 0.0
@@ -220,6 +232,7 @@ func (prefix_cache* cache) get_stats() cache_stats {
         compression_ratio: compression,
     }
 }
+
 func (prefix_cache* cache) clear() {
     cache.entries = map[string, cache_entry]{}
     cache.current_cache_size = 0
@@ -227,15 +240,18 @@ func (prefix_cache* cache) clear() {
     cache.miss_count = 0
     cache.eviction_count = 0
 }
+
 func (prefix_cache* cache) get_cache_utilization() float {
     if cache.max_cache_size == 0 {
         0.0
     }
     float(cache.current_cache_size) / float(cache.max_cache_size)
 }
+
 func (prefix_cache* cache) is_full() bool {
     cache.current_cache_size >= cache.max_cache_size
 }
+
 func (prefix_cache* cache) find_matching_prefix(int32[] query_tokens) cache_entry {
     result := cache.lookup(query_tokens)
     if result.success && result.cache_key in cache.entries {
@@ -251,6 +267,7 @@ func (prefix_cache* cache) find_matching_prefix(int32[] query_tokens) cache_entr
         entry_id: "",
     }
 }
+
 func (prefix_cache* cache) get_high_reuse_prefixes() cache_entry[] {
     results := cache_entry[]{}
     high_reuse_nodes := cache.tree.find_high_reuse_nodes()
@@ -264,6 +281,7 @@ func (prefix_cache* cache) get_high_reuse_prefixes() cache_entry[] {
     }
     results
 }
+
 func (prefix_cache* cache) estimate_memory_savings() int64 {
     cache.tree.estimate_compression()
     tree_stats := cache.tree.get_cache_stats()

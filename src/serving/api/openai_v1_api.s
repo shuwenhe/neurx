@@ -15,6 +15,7 @@ struct chat_completion_message {
     interface{} tool_calls
     string tool_call_id
 }
+
 struct chat_completion_request {
     string model
     []chat_completion_message* messages
@@ -35,12 +36,14 @@ struct chat_completion_request {
     string response_format
     map[string]interface{} metadata
 }
+
 struct chat_completion_choice {
     int32 index
     chat_completion_message* message
     string finish_reason
     float32 logprobs
 }
+
 struct usage {
     int32 prompt_tokens
     int32 completion_tokens
@@ -48,6 +51,7 @@ struct usage {
     int32 prompt_tokens_details
     int32 completion_tokens_details
 }
+
 struct chat_completion_response {
     string id
     string object
@@ -57,6 +61,7 @@ struct chat_completion_response {
     usage token_usage
     string system_fingerprint
 }
+
 struct chat_completion_stream_response {
     string id
     string object
@@ -64,6 +69,7 @@ struct chat_completion_stream_response {
     string model
     int[]erface{} choices
 }
+
 struct completion_request {
     string model
     string prompt
@@ -77,6 +83,7 @@ struct completion_request {
     float32 presence_penalty
     int64 seed
 }
+
 struct completion_response {
     string id
     string object
@@ -85,6 +92,7 @@ struct completion_response {
     int[]erface{} choices
     usage token_usage
 }
+
 struct openai_api_server {
     llm_engine* engine
     string api_version
@@ -92,6 +100,7 @@ struct openai_api_server {
     int32 port
     bool running
 }
+
 func create_openai_api_server(llm_engine* engine, int32 port) openai_api_server* {
     return *openai_api_server{
         engine: engine,
@@ -101,20 +110,24 @@ func create_openai_api_server(llm_engine* engine, int32 port) openai_api_server*
         running: false,
     }
 }
+
 func (openai_api_server* srv) start() error {
     srv.running = true
     return nil
 }
+
 func (openai_api_server* srv) stop() error {
     srv.running = false
     return nil
 }
+
 func (openai_api_server* srv) verify_api_key(string api_key) bool {
     if srv.api_key == "" {
         return true
     }
     return api_key == srv.api_key
 }
+
 func (openai_api_server* srv) create_chat_completion(chat_completion_request* req) (chat_completion_response*, error) {
     if !srv.verify_api_key(req.metadata["authorization"]) {
         return nil, nil
@@ -151,6 +164,7 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
     }
     return openai_resp, nil
 }
+
 func (openai_api_server* srv) create_chat_completion_stream(chat_completion_request* req) streaming_response* {
     if !srv.verify_api_key(req.metadata["authorization"]) {
         return nil
@@ -161,6 +175,7 @@ func (openai_api_server* srv) create_chat_completion_stream(chat_completion_requ
     }
     return srv.engine.complete_stream(api_req)
 }
+
 func (openai_api_server* srv) create_completion(completion_request* req) (completion_response*, error) {
     api_req := *completion_request{
         prompt: req.prompt,
@@ -184,10 +199,12 @@ func (openai_api_server* srv) create_completion(completion_request* req) (comple
     }
     return openai_resp, nil
 }
+
 func (openai_api_server* srv) list_models() (int[]erface{}, error) {
     models := make(int[]erface{}, 0)
     return models, nil
 }
+
 func (openai_api_server* srv) get_model(string model_id) (map[string]interface{}, error) {
     model_info := make(map[string]interface{})
     model_info["id"] = model_id
@@ -195,9 +212,11 @@ func (openai_api_server* srv) get_model(string model_id) (map[string]interface{}
     model_info["owned_by"] = "neurx"
     return model_info, nil
 }
+
 func (openai_api_server* srv) is_running() bool {
     return srv.running
 }
+
 func (openai_api_server* srv) get_port() int32 {
     return srv.port
 }

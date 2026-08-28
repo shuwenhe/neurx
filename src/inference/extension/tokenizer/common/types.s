@@ -12,12 +12,14 @@ import "std/vector"
     UNKNOWN,
     SYSTEM,
 }
+
 struct Token {
     id: i32,
     text: string,
     token_class: TokenClass,
     special: bool,
 }
+
 struct TokenizerConfig {
     model_name: string,
     tokenizer_type: TokenizerType,
@@ -31,6 +33,7 @@ struct TokenizerConfig {
     trim_spaces: bool,
     lowercase: bool,
 }
+
 struct TokenizerStats {
     total_encodings: i64,
     total_decodings: i64,
@@ -41,6 +44,7 @@ struct TokenizerStats {
     encoding_time_ms: f32,
     decoding_time_ms: f32,
 }
+
 struct TokenizerResult {
     success: bool,
     error_code: i32,
@@ -50,6 +54,7 @@ struct TokenizerResult {
     stats: TokenizerStats,
     timestamp_ms: i64,
 }
+
 struct SpecialTokens {
     bos_token_id: i32,
     eos_token_id: i32,
@@ -59,6 +64,7 @@ struct SpecialTokens {
     sep_token_id: i32,
     mask_token_id: i32,
 }
+
 struct TokenizerVocab {
     size: i32,
     min_token_id: i32,
@@ -68,6 +74,7 @@ struct TokenizerVocab {
     encoding_name: string,
     language: string,
 }
+
 struct EncodingOptions {
     add_special_tokens: bool,
     max_length: i32,
@@ -77,11 +84,13 @@ struct EncodingOptions {
     return_attention_mask: bool,
     return_token_type_ids: bool,
 }
+
 struct DecodingOptions {
     skip_special_tokens: bool,
     clean_up_tokenization_spaces: bool,
     use_source_tokenizer: bool,
 }
+
 struct TokenSequence {
     tokens: i32[],
     text_tokens: string[],
@@ -90,6 +99,7 @@ struct TokenSequence {
     special_tokens_mask: i32[],
     length: i32,
 }
+
 struct TokenCache {
     text: string,
     tokens: i32[],
@@ -98,6 +108,7 @@ struct TokenCache {
     hit_count: i32,
     size_bytes: i32,
 }
+
 struct EncodingStats {
     input_length: i32,
     output_length: i32,
@@ -106,6 +117,7 @@ struct EncodingStats {
     special_tokens_added: i32,
     padding_added: i32,
 }
+
 struct VocabularyEntry {
     token_id: i32,
     text: string,
@@ -114,6 +126,7 @@ struct VocabularyEntry {
     is_special: bool,
     encoding_length: i32,
 }
+
 struct TokenStatistics {
     token_id: i32,
     occurrences: i64,

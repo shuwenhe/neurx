@@ -27,6 +27,7 @@ struct model_loader_options {
     model_cache_policy cache_policy
     weight_loader_strategy weight_loader_strategy
 }
+
 struct model_loader_metrics {
     int64 total_load_time_ms
     int64 weight_loading_time_ms
@@ -39,6 +40,7 @@ struct model_loader_metrics {
     int32 successful_loads
     int32 failed_loads
 }
+
 struct dynamic_model_loader {
     model_load_config config
     model_loader_options options
@@ -51,6 +53,7 @@ struct dynamic_model_loader {
     bool running
     interface{} lock
 }
+
 struct weight_loading_task {
     *model_executor executor
     int32 layer_id
@@ -60,6 +63,7 @@ struct weight_loading_task {
     int64 completion_time
     int64 bytes_loaded
 }
+
 struct model_registry_entry {
     string model_id
     *model_config_spec config
@@ -68,12 +72,14 @@ struct model_registry_entry {
     int64 access_count
     int32 size_mb
 }
+
 struct model_registry {
     map[string]*model_registry_entry entries
     int64 capacity_mb
     int64 current_usage_mb
     model_cache_policy eviction_policy
 }
+
 func new_dynamic_model_loader(model_load_config config, model_loader_options options) *dynamic_model_loader {
     return *dynamic_model_loader{
         config: config,
@@ -87,6 +93,7 @@ func new_dynamic_model_loader(model_load_config config, model_loader_options opt
         running: false,
     }
 }
+
 func (dynamic_model_loader* dml) start() error {
     if dml.running {
         return nil
@@ -94,14 +101,17 @@ func (dynamic_model_loader* dml) start() error {
     dml.running = true
     return nil
 }
+
 func (dynamic_model_loader* dml) stop() error {
     dml.running = false
     dml.loading_queue = []*model_executor{}
     return nil
 }
+
 func (dynamic_model_loader* dml) register_load_callback(loader_callback callback) {
     dml.callbacks = append(dml.callbacks, callback)
 }
+
 func (dynamic_model_loader* dml) load_model_eager(string model_id) (*model_executor, error) {
     if !dml.running {
         return nil, "loader not running"
@@ -119,6 +129,7 @@ func (dynamic_model_loader* dml) load_model_eager(string model_id) (*model_execu
     dml.metrics.successful_loads++
     return executor, nil
 }
+
 func (dynamic_model_loader* dml) load_model_lazy(string model_id) (*model_executor, error) {
     executor := *model_executor{
         load_config: dml.config,
@@ -140,6 +151,7 @@ func (dynamic_model_loader* dml) load_model_lazy(string model_id) (*model_execut
     dml.loading_queue = append(dml.loading_queue, executor)
     return executor, nil
 }
+
 func (dynamic_model_loader* dml) load_model_with_strategy(string model_id, weight_loader_strategy strategy) (*model_executor, error) {
     config, err := dml.load_config_from_source(model_id)
     if err != nil {
@@ -178,6 +190,7 @@ func (dynamic_model_loader* dml) load_model_with_strategy(string model_id, weigh
     dml.invoke_callbacks(executor)
     return executor, nil
 }
+
 func (dynamic_model_loader* dml) load_config_from_source(string model_id) (*model_config_spec, error) {
     config := *model_config_spec{
         model_id: model_id,
@@ -213,6 +226,7 @@ func (dynamic_model_loader* dml) load_config_from_source(string model_id) (*mode
     }
     return config, nil
 }
+
 func (dynamic_model_loader* dml) load_weights_with_strategy(model_executor* executor, weight_loader_strategy strategy) error {
     executor.loading_state.current_stage = "loading_weights"
     executor.loading_state.progress_percent = 10
@@ -229,6 +243,7 @@ func (dynamic_model_loader* dml) load_weights_with_strategy(model_executor* exec
             return dml.load_weights_eager(executor)
     }
 }
+
 func (dynamic_model_loader* dml) load_weights_eager(model_executor* executor) error {
     executor.loading_state.progress_percent = 20
     config := executor.config
@@ -262,11 +277,13 @@ func (dynamic_model_loader* dml) load_weights_eager(model_executor* executor) er
     executor.loading_state.progress_percent = 100
     return nil
 }
+
 func (dynamic_model_loader* dml) load_weights_lazy(model_executor* executor) error {
     executor.loading_state.current_stage = "lazy_weight_loading"
     executor.loading_state.loaded_weights = 0
     return nil
 }
+
 func (dynamic_model_loader* dml) load_weights_streaming(model_executor* executor) error {
     executor.loading_state.current_stage = "streaming_weights"
     for i := int32(0); i < executor.config.num_hidden_layers; i++ {
@@ -277,6 +294,7 @@ func (dynamic_model_loader* dml) load_weights_streaming(model_executor* executor
     executor.loading_state.loaded_weights = executor.config.num_hidden_layers
     return nil
 }
+
 func (dynamic_model_loader* dml) load_weights_mmap(model_executor* executor) error {
     executor.loading_state.current_stage = "mmap_weights"
     executor.loading_state.progress_percent = 50
@@ -284,6 +302,7 @@ func (dynamic_model_loader* dml) load_weights_mmap(model_executor* executor) err
     executor.loading_state.progress_percent = 100
     return nil
 }
+
 func (dynamic_model_loader* dml) initialize_layers(model_executor* executor) error {
     executor.loading_state.current_stage = "initializing_layers"
     executor.layer_executors = []*model_layer_executor{}
@@ -298,6 +317,7 @@ func (dynamic_model_loader* dml) initialize_layers(model_executor* executor) err
     }
     return nil
 }
+
 func (dynamic_model_loader* dml) prefetch_model(string model_id, int32 num_layers) error {
     executor := dml.executors[model_id]
     if executor == nil {
@@ -314,6 +334,7 @@ func (dynamic_model_loader* dml) prefetch_model(string model_id, int32 num_layer
     }
     return nil
 }
+
 func (dynamic_model_loader* dml) evict_model(string model_id) error {
     if executor, exists := dml.executors[model_id]; exists {
         executor.clear_cache()
@@ -322,14 +343,17 @@ func (dynamic_model_loader* dml) evict_model(string model_id) error {
     }
     return "model not found"
 }
+
 func (dynamic_model_loader* dml) invoke_callbacks(model_executor* executor) {
     for _, callback := range dml.callbacks {
         callback(executor, 0)
     }
 }
+
 func (dynamic_model_loader* dml) get_metrics() *model_loader_metrics {
     return *dml.metrics
 }
+
 func (dynamic_model_loader* dml) get_loaded_models() string[] {
     models := string[]{}
     for model_id := range dml.executors {
@@ -337,14 +361,17 @@ func (dynamic_model_loader* dml) get_loaded_models() string[] {
     }
     return models
 }
+
 func (dynamic_model_loader* dml) get_executor(string model_id) *model_executor {
     return dml.executors[model_id]
 }
+
 func (dynamic_model_loader* dml) update_metrics_on_load_complete(model_executor* executor, int64 duration_ms) {
     dml.metrics.total_load_time_ms += duration_ms
     dml.metrics.total_bytes_loaded += executor.loading_state.bytes_loaded
     dml.metrics.total_weights_loaded += executor.loading_state.loaded_weights
 }
+
 func (dynamic_model_loader* dml) get_cache_usage() int64 {
     total := int64(0)
     for _, buffer := range dml.model_cache {
@@ -352,6 +379,7 @@ func (dynamic_model_loader* dml) get_cache_usage() int64 {
     }
     return total
 }
+
 func (dynamic_model_loader* dml) get_num_models_loaded() int32 {
     count := int32(0)
     for _, executor := range dml.executors {
@@ -361,6 +389,7 @@ func (dynamic_model_loader* dml) get_num_models_loaded() int32 {
     }
     return count
 }
+
 func (dynamic_model_loader* dml) get_loading_queue_size() int32 {
     return int32(len(dml.loading_queue))
 }

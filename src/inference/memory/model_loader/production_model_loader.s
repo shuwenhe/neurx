@@ -1,6 +1,8 @@
 package neurx.deploy.production
 func model_path_text() string { return "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct" }
+
 func model_path_vl() string { return "/home/shuwen/shuwen/model/Qwen2.5-VL-7B" }
+
 func get_model_config_path(string model_type) string {
     if model_type == "text" {
         model_path_text() + "/config.json"
@@ -8,6 +10,7 @@ func get_model_config_path(string model_type) string {
         model_path_vl() + "/config.json"
     }
 }
+
 func get_model_weights_path(string model_type, int shard_idx) string {
     string base_path
     if model_type == "text" {
@@ -25,6 +28,7 @@ func get_model_weights_path(string model_type, int shard_idx) string {
         }
     }
 }
+
 func get_tokenizer_path(string model_type) string {
     if model_type == "text" {
         model_path_text() + "/tokenizer.json"
@@ -32,6 +36,7 @@ func get_tokenizer_path(string model_type) string {
         model_path_vl() + "/tokenizer.json"
     }
 }
+
 func validate_model_files(string model_type) bool {
     print("🔍 Validating model files for: " + model_type + "\n")
     string config_path = get_model_config_path(model_type)
@@ -51,6 +56,7 @@ func validate_model_files(string model_type) bool {
     }
     true
 }
+
 func load_model_config(string model_type) string {
     string config_path = get_model_config_path(model_type)
     print("📖 Loading model config from: " + config_path + "\n")
@@ -72,6 +78,7 @@ func load_model_config(string model_type) string {
     }
     config_path
 }
+
 func calculate_model_memory(string model_type, string precision) int {
     int vocab_size = 0
     int hidden_size = 0
@@ -96,6 +103,7 @@ func calculate_model_memory(string model_type, string precision) int {
     }
     params * bytes_per_param / (1024 * 1024)
 }
+
 func print_model_loading_status(string model_type, int progress_percent) {
     print("\r  Loading: [")
     int filled = progress_percent / 10
@@ -112,6 +120,7 @@ func print_model_loading_status(string model_type, int progress_percent) {
     }
     print("] " + int_to_string(progress_percent) + "%")
 }
+
 func load_model_weights(string model_type, string precision) bool {
     print("\n📦 Loading model weights:\n")
     print("  Model: " + model_type + "\n")
@@ -139,6 +148,7 @@ func load_model_weights(string model_type, string precision) bool {
     }
     true
 }
+
 func verify_model_integrity(string model_type) bool {
     print("\n🔐 Verifying model integrity:\n")
     int checks_passed = 0
@@ -154,6 +164,7 @@ func verify_model_integrity(string model_type) bool {
     print("\nStatus: " + int_to_string(checks_passed) + "/" + int_to_string(total_checks) + " checks passed\n")
     checks_passed == total_checks
 }
+
 func print_model_info(string model_type) {
     print("\n" + "="*60 + "\n")
     print("📊 Model Information\n")
@@ -197,6 +208,7 @@ func print_model_info(string model_type) {
     }
     print("\n" + "="*60 + "\n\n")
 }
+
 func main() {
     print("\n🚀 NeurX Production Model Loader\n")
     print("="*60 + "\n\n")

@@ -20,18 +20,21 @@ struct lora_config {
     string target_modules
     bool modules_to_save
 }
+
 struct lora_matrix {
     float32[][]] weights
     int32 rows
     int32 cols
     lora_dtype dtype
 }
+
 struct lora_layer {
     lora_matrix* lora_a
     lora_matrix* lora_b
     string layer_name
     bool is_active
 }
+
 struct lora_model {
     string adapter_name
     lora_config config
@@ -41,6 +44,7 @@ struct lora_model {
     int32 total_params
     int32 trainable_params
 }
+
 func create_lora_model(string adapter_name, lora_config config) lora_model* {
     model := lora_model{
         adapter_name: adapter_name,
@@ -53,6 +57,7 @@ func create_lora_model(string adapter_name, lora_config config) lora_model* {
     }
     return *model
 }
+
 func (lora_model* model) add_lora_layer(string layer_name, int32 in_features, int32 out_features) {
     layer := *lora_layer{
         lora_a: *lora_matrix{
@@ -74,6 +79,7 @@ func (lora_model* model) add_lora_layer(string layer_name, int32 in_features, in
     model.num_layers = model.num_layers + 1
     model.trainable_params = model.trainable_params + (model.config.rank * in_features) + (out_features * model.config.rank)
 }
+
 func (lora_model* model) activate_layer(string layer_name) bool {
     if layer, exists := model.layers[layer_name]; exists {
         layer.is_active = true
@@ -81,6 +87,7 @@ func (lora_model* model) activate_layer(string layer_name) bool {
     }
     return false
 }
+
 func (lora_model* model) deactivate_layer(string layer_name) bool {
     if layer, exists := model.layers[layer_name]; exists {
         layer.is_active = false
@@ -88,18 +95,22 @@ func (lora_model* model) deactivate_layer(string layer_name) bool {
     }
     return false
 }
+
 func (lora_model* model) get_lora_layer(string layer_name) lora_layer* {
     if layer, exists := model.layers[layer_name]; exists {
         return layer
     }
     return nil
 }
+
 func (lora_model* model) set_status(adapter_status new_status) {
     model.status = new_status
 }
+
 func (lora_model* model) is_loaded() bool {
     return model.status == status_loaded
 }
+
 func (lora_model* model) initialize_weights() {
     for name := range model.layers {
         layer := model.layers[name]
@@ -121,6 +132,7 @@ func (lora_model* model) initialize_weights() {
         }
     }
 }
+
 func (lora_model* model) validate_config() bool {
     if model.config.rank <= 0 {
         return false
@@ -133,6 +145,7 @@ func (lora_model* model) validate_config() bool {
     }
     return true
 }
+
 func (lora_model* model) get_model_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["adapter_name"] = model.adapter_name
@@ -152,6 +165,7 @@ func (lora_model* model) get_model_stats() map[string]interface{} {
     stats["active_layers"] = active_layers
     return stats
 }
+
 func (lora_model* model) compute_scaling_factor() float32 {
     if model.config.lora_alpha == 0 {
         return 1.0

@@ -26,6 +26,7 @@ struct process_group {
     bool is_initialized
     string name
 }
+
 struct comm_tensor {
     float[] data
     int[] shape
@@ -33,6 +34,7 @@ struct comm_tensor {
     int numel
     int device
 }
+
 struct comm_request {
     int request_id
     bool is_completed
@@ -42,14 +44,17 @@ struct comm_request {
     int error_code
     string error_msg
 }
+
 struct p2p_irecv_result {
     comm_request request
     comm_tensor tensor
 }
+
 struct allreduce_async_result {
     comm_tensor tensor
     comm_request request
 }
+
 struct comm_metrics {
     float total_comm_time_ms
     float total_bytes_sent
@@ -59,6 +64,7 @@ struct comm_metrics {
     int num_reducescatters
     float bandwidth_efficiency
 }
+
 func new_process_group(int pg_id, int[] ranks, int my_rank, int backend) process_group {
     process_group pg
     pg.pg_id = pg_id
@@ -70,6 +76,7 @@ func new_process_group(int pg_id, int[] ranks, int my_rank, int backend) process
     pg.name = "pg_" + str(pg_id)
     return pg
 }
+
 func create_default_world_group(int world_size, int my_rank) process_group {
     int[] all_ranks = int[]{cap: world_size}
     int i = 0
@@ -79,6 +86,7 @@ func create_default_world_group(int world_size, int my_rank) process_group {
     }
     return new_process_group(0, all_ranks, my_rank, BACKEND_NCCL)
 }
+
 func split_process_group(process_group parent_pg, int color, int key) process_group {
     int[] subgroup_ranks = int[]{cap: parent_pg.world_size}
     int count = 0
@@ -99,9 +107,11 @@ func split_process_group(process_group parent_pg, int color, int key) process_gr
     return new_process_group(parent_pg.pg_id * 100 + color, final_ranks,
                              parent_pg.my_rank, parent_pg.backend)
 }
+
 func destroy_process_group(process_group pg) {
     pg.is_initialized = false
 }
+
 func c_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 { return 0 }
     int current = value
@@ -109,6 +119,7 @@ func c_mod_nonneg(int value, int divisor) int {
     for current < 0 { current = current + divisor }
     return current
 }
+
 func dtype_bytes(int dtype) int {
     if dtype == DTYPE_FLOAT32 { return 4 }
     if dtype == DTYPE_FLOAT16 { return 2 }
@@ -118,6 +129,7 @@ func dtype_bytes(int dtype) int {
     if dtype == DTYPE_BOOL { return 1 }
     return 4
 }
+
 func make_comm_tensor(float[] data, int[] shape, int dtype) comm_tensor {
     comm_tensor t
     t.data = data
@@ -133,6 +145,7 @@ func make_comm_tensor(float[] data, int[] shape, int dtype) comm_tensor {
     t.device = -1
     return t
 }
+
 func new_comm_metrics() comm_metrics {
     comm_metrics m
     m.total_comm_time_ms = 0.0
@@ -144,6 +157,7 @@ func new_comm_metrics() comm_metrics {
     m.bandwidth_efficiency = 1.0
     return m
 }
+
 func p2p_send(
     process_group pg,
     comm_tensor tensor,
@@ -158,6 +172,7 @@ func p2p_send(
     req.error_code = 0
     return req
 }
+
 func p2p_recv(
     process_group pg,
     int expected_numel,
@@ -172,6 +187,7 @@ func p2p_recv(
     result.data = float[]{cap: expected_numel}
     return result
 }
+
 func p2p_isend(
     process_group pg,
     comm_tensor tensor,
@@ -181,6 +197,7 @@ func p2p_isend(
     req.is_completed = false
     return req
 }
+
 func p2p_irecv(
     process_group pg,
     int expected_numel,
@@ -201,11 +218,13 @@ func p2p_irecv(
     result.tensor = placeholder
     return result
 }
+
 func wait_request(comm_request req) comm_request {
     req.is_completed = true
     req.elapsed_ms = 0.002
     return req
 }
+
 func wait_all_requests([]comm_request requests) []comm_request {
     int i = 0
     for i < len(requests) {
@@ -215,9 +234,11 @@ func wait_all_requests([]comm_request requests) []comm_request {
     }
     return requests
 }
+
 func test_request(comm_request req) bool {
     return req.is_completed
 }
+
 func broadcast(
     process_group pg,
     comm_tensor tensor,
@@ -233,6 +254,7 @@ func broadcast(
     metrics.total_bytes_received = metrics.total_bytes_received + tensor.numel * dtype_bytes(tensor.dtype)
     return tensor
 }
+
 func allreduce(
     process_group pg,
     comm_tensor tensor,
@@ -250,6 +272,7 @@ func allreduce(
     metrics.total_bytes_received = metrics.total_bytes_received + tensor_bytes * 2 * (world_size - 1)
     return result
 }
+
 func local_identical_allreduce(process_group pg, comm_tensor tensor, int reduce_op) comm_tensor {
     int world_size = pg.world_size
     if world_size <= 1 {
@@ -279,6 +302,7 @@ func local_identical_allreduce(process_group pg, comm_tensor tensor, int reduce_
     tensor.data = out
     return tensor
 }
+
 func ring_allreduce_impl(
     process_group pg,
     comm_tensor tensor,
@@ -341,6 +365,7 @@ func ring_allreduce_impl(
     tensor.data = output_data
     return tensor
 }
+
 func tree_allreduce_impl(
     process_group pg,
     comm_tensor tensor,
@@ -384,6 +409,7 @@ func tree_allreduce_impl(
     tensor.data = output_data
     return tensor
 }
+
 func allgather(
     process_group pg,
     comm_tensor tensor,
@@ -433,6 +459,7 @@ func allgather(
     metrics.total_bytes_received = metrics.total_bytes_received + numel * dtype_sz * (world_size - 1)
     return result
 }
+
 func reducescatter(
     process_group pg,
     comm_tensor tensor,
@@ -467,6 +494,7 @@ func reducescatter(
     metrics.num_reducescatters = metrics.num_reducescatters + 1
     return result
 }
+
 func scatter(
     process_group pg,
     comm_tensor tensor,
@@ -493,6 +521,7 @@ func scatter(
     result.dtype = tensor.dtype
     return result
 }
+
 func gather(
     process_group pg,
     comm_tensor tensor,
@@ -531,6 +560,7 @@ func gather(
         return tensor
     }
 }
+
 func alltoall(
     process_group pg,
     comm_tensor tensor,
@@ -565,6 +595,7 @@ func alltoall(
     metrics.total_bytes_received = metrics.total_bytes_received + chunk_size * dtype_sz * world_size
     return result
 }
+
 func reduce(
     process_group pg,
     comm_tensor tensor,
@@ -578,6 +609,7 @@ func reduce(
         return empty_result
     }
 }
+
 func allreduce_copy(
     process_group pg,
     comm_tensor tensor,
@@ -585,6 +617,7 @@ func allreduce_copy(
     ref comm_metrics metrics) comm_tensor {
     return allreduce(pg, tensor, reduce_op, metrics)
 }
+
 func allreduce_inplace(
     process_group pg,
     comm_tensor tensor,
@@ -593,6 +626,7 @@ func allreduce_inplace(
     comm_tensor temp = allreduce(pg, tensor, reduce_op, metrics)
     return temp
 }
+
 func allreduce_async(
     process_group pg,
     comm_tensor tensor,
@@ -609,6 +643,7 @@ func allreduce_async(
     out.request = req
     return out
 }
+
 func apply_reduce_op(float a, float b, int op) float {
     if op == OP_SUM { return a + b }
     if op == OP_PROD { return a * b }
@@ -621,6 +656,7 @@ func apply_reduce_op(float a, float b, int op) float {
     if op == OP_AVG { return (a + b) / 2.0 }
     return a + b
 }
+
 func compute_chunk_offset(int[] chunk_sizes, int chunk_idx) int {
     int offset = 0
     int i = 0
@@ -630,6 +666,7 @@ func compute_chunk_offset(int[] chunk_sizes, int chunk_idx) int {
     }
     return offset
 }
+
 func estimate_comm_time(int numel, int dtype_bytes, int world_size, string op_type) float {
     int total_bytes = numel * dtype_bytes
     float alpha = 5e-6
@@ -649,11 +686,13 @@ func estimate_comm_time(int numel, int dtype_bytes, int world_size, string op_ty
     }
     return alpha + bytes_per_gpu / beta_inv
 }
+
 func barrier(process_group pg, ref comm_metrics metrics) {
     float start_time = 0.0
     float elapsed = 0.01
     metrics.total_comm_time_ms = metrics.total_comm_time_ms + elapsed
 }
+
 struct nccl_unique_id {
     byte[NCCL_UNIQUE_ID_BYTES] id
 }
@@ -662,9 +701,11 @@ func get_nccl_unique_id(process_group pg) nccl_unique_id {
     nccl_unique_id uid
     return uid
 }
+
 func nccl_comm_init_rank(nccl_unique_id uid, int rank, int world_size) int {
     return rank * 1000
 }
+
 func reset_metrics(ref comm_metrics m) {
     m.total_comm_time_ms = 0.0
     m.total_bytes_sent = 0.0
@@ -674,11 +715,13 @@ func reset_metrics(ref comm_metrics m) {
     m.num_reducescatters = 0
     m.bandwidth_efficiency = 1.0
 }
+
 func print_comm_summary(comm_metrics m, string prefix) {
     float sent_gb = m.total_bytes_sent / (1024.0 * 1024.0 * 1024.0)
     float recv_gb = m.total_bytes_received / (1024.0 * 1024.0 * 1024.0)
     float eff_pct = m.bandwidth_efficiency * 100.0
 }
+
 func estimate_collective_memory(int tensor_elements, int world_size, int dtype) float {
     int elem_bytes = dtype_bytes(dtype)
     float allgather_mem = tensor_elements * elem_bytes * world_size

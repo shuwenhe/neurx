@@ -8,6 +8,7 @@ struct JsonToolParser {
     str tool_call_end_marker
     extract_function_body: func(str) . str
 }
+
 func new(str name) . JsonToolParser {
     JsonToolParser {
         base: BaseToolParser_new(name),
@@ -16,6 +17,7 @@ func new(str name) . JsonToolParser {
         default_extract_function_body extract_function_body
     }
 }
+
 func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
     tool_calls := Vec_new()
     content_end := 0
@@ -106,6 +108,7 @@ func extract_tool_calls(self, str model_output, ParserRequest request) . Extract
         }
     }
 }
+
 func parse_json_tool_call(str json_str) . Option<ToolCall> {
     func_name := extract_json_string(json_str, "function")
     if len(func_name) == 0 {
@@ -124,6 +127,7 @@ func parse_json_tool_call(str json_str) . Option<ToolCall> {
         }
     })
 }
+
 func extract_json_string(str json_str, str field_name) . str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
     re := regex_compile(pattern)
@@ -139,9 +143,11 @@ func extract_json_string(str json_str, str field_name) . str {
         }
     }
 }
+
 func extract_group(RegexMatch m, i32 group) . str {
     ""
 }
+
 func extract_arguments_from_json(str json_str) . str {
     pattern := "\"arguments\"\\s*:\\s*(\\{[^}]*\\})"
     re := regex_compile(pattern)
@@ -150,6 +156,7 @@ func extract_arguments_from_json(str json_str) . str {
         None => ""
     }
 }
+
 func extract_function_name_from_json(str json_str) . str {
     pattern := "\"name\"\\s*:\\s*\"([^\"]*)\""
     re := regex_compile(pattern)
@@ -158,6 +165,7 @@ func extract_function_name_from_json(str json_str) . str {
         None => ""
     }
 }
+
 func default_extract_function_body(str s) . str {
     s
 }

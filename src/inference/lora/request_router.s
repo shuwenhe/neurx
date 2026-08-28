@@ -10,6 +10,7 @@ struct lora_request {
     int layer_idx
     float urgency_score
 }
+
 struct lora_inference_result {
     string request_id
     float[] output
@@ -18,11 +19,13 @@ struct lora_inference_result {
     bool success
     string error_message
 }
+
 struct adapter_queue {
     string adapter_id
     []lora_request requests
     int priority
 }
+
 struct lora_request_router {
     []adapter_queue queues
     lora_adapter_manager adapter_mgr
@@ -31,6 +34,7 @@ struct lora_request_router {
     int total_requests_failed
     map[string]lora_inference_result results_cache
 }
+
 func new_lora_request_router(
     lora_adapter_manager mgr,
     int max_queue_depth
@@ -47,6 +51,7 @@ func new_lora_request_router(
         results_cache: map[string]lora_inference_result{},
     }
 }
+
 func (lora_request_router* router) submit_request(req lora_request) bool {
     if router.adapter_mgr.cache[req.adapter_id].weights.rank <= 0 {
         return false
@@ -78,6 +83,7 @@ func (lora_request_router* router) submit_request(req lora_request) bool {
     )
     return true
 }
+
 func (lora_request_router* router) process_request_batch() []lora_inference_result {
     results := []lora_inference_result{}
     sort_queues_by_priority(router.queues)
@@ -101,6 +107,7 @@ func (lora_request_router* router) process_request_batch() []lora_inference_resu
     }
     return results
 }
+
 func (lora_request_router* router) process_single_request(req lora_request) lora_inference_result {
     if !router.adapter_mgr.switch_adapter(req.adapter_id) {
         return lora_inference_result{
@@ -151,6 +158,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     router.results_cache[req.request_id] = result
     return result
 }
+
 func (lora_request_router* router) adjust_queue_priorities() {
     int i = 0
     for i < len(router.queues) {
@@ -160,6 +168,7 @@ func (lora_request_router* router) adjust_queue_priorities() {
         i = i + 1
     }
 }
+
 func sort_queues_by_priority([]adapter_queue queues) {
     int n = len(queues)
     int i = 0
@@ -176,12 +185,14 @@ func sort_queues_by_priority([]adapter_queue queues) {
         i = i + 1
     }
 }
+
 struct adaptive_batch_config {
     int target_batch_size
     int max_adapters_per_batch
     bool enable_packing
     bool enable_reordering
 }
+
 func create_adaptive_batch_config() adaptive_batch_config {
     adaptive_batch_config{
         target_batch_size: 32,
@@ -190,6 +201,7 @@ func create_adaptive_batch_config() adaptive_batch_config {
         enable_reordering: true,
     }
 }
+
 func (lora_request_router* router) create_adaptive_batches(
     config adaptive_batch_config
 ) [][]lora_request {
@@ -223,11 +235,13 @@ func (lora_request_router* router) create_adaptive_batches(
     }
     return batches
 }
+
 struct load_balance_strategy {
     string strategy
     int min_queue_length
     int max_queue_length
 }
+
 func (lora_request_router* router) get_best_adapter_for_loading(
     string[] candidate_adapters
 ) string {
@@ -249,6 +263,7 @@ func (lora_request_router* router) get_best_adapter_for_loading(
     }
     return best_adapter
 }
+
 func (lora_request_router* router) find_queue_for_adapter(adapter_id string) adapter_queue {
     int i = 0
     for i < len(router.queues) {
@@ -263,6 +278,7 @@ func (lora_request_router* router) find_queue_for_adapter(adapter_id string) ada
         priority: 0,
     }
 }
+
 func (lora_request_router* router) get_router_stats() map[string]int {
     stats := map[string]int{}
     stats["total_processed"] = router.total_requests_processed
@@ -277,13 +293,16 @@ func (lora_request_router* router) get_router_stats() map[string]int {
     stats["num_active_adapters"] = len(router.queues)
     return stats
 }
+
 func (lora_request_router* router) get_queue_length(adapter_id string) int {
     queue := router.find_queue_for_adapter(adapter_id)
     return len(queue.requests)
 }
+
 func (lora_request_router* router) clear_cache() {
     router.results_cache = map[string]lora_inference_result{}
 }
+
 func append_queue([]adapter_queue arr, adapter_queue val) []adapter_queue {
     []adapter_queue new_arr = make([]adapter_queue, len(arr) + 1)
     int i = 0
@@ -294,6 +313,7 @@ func append_queue([]adapter_queue arr, adapter_queue val) []adapter_queue {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func append_request([]lora_request arr, lora_request val) []lora_request {
     []lora_request new_arr = make([]lora_request, len(arr) + 1)
     int i = 0
@@ -304,6 +324,7 @@ func append_request([]lora_request arr, lora_request val) []lora_request {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func append_result([]lora_inference_result arr, lora_inference_result val) []lora_inference_result {
     []lora_inference_result new_arr = make([]lora_inference_result, len(arr) + 1)
     int i = 0
@@ -314,6 +335,7 @@ func append_result([]lora_inference_result arr, lora_inference_result val) []lor
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func append_batch([][]lora_request arr, []lora_request val) [][]lora_request {
     [][]lora_request new_arr = make([][]lora_request, len(arr) + 1)
     int i = 0
@@ -324,6 +346,7 @@ func append_batch([][]lora_request arr, []lora_request val) [][]lora_request {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func main() {
     print("🔀 LoRA Request Router - Complete Implementation")
     print("✓ Request submission and routing")

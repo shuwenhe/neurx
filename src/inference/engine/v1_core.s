@@ -14,6 +14,7 @@ struct generation_context {
     float32 generation_time
     int32 tokens_per_second
 }
+
 struct v1_core {
     sampler* sampler_instance
     kv_cache_interface* kv_cache
@@ -21,6 +22,7 @@ struct v1_core {
     int32[] token_buffer
     int32 batch_size
 }
+
 func create_v1_core(sampler* sampler_inst, kv_cache_interface* cache) v1_core* {
     return *v1_core{
         sampler_instance: sampler_inst,
@@ -38,6 +40,7 @@ func create_v1_core(sampler* sampler_inst, kv_cache_interface* cache) v1_core* {
         batch_size: 32,
     }
 }
+
 func (v1_core* core) prefill(int32[] input_ids, float32[] logits) bool {
     if len(input_ids) == 0 {
         return false
@@ -52,6 +55,7 @@ func (v1_core* core) prefill(int32[] input_ids, float32[] logits) bool {
     success := core.kv_cache.put_kv(1, keys, values)
     return success
 }
+
 func (v1_core* core) decode(float32[] logits, sampling_params* params) int32 {
     core.gen_ctx.mode = mode_decode_only
     if core.gen_ctx.num_tokens_generated >= core.gen_ctx.max_new_tokens {
@@ -62,6 +66,7 @@ func (v1_core* core) decode(float32[] logits, sampling_params* params) int32 {
     core.gen_ctx.num_tokens_generated = core.gen_ctx.num_tokens_generated + 1
     return token
 }
+
 func (v1_core* core) batch_prefill(int32[][]] batch_input_ids, float32[][]] batch_logits) bool {
     if len(batch_input_ids) == 0 {
         return false
@@ -71,6 +76,7 @@ func (v1_core* core) batch_prefill(int32[][]] batch_input_ids, float32[][]] batc
     }
     return true
 }
+
 func (v1_core* core) batch_decode(float32[][]] batch_logits, sampling_params* params) int32[] {
     results := make(int32[])
     for i := 0; i < len(batch_logits); i = i + 1 {
@@ -79,19 +85,24 @@ func (v1_core* core) batch_decode(float32[][]] batch_logits, sampling_params* pa
     }
     return results
 }
+
 func (v1_core* core) get_generated_tokens() int32[] {
     return core.token_buffer
 }
+
 func (v1_core* core) reset_generation() {
     core.token_buffer = make(int32[])
     core.gen_ctx.num_tokens_generated = 0
 }
+
 func (v1_core* core) set_max_new_tokens(int32 max_tokens) {
     core.gen_ctx.max_new_tokens = max_tokens
 }
+
 func (v1_core* core) enable_streaming(bool enabled) {
     core.gen_ctx.enable_streaming = enabled
 }
+
 func (v1_core* core) get_generation_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["tokens_generated"] = core.gen_ctx.num_tokens_generated

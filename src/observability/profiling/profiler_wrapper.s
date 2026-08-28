@@ -66,6 +66,7 @@ type profiler_manager struct {
 	total_events int64
 	created_at_ms int64
 }
+
 func create_profiler_config() profiler_config* {
 	return *profiler_config{
 		enabled: true,
@@ -79,6 +80,7 @@ func create_profiler_config() profiler_config* {
 		output_format: "json",
 	}
 }
+
 func create_profiler_event(event_id string, name string) profiler_event* {
 	return *profiler_event{
 		event_id: event_id,
@@ -90,6 +92,7 @@ func create_profiler_event(event_id string, name string) profiler_event* {
 		metadata: make(map[string]interface{}),
 	}
 }
+
 func create_worker_profiler(config profiler_config*) worker_profiler* {
 	if config == nil {
 		config = create_profiler_config()
@@ -107,6 +110,7 @@ func create_worker_profiler(config profiler_config*) worker_profiler* {
 		created_at_ms: 0,
 	}
 }
+
 func create_cuda_profiler(config profiler_config*) cuda_profiler* {
 	if config == nil {
 		config = create_profiler_config()
@@ -118,6 +122,7 @@ func create_cuda_profiler(config profiler_config*) cuda_profiler* {
 		launch_overhead_us: 0,
 	}
 }
+
 func create_profiler_manager() profiler_manager* {
 	return *profiler_manager{
 		profilers: make(map[string]worker_profiler*),
@@ -129,6 +134,7 @@ func create_profiler_manager() profiler_manager* {
 		created_at_ms: 0,
 	}
 }
+
 func (p* worker_profiler) start() bool {
 	if p == nil || p.config == nil {
 		return false
@@ -146,6 +152,7 @@ func (p* worker_profiler) start() bool {
 	p.status = profiler_status_initialized
 	return true
 }
+
 func (p* worker_profiler) stop() bool {
 	if p == nil {
 		return false
@@ -163,6 +170,7 @@ func (p* worker_profiler) stop() bool {
 	}
 	return true
 }
+
 func (p* worker_profiler) step() bool {
 	if p == nil || !p.active {
 		return false
@@ -186,6 +194,7 @@ func (p* worker_profiler) step() bool {
 	}
 	return false
 }
+
 func (p* worker_profiler) record_event(event profiler_event*) bool {
 	if p == nil || event == nil || !p.is_running {
 		return false
@@ -194,6 +203,7 @@ func (p* worker_profiler) record_event(event profiler_event*) bool {
 	p.total_events = int64(len(p.events))
 	return true
 }
+
 func (p* worker_profiler) record_operation(name string, cpu_us float64, gpu_us float64) bool {
 	if p == nil || !p.is_running {
 		return false
@@ -201,6 +211,7 @@ func (p* worker_profiler) record_operation(name string, cpu_us float64, gpu_us f
 	p.stats.record_operation(name, cpu_us, gpu_us)
 	return true
 }
+
 func (p* worker_profiler) shutdown() bool {
 	if p == nil {
 		return false
@@ -212,12 +223,14 @@ func (p* worker_profiler) shutdown() bool {
 	p.events = make(profiler_event*[])
 	return true
 }
+
 func (p* worker_profiler) get_stats() profiler_stats* {
 	if p == nil {
 		return nil
 	}
 	return p.stats
 }
+
 func (p* worker_profiler) get_summary() map[string]interface{} {
 	summary := make(map[string]interface{})
 	if p == nil {
@@ -234,18 +247,21 @@ func (p* worker_profiler) get_summary() map[string]interface{} {
 	}
 	return summary
 }
+
 func (cp* cuda_profiler) start() bool {
 	if cp == nil || cp.base_profiler == nil {
 		return false
 	}
 	return cp.base_profiler.start()
 }
+
 func (cp* cuda_profiler) stop() bool {
 	if cp == nil || cp.base_profiler == nil {
 		return false
 	}
 	return cp.base_profiler.stop()
 }
+
 func (cp* cuda_profiler) record_kernel(kernel_name string, duration_us float64) bool {
 	if cp == nil || cp.base_profiler == nil {
 		return false
@@ -253,6 +269,7 @@ func (cp* cuda_profiler) record_kernel(kernel_name string, duration_us float64) 
 	cp.kernel_count = cp.kernel_count + 1
 	return cp.base_profiler.record_operation(kernel_name, 0, duration_us)
 }
+
 func (cp* cuda_profiler) get_kernel_stats() map[string]interface{} {
 	stats := make(map[string]interface{})
 	if cp == nil {
@@ -266,6 +283,7 @@ func (cp* cuda_profiler) get_kernel_stats() map[string]interface{} {
 	}
 	return stats
 }
+
 func (pm* profiler_manager) register_profiler(name string, profiler worker_profiler*) bool {
 	if pm == nil || profiler == nil {
 		return false
@@ -277,6 +295,7 @@ func (pm* profiler_manager) register_profiler(name string, profiler worker_profi
 	}
 	return true
 }
+
 func (pm* profiler_manager) unregister_profiler(name string) bool {
 	if pm == nil {
 		return false
@@ -292,6 +311,7 @@ func (pm* profiler_manager) unregister_profiler(name string) bool {
 	}
 	return true
 }
+
 func (pm* profiler_manager) get_profiler(name string) worker_profiler* {
 	if pm == nil {
 		return nil
@@ -302,6 +322,7 @@ func (pm* profiler_manager) get_profiler(name string) worker_profiler* {
 	}
 	return profiler
 }
+
 func (pm* profiler_manager) start_all() bool {
 	if pm == nil {
 		return false
@@ -315,6 +336,7 @@ func (pm* profiler_manager) start_all() bool {
 	}
 	return started > 0
 }
+
 func (pm* profiler_manager) stop_all() bool {
 	if pm == nil {
 		return false
@@ -328,6 +350,7 @@ func (pm* profiler_manager) stop_all() bool {
 	}
 	return stopped > 0
 }
+
 func (pm* profiler_manager) step_all() bool {
 	if pm == nil {
 		return false
@@ -340,6 +363,7 @@ func (pm* profiler_manager) step_all() bool {
 	}
 	return stepped > 0
 }
+
 func (pm* profiler_manager) aggregate_stats() profiler_stats* {
 	if pm == nil {
 		return nil
@@ -354,6 +378,7 @@ func (pm* profiler_manager) aggregate_stats() profiler_stats* {
 	}
 	return pm.global_stats
 }
+
 func (pm* profiler_manager) get_manager_summary() map[string]interface{} {
 	summary := make(map[string]interface{})
 	if pm == nil {
@@ -374,6 +399,7 @@ func (pm* profiler_manager) get_manager_summary() map[string]interface{} {
 	}
 	return summary
 }
+
 func (pm* profiler_manager) shutdown() bool {
 	if pm == nil {
 		return false

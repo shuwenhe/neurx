@@ -6,6 +6,7 @@ struct eplb_config {
     int rebalance_threshold_percent
     bool enabled
 }
+
 struct eplb_state {
     eplb_config config
     int[] expert_rank
@@ -16,6 +17,7 @@ struct eplb_state {
     bool initialized
     string error_message
 }
+
 struct eplb_rebalance_plan {
     int expert_id
     int source_rank
@@ -24,16 +26,19 @@ struct eplb_rebalance_plan {
     int destination_load
     bool required
 }
+
 func eplb_config_valid(eplb_config config) bool {
     if !config.enabled { return true }
     config.expert_count > 0 && config.rank_count > 0 && config.replicas_per_expert > 0 && config.rebalance_threshold_percent >= 0
 }
+
 func eplb_zero_array(int count) int[] {
     int[] values = int[]{cap: count}
     int i = 0
     for i < count { values[i] = 0; i = i + 1 }
     values
 }
+
 func eplb_initial_placement(int expert_count, int rank_count) int[] {
     int[] placement = int[]{cap: expert_count}
     int i = 0
@@ -43,6 +48,7 @@ func eplb_initial_placement(int expert_count, int rank_count) int[] {
     }
     placement
 }
+
 func init_eplb(eplb_config config) eplb_state {
     bool initialized = eplb_config_valid(config)
     string error_message = ""
@@ -58,6 +64,7 @@ func init_eplb(eplb_config config) eplb_state {
         error_message: error_message,
     }
 }
+
 func eplb_record_routing(eplb_state state, int expert_id, int token_count) eplb_state {
     if !state.initialized || expert_id < 0 || expert_id >= len(state.expert_rank) || token_count <= 0 { return state }
     int rank = state.expert_rank[expert_id]
@@ -66,6 +73,7 @@ func eplb_record_routing(eplb_state state, int expert_id, int token_count) eplb_
     state.routing_samples = state.routing_samples + token_count
     state
 }
+
 func eplb_heaviest_rank(eplb_state state) int {
     int result = 0
     int i = 1
@@ -75,6 +83,7 @@ func eplb_heaviest_rank(eplb_state state) int {
     }
     result
 }
+
 func eplb_lightest_rank(eplb_state state) int {
     int result = 0
     int i = 1
@@ -84,6 +93,7 @@ func eplb_lightest_rank(eplb_state state) int {
     }
     result
 }
+
 func eplb_imbalance_percent(eplb_state state) int {
     if len(state.rank_load) == 0 { return 0 }
     int heavy = state.rank_load[eplb_heaviest_rank(state)]
@@ -91,6 +101,7 @@ func eplb_imbalance_percent(eplb_state state) int {
     if heavy == 0 { return 0 }
     (heavy - light) * 100 / heavy
 }
+
 func eplb_plan_rebalance(eplb_state state) eplb_rebalance_plan {
     if !state.initialized || len(state.rank_load) < 2 || eplb_imbalance_percent(state) <= state.config.rebalance_threshold_percent {
         return eplb_rebalance_plan {expert_id: 0 - 1, source_rank: 0 - 1, destination_rank: 0 - 1, source_load: 0, destination_load: 0, required: false}
@@ -109,6 +120,7 @@ func eplb_plan_rebalance(eplb_state state) eplb_rebalance_plan {
     }
     eplb_rebalance_plan {expert_id: expert, source_rank: source, destination_rank: destination, source_load: state.rank_load[source], destination_load: state.rank_load[destination], required: expert >= 0}
 }
+
 func eplb_apply_rebalance(eplb_state state, eplb_rebalance_plan plan) eplb_state {
     if !plan.required || plan.expert_id < 0 || plan.expert_id >= len(state.expert_rank) { return state }
     int load = state.expert_load[plan.expert_id]

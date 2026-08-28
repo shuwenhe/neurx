@@ -24,6 +24,7 @@ struct retrieval_system_config {
     max_context_tokens: int = 4096
     citation_format: string = "[doc{index}]"
 }
+
 struct document_chunk {
     string id
     string content
@@ -32,6 +33,7 @@ struct document_chunk {
     int chunk_index
     int token_count
 }
+
 struct document_metadata {
     string source_id
     string source_path
@@ -46,6 +48,7 @@ struct document_metadata {
     string section
     float relevance_score
 }
+
 struct search_result {
     list<document_chunk> chunks
     list<float> scores
@@ -53,6 +56,7 @@ struct search_result {
     string expanded_query
     retrieval_metadata retrieval_metadata
 }
+
 struct retrieval_metadata {
     int total_scanned
     int total_returned
@@ -74,11 +78,13 @@ interface vector_db_interface {
     clear()
     get_status()
 }
+
 struct search_result_item {
     string chunk_id
     float score
     document_metadata metadata
 }
+
 struct dbstatus {
     int total_documents
     string index_type
@@ -86,6 +92,7 @@ struct dbstatus {
     bool is_initialized
     float last_updated
 }
+
 struct in_memory_vector_db implements vector_db_interface {
     retrieval_system_config config
     embeddings: map<str, tensor>
@@ -176,6 +183,7 @@ struct in_memory_vector_db implements vector_db_interface {
         }
     }
 }
+
 struct faiss_vector_db implements vector_db_interface {
     retrieval_system_config config
     any index
@@ -320,6 +328,7 @@ struct faiss_vector_db implements vector_db_interface {
         }
     }
 }
+
 struct embedding_service {
     string model_name
     any model
@@ -419,6 +428,7 @@ struct embedding_service {
         return result
     }
 }
+
 struct lru_cache<K, V> {
     int capacity
     cache: OrderedDict<K, V>
@@ -444,6 +454,7 @@ struct lru_cache<K, V> {
         return this.cache.size()
     }
 }
+
 struct document_processor {
     retrieval_system_config config
     TextSplitter splitter
@@ -477,6 +488,7 @@ struct document_processor {
         return all_chunks
     }
 }
+
 struct recursive_character_text_splitter {
     int chunk_size
     int chunk_overlap
@@ -535,6 +547,7 @@ struct recursive_character_text_splitter {
         return chunks
     }
 }
+
 struct query_expander {
     any llm_client
     bool enabled
@@ -599,10 +612,12 @@ Expanded queries:
         return expanded[:num]
     }
 }
+
 struct query_expansion_result {
     string original
     list<string> expanded
 }
+
 struct b_m_25_retriever {
     list<string> corpus
     list<string> doc_ids
@@ -678,10 +693,12 @@ struct b_m_25_retriever {
             .filter(t => t.length >= 2)
     }
 }
+
 struct bm25_result {
     string chunk_id
     float score
 }
+
 struct cross_encoder_reranker {
     any model
     any tokenizer
@@ -726,10 +743,12 @@ struct cross_encoder_reranker {
         return results
     }
 }
+
 struct reranked_result {
     document_chunk chunk
     float rerank_score
 }
+
 struct hybrid_fusion_engine {
     float vector_weight
     float keyword_weight
@@ -819,10 +838,12 @@ struct hybrid_fusion_engine {
         return this._weighted_average_fusion(vector_results, bm25_results, top_k)
     }
 }
+
 struct fused_result {
     string chunk_id
     float fused_score
 }
+
 struct retrieval_engine {
     retrieval_system_config config
     VectorDBInterface vector_db
@@ -1014,6 +1035,7 @@ struct retrieval_engine {
         }
     }
 }
+
 struct ingestion_report {
     int documents_ingested
     int chunks_created
@@ -1021,6 +1043,7 @@ struct ingestion_report {
     float processing_time_ms
     dbstatus db_status
 }
+
 struct rag_statistics {
     int total_documents
     dbstatus db_status
@@ -1029,9 +1052,11 @@ struct rag_statistics {
     bool reranker_ready
     bool query_expansion_enabled
 }
+
 function create_retrieval_system(config: retrieval_system_config, llm_client: any) {
     return new retrieval_engine(config=config  new retrieval_system_config(), llm_client=llm_client)
 }
+
 function test_retrieval_system() {
     print("🧪 Testing NEURX RAG System...")
     cfg = retrieval_system_config(vector_db_backend="in_memory", vector_dim=128, enable_reranking=false, enable_query_expansion=false)

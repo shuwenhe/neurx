@@ -4,20 +4,25 @@
     metal
     custom
 }
+
 struct cpu_device {
     i64 id
 }
+
 struct cuda_device {
     i64 id
     string compute_capability
 }
+
 struct cann_device {
     i64 id
     string compute_capability
 }
+
 struct metal_device {
     i64 id
 }
+
 struct device {
     DeviceType device_type
     i64 id

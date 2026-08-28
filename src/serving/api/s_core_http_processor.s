@@ -29,6 +29,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func starts_with(string str, string prefix) bool {
     int str_len = len(str)
     int prefix_len = len(prefix)
@@ -44,6 +45,7 @@ func starts_with(string str, string prefix) bool {
     }
     return true
 }
+
 func contains(string str, string substring) bool {
     int str_len = len(str)
     int sub_len = len(substring)
@@ -68,6 +70,7 @@ func contains(string str, string substring) bool {
     }
     return false
 }
+
 func extract_method(string request) string {
     if starts_with(request, "POST") { return "POST" }
     else if starts_with(request, "GET") { return "GET" }
@@ -76,6 +79,7 @@ func extract_method(string request) string {
     else if starts_with(request, "PATCH") { return "PATCH" }
     return "GET"
 }
+
 func extract_path(string request) string {
     int first_space = -1
     int second_space = -1
@@ -127,27 +131,35 @@ func extract_path(string request) string {
     }
     return path
 }
+
 func is_health(string path) bool {
     return starts_with(path, "/health")
 }
+
 func is_models(string path) bool {
     return starts_with(path, "/v1/models")
 }
+
 func is_chat(string path) bool {
     return starts_with(path, "/v1/chat/completions")
 }
+
 func json_health() string {
     return "{\"status\":\"healthy\",\"service\":\"neurx-inference\",\"version\":\"1.0.0-s\"}"
 }
+
 func json_models() string {
     return "{\"object\":\"list\",\"data\":[{\"id\":\"Qwen2.5-0.5B-Instruct\",\"object\":\"model\"}]}"
 }
+
 func json_chat() string {
     return "{\"id\":\"chatcmpl-001\",\"object\":\"chat.completion\",\"model\":\"Qwen2.5-0.5B-Instruct\",\"choices\":[{\"message\":{\"content\":\"Generated response from pure S inference engine\"}}],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":25,\"total_tokens\":30}}"
 }
+
 func json_error() string {
     return "{\"error\":\"endpoint not found\"}"
 }
+
 func format_http_response(int status, string reason, string body) string {
     string response = "HTTP/1.1 "
     response = response + int_to_string(status)
@@ -160,6 +172,7 @@ func format_http_response(int status, string reason, string body) string {
     response = response + body
     return response
 }
+
 func handle_http_request(string raw_request) string {
     string method = extract_method(raw_request)
     string path = extract_path(raw_request)
@@ -188,6 +201,7 @@ func handle_http_request(string raw_request) string {
     }
     return format_http_response(status, reason, body)
 }
+
 func main() {
     print("\n╔════════════════════════════════════════════════════════╗\n")
     print("║   🚀 NeurX pure S language HTTP 核心implementation                   ║\n")
@@ -211,6 +225,7 @@ func main() {
     print_http_response(test4_response)
     print("\n✅ pure S HTTP processing器already准备then绪\n\n")
 }
+
 func print_http_response(string response) {
     print("══════════════════════════════════════════════════════\n")
     print(response)

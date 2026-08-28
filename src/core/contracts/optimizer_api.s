@@ -6,6 +6,7 @@ import "serialization_api"
     rm_sprop
     adagrad
 }
+
 struct optimizer_state {
     i64 step
     f64 learning_rate

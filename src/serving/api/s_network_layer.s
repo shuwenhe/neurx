@@ -29,6 +29,7 @@ func int_to_string_net(int n) string {
     }
     return result
 }
+
 func starts_with(string str, string prefix) bool {
     int str_len = len(str)
     int prefix_len = len(prefix)
@@ -44,6 +45,7 @@ func starts_with(string str, string prefix) bool {
     }
     return true
 }
+
 func extract_method_from_request(string request) string {
     if starts_with(request, "POST") {
         return "POST"
@@ -62,6 +64,7 @@ func extract_method_from_request(string request) string {
     }
     return "GET"
 }
+
 func extract_path_from_request(string request) string {
     int first_space = -1
     int second_space = -1
@@ -113,15 +116,19 @@ func extract_path_from_request(string request) string {
     }
     return path
 }
+
 func is_health_path(string path) bool {
     return starts_with(path, "/health")
 }
+
 func is_models_path(string path) bool {
     return starts_with(path, "/v1/models")
 }
+
 func is_chat_path(string path) bool {
     return starts_with(path, "/v1/chat/completions")
 }
+
 func create_http_response_complete(int status_code, string body) string {
     string status_line = ""
     if status_code == 200 {
@@ -142,21 +149,26 @@ func create_http_response_complete(int status_code, string body) string {
     response = response + body
     return response
 }
+
 func create_health_json() string {
     return "{\"status\":\"healthy\",\"service\":\"neurx-inference\",\"version\":\"1.0.0-s\"}"
 }
+
 func create_models_json() string {
     return "{\"object\":\"list\",\"data\":[{\"id\":\"Qwen2.5-0.5B-Instruct\",\"object\":\"model\"}]}"
 }
+
 func create_chat_json(string model) string {
     string json = "{\"id\":\"chatcmpl-001\",\"object\":\"chat.completion\",\"model\":\""
     json = json + model
     json = json + "\",\"choices\":[{\"message\":{\"content\":\"Generated response from pure S inference engine\"}}],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":25,\"total_tokens\":30}}"
     return json
 }
+
 func create_error_json() string {
     return "{\"error\":\"endpoint not found\"}"
 }
+
 func handle_http_request_full(string raw_http_request) string {
     string method = extract_method_from_request(raw_http_request)
     string path = extract_path_from_request(raw_http_request)
@@ -181,11 +193,13 @@ func handle_http_request_full(string raw_http_request) string {
     }
     return create_http_response_complete(status, response_body)
 }
+
 func print_network_startup() {
     print("\n╔═══════════════════════════════════════════════════════╗\n")
     print("║  🌐 NeurX pure S language网络层 (Pure S Network Layer)  ║\n")
     print("╚═══════════════════════════════════════════════════════╝\n\n")
 }
+
 func print_network_capabilities() {
     print("✅ 网络功能:\n")
     print("   • HTTP 请求parsing (HTTP Request Parsing)\n")
@@ -194,6 +208,7 @@ func print_network_capabilities() {
     print("   • fullypure S implementation (Pure S Implementation)\n")
     print("   • 零outsidepart依赖 (Zero External Dependencies)\n\n")
 }
+
 func main() {
     print_network_startup()
     print_network_capabilities()

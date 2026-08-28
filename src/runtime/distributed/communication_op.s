@@ -1,16 +1,19 @@
 package neurx.distributed.communication_op
 use neurx.distributed.parallel_state.{group_coordinator}
+
 struct distributed_tensor {
     float[] data
     int[] shape
     string dtype
 }
+
 struct collective_result {
     distributed_tensor tensor
     bool success
     bool present
     string error_message
 }
+
 func copy_tensor_floats(float[] values) float[] {
     float[] copied = float[]{cap: len(values)}
     int i = 0
@@ -20,6 +23,7 @@ func copy_tensor_floats(float[] values) float[] {
     }
     copied
 }
+
 func copy_tensor_shape(int[] shape) int[] {
     int[] copied = int[]{cap: len(shape)}
     int i = 0
@@ -29,6 +33,7 @@ func copy_tensor_shape(int[] shape) int[] {
     }
     copied
 }
+
 func tensor_shape_numel(int[] shape) int {
     if len(shape) == 0 {
         return 0
@@ -44,6 +49,7 @@ func tensor_shape_numel(int[] shape) int {
     }
     count
 }
+
 func make_distributed_tensor(float[] data, int[] shape, string dtype) distributed_tensor {
     distributed_tensor {
         data: copy_tensor_floats(data),
@@ -51,12 +57,15 @@ func make_distributed_tensor(float[] data, int[] shape, string dtype) distribute
         dtype: dtype,
     }
 }
+
 func copy_distributed_tensor(distributed_tensor tensor) distributed_tensor {
     make_distributed_tensor(tensor.data, tensor.shape, tensor.dtype)
 }
+
 func distributed_tensor_valid(distributed_tensor tensor) bool {
     tensor_shape_numel(tensor.shape) == len(tensor.data)
 }
+
 func normalize_tensor_dim(int dim, int dimensions) int {
     int normalized = dim
     if normalized < 0 {
@@ -64,6 +73,7 @@ func normalize_tensor_dim(int dim, int dimensions) int {
     }
     normalized
 }
+
 func tensor_outer_size(int[] shape, int dim) int {
     int size = 1
     int i = 0
@@ -73,6 +83,7 @@ func tensor_outer_size(int[] shape, int dim) int {
     }
     size
 }
+
 func tensor_inner_size(int[] shape, int dim) int {
     int size = 1
     int i = dim + 1
@@ -82,6 +93,7 @@ func tensor_inner_size(int[] shape, int dim) int {
     }
     size
 }
+
 func failed_collective(distributed_tensor input, string message) collective_result {
     collective_result {
         tensor: copy_distributed_tensor(input),
@@ -90,6 +102,7 @@ func failed_collective(distributed_tensor input, string message) collective_resu
         error_message: message,
     }
 }
+
 func successful_collective(distributed_tensor output) collective_result {
     collective_result {
         tensor: output,
@@ -98,9 +111,11 @@ func successful_collective(distributed_tensor output) collective_result {
         error_message: "",
     }
 }
+
 func collective_input_valid(group_coordinator group, distributed_tensor input) bool {
     group.initialized && group.world_size > 0 && distributed_tensor_valid(input)
 }
+
 func tensor_model_parallel_all_reduce(group_coordinator group, distributed_tensor input) collective_result {
     if !collective_input_valid(group, input) {
         return failed_collective(input, "all-reduce requires an initialized group and a valid tensor")
@@ -113,6 +128,7 @@ func tensor_model_parallel_all_reduce(group_coordinator group, distributed_tenso
     }
     successful_collective(make_distributed_tensor(output, input.shape, input.dtype))
 }
+
 func tensor_model_parallel_all_gather(group_coordinator group, distributed_tensor input, int dim) collective_result {
     if !collective_input_valid(group, input) {
         return failed_collective(input, "all-gather requires an initialized group and a valid tensor")
@@ -149,6 +165,7 @@ func tensor_model_parallel_all_gather(group_coordinator group, distributed_tenso
     }
     successful_collective(make_distributed_tensor(output, output_shape, input.dtype))
 }
+
 func tensor_model_parallel_reduce_scatter(group_coordinator group, distributed_tensor input, int dim) collective_result {
     if !collective_input_valid(group, input) {
         return failed_collective(input, "reduce-scatter requires an initialized group and a valid tensor")
@@ -185,6 +202,7 @@ func tensor_model_parallel_reduce_scatter(group_coordinator group, distributed_t
     }
     successful_collective(make_distributed_tensor(output, output_shape, input.dtype))
 }
+
 func tensor_model_parallel_gather(group_coordinator group, distributed_tensor input, int destination, int dim) collective_result {
     if destination < 0 || destination >= group.world_size {
         return failed_collective(input, "gather destination is out of range")
@@ -200,6 +218,7 @@ func tensor_model_parallel_gather(group_coordinator group, distributed_tensor in
     }
     gathered
 }
+
 func broadcast_tensor(group_coordinator group, distributed_tensor input, int source) collective_result {
     if !collective_input_valid(group, input) {
         return failed_collective(input, "broadcast requires an initialized group and a valid tensor")
@@ -209,6 +228,7 @@ func broadcast_tensor(group_coordinator group, distributed_tensor input, int sou
     }
     successful_collective(copy_distributed_tensor(input))
 }
+
 func all_to_all_single(group_coordinator group, distributed_tensor input) collective_result {
     if !collective_input_valid(group, input) {
         return failed_collective(input, "all-to-all requires an initialized group and a valid tensor")

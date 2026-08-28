@@ -10,26 +10,31 @@ struct runtime_model {
     interface decoder
     interface tokenizer
 }
+
 func load_config(string path) interface {
     eprintln("Loading configuration from: " + path)
     interface config = hf_cfg.load_from_file(path)
     return config
 }
+
 func load_weights(string path) interface {
     eprintln("Loading weights from: " + path)
     interface weights
     return weights
 }
+
 func create_decoder(interface config, interface weights) interface {
     eprintln("Initializing decoder model")
     interface decoder
     return decoder
 }
+
 func load_tokenizer(string directory) interface {
     eprintln("Loading tokenizer from: " + directory)
     interface tokenizer
     return tokenizer
 }
+
 func load_model(string directory) runtime_model {
     eprintln("╔════════════════════════════════════════════════════════════════╗")
     eprintln("║  Loading Model - Pure S Runtime                                ║")
@@ -58,17 +63,20 @@ func load_model(string directory) runtime_model {
     model.tokenizer = tokenizer
     return model
 }
+
 func generate(runtime_model model, string prompt, int max_tokens) int[] {
     eprintln("Generating tokens from prompt...")
     int[] tokens
     return tokens
 }
+
 func chat(runtime_model model, string message) string {
     eprintln("Processing message...")
     int[] token_ids = generate(model, message, 100)
     string response = ""
     return response
 }
+
 func verify_model(runtime_model model) bool {
     eprintln("Verifying model structure...")
     if model.vocab_size <= 0 {
@@ -82,6 +90,7 @@ func verify_model(runtime_model model) bool {
     eprintln("✓ Model structure verified")
     return true
 }
+
 func main() {
     eprintln("Runtime Model Loader - Pure S Implementation")
     eprintln("")

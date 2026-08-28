@@ -2,27 +2,32 @@ package neurx.transformers_utils.weight_conversion.safetensors_loader
 struct safetensors_metadata {
     string __metadata__
 }
+
 struct tensor_info {
     string dtype
     int[] shape
     int offset_start
     int offset_end
 }
+
 struct safetensors_header {
     string[] tensor_names
     []tensor_info tensor_infos
     safetensors_metadata metadata
 }
+
 struct weight_tensor {
     string name
     string dtype
     int[] shape
     int size_bytes
 }
+
 struct weight_dict {
     []weight_tensor tensors
     int total_size_bytes
 }
+
 func parse_safetensors_header(string header_json) safetensors_header {
     safetensors_header {
         tensor_names: [],
@@ -32,6 +37,7 @@ func parse_safetensors_header(string header_json) safetensors_header {
         },
     }
 }
+
 func get_tensor_info(string name) tensor_info {
     tensor_info {
         dtype: "F32",
@@ -40,6 +46,7 @@ func get_tensor_info(string name) tensor_info {
         offset_end: 0,
     }
 }
+
 func map_layer_name_to_neurx(string hf_name) string {
     if hf_name == "model.embed_tokens.weight" {
         return "embedding.token_embed"
@@ -61,6 +68,7 @@ func map_layer_name_to_neurx(string hf_name) string {
     }
     hf_name
 }
+
 func convert_weight_names_huggingface_to_neurx(
     hf_names: string[]
 ) string[] {
@@ -71,6 +79,7 @@ func convert_weight_names_huggingface_to_neurx(
     }
     neurx_names
 }
+
 func dtype_size_bytes(string dtype) int {
     if dtype == "F32" || dtype == "I32" {
         return 4
@@ -86,6 +95,7 @@ func dtype_size_bytes(string dtype) int {
     }
     4
 }
+
 func calculate_tensor_size(int[] shape, string dtype) int {
     int size = 1
     for dim in shape {
@@ -93,12 +103,14 @@ func calculate_tensor_size(int[] shape, string dtype) int {
     }
     size * dtype_size_bytes(dtype)
 }
+
 func load_safetensors_metadata(string file_path) weight_dict {
     weight_dict {
         tensors: [],
         total_size_bytes: 0,
     }
 }
+
 func extract_weights_from_safetensors(
     file_path: string,
     layer_patterns: string[]
@@ -115,11 +127,13 @@ func extract_weights_from_safetensors(
     }
     extracted
 }
+
 struct weight_validation_result {
     bool is_valid
     string[] errors
     string[] warnings
 }
+
 func validate_weight_compatibility(
     hf_config_dict: string,
     weight_dict: weight_dict,
@@ -146,6 +160,7 @@ func validate_weight_compatibility(
         warnings: warnings,
     }
 }
+
 func summarize_weight_loading(
     weight_dict: weight_dict,
     int num_layers

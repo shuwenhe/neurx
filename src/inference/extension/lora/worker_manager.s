@@ -24,6 +24,7 @@ struct worker_task {
     int32 retry_count
     int32 max_retries
 }
+
 struct worker_process {
     int32 worker_id
     worker_status status
@@ -32,6 +33,7 @@ struct worker_process {
     int32 failed_tasks
     float32 avg_task_time_us
 }
+
 struct worker_manager {
     map[string]worker_process* workers
     map[string]worker_task* task_queue
@@ -40,6 +42,7 @@ struct worker_manager {
     int32 completed_tasks
     bool enable_load_balancing
 }
+
 func create_worker_manager(int32 num_workers) worker_manager* {
     mgr := worker_manager{
         workers: make(map[string]worker_process*),
@@ -63,6 +66,7 @@ func create_worker_manager(int32 num_workers) worker_manager* {
     }
     return *mgr
 }
+
 func (worker_manager* mgr) submit_task(string task_id, task_type type, string adapter_name, float32 priority) bool {
     if _, exists := mgr.task_queue[task_id]; exists {
         return false
@@ -80,6 +84,7 @@ func (worker_manager* mgr) submit_task(string task_id, task_type type, string ad
     mgr.total_tasks = mgr.total_tasks + 1
     return true
 }
+
 func (worker_manager* mgr) cancel_task(string task_id) bool {
     if _, exists := mgr.task_queue[task_id]; exists {
         delete(mgr.task_queue, task_id)
@@ -87,6 +92,7 @@ func (worker_manager* mgr) cancel_task(string task_id) bool {
     }
     return false
 }
+
 func (worker_manager* mgr) assign_task(string worker_id, string task_id) bool {
     if worker, exists := mgr.workers[worker_id]; exists {
         if task, task_exists := mgr.task_queue[task_id]; task_exists {
@@ -98,6 +104,7 @@ func (worker_manager* mgr) assign_task(string worker_id, string task_id) bool {
     }
     return false
 }
+
 func (worker_manager* mgr) complete_task(string worker_id, string task_id, bool success) bool {
     if worker, exists := mgr.workers[worker_id]; exists {
         if worker.assigned_task_id == task_id {
@@ -115,6 +122,7 @@ func (worker_manager* mgr) complete_task(string worker_id, string task_id, bool 
     }
     return false
 }
+
 func (worker_manager* mgr) get_idle_worker() string {
     min_load := 999999
     idle_worker := ""
@@ -129,12 +137,14 @@ func (worker_manager* mgr) get_idle_worker() string {
     }
     return idle_worker
 }
+
 func (worker_manager* mgr) get_worker_status(string worker_id) worker_status {
     if worker, exists := mgr.workers[worker_id]; exists {
         return worker.status
     }
     return worker_terminated
 }
+
 func (worker_manager* mgr) get_pending_tasks() string[] {
     tasks := make(string[])
     for task_id := range mgr.task_queue {
@@ -142,6 +152,7 @@ func (worker_manager* mgr) get_pending_tasks() string[] {
     }
     return tasks
 }
+
 func (worker_manager* mgr) retry_failed_task(string task_id) bool {
     if task, exists := mgr.task_queue[task_id]; exists {
         if task.retry_count < task.max_retries {
@@ -151,9 +162,11 @@ func (worker_manager* mgr) retry_failed_task(string task_id) bool {
     }
     return false
 }
+
 func (worker_manager* mgr) set_load_balancing(bool enable) {
     mgr.enable_load_balancing = enable
 }
+
 func (worker_manager* mgr) process_queue() {
     for task_id := range mgr.task_queue {
         idle_worker := mgr.get_idle_worker()
@@ -162,6 +175,7 @@ func (worker_manager* mgr) process_queue() {
         }
     }
 }
+
 func (worker_manager* mgr) get_worker_stats(string worker_id) map[string]interface{} {
     stats := make(map[string]interface{})
     if worker, exists := mgr.workers[worker_id]; exists {
@@ -174,6 +188,7 @@ func (worker_manager* mgr) get_worker_stats(string worker_id) map[string]interfa
     }
     return stats
 }
+
 func (worker_manager* mgr) get_manager_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["num_workers"] = mgr.num_workers
@@ -199,6 +214,7 @@ func (worker_manager* mgr) get_manager_stats() map[string]interface{} {
     stats["processing_workers"] = processing_count
     return stats
 }
+
 func (worker_manager* mgr) shutdown() {
     for worker_id := range mgr.workers {
         worker := mgr.workers[worker_id]

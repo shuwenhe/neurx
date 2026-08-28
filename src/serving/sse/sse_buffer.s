@@ -6,6 +6,7 @@ import "time"
 	BUFFER_FULL = 2
 	BUFFER_OVERFLOW = 3
 }
+
 struct sse_buffer {
 	sse_event[]          events
 	int32                   write_index
@@ -20,10 +21,12 @@ struct sse_buffer {
 	int64                   last_flush_time
 	sync.Mutex              mu
 }
+
 struct buffer_config {
 	int32                   capacity
 	int32                   max_size_bytes
 }
+
 struct buffer_stats {
 	int32                   current_events
 	int32                   total_added
@@ -33,6 +36,7 @@ struct buffer_stats {
 	int32                   current_size_bytes
 	int64                   uptime_ms
 }
+
 struct sse_queue {
 	sse_buffer[]         buffers
 	int32                   buffer_count
@@ -43,6 +47,7 @@ struct sse_queue {
 	int32                   buffer_capacity
 	sync.Mutex              mu
 }
+
 func create_sse_buffer(config buffer_config) sse_buffer {
 	return sse_buffer{
 		events:               make(sse_event[], 0, config.capacity),
@@ -59,6 +64,7 @@ func create_sse_buffer(config buffer_config) sse_buffer {
 		mu:                   sync.Mutex{},
 	}
 }
+
 func create_sse_queue(max_buffers int32, buffer_capacity int32) sse_queue {
 	return sse_queue{
 		buffers:              make(sse_buffer[], 0, max_buffers),
@@ -71,6 +77,7 @@ func create_sse_queue(max_buffers int32, buffer_capacity int32) sse_queue {
 		mu:                   sync.Mutex{},
 	}
 }
+
 func (sse_buffer* b) add_event(event sse_event) bool {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -94,6 +101,7 @@ func (sse_buffer* b) add_event(event sse_event) bool {
 	}
 	return true
 }
+
 func (sse_buffer* b) get_event() (sse_event, bool) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -110,6 +118,7 @@ func (sse_buffer* b) get_event() (sse_event, bool) {
 	}
 	return event, true
 }
+
 func (sse_buffer* b) peek_event() (sse_event, bool) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -119,6 +128,7 @@ func (sse_buffer* b) peek_event() (sse_event, bool) {
 	event := b.events[b.read_index]
 	return event, true
 }
+
 func (sse_buffer* b) get_pending_events() sse_event[] {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -128,6 +138,7 @@ func (sse_buffer* b) get_pending_events() sse_event[] {
 	}
 	return result
 }
+
 func (sse_buffer* b) flush() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -140,11 +151,13 @@ func (sse_buffer* b) flush() {
 	b.status = BUFFER_EMPTY
 	b.last_flush_time = time.Now().UnixNano()
 }
+
 func (sse_buffer* b) get_buffer_status() buffer_status {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return b.status
 }
+
 func (sse_buffer* b) get_buffer_stats() buffer_stats {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -164,6 +177,7 @@ func (sse_buffer* b) get_buffer_stats() buffer_stats {
 	stats.uptime_ms = uptime
 	return stats
 }
+
 func (sse_queue* q) create_new_buffer() sse_buffer {
 	config := buffer_config{
 		capacity:       q.buffer_capacity,
@@ -171,6 +185,7 @@ func (sse_queue* q) create_new_buffer() sse_buffer {
 	}
 	return create_sse_buffer(config)
 }
+
 func (sse_queue* q) enqueue_event(event sse_event) bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -194,6 +209,7 @@ func (sse_queue* q) enqueue_event(event sse_event) bool {
 	}
 	return added
 }
+
 func (sse_queue* q) dequeue_event() (sse_event, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -206,6 +222,7 @@ func (sse_queue* q) dequeue_event() (sse_event, bool) {
 	}
 	return sse_event{}, false
 }
+
 func (sse_queue* q) get_pending_events() sse_event[] {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -218,6 +235,7 @@ func (sse_queue* q) get_pending_events() sse_event[] {
 	}
 	return result
 }
+
 func (sse_queue* q) flush_all() {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -228,6 +246,7 @@ func (sse_queue* q) flush_all() {
 	q.buffer_count = 0
 	q.active_buffer_index = -1
 }
+
 func (sse_queue* q) get_queue_stats() map[string]interface{} {
 	q.mu.Lock()
 	defer q.mu.Unlock()

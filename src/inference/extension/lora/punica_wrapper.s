@@ -19,6 +19,7 @@ struct punica_config {
     int32 max_seq_len
     bool use_custom_kernels
 }
+
 struct punica_kernel {
     punica_op operation
     string kernel_name
@@ -26,6 +27,7 @@ struct punica_kernel {
     float32 avg_time_us
     int32 call_count
 }
+
 struct punica_wrapper {
     punica_config config
     map[string]punica_kernel* kernels
@@ -33,6 +35,7 @@ struct punica_wrapper {
     float32 total_time_us
     bool is_initialized
 }
+
 func create_punica_wrapper(punica_config config) punica_wrapper* {
     wrapper := punica_wrapper{
         config: config,
@@ -43,6 +46,7 @@ func create_punica_wrapper(punica_config config) punica_wrapper* {
     }
     return *wrapper
 }
+
 func (punica_wrapper* wrapper) initialize() bool {
     if wrapper.is_initialized {
         return true
@@ -54,6 +58,7 @@ func (punica_wrapper* wrapper) initialize() bool {
     wrapper.is_initialized = true
     return true
 }
+
 func (punica_wrapper* wrapper) register_kernel(string kernel_name, punica_op operation) {
     kernel := *punica_kernel{
         operation: operation,
@@ -65,6 +70,7 @@ func (punica_wrapper* wrapper) register_kernel(string kernel_name, punica_op ope
     wrapper.kernels[kernel_name] = kernel
     wrapper.total_kernels = wrapper.total_kernels + 1
 }
+
 func (punica_wrapper* wrapper) compile_kernel(string kernel_name) bool {
     if kernel, exists := wrapper.kernels[kernel_name]; exists {
         kernel.is_compiled = true
@@ -72,6 +78,7 @@ func (punica_wrapper* wrapper) compile_kernel(string kernel_name) bool {
     }
     return false
 }
+
 func (punica_wrapper* wrapper) add_lora(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
     output := make(float32[])
     for i := 0; i < len(input); i = i + 1 {
@@ -99,6 +106,7 @@ func (punica_wrapper* wrapper) add_lora(float32[] input, float32[][]] lora_a, fl
     }
     return output
 }
+
 func (punica_wrapper* wrapper) mul_lora(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
     output := make(float32[])
     for i := 0; i < len(input); i = i + 1 {
@@ -126,9 +134,11 @@ func (punica_wrapper* wrapper) mul_lora(float32[] input, float32[][]] lora_a, fl
     }
     return output
 }
+
 func (punica_wrapper* wrapper) fused_lora_add(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
     return wrapper.add_lora(input, lora_a, lora_b, scaling)
 }
+
 func (punica_wrapper* wrapper) batch_lora_add(float32[][]] inputs, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[][]] {
     outputs := make(float32[][]])
     for i := 0; i < len(inputs); i = i + 1 {
@@ -137,15 +147,19 @@ func (punica_wrapper* wrapper) batch_lora_add(float32[][]] inputs, float32[][]] 
     }
     return outputs
 }
+
 func (punica_wrapper* wrapper) enable_async_execution(bool enable) {
     wrapper.config.enable_async = enable
 }
+
 func (punica_wrapper* wrapper) set_batch_size(int32 batch_size) {
     wrapper.config.batch_size = batch_size
 }
+
 func (punica_wrapper* wrapper) set_max_seq_len(int32 max_seq_len) {
     wrapper.config.max_seq_len = max_seq_len
 }
+
 func (punica_wrapper* wrapper) benchmark_kernel(string kernel_name, int32 iterations) map[string]interface{} {
     results := make(map[string]interface{})
     total_time := 0.0
@@ -170,6 +184,7 @@ func (punica_wrapper* wrapper) benchmark_kernel(string kernel_name, int32 iterat
     results["max_time_us"] = max_time
     return results
 }
+
 func (punica_wrapper* wrapper) get_wrapper_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["backend"] = wrapper.config.backend

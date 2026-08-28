@@ -3,12 +3,14 @@ struct checkpoint_context {
     float[][] saved_activations
     bool[] is_checkpoint_required
 }
+
 func new_checkpoint_context() checkpoint_context {
     checkpoint_context {
         saved_activations: make(float[][], 0),
         is_checkpoint_required: make(bool[], 0),
     }
 }
+
 func checkpoint_save_activation(
     checkpoint_context ctx,
     float[] activation
@@ -17,6 +19,7 @@ func checkpoint_save_activation(
     ctx.is_checkpoint_required = append(ctx.is_checkpoint_required, true)
     return ctx
 }
+
 func checkpoint_get_activation(checkpoint_context ctx, int layer_id) float[] {
     if layer_id < 0 {
         return float[]{}
@@ -26,6 +29,7 @@ func checkpoint_get_activation(checkpoint_context ctx, int layer_id) float[] {
     }
     return clone_activation(ctx.saved_activations[layer_id])
 }
+
 func checkpoint_clear_activation(checkpoint_context ctx, int layer_id) checkpoint_context {
     if layer_id >= 0 {
         if layer_id < len(ctx.saved_activations) {
@@ -34,6 +38,7 @@ func checkpoint_clear_activation(checkpoint_context ctx, int layer_id) checkpoin
     }
     return ctx
 }
+
 func checkpoint_get_memory_saved(checkpoint_context ctx) int {
     int total = 0
     int i = 0
@@ -45,6 +50,7 @@ func checkpoint_get_memory_saved(checkpoint_context ctx) int {
     }
     return total
 }
+
 func clone_activation(float[] act) float[] {
     float[] cloned = float[]{cap: len(act)}
     int i = 0

@@ -5,6 +5,7 @@ struct matrix {
     int rows
     int cols
 }
+
 func matrix_new(int rows, int cols) matrix {
     matrix m
     m.data = float[]{cap: rows * cols}
@@ -12,12 +13,15 @@ func matrix_new(int rows, int cols) matrix {
     m.cols = cols
     m
 }
+
 func matrix_at(matrix m, int i, int j) float {
     m.data[i * m.cols + j]
 }
+
 func matrix_set(matrix m, int i, int j, float value) {
     m.data[i * m.cols + j] = value
 }
+
 func matrix_mult_naive(matrix A, matrix B) matrix {
     matrix result = matrix_new(A.rows, B.cols)
     int i = 0
@@ -37,6 +41,7 @@ func matrix_mult_naive(matrix A, matrix B) matrix {
     }
     result
 }
+
 func matrix_mult_blocked(matrix A, matrix B) matrix {
     int BLOCK_SIZE = 64
     matrix result = matrix_new(A.rows, B.cols)
@@ -77,6 +82,7 @@ func matrix_mult_blocked(matrix A, matrix B) matrix {
     }
     result
 }
+
 func matvec_optimized(float[] v, matrix W) float[] {
     float[] result = float[]{cap: W.cols}
     int j = 0
@@ -92,6 +98,7 @@ func matvec_optimized(float[] v, matrix W) float[] {
     }
     result
 }
+
 func matvec_row_major(float[] v, float[] W_data, int W_rows, int W_cols) float[] {
     float[] result = float[]{cap: W_cols}
     int i = 0
@@ -107,6 +114,7 @@ func matvec_row_major(float[] v, float[] W_data, int W_rows, int W_cols) float[]
     }
     result
 }
+
 func matmul_with_activation(matrix A, matrix B, string activation) matrix {
     matrix result = matrix_mult_blocked(A, B)
     int i = 0
@@ -129,6 +137,7 @@ func matmul_with_activation(matrix A, matrix B, string activation) matrix {
     }
     result
 }
+
 func sigmoid_approx(float x) float {
     if x > 0.0 {
         return 1.0 / (1.0 + exp_approx(-x))
@@ -136,6 +145,7 @@ func sigmoid_approx(float x) float {
     float exp_x = exp_approx(x)
     exp_x / (1.0 + exp_x)
 }
+
 func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
@@ -147,10 +157,12 @@ func exp_approx(float x) float {
     }
     result
 }
+
 func min_int(int a, int b) int {
     if a < b { return a }
     b
 }
+
 func float(int x) float {
     x * 1.0
 }

@@ -39,6 +39,7 @@ func BasicWorkerExample() {
     worker.Shutdown()
     println("Worker shutdown complete\n")
 }
+
 func GPUWorkerExample() {
     println("=== GPU Worker Example ===")
     config := WorkerConfig{
@@ -75,6 +76,7 @@ func GPUWorkerExample() {
     gpu_worker.Shutdown()
     println("GPU Worker shutdown complete\n")
 }
+
 func WorkerManagerExample() {
     println("=== Worker Manager Example ===")
     policy := SchedulingPolicy{
@@ -127,6 +129,7 @@ func WorkerManagerExample() {
     manager.Shutdown()
     println("Worker Manager shutdown complete\n")
 }
+
 func WorkerCommunicationExample() {
     println("=== Worker Communication Example ===")
     comm_config := CommunicationConfig{
@@ -171,6 +174,7 @@ func WorkerCommunicationExample() {
     handler.Shutdown()
     println("Communication handler shutdown complete\n")
 }
+
 func BatchProcessingExample() {
     println("=== Batch Processing Example ===")
     policy := SchedulingPolicy{
@@ -207,6 +211,7 @@ func BatchProcessingExample() {
     println("Total tokens:", stats["total_tokens"])
     println()
 }
+
 func DistributedSyncExample() {
     println("=== Distributed Synchronization Example ===")
     sync_mgr := NewSynchronizationManager()
@@ -225,6 +230,7 @@ func DistributedSyncExample() {
     println("Failed syncs:", sync_mgr.failed_syncs)
     println()
 }
+
 func main() {
     println("╔════════════════════════════════════════╗")
     println("║  NeurX Worker Basic Examples           ║")

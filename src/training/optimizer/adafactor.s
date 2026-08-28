@@ -15,6 +15,7 @@ struct adafactor_optimizer {
     int num_rows
     int num_cols
 }
+
 func new_adafactor(
     float lr,
     float beta2_decay,
@@ -38,6 +39,7 @@ func new_adafactor(
         num_cols: 0,
     }
 }
+
 func adafactor_step_2d(
     adafactor_optimizer optimizer,
     tensor params,
@@ -119,10 +121,12 @@ func adafactor_step_2d(
         params: new(out, params.shape, params.requires_grad),
     }
 }
+
 struct adafactor_optimizer_step_output {
     adafactor_optimizer optimizer
     tensor params
 }
+
 func ensure_adafactor_state(float[] values, int n) float[] {
     float[] out = float[]{cap: n}
     int i = 0
@@ -136,6 +140,7 @@ func ensure_adafactor_state(float[] values, int n) float[] {
     }
     out
 }
+
 func adafactor_rms(float[] values, int n) float {
     if n == 0 {
         return 0.0
@@ -148,12 +153,14 @@ func adafactor_rms(float[] values, int n) float {
     }
     return adafactor_sqrt(sum_sq / float(n))
 }
+
 func adafactor_max(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
+
 func adafactor_sqrt(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -169,12 +176,14 @@ func adafactor_sqrt(float x) float {
     }
     y
 }
+
 func adafactor_pow(float base, float exponent) float {
     if base <= 0.0 {
         return 0.0
     }
     return adafactor_exp(exponent * adafactor_ln(base))
 }
+
 func adafactor_exp(float x) float {
     float result = 1.0
     float term = 1.0
@@ -186,6 +195,7 @@ func adafactor_exp(float x) float {
     }
     result
 }
+
 func adafactor_ln(float x) float {
     if x <= 0.0 {
         return 0.0

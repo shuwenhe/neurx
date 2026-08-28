@@ -1,5 +1,6 @@
 package neurx.distributed.cluster.heartbeat
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file, runtime_read_text_file, runtime_file_exists, runtime_env_get}
+
 struct cluster_heartbeat_record {
     int node_id
     string node_name
@@ -10,11 +11,13 @@ struct cluster_heartbeat_record {
     bool healthy
     string status
 }
+
 struct cluster_heartbeat_state {
     string heartbeat_dir
     string cluster_name
     int record_count
 }
+
 struct cluster_heartbeat_scan_result {
     int total_ranks
     int live_ranks
@@ -22,6 +25,7 @@ struct cluster_heartbeat_scan_result {
     int[] failed_rank_ids
     bool healthy
 }
+
 func cluster_heartbeat_zero_records(int capacity) cluster_heartbeat_record[] {
     cluster_heartbeat_record[] records = cluster_heartbeat_record[]{}
     int i = 0
@@ -40,6 +44,7 @@ func cluster_heartbeat_zero_records(int capacity) cluster_heartbeat_record[] {
     }
     records
 }
+
 func create_cluster_heartbeat_state(string cluster_name, string heartbeat_dir) cluster_heartbeat_state {
     if heartbeat_dir == "" {
         heartbeat_dir = "/tmp/neurx_cluster/heartbeat"
@@ -51,9 +56,11 @@ func create_cluster_heartbeat_state(string cluster_name, string heartbeat_dir) c
         record_count: 0
     }
 }
+
 func cluster_heartbeat_path(cluster_heartbeat_state state, int rank) string {
     state.heartbeat_dir + "/rank_" + itoa(rank) + ".txt"
 }
+
 func cluster_heartbeat_write(
     cluster_heartbeat_state state,
     int node_id,
@@ -80,6 +87,7 @@ func cluster_heartbeat_write(
     state.record_count = state.record_count + 1
     state
 }
+
 func cluster_heartbeat_read(cluster_heartbeat_state state, int rank) string {
     string path = cluster_heartbeat_path(state, rank)
     if !runtime_file_exists(path) {
@@ -87,10 +95,12 @@ func cluster_heartbeat_read(cluster_heartbeat_state state, int rank) string {
     }
     runtime_read_text_file(path)
 }
+
 func cluster_heartbeat_is_live(cluster_heartbeat_state state, int rank) bool {
     string text = cluster_heartbeat_read(state, rank)
     text != ""
 }
+
 func cluster_heartbeat_scan(cluster_heartbeat_state state, int total_ranks) cluster_heartbeat_scan_result {
     cluster_heartbeat_scan_result result
     result.total_ranks = total_ranks
@@ -110,6 +120,7 @@ func cluster_heartbeat_scan(cluster_heartbeat_state state, int total_ranks) clus
     result.healthy = result.failed_ranks == 0
     result
 }
+
 func cluster_heartbeat_scan_summary(cluster_heartbeat_scan_result scan) string {
     string out = ""
     out = out + "total_ranks=" + itoa(scan.total_ranks) + "\n"
@@ -118,6 +129,7 @@ func cluster_heartbeat_scan_summary(cluster_heartbeat_scan_result scan) string {
     out = out + "healthy=" + itoa(scan.healthy ? 1 : 0) + "\n"
     out
 }
+
 func cluster_heartbeat_summary(cluster_heartbeat_state state) string {
     string out = ""
     out = out + "cluster=" + state.cluster_name + "\n"
@@ -125,6 +137,7 @@ func cluster_heartbeat_summary(cluster_heartbeat_state state) string {
     out = out + "records=" + itoa(state.record_count) + "\n"
     out
 }
+
 func cluster_heartbeat_default_dir() string {
     runtime_env_get("NEURX_HEARTBEAT_DIR", "/tmp/neurx_cluster/heartbeat")
 }

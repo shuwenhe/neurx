@@ -3,6 +3,7 @@ use std.conv.string_to_int
 package neurx.inference.api.rest_api
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, resolve_prompt_from_body, parse_max_tokens, parse_bool, build_health_json, build_models_json, build_generate_json, build_chat_completion_json}
 use src.net.http.{http_request, http_response}
+
 struct inference_request {
     string prompt
     int max_tokens
@@ -11,6 +12,7 @@ struct inference_request {
     int top_k
     bool stream
 }
+
 struct inference_response {
     string response
     int tokens_generated
@@ -36,6 +38,7 @@ func parse_json_string(string json_str, string key) string {
     }
     return ""
 }
+
 func parse_json_int(string json_str, string key) int {
     start_key := "\"" + key + "\":"
     start_idx := index_of(json_str, start_key)
@@ -53,6 +56,7 @@ func parse_json_int(string json_str, string key) int {
     }
     return 0
 }
+
 func index_of(string s, string substr) int {
     for i := 0; i < len(s) - len(substr) + 1; i++ {
         if s[i:i+len(substr)] == substr {
@@ -61,6 +65,7 @@ func index_of(string s, string substr) int {
     }
     return -1
 }
+
 func index_of_from(string s, string substr, int start) int {
     for i := start; i < len(s) - len(substr) + 1; i++ {
         if s[i:i+len(substr)] == substr {
@@ -69,10 +74,12 @@ func index_of_from(string s, string substr, int start) int {
     }
     return -1
 }
+
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return string(s[idx : idx+1])
 }
+
 func parse_inference_request(string body) inference_request {
     prompt := parse_json_string(body, "prompt")
     max_tokens := parse_json_int(body, "max_tokens")
@@ -88,6 +95,7 @@ func parse_inference_request(string body) inference_request {
         stream: false,
     }
 }
+
 func load_engine() real_text_engine_state {
     string model_path = resolve_model_path_from_env()
     if g_cached_engine_loaded && g_cached_engine_path == model_path {
@@ -98,6 +106,7 @@ func load_engine() real_text_engine_state {
     g_cached_engine_loaded = true
     g_cached_engine
 }
+
 func handle_generate(http_request req) http_response {
     if req.method != "POST" {
         return http_response{
@@ -124,6 +133,7 @@ func handle_generate(http_request req) http_response {
         body: build_generate_json(result),
     }
 }
+
 func handle_chat_completions(http_request req) http_response {
     if req.method != "POST" {
         return http_response{
@@ -150,6 +160,7 @@ func handle_chat_completions(http_request req) http_response {
         body: build_chat_completion_json(result),
     }
 }
+
 func handle_health(http_request req) http_response {
     real_text_engine_state state = load_engine()
     int status_code = 200
@@ -162,6 +173,7 @@ func handle_health(http_request req) http_response {
         body: build_health_json(state),
     }
 }
+
 func handle_models(http_request req) http_response {
     real_text_engine_state state = load_engine()
     int status_code = 200
@@ -174,6 +186,7 @@ func handle_models(http_request req) http_response {
         body: build_models_json(state),
     }
 }
+
 func route_request(http_request req) http_response {
     path := req.path
     if path == "/api/generate" {

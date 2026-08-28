@@ -5,6 +5,7 @@ struct processor_pipeline_config {
     bool fail_on_error
     map[string]map[string]float params
 }
+
 struct pipeline_statistics {
     int total_calls
     int failed_calls
@@ -12,6 +13,7 @@ struct pipeline_statistics {
     map[string]float processor_times
     map[string]int processor_call_counts
 }
+
 struct logits_processor_manager {
     []logits_processor_config processors
     processor_pipeline_config pipeline
@@ -19,6 +21,7 @@ struct logits_processor_manager {
     int vocab_size
     bool enabled
 }
+
 func new_logits_processor_manager(int vocab_size) logits_processor_manager {
     return logits_processor_manager{
         processors: make([]logits_processor_config, 0),
@@ -39,6 +42,7 @@ func new_logits_processor_manager(int vocab_size) logits_processor_manager {
         enabled: true,
     }
 }
+
 func (logits_processor_manager* mgr) register_processor(
     string name,
     string processor_type,
@@ -59,6 +63,7 @@ func (logits_processor_manager* mgr) register_processor(
     mgr.pipeline.params[name] = params
     return true
 }
+
 func (logits_processor_manager* mgr) disable_processor(string name) bool {
     int i = 0
     for i < len(mgr.processors) {
@@ -70,6 +75,7 @@ func (logits_processor_manager* mgr) disable_processor(string name) bool {
     }
     return false
 }
+
 func (logits_processor_manager* mgr) enable_processor(string name) bool {
     int i = 0
     for i < len(mgr.processors) {
@@ -81,6 +87,7 @@ func (logits_processor_manager* mgr) enable_processor(string name) bool {
     }
     return false
 }
+
 func (logits_processor_manager* mgr) process_logits(
     float[] logits
 ) float[] {
@@ -110,6 +117,7 @@ func (logits_processor_manager* mgr) process_logits(
     }
     return result
 }
+
 func apply_single_processor(
     float[] logits,
     logits_processor_config config,
@@ -133,6 +141,7 @@ func apply_single_processor(
     mgr.stats.processor_call_counts[name] = mgr.stats.processor_call_counts[name] + 1
     return result
 }
+
 func create_conservative_config() processor_pipeline_config {
     return processor_pipeline_config{
         processor_order: string[]{"temperature", "top_k", "top_p"},
@@ -141,6 +150,7 @@ func create_conservative_config() processor_pipeline_config {
         params: map[string]map[string]float{},
     }
 }
+
 func create_balanced_config() processor_pipeline_config {
     return processor_pipeline_config{
         processor_order: string[]{"temperature", "top_p", "frequency"},
@@ -149,6 +159,7 @@ func create_balanced_config() processor_pipeline_config {
         params: map[string]map[string]float{},
     }
 }
+
 func create_creative_config() processor_pipeline_config {
     return processor_pipeline_config{
         processor_order: string[]{"repetition", "top_p", "min_p"},
@@ -157,6 +168,7 @@ func create_creative_config() processor_pipeline_config {
         params: map[string]map[string]float{},
     }
 }
+
 func create_diverse_config() processor_pipeline_config {
     return processor_pipeline_config{
         processor_order: string[]{"temperature", "top_a", "frequency", "presence"},
@@ -165,12 +177,14 @@ func create_diverse_config() processor_pipeline_config {
         params: map[string]map[string]float{},
     }
 }
+
 struct inference_with_logits_processing {
     logits_processor_manager processor_mgr
     int step_count
     float[][] logits_history
     int[] selected_tokens
 }
+
 func create_inference_pipeline(
     int vocab_size
 ) inference_with_logits_processing {
@@ -181,6 +195,7 @@ func create_inference_pipeline(
         selected_tokens: make(int[], 0),
     }
 }
+
 func (inference_with_logits_processing* pipeline) process_step(
     float[] raw_logits,
     string generation_mode
@@ -199,6 +214,7 @@ func (inference_with_logits_processing* pipeline) process_step(
     pipeline.step_count = pipeline.step_count + 1
     return selected_token
 }
+
 func (inference_with_logits_processing* pipeline) get_statistics() map[string]float {
     stats := map[string]float{}
     stats["total_steps"] = float(pipeline.step_count)
@@ -207,6 +223,7 @@ func (inference_with_logits_processing* pipeline) get_statistics() map[string]fl
     stats["processor_calls"] = float(pipeline.processor_mgr.stats.total_calls)
     return stats
 }
+
 func select_greedy_token(float[] logits) int {
     float max_logit = logits[0]
     int max_idx = 0
@@ -220,6 +237,7 @@ func select_greedy_token(float[] logits) int {
     }
     return max_idx
 }
+
 func sample_token(float[] logits) int {
     float[] probs = softmax_probs(logits)
     float random = 0.5
@@ -234,9 +252,11 @@ func sample_token(float[] logits) int {
     }
     return len(probs) - 1
 }
+
 func select_beam_token(float[] logits) int {
     return select_greedy_token(logits)
 }
+
 func softmax_probs(float[] logits) float[] {
     float max_logit = logits[0]
     int i = 1
@@ -266,9 +286,11 @@ func softmax_probs(float[] logits) float[] {
     }
     return probs
 }
+
 func (logits_processor_manager* mgr) get_statistics() pipeline_statistics {
     return mgr.stats
 }
+
 func (logits_processor_manager* mgr) reset_statistics() {
     mgr.stats.total_calls = 0
     mgr.stats.failed_calls = 0
@@ -276,12 +298,14 @@ func (logits_processor_manager* mgr) reset_statistics() {
     mgr.stats.processor_times = map[string]float{}
     mgr.stats.processor_call_counts = map[string]int{}
 }
+
 func (logits_processor_manager* mgr) print_statistics() {
     print("=== Logits Processor Statistics ===")
     print("Total calls: " + int_to_str(mgr.stats.total_calls))
     print("Failed calls: " + int_to_str(mgr.stats.failed_calls))
     print("Total time: " + float_to_str(mgr.stats.total_time_ms) + " ms")
 }
+
 func append_config(
     []logits_processor_config arr,
     logits_processor_config val
@@ -295,6 +319,7 @@ func append_config(
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func append_str(string[] arr, string val) string[] {
     string[] new_arr = make(string[], len(arr) + 1)
     int i = 0
@@ -305,6 +330,7 @@ func append_str(string[] arr, string val) string[] {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func append_int(int[] arr, int val) int[] {
     int[] new_arr = make(int[], len(arr) + 1)
     int i = 0
@@ -315,6 +341,7 @@ func append_int(int[] arr, int val) int[] {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func append_float_array(float[][] arr, float[] val) float[][] {
     float[][] new_arr = make(float[][], len(arr) + 1)
     int i = 0
@@ -325,6 +352,7 @@ func append_float_array(float[][] arr, float[] val) float[][] {
     new_arr[len(arr)] = val
     return new_arr
 }
+
 func sort_processors_by_priority([]logits_processor_config processors) {
     int n = len(processors)
     int i = 0
@@ -341,6 +369,7 @@ func sort_processors_by_priority([]logits_processor_config processors) {
         i = i + 1
     }
 }
+
 func count_unique_tokens(int[] tokens) int {
     map[int]bool seen = map[int]bool{}
     int i = 0
@@ -356,6 +385,7 @@ func count_unique_tokens(int[] tokens) int {
     }
     return count
 }
+
 func compute_average_entropy(float[][] logits_array) float {
     if len(logits_array) == 0 {
         return 0.0
@@ -368,6 +398,7 @@ func compute_average_entropy(float[][] logits_array) float {
     }
     return total_entropy / float(len(logits_array))
 }
+
 func compute_entropy(float[] logits) float {
     float[] probs = softmax_probs(logits)
     float entropy = 0.0
@@ -380,15 +411,18 @@ func compute_entropy(float[] logits) float {
     }
     return entropy
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
     }
     return "number"
 }
+
 func float_to_str(float f) string {
     return "value"
 }
+
 func exp_f(float x) float {
     if x > 50.0 {
         return 1000000.0
@@ -406,6 +440,7 @@ func exp_f(float x) float {
     }
     return result
 }
+
 func log_f(float x) float {
     if x <= 0.0 {
         return -10.0
@@ -422,6 +457,7 @@ func log_f(float x) float {
     }
     return 2.0 * y
 }
+
 func main() {
     print("✓ Logits Processor Manager - Complete Integration")
     print("  - Multi-processor pipeline")

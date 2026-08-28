@@ -13,6 +13,7 @@ struct structured_sampler {
     int violations
     warnings: string[]
 }
+
 func create_structured_sampler(*json_schema schema, string mode) structured_sampler {
     sampler := structured_sampler{
         schema: *schema,
@@ -28,6 +29,7 @@ func create_structured_sampler(*json_schema schema, string mode) structured_samp
     sampler.allowed_next = init_constraint.allowed_tokens
     return sampler
 }
+
 func filter_logits(*structured_sampler sampler, float[] logits) float[] {
     result := logits
     i := 0
@@ -44,6 +46,7 @@ func filter_logits(*structured_sampler sampler, float[] logits) float[] {
     }
     return result
 }
+
 func update_after_token(*structured_sampler sampler, int token_id, string token_str) {
     sampler.current_output = sampler.current_output + token_str
     was_allowed := is_token_allowed(token_id, *sampler.allowed_next)
@@ -62,6 +65,7 @@ func update_after_token(*structured_sampler sampler, int token_id, string token_
         sampler.state = 999
     }
 }
+
 func is_complete_output(string output, *json_schema schema) bool {
     if len(output) == 0 {
         return false
@@ -78,6 +82,7 @@ func is_complete_output(string output, *json_schema schema) bool {
     }
     return false
 }
+
 func is_complete_json_object(string s) bool {
     if len(s) < 2 {
         return false
@@ -100,6 +105,7 @@ func is_complete_json_object(string s) bool {
     }
     return count == 0
 }
+
 func is_complete_json_array(string s) bool {
     if len(s) < 2 {
         return false
@@ -122,6 +128,7 @@ func is_complete_json_array(string s) bool {
     }
     return count == 0
 }
+
 func is_valid_json_number(string s) bool {
     if len(s) == 0 {
         return false
@@ -162,6 +169,7 @@ func is_valid_json_number(string s) bool {
     }
     return i == len(s)
 }
+
 func process_batch(*[]structured_sampler samplers, float[][] logits_batch) float[][] {
     result := vec_new()
     i := 0
@@ -172,6 +180,7 @@ func process_batch(*[]structured_sampler samplers, float[][] logits_batch) float
     }
     return result
 }
+
 func get_sampler_stats(*structured_sampler sampler) string {
     stats := "Structured Sampler Stats:\n"
     stats = stats + "  Current output: " + sampler.current_output + "\n"
@@ -182,6 +191,7 @@ func get_sampler_stats(*structured_sampler sampler) string {
     stats = stats + "  Parse depth: " + int_to_string(sampler.parse_context.depth) + "\n"
     return stats
 }
+
 func print_sampler_debug(*structured_sampler sampler) {
     print(get_sampler_stats(sampler))
     if len(sampler.warnings) > 0 {
@@ -193,6 +203,7 @@ func print_sampler_debug(*structured_sampler sampler) {
         }
     }
 }
+
 func is_token_allowed(int token_id, *int[] allowed) bool {
     i := 0
     for i < len(*allowed) {
@@ -203,6 +214,7 @@ func is_token_allowed(int token_id, *int[] allowed) bool {
     }
     return false
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -222,6 +234,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func create_function_call_schema() json_schema {
     func_name_prop := json_property{
         name: "name",
@@ -243,9 +256,11 @@ func create_function_call_schema() json_schema {
     required.append("arguments")
     return schema_parser.create_object_schema(props, required)
 }
+
 func create_json_object_schema() json_schema {
     return schema_parser.create_object_schema(vec_new(), vec_new())
 }
+
 func create_json_array_schema() json_schema {
     item_schema := schema_parser.create_string_schema(0, 10000, "")
     return schema_parser.create_array_schema(*item_schema, 0, 1000)

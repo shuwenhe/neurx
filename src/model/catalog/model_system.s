@@ -15,6 +15,7 @@ struct model_system_config {
 	bool enable_batching
 	int32 max_batch_size
 }
+
 struct model_system_health {
 	string status
 	bool healthy
@@ -26,6 +27,7 @@ struct model_system_health {
 	float64 memory_usage_mb
 	float64 cache_utilization_percent
 }
+
 struct model_system {
 	sync.Mutex mu
 	*model_loader loader
@@ -42,6 +44,7 @@ struct model_system {
 	time.Time last_operation_time
 	int64 total_inferences
 }
+
 func create_model_system(model_system_config* config) *model_system {
 	if config == nil {
 		config = *model_system_config{
@@ -79,11 +82,13 @@ func create_model_system(model_system_config* config) *model_system {
 		created_at: time.Now(),
 	}
 }
+
 func (model_system* system) register_model_path(path string) error {
 	system.mu.Lock()
 	defer system.mu.Unlock()
 	return system.loader.register_model_path(path)
 }
+
 func (model_system* system) load_model(model_id string, model_type model_type, device model_device_type) *model_interface {
 	system.mu.Lock()
 	if int32(len(system.active_models)) >= system.config.max_models {
@@ -115,6 +120,7 @@ func (model_system* system) load_model(model_id string, model_type model_type, d
 	system.registry.register_model(reg_info)
 	return model
 }
+
 func (model_system* system) unload_model(model_id string) error {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -125,11 +131,13 @@ func (model_system* system) unload_model(model_id string) error {
 	system.last_operation_time = time.Now()
 	return nil
 }
+
 func (model_system* system) get_model(model_id string) *model_interface {
 	system.mu.Lock()
 	defer system.mu.Unlock()
 	return system.active_models[model_id]
 }
+
 func (model_system* system) infer(model_id string, request *inference_request) *inference_response {
 	system.mu.Lock()
 	engine, exists := system.inference_engines[model_id]
@@ -145,6 +153,7 @@ func (model_system* system) infer(model_id string, request *inference_request) *
 	system.mu.Unlock()
 	return engine.execute_inference(request)
 }
+
 func (model_system* system) batch_infer(model_id string, batch_request *batch_inference_request) *batch_inference_response {
 	system.mu.Lock()
 	engine, exists := system.inference_engines[model_id]
@@ -160,16 +169,19 @@ func (model_system* system) batch_infer(model_id string, batch_request *batch_in
 	system.mu.Unlock()
 	return engine.submit_batch_inference(batch_request)
 }
+
 func (model_system* system) get_tokenizer(model_id string) *tokenizer_interface {
 	system.mu.Lock()
 	defer system.mu.Unlock()
 	return system.tokenizers[model_id]
 }
+
 func (model_system* system) register_model_path_with_type(path string, model_type model_type) error {
 	system.mu.Lock()
 	defer system.mu.Unlock()
 	return system.loader.register_model_path(path)
 }
+
 func (model_system* system) list_active_models() string[] {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -179,6 +191,7 @@ func (model_system* system) list_active_models() string[] {
 	}
 	return models
 }
+
 func (model_system* system) check_system_health() *model_system_health {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -214,6 +227,7 @@ func (model_system* system) check_system_health() *model_system_health {
 	}
 	return system.health
 }
+
 func (model_system* system) get_model_stats(model_id string) map[string]interface{} {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -232,6 +246,7 @@ func (model_system* system) get_model_stats(model_id string) map[string]interfac
 	stats["uptime_seconds"] = int64(time.Since(stats_obj.loaded_at).Seconds())
 	return stats
 }
+
 func (model_system* system) get_system_stats() map[string]interface{} {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -247,6 +262,7 @@ func (model_system* system) get_system_stats() map[string]interface{} {
 	stats["adapter_stats"] = system.adapter_registry.get_registry_stats()
 	return stats
 }
+
 func (model_system* system) cache_put(key string, value interface{}, size_bytes int64) {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -254,6 +270,7 @@ func (model_system* system) cache_put(key string, value interface{}, size_bytes 
 		system.cache.put(key, value, CACHE_ENTRY_INFERENCE, size_bytes)
 	}
 }
+
 func (model_system* system) cache_get(key string) (interface{}, bool) {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -262,28 +279,33 @@ func (model_system* system) cache_get(key string) (interface{}, bool) {
 	}
 	return nil, false
 }
+
 func (model_system* system) get_health() *model_system_health {
 	system.check_system_health()
 	system.mu.Lock()
 	defer system.mu.Unlock()
 	return system.health
 }
+
 func (model_system* system) initialize_standard_models() error {
 	system.mu.Lock()
 	system.mu.Unlock()
 	register_all_standard_adapters(system.adapter_registry)
 	return nil
 }
+
 func (model_system* system) get_adapter_registry() *model_adapter_registry {
 	system.mu.Lock()
 	defer system.mu.Unlock()
 	return system.adapter_registry
 }
+
 func (model_system* system) get_model_registry() *model_registry {
 	system.mu.Lock()
 	defer system.mu.Unlock()
 	return system.registry
 }
+
 func (model_system* system) shutdown() error {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -296,6 +318,7 @@ func (model_system* system) shutdown() error {
 	system.health.status = "shutdown"
 	return nil
 }
+
 func (model_system* system) set_config(model_system_config* config) {
 	system.mu.Lock()
 	defer system.mu.Unlock()
@@ -303,6 +326,7 @@ func (model_system* system) set_config(model_system_config* config) {
 		system.config = config
 	}
 }
+
 func (model_system* system) get_config() *model_system_config {
 	system.mu.Lock()
 	defer system.mu.Unlock()

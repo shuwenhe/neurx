@@ -29,21 +29,27 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func json_completions() string {
     return "{\"id\":\"cmpl-001\",\"object\":\"text_completion\",\"created\":1726509600,\"model\":\"Qwen2.5-0.5B-Instruct\",\"choices\":[{\"text\":\" thisis补全response\",\"index\":0,\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":15,\"total_tokens\":25}}"
 }
+
 func json_embeddings() string {
     return "{\"object\":\"list\",\"data\":[{\"object\":\"embedding\",\"embedding\":[0.1,0.2,0.3,0.4,0.5],\"index\":0}],\"model\":\"Qwen2.5-0.5B-Instruct\",\"usage\":{\"prompt_tokens\":5,\"total_tokens\":5}}"
 }
+
 func json_image_generation() string {
     return "{\"created\":1726509600,\"data\":[{\"url\":\"data:image/jpeg;base64,...\",\"revised_prompt\":\"generated image\"}]}"
 }
+
 func json_audio_transcription() string {
     return "{\"text\":\"thisis音频转录of文本\",\"duration\":30.5,\"language\":\"zh\"}"
 }
+
 func json_fine_tune_list() string {
     return "{\"object\":\"list\",\"data\":[{\"id\":\"ft-001\",\"object\":\"fine-tune\",\"model\":\"Qwen2.5-0.5B-Instruct\",\"status\":\"succeeded\"}]}"
 }
+
 func format_http_response(int status, string reason, string body) string {
     string response = "HTTP/1.1 "
     response = response + int_to_string(status)
@@ -56,6 +62,7 @@ func format_http_response(int status, string reason, string body) string {
     response = response + body
     return response
 }
+
 func handle_completions(string method) string {
     if method == "POST" {
         string body = json_completions()
@@ -63,6 +70,7 @@ func handle_completions(string method) string {
     }
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
+
 func handle_embeddings(string method) string {
     if method == "POST" {
         string body = json_embeddings()
@@ -70,6 +78,7 @@ func handle_embeddings(string method) string {
     }
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
+
 func handle_images(string method) string {
     if method == "POST" {
         string body = json_image_generation()
@@ -77,6 +86,7 @@ func handle_images(string method) string {
     }
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
+
 func handle_audio(string method) string {
     if method == "POST" {
         string body = json_audio_transcription()
@@ -84,6 +94,7 @@ func handle_audio(string method) string {
     }
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
+
 func handle_fine_tunes(string method) string {
     if method == "GET" {
         string body = json_fine_tune_list()
@@ -91,6 +102,7 @@ func handle_fine_tunes(string method) string {
     }
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
+
 func main() {
     print("✅ pure S API 扩展endpointalready编译\n")
     print("alreadyimplementationendpoint:\n")

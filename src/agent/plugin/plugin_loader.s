@@ -6,6 +6,7 @@ import "sync"
 	LOADER_VALIDATING = 2
 	LOADER_ERROR = 3
 }
+
 struct plugin_loader {
 	string                  plugin_search_path
 	string[]             loaded_plugin_paths
@@ -19,6 +20,7 @@ struct plugin_loader {
 	int64                   loader_start_time
 	sync.Mutex              mu
 }
+
 struct plugin_package {
 	string                  package_id
 	string                  package_name
@@ -31,6 +33,7 @@ struct plugin_package {
 	int64                   package_created_at
 	int64                   package_size_bytes
 }
+
 struct plugin_descriptor {
 	string                  descriptor_id
 	string                  plugin_id
@@ -45,6 +48,7 @@ struct plugin_descriptor {
 	int32                   startup_timeout_ms
 	int32                   shutdown_timeout_ms
 }
+
 struct load_validation_result {
 	bool                    is_valid
 	string[]             validation_errors
@@ -52,6 +56,7 @@ struct load_validation_result {
 	string                  validation_message
 	int64                   validation_time
 }
+
 func create_plugin_loader(search_path string, max_plugins int32) plugin_loader {
 	return plugin_loader{
 		plugin_search_path:    search_path,
@@ -67,6 +72,7 @@ func create_plugin_loader(search_path string, max_plugins int32) plugin_loader {
 		mu:                    sync.Mutex{},
 	}
 }
+
 func create_plugin_package(id string, name string, path string) plugin_package {
 	return plugin_package{
 		package_id:          id,
@@ -81,6 +87,7 @@ func create_plugin_package(id string, name string, path string) plugin_package {
 		package_size_bytes:  0,
 	}
 }
+
 func create_plugin_descriptor(plugin_id string, name string) plugin_descriptor {
 	return plugin_descriptor{
 		descriptor_id:         "",
@@ -97,6 +104,7 @@ func create_plugin_descriptor(plugin_id string, name string) plugin_descriptor {
 		shutdown_timeout_ms:   5000,
 	}
 }
+
 func (plugin_loader* l) load_plugin(plugin_id string, plugin_path string) (plugin_package, bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -116,6 +124,7 @@ func (plugin_loader* l) load_plugin(plugin_id string, plugin_path string) (plugi
 	l.status = LOADER_READY
 	return pkg, true
 }
+
 func (plugin_loader* l) unload_plugin(plugin_id string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -134,6 +143,7 @@ func (plugin_loader* l) unload_plugin(plugin_id string) bool {
 	l.loaded_plugin_paths = result_list
 	return true
 }
+
 func (plugin_loader* l) validate_plugin_package(pkg plugin_package) load_validation_result {
 	result := load_validation_result{
 		is_valid:            true,
@@ -164,6 +174,7 @@ func (plugin_loader* l) validate_plugin_package(pkg plugin_package) load_validat
 	}
 	return result
 }
+
 func (plugin_loader* l) get_loaded_plugins() string[] {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -173,12 +184,14 @@ func (plugin_loader* l) get_loaded_plugins() string[] {
 	}
 	return result
 }
+
 func (plugin_loader* l) get_plugin_path(plugin_id string) (string, bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	path, exists := l.plugin_path_map[plugin_id]
 	return path, exists
 }
+
 func (plugin_loader* l) register_plugin_path(plugin_id string, path string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -191,6 +204,7 @@ func (plugin_loader* l) register_plugin_path(plugin_id string, path string) bool
 	l.current_plugins_loaded++
 	return true
 }
+
 func (plugin_loader* l) get_loader_stats() map[string]interface{} {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -205,6 +219,7 @@ func (plugin_loader* l) get_loader_stats() map[string]interface{} {
 	stats["uptime_ms"] = uptime_ms
 	return stats
 }
+
 func (plugin_loader* l) reload_plugin(plugin_id string) bool {
 	l.mu.Lock()
 	path, exists := l.plugin_path_map[plugin_id]
@@ -220,22 +235,26 @@ func (plugin_loader* l) reload_plugin(plugin_id string) bool {
 	_, load_success := l.load_plugin(plugin_id, path)
 	return load_success
 }
+
 func (plugin_loader* l) has_plugin(plugin_id string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	_, exists := l.plugin_path_map[plugin_id]
 	return exists
 }
+
 func (plugin_package* p) add_file(filename string, content string) {
 	p.files = append(p.files, filename)
 	p.file_content_map[filename] = content
 	p.file_count++
 	p.package_size_bytes = p.package_size_bytes + int32(len(content))
 }
+
 func (plugin_package* p) get_file_content(filename string) (string, bool) {
 	content, exists := p.file_content_map[filename]
 	return content, exists
 }
+
 func (plugin_package* p) calculate_checksum() string {
 	checksum := int32(0)
 	for _, content := range p.file_content_map {
@@ -246,15 +265,19 @@ func (plugin_package* p) calculate_checksum() string {
 	p.checksum = string(checksum)
 	return p.checksum
 }
+
 func (plugin_descriptor* d) add_required_module(module string) {
 	d.required_modules = append(d.required_modules, module)
 }
+
 func (plugin_descriptor* d) add_exported_function(function_name string) {
 	d.exported_functions = append(d.exported_functions, function_name)
 }
+
 func (plugin_descriptor* d) get_required_modules() string[] {
 	return d.required_modules
 }
+
 func (plugin_descriptor* d) get_exported_functions() string[] {
 	return d.exported_functions
 }

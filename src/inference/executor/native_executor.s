@@ -7,6 +7,7 @@ use neurx.inference.tokenizer.byte_tokenizer.{byte_tokenization_result, tokenize
 use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, hf_bpe_decode_result, load_hf_bpe_tokenizer, hf_bpe_encode, hf_bpe_decode_generated}
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding}
 use neurx.models.loaders.hf_transformer.{hf_model_weights, load_hf_model}
+
 struct native_execution_result {
     bool ok
     string request_id
@@ -17,6 +18,7 @@ struct native_execution_result {
     string error_code
     string error_message
 }
+
 func native_int_string(int value) string {
     if value == 0 { return "0" }
     string output = ""
@@ -24,6 +26,7 @@ func native_int_string(int value) string {
     for current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
     output
 }
+
 func native_token_ids(int[] values) string {
     string output = ""
     int i = 0
@@ -34,6 +37,7 @@ func native_token_ids(int[] values) string {
     }
     output
 }
+
 func native_ends_with(string value, string suffix) bool {
     if len(value) < len(suffix) { return false }
     int offset = len(value) - len(suffix)
@@ -44,6 +48,7 @@ func native_ends_with(string value, string suffix) bool {
     }
     true
 }
+
 func execute_native_request(string request_id, string model, string prompt, int max_tokens, int capacity, int active_requests) native_execution_result {
     native_schedule_decision decision = schedule_native_request(request_id, max_tokens, capacity, active_requests)
     if !decision.accepted {

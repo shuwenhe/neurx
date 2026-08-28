@@ -12,6 +12,7 @@ struct kv_cache_metadata {
     int32 slot_id
     bool is_allocated
 }
+
 struct kv_block {
     int32 block_id
     int32 seq_id
@@ -21,6 +22,7 @@ struct kv_block {
     bool is_full
     int32 allocated_size
 }
+
 struct kv_cache_interface {
     cache_location location
     int32 block_size
@@ -35,6 +37,7 @@ struct kv_cache_interface {
     bool enable_compression
     float32 compression_ratio
 }
+
 func create_kv_cache_interface(int32 num_blocks, int32 block_size) kv_cache_interface* {
     return *kv_cache_interface{
         location: cache_gpu,
@@ -51,6 +54,7 @@ func create_kv_cache_interface(int32 num_blocks, int32 block_size) kv_cache_inte
         compression_ratio: 1.0,
     }
 }
+
 func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
     if cache.num_allocated_blocks >= cache.num_blocks {
         return -1
@@ -76,6 +80,7 @@ func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
     }
     return block_id
 }
+
 func (kv_cache_interface* cache) put_kv(int32 seq_id, float32[] keys, float32[] values) bool {
     if len(cache.blocks) == 0 {
         cache.allocate_block(seq_id)
@@ -95,6 +100,7 @@ func (kv_cache_interface* cache) put_kv(int32 seq_id, float32[] keys, float32[] 
     }
     return false
 }
+
 func (kv_cache_interface* cache) get_kv(int32 seq_id) option[float32[]] {
     for _, block := range cache.blocks {
         if block.seq_id == seq_id {
@@ -103,6 +109,7 @@ func (kv_cache_interface* cache) get_kv(int32 seq_id) option[float32[]] {
     }
     return option[float32[]]{}
 }
+
 func (kv_cache_interface* cache) free_block(int32 block_id) bool {
     if block, exists := cache.blocks[block_id]; exists {
         delete(cache.blocks, block_id)
@@ -112,14 +119,17 @@ func (kv_cache_interface* cache) free_block(int32 block_id) bool {
     }
     return false
 }
+
 func (kv_cache_interface* cache) get_memory_usage() int32 {
     total := cache.gpu_memory_used + cache.cpu_memory_used
     return total
 }
+
 func (kv_cache_interface* cache) enable_compression(float32 ratio) {
     cache.enable_compression = true
     cache.compression_ratio = ratio
 }
+
 func (kv_cache_interface* cache) get_cache_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["num_blocks"] = cache.num_blocks
@@ -128,6 +138,7 @@ func (kv_cache_interface* cache) get_cache_stats() map[string]interface{} {
     stats["compression_enabled"] = cache.enable_compression
     return stats
 }
+
 func (kv_cache_interface* cache) clear() {
     cache.blocks = make(map[int32]kv_block*)
     cache.metadata = make(map[int32]kv_cache_metadata*)

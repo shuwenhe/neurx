@@ -11,6 +11,7 @@ struct adamax_optimizer {
     float[] exp_avg
     float[] exp_inf
 }
+
 func new_adamax(float lr, float beta1, float beta2, float eps, float weight_decay) adamax_optimizer {
     adamax_optimizer {
         lr: lr,
@@ -23,6 +24,7 @@ func new_adamax(float lr, float beta1, float beta2, float eps, float weight_deca
         exp_inf: [],
     }
 }
+
 func adamax_step(adamax_optimizer optimizer, tensor params, tensor grads) adamax_optimizer_step_output {
     int n = len(params.data)
     optimizer.step = optimizer.step + 1
@@ -49,10 +51,12 @@ func adamax_step(adamax_optimizer optimizer, tensor params, tensor grads) adamax
         params: new(out, params.shape, params.requires_grad),
     }
 }
+
 struct adamax_optimizer_step_output {
     adamax_optimizer optimizer
     tensor params
 }
+
 func ensure_adamax_state(float[] values, int n) float[] {
     float[] out = float[]{cap: n}
     int i = 0
@@ -66,18 +70,21 @@ func ensure_adamax_state(float[] values, int n) float[] {
     }
     out
 }
+
 func adamax_abs(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     return x
 }
+
 func adamax_max(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
+
 func adamax_pow(float base, int exponent) float {
     float result = 1.0
     int i = 0

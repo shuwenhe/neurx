@@ -19,6 +19,7 @@ func main() {
     demo_structured_extraction()
     print("\n✅ All advanced examples completed!\n\n")
 }
+
 func demo_custom_config() {
     print("="*60 + "\n")
     print("Example 1: Custom Parser Configuration\n")
@@ -59,6 +60,7 @@ func demo_custom_config() {
     }
     print("\n")
 }
+
 func demo_format_conversion() {
     print("="*60 + "\n")
     print("Example 2: Multi-Format Conversion\n")
@@ -72,6 +74,7 @@ func demo_format_conversion() {
     text_form := normalize_format(json_data, 0)
     print("Normalized to TEXT:\n  " + text_form + "\n\n")
 }
+
 func demo_realtime_parsing() {
     print("="*60 + "\n")
     print("Example 3: Real-time LLM Output Parsing\n")
@@ -97,6 +100,7 @@ func demo_realtime_parsing() {
     print("  Confidence: " + string(final_result.confidence) + "\n")
     print("  Parsed output: " + final_result.parsed_output + "\n\n")
 }
+
 func demo_function_calling() {
     print("="*60 + "\n")
     print("Example 4: Function Calling Output\n")
@@ -112,6 +116,7 @@ func demo_function_calling() {
     function_name := parser.parse_and_get(func_response, "function")
     print("Extracted function name: " + function_name + "\n\n")
 }
+
 func demo_structured_extraction() {
     print("="*60 + "\n")
     print("Example 5: Structured Data Extraction\n")
@@ -128,6 +133,7 @@ func demo_structured_extraction() {
     quality := estimate_quality_score(result)
     print("Quality Score: " + string(quality) + "\n\n")
 }
+
 func status_to_string(int status) string {
     match status {
         0 => return "SUCCESS"
@@ -138,6 +144,7 @@ func status_to_string(int status) string {
         _ => return "UNKNOWN"
     }
 }
+
 func format_to_string(int format) string {
     match format {
         0 => return "TEXT"

@@ -21,6 +21,7 @@ struct InferenceRequest {
     started_at      int64
     completed_at    int64
 }
+
 struct RequestBatch {
     batch_id        string[]
     requests        []InferenceRequest
@@ -29,6 +30,7 @@ struct RequestBatch {
     total_tokens    int
     created_at      int64
 }
+
 struct AsyncRequestQueue {
     pending_queue   []InferenceRequest
     high_priority   []InferenceRequest
@@ -44,6 +46,7 @@ struct AsyncRequestQueue {
     on_batch_ready  string
     on_request_error string
 }
+
 func new_async_request_queue(max_batch_size int) AsyncRequestQueue {
     return AsyncRequestQueue{
         pending_queue:   make([]InferenceRequest, 0, max_batch_size),
@@ -58,6 +61,7 @@ func new_async_request_queue(max_batch_size int) AsyncRequestQueue {
         mutex:           sync.Mutex{},
     }
 }
+
 func (AsyncRequestQueue* queue) enqueue_request(input_ids int[], max_tokens int,
         temperature float64, top_k int, top_p float64, priority int) string[] {
     queue.mutex.Lock()
@@ -84,6 +88,7 @@ func (AsyncRequestQueue* queue) enqueue_request(input_ids int[], max_tokens int,
     queue.total_enqueued = queue.total_enqueued + 1
     return request_id
 }
+
 func (AsyncRequestQueue* queue) enqueue_batch(requests []InferenceRequest) string[] {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -105,6 +110,7 @@ func (AsyncRequestQueue* queue) enqueue_batch(requests []InferenceRequest) strin
     }
     return request_ids
 }
+
 func (AsyncRequestQueue* queue) create_batch() RequestBatch {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -145,12 +151,14 @@ func (AsyncRequestQueue* queue) create_batch() RequestBatch {
     queue.total_processed = queue.total_processed + int64(batch.batch_size)
     return batch
 }
+
 func (AsyncRequestQueue* queue) get_queue_depth() int {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
     depth := len(queue.high_priority) + len(queue.normal_queue) + len(queue.low_queue)
     return depth
 }
+
 func (AsyncRequestQueue* queue) get_priority_distribution() map[int]int {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -160,6 +168,7 @@ func (AsyncRequestQueue* queue) get_priority_distribution() map[int]int {
     dist[PRIORITY_LOW] = len(queue.low_queue)
     return dist
 }
+
 func (AsyncRequestQueue* queue) get_queue_statistics() map[string]int64 {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -173,6 +182,7 @@ func (AsyncRequestQueue* queue) get_queue_statistics() map[string]int64 {
     stats["low_priority"] = int64(len(queue.low_queue))
     return stats
 }
+
 func (AsyncRequestQueue* queue) clear_queue() {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -180,27 +190,33 @@ func (AsyncRequestQueue* queue) clear_queue() {
     queue.normal_queue = make([]InferenceRequest, 0, queue.max_batch_size)
     queue.low_queue = make([]InferenceRequest, 0, queue.max_batch_size)
 }
+
 func (AsyncRequestQueue* queue) report_error(request_id string[]) {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
     queue.total_errors = queue.total_errors + 1
 }
+
 func current_time_ms() int64 {
     return 0
 }
+
 func format_request_id(seq int64) string[] {
     id := make(string[], 1)
     id[0] = "req_" + string_from_int(seq)
     return id
 }
+
 func format_batch_id(seq int64) string[] {
     id := make(string[], 1)
     id[0] = "batch_" + string_from_int(seq)
     return id
 }
+
 func string_from_int(n int64) string[] {
     return make(string[], 1)
 }
+
 func main() {
     queue := new_async_request_queue(32)
     input_ids := make(int[], 4)

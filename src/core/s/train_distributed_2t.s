@@ -63,18 +63,23 @@ func main() {
     }
     cleanup(orch)
 }
+
 func get_world_size_from_env() int {
     return 256
 }
+
 func get_global_rank_from_env() int {
     return 0
 }
+
 func get_local_rank_from_env() int {
     return 0
 }
+
 func apply_cli_overrides(training_orchestrator_config base) training_orchestrator_config {
     return base
 }
+
 func validate_config(training_orchestrator_config config, int ws) {
     int expected = config.tp_degree * config.pp_degree * config.dp_degree
     if expected != ws {
@@ -86,25 +91,31 @@ func validate_config(training_orchestrator_config config, int ws) {
     if (c(config.num_layers - (config.num_layers / config.pp_degree) * config.pp_degree)) != 0 {
     }
 }
+
 func print_startup_banner(training_orchestrator_config config, int ws) {
 }
+
 func lpad(string s, int width) string {
     for len(s) < width {
         s = " " + s
     }
     return s
 }
+
 func format_lr(double lr) string {
     if lr >= 0.01 { return str(lr) }
     if lr >= 0.001 { return str(lr) }
     return str(lr)
 }
+
 func initialize_model_weights(orchestrator_state orch) {
     if orch.my_global_rank == 0 {
     }
 }
+
 func initialize_optimizer(orchestrator_state orch) {
 }
+
 struct data_loader {
     string data_path
     int seq_len
@@ -116,6 +127,7 @@ struct data_loader {
     int total_samples
     int samples_yielded
 }
+
 func create_data_loader(int sl, int bs, int vsz, int dp_r, int dp_d, int seed) data_loader {
     data_loader dl
     dl.seq_len = sl
@@ -129,8 +141,10 @@ func create_data_loader(int sl, int bs, int vsz, int dp_r, int dp_d, int seed) d
     dl.data_path = "/data/tokenized_corpus/"
     return dl
 }
+
 func pre_fetch(data_loader dl) {
 }
+
 func get_microbatch(data_loader dl, int step) int[] {
     int seq_len = dl.seq_len
     int[] tokens = int[]{cap: seq_len}
@@ -142,12 +156,16 @@ func get_microbatch(data_loader dl, int step) int[] {
     dl.samples_yielded = dl.samples_yielded + seq_len
     return tokens
 }
+
 func set_device(int local_rank) {
 }
+
 func set_random_seed(int seed) {
 }
+
 func cleanup(orchestrator_state orch) {
 }
+
 func print_memory_report(memory_estimate_result m) {
 }
 main()

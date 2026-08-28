@@ -27,6 +27,7 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
+
 func generate_response(string prompt, int max_tokens) string {
     string model_path = resolve_model_path_from_env()
     real_text_engine_state state = load_real_text_engine(model_path)
@@ -42,9 +43,11 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return result.text
 }
+
 func runtime_run_command_output(string command) string {
     ""
 }
+
 func main() {
     print("NeurX Medical AI Backend - File IPC Mode\n")
     print("Listening on: /tmp/neurx_request.txt\n")

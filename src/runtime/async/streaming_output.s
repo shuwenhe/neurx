@@ -8,6 +8,7 @@ import "encoding/json"
 	EVENT_CHECKPOINT    = 4
 	EVENT_METADATA      = 5
 }
+
 struct stream_event {
 	event_type      int32
 	event_id        string
@@ -26,6 +27,7 @@ struct stream_event {
 	error_message   string
 	is_last         bool
 }
+
 struct stream_output {
 	request_id              string
 	session_id              string
@@ -65,6 +67,7 @@ struct sse_config {
 	include_token_ids       bool
 	buffer_strategy         int32
 }
+
 struct stream_buffer {
 	events          stream_event[]
 	text_buffer     string
@@ -74,6 +77,7 @@ struct stream_buffer {
 	is_flushed      bool
 	mu              sync.Mutex
 }
+
 struct stream_state {
 	output              stream_output
 	buffer              stream_buffer
@@ -85,6 +89,7 @@ struct stream_state {
 	sent_events_count   int64
 	dropped_events      int64
 }
+
 func create_stream_state(request_id string, mode int32) stream_state {
 	return stream_state{
 		output: stream_output{
@@ -108,6 +113,7 @@ func create_stream_state(request_id string, mode int32) stream_state {
 		is_finished: false,
 	}
 }
+
 func create_default_sse_config() sse_config {
 	return sse_config{
 		enable_streaming:        true,
@@ -121,6 +127,7 @@ func create_default_sse_config() sse_config {
 		buffer_strategy:         MODE_DELTA,
 	}
 }
+
 func (s stream_state*) add_token(token_id int32, token_text string) bool {
 	s.buffer.mu.Lock()
 	defer s.buffer.mu.Unlock()
@@ -141,12 +148,14 @@ func (s stream_state*) add_token(token_id int32, token_text string) bool {
 	}
 	return true
 }
+
 func (s stream_state*) add_tokens_batch(token_ids int32[], token_texts string[]) bool {
 	for i := int32(0); i < int32(len(token_ids)); i++ {
 		s.add_token(token_ids[i], token_texts[i])
 	}
 	return true
 }
+
 func (s stream_state*) flush_chunk() bool {
 	if int32(len(s.buffer.token_buffer)) == 0 {
 		return false
@@ -171,6 +180,7 @@ func (s stream_state*) flush_chunk() bool {
 	s.buffer.token_buffer = make(int32[], 0, s.config.chunk_size)
 	return true
 }
+
 func (s stream_state*) create_delta_event() stream_event {
 	event := stream_event{
 		event_type:      EVENT_TOKEN_DELTA,
@@ -185,6 +195,7 @@ func (s stream_state*) create_delta_event() stream_event {
 	}
 	return event
 }
+
 func (s stream_state*) create_completion_event() stream_event {
 	event := stream_event{
 		event_type:      EVENT_COMPLETE,
@@ -196,6 +207,7 @@ func (s stream_state*) create_completion_event() stream_event {
 	}
 	return event
 }
+
 func (s stream_state*) create_error_event(error_code int32, error_msg string) stream_event {
 	event := stream_event{
 		event_type:      EVENT_ERROR,
@@ -209,6 +221,7 @@ func (s stream_state*) create_error_event(error_code int32, error_msg string) st
 	}
 	return event
 }
+
 func (s stream_state*) create_heartbeat_event() stream_event {
 	return stream_event{
 		event_type:      EVENT_METADATA,
@@ -220,6 +233,7 @@ func (s stream_state*) create_heartbeat_event() stream_event {
 		metadata_value:  "alive",
 	}
 }
+
 func (s stream_state*) get_pending_events() stream_event[] {
 	s.buffer.mu.Lock()
 	defer s.buffer.mu.Unlock()
@@ -231,13 +245,16 @@ func (s stream_state*) get_pending_events() stream_event[] {
 	s.sent_events_count += int64(len(events))
 	return events
 }
+
 func (s stream_state*) should_send_heartbeat() bool {
 	now := time.Now().UnixNano()
 	return now - s.last_heartbeat >= s.heartbeat_interval
 }
+
 func (s stream_state*) mark_heartbeat_sent() {
 	s.last_heartbeat = time.Now().UnixNano()
 }
+
 func (s stream_state*) finish(finish_reason string, status int32) {
 	s.buffer.mu.Lock()
 	defer s.buffer.mu.Unlock()
@@ -249,43 +266,54 @@ func (s stream_state*) finish(finish_reason string, status int32) {
 		s.flush_chunk()
 	}
 }
+
 func (s stream_state*) get_output() stream_output {
 	s.buffer.mu.Lock()
 	defer s.buffer.mu.Unlock()
 	return s.output
 }
+
 func (s stream_state*) add_metadata(key string, value string) {
 	s.buffer.mu.Lock()
 	defer s.buffer.mu.Unlock()
 	s.output.metadata[key] = value
 }
+
 func (s stream_state*) set_session_id(session_id string) {
 	s.output.session_id = session_id
 }
+
 func (s stream_state*) pause() {
 	s.is_paused = true
 }
+
 func (s stream_state*) resume() {
 	s.is_paused = false
 }
+
 func (s stream_state*) is_paused() bool {
 	return s.is_paused
 }
+
 func (s stream_state*) is_complete() bool {
 	return s.is_finished
 }
+
 func (s stream_state*) get_event_count() int64 {
 	s.buffer.mu.Lock()
 	defer s.buffer.mu.Unlock()
 	return s.sent_events_count
 }
+
 func (s stream_state*) format_sse_message(event stream_event) string {
 	event_json := json.Marshal(event)
 	return format("data: %s\n\n", event_json)
 }
+
 func generate_event_id() string {
 	return format("event_%d", time.Now().UnixNano())
 }
+
 func event_to_json(event stream_event) map[string]interface{} {
 	data := make(map[string]interface{})
 	data["event_id"] = event.event_id

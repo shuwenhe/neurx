@@ -17,6 +17,7 @@ struct grpo_pass_k_config {
     bool use_value_loss
     f32 value_loss_coeff
 }
+
 struct code_evaluation {
     bool compiles
     bool passes_tests
@@ -26,6 +27,7 @@ struct code_evaluation {
     f32 execution_time
     f32 correctness_score
 }
+
 struct grpo_pass_k_trainer {
     GRPOPassKConfig config
     *model policy_model
@@ -36,6 +38,7 @@ struct grpo_pass_k_trainer {
     f32 success_rate
     i64 step_count
 }
+
 func new_grpo_passk_trainer(
     GRPOPassKConfig config,
     *model policy,
@@ -58,6 +61,7 @@ func new_grpo_passk_trainer(
         step_count: 0,
     }
 }
+
 func evaluate_code(string code, []test_case test_cases) . CodeEvaluation {
     return code_evaluation{
         compiles: true,
@@ -69,6 +73,7 @@ func evaluate_code(string code, []test_case test_cases) . CodeEvaluation {
         correctness_score: 1.0,
     }
 }
+
 func compute_passk([]code_evaluation evaluations, i32 k) . f32 {
     num_passed := 0
     for eval in evaluations {
@@ -81,6 +86,7 @@ func compute_passk([]code_evaluation evaluations, i32 k) . f32 {
     }
     return 0.0
 }
+
 func (grpo_pass_k_trainer* trainer) compute_code_reward(CodeEvaluation eval) . f32 {
     reward := 0.0
     if eval.compiles {
@@ -91,6 +97,7 @@ func (grpo_pass_k_trainer* trainer) compute_code_reward(CodeEvaluation eval) . f
     reward += eval.style_score * trainer.config.style_weight
     return reward
 }
+
 func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
     [][]code_evaluation evaluations,
     [][]f32 rewards
@@ -121,6 +128,7 @@ func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
     }
     return advantages
 }
+
 func (grpo_pass_k_trainer* trainer) normalize_advantages(
     [][]f32 advantages
 ) . [][]f32 {
@@ -149,6 +157,7 @@ func (grpo_pass_k_trainer* trainer) normalize_advantages(
     }
     return normalized
 }
+
 func (grpo_pass_k_trainer* trainer) train_step(
     string[] prompts,
     [][]test_case test_cases
@@ -233,6 +242,7 @@ func (grpo_pass_k_trainer* trainer) train_step(
         avg_passk
     )
 }
+
 func compute_mean([]f32 values) . f32 {
     if len(values) == 0 {
         return 0.0
@@ -243,6 +253,7 @@ func compute_mean([]f32 values) . f32 {
     }
     return sum / f32(len(values))
 }
+
 func compute_std([]f32 values, f32 mean) . f32 {
     if len(values) == 0 {
         return 1.0
@@ -253,6 +264,7 @@ func compute_std([]f32 values, f32 mean) . f32 {
     }
     return sqrt(sum_sq / f32(len(values)))
 }
+
 func clamp_scalar(f32 x, f32 min_val, f32 max_val) . f32 {
     if x < min_val {
         return min_val
@@ -262,12 +274,15 @@ func clamp_scalar(f32 x, f32 min_val, f32 max_val) . f32 {
     }
     return x
 }
+
 func sort([]f32 values) . []f32 {
     return values
 }
+
 func concat_prompt_code(string prompt, string code) . Tensor {
     return tensor_zeros([1])
 }
+
 struct test_case {
     string input
     string expected_output

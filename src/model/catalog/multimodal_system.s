@@ -17,6 +17,7 @@ struct multimodal_system_config {
 	int32 timeout_seconds
 	map[string]interface{} extra_params
 }
+
 struct multimodal_system_health {
 	string status
 	bool healthy
@@ -27,6 +28,7 @@ struct multimodal_system_health {
 	float64 cache_utilization_percent
 	float64 avg_inference_latency_ms
 }
+
 struct multimodal_system {
 	sync.Mutex mu
 	*audio_processor audio_proc
@@ -43,6 +45,7 @@ struct multimodal_system {
 	time.Time last_operation_time
 	int64 total_operations
 }
+
 func create_multimodal_system(model_system* model_sys) *multimodal_system {
 	config := *multimodal_system_config{
 		max_concurrent_inferences:      10,
@@ -86,26 +89,31 @@ func create_multimodal_system(model_system* model_sys) *multimodal_system {
 	}
 	return ms
 }
+
 func (multimodal_system* ms) load_audio(audio_id string, samples float[]32, metadata *audio_metadata) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.audio_proc.load_audio(audio_id, samples, metadata)
 }
+
 func (multimodal_system* ms) load_video(video_id string, frames []video_frame, metadata *video_metadata) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.video_proc.load_video(video_id, frames, metadata)
 }
+
 func (multimodal_system* ms) unload_audio(audio_id string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.audio_proc.unload_audio(audio_id)
 }
+
 func (multimodal_system* ms) unload_video(video_id string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.video_proc.unload_video(video_id)
 }
+
 func (multimodal_system* ms) process_audio(audio_id string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -131,6 +139,7 @@ func (multimodal_system* ms) process_audio(audio_id string) error {
 	ms.last_operation_time = time.Now()
 	return nil
 }
+
 func (multimodal_system* ms) process_video(video_id string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -160,6 +169,7 @@ func (multimodal_system* ms) process_video(video_id string) error {
 	ms.last_operation_time = time.Now()
 	return nil
 }
+
 func (multimodal_system* ms) infer(multimodal_inference_request* request) (*multimodal_inference_response, error) {
 	ms.mu.Lock()
 	active_tasks := ms.health.active_tasks
@@ -179,6 +189,7 @@ func (multimodal_system* ms) infer(multimodal_inference_request* request) (*mult
 	ms.mu.Unlock()
 	return response, err
 }
+
 func (multimodal_system* ms) batch_infer(requests []*multimodal_inference_request) ([]*multimodal_inference_response, error) {
 	if len(requests) == 0 {
 		return nil, fmt.Errorf("no inference requests provided")
@@ -195,11 +206,13 @@ func (multimodal_system* ms) batch_infer(requests []*multimodal_inference_reques
 	}
 	return responses, nil
 }
+
 func (multimodal_system* ms) align_audio_video(pair_id string) (*sync_result, error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.aligner.auto_sync(pair_id)
 }
+
 func (multimodal_system* ms) check_system_health() *multimodal_system_health {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -223,6 +236,7 @@ func (multimodal_system* ms) check_system_health() *multimodal_system_health {
 	ms.health.last_health_check = time.Now()
 	return ms.health
 }
+
 func (multimodal_system* ms) get_system_stats() map[string]interface{} {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -241,6 +255,7 @@ func (multimodal_system* ms) get_system_stats() map[string]interface{} {
 	}
 	return stats
 }
+
 func (multimodal_system* ms) clear_cache() error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -249,6 +264,7 @@ func (multimodal_system* ms) clear_cache() error {
 	ms.last_operation_time = time.Now()
 	return nil
 }
+
 func (multimodal_system* ms) cleanup() error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -257,12 +273,14 @@ func (multimodal_system* ms) cleanup() error {
 	_ = ms.cache.clear_cache()
 	return nil
 }
+
 func (multimodal_system* ms) set_fusion_strategy(strategy fusion_strategy) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	ms.config.default_fusion_strategy = strategy
 	return ms.fusion_engine.set_fusion_strategy(strategy)
 }
+
 func (multimodal_system* ms) set_confidence_threshold(threshold float32) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -272,41 +290,49 @@ func (multimodal_system* ms) set_confidence_threshold(threshold float32) error {
 	ms.config.confidence_threshold = threshold
 	return ms.aligner.set_confidence_threshold(threshold)
 }
+
 func (multimodal_system* ms) register_text_encoder(tokenizer *tokenizer_interface, model_id string, max_seq int32) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.encoder.register_text_encoder(tokenizer, model_id, max_seq)
 }
+
 func (multimodal_system* ms) register_vision_encoder(model_id string, image_size int32, patch_size int32) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.encoder.register_vision_encoder(model_id, image_size, patch_size)
 }
+
 func (multimodal_system* ms) register_audio_encoder(model_id string, sample_rate int32, n_mels int32) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.encoder.register_audio_encoder(model_id, sample_rate, n_mels)
 }
+
 func (multimodal_system* ms) register_video_encoder(model_id string, num_frames int32, temporal_agg string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.encoder.register_video_encoder(model_id, num_frames, temporal_agg)
 }
+
 func (multimodal_system* ms) get_encoder_stats() map[string]interface{} {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.encoder.get_encoder_stats()
 }
+
 func (multimodal_system* ms) get_fusion_stats() map[string]interface{} {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.fusion_engine.get_fusion_stats()
 }
+
 func (multimodal_system* ms) get_inference_stats() map[string]interface{} {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.inference_engine.get_inference_stats()
 }
+
 func (multimodal_system* ms) get_cache_stats() *mm_cache_statistics {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

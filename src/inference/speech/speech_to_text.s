@@ -1,6 +1,8 @@
 package neurx.inference.speech.speech_to_text
 func speech_task_transcribe() int { 1 }
+
 func speech_task_translate() int { 2 }
+
 struct speech_to_text_config {
     string model
     int task
@@ -11,6 +13,7 @@ struct speech_to_text_config {
     bool streaming
     bool word_timestamps
 }
+
 struct speech_to_text_state {
     speech_to_text_config config
     int samples_received
@@ -22,6 +25,7 @@ struct speech_to_text_state {
     bool complete
     string error_message
 }
+
 struct speech_chunk {
     int sequence_id
     float[] samples
@@ -29,6 +33,7 @@ struct speech_chunk {
     int end_ms
     bool final_chunk
 }
+
 struct speech_chunk_result {
     speech_to_text_state state
     string text
@@ -37,6 +42,7 @@ struct speech_chunk_result {
     bool final_chunk
     bool success
 }
+
 struct speech_native_job {
     int64 samples_pointer
     int sample_count
@@ -53,6 +59,7 @@ func speech_config_valid(speech_to_text_config config) bool {
     if config.sample_rate <= 0 || config.channels <= 0 || config.chunk_seconds <= 0 { return false }
     true
 }
+
 func init_speech_to_text(speech_to_text_config config) speech_to_text_state {
     bool initialized = speech_config_valid(config)
     string error_message = ""
@@ -69,15 +76,18 @@ func init_speech_to_text(speech_to_text_config config) speech_to_text_state {
         error_message: error_message,
     }
 }
+
 func speech_chunk_duration_ms(speech_to_text_config config, int sample_count) int {
     if config.sample_rate <= 0 || config.channels <= 0 { return 0 }
     sample_count * 1000 / (config.sample_rate * config.channels)
 }
+
 func speech_append_text(string transcript, string text) string {
     if text == "" { return transcript }
     if transcript == "" { return text }
     transcript + " " + text
 }
+
 func speech_int_string(int value) string {
     if value == 0 { return "0" }
     int current = value
@@ -91,6 +101,7 @@ func speech_int_string(int value) string {
     }
     prefix + digits
 }
+
 func speech_digit_string(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -103,6 +114,7 @@ func speech_digit_string(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
+
 func speech_consume_chunk(speech_to_text_state state, speech_chunk chunk, string decoded_text, string detected_language) speech_chunk_result {
     if !state.initialized || state.complete {
         return speech_chunk_result {state: state, text: "", start_ms: chunk.start_ms, end_ms: chunk.end_ms, final_chunk: chunk.final_chunk, success: false}
@@ -123,14 +135,17 @@ func speech_consume_chunk(speech_to_text_state state, speech_chunk chunk, string
     }
     speech_chunk_result {state: updated, text: decoded_text, start_ms: chunk.start_ms, end_ms: chunk.end_ms, final_chunk: chunk.final_chunk, success: true}
 }
+
 func speech_native_execute(speech_native_job job) int {
     if job.samples_pointer == i64(0) || job.output_pointer == i64(0) || job.sample_count <= 0 || job.output_capacity <= 0 { return 0 - 1 }
     neurx_speech_transcribe_f32(job.samples_pointer, job.sample_count, job.sample_rate, job.channels, job.task, job.output_pointer, job.output_capacity)
 }
+
 func speech_openai_json(speech_to_text_state state, bool verbose) string {
     if !verbose { return "{\"text\":\"" + anthropic_safe_json(state.transcript) + "\"}" }
     "{\"task\":\"transcribe\",\"language\":\"" + anthropic_safe_json(state.detected_language) + "\",\"duration\":" + speech_int_string(state.audio_duration_ms) + ",\"text\":\"" + anthropic_safe_json(state.transcript) + "\"}"
 }
+
 func anthropic_safe_json(string value) string {
     string output = ""
     int i = 0

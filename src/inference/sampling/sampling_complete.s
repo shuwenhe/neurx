@@ -11,12 +11,14 @@ struct sampling_parameters {
     int seed
     string method
 }
+
 struct sampling_output {
     int token_id
     float probability
     float[] top_tokens
     int[] top_token_ids
 }
+
 func next_token(float[] logits, sampling_parameters params) int {
     float[] adjusted_logits = float[]{}
     for i = 0; i < len(logits); i = i + 1 {
@@ -40,6 +42,7 @@ func next_token(float[] logits, sampling_parameters params) int {
         argmax_sampling(adjusted_logits)
     }
 }
+
 func argmax_sampling(float[] logits) int {
     int best_idx = 0
     float best_val = logits[0]
@@ -51,6 +54,7 @@ func argmax_sampling(float[] logits) int {
     }
     best_idx
 }
+
 func multinomial_sampling(float[] logits, int seed) int {
     float[] probs = softmax_logits(logits)
     float r = 0.5
@@ -63,6 +67,7 @@ func multinomial_sampling(float[] logits, int seed) int {
     }
     len(probs) - 1
 }
+
 func top_k_sampling(float[] logits, int k, int seed) int {
     int vocab_size = len(logits)
     int[] top_indices = get_top_k_indices(logits, k)
@@ -74,6 +79,7 @@ func top_k_sampling(float[] logits, int k, int seed) int {
     int idx = multinomial_sampling(top_logits, seed)
     top_indices[idx]
 }
+
 func nucleus_sampling(float[] logits, float p, int seed) int {
     int[] sorted_indices = get_sorted_indices(logits)
     float[] sorted_logits = float[]{}
@@ -99,6 +105,7 @@ func nucleus_sampling(float[] logits, float p, int seed) int {
     int idx = multinomial_sampling(nucleus_logits, seed)
     nucleus_indices[idx]
 }
+
 func typical_sampling(float[] logits, float mass, int seed) int {
     float[] probs = softmax_logits(logits)
     float entropy = calculate_entropy(probs)
@@ -109,11 +116,13 @@ func typical_sampling(float[] logits, float mass, int seed) int {
     }
     top_k_sampling(typical_scores, 100, seed)
 }
+
 struct mirostat_state {
     float tau
     float eta
     float mu
 }
+
 func mirostat_sampling(
     float[] logits,
     float tau,
@@ -126,6 +135,7 @@ func mirostat_sampling(
     int token = multinomial_sampling(logits, 0)
     token
 }
+
 func dry_sampling(
     float[] logits,
     float alpha,
@@ -139,6 +149,7 @@ func dry_sampling(
     }
     argmax_sampling(adjusted_logits)
 }
+
 func min_p_sampling(
     float[] logits,
     float min_p
@@ -156,6 +167,7 @@ func min_p_sampling(
     }
     argmax_sampling(filtered_logits)
 }
+
 func local_typicality_sampling(
     float[] logits,
     float alpha,
@@ -169,6 +181,7 @@ func local_typicality_sampling(
     }
     argmax_sampling(locality_scores)
 }
+
 func lookahead_sampling(
     float[] logits,
     float[][] future_logits,
@@ -184,11 +197,13 @@ func lookahead_sampling(
     }
     argmax_sampling(combined_logits)
 }
+
 struct beam_search_state {
     int[] sequences
     float[] scores
     int beam_size
 }
+
 func beam_search_step(
     float[] logits,
     beam_search_state state,
@@ -198,6 +213,7 @@ func beam_search_step(
     new_state.beam_size = beam_size
     new_state
 }
+
 func length_normalized_sampling(
     float[] logits,
     int current_length,
@@ -211,6 +227,7 @@ func length_normalized_sampling(
     }
     argmax_sampling(adjusted_logits)
 }
+
 func contrastive_search_step(
     float[] logits,
     float[][] model_embeddings,
@@ -227,6 +244,7 @@ func contrastive_search_step(
     int selected = argmax_sampling(contrastive_scores)
     top_k_idx[selected]
 }
+
 func multinomial_with_repetition_penalty(
     float[] logits,
     int[] input_ids,
@@ -244,6 +262,7 @@ func multinomial_with_repetition_penalty(
     }
     multinomial_sampling(adjusted_logits, seed)
 }
+
 func constrained_decoding_sampling(
     float[] logits,
     int[] allowed_tokens
@@ -258,6 +277,7 @@ func constrained_decoding_sampling(
     }
     argmax_sampling(constrained_logits)
 }
+
 func softmax_logits(float[] logits) float[] {
     float[] probs = float[]{}
     float max_logit = get_max(logits)
@@ -272,6 +292,7 @@ func softmax_logits(float[] logits) float[] {
     }
     probs
 }
+
 func get_top_k_indices(float[] logits, int k) int[] {
     int[] indices = int[]{}
     if k >= len(logits) {
@@ -285,6 +306,7 @@ func get_top_k_indices(float[] logits, int k) int[] {
     }
     indices
 }
+
 func get_sorted_indices(float[] logits) int[] {
     int[] indices = int[]{}
     for i = 0; i < len(logits); i = i + 1 {
@@ -292,6 +314,7 @@ func get_sorted_indices(float[] logits) int[] {
     }
     indices
 }
+
 func calculate_entropy(float[] probs) float {
     float entropy = 0.0
     for i = 0; i < len(probs); i = i + 1 {
@@ -301,6 +324,7 @@ func calculate_entropy(float[] probs) float {
     }
     entropy
 }
+
 func get_max(float[] arr) float {
     float max_val = arr[0]
     for i = 1; i < len(arr); i = i + 1 {
@@ -310,6 +334,7 @@ func get_max(float[] arr) float {
     }
     max_val
 }
+
 func copy_array(float[] arr) float[] {
     float[] copy
     for i = 0; i < len(arr); i = i + 1 {
@@ -317,11 +342,13 @@ func copy_array(float[] arr) float[] {
     }
     copy
 }
+
 struct sampling_pipeline {
     string[] preprocessing_steps
     string main_sampler
     string[] postprocessing_steps
 }
+
 func create_default_sampling_pipeline() sampling_pipeline {
     sampling_pipeline pipeline
     pipeline.preprocessing_steps = string[]{"temperature_scaling", "repetition_penalty"}
@@ -329,6 +356,7 @@ func create_default_sampling_pipeline() sampling_pipeline {
     pipeline.postprocessing_steps = string[]{}
     pipeline
 }
+
 func apply_sampling_pipeline(
     float[] logits,
     int[] input_ids,
@@ -344,6 +372,7 @@ func apply_sampling_pipeline(
     output.token_id = token_id
     output
 }
+
 func benchmark_sampling_methods(
     float[][] logits_batch,
     int num_iterations
@@ -355,12 +384,14 @@ func benchmark_sampling_methods(
     params.top_k = 50
     params.top_p = 0.9
 }
+
 struct sampling_statistics {
     int[] token_counts
     float[] token_probabilities
     float entropy
     float diversity_score
 }
+
 func collect_sampling_statistics(
     int[] token_sequence
 ) sampling_statistics {
@@ -371,6 +402,7 @@ func collect_sampling_statistics(
     stats.diversity_score = 0.0
     stats
 }
+
 func main() {
     println("=== Complete Sampling System ===")
     sampling_parameters params

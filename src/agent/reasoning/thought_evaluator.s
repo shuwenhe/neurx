@@ -8,12 +8,14 @@ import "time"
 	CONFIDENCE = 4
 	NOVELTY = 5
 }
+
 struct evaluation_score {
 	evaluation_criteria criteria
 	float32             score
 	string              feedback
 	int64               evaluated_at
 }
+
 struct thought_quality_metrics {
 	float32     relevance_score
 	float32     completeness_score
@@ -23,6 +25,7 @@ struct thought_quality_metrics {
 	float32     novelty_score
 	float32     overall_score
 }
+
 struct thought_evaluation_result {
 	string                      thought_id
 	thought_quality_metrics     metrics
@@ -32,6 +35,7 @@ struct thought_evaluation_result {
 	string                      recommendation
 	int64                       evaluation_time
 }
+
 struct thought_evaluator {
 	map[string]thought_quality_metrics metrics_cache
 	map[string]thought_evaluation_result results_cache
@@ -47,6 +51,7 @@ struct thought_evaluator {
 	map[string]int32            evaluation_counts
 	sync.Mutex                  mu
 }
+
 func create_thought_evaluator() thought_evaluator {
 	return thought_evaluator{
 		metrics_cache:         make(map[string]thought_quality_metrics),
@@ -64,6 +69,7 @@ func create_thought_evaluator() thought_evaluator {
 		mu:                    sync.Mutex{},
 	}
 }
+
 func (thought_evaluator* e) evaluate_thought(
 	thought_id string,
 	thought_content string,
@@ -158,6 +164,7 @@ func (thought_evaluator* e) evaluate_thought(
 	e.evaluation_counts[thought_id]++
 	return result
 }
+
 func (thought_evaluator* e) calculate_relevance(
 	thought string,
 	context string,
@@ -185,6 +192,7 @@ func (thought_evaluator* e) calculate_relevance(
 	}
 	return score
 }
+
 func (thought_evaluator* e) calculate_completeness(thought string) float32 {
 	if len(thought) == 0 {
 		return 0.0
@@ -199,6 +207,7 @@ func (thought_evaluator* e) calculate_completeness(thought string) float32 {
 	}
 	return 1.0
 }
+
 func (thought_evaluator* e) calculate_consistency(
 	thought string,
 	previous_thoughts string[],
@@ -227,6 +236,7 @@ func (thought_evaluator* e) calculate_consistency(
 	}
 	return score
 }
+
 func (thought_evaluator* e) calculate_clarity(thought string) float32 {
 	if len(thought) == 0 {
 		return 0.0
@@ -249,6 +259,7 @@ func (thought_evaluator* e) calculate_clarity(thought string) float32 {
 	}
 	return score
 }
+
 func (thought_evaluator* e) calculate_confidence(thought string) float32 {
 	if len(thought) == 0 {
 		return 0.0
@@ -276,6 +287,7 @@ func (thought_evaluator* e) calculate_confidence(thought string) float32 {
 	}
 	return max_conf
 }
+
 func (thought_evaluator* e) calculate_novelty(
 	thought string,
 	previous_thoughts string[],
@@ -297,6 +309,7 @@ func (thought_evaluator* e) calculate_novelty(
 	}
 	return novelty_score
 }
+
 func (thought_evaluator* e) calculate_text_similarity(
 	text1 string,
 	text2 string,
@@ -319,6 +332,7 @@ func (thought_evaluator* e) calculate_text_similarity(
 	}
 	return float32(common*2) / float32(total)
 }
+
 func (thought_evaluator* e) tokenize(text string) string[] {
 	tokens := make(string[], 0)
 	current_token := ""
@@ -337,6 +351,7 @@ func (thought_evaluator* e) tokenize(text string) string[] {
 	}
 	return tokens
 }
+
 func (thought_evaluator* e) to_lower(text string) string {
 	result := ""
 	for i := int32(0); i < int32(len(text)); i++ {
@@ -349,6 +364,7 @@ func (thought_evaluator* e) to_lower(text string) string {
 	}
 	return result
 }
+
 func (thought_evaluator* e) contains_substring(
 	text string,
 	substr string,
@@ -370,6 +386,7 @@ func (thought_evaluator* e) contains_substring(
 	}
 	return false
 }
+
 func (thought_evaluator* e) count_substring(
 	text string,
 	substr string,
@@ -392,6 +409,7 @@ func (thought_evaluator* e) count_substring(
 	}
 	return count
 }
+
 func (thought_evaluator* e) get_cached_metrics(
 	thought_id string,
 ) (thought_quality_metrics, bool) {
@@ -400,6 +418,7 @@ func (thought_evaluator* e) get_cached_metrics(
 	metrics, exists := e.metrics_cache[thought_id]
 	return metrics, exists
 }
+
 func (thought_evaluator* e) get_evaluation_result(
 	thought_id string,
 ) (thought_evaluation_result, bool) {
@@ -408,6 +427,7 @@ func (thought_evaluator* e) get_evaluation_result(
 	result, exists := e.results_cache[thought_id]
 	return result, exists
 }
+
 func (thought_evaluator* e) set_thresholds(
 	pruning_threshold float32,
 	valid_threshold float32,
@@ -421,6 +441,7 @@ func (thought_evaluator* e) set_thresholds(
 		e.valid_threshold = valid_threshold
 	}
 }
+
 func (thought_evaluator* e) get_statistics() map[string]interface{} {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -437,6 +458,7 @@ func (thought_evaluator* e) get_statistics() map[string]interface{} {
 	}
 	return stats
 }
+
 func (thought_evaluator* e) clear_cache() {
 	e.mu.Lock()
 	defer e.mu.Unlock()

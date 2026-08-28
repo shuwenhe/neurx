@@ -6,11 +6,13 @@ struct http_request_body {
     float32 top_p
     bool stream
 }
+
 struct http_response_chunk {
     int32 token_id
     string token_text
     bool is_last
 }
+
 struct http_generate_response {
     string request_id
     int32[] tokens
@@ -18,6 +20,7 @@ struct http_generate_response {
     int32 total_tokens
     int64 elapsed_ms
 }
+
 struct http_server {
     string host
     int32 port
@@ -27,6 +30,7 @@ struct http_server {
     bool is_running
     int32 request_counter
 }
+
 func create_http_server(string host, int32 port, inference_engine* eng) http_server* {
     return *http_server{
         host: host,
@@ -38,14 +42,17 @@ func create_http_server(string host, int32 port, inference_engine* eng) http_ser
         request_counter: 0,
     }
 }
+
 func (http_server* server) start() bool {
     server.is_running = true
     return true
 }
+
 func (http_server* server) stop() bool {
     server.is_running = false
     return true
 }
+
 func (http_server* server) handle_generate_request(http_request_body req_body) (string, int32) {
     if !server.is_running {
         return "", 503
@@ -85,6 +92,7 @@ func (http_server* server) handle_generate_request(http_request_body req_body) (
     response := format_generate_response(request_id, tokens)
     return response, 200
 }
+
 func (http_server* server) handle_health_check() string {
     if server.engine.state == state_ready {
         status := "{\n"
@@ -97,6 +105,7 @@ func (http_server* server) handle_health_check() string {
     }
     return "{ \"status\": \"not_ready\" }"
 }
+
 func (http_server* server) handle_metrics() string {
     metrics := server.engine.get_metrics()
     result := "{\n"
@@ -107,6 +116,7 @@ func (http_server* server) handle_metrics() string {
     result = result + "}\n"
     return result
 }
+
 func (http_server* server) handle_stream_next(string request_id) (string, int32) {
     stream := server.stream_mgr.streams[request_id]
     if stream.request_id != request_id {
@@ -124,6 +134,7 @@ func (http_server* server) handle_stream_next(string request_id) (string, int32)
     json := format_chunk_response(chunk)
     return json, 200
 }
+
 func (http_server* server) handle_cancel_request(string request_id) (string, int32) {
     req := server.engine.get_request_status(request_id)
     if req == nil {
@@ -133,9 +144,11 @@ func (http_server* server) handle_cancel_request(string request_id) (string, int
     server.stream_mgr.unregister_stream(request_id)
     return "{ \"status\": \"cancelled\" }", 200
 }
+
 func generate_request_id(int32 counter) string {
     return "req_" + int32_to_string(counter)
 }
+
 func tokenize_prompt(string prompt) int32[] {
     tokens := make(int32[])
     for i := 0; i < len(prompt); i = i + 1 {
@@ -143,6 +156,7 @@ func tokenize_prompt(string prompt) int32[] {
     }
     return tokens
 }
+
 func format_generate_response(string request_id, int32[] tokens) string {
     result := "{\n"
     result = result + "  \"request_id\": \"" + request_id + "\",\n"
@@ -151,6 +165,7 @@ func format_generate_response(string request_id, int32[] tokens) string {
     result = result + "}\n"
     return result
 }
+
 func format_chunk_response(http_response_chunk chunk) string {
     result := "{\n"
     result = result + "  \"token_id\": " + int32_to_string(chunk.token_id) + ",\n"
@@ -159,6 +174,7 @@ func format_chunk_response(http_response_chunk chunk) string {
     result = result + "}\n"
     return result
 }
+
 func token_to_string(int32 token) string {
     if token == 0 {
         return "<unk>"
@@ -168,6 +184,7 @@ func token_to_string(int32 token) string {
     }
     return "token"
 }
+
 func int32_array_to_json(int32[] arr) string {
     result := "["
     for i := 0; i < len(arr); i = i + 1 {
@@ -179,6 +196,7 @@ func int32_array_to_json(int32[] arr) string {
     result = result + "]"
     return result
 }
+
 func bool_to_string(bool b) string {
     if b {
         return "true"

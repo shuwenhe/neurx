@@ -13,6 +13,7 @@ struct inference_request {
 	int32 timeout_ms
 	int32 priority
 }
+
 struct inference_response {
 	string request_id
 	string model_id
@@ -23,6 +24,7 @@ struct inference_response {
 	bool success
 	string error_message
 }
+
 struct inference_statistics {
 	int64 total_requests
 	int64 total_success
@@ -35,6 +37,7 @@ struct inference_statistics {
 	float64 p95_latency_ms
 	float64 p99_latency_ms
 }
+
 struct inference_engine {
 	sync.Mutex mu
 	string model_id
@@ -51,6 +54,7 @@ struct inference_engine {
 	int32 max_concurrent_requests
 	time.Time last_inference_time
 }
+
 struct batch_inference_request {
 	string batch_id
 	string model_id
@@ -59,6 +63,7 @@ struct batch_inference_request {
 	time.Time timestamp
 	int32 batch_size
 }
+
 struct batch_inference_response {
 	string batch_id
 	string model_id
@@ -69,6 +74,7 @@ struct batch_inference_response {
 	int32 batch_size
 	int64 total_latency_ms
 }
+
 func create_inference_engine(model_id string, model *model_interface) *inference_engine {
 	return *inference_engine{
 		model_id: model_id,
@@ -83,6 +89,7 @@ func create_inference_engine(model_id string, model *model_interface) *inference
 		max_concurrent_requests: 10,
 	}
 }
+
 func (inference_engine* engine) submit_request(inference_request* request) error {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
@@ -99,6 +106,7 @@ func (inference_engine* engine) submit_request(inference_request* request) error
 	engine.stats.total_requests++
 	return nil
 }
+
 func (inference_engine* engine) execute_inference(inference_request* request) *inference_response {
 	start_time := time.Now()
 	if request == nil || request.input == nil {
@@ -137,6 +145,7 @@ func (inference_engine* engine) execute_inference(inference_request* request) *i
 	}
 	return response
 }
+
 func (inference_engine* engine) submit_batch_inference(batch_inference_request* batch_request) *batch_inference_response {
 	start_time := time.Now()
 	engine.mu.Lock()
@@ -180,11 +189,13 @@ func (inference_engine* engine) submit_batch_inference(batch_inference_request* 
 		total_latency_ms: total_latency,
 	}
 }
+
 func (inference_engine* engine) get_response(request_id string) *inference_response {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	return engine.response_map[request_id]
 }
+
 func (inference_engine* engine) process_queue() int32 {
 	engine.mu.Lock()
 	processed := int32(0)
@@ -212,41 +223,49 @@ func (inference_engine* engine) process_queue() int32 {
 	}
 	return processed
 }
+
 func (inference_engine* engine) get_queue_size() int32 {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	return engine.current_queue_size
 }
+
 func (inference_engine* engine) set_max_batch_size(size int32) {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	engine.max_batch_size = size
 }
+
 func (inference_engine* engine) set_max_concurrent_requests(max_requests int32) {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	engine.max_concurrent_requests = max_requests
 }
+
 func (inference_engine* engine) get_stats() *inference_statistics {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	return engine.stats
 }
+
 func (inference_engine* engine) clear_stats() {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	engine.stats = *inference_statistics{}
 }
+
 func (inference_engine* engine) enable_batching(enabled bool) {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	engine.batch_enabled = enabled
 }
+
 func (inference_engine* engine) set_batch_timeout(timeout_ms int32) {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	engine.batch_timeout_ms = timeout_ms
 }
+
 func (inference_engine* engine) drain_queue() []*inference_response {
 	engine.mu.Lock()
 	for {

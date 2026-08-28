@@ -1,5 +1,6 @@
 package neurx.inference.runtime.production_inference_pipeline
 use std.conv.{int_to_string, float_to_string}
+
 struct inference_request {
     string prompt
     int max_tokens
@@ -8,6 +9,7 @@ struct inference_request {
     string model_id
     int request_id
 }
+
 struct inference_response {
     int request_id
     string text
@@ -16,6 +18,7 @@ struct inference_response {
     float latency_ms
     string status
 }
+
 struct pipeline_metrics {
     int total_requests
     int successful_requests
@@ -25,6 +28,7 @@ struct pipeline_metrics {
     float throughput_tokens_per_sec
     float memory_used_mb
 }
+
 struct production_pipeline {
     string model_path
     string device_type
@@ -32,6 +36,7 @@ struct production_pipeline {
     int max_batch_size
     pipeline_metrics metrics
 }
+
 func create_production_pipeline(string model_path, string device_type) production_pipeline {
     print("═══════════════════════════════════════════════════════════\n")
     print("🚀 PRODUCTION INFERENCE PIPELINE INITIALIZATION\n")
@@ -59,6 +64,7 @@ func create_production_pipeline(string model_path, string device_type) productio
     print("✅ Pipeline created successfully\n\n")
     return pipeline
 }
+
 func validate_inference_request(inference_request req) bool {
     print("🔍 Validating Inference Request #" + int_to_string(req.request_id) + ":\n")
     if len(req.prompt) == 0 {
@@ -88,6 +94,7 @@ func validate_inference_request(inference_request req) bool {
     print("   ✓ Model ID: " + req.model_id + "\n\n")
     return true
 }
+
 func tokenize_prompt(string prompt) int[] {
     print("🔤 TOKENIZATION PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
@@ -114,6 +121,7 @@ func tokenize_prompt(string prompt) int[] {
     print("]\n\n")
     return token_ids
 }
+
 func prefill_kv_cache(int[] prompt_tokens, string device) bool {
     print("💾 PREFILL KV CACHE PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
@@ -131,6 +139,7 @@ func prefill_kv_cache(int[] prompt_tokens, string device) bool {
     print("   ✓ Output projection\n\n")
     return true
 }
+
 func generate_tokens(int num_tokens, float temperature) int[] {
     print("🎲 TOKEN GENERATION PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
@@ -149,6 +158,7 @@ func generate_tokens(int num_tokens, float temperature) int[] {
     print("✅ Generated " + int_to_string(len(generated)) + " tokens\n\n")
     return generated
 }
+
 func detokenize_output(int[] token_ids) string {
     print("📄 DETOKENIZATION PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
@@ -165,6 +175,7 @@ func detokenize_output(int[] token_ids) string {
     print("Length: " + int_to_string(len(output)) + " characters\n\n")
     return output
 }
+
 func create_inference_response(int request_id, string text, int[] tokens, float latency) inference_response {
     return inference_response {
         request_id: request_id,
@@ -175,6 +186,7 @@ func create_inference_response(int request_id, string text, int[] tokens, float 
         status: "completed",
     }
 }
+
 func update_pipeline_metrics(production_pipeline *p, inference_response resp, bool success) {
     p.metrics.total_requests = p.metrics.total_requests + 1
     if success {
@@ -186,6 +198,7 @@ func update_pipeline_metrics(production_pipeline *p, inference_response resp, bo
     p.metrics.avg_latency_ms = p.metrics.total_latency_ms / float(p.metrics.total_requests)
     p.metrics.throughput_tokens_per_sec = float(resp.total_tokens) / (resp.latency_ms / 1000.0)
 }
+
 func print_pipeline_metrics(pipeline_metrics metrics) {
     print("═══════════════════════════════════════════════════════════\n")
     print("📊 PIPELINE PERFORMANCE METRICS\n")
@@ -201,6 +214,7 @@ func print_pipeline_metrics(pipeline_metrics metrics) {
     print("Resource Usage:\n")
     print("   Memory: " + float_to_string(metrics.memory_used_mb) + " MB\n\n")
 }
+
 func execute_inference_pipeline(production_pipeline *pipeline, inference_request req) inference_response {
     print("\n")
     print("╔═══════════════════════════════════════════════════════════╗\n")
@@ -246,6 +260,7 @@ func execute_inference_pipeline(production_pipeline *pipeline, inference_request
     print("╚═══════════════════════════════════════════════════════════╝\n\n")
     return response
 }
+
 func validate_pipeline_output(inference_response resp) bool {
     print("🔍 OUTPUT VALIDATION\n")
     print("───────────────────────────────────────────────────────────\n")

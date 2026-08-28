@@ -14,18 +14,21 @@ struct pipeline_config {
     int32 max_batch_tokens
     int32 max_seq_length
 }
+
 struct prefill_batch {
     active_request*[] requests
     int32 batch_id
     int32 total_tokens
     int64 created_at
 }
+
 struct decode_batch {
     active_request*[] requests
     int32 batch_id
     int32 num_decode_steps
     int64 created_at
 }
+
 struct prefill_decode_pipeline {
     pipeline_config config
     pipeline_stage current_stage
@@ -38,6 +41,7 @@ struct prefill_decode_pipeline {
     active_request*[] in_flight_decode
     active_request*[] completed_requests
 }
+
 func create_pipeline(pipeline_config cfg) prefill_decode_pipeline* {
     return *prefill_decode_pipeline{
         config: cfg,
@@ -52,11 +56,13 @@ func create_pipeline(pipeline_config cfg) prefill_decode_pipeline* {
         completed_requests: make(active_request*[]),
     }
 }
+
 func (prefill_decode_pipeline* pd) submit_request(active_request* req) bool {
     req.state = req_state_submitted
     pd.pending_prefill = append(pd.pending_prefill, req)
     return true
 }
+
 func (prefill_decode_pipeline* pd) prepare_prefill_batch() prefill_batch* {
     if len(pd.pending_prefill) == 0 {
         return nil
@@ -94,6 +100,7 @@ func (prefill_decode_pipeline* pd) prepare_prefill_batch() prefill_batch* {
     pd.current_prefill_batch = prefill_batch
     return prefill_batch
 }
+
 func (prefill_decode_pipeline* pd) execute_prefill() bool {
     if pd.current_prefill_batch == nil {
         return false
@@ -116,6 +123,7 @@ func (prefill_decode_pipeline* pd) execute_prefill() bool {
     pd.current_prefill_batch = nil
     return true
 }
+
 func (prefill_decode_pipeline* pd) prepare_decode_batch() decode_batch* {
     if len(pd.in_flight_decode) == 0 {
         return nil
@@ -143,6 +151,7 @@ func (prefill_decode_pipeline* pd) prepare_decode_batch() decode_batch* {
     pd.current_decode_batch = decode_batch
     return decode_batch
 }
+
 func (prefill_decode_pipeline* pd) execute_decode() bool {
     if pd.current_decode_batch == nil {
         return false
@@ -168,6 +177,7 @@ func (prefill_decode_pipeline* pd) execute_decode() bool {
     pd.cleanup_completed_from_in_flight()
     return true
 }
+
 func (prefill_decode_pipeline* pd) cleanup_completed_from_in_flight() {
     new_in_flight := make(active_request*[])
     for i := 0; i < len(pd.in_flight_decode); i = i + 1 {
@@ -178,6 +188,7 @@ func (prefill_decode_pipeline* pd) cleanup_completed_from_in_flight() {
     }
     pd.in_flight_decode = new_in_flight
 }
+
 func (prefill_decode_pipeline* pd) step() bool {
     if pd.current_stage == stage_idle {
         if len(pd.pending_prefill) > 0 {
@@ -212,18 +223,23 @@ func (prefill_decode_pipeline* pd) step() bool {
     }
     return false
 }
+
 func (prefill_decode_pipeline* pd) get_pending_count() int32 {
     return int32(len(pd.pending_prefill))
 }
+
 func (prefill_decode_pipeline* pd) get_in_flight_count() int32 {
     return int32(len(pd.in_flight_decode))
 }
+
 func (prefill_decode_pipeline* pd) get_completed_count() int32 {
     return int32(len(pd.completed_requests))
 }
+
 func (prefill_decode_pipeline* pd) get_current_stage() pipeline_stage {
     return pd.current_stage
 }
+
 func (prefill_decode_pipeline* pd) get_stats() string {
     result := "Pipeline Stats:\n"
     result = result + "Pending: " + int32_to_string(pd.get_pending_count()) + "\n"

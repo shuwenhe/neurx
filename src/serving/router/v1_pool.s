@@ -16,6 +16,7 @@ struct request_pool {
     int32 total_tokens_processed
     map[string]v1_request* request_map
 }
+
 func create_request_pool(int32 max_size, int32 max_running) request_pool* {
     return *request_pool{
         strategy: strategy_fcfs,
@@ -29,6 +30,7 @@ func create_request_pool(int32 max_size, int32 max_running) request_pool* {
         request_map: make(map[string]v1_request*),
     }
 }
+
 func (request_pool* pool) add_request(v1_request* req) bool {
     if len(pool.pending_requests) >= pool.max_pool_size {
         return false
@@ -37,6 +39,7 @@ func (request_pool* pool) add_request(v1_request* req) bool {
     pool.request_map[req.request_id] = req
     return true
 }
+
 func (request_pool* pool) get_next_request() option[v1_request*] {
     if len(pool.pending_requests) == 0 {
         return option[v1_request*]{}
@@ -45,6 +48,7 @@ func (request_pool* pool) get_next_request() option[v1_request*] {
     pool.pending_requests = pool.pending_requests[1:]
     return option[v1_request*]{value: req}
 }
+
 func (request_pool* pool) schedule_batch(int32 batch_size) v1_request*[] {
     batch := make(v1_request*[])
     if pool.strategy == strategy_fcfs {
@@ -60,9 +64,11 @@ func (request_pool* pool) schedule_batch(int32 batch_size) v1_request*[] {
     }
     return batch
 }
+
 func (request_pool* pool) mark_running(v1_request* req) {
     req.status = status_running
 }
+
 func (request_pool* pool) mark_completed(v1_request* req) {
     req.status = status_completed
     for i := 0; i < len(pool.running_requests); i = i + 1 {
@@ -74,12 +80,14 @@ func (request_pool* pool) mark_completed(v1_request* req) {
     pool.completed_requests = append(pool.completed_requests, req)
     pool.total_requests_processed = pool.total_requests_processed + 1
 }
+
 func (request_pool* pool) get_request(string request_id) option[v1_request*] {
     if req, exists := pool.request_map[request_id]; exists {
         return option[v1_request*]{value: req}
     }
     return option[v1_request*]{}
 }
+
 func (request_pool* pool) get_pool_stats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["pending"] = len(pool.pending_requests)
@@ -89,9 +97,11 @@ func (request_pool* pool) get_pool_stats() map[string]interface{} {
     stats["total_tokens"] = pool.total_tokens_processed
     return stats
 }
+
 func (request_pool* pool) clear_completed() {
     pool.completed_requests = make(v1_request*[])
 }
+
 func (request_pool* pool) abort_request(string request_id) bool {
     if req, exists := pool.request_map[request_id]; exists {
         req.status = status_aborted

@@ -13,6 +13,7 @@ struct VisionEncoder {
     cache_enabled: bool,
     feature_cache: map[string, *types.Tensor]
 }
+
 func NewVisionEncoder(
     model_name: string,
     hidden_size: i32,
@@ -31,6 +32,7 @@ func NewVisionEncoder(
     }
     return encoder
 }
+
 func (VisionEncoder* e) ExtractPatches(
     image_tensor: *types.Tensor
 ) ([]*types.Tensor, types.PatchInfo) {
@@ -75,6 +77,7 @@ func (VisionEncoder* e) ExtractPatches(
     e.num_patches = patch_info.num_patches
     return patches, patch_info
 }
+
 func (VisionEncoder* e) EncodePatch(
     patch: *types.Tensor
 ) *types.Tensor {
@@ -93,6 +96,7 @@ func (VisionEncoder* e) EncodePatch(
         dtype: "float32"
     }
 }
+
 func (VisionEncoder* e) Encode(
     image_data: *types.ImageData,
     image_tensor: *types.Tensor
@@ -146,6 +150,7 @@ func (VisionEncoder* e) Encode(
         temporal_index: 0
     }
 }
+
 func (VisionEncoder* e) EncodeBatch(
     images: []types.ImageData,
     tensors: []types.Tensor
@@ -156,6 +161,7 @@ func (VisionEncoder* e) EncodeBatch(
     }
     return results
 }
+
 func (VisionEncoder* e) GetPatchEmbeddings(
     features: *types.ImageFeatures
 ) *types.Tensor {
@@ -172,6 +178,7 @@ func (VisionEncoder* e) GetPatchEmbeddings(
         dtype: "float32"
     }
 }
+
 func (VisionEncoder* e) GetClsToken(
     features: *types.ImageFeatures
 ) *types.Tensor {
@@ -185,9 +192,11 @@ func (VisionEncoder* e) GetClsToken(
         dtype: "float32"
     }
 }
+
 func (VisionEncoder* e) ClearCache() {
     e.feature_cache = make(map[string, *types.Tensor])
 }
+
 func (VisionEncoder* e) GetCacheSize() i32 {
     size := i32(0)
     for _, tensor := range e.feature_cache {
@@ -195,6 +204,7 @@ func (VisionEncoder* e) GetCacheSize() i32 {
     }
     return size
 }
+
 func main() {
     println("Vision Encoder Module")
     println("✅ Vision encoding ready")

@@ -5,6 +5,7 @@ import "encoding/json"
 	CHAIN_OF_THOUGHT = 0
 	TREE_OF_THOUGHT = 1
 }
+
 struct reasoning_request {
 	string              request_id
 	reasoning_type      reasoning_enum
@@ -17,6 +18,7 @@ struct reasoning_request {
 	int32               timeout_ms
 	int64               created_at
 }
+
 struct reasoning_response {
 	string              request_id
 	string              status
@@ -29,6 +31,7 @@ struct reasoning_response {
 	int64               processing_time_ms
 	map[string]interface{} metadata
 }
+
 struct reasoning_stream_chunk {
 	string              chunk_id
 	string              chunk_type
@@ -37,6 +40,7 @@ struct reasoning_stream_chunk {
 	float32             confidence
 	int64               timestamp
 }
+
 struct reasoning_engine {
 	cot_framework*      cot_engine
 	tot_framework*      tot_engine
@@ -51,6 +55,7 @@ struct reasoning_engine {
 	int32               current_requests
 	sync.Mutex          mu
 }
+
 func create_reasoning_engine() reasoning_engine {
 	cot := create_cot_framework("", 20)
 	tot := create_tot_framework("", 10, 3)
@@ -69,6 +74,7 @@ func create_reasoning_engine() reasoning_engine {
 		mu:                      sync.Mutex{},
 	}
 }
+
 func (reasoning_engine* e) process_reasoning_request(
 	req reasoning_request,
 ) (reasoning_response, error) {
@@ -106,6 +112,7 @@ func (reasoning_engine* e) process_reasoning_request(
 	e.mu.Unlock()
 	return response, err
 }
+
 func (reasoning_engine* e) process_cot_reasoning(
 	req reasoning_request,
 ) (reasoning_response, error) {
@@ -177,6 +184,7 @@ func (reasoning_engine* e) process_cot_reasoning(
 	response.quality_score = response.confidence_score
 	return response, nil
 }
+
 func (reasoning_engine* e) process_tot_reasoning(
 	req reasoning_request,
 ) (reasoning_response, error) {
@@ -250,6 +258,7 @@ func (reasoning_engine* e) process_tot_reasoning(
 	response.quality_score = response.confidence_score
 	return response, nil
 }
+
 func (reasoning_engine* e) add_stream_chunk(
 	request_id string,
 	chunk reasoning_stream_chunk,
@@ -264,6 +273,7 @@ func (reasoning_engine* e) add_stream_chunk(
 		chunk,
 	)
 }
+
 func (reasoning_engine* e) get_stream_chunks(
 	request_id string,
 ) reasoning_stream_chunk[] {
@@ -279,6 +289,7 @@ func (reasoning_engine* e) get_stream_chunks(
 	}
 	return result
 }
+
 func (reasoning_engine* e) get_response(
 	request_id string,
 ) (reasoning_response, bool) {
@@ -287,6 +298,7 @@ func (reasoning_engine* e) get_response(
 	response, exists := e.completed_responses[request_id]
 	return response, exists
 }
+
 func (reasoning_engine* e) cancel_request(request_id string) bool {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -302,6 +314,7 @@ func (reasoning_engine* e) cancel_request(request_id string) bool {
 	}
 	return false
 }
+
 func (reasoning_engine* e) get_engine_status() map[string]interface{} {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -312,6 +325,7 @@ func (reasoning_engine* e) get_engine_status() map[string]interface{} {
 	status["state"] = e.state_manager.current_state
 	return status
 }
+
 func (reasoning_engine* e) reset_engine() {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -327,6 +341,7 @@ func (reasoning_engine* e) reset_engine() {
 	e.cot_engine = *cot
 	e.tot_engine = *tot
 }
+
 func (reasoning_engine* e) to_json(response reasoning_response) string {
 	json_str := "{"
 	json_str = json_str + "\"request_id\":\"" + response.request_id + "\","

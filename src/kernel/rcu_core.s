@@ -8,6 +8,7 @@ struct rcu_data {
     int qs_passed
     int nesting_level
 }
+
 struct rcu_state {
     int gp_seq
     int[] rcu_data_array
@@ -24,16 +25,19 @@ func init_rcu() int {
     }
     0
 }
+
 func rcu_read_lock() int {
     g_rcu_state.rcu_data_array[0] = g_rcu_state.rcu_data_array[0] + 1
     0
 }
+
 func rcu_read_unlock() int {
     if g_rcu_state.rcu_data_array[0] > 0 {
         g_rcu_state.rcu_data_array[0] = g_rcu_state.rcu_data_array[0] - 1
     }
     0
 }
+
 func synchronize_rcu() int {
     g_rcu_state.gp_in_progress = true
     g_rcu_state.gp_seq = g_rcu_state.gp_seq + 1
@@ -49,6 +53,7 @@ func synchronize_rcu() int {
     g_rcu_state.gp_in_progress = false
     -1
 }
+
 func all_cpus_qs_passed(int gp_seq) bool {
     int i = 0
     for i < 256 {
@@ -59,19 +64,23 @@ func all_cpus_qs_passed(int gp_seq) bool {
     }
     true
 }
+
 func call_rcu(int callback_id) int {
     if len(g_rcu_state.rcu_data_array) > 0 {
         return 0
     }
     -1
 }
+
 func rcu_barrier() int {
     synchronize_rcu()
     0
 }
+
 func get_rcu_gp_seq() int {
     g_rcu_state.gp_seq
 }
+
 func rcu_is_gp_in_progress() bool {
     g_rcu_state.gp_in_progress
 }

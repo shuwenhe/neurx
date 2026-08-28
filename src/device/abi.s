@@ -4,6 +4,7 @@ struct device_ptr {
     int64 address
     int device_id
 }
+
 struct device_tensor {
     device_ptr data
     int[] shape
@@ -12,14 +13,17 @@ struct device_tensor {
     int device_id
     int element_count
 }
+
 struct stream_handle {
     int64 handle
     int device_id
 }
+
 struct event_handle {
     int64 handle
     int device_id
 }
+
 struct device_context {
     int device_id
     stream_handle* default_stream
@@ -33,6 +37,7 @@ enum dtype_kind {
     int32 = 4,
     int64 = 5,
 }
+
 func device_get_dtype_size(int dtype) int {
     if dtype == 0 {
         return 4
@@ -49,6 +54,7 @@ func device_get_dtype_size(int dtype) int {
     }
     return 0
 }
+
 func compute_element_count(int[] shape) int {
     int count = 1
     int i = 0
@@ -58,6 +64,7 @@ func compute_element_count(int[] shape) int {
     }
     return count
 }
+
 func compute_strides(int[] shape) int[] {
     int rank = len(shape)
     int[] strides = new int[rank]
@@ -70,6 +77,7 @@ func compute_strides(int[] shape) int[] {
     }
     return strides
 }
+
 func device_create_context(int device_id) (device_context, bool, string) {
     success, err := device_set_current(device_id)
     if !success {
@@ -86,6 +94,7 @@ func device_create_context(int device_id) (device_context, bool, string) {
     }
     return ctx, true, ""
 }
+
 func device_destroy_context(device_context* ctx) (bool, string) {
     if !ctx.is_initialized {
         return false, "Context not initialized"
@@ -97,42 +106,55 @@ func device_destroy_context(device_context* ctx) (bool, string) {
     ctx.is_initialized = false
     return true, ""
 }
+
 func device_set_current(int device_id) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_create_stream(int device_id) (stream_handle, bool, string) {
     return stream_handle{}, false, "backend not implemented"
 }
+
 func device_destroy_stream(stream_handle* stream) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_create_event(int device_id) (event_handle, bool, string) {
     return event_handle{}, false, "backend not implemented"
 }
+
 func device_destroy_event(event_handle* event) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_record_event(event_handle* event, stream_handle stream) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_sync_event(event_handle* event) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_stream_wait_event(stream_handle stream, event_handle* event) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_synchronize(int device_id) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_get_memory_info(int device_id) (int64, int64, bool, string) {
     return 0, 0, false, "backend not implemented"
 }
+
 func device_alloc(int device_id, int64 num_bytes) (device_ptr, bool, string) {
     return device_ptr{}, false, "backend not implemented"
 }
+
 func device_free(device_ptr ptr) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_alloc_tensor(int device_id, int[] shape, int dtype) (device_tensor, bool, string) {
     element_count := compute_element_count(shape)
     dtype_size := device_get_dtype_size(dtype)
@@ -155,10 +177,12 @@ func device_alloc_tensor(int device_id, int[] shape, int dtype) (device_tensor, 
     }
     return tensor, true, ""
 }
+
 func device_free_tensor(device_tensor* tensor) (bool, string) {
     success, err := device_free(tensor.data)
     return success, err
 }
+
 func device_memcpy_h2d(
     device_ptr dst,
     int64 host_src,
@@ -167,6 +191,7 @@ func device_memcpy_h2d(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_memcpy_d2h(
     int64 host_dst,
     device_ptr src,
@@ -175,6 +200,7 @@ func device_memcpy_d2h(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_memcpy_d2d(
     device_ptr dst,
     device_ptr src,
@@ -183,6 +209,7 @@ func device_memcpy_d2d(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_memset(
     device_ptr ptr,
     int value,
@@ -191,6 +218,7 @@ func device_memset(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_copy_tensor_h2d(
     device_tensor* dst,
     int64 host_src,
@@ -199,6 +227,7 @@ func device_copy_tensor_h2d(
     total_bytes := dst.element_count * device_get_dtype_size(dst.dtype)
     return device_memcpy_h2d(dst.data, host_src, int64(total_bytes), stream)
 }
+
 func device_copy_tensor_d2h(
     int64 host_dst,
     device_tensor src,
@@ -207,6 +236,7 @@ func device_copy_tensor_d2h(
     total_bytes := src.element_count * device_get_dtype_size(src.dtype)
     return device_memcpy_d2h(host_dst, src.data, int64(total_bytes), stream)
 }
+
 func device_copy_tensor_d2d(
     device_tensor* dst,
     device_tensor src,
@@ -221,6 +251,7 @@ func device_copy_tensor_d2d(
     total_bytes := src.element_count * device_get_dtype_size(src.dtype)
     return device_memcpy_d2d(dst.data, src.data, int64(total_bytes), stream)
 }
+
 func device_launch_kernel(
     int64 kernel_func,
     int[] grid_dim,
@@ -231,6 +262,7 @@ func device_launch_kernel(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_matmul(
     device_tensor a,
     device_tensor b,
@@ -241,6 +273,7 @@ func device_matmul(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_rms_norm(
     device_tensor input,
     device_tensor weight,
@@ -250,6 +283,7 @@ func device_rms_norm(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_rope(
     device_tensor q,
     device_tensor k,
@@ -260,6 +294,7 @@ func device_rope(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_attention(
     device_tensor q,
     device_tensor k,
@@ -269,6 +304,7 @@ func device_attention(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_flash_attention_v3(
     device_tensor q,
     device_tensor k,
@@ -280,6 +316,7 @@ func device_flash_attention_v3(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_embedding(
     device_tensor token_ids,
     device_tensor weight,
@@ -288,6 +325,7 @@ func device_embedding(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_linear(
     device_tensor input,
     device_tensor weight,
@@ -297,6 +335,7 @@ func device_linear(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_gelu(
     device_tensor input,
     device_tensor* output,
@@ -304,6 +343,7 @@ func device_gelu(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_silu(
     device_tensor input,
     device_tensor* output,
@@ -311,6 +351,7 @@ func device_silu(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_vector_add(
     device_tensor a,
     device_tensor b,
@@ -331,6 +372,7 @@ func device_vector_add(
     }
     return false, "backend not implemented"
 }
+
 func device_softmax(
     device_tensor input,
     int axis,
@@ -339,6 +381,7 @@ func device_softmax(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_layernorm(
     device_tensor input,
     device_tensor weight,
@@ -349,6 +392,7 @@ func device_layernorm(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_allreduce(
     device_tensor input,
     device_tensor* output,
@@ -358,6 +402,7 @@ func device_allreduce(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_allgather(
     device_tensor input,
     device_tensor* output,
@@ -366,6 +411,7 @@ func device_allgather(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_reducescatter(
     device_tensor input,
     device_tensor* output,
@@ -375,6 +421,7 @@ func device_reducescatter(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_broadcast(
     device_tensor input,
     device_tensor* output,
@@ -384,6 +431,7 @@ func device_broadcast(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_send(
     device_tensor data,
     int destination,
@@ -393,6 +441,7 @@ func device_send(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_recv(
     device_tensor* data,
     int source,
@@ -402,15 +451,19 @@ func device_recv(
 ) (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_get_device_count() (int, bool, string) {
     return 0, false, "backend not implemented"
 }
+
 func device_get_device_properties(int device_id) (int, int, int, bool, string) {
     return 0, 0, 0, false, "backend not implemented"
 }
+
 func device_backend_init() (bool, string) {
     return false, "backend not implemented"
 }
+
 func device_backend_finalize() (bool, string) {
     return false, "backend not implemented"
 }

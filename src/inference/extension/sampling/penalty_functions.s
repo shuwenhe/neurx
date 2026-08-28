@@ -4,6 +4,7 @@ struct token_frequency {
 	token_id int32
 	frequency int32
 }
+
 func apply_frequency_penalty(float32[] logits, map[int32]int32 token_freq, float32 penalty) float32[] {
 	adjusted := make(float32[])
 	for i := 0; i < len(logits); i = i + 1 {
@@ -20,6 +21,7 @@ func apply_frequency_penalty(float32[] logits, map[int32]int32 token_freq, float
 	}
 	return adjusted
 }
+
 func apply_presence_penalty(float32[] logits, map[int32]int32 token_freq, float32 penalty) float32[] {
 	adjusted := make(float32[])
 	for i := 0; i < len(logits); i = i + 1 {
@@ -39,6 +41,7 @@ func apply_presence_penalty(float32[] logits, map[int32]int32 token_freq, float3
 	}
 	return adjusted
 }
+
 func apply_repetition_penalty(float32[] logits, map[int32]int32 token_freq, float32 penalty) float32[] {
 	adjusted := make(float32[])
 	for i := 0; i < len(logits); i = i + 1 {
@@ -64,6 +67,7 @@ func apply_repetition_penalty(float32[] logits, map[int32]int32 token_freq, floa
 	}
 	return adjusted
 }
+
 func apply_length_penalty(float32[] logits, int32 generated_length, float32 penalty) float32[] {
 	adjusted := make(float32[])
 	if penalty <= 0.0 {
@@ -79,6 +83,7 @@ func apply_length_penalty(float32[] logits, int32 generated_length, float32 pena
 	}
 	return adjusted
 }
+
 func apply_ngram_penalty(float32[] logits, int32[] generated_tokens, int32 ngram_size, float32 penalty) float32[] {
 	if ngram_size <= 0 || penalty <= 0.0 {
 		return logits
@@ -112,6 +117,7 @@ func apply_ngram_penalty(float32[] logits, int32[] generated_tokens, int32 ngram
 	}
 	return adjusted
 }
+
 func apply_bad_token_mask(float32[] logits, int32[] bad_token_ids) float32[] {
 	if len(bad_token_ids) == 0 {
 		return logits
@@ -134,6 +140,7 @@ func apply_bad_token_mask(float32[] logits, int32[] bad_token_ids) float32[] {
 	}
 	return adjusted
 }
+
 func apply_forced_token_boost(float32[] logits, int32[] forced_token_ids, float32 boost) float32[] {
 	if len(forced_token_ids) == 0 {
 		return logits
@@ -156,6 +163,7 @@ func apply_forced_token_boost(float32[] logits, int32[] forced_token_ids, float3
 	}
 	return adjusted
 }
+
 func compute_token_frequency(int32[] tokens) map[int32]int32 {
 	freq_map := make(map[int32]int32)
 	for i := 0; i < len(tokens); i = i + 1 {
@@ -169,6 +177,7 @@ func compute_token_frequency(int32[] tokens) map[int32]int32 {
 	}
 	return freq_map
 }
+
 func apply_all_penalties(float32[] logits, int32[] generated_tokens, penalty_config* penalty_params) float32[] {
 	adjusted := logits
 	if penalty_config == nil {
@@ -198,6 +207,7 @@ func apply_all_penalties(float32[] logits, int32[] generated_tokens, penalty_con
 	}
 	return adjusted
 }
+
 struct penalty_params {
 	frequency_penalty float32
 	presence_penalty float32
@@ -209,6 +219,7 @@ struct penalty_params {
 	forced_tokens int32[]
 	forced_boost float32
 }
+
 func create_penalty_params() penalty_params* {
 	return *penalty_params{
 		frequency_penalty: 0.0,
@@ -222,6 +233,7 @@ func create_penalty_params() penalty_params* {
 		forced_boost: 10.0,
 	}
 }
+
 func (p* penalty_params) set_frequency_penalty(pen float32) {
 	if pen < -2.0 {
 		pen = -2.0
@@ -231,6 +243,7 @@ func (p* penalty_params) set_frequency_penalty(pen float32) {
 	}
 	p.frequency_penalty = pen
 }
+
 func (p* penalty_params) set_presence_penalty(pen float32) {
 	if pen < -2.0 {
 		pen = -2.0
@@ -240,17 +253,20 @@ func (p* penalty_params) set_presence_penalty(pen float32) {
 	}
 	p.presence_penalty = pen
 }
+
 func (p* penalty_params) set_repetition_penalty(pen float32) {
 	if pen < 0.0 {
 		pen = 1.0
 	}
 	p.repetition_penalty = pen
 }
+
 func (p* penalty_params) add_bad_token(token_id int32) {
 	if len(p.bad_tokens) < 100 {
 		p.bad_tokens = append(p.bad_tokens, token_id)
 	}
 }
+
 func (p* penalty_params) add_forced_token(token_id int32) {
 	if len(p.forced_tokens) < 50 {
 		p.forced_tokens = append(p.forced_tokens, token_id)

@@ -9,6 +9,7 @@ struct distributed_context {
     process_group_manager group_manager
     bool initialized
 }
+
 func new_distributed_context(int rank, int world_size, int local_rank, int num_gpus, comm_backend backend) distributed_context {
     backend_name := ""
     switch backend {
@@ -30,6 +31,7 @@ func new_distributed_context(int rank, int world_size, int local_rank, int num_g
         initialized: false,
     }
 }
+
 func (distributed_context* ctx) initialize() bool {
     if ctx.initialized {
         false
@@ -40,6 +42,7 @@ func (distributed_context* ctx) initialize() bool {
     ctx.initialized = true
     true
 }
+
 func (distributed_context* ctx) finalize() bool {
     if !ctx.initialized {
         false
@@ -56,21 +59,27 @@ func (distributed_context* ctx) finalize() bool {
     ctx.initialized = false
     true
 }
+
 func (distributed_context* ctx) is_initialized() bool {
     ctx.initialized
 }
+
 func (distributed_context* ctx) get_rank() int {
     ctx.rank
 }
+
 func (distributed_context* ctx) get_world_size() int {
     ctx.world_size
 }
+
 func (distributed_context* ctx) get_local_rank() int {
     ctx.local_rank
 }
+
 func (distributed_context* ctx) is_master() bool {
     ctx.rank == 0
 }
+
 func (distributed_context* ctx) create_subgroup(int[] ranks, string name) int {
     backend := comm_backend_nccl
     switch ctx.backend_name {
@@ -81,12 +90,15 @@ func (distributed_context* ctx) create_subgroup(int[] ranks, string name) int {
     }
     ctx.group_manager.create_group(ranks, name, backend)
 }
+
 func (distributed_context* ctx) synchronize() bool {
     ctx.comm.barrier()
 }
+
 func (distributed_context* ctx) get_communicator() (*communicator) {
     *ctx.comm
 }
+
 func (distributed_context* ctx) get_group_manager() (*process_group_manager) {
     *ctx.group_manager
 }

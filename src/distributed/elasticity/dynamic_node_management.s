@@ -6,6 +6,7 @@ struct node_registration_request {
     int num_gpus
     float[] gpu_memory_gb
 }
+
 struct rank_mapping {
     int old_rank
     int new_rank
@@ -16,6 +17,7 @@ struct rank_mapping {
     int new_pp_rank
     int new_dp_rank
 }
+
 struct elastic_scaling_manager {
     int current_world_size
     int[] active_ranks
@@ -25,6 +27,7 @@ struct elastic_scaling_manager {
     float rebalance_time_ms
     int total_nodes
 }
+
 func new_elastic_scaling_manager(int initial_world_size) elastic_scaling_manager {
     manager := elastic_scaling_manager {
         current_world_size: initial_world_size,
@@ -44,6 +47,7 @@ func new_elastic_scaling_manager(int initial_world_size) elastic_scaling_manager
     manager.total_nodes = (initial_world_size + 7) / 8
     return manager
 }
+
 func (elastic_scaling_manager* manager) request_node_join(
     node_registration_request req
 ) (bool, string) {
@@ -58,6 +62,7 @@ func (elastic_scaling_manager* manager) request_node_join(
     manager.active_ranks = append(manager.active_ranks, new_rank)
     return true, "Node join registered, rank " + str(new_rank)
 }
+
 func (elastic_scaling_manager* manager) handle_node_removal(removed_rank int) (bool, string) {
     if manager.rebalancing {
         return false, "Rebalancing in progress"
@@ -78,6 +83,7 @@ func (elastic_scaling_manager* manager) handle_node_removal(removed_rank int) (b
     manager.rebalancing = false
     return true, "Node removal handled, new world_size=" + str(manager.current_world_size)
 }
+
 func (elastic_scaling_manager* manager) recompute_parallelism_strategy(
     int new_world_size,
     int model_hidden_dim,
@@ -126,6 +132,7 @@ func (elastic_scaling_manager* manager) recompute_parallelism_strategy(
     }
     return best_tp, best_pp, best_dp
 }
+
 func (elastic_scaling_manager* manager) generate_parameter_remapping(
     int old_tp int, old_pp int, old_dp int,
     int new_tp int, new_pp int, new_dp int,
@@ -160,6 +167,7 @@ func (elastic_scaling_manager* manager) generate_parameter_remapping(
     }
     return remappings
 }
+
 func (elastic_scaling_manager* manager) apply_parameter_remapping(
     float[] model_params,
     rank_mapping[] remappings
@@ -181,6 +189,7 @@ func (elastic_scaling_manager* manager) apply_parameter_remapping(
     }
     return remapped_params
 }
+
 func (elastic_scaling_manager* manager) synchronize_new_node(
     float[] model_params,
     float[] optimizer_state,
@@ -210,12 +219,15 @@ func (elastic_scaling_manager* manager) synchronize_new_node(
     }
     return true, "Node synchronized with " + str(num_packets) + " packets"
 }
+
 func (elastic_scaling_manager* manager) get_current_world_size() int {
     return manager.current_world_size
 }
+
 func (elastic_scaling_manager* manager) get_active_ranks() int[] {
     return manager.active_ranks
 }
+
 func (elastic_scaling_manager* manager) is_rebalancing() bool {
     return manager.rebalancing
 }

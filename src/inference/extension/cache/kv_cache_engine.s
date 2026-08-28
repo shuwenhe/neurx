@@ -5,6 +5,7 @@ struct cache_memory_pool {
     int64 total_memory_bytes
     int64 used_memory_bytes
 }
+
 struct kv_cache_engine {
     cache_memory_pool memory_pool
     cache_index index
@@ -14,6 +15,7 @@ struct kv_cache_engine {
     int64 total_hits
     int64 total_misses
 }
+
 func create_kv_cache_engine(int max_blocks, int hidden_dim_val, int num_layers_val, int max_cache_entries) kv_cache_engine {
     kv_cache_engine engine = kv_cache_engine{}
     engine.hidden_dim = hidden_dim_val
@@ -30,6 +32,7 @@ func create_kv_cache_engine(int max_blocks, int hidden_dim_val, int num_layers_v
     print("[KVCacheEngine] Initialized: max_blocks=" + int_to_string(max_blocks) + ", hidden_dim=" + int_to_string(hidden_dim_val) + ", layers=" + int_to_string(num_layers_val) + "\n")
     return engine
 }
+
 func kv_cache_engine_allocate_block(kv_cache_engine engine, int layer_id, int token_count) int {
     if engine.memory_pool.num_blocks >= engine.memory_pool.max_blocks {
         print("[KVCacheEngine] Memory pool full, cannot allocate block\n")
@@ -48,6 +51,7 @@ func kv_cache_engine_allocate_block(kv_cache_engine engine, int layer_id, int to
     print("[KVCacheEngine] Allocated block " + int_to_string(block_id) + ", memory usage: " + int_to_string(engine.memory_pool.used_memory_bytes) + "/" + int_to_string(engine.memory_pool.total_memory_bytes) + "\n")
     return block_id
 }
+
 func kv_cache_engine_get_block(kv_cache_engine engine, int block_id) kv_cache_block {
     if block_id < 0 || block_id >= engine.memory_pool.num_blocks {
         print("[KVCacheEngine] Invalid block_id: " + int_to_string(block_id) + "\n")
@@ -59,6 +63,7 @@ func kv_cache_engine_get_block(kv_cache_engine engine, int block_id) kv_cache_bl
     engine.memory_pool.blocks[block_id] = block
     return block
 }
+
 func kv_cache_engine_store_kv(kv_cache_engine engine, int[] prompt_tokens, float[] kv_data, int layer_id) int {
     string prefix_hash = compute_prefix_hash(prompt_tokens, 100)
     int cached_block_id = kv_cache_engine_allocate_block(engine, layer_id, len(prompt_tokens))
@@ -75,6 +80,7 @@ func kv_cache_engine_store_kv(kv_cache_engine engine, int[] prompt_tokens, float
     print("[KVCacheEngine] Stored KV for prefix " + prefix_hash + " in block " + int_to_string(cached_block_id) + "\n")
     return cached_block_id
 }
+
 func kv_cache_engine_query_kv(kv_cache_engine engine, int[] prompt_tokens) int[] {
     string prefix_hash = compute_prefix_hash(prompt_tokens, 100)
     int[] cached_blocks = cache_index_get_blocks(engine.index, prefix_hash)
@@ -87,6 +93,7 @@ func kv_cache_engine_query_kv(kv_cache_engine engine, int[] prompt_tokens) int[]
     print("[KVCacheEngine] Cache hit! Found " + int_to_string(len(cached_blocks)) + " blocks\n")
     return cached_blocks
 }
+
 func kv_cache_engine_get_hit_rate(kv_cache_engine engine) float {
     if engine.total_hits + engine.total_misses == 0 {
         return 0.0
@@ -96,6 +103,7 @@ func kv_cache_engine_get_hit_rate(kv_cache_engine engine) float {
     float hit_rate = hit_count / total_count
     return hit_rate
 }
+
 func kv_cache_engine_get_memory_usage_percent(kv_cache_engine engine) int {
     if engine.memory_pool.total_memory_bytes == 0 {
         return 0
@@ -103,6 +111,7 @@ func kv_cache_engine_get_memory_usage_percent(kv_cache_engine engine) int {
     int percent = int(engine.memory_pool.used_memory_bytes * 100 / engine.memory_pool.total_memory_bytes)
     return percent
 }
+
 func kv_cache_engine_evict_lru_block(kv_cache_engine engine) int {
     if engine.memory_pool.num_blocks == 0 {
         return -1
@@ -128,6 +137,7 @@ func kv_cache_engine_evict_lru_block(kv_cache_engine engine) int {
     print("[KVCacheEngine] Evicted LRU block, memory usage: " + int_to_string(engine.memory_pool.used_memory_bytes) + "\n")
     return lru_block_idx
 }
+
 func kv_cache_engine_get_stats(kv_cache_engine engine) string {
     float hit_rate = kv_cache_engine_get_hit_rate(engine)
     int memory_percent = kv_cache_engine_get_memory_usage_percent(engine)
@@ -137,10 +147,12 @@ func kv_cache_engine_get_stats(kv_cache_engine engine) string {
                    ", Memory=" + int_to_string(memory_percent) + "%"
     return stats
 }
+
 func kv_cache_engine_tick(kv_cache_engine engine, int64 time_increment_ms) {
     engine.current_time_ms = engine.current_time_ms + time_increment_ms
     cache_index_update_time(engine.index, engine.current_time_ms)
 }
+
 func kv_cache_engine_clear(kv_cache_engine engine) {
     engine.memory_pool.num_blocks = 0
     engine.memory_pool.used_memory_bytes = 0

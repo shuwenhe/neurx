@@ -11,6 +11,7 @@ struct batch_config {
     int queue_size
     string scheduling_policy
 }
+
 struct inference_request {
     int request_id
     string prompt
@@ -19,12 +20,14 @@ struct inference_request {
     int seq_length
     bool streaming
 }
+
 struct batch_request {
     []inference_request requests
     int batch_size
     int max_length
     int total_tokens
 }
+
 struct batch_scheduler {
     []inference_request queue
     batch_config config
@@ -33,6 +36,7 @@ struct batch_scheduler {
     int total_completed
     int current_batch_size
 }
+
 struct batch_statistics {
     int total_requests
     int avg_batch_size
@@ -42,6 +46,7 @@ struct batch_statistics {
     float throughput_tokens_per_sec
     float utilization_rate
 }
+
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start
@@ -51,11 +56,13 @@ func string_slice(string text, int start, int end) string {
     }
     result
 }
+
 func string_char(int code) string {
     if code == 10 { return "\n" }
     if code == 32 { return " " }
     ""
 }
+
 func create_default_batch_config() batch_config {
     batch_config{
         max_batch_size: 32,
@@ -68,6 +75,7 @@ func create_default_batch_config() batch_config {
         scheduling_policy: "fcfs"
     }
 }
+
 func create_batch_scheduler(batch_config config) batch_scheduler {
     batch_scheduler{
         queue: []inference_request{cap: config.queue_size},
@@ -78,6 +86,7 @@ func create_batch_scheduler(batch_config config) batch_scheduler {
         current_batch_size: 0
     }
 }
+
 func add_request(batch_scheduler* scheduler, inference_request req) bool {
     if len(scheduler.queue) >= scheduler.config.queue_size {
         return false
@@ -87,6 +96,7 @@ func add_request(batch_scheduler* scheduler, inference_request req) bool {
     scheduler.queue = append(scheduler.queue, req)
     true
 }
+
 func get_next_batch(batch_scheduler* scheduler) batch_request {
     batch_request batch = batch_request{
         requests: []inference_request{cap: scheduler.config.max_batch_size},
@@ -119,6 +129,7 @@ func get_next_batch(batch_scheduler* scheduler) batch_request {
     scheduler.current_batch_size = batch.batch_size
     batch
 }
+
 func calculate_batch_efficiency(batch_request batch) float {
     if batch.batch_size == 0 {
         return 0.0
@@ -130,6 +141,7 @@ func calculate_batch_efficiency(batch_request batch) float {
     }
     efficiency
 }
+
 func should_merge_batches(batch_request batch1, batch_request batch2, batch_config config) bool {
     int merged_size = batch1.batch_size + batch2.batch_size
     if merged_size > config.max_batch_size {
@@ -141,6 +153,7 @@ func should_merge_batches(batch_request batch1, batch_request batch2, batch_conf
     }
     true
 }
+
 func merge_batches(batch_request batch1, batch_request batch2) batch_request {
     batch_request merged = batch_request{
         requests: []inference_request{cap: len(batch1.requests) + len(batch2.requests)},
@@ -163,6 +176,7 @@ func merge_batches(batch_request batch1, batch_request batch2) batch_request {
     }
     merged
 }
+
 func estimate_batch_latency(batch_request batch, batch_config config) float {
     if batch.batch_size == 0 {
         return 0.0
@@ -171,6 +185,7 @@ func estimate_batch_latency(batch_request batch, batch_config config) float {
     float decode_latency = float(batch.batch_size) * 10.0
     prefill_latency + decode_latency
 }
+
 func create_batch_statistics(batch_scheduler scheduler) batch_statistics {
     batch_statistics stats = batch_statistics{
         total_requests: scheduler.total_scheduled + len(scheduler.queue),
@@ -191,6 +206,7 @@ func create_batch_statistics(batch_scheduler scheduler) batch_statistics {
     }
     stats
 }
+
 func float_to_string(float value) string {
     return float_to_string_precision(value, 2)
 func print_batch_summary(batch_request batch) {
@@ -202,6 +218,7 @@ func print_batch_summary(batch_request batch) {
     float latency = estimate_batch_latency(batch, create_default_batch_config())
     println("  Estimated Latency: " + float_to_string(latency) + " ms")
 }
+
 func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════╗")

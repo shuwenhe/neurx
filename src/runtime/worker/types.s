@@ -50,6 +50,7 @@ struct RequestMetadata {
     timestamp       i64
     worker_id       i32
 }
+
 struct WorkerConfig {
     worker_id       i32
     worker_type     i32
@@ -67,6 +68,7 @@ struct WorkerConfig {
     communication_type i32
     custom_config   map[string]string
 }
+
 struct WorkerStats {
     total_requests  i64
     completed_requests i64
@@ -81,6 +83,7 @@ struct WorkerStats {
     uptime_ms       i64
     last_heartbeat  i64
 }
+
 struct WorkerState {
     worker_id       i32
     state           i32
@@ -95,6 +98,7 @@ struct WorkerState {
     stats           WorkerStats
     last_update     i64
 }
+
 struct BatchRequest {
     request_id      string
     prompt_tokens   []i32
@@ -105,6 +109,7 @@ struct BatchRequest {
     timestamp       i64
     metadata        RequestMetadata
 }
+
 struct Batch {
     batch_id        i32
     requests        []BatchRequest
@@ -117,6 +122,7 @@ struct Batch {
     created_time    i64
     submitted_time  i64
 }
+
 struct ExecutionResult {
     request_id      string
     batch_id        i32
@@ -131,6 +137,7 @@ struct ExecutionResult {
     error_code      i32
     error_message   string
 }
+
 struct WorkerMessage {
     message_id      i64
     sender_id       i32
@@ -141,6 +148,7 @@ struct WorkerMessage {
     timestamp       i64
     requires_ack    i32
 }
+
 struct CommunicationConfig {
     comm_type       i32
     timeout_ms      i32
@@ -149,6 +157,7 @@ struct CommunicationConfig {
     use_compression i32
     buffer_size     i32
 }
+
 struct SchedulingPolicy {
     policy_type     i32
     enable_preemption i32
@@ -157,6 +166,7 @@ struct SchedulingPolicy {
     max_queue_size  i32
     priority_levels i32
 }
+
 struct WorkerPool {
     total_workers   i32
     active_workers  i32
@@ -166,6 +176,7 @@ struct WorkerPool {
     total_gpus      i32
     total_memory_gb f64
 }
+
 struct SyncState {
     sync_id         i64
     source_worker   i32
@@ -176,6 +187,7 @@ struct SyncState {
     timestamp       i64
     is_distributed  i32
 }
+
 struct WorkerResult {
     success         i32
     error_code      i32
@@ -184,6 +196,7 @@ struct WorkerResult {
     data_size       i32
     execution_time  i32
 }
+
 struct HeartbeatMessage {
     worker_id       i32
     timestamp       i64
@@ -195,6 +208,7 @@ struct HeartbeatMessage {
     error_count     i32
     is_responsive   i32
 }
+
 struct WorkerPoolStats {
     total_requests  i64
     completed_requests i64
@@ -207,6 +221,7 @@ struct WorkerPoolStats {
     total_uptime_ms i64
     last_updated    i64
 }
+
 struct DistributedConfig {
     rank            i32
     world_size      i32

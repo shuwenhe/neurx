@@ -40,6 +40,7 @@ struct engine_config {
     quantization            string
     kv_cache_dtype          string
 }
+
 struct sampling_params {
     temperature             float32
     top_p                   float32
@@ -57,6 +58,7 @@ struct sampling_params {
     spaces_between_special  bool
     seed                    int64
 }
+
 struct request_output {
     request_id      string
     prompt          string
@@ -70,12 +72,14 @@ struct request_output {
     lm_probs        int[]erface{}
     created_time    int64
 }
+
 struct request_metadata {
     request_id          string
     prompt_tokens       int32
     total_tokens        int32
     estimated_time_ms   float32
 }
+
 struct request {
     request_id              string
     prompt                  string
@@ -96,6 +100,7 @@ struct request {
     lora_request            interface{}
     guided_decode_params    interface{}
 }
+
 struct request_queue {
     requests         map[string]*request
     queue            []*request
@@ -103,11 +108,13 @@ struct request_queue {
     max_size         int32
     lock             interface{}
 }
+
 struct scheduler_output {
     scheduled_requests []*request
     running_requests   []*request
     finished_requests  []*request
 }
+
 struct execution_config {
     num_layers              int32
     hidden_size             int32
@@ -118,6 +125,7 @@ struct execution_config {
     device_type             string
     enable_prefix_cache     bool
 }
+
 struct llm_engine {
     config                  engine_config
     execution_config        execution_config
@@ -142,6 +150,7 @@ struct llm_engine {
     num_iterations          int64
     stream_output_callbacks map[string]interface{}
 }
+
 struct llm_engine_stats {
     total_requests          int64
     total_tokens            int64
@@ -154,6 +163,7 @@ struct llm_engine_stats {
     running_requests        int32
     num_iterations          int64
 }
+
 func new_engine_config() engine_config {
     return engine_config{
         model_path:             "",
@@ -176,6 +186,7 @@ func new_engine_config() engine_config {
         kv_cache_dtype:         "auto",
     }
 }
+
 func new_request_queue(max_size int32) *request_queue {
     return *request_queue{
         requests:       make(map[string]*request),
@@ -184,6 +195,7 @@ func new_request_queue(max_size int32) *request_queue {
         max_size:       max_size,
     }
 }
+
 func (request_queue* q) add(request* req) error {
     if int32(len(q.queue)) >= q.max_size {
         return core.Errorf("request queue is full (size=%d)", q.max_size)
@@ -196,9 +208,11 @@ func (request_queue* q) add(request* req) error {
     }
     return nil
 }
+
 func (request_queue* q) get(request_id string) *request {
     return q.requests[request_id]
 }
+
 func (request_queue* q) remove(request_id string) error {
     if _, exists := q.requests[request_id]; !exists {
         return core.Errorf("request not found: %s", request_id)
@@ -218,6 +232,7 @@ func (request_queue* q) remove(request_id string) error {
     }
     return nil
 }
+
 func (request_queue* q) get_next_batch(batch_size int32) []*request {
     batch := make([]*request, 0, batch_size)
     for len(batch) < int(batch_size) && len(q.priority_queue) > 0 {
@@ -230,9 +245,11 @@ func (request_queue* q) get_next_batch(batch_size int32) []*request {
     }
     return batch
 }
+
 func (request_queue* q) size() int32 {
     return int32(len(q.queue) + len(q.priority_queue))
 }
+
 func new_llm_engine(config engine_config) *llm_engine {
     engine := *llm_engine{
         config:                  config,
@@ -249,6 +266,7 @@ func new_llm_engine(config engine_config) *llm_engine {
     }
     return engine
 }
+
 func (llm_engine* e) initialize() error {
     if e.is_initialized {
         return nil
@@ -275,6 +293,7 @@ func (llm_engine* e) initialize() error {
     core.Println("========================")
     return nil
 }
+
 func (llm_engine* e) add_request(request_id string, prompt string, sampling_params sampling_params) error {
     if !e.is_initialized {
         return core.Errorf("engine not initialized")
@@ -302,12 +321,14 @@ func (llm_engine* e) add_request(request_id string, prompt string, sampling_para
     core.Printf("Request added: %s (prompt_length=%d)\n", request_id, len(prompt))
     return nil
 }
+
 func (llm_engine* e) get_request(request_id string) *request {
     if req, exists := e.running_requests[request_id]; exists {
         return req
     }
     return e.request_queue.get(request_id)
 }
+
 func (llm_engine* e) step() (bool, error) {
     if !e.is_initialized || e.paused {
         return false, nil
@@ -351,6 +372,7 @@ func (llm_engine* e) step() (bool, error) {
     e.total_requests += int64(len(batch))
     return true, nil
 }
+
 func (llm_engine* e) update_latency_stats(latency_ms float32) {
     if latency_ms < e.min_latency_ms {
         e.min_latency_ms = latency_ms
@@ -362,6 +384,7 @@ func (llm_engine* e) update_latency_stats(latency_ms float32) {
         e.avg_latency_ms = (e.avg_latency_ms*float32(e.total_requests-1) + latency_ms) / float32(e.total_requests)
     }
 }
+
 func (llm_engine* e) generate_completion(prompt string, sampling_params sampling_params) (string, error) {
     if !e.is_initialized {
         return "", core.Errorf("engine not initialized")
@@ -393,12 +416,15 @@ func (llm_engine* e) generate_completion(prompt string, sampling_params sampling
     }
     return "", core.Errorf("failed to generate completion for request: %s", request_id)
 }
+
 func (llm_engine* e) get_output(request_id string) *request_output {
     return e.outputs[request_id]
 }
+
 func (llm_engine* e) register_stream_callback(request_id string, callback interface{}) {
     e.stream_output_callbacks[request_id] = callback
 }
+
 func (llm_engine* e) abort_request(request_id string) error {
     req := e.get_request(request_id)
     if req == nil {
@@ -409,9 +435,11 @@ func (llm_engine* e) abort_request(request_id string) error {
     delete(e.stream_output_callbacks, request_id)
     return e.request_queue.remove(request_id)
 }
+
 func (llm_engine* e) get_num_unfinished_requests() int32 {
     return e.request_queue.size() + int32(len(e.running_requests))
 }
+
 func (llm_engine* e) get_stats() llm_engine_stats {
     return llm_engine_stats{
         total_requests:     e.total_requests,
@@ -426,6 +454,7 @@ func (llm_engine* e) get_stats() llm_engine_stats {
         num_iterations:     e.num_iterations,
     }
 }
+
 func (llm_engine* e) print_stats() {
     stats := e.get_stats()
     core.Println("\n" + "="*60)
@@ -443,14 +472,17 @@ func (llm_engine* e) print_stats() {
     core.Printf("Total iterations: %d\n", stats.num_iterations)
     core.Println("="*60 + "\n")
 }
+
 func (llm_engine* e) pause() {
     e.paused = true
     core.Println("llm_engine paused")
 }
+
 func (llm_engine* e) resume() {
     e.paused = false
     core.Println("llm_engine resumed")
 }
+
 func (llm_engine* e) shutdown() error {
     if !e.is_initialized {
         return core.Errorf("engine not initialized")
@@ -465,6 +497,7 @@ func (llm_engine* e) shutdown() error {
     core.Println("llm_engine shutdown complete")
     return nil
 }
+
 func (llm_engine* e) get_configuration() map[string]interface{} {
     config_map := make(map[string]interface{})
     config_map["model_path"] = e.config.model_path
@@ -481,6 +514,7 @@ func (llm_engine* e) get_configuration() map[string]interface{} {
     config_map["gpu_memory_utilization"] = e.config.gpu_memory_utilization
     return config_map
 }
+
 func (llm_engine* e) warmup() error {
     core.Println("Warming up llm_engine...")
     for i := 0; i < 3; i++ {
@@ -502,6 +536,7 @@ func (llm_engine* e) warmup() error {
     core.Println("Warmup complete")
     return nil
 }
+
 func new_default_sampling_params() sampling_params {
     return sampling_params{
         temperature:        0.7,

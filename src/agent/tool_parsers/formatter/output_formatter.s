@@ -6,6 +6,7 @@ const FORMAT_YAML = "yaml"
 func format_as_json(string obj) string {
     return obj
 }
+
 func create_json_object([]json_field fields) string {
     result := "{"
     i := 0
@@ -20,6 +21,7 @@ func create_json_object([]json_field fields) string {
     result = result + "}"
     return result
 }
+
 func create_json_array(string[] items) string {
     result := "["
     i := 0
@@ -33,6 +35,7 @@ func create_json_array(string[] items) string {
     result = result + "]"
     return result
 }
+
 func format_as_xml(string json_str) string {
     result := "<xml version=\"1.0\" encoding=\"UTF-8\">\n"
     result = result + "<root>\n"
@@ -40,6 +43,7 @@ func format_as_xml(string json_str) string {
     result = result + "</root>"
     return result
 }
+
 func json_to_xml_inner(string json_str, int depth) string {
     result := ""
     indent := get_indent(depth)
@@ -74,9 +78,11 @@ func json_to_xml_inner(string json_str, int depth) string {
     }
     return result
 }
+
 func format_as_yaml(string json_str) string {
     return json_to_yaml(json_str, 0)
 }
+
 func json_to_yaml(string json_str, int depth) string {
     result := ""
     indent := get_indent(depth)
@@ -91,18 +97,21 @@ func json_to_yaml(string json_str, int depth) string {
     }
     return result
 }
+
 func parse_yaml_object(string json_str, int depth) string {
     result := ""
     indent := get_indent(depth)
     next_indent := get_indent(depth + 1)
     return result
 }
+
 func parse_yaml_array(string json_str, int depth) string {
     result := ""
     indent := get_indent(depth)
     next_indent := get_indent(depth + 1)
     return result
 }
+
 func convert_format(string input, string from_format, string to_format) string {
     json_form := input
     if from_format == FORMAT_XML {
@@ -119,15 +128,19 @@ func convert_format(string input, string from_format, string to_format) string {
     }
     return json_form
 }
+
 func xml_to_json(string xml_str) string {
     return "{}"
 }
+
 func yaml_to_json(string yaml_str) string {
     return "{}"
 }
+
 func prettify_json(string json_str) string {
     return prettify_json_inner(json_str, 0)
 }
+
 func prettify_json_inner(string json_str, int depth) string {
     result := ""
     indent := get_indent(depth)
@@ -160,6 +173,7 @@ func prettify_json_inner(string json_str, int depth) string {
     }
     return result
 }
+
 func minify_json(string json_str) string {
     result := ""
     in_string := false
@@ -178,10 +192,12 @@ func minify_json(string json_str) string {
     }
     return result
 }
+
 struct json_field {
     string key
     string value
 }
+
 func get_indent(int level) string {
     result := ""
     i := 0
@@ -191,6 +207,7 @@ func get_indent(int level) string {
     }
     return result
 }
+
 func string_from_code(int code) string {
     if code == 32 { return " " }
     else if code == 34 { return "\"" }
@@ -209,6 +226,7 @@ func string_from_code(int code) string {
     else if code >= 97 && code <= 122 { return string(code) }
     else { return string(code) }
 }
+
 func extract_string_value(string s, int start) string {
     i := start
     if i < len(s) && s[i] == '"' {
@@ -221,12 +239,14 @@ func extract_string_value(string s, int start) string {
     }
     return result
 }
+
 struct streaming_json_builder {
     string buffer
     bool is_first
     bool in_object
     bool in_array
 }
+
 func create_streaming_builder() streaming_json_builder {
     builder := streaming_json_builder{
         buffer: "",
@@ -236,16 +256,19 @@ func create_streaming_builder() streaming_json_builder {
     }
     return builder
 }
+
 func start_object(*streaming_json_builder builder) {
     builder.buffer = builder.buffer + "{"
     builder.in_object = true
     builder.is_first = true
 }
+
 func start_array(*streaming_json_builder builder) {
     builder.buffer = builder.buffer + "["
     builder.in_array = true
     builder.is_first = true
 }
+
 func add_field(*streaming_json_builder builder, string key, string value) {
     if builder.is_first == false {
         builder.buffer = builder.buffer + ", "
@@ -253,6 +276,7 @@ func add_field(*streaming_json_builder builder, string key, string value) {
     builder.buffer = builder.buffer + "\"" + key + "\": " + value
     builder.is_first = false
 }
+
 func add_item(*streaming_json_builder builder, string value) {
     if builder.is_first == false {
         builder.buffer = builder.buffer + ", "
@@ -260,14 +284,17 @@ func add_item(*streaming_json_builder builder, string value) {
     builder.buffer = builder.buffer + value
     builder.is_first = false
 }
+
 func end_object(*streaming_json_builder builder) {
     builder.buffer = builder.buffer + "}"
     builder.in_object = false
 }
+
 func end_array(*streaming_json_builder builder) {
     builder.buffer = builder.buffer + "]"
     builder.in_array = false
 }
+
 func get_buffer(*streaming_json_builder builder) string {
     return builder.buffer
 }

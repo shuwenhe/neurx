@@ -29,16 +29,19 @@ struct hf_bpe_tokenizer {
     int unknown_id
     string error_code
 }
+
 struct hf_bpe_result {
     bool ok
     int[] token_ids
     string error_code
 }
+
 struct hf_bpe_decode_result {
     bool ok
     string text
     string error_code
 }
+
 struct hf_bpe_offset_result {
     bool ok
     int[] token_ids
@@ -46,20 +49,24 @@ struct hf_bpe_offset_result {
     int[] end_offsets
     string error_code
 }
+
 struct bpe_string_result {
     string value
     int next
 }
+
 struct bpe_int_result {
     int value
     int next
 }
+
 func bpe_hex(int ch) int {
     if ch >= 48 && ch <= 57 { return ch - 48 }
     if ch >= 65 && ch <= 70 { return ch - 55 }
     if ch >= 97 && ch <= 102 { return ch - 87 }
     -1
 }
+
 func bpe_utf8(int codepoint) string {
     if codepoint < 128 { return string(codepoint) }
     string output = ""
@@ -79,12 +86,14 @@ func bpe_utf8(int codepoint) string {
     output = output + string(128 + codepoint % 64)
     output
 }
+
 func bpe_bytes_string(int[] bytes) string {
     string output = ""
     int i = 0
     for i < len(bytes) { output = output + string(bytes[i]); i = i + 1 }
     output
 }
+
 func bpe_find(string text, string pattern, int start) int {
     int i = start
     for i + len(pattern) <= len(text) {
@@ -96,11 +105,13 @@ func bpe_find(string text, string pattern, int start) int {
     }
     -1
 }
+
 func bpe_skip_space(string text, int position) int {
     int i = position
     for i < len(text) && (text[i] == 32 || text[i] == 9 || text[i] == 10 || text[i] == 13) { i = i + 1 }
     i
 }
+
 func bpe_json_string(string text, int quote) bpe_string_result {
     if quote < 0 || quote >= len(text) || text[quote] != 34 { return bpe_string_result { value: "", next: quote } }
     string output = ""
@@ -125,12 +136,14 @@ func bpe_json_string(string text, int quote) bpe_string_result {
     }
     bpe_string_result { value: output, next: i + 1 }
 }
+
 func bpe_parse_int(string text, int position) bpe_int_result {
     int i = bpe_skip_space(text, position)
     int value = 0
     for i < len(text) && text[i] >= 48 && text[i] <= 57 { value = value * 10 + text[i] - 48; i = i + 1 }
     bpe_int_result { value: value, next: i }
 }
+
 func bpe_vocab_id(hf_bpe_tokenizer tokenizer, string token) int {
     int i = 0
     for i < tokenizer.vocab_count {
@@ -139,6 +152,7 @@ func bpe_vocab_id(hf_bpe_tokenizer tokenizer, string token) int {
     }
     tokenizer.unknown_id
 }
+
 func bpe_merge_rank(hf_bpe_tokenizer tokenizer, string left, string right) int {
     int i = 0
     for i < tokenizer.merge_count {
@@ -147,12 +161,14 @@ func bpe_merge_rank(hf_bpe_tokenizer tokenizer, string left, string right) int {
     }
     -1
 }
+
 func bpe_direct_byte(int value) bool {
     if value >= 33 && value <= 126 { return true }
     if value >= 161 && value <= 172 { return true }
     if value >= 174 && value <= 255 { return true }
     false
 }
+
 func bpe_byte_symbol(int value) string {
     if bpe_direct_byte(value) { return bpe_utf8(value) }
     int codepoint = 256
@@ -163,6 +179,7 @@ func bpe_byte_symbol(int value) string {
     }
     bpe_utf8(codepoint)
 }
+
 func bpe_json_true(string json, string key, int start) bool {
     int position = bpe_find(json, key, start)
     if position < 0 { return false }
@@ -170,25 +187,30 @@ func bpe_json_true(string json, string key, int start) bool {
     int value = bpe_skip_space(json, colon + 1)
     value + 4 <= len(json) && json[value] == 116 && json[value + 1] == 114 && json[value + 2] == 117 && json[value + 3] == 101
 }
+
 func bpe_utf8_width(int byte) int {
     if byte < 128 { return 1 }
     if byte < 224 { return 2 }
     if byte < 240 { return 3 }
     4
 }
+
 func bpe_substring(string text, int start, int end) string {
     string output = ""
     int i = start
     for i < end { output = output + string(text[i]); i = i + 1 }
     output
 }
+
 func bpe_is_space(int byte) bool { byte == 32 || byte == 9 || byte == 10 || byte == 13 }
+
 func bpe_is_bert_punctuation(int byte) bool {
     if byte >= 33 && byte <= 47 { return true }
     if byte >= 58 && byte <= 64 { return true }
     if byte >= 91 && byte <= 96 { return true }
     byte >= 123 && byte <= 126
 }
+
 func bpe_latin_accent(int lead, int tail) int {
     if lead != 195 { return -1 }
     if tail >= 128 && tail <= 133 { return 65 }
@@ -209,6 +231,7 @@ func bpe_latin_accent(int lead, int tail) int {
     if tail == 189 || tail == 191 { return 121 }
     -1
 }
+
 func bpe_normalize(hf_bpe_tokenizer tokenizer, string text) string {
     string normalized = text
     if tokenizer.unicode_normalizer != "" {
@@ -235,6 +258,7 @@ func bpe_normalize(hf_bpe_tokenizer tokenizer, string text) string {
     }
     output
 }
+
 func bpe_added_id(hf_bpe_tokenizer tokenizer, string token) int {
     int i = 0
     for i < tokenizer.added_count {
@@ -243,6 +267,7 @@ func bpe_added_id(hf_bpe_tokenizer tokenizer, string token) int {
     }
     -1
 }
+
 func bpe_first_token_id(hf_bpe_tokenizer tokenizer, string first, string second, string third) int {
     int id = bpe_added_id(tokenizer, first)
     if id < 0 { id = bpe_vocab_id(tokenizer, first) }
@@ -259,6 +284,7 @@ func bpe_first_token_id(hf_bpe_tokenizer tokenizer, string first, string second,
     }
     id
 }
+
 func bpe_id_token(hf_bpe_tokenizer tokenizer, int id) string {
     int i = 0
     for i < tokenizer.added_count {
@@ -272,6 +298,7 @@ func bpe_id_token(hf_bpe_tokenizer tokenizer, int id) string {
     }
     ""
 }
+
 func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     int[] bytes = __host_read_binary_file(model_dir + "/tokenizer.json")
     if len(bytes) == 0 { return hf_bpe_tokenizer { valid: false, vocab_tokens: [], vocab_ids: [], vocab_count: 0, merge_left: [], merge_right: [], merge_count: 0, added_tokens: [], added_ids: [], added_count: 0, byte_level: false, bert_pre_tokenizer: false, metaspace_pre_tokenizer: false, normalizer_lowercase: false, normalizer_strip: false, bert_clean_text: false, bert_strip_accents: false, byte_level_trim_offsets: false, unicode_normalizer: "", unicode_db: empty_unicode_database(), metaspace_replacement: "", bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "tokenizer_not_found" } }
@@ -355,6 +382,7 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     tokenizer.pad_id = bpe_first_token_id(tokenizer, "<pad>", "[PAD]", "<|pad|>")
     tokenizer
 }
+
 func bpe_encode_piece(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) hf_bpe_result {
     if text == "" { return hf_bpe_result { ok: true, token_ids: [], error_code: "" } }
     string[] symbols = string[]{cap: len(text) + 4}
@@ -394,6 +422,7 @@ func bpe_encode_piece(hf_bpe_tokenizer tokenizer, string text, int maximum_token
     for i < output_count { ids[i] = bpe_vocab_id(tokenizer, symbols[i]); i = i + 1 }
     hf_bpe_result { ok: true, token_ids: ids, error_code: "" }
 }
+
 func bpe_encode_normal(hf_bpe_tokenizer tokenizer, string source, int maximum_tokens) hf_bpe_result {
     string text = bpe_normalize(tokenizer, source)
     if tokenizer.metaspace_pre_tokenizer {
@@ -435,6 +464,7 @@ func bpe_encode_normal(hf_bpe_tokenizer tokenizer, string source, int maximum_to
     }
     bpe_encode_piece(tokenizer, text, maximum_tokens)
 }
+
 func hf_bpe_encode(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) hf_bpe_result {
     if !tokenizer.valid || text == "" || maximum_tokens <= 0 { return hf_bpe_result { ok: false, token_ids: [], error_code: "invalid_bpe_input" } }
     int[] ids = int[]{cap: maximum_tokens}
@@ -469,6 +499,7 @@ func hf_bpe_encode(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) 
     for i < output_count { result_ids[i] = ids[i]; i = i + 1 }
     hf_bpe_result { ok: true, token_ids: result_ids, error_code: "" }
 }
+
 func hf_bpe_encode_bytelevel_offsets(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) hf_bpe_offset_result {
     if !tokenizer.valid || !tokenizer.byte_level || text == "" || maximum_tokens <= 0 { return hf_bpe_offset_result { ok: false, token_ids: [], start_offsets: [], end_offsets: [], error_code: "invalid_bytelevel_offset_input" } }
     int exact_special = 0
@@ -528,6 +559,7 @@ func hf_bpe_encode_bytelevel_offsets(hf_bpe_tokenizer tokenizer, string text, in
     }
     hf_bpe_offset_result { ok: true, token_ids: ids, start_offsets: output_starts, end_offsets: output_ends, error_code: "" }
 }
+
 func bpe_decode_byte_symbol(string symbol) int {
     int byte = 0
     for byte < 256 {
@@ -536,6 +568,7 @@ func bpe_decode_byte_symbol(string symbol) int {
     }
     -1
 }
+
 func hf_bpe_decode(hf_bpe_tokenizer tokenizer, int[] token_ids) hf_bpe_decode_result {
     if !tokenizer.valid { return hf_bpe_decode_result { ok: false, text: "", error_code: "invalid_bpe_tokenizer" } }
     string output = ""
@@ -564,6 +597,7 @@ func hf_bpe_decode(hf_bpe_tokenizer tokenizer, int[] token_ids) hf_bpe_decode_re
     if tokenizer.metaspace_pre_tokenizer && len(output) > 0 && output[0] == 32 { output = bpe_substring(output, 1, len(output)) }
     hf_bpe_decode_result { ok: true, text: output, error_code: "" }
 }
+
 func hf_bpe_decode_generated(hf_bpe_tokenizer tokenizer, int[] token_ids) hf_bpe_decode_result {
     int[] content_ids = int[]{cap: len(token_ids)}
     int count = 0

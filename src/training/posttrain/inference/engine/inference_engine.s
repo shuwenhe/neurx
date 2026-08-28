@@ -1,6 +1,7 @@
 package neurx.posttrain.inference.engine
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct inference_config {
     int max_num_batched_tokens
     int max_num_seqs
@@ -14,6 +15,7 @@ struct inference_config {
     string dtype
     int tensor_parallel_size
 }
+
 struct inference_sequence {
     int seq_id
     int[] token_ids
@@ -25,24 +27,28 @@ struct inference_sequence {
     int top_k
     bool finished
 }
+
 struct cache_block {
     int block_id
     int[] token_ids
     int ref_count
     bool is_gpu
 }
+
 struct block_cache_table {
     int[][] seq_block_tables
     []cache_block blocks
     int num_free_gpu_blocks
     int num_free_cpu_blocks
 }
+
 struct scheduler_output {
     int[] scheduled_seq_ids
     int[] num_tokens_per_seq
     int total_tokens
     bool is_prompt_phase
 }
+
 struct inference_engine {
     module model
     inference_config config
@@ -50,6 +56,7 @@ struct inference_engine {
     []inference_sequence sequences
     int next_seq_id
 }
+
 func new_inference_config() inference_config {
     inference_config {
         max_num_batched_tokens: 2048,
@@ -65,6 +72,7 @@ func new_inference_config() inference_config {
         tensor_parallel_size: 1,
     }
 }
+
 func allocate_block(block_cache_table table, bool is_gpu) int {
     if is_gpu && table.num_free_gpu_blocks > 0 {
         int i = 0
@@ -89,6 +97,7 @@ func allocate_block(block_cache_table table, bool is_gpu) int {
     }
     return -1
 }
+
 func free_block(block_cache_table table, int block_id) {
     if block_id >= 0 && block_id < table.blocks.len {
         table.blocks[block_id].ref_count = table.blocks[block_id].ref_count - 1
@@ -101,6 +110,7 @@ func free_block(block_cache_table table, int block_id) {
         }
     }
 }
+
 func schedule_sequences(
     inference_engine engine
 ) scheduler_output {
@@ -137,6 +147,7 @@ func schedule_sequences(
         is_prompt_phase: is_prompt,
     }
 }
+
 func paged_attention(
     tensor query,
     tensor key_cache,
@@ -206,6 +217,7 @@ func paged_attention(
     }
     output
 }
+
 func generate(
     inference_engine engine,
     int[][] prompts,
@@ -254,6 +266,7 @@ func generate(
     }
     outputs
 }
+
 func new_inference_engine(module model, inference_config config) inference_engine {
     []cache_block blocks = []cache_block{cap: config.num_gpu_blocks + config.num_cpu_blocks}
     int i = 0

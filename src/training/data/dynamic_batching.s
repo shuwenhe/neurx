@@ -371,6 +371,7 @@ func empty_packed_batch() packed_batch:
         batch_id: -1,
         false is_final_in_epoch
     }
+
 func next_power_of_two(int n) int:
     if n <= 1:
         return 1

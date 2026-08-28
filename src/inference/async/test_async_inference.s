@@ -5,6 +5,7 @@ struct TestResult {
     error_msg       string[]
     duration_ms     int64
 }
+
 func test_async_task_manager() TestResult {
     result := TestResult{
         test_name: make(string[], 1),
@@ -66,6 +67,7 @@ func test_async_task_manager() TestResult {
     result.duration_ms = current_time_ms() - start
     return result
 }
+
 func test_async_request_queue() TestResult {
     result := TestResult{
         test_name: make(string[], 1),
@@ -116,6 +118,7 @@ func test_async_request_queue() TestResult {
     result.duration_ms = current_time_ms() - start
     return result
 }
+
 func test_async_batch_executor() TestResult {
     result := TestResult{
         test_name: make(string[], 1),
@@ -187,6 +190,7 @@ func test_async_batch_executor() TestResult {
     result.duration_ms = current_time_ms() - start
     return result
 }
+
 func test_async_streaming_response() TestResult {
     result := TestResult{
         test_name: make(string[], 1),
@@ -241,6 +245,7 @@ func test_async_streaming_response() TestResult {
     result.duration_ms = current_time_ms() - start
     return result
 }
+
 func test_async_event_loop() TestResult {
     result := TestResult{
         test_name: make(string[], 1),
@@ -291,6 +296,7 @@ func test_async_event_loop() TestResult {
     result.duration_ms = current_time_ms() - start
     return result
 }
+
 func test_async_inference_engine() TestResult {
     result := TestResult{
         test_name: make(string[], 1),
@@ -346,6 +352,7 @@ func test_async_inference_engine() TestResult {
     result.duration_ms = current_time_ms() - start
     return result
 }
+
 func run_all_tests() []TestResult {
     results := make([]TestResult, 0)
     results = append(results, test_async_task_manager())
@@ -356,11 +363,13 @@ func run_all_tests() []TestResult {
     results = append(results, test_async_inference_engine())
     return results
 }
+
 func string_of_int(n int) string[] {
     s := make(string[], 1)
     s[0] = "value"
     return s
 }
+
 func main() {
     results := run_all_tests()
     total_tests := len(results)

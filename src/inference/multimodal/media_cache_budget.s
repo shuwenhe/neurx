@@ -1,8 +1,12 @@
 package neurx.inference.multimodal.media_cache_budget
 func media_modality_image() int { 1 }
+
 func media_modality_audio() int { 2 }
+
 func media_modality_video() int { 3 }
+
 func media_modality_embedding() int { 4 }
+
 struct media_cache_config {
     int capacity_items
     int encoder_compute_budget
@@ -11,6 +15,7 @@ struct media_cache_config {
     int max_batch_requests
     bool enabled
 }
+
 struct media_cache_state {
     media_cache_config config
     int[] hashes
@@ -25,6 +30,7 @@ struct media_cache_state {
     int cached_tokens
     bool initialized
 }
+
 struct media_cache_result {
     media_cache_state state
     int slot
@@ -32,18 +38,21 @@ struct media_cache_result {
     bool stored
     int evicted_hash
 }
+
 struct media_budget_result {
     int encoder_budget
     int max_items_per_prompt
     int max_items_per_batch
     bool supported
 }
+
 func media_zero_array(int capacity) int[] {
     int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
+
 func media_hash_bytes(int[] bytes, int modality, int metadata_hash) int {
     int hash = 216613
     hash = hash * 167 + modality
@@ -57,10 +66,12 @@ func media_hash_bytes(int[] bytes, int modality, int metadata_hash) int {
     if hash < 0 { hash = 0 - hash }
     hash + 1
 }
+
 func init_media_cache(media_cache_config config) media_cache_state {
     bool initialized = !config.enabled || (config.capacity_items > 0 && config.encoder_compute_budget >= 0 && config.encoder_cache_budget >= 0 && config.max_model_length > 0 && config.max_batch_requests > 0)
     media_cache_state {config: config, hashes: media_zero_array(config.capacity_items), modalities: media_zero_array(config.capacity_items), token_counts: media_zero_array(config.capacity_items), last_access: media_zero_array(config.capacity_items), item_count: 0, logical_clock: 1, hits: 0, misses: 0, evictions: 0, cached_tokens: 0, initialized: initialized}
 }
+
 func media_cache_find(media_cache_state state, int hash) int {
     int i = 0
     for i < state.config.capacity_items {
@@ -69,6 +80,7 @@ func media_cache_find(media_cache_state state, int hash) int {
     }
     0 - 1
 }
+
 func media_cache_lookup(media_cache_state state, int hash) media_cache_result {
     int slot = media_cache_find(state, hash)
     if slot < 0 { state.misses = state.misses + 1; return media_cache_result {state: state, slot: slot, hit: false, stored: false, evicted_hash: 0} }
@@ -77,6 +89,7 @@ func media_cache_lookup(media_cache_state state, int hash) media_cache_result {
     state.hits = state.hits + 1
     media_cache_result {state: state, slot: slot, hit: true, stored: false, evicted_hash: 0}
 }
+
 func media_cache_insert(media_cache_state state, int hash, int modality, int token_count) media_cache_result {
     if !state.initialized || !state.config.enabled || hash == 0 || token_count <= 0 { return media_cache_result {state: state, slot: 0 - 1, hit: false, stored: false, evicted_hash: 0} }
     int existing = media_cache_find(state, hash)
@@ -108,6 +121,7 @@ func media_cache_insert(media_cache_state state, int hash, int modality, int tok
     state.cached_tokens = state.cached_tokens + token_count
     media_cache_result {state: state, slot: slot, hit: false, stored: true, evicted_hash: evicted_hash}
 }
+
 func compute_media_budget(media_cache_config config, int max_tokens_per_item, int modality_limit, bool chunked_prefill, int max_batched_tokens) media_budget_result {
     int encoder_budget = config.encoder_compute_budget
     if config.encoder_cache_budget < encoder_budget { encoder_budget = config.encoder_cache_budget }

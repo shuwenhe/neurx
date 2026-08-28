@@ -13,10 +13,12 @@ struct lora_config {
     option[*string[]] modules_to_save
     bool init_lora_weights
 }
+
 struct lora_config_error {
     string code
     string message
 }
+
 func default() lora_config {
     lora_config {
         lora_rank: 8,
@@ -29,6 +31,7 @@ func default() lora_config {
         init_lora_weights: true,
     }
 }
+
 func (lora_config* config) validate() ((), lora_config_error) {
     if config.lora_rank <= 0 || config.lora_rank > 1024 {
         return (lora_config_error {
@@ -65,6 +68,7 @@ func (lora_config* config) validate() ((), lora_config_error) {
     }
     return (), ""
 }
+
 func from_dict(*map[string, string] config_dict) (lora_config, lora_config_error) {
     config := default()
     switch config_dict.get("lora_rank") {
@@ -130,9 +134,11 @@ func from_dict(*map[string, string] config_dict) (lora_config, lora_config_error
     config.validate()
 return     (config, "")
 }
+
 func (lora_config* config) get_lora_scaling() float {
     config.lora_alpha / config.lora_rank as float
 }
+
 func (lora_config* config) is_target_module(string module_name) bool {
     for target in config.target_modules.iter() {
         if target == module_name {
@@ -141,6 +147,7 @@ func (lora_config* config) is_target_module(string module_name) bool {
     }
     false
 }
+
 func (lora_config* config) should_save_full_weights(string module_name) bool {
     switch config.modules_to_save {
         some(modules) : {
@@ -154,6 +161,7 @@ func (lora_config* config) should_save_full_weights(string module_name) bool {
         nil : false,
     }
 }
+
 func (lora_config* config) summary() string {
     s := "LoRA Configuration:\n"
     s = s + "  rank: " + config.lora_rank.to_string() + "\n"

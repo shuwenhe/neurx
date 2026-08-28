@@ -5,12 +5,14 @@ struct min_hash_signature {
     string document_id
     int doc_length
 }
+
 struct bloom_filter {
     bool* bits
     int size
     int hash_functions
     int insertions
 }
+
 struct deduplication_stats {
     int total_documents
     int unique_documents
@@ -18,12 +20,14 @@ struct deduplication_stats {
     int duplicate_ratio
     int computation_time_ms
 }
+
 struct document_similarity {
     string doc1_id
     string doc2_id
     float similarity_score
     bool is_duplicate
 }
+
 func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_filter {
     bloom_filter bf
     float ln2_squared = 0.4804530139
@@ -39,6 +43,7 @@ func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_
     }
     bf
 }
+
 func hash_function_1(string text) int {
     int hash = 5381
     int i = 0
@@ -52,6 +57,7 @@ func hash_function_1(string text) int {
     }
     hash
 }
+
 func hash_function_2(string text) int {
     int hash = 33
     int i = 0
@@ -65,6 +71,7 @@ func hash_function_2(string text) int {
     }
     hash
 }
+
 func hash_function_3(string text) int {
     int hash = 1
     int i = 0
@@ -78,6 +85,7 @@ func hash_function_3(string text) int {
     }
     hash
 }
+
 func bloom_add(bloom_filter bf, string text) void {
     int h1 = hash_function_1(text) % bf.size
     int h2 = hash_function_2(text) % bf.size
@@ -87,6 +95,7 @@ func bloom_add(bloom_filter bf, string text) void {
     bf.bits[h3] = true
     bf.insertions = bf.insertions + 1
 }
+
 func bloom_contains(bloom_filter bf, string text) bool {
     int h1 = hash_function_1(text) % bf.size
     int h2 = hash_function_2(text) % bf.size
@@ -96,6 +105,7 @@ func bloom_contains(bloom_filter bf, string text) bool {
     }
     false
 }
+
 func generate_minhash_signature(string text, int num_hashes) min_hash_signature {
     min_hash_signature sig
     sig.num_hashes = num_hashes
@@ -123,6 +133,7 @@ func generate_minhash_signature(string text, int num_hashes) min_hash_signature 
     }
     sig
 }
+
 func compute_hash(string text, int seed) int {
     int hash = seed
     int i = 0
@@ -136,6 +147,7 @@ func compute_hash(string text, int seed) int {
     }
     hash
 }
+
 func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float {
     if sig1.num_hashes != sig2.num_hashes {
         return 0.0
@@ -151,6 +163,7 @@ func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float 
     float similarity = float(matches) / float(sig1.num_hashes)
     similarity
 }
+
 func find_exact_duplicates(string* documents, int doc_count) bool* {
     bool* is_duplicate = alloc(bool, doc_count)
     int i = 0
@@ -177,6 +190,7 @@ func find_exact_duplicates(string* documents, int doc_count) bool* {
     }
     is_duplicate
 }
+
 func find_similar_duplicates(string* documents, int doc_count, float similarity_threshold) document_similarity* {
     document_similarity* similarities = alloc(document_similarity, doc_count * doc_count / 2)
     int similarity_count = 0
@@ -206,6 +220,7 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
     }
     similarities
 }
+
 func deduplicate_documents(string* documents, int doc_count, float similarity_threshold) deduplication_stats {
     deduplication_stats stats
     stats.total_documents = doc_count
@@ -226,6 +241,7 @@ func deduplicate_documents(string* documents, int doc_count, float similarity_th
     stats.computation_time_ms = get_time_ms() - start_time
     stats
 }
+
 func filter_unique_documents(string* documents, int doc_count, bool* is_duplicate) string* {
     int unique_count = 0
     int i = 0
@@ -247,6 +263,7 @@ func filter_unique_documents(string* documents, int doc_count, bool* is_duplicat
     }
     unique_docs
 }
+
 func str_equals(string s1, string s2) bool {
     if strlen(s1) != strlen(s2) {
         return false
@@ -260,6 +277,7 @@ func str_equals(string s1, string s2) bool {
     }
     true
 }
+
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -269,9 +287,11 @@ func strlen(string s) int {
     }
     count
 }
+
 func char_to_string(int c) string {
     ""
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -285,15 +305,19 @@ func int_to_string(int n) string {
     }
     result
 }
+
 func float(int n) float {
     0.0
 }
+
 func get_time_ms() int {
     0
 }
+
 func ln_f(float x) float {
     0.0
 }
+
 func main() {
     println("Data Deduplication System")
     string* docs = alloc(string, 5)

@@ -8,6 +8,7 @@ import "time"
 	CONN_CLOSED = 4
 	CONN_FAILED = 5
 }
+
 struct resume_token {
 	string                  token_id
 	int32                   last_event_id
@@ -19,6 +20,7 @@ struct resume_token {
 	bool                    is_valid
 	int64                   token_expiry
 }
+
 struct connection_checkpoint {
 	int32                   checkpoint_id
 	int32                   last_sent_event_id
@@ -27,6 +29,7 @@ struct connection_checkpoint {
 	int32                   total_bytes_sent
 	string                  last_event_data_hash
 }
+
 struct sse_connection {
 	string                  connection_id
 	string                  client_id
@@ -47,12 +50,14 @@ struct sse_connection {
 	bool                    compression_enabled
 	compression_type        active_compression
 }
+
 struct reconnection_info {
 	string                  resume_token
 	int32                   expected_event_id
 	int64                   disconnection_time
 	int32                   reconnection_attempts
 }
+
 func create_sse_connection(connection_id string, client_id string, stream_id string) sse_connection {
 	return sse_connection{
 		connection_id:          connection_id,
@@ -75,6 +80,7 @@ func create_sse_connection(connection_id string, client_id string, stream_id str
 		active_compression:     COMPRESSION_NONE,
 	}
 }
+
 func create_resume_token(client_id string, stream_id string, last_event_id int32) resume_token {
 	return resume_token{
 		token_id:              "",
@@ -88,6 +94,7 @@ func create_resume_token(client_id string, stream_id string, last_event_id int32
 		token_expiry:          time.Now().UnixNano() + 3600000000000,
 	}
 }
+
 func (sse_connection* c) open_connection() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -99,11 +106,13 @@ func (sse_connection* c) open_connection() bool {
 	}
 	return false
 }
+
 func (sse_connection* c) get_state() connection_state {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.current_state
 }
+
 func (sse_connection* c) record_event_sent(event_id int32, event_size int32) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -111,24 +120,28 @@ func (sse_connection* c) record_event_sent(event_id int32, event_size int32) {
 	c.total_bytes_sent = c.total_bytes_sent + event_size
 	c.last_activity_time = time.Now().UnixNano()
 }
+
 func (sse_connection* c) send_heartbeat() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.last_heartbeat_time = time.Now().UnixNano()
 	c.last_activity_time = time.Now().UnixNano()
 }
+
 func (sse_connection* c) is_idle() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	idle_time := time.Now().UnixNano() - c.last_activity_time
 	return idle_time > int64(c.idle_timeout_ms)*1000000
 }
+
 func (sse_connection* c) need_heartbeat() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	time_since_heartbeat := time.Now().UnixNano() - c.last_heartbeat_time
 	return time_since_heartbeat > int64(c.heartbeat_interval_ms)*1000000
 }
+
 func (sse_connection* c) create_checkpoint() connection_checkpoint {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -144,6 +157,7 @@ func (sse_connection* c) create_checkpoint() connection_checkpoint {
 	c.current_checkpoint_id++
 	return checkpoint
 }
+
 func (sse_connection* c) create_resume_token(last_event_id int32) resume_token {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -153,6 +167,7 @@ func (sse_connection* c) create_resume_token(last_event_id int32) resume_token {
 	c.resume_tokens = append(c.resume_tokens, token)
 	return token
 }
+
 func (sse_connection* c) pause() resume_token {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -166,6 +181,7 @@ func (sse_connection* c) pause() resume_token {
 	c.resume_tokens = append(c.resume_tokens, token)
 	return token
 }
+
 func (sse_connection* c) resume(resume_token resume_token) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -183,6 +199,7 @@ func (sse_connection* c) resume(resume_token resume_token) bool {
 	c.last_activity_time = now
 	return true
 }
+
 func (sse_connection* c) resume_complete() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -193,17 +210,20 @@ func (sse_connection* c) resume_complete() bool {
 	}
 	return false
 }
+
 func (sse_connection* c) close() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.current_state = CONN_CLOSED
 	c.resume_tokens = make(resume_token[], 0)
 }
+
 func (sse_connection* c) mark_failed() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.current_state = CONN_FAILED
 }
+
 func (sse_connection* c) get_connection_stats() map[string]interface{} {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -220,34 +240,40 @@ func (sse_connection* c) get_connection_stats() map[string]interface{} {
 	stats["idle_time_ms"] = idle_time
 	return stats
 }
+
 func (sse_connection* c) set_metadata(key string, value string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.metadata[key] = value
 }
+
 func (sse_connection* c) get_metadata(key string) (string, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	value, exists := c.metadata[key]
 	return value, exists
 }
+
 func (sse_connection* c) enable_compression(ctype compression_type) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.compression_enabled = true
 	c.active_compression = ctype
 }
+
 func (sse_connection* c) disable_compression() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.compression_enabled = false
 	c.active_compression = COMPRESSION_NONE
 }
+
 func (sse_connection* c) get_connection_duration_ms() int64 {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return (time.Now().UnixNano() - c.connection_open_time) / 1000000
 }
+
 func (sse_connection* c) validate_resume_token(token resume_token) bool {
 	if !token.is_valid {
 		return false

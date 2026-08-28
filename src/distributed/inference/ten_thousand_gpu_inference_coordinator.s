@@ -18,6 +18,7 @@ struct ten_thousand_gpu_inference_coordinator {
     float gpu_utilization_percent
     bool is_running
 }
+
 func new_ten_thousand_gpu_inference_coordinator(
     int coordinator_id,
     int world_size,
@@ -61,6 +62,7 @@ func new_ten_thousand_gpu_inference_coordinator(
     }
     return coordinator
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) receive_inference_request(
     request_metadata req
 ) (bool, string) {
@@ -81,6 +83,7 @@ func (ten_thousand_gpu_inference_coordinator* coord) receive_inference_request(
     }
     return success, msg
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) inference_iteration() (int, bool) {
     if !coord.is_running {
         return 0, false
@@ -127,6 +130,7 @@ func (ten_thousand_gpu_inference_coordinator* coord) inference_iteration() (int,
     coord.gpu_utilization_percent = avg_batch_util * 100.0
     return coord.total_tokens_generated, true
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) handle_request_burst(
     request_metadata[] requests
 ) (int, int) {
@@ -144,6 +148,7 @@ func (ten_thousand_gpu_inference_coordinator* coord) handle_request_burst(
     }
     return admitted, rejected
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) get_system_metrics() (int, int, float, float, float) {
     return coord.total_requests_completed,
            coord.total_tokens_generated,
@@ -151,16 +156,19 @@ func (ten_thousand_gpu_inference_coordinator* coord) get_system_metrics() (int, 
            coord.avg_tpot_ms,
            coord.gpu_utilization_percent
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) get_queue_status() (int, int) {
     prefill_q := coord.global_sched.get_request_queue_length()
     decode_q := len(coord.prefill_decode_sched.decode_queue)
     return prefill_q, decode_q
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) get_kv_cache_status() (float, int) {
     usage := coord.kv_cache.get_memory_usage_percent()
     available := coord.kv_cache.get_available_blocks()
     return usage, available
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) continuous_serving_loop() {
     int iteration = 0
     for coord.is_running && iteration < 10000 {
@@ -171,9 +179,11 @@ func (ten_thousand_gpu_inference_coordinator* coord) continuous_serving_loop() {
         iteration = iteration + 1
     }
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) stop() {
     coord.is_running = false
 }
+
 func (ten_thousand_gpu_inference_coordinator* coord) get_performance_report() string {
     requests, tokens, ttft, tpot, util := coord.get_system_metrics()
     prefill_q, decode_q := coord.get_queue_status()
@@ -190,9 +200,11 @@ func (ten_thousand_gpu_inference_coordinator* coord) get_performance_report() st
     report = report + "KV Blocks Available: " + str(kv_avail) + "\n"
     return report
 }
+
 func str(int x) string {
     return ""
 }
+
 func str(float x) string {
     return ""
 }

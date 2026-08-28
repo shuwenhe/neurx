@@ -12,6 +12,7 @@ struct mooncake_config {
     bool enable_compression
     string compression_method
 }
+
 struct mooncake_engine {
     mooncake_config config
     i32 prev_rank
@@ -24,6 +25,7 @@ struct mooncake_engine {
     i64 transfer_count
     f64 total_transfer_time
 }
+
 func new_mooncake_engine(mooncake_config config) . mooncake_engine {
     prev_rank := (config.rank - 1 + config.world_size) % config.world_size
     next_rank := (config.rank + 1) % config.world_size
@@ -46,6 +48,7 @@ func new_mooncake_engine(mooncake_config config) . mooncake_engine {
         total_transfer_time: 0.0,
     }
 }
+
 func (mooncake_engine* engine) sync_weights(
     map[string]tensor model_state,
     []i32 source_ranks,
@@ -61,6 +64,7 @@ func (mooncake_engine* engine) sync_weights(
     engine.total_transfer_time += elapsed
     engine.transfer_count += 1
 }
+
 func (mooncake_engine* engine) send_weights(
     map[string]tensor model_state,
     []i32 target_ranks
@@ -81,6 +85,7 @@ func (mooncake_engine* engine) send_weights(
         }
     }
 }
+
 func (mooncake_engine* engine) receive_weights(
     map[string]tensor model_state,
     []i32 source_ranks
@@ -101,6 +106,7 @@ func (mooncake_engine* engine) receive_weights(
     }
     engine.unflatten_state(flat_params, model_state)
 }
+
 func (mooncake_engine* engine) ring_send(tensor params, []i32 target_ranks) {
     num_chunks := (params.numel() * params.element_size() + engine.config.chunk_size - 1) /
                      engine.config.chunk_size
@@ -122,6 +128,7 @@ func (mooncake_engine* engine) ring_send(tensor params, []i32 target_ranks) {
         cuda_stream_synchronize(stream)
     }
 }
+
 func (mooncake_engine* engine) ring_recv(tensor params, []i32 source_ranks) {
     num_chunks := (params.numel() * params.element_size() + engine.config.chunk_size - 1) /
                      engine.config.chunk_size
@@ -143,6 +150,7 @@ func (mooncake_engine* engine) ring_recv(tensor params, []i32 source_ranks) {
         cuda_stream_synchronize(stream)
     }
 }
+
 func (mooncake_engine* engine) p2p_send(tensor params, i32 target_rank) {
     stream := engine.send_streams[0]
     cuda_memcpy_async(
@@ -152,6 +160,7 @@ func (mooncake_engine* engine) p2p_send(tensor params, i32 target_rank) {
     )
     cuda_stream_synchronize(stream)
 }
+
 func (mooncake_engine* engine) p2p_recv(tensor params, i32 source_rank) {
     stream := engine.recv_streams[0]
     cuda_memcpy_async(
@@ -161,6 +170,7 @@ func (mooncake_engine* engine) p2p_recv(tensor params, i32 source_rank) {
     )
     cuda_stream_synchronize(stream)
 }
+
 func (mooncake_engine* engine) flatten_state(map state[string]tensor) . tensor {
     total_size := 0
     param_list := []
@@ -170,6 +180,7 @@ func (mooncake_engine* engine) flatten_state(map state[string]tensor) . tensor {
     }
     return tensor_cat(param_list)
 }
+
 func (mooncake_engine* engine) unflatten_state(tensor flat, map state[string]tensor) {
     offset := 0
     for name, param in state {
@@ -179,6 +190,7 @@ func (mooncake_engine* engine) unflatten_state(tensor flat, map state[string]ten
         offset += size
     }
 }
+
 func (mooncake_engine* engine) compute_state_size(map state[string]tensor) . i64 {
     total := 0
     for name, param in state {
@@ -186,6 +198,7 @@ func (mooncake_engine* engine) compute_state_size(map state[string]tensor) . i64
     }
     return total
 }
+
 func (mooncake_engine* engine) is_same_node([]i32 ranks) . bool {
     for rank in ranks {
         if abs(rank - engine.config.rank) > 8 {
@@ -194,6 +207,7 @@ func (mooncake_engine* engine) is_same_node([]i32 ranks) . bool {
     }
     return true
 }
+
 func (mooncake_engine* engine) compress(tensor data) . tensor {
     match engine.config.compression_method {
         "lz4" => return lz4_compress(data),
@@ -201,6 +215,7 @@ func (mooncake_engine* engine) compress(tensor data) . tensor {
         _ => return data,
     }
 }
+
 func (mooncake_engine* engine) decompress(tensor data) . tensor {
     match engine.config.compression_method {
         "lz4" => return lz4_decompress(data),
@@ -208,6 +223,7 @@ func (mooncake_engine* engine) decompress(tensor data) . tensor {
         _ => return data,
     }
 }
+
 func (mooncake_engine* engine) get_statistics() . (i64, f64, f64) {
     avg_bandwidth := 0.0
     if engine.total_transfer_time > 0.0 {
@@ -219,6 +235,7 @@ func (mooncake_engine* engine) get_statistics() . (i64, f64, f64) {
         avg_bandwidth
     )
 }
+
 func (mooncake_engine* engine) print_statistics() {
     bytes, time, bandwidth  := engine.get_statistics()
     println(f"Mooncake Transfer Statistics:")
@@ -227,6 +244,7 @@ func (mooncake_engine* engine) print_statistics() {
     println(f"  Average bandwidth: {bandwidth:.2f} GB/s")
     println(f"  Number of transfers: {engine.transfer_count}")
 }
+
 func (mooncake_engine* engine) destroy() {
     for stream in engine.send_streams {
         cuda_stream_destroy(stream)
@@ -235,15 +253,19 @@ func (mooncake_engine* engine) destroy() {
         cuda_stream_destroy(stream)
     }
 }
+
 func lz4_compress(tensor data) . tensor {
     return data
 }
+
 func lz4_decompress(tensor data) . tensor {
     return data
 }
+
 func zstd_compress(tensor data) . tensor {
     return data
 }
+
 func zstd_decompress(tensor data) . tensor {
     return data
 }

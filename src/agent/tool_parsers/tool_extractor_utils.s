@@ -3,6 +3,7 @@ use std.strings
 use std.regex
 use std.json
 struct ToolExtractorUtils {}
+
 func extract_json_between_markers(
     text: str,
     start_marker: str,
@@ -26,6 +27,7 @@ func extract_json_between_markers(
     }
     results
 }
+
 func extract_xml_elements(
     text: str,
     str tag_name
@@ -34,6 +36,7 @@ func extract_xml_elements(
     end_tag := "</" + tag_name + ">"
     ToolExtractorUtils_extract_json_between_markers(text, start_tag, end_tag)
 }
+
 func extract_named_xml_elements(
     text: str,
     str tag_prefix
@@ -70,6 +73,7 @@ func extract_named_xml_elements(
     }
     results
 }
+
 func find_bracket_pair(str text, i32 start_index) . (i32, i32) {
     depth := 0
     in_string := false
@@ -124,6 +128,7 @@ func find_bracket_pair(str text, i32 start_index) . (i32, i32) {
     }
     (-1, -1)
 }
+
 func parse_json_safely(str json_str) . Option<Map<str, Any>> {
     if len(json_str) == 0 {
         return None
@@ -134,6 +139,7 @@ func parse_json_safely(str json_str) . Option<Map<str, Any>> {
     }
     None
 }
+
 func extract_regex_group(str text, str pattern, i32 group_index) . str {
     re := regex_compile(pattern)
     match regex_find_string(re, text) {
@@ -146,6 +152,7 @@ func extract_regex_group(str text, str pattern, i32 group_index) . str {
         None => ""
     }
 }
+
 func find_all_regex_matches(str text, str pattern) . Vec<str> {
     results := Vec_new()
     re := regex_compile(pattern)
@@ -161,6 +168,7 @@ func find_all_regex_matches(str text, str pattern) . Vec<str> {
     }
     results
 }
+
 func extract_content_before_tool_calls(
     text: str,
     str tool_start_marker
@@ -179,6 +187,7 @@ func extract_content_before_tool_calls(
         ""
     }
 }
+
 func validate_json_structure(str json_str) . bool {
     brace_depth := 0
     bracket_depth := 0
@@ -219,6 +228,7 @@ func validate_json_structure(str json_str) . bool {
     }
     brace_depth == 0 && bracket_depth == 0 && !in_string
 }
+
 func normalize_json_string(str json_str) . str {
     json_str = strings_trim(json_str)
     if strings_starts_with(json_str, "```json") {
@@ -231,16 +241,19 @@ func normalize_json_string(str json_str) . str {
     json_str
 }
 }
+
 struct ToolCallValidator {
 Vec<str> available_tools
 bool strict_mode
 }
+
 func new(Vec<str> tools, bool strict) . ToolCallValidator {
     ToolCallValidator {
         available_tools: tools,
         strict strict_mode
     }
 }
+
 func validate_tool_call(self, ToolCall tool_call) . bool {
     if len(self.available_tools) == 0 {
         return true
@@ -265,6 +278,7 @@ func validate_tool_call(self, ToolCall tool_call) . bool {
     }
     true
 }
+
 func validate_tool_calls(self, Vec<ToolCall> tool_calls) . Vec<ToolCall> {
     valid_calls := Vec_new()
     for tc in tool_calls {

@@ -11,6 +11,7 @@ struct TestResult {
     error_message   string
     execution_time  i32
 }
+
 var test_results []TestResult
 i32 total_tests = 0
 i32 passed_tests = 0
@@ -23,6 +24,7 @@ func LogTest(test_name string, condition i32, error_msg string) {
         println("✗ FAIL:", test_name, "-", error_msg)
     }
 }
+
 func TestWorkerInitialization() {
     println("\n--- Test: Worker Initialization ---")
     config := WorkerConfig{
@@ -41,6 +43,7 @@ func TestWorkerInitialization() {
     result = worker.Shutdown()
     LogTest("Shutdown succeeds", result.success, "Shutdown failed")
 }
+
 func TestRequestSubmission() {
     println("\n--- Test: Request Submission ---")
     config := WorkerConfig{
@@ -71,6 +74,7 @@ func TestRequestSubmission() {
     LogTest("Queue size is 16", worker.GetQueueSize() == 16, "Queue size mismatch")
     worker.Shutdown()
 }
+
 func TestBatchRetrieval() {
     println("\n--- Test: Batch Retrieval ---")
     config := WorkerConfig{
@@ -96,6 +100,7 @@ func TestBatchRetrieval() {
     LogTest("Queue updated after completion", worker.GetQueueSize() == 32, "Queue not updated")
     worker.Shutdown()
 }
+
 func TestGPUWorkerDeviceManagement() {
     println("\n--- Test: GPU Worker Device Management ---")
     config := WorkerConfig{
@@ -117,6 +122,7 @@ func TestGPUWorkerDeviceManagement() {
     LogTest("Device sync succeeds", result.success, "Sync failed")
     gpu_worker.Shutdown()
 }
+
 func TestWorkerManagerScheduling() {
     println("\n--- Test: Worker Manager Scheduling ---")
     policy := SchedulingPolicy{
@@ -148,6 +154,7 @@ func TestWorkerManagerScheduling() {
     LogTest("Batch scheduled", result.success, "Scheduling failed")
     manager.Shutdown()
 }
+
 func TestWorkerCommunication() {
     println("\n--- Test: Worker Communication ---")
     config := CommunicationConfig{
@@ -177,6 +184,7 @@ func TestWorkerCommunication() {
     LogTest("Broadcast sent to workers", success > 0, "Broadcast failed")
     handler.Shutdown()
 }
+
 func TestBatchProcessing() {
     println("\n--- Test: Batch Processing ---")
     policy := SchedulingPolicy{
@@ -207,6 +215,7 @@ func TestBatchProcessing() {
     stats := processor.GetBatchStats()
     LogTest("Batch stats available", stats["completed"] == 1, "Stats not updated")
 }
+
 func TestWorkerHealthMonitoring() {
     println("\n--- Test: Worker Health Monitoring ---")
     config := WorkerConfig{
@@ -222,6 +231,7 @@ func TestWorkerHealthMonitoring() {
     LogTest("Worker unhealthy after timeout", health == 0, "Timeout not detected")
     worker.Shutdown()
 }
+
 func TestSynchronizationBarrier() {
     println("\n--- Test: Synchronization Barrier ---")
     sync_mgr := NewSynchronizationManager()
@@ -231,6 +241,7 @@ func TestSynchronizationBarrier() {
     result = sync_mgr.WaitForSync(0, 5000)
     LogTest("Sync waits", result.success == 0 || result.success == 1, "Wait returned invalid")
 }
+
 func TestAllReduceOperation() {
     println("\n--- Test: AllReduce Operation ---")
     config := CommunicationConfig{
@@ -248,6 +259,7 @@ func TestAllReduceOperation() {
     LogTest("AllReduce succeeds", result.success, "AllReduce failed")
     handler.Shutdown()
 }
+
 func TestDynamicBatching() {
     println("\n--- Test: Dynamic Batching ---")
     processor := NewBatchProcessor(512, SchedulingPolicy{
@@ -271,6 +283,7 @@ func TestDynamicBatching() {
     merged := processor.MergeBatches([]Batch{batch, batch2})
     LogTest("Batches merged", merged.request_count > batch.request_count, "Merge failed")
 }
+
 func TestBatchSplitting() {
     println("\n--- Test: Batch Splitting ---")
     processor := NewBatchProcessor(512, SchedulingPolicy{
@@ -295,6 +308,7 @@ func TestBatchSplitting() {
     }
     LogTest("Batch split correctly", i32(total) == batch.request_count, "Split mismatch")
 }
+
 func TestWorkerStateTransitions() {
     println("\n--- Test: Worker State Transitions ---")
     config := WorkerConfig{
@@ -310,6 +324,7 @@ func TestWorkerStateTransitions() {
     worker.Shutdown()
     LogTest("After shutdown is SHUTDOWN", worker.GetState() == WORKER_STATE_SHUTDOWN, "Shutdown state wrong")
 }
+
 func TestWorkerPoolStatistics() {
     println("\n--- Test: Worker Pool Statistics ---")
     policy := SchedulingPolicy{
@@ -330,6 +345,7 @@ func TestWorkerPoolStatistics() {
     LogTest("Pool has 4 active workers", pool.total_workers == 4, "Worker count mismatch")
     manager.Shutdown()
 }
+
 func PrintTestReport() {
     println("\n╔════════════════════════════════════════╗")
     println("║          Test Report                   ║")
@@ -343,6 +359,7 @@ func PrintTestReport() {
     }
     println()
 }
+
 func main() {
     println("╔════════════════════════════════════════╗")
     println("║  NeurX Worker Test Suite               ║")

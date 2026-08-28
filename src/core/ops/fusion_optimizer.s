@@ -6,17 +6,20 @@ struct kernel_fusion_opportunity {
     int potential_flops_reduction
     float fusion_benefit_ratio
 }
+
 struct operation_dependency {
     string producer_op
     string consumer_op
     int output_size
 }
+
 struct operation_fusion_graph {
     string[] nodes
     operation_dependency[] edges
     int num_nodes
     int num_edges
 }
+
 struct fused_kernel_config {
     string fused_op_name
     string[] component_ops
@@ -26,6 +29,7 @@ struct fused_kernel_config {
     bool memory_bound
     float compute_bound_ratio
 }
+
 func detect_fusion_opportunities(operation_registry reg, string[] operation_sequence) kernel_fusion_opportunity[] {
     opportunities := kernel_fusion_opportunity[]{}
     i := 0
@@ -58,6 +62,7 @@ func detect_fusion_opportunities(operation_registry reg, string[] operation_sequ
     }
     opportunities
 }
+
 struct operation_scheduler {
     operation_registry registry
     string[] operation_queue
@@ -65,6 +70,7 @@ struct operation_scheduler {
     int num_scheduled_ops
     bool optimization_enabled
 }
+
 func new_operation_scheduler(operation_registry reg) operation_scheduler {
     operation_scheduler {
         registry: reg,
@@ -79,6 +85,7 @@ func new_operation_scheduler(operation_registry reg) operation_scheduler {
         optimization_enabled: true,
     }
 }
+
 func (operation_scheduler* sched) add_operation(string op_id) bool {
     if sched.registry.has_operation(op_id) {
         sched.operation_queue = append(sched.operation_queue, op_id)
@@ -88,6 +95,7 @@ func (operation_scheduler* sched) add_operation(string op_id) bool {
     }
     false
 }
+
 func (operation_scheduler* sched) add_dependency(string producer_op, string consumer_op, int output_size) bool {
     dep := operation_dependency {
         producer_op: producer_op,
@@ -98,6 +106,7 @@ func (operation_scheduler* sched) add_dependency(string producer_op, string cons
     sched.fusion_graph.num_edges = sched.fusion_graph.num_edges + 1
     true
 }
+
 func (operation_scheduler* sched) optimize_schedule() string[] {
     if !sched.optimization_enabled {
         sched.operation_queue
@@ -122,6 +131,7 @@ func (operation_scheduler* sched) optimize_schedule() string[] {
     }
     optimized_schedule
 }
+
 func (operation_scheduler* sched) execute_schedule(compute_capability hw) bool {
     schedule := sched.optimize_schedule()
     i := 0
@@ -137,6 +147,7 @@ func (operation_scheduler* sched) execute_schedule(compute_capability hw) bool {
     }
     true
 }
+
 func (operation_scheduler* sched) get_schedule_stats() string {
     stats := "Scheduled Operations: " + string(sched.num_scheduled_ops) + "\n"
     stats = stats + "Total Operations: " + string(len(sched.operation_queue)) + "\n"
