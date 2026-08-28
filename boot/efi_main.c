@@ -148,19 +148,33 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
     efi_print(L"NeurX G1: Memory map retrieved, exiting boot services...\r\n");
     
     /* Exit Boot Services - This is the critical transition point */
+    /* Per UEFI spec: ExitBootServices may fail with EFI_INVALID_PARAMETER if map_key is stale */
     Status = BS->ExitBootServices(ImageHandle, MemMapKey);
+    
+    if (Status == EFI_INVALID_PARAMETER) {
+        /* map_key became invalid (system events changed memory map) */
+        /* Retry: get fresh memory map and try again (allowed by UEFI spec) */
+        efi_print(L"ExitBootServices failed with stale map_key, retrying with fresh map...\r\n");
+        
+        BS->GetMemoryMap(&MemMapSize, MemoryMap, &MemMapKey, &DescSize, &DescVersion);
+        Status = BS->ExitBootServices(ImageHandle, MemMapKey);
+    }
+    
+    /* 
+     * If Status is still an error, we cannot continue
+     * Only EFI_SUCCESS indicates Boot Services are now permanently unavailable
+     */
     if (EFI_ERROR(Status)) {
-        /* ExitBootServices MUST succeed on first call */
-        /* Do NOT call any Boot Services after failure (per UEFI spec) */
-        /* If it fails, halt immediately */
+        /* Something went wrong - halt immediately */
         while (1) {
             asm volatile("hlt");
         }
     }
     
     /* 
-     * CRITICAL: We are now in bare-metal mode
-     * No UEFI services are available after this point
+     * CRITICAL: We have successfully exited boot services
+     * Boot Services are now permanently unavailable
+     * No UEFI calls allowed after this point
      * CPU is under NeurX control
      */
     
