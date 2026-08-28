@@ -28,8 +28,8 @@ struct pipeline_batch {
     int num_microbatches
 }
 
-var g_pp_config pipeline_stage_config
-var g_activation_cache activation_cache
+pipeline_stage_config g_pp_config
+activation_cache g_activation_cache
 
 func pipeline_parallel_init(
     stage_id: int,

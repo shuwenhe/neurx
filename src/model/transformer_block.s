@@ -36,7 +36,7 @@ struct transformer_block_weights {
     abi.device_tensor norm2_weight
 }
 
-var g_block_config transformer_block_config
+transformer_block_config g_block_config
 
 func transformer_block_config_init(
     hidden_size: int,

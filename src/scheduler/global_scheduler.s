@@ -50,7 +50,7 @@ struct scheduler_state {
     int64 total_compute_time
 }
 
-var g_scheduler scheduler_state
+scheduler_state g_scheduler
 
 func scheduler_init(num_groups: int, max_queue: int) (bool, string) {
     if num_groups <= 0 || max_queue <= 0 {

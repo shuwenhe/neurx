@@ -20,7 +20,7 @@ struct sharded_tensor {
     int rank
 }
 
-var g_tp_config tensor_parallel_config
+tensor_parallel_config g_tp_config
 
 func tensor_parallel_init(tp_size: int, rank: int, hidden_size: int) (bool, string) {
     if tp_size <= 0 || rank < 0 || rank >= tp_size {

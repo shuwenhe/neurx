@@ -19,7 +19,7 @@ struct device_tensor_manager_state {
     int64 fragmentation_ratio
 }
 
-var g_tensor_manager device_tensor_manager_state
+device_tensor_manager_state g_tensor_manager
 
 func device_tensor_manager_init(device_id: int, pool_size: int64) (bool, string) {
     if pool_size <= 0 {

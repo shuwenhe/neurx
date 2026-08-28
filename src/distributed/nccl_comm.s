@@ -21,8 +21,8 @@ struct collective_op_config {
     float timeout_ms
 }
 
-var g_comm nccl_communicator
-var g_stream nccl_stream
+nccl_communicator g_comm
+nccl_stream g_stream
 
 func nccl_init(rank: int, world_size: int, device_id: int) (bool, string) {
     if rank < 0 || world_size <= 0 || rank >= world_size {

@@ -16,7 +16,7 @@ struct attention_config {
     bool use_flash_v3
 }
 
-var g_kernel_config compute_kernel_config
+compute_kernel_config g_kernel_config
 
 func compute_kernel_config_init(block_size: int, grid_size: int) (bool, string) {
     g_kernel_config = compute_kernel_config {

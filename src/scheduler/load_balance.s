@@ -23,7 +23,7 @@ struct load_balancer_state {
     int rebalance_count
 }
 
-var g_load_balancer load_balancer_state
+load_balancer_state g_load_balancer
 
 func load_balancer_init(
     num_groups: int,

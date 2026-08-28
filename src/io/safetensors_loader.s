@@ -37,7 +37,7 @@ struct weight_manager_state {
     int max_cache_entries
 }
 
-var g_weight_manager weight_manager_state
+weight_manager_state g_weight_manager
 
 func weight_manager_init(device_id: int, max_cache_size: int) (bool, string) {
     g_weight_manager = weight_manager_state {

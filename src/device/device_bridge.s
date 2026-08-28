@@ -14,7 +14,7 @@ func device_bridge_state_init() device_bridge_state {
     return state
 }
 
-var g_device_bridge device_bridge_state
+device_bridge_state g_device_bridge
 
 func device_bridge_init() (bool, string) {
     g_device_bridge = device_bridge_state_init()

@@ -6,7 +6,7 @@ struct embedding_layer {
     int hidden_size
 }
 
-var GLOBAL_EMBEDDING float[][]
+float[][] GLOBAL_EMBEDDING
 
 func create_embedding_layer() embedding_layer {
     return embedding_layer{
