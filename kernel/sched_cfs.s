@@ -86,7 +86,7 @@ func update_curr(task_struct* task, cfs_rq* cfs_rq_ptr) {
 // 选择下一个要运行的任务
 // 总是选择 vruntime 最小的任务 (最饥饿的任务)
 func pick_next_task(int cpu) task_struct* {
-    cfs_rq_ptr: &cfs_rq = &global_sched_state.cpu_rqs[cpu]
+    cfs_rq* cfs_rq_ptr = &global_sched_state.cpu_rqs[cpu]
     
     // 在实际实现中使用红黑树，这里简化为线性搜索
     int i, min_vruntime, selected
@@ -138,7 +138,7 @@ func dequeue_task(task_struct* task, int cpu) (int, string) {
         return 1, "invalid cpu"
     }
     
-    cfs_rq_ptr: &cfs_rq = &global_sched_state.cpu_rqs[cpu]
+    cfs_rq* cfs_rq_ptr = &global_sched_state.cpu_rqs[cpu]
     
     cfs_rq_ptr.nr_running = cfs_rq_ptr.nr_running - 1
     cfs_rq_ptr.total_weight = cfs_rq_ptr.total_weight - task.weight
@@ -156,8 +156,8 @@ func load_balance(int src_cpu, int dst_cpu) (int, string) {
         return 1, "invalid dst_cpu"
     }
     
-    src_rq: &cfs_rq = &global_sched_state.cpu_rqs[src_cpu]
-    dst_rq: &cfs_rq = &global_sched_state.cpu_rqs[dst_cpu]
+    cfs_rq* src_rq = &global_sched_state.cpu_rqs[src_cpu]
+    cfs_rq* dst_rq = &global_sched_state.cpu_rqs[dst_cpu]
     
     // 检查是否需要负载均衡
     int src_load = src_rq.total_weight
@@ -202,7 +202,7 @@ func schedule() task_struct* {
     int cpu = global_sched_state.current_cpu
     
     // 1. 从当前CPU运行队列选择下一个任务
-    next_task: &task_struct = pick_next_task(cpu)
+    task_struct* next_task = pick_next_task(cpu)
     
     // 2. 如果没有任务，考虑从其他CPU偷取
     if next_task == nil {

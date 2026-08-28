@@ -41,7 +41,7 @@ func request_irq(int irq, int handler_ptr, int flags) (int, string) {
         return 1, "invalid irq number"
     }
     
-    irq_desc_ptr: &irq_desc = &global_irq_manager.descriptors[irq]
+    irq_desc* irq_desc_ptr = &global_irq_manager.descriptors[irq]
     
     irq_desc_ptr.irq_num = irq
     irq_desc_ptr.handler = handler_ptr
@@ -62,7 +62,7 @@ func free_irq(int irq) (int, string) {
         return 1, "invalid irq number"
     }
     
-    irq_desc_ptr: &irq_desc = &global_irq_manager.descriptors[irq]
+    irq_desc* irq_desc_ptr = &global_irq_manager.descriptors[irq]
     irq_desc_ptr.handler = 0
     
     return 0, ""
@@ -75,7 +75,7 @@ func irq_set_affinity(int irq, int cpumask) (int, string) {
         return 1, "invalid irq number"
     }
     
-    irq_desc_ptr: &irq_desc = &global_irq_manager.descriptors[irq]
+    irq_desc* irq_desc_ptr = &global_irq_manager.descriptors[irq]
     
     // 更新 CPU 亲和性掩码
     // 位0对应CPU0，位1对应CPU1，以此类推
@@ -93,7 +93,7 @@ func irq_get_affinity(int irq) (int, string) {
         return 1, "invalid irq number"
     }
     
-    irq_desc_ptr: &irq_desc = &global_irq_manager.descriptors[irq]
+    irq_desc* irq_desc_ptr = &global_irq_manager.descriptors[irq]
     return irq_desc_ptr.cpu_affinity, ""
 }
 
@@ -104,7 +104,7 @@ func handle_irq(int irq) (int, string) {
         return 1, "invalid irq"
     }
     
-    irq_desc_ptr: &irq_desc = &global_irq_manager.descriptors[irq]
+    irq_desc* irq_desc_ptr = &global_irq_manager.descriptors[irq]
     
     // 更新统计信息
     global_irq_manager.stats.total_irqs = global_irq_manager.stats.total_irqs + 1
@@ -146,7 +146,7 @@ func disable_irq(int irq) (int, string) {
         return 1, "invalid irq number"
     }
     
-    irq_desc_ptr: &irq_desc = &global_irq_manager.descriptors[irq]
+    irq_desc* irq_desc_ptr = &global_irq_manager.descriptors[irq]
     irq_desc_ptr.status = irq_desc_ptr.status | 0x01  // DISABLED 标志
     
     return 0, ""
@@ -158,7 +158,7 @@ func enable_irq(int irq) (int, string) {
         return 1, "invalid irq number"
     }
     
-    irq_desc_ptr: &irq_desc = &global_irq_manager.descriptors[irq]
+    irq_desc* irq_desc_ptr = &global_irq_manager.descriptors[irq]
     irq_desc_ptr.status = irq_desc_ptr.status & 0xFE  // 清除 DISABLED 标志
     
     return 0, ""
@@ -265,7 +265,7 @@ func dump_irq_info(int irq) string {
         return "invalid irq"
     }
     
-    irq_desc_ptr: &irq_desc = &global_irq_manager.descriptors[irq]
+    irq_desc* irq_desc_ptr = &global_irq_manager.descriptors[irq]
     
     string info = "IRQ info: "
     // 构建信息字符串
