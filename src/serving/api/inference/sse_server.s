@@ -53,7 +53,6 @@ func new_sse_server_config(string host, int port, string default_model) sse_serv
         default_model: norm_model,
         max_concurrent_streams: 64,
     }
-
 func new_sse_session(string request_id, string model, bool stream, int max_tokens) sse_session {
     int norm_max = max_tokens
     if norm_max <= 0 {
@@ -67,14 +66,12 @@ func new_sse_session(string request_id, string model, bool stream, int max_token
         tokens_sent: 0,
         closed: false,
     }
-
 func new_generation_callback_state(string[] tokens) generation_callback_state {
     generation_callback_state{
         tokens: tokens,
         cursor: 0,
         done: false,
     }
-
 func sse_header() string {
     "HTTP/1.1 200 OK\r\n" +
     "Content-Type: text/event-stream\r\n" +
@@ -93,7 +90,6 @@ func error_response(int status_code, string message, string error_type, string c
         headers: string[]{},
         body: body,
     }
-
 func sse_write_chunk(int client_fd, string request_id, string model, string content_delta, string finish_reason) int {
     string chunk = openai_chat_chunk(request_id, model, content_delta, finish_reason)
     write_client_data(client_fd, chunk)

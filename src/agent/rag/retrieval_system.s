@@ -1,5 +1,4 @@
 module rag_system
-
 struct retrieval_system_config {
     vector_db_backend: string = "faiss"
     vector_dim: int = 768
@@ -25,7 +24,6 @@ struct retrieval_system_config {
     max_context_tokens: int = 4096
     citation_format: string = "[doc{index}]"
 }
-
 struct document_chunk {
     string id
     string content
@@ -34,7 +32,6 @@ struct document_chunk {
     int chunk_index
     int token_count
 }
-
 struct document_metadata {
     string source_id
     string source_path
@@ -49,7 +46,6 @@ struct document_metadata {
     string section
     float relevance_score
 }
-
 struct search_result {
     list<document_chunk> chunks
     list<float> scores
@@ -57,7 +53,6 @@ struct search_result {
     string expanded_query
     retrieval_metadata retrieval_metadata
 }
-
 struct retrieval_metadata {
     int total_scanned
     int total_returned
@@ -79,13 +74,11 @@ interface vector_db_interface {
     clear()
     get_status()
 }
-
 struct search_result_item {
     string chunk_id
     float score
     document_metadata metadata
 }
-
 struct dbstatus {
     int total_documents
     string index_type
@@ -1028,7 +1021,6 @@ struct ingestion_report {
     float processing_time_ms
     dbstatus db_status
 }
-
 struct rag_statistics {
     int total_documents
     dbstatus db_status

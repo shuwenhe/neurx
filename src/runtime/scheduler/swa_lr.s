@@ -1,5 +1,4 @@
 package neurx.scheduler.swa_lr
-
 struct swa_lr_state {
     float[] current_lrs
     float[] swa_lrs
@@ -7,7 +6,6 @@ struct swa_lr_state {
     string anneal_strategy
     int step_count
 }
-
 func new_swa_lr(float[] initial_lrs, float[] swa_lrs, int anneal_epochs, string anneal_strategy) swa_lr_state {
     swa_lr_state {
         current_lrs: clone_float_array(initial_lrs),
@@ -17,22 +15,18 @@ func new_swa_lr(float[] initial_lrs, float[] swa_lrs, int anneal_epochs, string 
         step_count: 0,
     }
 }
-
 func swa_linear_anneal(float t) float {
     return t
 }
-
 func swa_cosine_anneal(float t) float {
     return (1.0 - cos_approx(3.14159265358979323846 * t)) / 2.0
 }
-
 func swa_anneal_func(string strategy, float t) float {
     if strategy == "linear" {
         return swa_linear_anneal(t)
     }
     return swa_cosine_anneal(t)
 }
-
 func swa_clamp_01(float t) float {
     if t < 0.0 {
         return 0.0
@@ -42,14 +36,12 @@ func swa_clamp_01(float t) float {
     }
     return t
 }
-
 func swa_get_initial_lr(float lr, float swa_lr, float alpha) float {
     if alpha == 1.0 {
         return swa_lr
     }
     return (lr - alpha * swa_lr) / (1.0 - alpha)
 }
-
 func swa_lr_step(swa_lr_state sched) swa_lr_state {
     sched.step_count = sched.step_count + 1
     int step = sched.step_count - 1
@@ -75,7 +67,6 @@ func swa_lr_step(swa_lr_state sched) swa_lr_state {
     }
     return sched
 }
-
 func swa_lr_get_lr(swa_lr_state sched, int group_index) float {
     if group_index < 0 {
         return 0.0
@@ -85,7 +76,6 @@ func swa_lr_get_lr(swa_lr_state sched, int group_index) float {
     }
     return sched.current_lrs[group_index]
 }
-
 func clone_float_array(float[] values) float[] {
     float[] out = float[]{cap: len(values)}
     int i = 0
@@ -95,7 +85,6 @@ func clone_float_array(float[] values) float[] {
     }
     return out
 }
-
 func cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2

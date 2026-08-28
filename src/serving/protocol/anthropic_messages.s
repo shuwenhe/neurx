@@ -1,5 +1,4 @@
 package neurx.serving.protocol.anthropic_messages
-
 struct anthropic_message_request {
     string model
     string system_prompt
@@ -10,7 +9,6 @@ struct anthropic_message_request {
     bool stream
     string stop_sequence
 }
-
 struct anthropic_message_response {
     string id
     string model
@@ -21,13 +19,11 @@ struct anthropic_message_response {
     int input_tokens
     int output_tokens
 }
-
 struct anthropic_validation_result {
     bool valid
     string error_type
     string error_message
 }
-
 func anthropic_int_string(int value) string {
     if value == 0 { return "0" }
     int current = value
@@ -41,7 +37,6 @@ func anthropic_int_string(int value) string {
     }
     prefix + digits
 }
-
 func anthropic_digit_string(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -54,7 +49,6 @@ func anthropic_digit_string(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
-
 func anthropic_json_escape(string value) string {
     string output = ""
     int i = 0
@@ -70,7 +64,6 @@ func anthropic_json_escape(string value) string {
     }
     output
 }
-
 func anthropic_validate_request(anthropic_message_request request) anthropic_validation_result {
     if request.model == "" {
         return anthropic_validation_result {valid: false, error_type: "invalid_request_error", error_message: "model is required"}
@@ -89,7 +82,6 @@ func anthropic_validate_request(anthropic_message_request request) anthropic_val
     }
     anthropic_validation_result {valid: true, error_type: "", error_message: ""}
 }
-
 func anthropic_estimate_tokens(string text) int {
     if len(text) == 0 { return 0 }
     int tokens = 1
@@ -104,36 +96,28 @@ func anthropic_estimate_tokens(string text) int {
     }
     tokens
 }
-
 func anthropic_messages_json(anthropic_message_response response) string {
     "{\"id\":\"" + anthropic_json_escape(response.id) + "\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"" + anthropic_json_escape(response.model) + "\",\"content\":[{\"type\":\"text\",\"text\":\"" + anthropic_json_escape(response.content) + "\"}],\"stop_reason\":\"" + anthropic_json_escape(response.stop_reason) + "\",\"stop_sequence\":\"" + anthropic_json_escape(response.stop_sequence) + "\",\"usage\":{\"input_tokens\":" + anthropic_int_string(response.input_tokens) + ",\"output_tokens\":" + anthropic_int_string(response.output_tokens) + "}}"
 }
-
 func anthropic_error_json(string error_type, string message) string {
     "{\"type\":\"error\",\"error\":{\"type\":\"" + anthropic_json_escape(error_type) + "\",\"message\":\"" + anthropic_json_escape(message) + "\"}}"
 }
-
 func anthropic_sse_event(string event_name, string payload) string {
     "event: " + event_name + "\ndata: " + payload + "\n\n"
 }
-
 func anthropic_message_start_event(string id, string model, int input_tokens) string {
     string payload = "{\"type\":\"message_start\",\"message\":{\"id\":\"" + anthropic_json_escape(id) + "\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"" + anthropic_json_escape(model) + "\",\"content\":[],\"stop_reason\":null,\"usage\":{\"input_tokens\":" + anthropic_int_string(input_tokens) + ",\"output_tokens\":0}}"
     anthropic_sse_event("message_start", payload)
 }
-
 func anthropic_content_block_start_event(int index) string {
     anthropic_sse_event("content_block_start", "{\"type\":\"content_block_start\",\"index\":" + anthropic_int_string(index) + ",\"content_block\":{\"type\":\"text\",\"text\":\"\"}}")
 }
-
 func anthropic_content_delta_event(int index, string text) string {
     anthropic_sse_event("content_block_delta", "{\"type\":\"content_block_delta\",\"index\":" + anthropic_int_string(index) + ",\"delta\":{\"type\":\"text_delta\",\"text\":\"" + anthropic_json_escape(text) + "\"}}")
 }
-
 func anthropic_content_block_stop_event(int index) string {
     anthropic_sse_event("content_block_stop", "{\"type\":\"content_block_stop\",\"index\":" + anthropic_int_string(index) + "}")
 }
-
 func anthropic_message_stop_events(string stop_reason, int output_tokens) string {
     string delta = anthropic_sse_event("message_delta", "{\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"" + anthropic_json_escape(stop_reason) + "\",\"stop_sequence\":null},\"usage\":{\"output_tokens\":" + anthropic_int_string(output_tokens) + "}}")
     delta + anthropic_sse_event("message_stop", "{\"type\":\"message_stop\"}")

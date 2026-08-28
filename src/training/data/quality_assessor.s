@@ -5,7 +5,6 @@ import (
     "std/strings"
     "std/math"
 )
-
 struct quality_metrics {
     i64 total_lines
     i64 valid_docs
@@ -21,13 +20,11 @@ struct quality_metrics {
     quality_distribution: map<string, i64>
     issues: string[]
 }
-
 struct quality_assessor {
     i64 sample_size
     quality_metrics metrics
     set<string> seen_hashes
 }
-
 func new_quality_assessor(i64 sample_size) quality_assessor {
     return quality_assessor{
         sample_size: sample_size,
@@ -45,7 +42,6 @@ func new_quality_assessor(i64 sample_size) quality_assessor {
         seen_hashes: make(set<string>),
     }
 }
-
 func (quality_assessor* qa) calculate_quality_score(string text) f64 {
     if len(text) == 0 {
         return 0.0
@@ -83,7 +79,6 @@ func (quality_assessor* qa) calculate_quality_score(string text) f64 {
     }
     return score
 }
-
 func count_unique_chars(string text) i64 {
     seen := make(set<rune>)
     for c in text {
@@ -91,7 +86,6 @@ func count_unique_chars(string text) i64 {
     }
     return i64(len(seen))
 }
-
 func has_natural_language_features(string text) bool {
     words := strings.Split(text, " ")
     long_word_count := 0
@@ -102,7 +96,6 @@ func has_natural_language_features(string text) bool {
     }
     return long_word_count > 0 && long_word_count > len(words) / 100
 }
-
 func detect_language(string text) string {
     if strings.Contains(text, "é") || strings.Contains(text, "à") {
         return "fr"
@@ -124,7 +117,6 @@ func detect_language(string text) string {
     }
     return "en"
 }
-
 func (quality_assessor* qa) assess_file(string filepath) quality_metrics {
     println("📊 evaluationfile: " + filepath)
     file := io.Open(filepath, "r")
@@ -199,7 +191,6 @@ func (quality_assessor* qa) assess_file(string filepath) quality_metrics {
     qa.metrics.avg_line_length = f64(qa.metrics.total_chars) / f64(qa.metrics.total_lines)
     return qa.metrics
 }
-
 func (metrics quality_metrics) print_report() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║         📊 NeurX dataEnglish textevaluationEnglish text                      ║")
@@ -254,7 +245,6 @@ func (metrics quality_metrics) print_report() {
     println("")
     println("═══════════════════════════════════════════════════════════")
 }
-
 func format_size(i64 size) string {
     if size < 1024 {
         return string(size) + " B"
@@ -267,7 +257,6 @@ func format_size(i64 size) string {
     }
     return format_float(f64(size) / (1024.0 * 1024.0 * 1024.0), 1) + " GB"
 }
-
 func format_tokens(i64 tokens) string {
     if tokens < 1000 {
         return string(tokens)
@@ -280,21 +269,17 @@ func format_tokens(i64 tokens) string {
     }
     return format_float(f64(tokens) / 1000000000.0, 1) + "B"
 }
-
 func format_score(f64 score) string {
     return format_float(score, 2) + " / 1.0"
 }
-
 func format_percent(f64 percent) string {
     return format_float(percent * 100.0, 1) + "%"
 }
-
 func format_float(f64 num, i32 decimals) string {
     multiplier := pow(10.0, f64(decimals))
     rounded := math.Floor(num * multiplier) / multiplier
     return string(rounded)
 }
-
 func pow(f64 base, f64 exp) f64 {
     result := 1.0
     for i := 0; i < i32(exp); i += 1 {
@@ -302,7 +287,6 @@ func pow(f64 base, f64 exp) f64 {
     }
     return result
 }
-
 func main() {
     if len(os.Args) < 2 {
         println("English text: quality_assessor <file> [sample_size]")
@@ -318,7 +302,6 @@ func main() {
     metrics := assessor.assess_file(filepath)
     metrics.print_report()
 }
-
 func string_to_int(string s) i64 {
     result := i64(0)
     for c in s {

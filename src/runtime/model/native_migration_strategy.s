@@ -1,8 +1,6 @@
 package neurx.runtime.model.native_migration
-
 use std.slices
 use std.io.println
-
 struct json_value {
     string type_name    
     string string_value
@@ -10,15 +8,7 @@ struct json_value {
     bool bool_value
     []json_value array_value
 }
-
 func parse_json(string input) option[json_value] {
-    
-    
-    
-    
-    
-    
-    
     some(json_value {
         type_name: "null",
         string_value: "",
@@ -27,17 +17,14 @@ func parse_json(string input) option[json_value] {
         array_value: json_value[](),
     })
 }
-
 struct native_tokenizer_handle {
     int handle_id
     bool initialized
 }
-
 external func __tokenizer_init(string vocab_file) int
 external func __tokenizer_encode(int handle, string text) int[]
 external func __tokenizer_decode(int handle, int[] tokens) string
 external func __tokenizer_free(int handle) void
-
 func new_tokenizer(string vocab_file) native_tokenizer_handle {
     handle_id := __tokenizer_init(vocab_file)
     return native_tokenizer_handle {
@@ -45,27 +32,23 @@ func new_tokenizer(string vocab_file) native_tokenizer_handle {
         initialized: handle_id > 0,
     }
 }
-
 func (native_tokenizer_handle* t) encode(string text) int[] {
     if !t.initialized {
         return int[]()
     }
     __tokenizer_encode(t.handle_id, text)
 }
-
 func (native_tokenizer_handle* t) decode(int[] tokens) string {    if !t.initialized {
         return ""
     }
     __tokenizer_decode(t.handle_id, tokens)
 }
-
 func (native_tokenizer_handle* t) cleanup() {
     if t.initialized {
         __tokenizer_free(t.handle_id)
         t.initialized = false
     }
 }
-
 struct compilation_strategy {
     string name
     string[] pure_s_modules     
@@ -73,7 +56,6 @@ struct compilation_strategy {
     string[] external_modules    
     int estimated_compile_time_sec
 }
-
 func get_current_compilation_strategy() compilation_strategy {
     return compilation_strategy {
         name: "hybrid_modular",
@@ -96,7 +78,6 @@ func get_current_compilation_strategy() compilation_strategy {
         estimated_compile_time_sec: 120,  
     }
 }
-
 struct code_quality_metrics {
     int total_s_lines
     int total_native_lines
@@ -105,7 +86,6 @@ struct code_quality_metrics {
     int test_coverage_percent
     string maintainability_index  
 }
-
 func get_quality_targets() code_quality_metrics {
     return code_quality_metrics {
         total_s_lines: 50000,            
@@ -116,7 +96,6 @@ func get_quality_targets() code_quality_metrics {
         maintainability_index: "Good",
     }
 }
-
 struct evolution_roadmap {
     string phase_name
     int target_phase
@@ -125,14 +104,12 @@ struct evolution_roadmap {
     int months_duration
     string[] migration_targets
 }
-
 func get_pure_s_evolution_roadmap() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
     println("║    NeurX Pure S 演进路线chart (18 months)                           ║")
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
-    
     println("whenfrontstatus (2026-08-25):")
     println("  • Pure S 代码: 99% (文piece数)")
     println("  • native代码: 1% (1,894 do C++/CUDA)")
@@ -143,7 +120,6 @@ func get_pure_s_evolution_roadmap() {
     println("    - json.cpp (JSON parsing)")
     println("    - CUDA 内核 (tensor_runtime, kernels)")
     println("")
-    
     println("📅 Phase 1: JSON 迁移 (th 1-2 months)")
     println("  target: json.cpp → json.s (complete replacement)")
     println("  • implementationpure S JSON parsing器")
@@ -151,7 +127,6 @@ func get_pure_s_evolution_roadmap() {
     println("  • remove json.cpp")
     println("  • Pure S: 99% → 99.2%")
     println("")
-    
     println("📅 Phase 2: HF model加载迁移 (th 3-4 months)")
     println("  target: hf_model.cpp → hf_model.s (complete replacement)")
     println("  • implementation S versionof config.json 加载器")
@@ -159,7 +134,6 @@ func get_pure_s_evolution_roadmap() {
     println("  • remove hf_model.cpp")
     println("  • Pure S: 99.2% → 99.5%")
     println("")
-    
     println("📅 Phase 3: SafeTensors 迁移 (th 5-7 months)")
     println("  target: safetensors.cpp → safetensors.s (complete replacement)")
     println("  • 二进制格式parsing器 (S version)")
@@ -168,7 +142,6 @@ func get_pure_s_evolution_roadmap() {
     println("  • remove safetensors.cpp")
     println("  • Pure S: 99.5% → 99.8%")
     println("")
-    
     println("📅 Phase 4: BPE tokenization器 FFI ization (th 8-10 months)")
     println("  target: bpe_tokenizer.cpp → S 包装器 (保留 C++)")
     println("  • 创建clear晰of S FFI 接口")
@@ -178,7 +151,6 @@ func get_pure_s_evolution_roadmap() {
     println("  • Pure S 业务逻辑: 100%")
     println("  • Pure S 代码rate: 99.8% → 99.9%")
     println("")
-    
     println("📅 Phase 5: CUDA 内核optimization (th 11-18 months)")
     println("  target: maintain CUDA (highity能必需)")
     println("  • optimization tensor_runtime.cpp (张量操作)")
@@ -187,7 +159,6 @@ func get_pure_s_evolution_roadmap() {
     println("  • CUDA 代码fully隐藏at backend/platform/")
     println("  • Pure S: 99.9% (维持)")
     println("")
-    
     println("╔════════════════════════════════════════════════════════════════╗")
     println("║                         最终status                             ║")
     println("├────────────────────────────────────────────────────────────────┤")

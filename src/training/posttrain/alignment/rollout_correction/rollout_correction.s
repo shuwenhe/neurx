@@ -3,7 +3,6 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/rollout_correction/config.s"
 import "src/training/posttrain/alignment/rollout_correction/importance_sampling.s"
 import "src/training/posttrain/alignment/rollout_correction/rejection_sampling.s"
-
 struct rollout_correction_result {
     ISWeights is_weights
     rs_results: []rs_result
@@ -12,7 +11,6 @@ struct rollout_correction_result {
     Tensor corrected_loss
     map[string]f32 statistics
 }
-
 func apply_rollout_correction_to_advantages(
     Tensor advantages,
     Tensor new_log_probs,
@@ -55,7 +53,6 @@ func apply_rollout_correction_to_advantages(
         statistics: statistics,
     }
 }
-
 func apply_rollout_correction_to_loss(
     Tensor policy_loss,
     Tensor new_log_probs,
@@ -98,7 +95,6 @@ func apply_rollout_correction_to_loss(
         statistics: statistics,
     }
 }
-
 func compute_policy_loss_bypass_mode(
     Tensor new_log_probs,
     Tensor rollout_log_probs,
@@ -130,7 +126,6 @@ func compute_policy_loss_bypass_mode(
     )
     return correction_result.corrected_loss, correction_result
 }
-
 func compute_policy_loss_decoupled_mode(
     Tensor new_log_probs,
     Tensor rollout_log_probs,
@@ -154,7 +149,6 @@ func compute_policy_loss_decoupled_mode(
     )
     return correction_result.corrected_loss, correction_result
 }
-
 func collect_statistics(
     ISWeights is_weights,
     []rs_result rs_results,
@@ -178,19 +172,15 @@ func collect_statistics(
     stats["rc_total_rejection_rate"] = total_rejection_rate.item()
     return stats
 }
-
 func is_rollout_correction_enabled(RolloutCorrectionConfig config) . bool {
     return config.is_level != is_aggregation_level.NONE || len(config.rs_modes) > 0
 }
-
 func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
-
 func minimum(Tensor x, Tensor y) . Tensor {
     return where((x < y), x, y)
 }
-
 func where(Tensor condition, Tensor x, Tensor y) . Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }

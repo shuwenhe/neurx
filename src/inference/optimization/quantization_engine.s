@@ -1,6 +1,5 @@
 package neurx.inference.optimization.quantization_engine
 use neurx.util.logger
-
 struct quantization_config {
     string quantization_type
     int bits
@@ -12,7 +11,6 @@ struct quantization_config {
     bool int8
     bool fp8
 }
-
 struct quantized_tensor {
     int[] data
     float scale
@@ -20,7 +18,6 @@ struct quantized_tensor {
     int bits
     string dtype
 }
-
 struct quantization_stats {
     float min_value
     float max_value
@@ -28,13 +25,11 @@ struct quantization_stats {
     float std_value
     float scale_factor
 }
-
 struct quantization_engine {
     quantization_config config
     []quantized_tensor cached_tensors
     int tensor_count
 }
-
 func new_quantization_config(
     string quant_type,
     int bits
@@ -51,7 +46,6 @@ func new_quantization_config(
         fp8: quant_type == "fp8",
     }
 }
-
 func new_quantization_engine(
     quantization_config config
 ) quantization_engine {
@@ -61,7 +55,6 @@ func new_quantization_engine(
         tensor_count: 0,
     }
 }
-
 func calculate_stats(float[] data) quantization_stats {
     if len(data) == 0 {
         return quantization_stats {
@@ -107,7 +100,6 @@ func calculate_stats(float[] data) quantization_stats {
         scale_factor: scale,
     }
 }
-
 func quantize_int8(
     float[] data,
     float scale,
@@ -129,7 +121,6 @@ func quantize_int8(
     }
     return quantized
 }
-
 func quantize_int4(
     float[] data,
     float scale,
@@ -151,7 +142,6 @@ func quantize_int4(
     }
     return quantized
 }
-
 func quantize_fp8(float[] data, float scale) int[] {
     quantized = int[]{}
     i = 0
@@ -169,7 +159,6 @@ func quantize_fp8(float[] data, float scale) int[] {
     }
     return quantized
 }
-
 func dequantize_int8(
     int[] data,
     float scale,
@@ -185,7 +174,6 @@ func dequantize_int8(
     }
     return dequantized
 }
-
 func quantize_tensor(
     quantization_engine engine,
     float[] tensor_data
@@ -246,7 +234,6 @@ func quantize_tensor(
     }
     return new_engine, q_tensor
 }
-
 func dequantize_tensor(quantized_tensor q_tensor) float[] {
     if q_tensor.bits == 8 && q_tensor.dtype == "int8" {
         return dequantize_int8(q_tensor.data, q_tensor.scale, q_tensor.zero_point)
@@ -259,7 +246,6 @@ func dequantize_tensor(quantized_tensor q_tensor) float[] {
     }
     return result
 }
-
 func get_compression_ratio(
     int original_size,
     quantized_tensor quantized
@@ -270,7 +256,6 @@ func get_compression_ratio(
     q_size = len(quantized.data) * quantized.bits / 8
     return f(original_size) / f(q_size)
 }
-
 func estimate_memory_saving(
     quantization_engine engine,
     int original_param_count
@@ -284,7 +269,6 @@ func estimate_memory_saving(
     result = result + "  Estimated Memory Save: " + string(saved_mb) + " MB\n"
     return result
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 1.0
@@ -297,7 +281,6 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
-
 func main() {
     logger.info("Quantization Engine Initialized")
     config = new_quantization_config("int8", 8)

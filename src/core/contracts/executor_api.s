@@ -1,12 +1,10 @@
 import "execution_plan_api"
 import "profiler_api"
-
     eager
     compiled
     JIT
     AOT
 }
-
 struct execution_profile {
     i64 total_time_us
     map[string]kernel_profile kernel_profiles

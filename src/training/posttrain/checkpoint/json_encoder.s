@@ -1,5 +1,4 @@
 package neurx.posttrain.checkpoint.json_encoder
-
 func trainer_state_to_json(
     int version,
     int step,
@@ -24,7 +23,6 @@ func trainer_state_to_json(
     json = json + "}"
     return json
 }
-
 func scheduler_state_to_json(
     int version,
     int step,
@@ -43,7 +41,6 @@ func scheduler_state_to_json(
     json = json + "}"
     return json
 }
-
 func optimizer_state_to_json(
     int version,
     string optimizer_type,
@@ -60,7 +57,6 @@ func optimizer_state_to_json(
     json = json + "}"
     return json
 }
-
 func training_config_to_json(
     string model_name,
     string dataset,
@@ -81,7 +77,6 @@ func training_config_to_json(
     json = json + "}"
     return json
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -108,7 +103,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func float_to_str(float value) string {
     float current = value
     bool negative = current < 0.0

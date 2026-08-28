@@ -1,5 +1,4 @@
 package neurx.distributed.inference
-
 struct distributed_inference_config {
     int world_size
     int rank
@@ -19,7 +18,6 @@ struct distributed_inference_config {
     string backend
     int comm_backend_port
 }
-
 struct distributed_model_shards {
     float[][] weights
     float[][] biases
@@ -28,7 +26,6 @@ struct distributed_model_shards {
     int local_num_heads
     int vocab_size_local
 }
-
 struct distributed_kv_cache {
     float[][] key_cache
     float[][] value_cache
@@ -37,7 +34,6 @@ struct distributed_kv_cache {
     int head_size
     int max_cache_len
 }
-
 struct distributed_inference_request {
     int[] input_ids
     int seq_len
@@ -45,7 +41,6 @@ struct distributed_inference_request {
     int batch_idx
     int source_rank
 }
-
 struct distributed_inference_response {
     int[] output_ids
     float[] logits
@@ -53,14 +48,12 @@ struct distributed_inference_response {
     string request_id
     int dest_rank
 }
-
 struct communication_buffer {
     float[][] send_buffer
     float[][] recv_buffer
     int[] buffer_sizes
     int max_buffer_size
 }
-
 func new_distributed_inference_config(
     int world_size,
     int rank,
@@ -84,7 +77,6 @@ func new_distributed_inference_config(
     cfg.enable_flash_attention = true
     cfg.backend = "nccl"
     cfg.comm_backend_port = 29500
-
     if strategy == "tensor" {
         cfg.tensor_parallel_size = world_size
         cfg.pipeline_parallel_size = 1
@@ -102,39 +94,30 @@ func new_distributed_inference_config(
         cfg.pipeline_parallel_size = 1
         cfg.sequence_parallel_size = world_size
     }
-
     cfg
 }
-
 func new_distributed_model_shards(
     distributed_inference_config cfg
 ) distributed_model_shards {
     distributed_model_shards shards
-
     shards.local_hidden_dim = cfg.hidden_dim
     shards.local_num_heads = cfg.num_heads
     shards.vocab_size_local = 0
-
     if cfg.tensor_parallel_size > 1 {
         shards.local_hidden_dim = cfg.hidden_dim / cfg.tensor_parallel_size
         shards.local_num_heads = cfg.num_heads / cfg.tensor_parallel_size
     }
-
     int layers_per_rank = cfg.num_layers / cfg.pipeline_parallel_size
     int start_layer = cfg.rank * layers_per_rank
-
     shards.layer_assignments = int[]{}
     for i = 0; i < layers_per_rank; i = i + 1 {
         int layer_id = start_layer + i
         shards.layer_assignments = append(shards.layer_assignments, layer_id)
     }
-
     shards.weights = float[][]{}
     shards.biases = float[][]{}
-
     shards
 }
-
 func new_distributed_kv_cache(
     distributed_inference_config cfg
 ) distributed_kv_cache {
@@ -147,7 +130,6 @@ func new_distributed_kv_cache(
     cache.cache_batch_indices = int[]{}
     cache
 }
-
 func new_communication_buffer(int max_size) communication_buffer {
     communication_buffer buf
     buf.max_buffer_size = max_size
@@ -156,19 +138,16 @@ func new_communication_buffer(int max_size) communication_buffer {
     buf.buffer_sizes = int[]{}
     buf
 }
-
 func all_reduce_sum(
     float[][] local_data,
     distributed_inference_config cfg
 ) float[][] {
-
     if cfg.world_size == 1 {
         local_data
     } else {
         float[][]{}
     }
 }
-
 func broadcast(
     float[][] data,
     int root,
@@ -180,22 +159,18 @@ func broadcast(
         float[][]{}
     }
 }
-
 func all_gather(
     float[] local_data,
     distributed_inference_config cfg
 ) float[][] {
     float[][] data_from_all_ranks
     data_from_all_ranks = append(data_from_all_ranks, local_data)
-
     for i = 1; i < cfg.world_size; i = i + 1 {
         float[] placeholder
         data_from_all_ranks = append(data_from_all_ranks, placeholder)
     }
-
     data_from_all_ranks
 }
-
 func reduce_scatter(
     float[][] global_data,
     distributed_inference_config cfg
@@ -204,26 +179,21 @@ func reduce_scatter(
     float[] local_chunk
     local_chunk
 }
-
 func forward_tensor_parallel(
     float[] input_hidden,
     distributed_model_shards shards,
     distributed_inference_config cfg,
     communication_buffer comm_buf
 ) float[] {
-
     int local_hidden = cfg.hidden_dim / cfg.tensor_parallel_size
     float[] local_output
-
     if cfg.tensor_parallel_size > 1 {
         float[][] outputs_to_reduce
         outputs_to_reduce = append(outputs_to_reduce, local_output)
         all_reduce_sum(outputs_to_reduce, cfg)
     }
-
     local_output
 }
-
 func attention_tensor_parallel(
     float[] query,
     float[] key,
@@ -231,44 +201,35 @@ func attention_tensor_parallel(
     distributed_inference_config cfg,
     communication_buffer comm_buf
 ) float[] {
-
     float[] output
     output
 }
-
 struct pipeline_stage {
     int stage_id
     int[] assigned_layers
     distributed_model_shards shards
     float[] activation_buffer
 }
-
 func forward_pipeline_parallel(
     float[] input_hidden,
     []pipeline_stage stages,
     distributed_inference_config cfg,
     communication_buffer comm_buf
 ) float[] {
-
     float[] current_activation = input_hidden
-
     for i = 0; i < len(stages); i = i + 1 {
         pipeline_stage stage = stages[i]
-
         if stage.stage_id == cfg.rank {
             for layer_idx = 0; layer_idx < len(stage.assigned_layers); layer_idx = layer_idx + 1 {
             }
         } else {
         }
-
         if i + 1 < len(stages) {
             int next_stage_id = stages[i + 1].stage_id
         }
     }
-
     current_activation
 }
-
 func backward_pipeline_parallel(
     float[] grad_output,
     []pipeline_stage stages,
@@ -277,7 +238,6 @@ func backward_pipeline_parallel(
     float[] grad_input = grad_output
     grad_input
 }
-
 func forward_sequence_parallel(
     float[][] hidden_states,
     distributed_inference_config cfg,
@@ -287,26 +247,21 @@ func forward_sequence_parallel(
     int local_seq_len = seq_len / cfg.sequence_parallel_size
     int start_idx = cfg.rank * local_seq_len
     int end_idx = start_idx + local_seq_len
-
     float[][] local_hidden_states
     for i = start_idx; i < end_idx; i = i + 1 {
         if i < len(hidden_states) {
             local_hidden_states = append(local_hidden_states, hidden_states[i])
         }
     }
-
     all_gather(local_hidden_states[0], cfg)
-
     local_hidden_states
 }
-
 func compute_rank_mapping(
     string strategy,
     int world_size,
     int rank
 ) int[] {
     int[] mapping = int[]{}
-
     if strategy == "tensor" {
         mapping = append(mapping, rank)
         mapping = append(mapping, 0)
@@ -324,10 +279,8 @@ func compute_rank_mapping(
         mapping = append(mapping, 0)
         mapping = append(mapping, rank)
     }
-
     mapping
 }
-
 func run_distributed_inference(
     distributed_inference_request request,
     distributed_model_shards shards,
@@ -335,16 +288,13 @@ func run_distributed_inference(
     distributed_inference_config cfg,
     communication_buffer comm_buf
 ) distributed_inference_response {
-
     distributed_inference_response response
     response.request_id = request.request_id
     response.dest_rank = 0
     response.output_ids = int[]{}
     response.logits = float[]{}
     response.generated_len = 0
-
     float[] hidden_state
-
     if cfg.strategy == "tensor" {
         for layer = 0; layer < cfg.num_layers; layer = layer + 1 {
             hidden_state = forward_tensor_parallel(hidden_state, shards, cfg, comm_buf)
@@ -356,26 +306,21 @@ func run_distributed_inference(
         float[][] hidden_seq
         hidden_seq = forward_sequence_parallel(hidden_seq, cfg, comm_buf)
     }
-
     if cfg.tensor_parallel_size > 1 {
     }
-
     response
 }
-
 func enable_overlap_communication(
     distributed_inference_config cfg
 ) bool {
     true
 }
-
 func optimize_gradient_accumulation(
     float[][] gradients,
     distributed_inference_config cfg
 ) float[][] {
     gradients
 }
-
 struct distributed_performance_metrics {
     float compute_time
     float communication_time
@@ -384,7 +329,6 @@ struct distributed_performance_metrics {
     float throughput
     float latency
 }
-
 func get_performance_metrics(
     distributed_inference_config cfg
 ) distributed_performance_metrics {
@@ -397,7 +341,6 @@ func get_performance_metrics(
     metrics.latency = 0.0
     metrics
 }
-
 func print_distributed_config(distributed_inference_config cfg) {
     println("=== Distributed Inference Config ===")
     println("World Size: ", cfg.world_size)
@@ -411,7 +354,6 @@ func print_distributed_config(distributed_inference_config cfg) {
     println("Max Seq Len: ", cfg.max_seq_len)
     println("Backend: ", cfg.backend)
 }
-
 func validate_distributed_config(distributed_inference_config cfg) bool {
     if cfg.world_size <= 0 {
         println("Error: world_size must be > 0")
@@ -431,7 +373,6 @@ func validate_distributed_config(distributed_inference_config cfg) bool {
     }
     true
 }
-
 func main() {
     distributed_inference_config cfg = new_distributed_inference_config(
         8,
@@ -441,14 +382,11 @@ func main() {
         4096,
         32
     )
-
     if validate_distributed_config(cfg) {
         print_distributed_config(cfg)
-
         distributed_model_shards shards = new_distributed_model_shards(cfg)
         distributed_kv_cache kv_cache = new_distributed_kv_cache(cfg)
         communication_buffer comm_buf = new_communication_buffer(1024 * 1024 * 100)
-
         println("Distributed Inference Engine initialized successfully!")
         println("Local layers assigned: ", len(shards.layer_assignments))
         println("Local hidden dim: ", shards.local_hidden_dim)

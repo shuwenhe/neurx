@@ -30,7 +30,6 @@ const (
     NORM_RMSNORM    NormType = 1
     NORM_GROUPNORM  NormType = 2
 )
-
 struct model_config {
     string model_type
     int32 vocab_size
@@ -54,7 +53,6 @@ struct model_config {
     int32 bos_token_id
     int32 eos_token_id
 }
-
 struct base_llm_model {
     model_config config_data
     string device
@@ -67,7 +65,6 @@ struct base_llm_model {
     bool quantized
     *quant_config quant_config_data
 }
-
 struct transformer_layer {
     *attention_layer self_attn
     *ffn_layer feed_forward
@@ -75,7 +72,6 @@ struct transformer_layer {
     *layer_norm norm2
     float32 dropout
 }
-
 struct attention_layer {
     *nn.Linear q_proj
     *nn.Linear k_proj
@@ -88,27 +84,23 @@ struct attention_layer {
     AttentionType attention_type
     float32 dropout
 }
-
 struct ffn_layer {
     *nn.Linear gate_proj
     *nn.Linear up_proj
     *nn.Linear down_proj
     ActivationType activation
 }
-
 struct layer_norm {
     float[]32 weight
     float[]32 bias
     float32 eps
     int[] normalized_shape
 }
-
 struct quant_config {
     bool enable_quant
     int quant_format
     int32 group_size
 }
-
 func new_model_config(string model_type) model_config {
     config := model_config{
         model_type:              model_type,
@@ -163,7 +155,6 @@ func new_model_config(string model_type) model_config {
     }
     return config
 }
-
 func new_base_llm_model(model_config config) *base_llm_model {
     model := *base_llm_model{
         config_data: config,
@@ -211,7 +202,6 @@ func new_base_llm_model(model_config config) *base_llm_model {
     }
     return model
 }
-
 func (m* base_llm_model) forward(int[]32 input_ids, int[][]32 attention_mask) float[]32 {
     embeddings := float[]32{}
     for i := 0; i < len(input_ids); i++ {
@@ -232,14 +222,12 @@ func (m* base_llm_model) forward(int[]32 input_ids, int[][]32 attention_mask) fl
     logits := m.output_linear.forward(normed)
     return logits
 }
-
 func (m* base_llm_model) apply_layer_norm(float[]32 x, *layer_norm norm) float[]32 {
     if norm == nil {
         return x
     }
     return x
 }
-
 func (m* base_llm_model) add_residual(float[]32 x, float[]32 y) float[]32 {
     if len(x) != len(y) {
         return x
@@ -250,18 +238,15 @@ func (m* base_llm_model) add_residual(float[]32 x, float[]32 y) float[]32 {
     }
     return result
 }
-
 func (a* attention_layer) forward(float[]32 hidden_states, int[][]32 attention_mask) float[]32 {
     _ = hidden_states
     _ = attention_mask
     return float[]32{}
 }
-
 func (f* ffn_layer) forward(float[]32 hidden_states) float[]32 {
     _ = hidden_states
     return float[]32{}
 }
-
 func supported_models() string[] {
     return string[]{
         "llama", "llama2", "llama3", "llama4",
@@ -272,7 +257,6 @@ func supported_models() string[] {
         "phi", "phi3",
     }
 }
-
 func main() {
     config := new_model_config("llama")
     model := new_base_llm_model(config)

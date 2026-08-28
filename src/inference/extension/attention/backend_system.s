@@ -1,12 +1,10 @@
 package attention
-
     standard
     flash_attention
     dsa
     paged_attention
     sparse_attention
 }
-
 struct attention_config {
     int num_heads
     int head_dim
@@ -17,7 +15,6 @@ struct attention_config {
     int max_seq_length
     bool enable_cache
 }
-
 struct attention_backend {
     attention_backend_type backend_type
     string backend_name
@@ -25,7 +22,6 @@ struct attention_backend {
     attention_config config
     map[string, string] metadata
 }
-
 struct attention_forward_request {
     string request_id
     int batch_size
@@ -35,14 +31,12 @@ struct attention_forward_request {
     bool use_cache
     int cache_seq_length
 }
-
 struct attention_forward_result {
     bool success
     string error_msg
     int64 computation_time_us
     int flops
 }
-
 struct key_value_cache {
     string cache_id
     string dtype
@@ -52,7 +46,6 @@ struct key_value_cache {
     int page_size
     int64 bytes_allocated
 }
-
 func new_attention_config(int num_heads, int head_dim) attention_config {
     attention_config {
         num_heads: num_heads,
@@ -65,7 +58,6 @@ func new_attention_config(int num_heads, int head_dim) attention_config {
         enable_cache: true,
     }
 }
-
 func new_attention_backend(attention_backend_type backend_type, attention_config config) attention_backend {
     backend_name := ""
     switch backend_type {
@@ -75,7 +67,6 @@ func new_attention_backend(attention_backend_type backend_type, attention_config
         attention_backend_type_paged_attention : backend_name = "paged_attention",
         attention_backend_type_sparse_attention : backend_name = "sparse_attention",
     }
-
     attention_backend {
         backend_type: backend_type,
         backend_name: backend_name,
@@ -84,49 +75,38 @@ func new_attention_backend(attention_backend_type backend_type, attention_config
         metadata: map[string, string]{},
     }
 }
-
 func (attention_backend* backend) initialize() bool {
     if backend.initialized {
         false
     }
-
     backend.initialized = true
     true
 }
-
 func (attention_backend* backend) finalize() bool {
     if !backend.initialized {
         false
     }
-
     backend.initialized = false
     true
 }
-
 func (attention_backend* backend) is_initialized() bool {
     backend.initialized
 }
-
 func (attention_backend* backend) get_backend_name() string {
     backend.backend_name
 }
-
 func (attention_backend* backend) get_num_heads() int {
     backend.config.num_heads
 }
-
 func (attention_backend* backend) get_head_dim() int {
     backend.config.head_dim
 }
-
 func (attention_backend* backend) supports_cache() bool {
     backend.config.enable_cache
 }
-
 func (attention_backend* backend) supports_flash_attention() bool {
     backend.config.use_flash_attention
 }
-
 func (attention_backend* backend) forward(attention_forward_request req) attention_forward_result {
     if !backend.initialized {
         attention_forward_result {
@@ -136,7 +116,6 @@ func (attention_backend* backend) forward(attention_forward_request req) attenti
             flops: 0,
         }
     }
-
     attention_forward_result {
         success: true,
         error_msg: "",
@@ -144,19 +123,15 @@ func (attention_backend* backend) forward(attention_forward_request req) attenti
         flops: 0,
     }
 }
-
 func (attention_backend* backend) set_metadata(string key, string value) () {
     backend.metadata[key] = value
 }
-
 func (attention_backend* backend) get_metadata(string key) string {
     if key in backend.metadata {
         backend.metadata[key]
     }
-
     ""
 }
-
 func new_kv_cache(string cache_id, string dtype, int64[] shape, bool is_paged) key_value_cache {
     cache := key_value_cache {
         cache_id: cache_id,
@@ -167,7 +142,6 @@ func new_kv_cache(string cache_id, string dtype, int64[] shape, bool is_paged) k
         page_size: 0,
         bytes_allocated: 0,
     }
-
     if is_paged {
         cache.page_size = 4096
         total_elements := 1
@@ -179,22 +153,17 @@ func new_kv_cache(string cache_id, string dtype, int64[] shape, bool is_paged) k
         cache.num_pages = (total_elements + cache.page_size - 1) / cache.page_size
         cache.bytes_allocated = total_elements * 2
     }
-
     cache
 }
-
 func (key_value_cache* cache) get_cache_id() string {
     cache.cache_id
 }
-
 func (key_value_cache* cache) get_num_pages() int {
     cache.num_pages
 }
-
 func (key_value_cache* cache) get_bytes_allocated() int64 {
     cache.bytes_allocated
 }
-
 func (key_value_cache* cache) is_paged() bool {
     cache.is_paged
 }

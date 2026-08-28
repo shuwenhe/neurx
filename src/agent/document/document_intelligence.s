@@ -1,5 +1,4 @@
 module document_parser
-
 struct document_parser_config {
     enabled_formats: list<string> = ["pdf", "html", "markdown", "docx", "pptx", "xlsx", "txt", "csv"]
     pdf_extract_images: bool = true
@@ -28,7 +27,6 @@ struct document_parser_config {
     enable_section_detection: bool = true
     enable_page_numbering: bool = true
 }
-
 struct parsed_document {
     string content
     document_metadata metadata
@@ -40,7 +38,6 @@ struct parsed_document {
     document_statistics statistics
     any raw_structure
 }
-
 struct document_metadata {
     string filename
     string file_path
@@ -56,7 +53,6 @@ struct document_metadata {
     string language
     string encoding
 }
-
 struct document_section {
     string id
     string title
@@ -67,7 +63,6 @@ struct document_section {
     int page_number
     list<document_section> subsections
 }
-
 struct extracted_table {
     string id
     list<string> headers
@@ -81,7 +76,6 @@ struct extracted_table {
     float confidence
     bbox: tuple<float, float, float, float>
 }
-
 struct extracted_image {
     string id
     bytes data
@@ -92,20 +86,17 @@ struct extracted_image {
     string caption
     position: tuple<int, int>
 }
-
 struct extracted_link {
     string url
     string text
     string link_type
 }
-
 struct code_block {
     string language
     string code
     int start_line
     int end_line
 }
-
 struct document_statistics {
     int total_characters
     int total_words
@@ -600,7 +591,6 @@ struct conversion_result {
     list<extracted_link> links
     list<code_block> code_blocks
 }
-
 struct table_conversion_result {
     extracted_table table
     string markdown

@@ -1,12 +1,10 @@
 package neurx.amp.gradient_accumulation
-
 struct gradient_accumulator {
     float[][] accumulated_grads
     int accumulation_steps
     int current_step
     int num_params
 }
-
 func new_gradient_accumulator(int num_params, int accumulation_steps) gradient_accumulator {
     float[][] grads = make(float[][], 0)
     int i = 0
@@ -21,7 +19,6 @@ func new_gradient_accumulator(int num_params, int accumulation_steps) gradient_a
         num_params: num_params,
     }
 }
-
 func accumulate_gradients(
     gradient_accumulator acc,
     float[] batch_grads
@@ -36,11 +33,9 @@ func accumulate_gradients(
     acc.current_step = acc.current_step + 1
     return acc
 }
-
 func should_update_params(gradient_accumulator acc) bool {
     return acc.current_step >= acc.accumulation_steps
 }
-
 func get_accumulated_grads(gradient_accumulator acc) float[] {
     float[] grads = float[]{cap: len(acc.accumulated_grads)}
     int i = 0
@@ -50,7 +45,6 @@ func get_accumulated_grads(gradient_accumulator acc) float[] {
     }
     return grads
 }
-
 func average_accumulated_grads(gradient_accumulator acc) float[] {
     float[] grads = float[]{cap: len(acc.accumulated_grads)}
     float denom = float(acc.accumulation_steps)
@@ -64,7 +58,6 @@ func average_accumulated_grads(gradient_accumulator acc) float[] {
     }
     return grads
 }
-
 func reset_accumulator(gradient_accumulator acc) gradient_accumulator {
     int i = 0
     for i < len(acc.accumulated_grads) {
@@ -74,7 +67,6 @@ func reset_accumulator(gradient_accumulator acc) gradient_accumulator {
     acc.current_step = 0
     return acc
 }
-
 func make_zero_array(int n) float[] {
     float[] arr = float[]{cap: n}
     int i = 0

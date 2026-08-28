@@ -1,15 +1,12 @@
 package neurx.cache.kv_cpu_offload
-
 use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
-
     gpu,
     cpu,
     disk,
 }
-
 struct cache_config {
     int max_gpu_memory_mb
     int max_cpu_memory_mb
@@ -17,7 +14,6 @@ struct cache_config {
     bool enable_pinned_memory
     bool enable_compression
 }
-
 struct kv_cache_stats {
     int gpu_used_mb
     int cpu_used_mb
@@ -27,7 +23,6 @@ struct kv_cache_stats {
     float avg_offload_time_ms
     float avg_restore_time_ms
 }
-
 struct cache_metadata {
     int sequence_id
     int layer_id
@@ -38,13 +33,11 @@ struct cache_metadata {
     int size_bytes
     bool compressed
 }
-
 struct kv_cache_entry {
     float[] key
     float[] value
     cache_metadata metadata
 }
-
 struct kv_cache_pool {
     gpu_cache: map[int, kv_cache_entry]
     cpu_cache: map[int, kv_cache_entry]
@@ -52,7 +45,6 @@ struct kv_cache_pool {
     cache_config config
     kv_cache_stats stats
 }
-
 func kv_cache_pool_new(cache_config config) kv_cache_pool {
     kv_cache_pool {
         gpu_cache: map[int, kv_cache_entry](),
@@ -70,11 +62,9 @@ func kv_cache_pool_new(cache_config config) kv_cache_pool {
         },
     }
 }
-
 func calculate_entry_size(*float[] k, *float[] v) int {
     (len(k) + len(v)) * 4
 }
-
 func (kv_cache_pool* pool) put_kv(
     sequence_id: int,
     layer_id: int,
@@ -84,7 +74,6 @@ func (kv_cache_pool* pool) put_kv(
 ) ((), error) {
     cache_key := sequence_id * 1000000 + layer_id * 1000 + token_position
     entry_size := calculate_entry_size(key, value)
-
     metadata := cache_metadata {
         sequence_id: sequence_id,
         layer_id: layer_id,
@@ -95,33 +84,26 @@ func (kv_cache_pool* pool) put_kv(
         size_bytes: entry_size,
         compressed: false,
     }
-
     gpu_budget_exceeded := pool.stats.gpu_used_mb + (entry_size / 1024 / 1024) > pool.config.max_gpu_memory_mb
-
     if gpu_budget_exceeded {
         pool.try_offload_to_cpu()
     }
-
     entry := kv_cache_entry {
         key: key,
         value: value,
         metadata: metadata,
     }
-
     pool.gpu_cache.insert(cache_key, entry)
     pool.metadata_map.insert(cache_key, metadata)
     pool.stats.gpu_used_mb = pool.stats.gpu_used_mb + (entry_size / 1024 / 1024)
-
     return (), ""
 }
-
 func (kv_cache_pool* pool) get_kv(
     sequence_id: int,
     layer_id: int,
     int token_position
 ) (kv_cache_entry, error) {
     cache_key := sequence_id * 1000000 + layer_id * 1000 + token_position
-
     if pool.gpu_cache.contains(cache_key) {
         switch pool.gpu_cache.get(cache_key) {
             some(entry) : {
@@ -133,7 +115,6 @@ return                 (entry, "")
         }
     } else if pool.cpu_cache.contains(cache_key) {
         pool.restore_from_cpu(cache_key)
-
         switch pool.gpu_cache.get(cache_key) {
             some(entry) : {
 return                 (entry, "")
@@ -146,13 +127,10 @@ return                 (entry, "")
         (0, error { code: "CACHE_MISS", message: "Entry not found" })
     }
 }
-
 func (kv_cache_pool* pool) try_offload_to_cpu() ((), error) {
     gpu_entries := pool.gpu_cache
-
     oldest_key := 0
     oldest_pos := 999999
-
     for key in gpu_entries.keys() {
         switch pool.metadata_map.get(key) {
             some(meta) : {
@@ -164,18 +142,15 @@ func (kv_cache_pool* pool) try_offload_to_cpu() ((), error) {
             nil : {},
         }
     }
-
     if oldest_key != 0 {
         switch pool.gpu_cache.get(oldest_key) {
             some(entry) : {
                 pool.cpu_cache.insert(oldest_key, entry)
                 pool.gpu_cache.remove(oldest_key)
-
                 entry_size := entry.metadata.size_bytes
                 pool.stats.gpu_used_mb = pool.stats.gpu_used_mb - (entry_size / 1024 / 1024)
                 pool.stats.cpu_used_mb = pool.stats.cpu_used_mb + (entry_size / 1024 / 1024)
                 pool.stats.offload_count = pool.stats.offload_count + 1
-
                 return (), ""
             },
             nil : {
@@ -186,18 +161,15 @@ func (kv_cache_pool* pool) try_offload_to_cpu() ((), error) {
         (0, error { code: "NO_ENTRY_TO_OFFLOAD", message: "No entry to offload" })
     }
 }
-
 func (kv_cache_pool* pool) restore_from_cpu(int cache_key) ((), error) {
     switch pool.cpu_cache.get(cache_key) {
         some(entry) : {
             pool.gpu_cache.insert(cache_key, entry)
             pool.cpu_cache.remove(cache_key)
-
             entry_size := entry.metadata.size_bytes
             pool.stats.cpu_used_mb = pool.stats.cpu_used_mb - (entry_size / 1024 / 1024)
             pool.stats.gpu_used_mb = pool.stats.gpu_used_mb + (entry_size / 1024 / 1024)
             pool.stats.restore_count = pool.stats.restore_count + 1
-
             return (), ""
         },
         nil : {
@@ -205,42 +177,32 @@ func (kv_cache_pool* pool) restore_from_cpu(int cache_key) ((), error) {
         },
     }
 }
-
 func (pool* pool) get_stats() kv_cache_stats {
     pool.stats
 }
-
 func (pool* pool) get_memory_usage_percent() float {
     total_used := pool.stats.gpu_used_mb + pool.stats.cpu_used_mb
     total_available := pool.config.max_gpu_memory_mb + pool.config.max_cpu_memory_mb
-
     (total_used as float) / (total_available as float) * 100.0
 }
-
 func (pool* pool) get_cache_hit_rate() float {
     total_accesses := pool.stats.offload_count + pool.stats.restore_count
-
     if total_accesses == 0 {
         return 0.0
     }
-
     (pool.stats.restore_count as float) / (total_accesses as float)
 }
-
 func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) ((), error) {
     keys_to_remove := int[]()
-
     for key in pool.gpu_cache.keys() {
         key_seq_id := key / 1000000
         if key_seq_id == sequence_id {
             keys_to_remove = append(keys_to_remove, key)
         }
     }
-
     i := 0
     for i < len(keys_to_remove) {
         key := keys_to_remove[i]
-
         switch pool.gpu_cache.get(key) {
             some(entry) : {
                 entry_size := entry.metadata.size_bytes
@@ -249,29 +211,22 @@ func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) ((), error) {
             },
             nil : {},
         }
-
         i = i + 1
     }
-
     return (), ""
 }
-
 func (kv_cache_pool* pool) clear_all() ((), error) {
     pool.gpu_cache = map[int, kv_cache_entry]()
     pool.cpu_cache = map[int, kv_cache_entry]()
     pool.metadata_map = map[int, cache_metadata]()
-
     pool.stats.gpu_used_mb = 0
     pool.stats.cpu_used_mb = 0
-
     return (), ""
 }
-
 struct error {
     string code
     string message
 }
-
 func main() {
     config := cache_config {
         max_gpu_memory_mb: 4096,
@@ -280,19 +235,15 @@ func main() {
         enable_pinned_memory: true,
         enable_compression: false,
     }
-
     pool := kv_cache_pool_new(config)
-
     key := float[]()
     value := float[]()
-
     i := 0
     for i < 1024 {
         key = append(key, 0.1)
         value = append(value, 0.2)
         i = i + 1
     }
-
     switch pool.put_kv(0, 0, 0, key, value) {
         return (), "" : {
             ""
@@ -301,7 +252,6 @@ func main() {
             ""
         },
     }
-
     stats := pool.get_stats()
     usage := pool.get_memory_usage_percent()
     hit_rate := pool.get_cache_hit_rate()

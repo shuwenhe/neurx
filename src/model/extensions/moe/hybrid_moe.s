@@ -1,7 +1,6 @@
 package neurx.moe.hybrid
 use neurx.moe.core.{moe_config, moe_weights, moe_result, new_moe_config, new_moe_weights, moe_forward}
 use neurx.attention.nda.{nda_config, nda_weights, nda_result, new_nda_config, new_nda_weights, nda_forward}
-
 struct hybrid_moe_config {
     int hidden_dim
     int state_dim
@@ -15,7 +14,6 @@ struct hybrid_moe_config {
     int groups
     int max_history
 }
-
 struct gated_mla_weights {
     hybrid_moe_config config
     float[] w_dq
@@ -26,25 +24,21 @@ struct gated_mla_weights {
     float[] w_gate
     float[] w_output
 }
-
 struct gated_mla_result {
     float[] output
     float[] attention
     float[] gate
 }
-
 struct attnres_weights {
     hybrid_moe_config config
     float[] query_scale
     float[] depth_keys
     float[] depth_bias
 }
-
 struct attnres_result {
     float[] output
     float[] weights
 }
-
 struct hybrid_moe_model {
     hybrid_moe_config config
     nda_weights nda
@@ -52,7 +46,6 @@ struct hybrid_moe_model {
     moe_weights moe
     attnres_weights residual
 }
-
 struct hybrid_moe_forward_result {
     float[] output
     float[] nda_state
@@ -61,7 +54,6 @@ struct hybrid_moe_forward_result {
     float[] last_expert_weights
     int history_count
 }
-
 func tiny_hybrid_moe_config() hybrid_moe_config {
     hybrid_moe_config {
         hidden_dim: 4,
@@ -77,7 +69,6 @@ func tiny_hybrid_moe_config() hybrid_moe_config {
         max_history: 10,
     }
 }
-
 func production_hybrid_moe_shape() hybrid_moe_config {
     hybrid_moe_config {
         hidden_dim: 7168,
@@ -93,7 +84,6 @@ func production_hybrid_moe_shape() hybrid_moe_config {
         max_history: 256,
     }
 }
-
 func zeros(int n) float[] {
     float[] out = float[]{cap: n}
     int i = 0
@@ -103,7 +93,6 @@ func zeros(int n) float[] {
     }
     out
 }
-
 func zeros_int(int n) int[] {
     int[] out = int[]{cap: n}
     int i = 0
@@ -113,7 +102,6 @@ func zeros_int(int n) int[] {
     }
     out
 }
-
 func deterministic_weights(int n, int salt, float scale) float[] {
     float[] out = zeros(n)
     int i = 0
@@ -125,7 +113,6 @@ func deterministic_weights(int n, int salt, float scale) float[] {
     }
     out
 }
-
 func copy_floats(float[] values) float[] {
     float[] out = zeros(len(values))
     int i = 0
@@ -135,7 +122,6 @@ func copy_floats(float[] values) float[] {
     }
     out
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -151,7 +137,6 @@ func sqrt_approx(float x) float {
     }
     result
 }
-
 func exp_approx(float x) float {
     float value = x
     if value > 10.0 {
@@ -173,22 +158,18 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func sigmoid(float x) float {
     1.0 / (1.0 + exp_approx(0.0 - x))
 }
-
 func swish(float x) float {
     x * sigmoid(x)
 }
-
 func situ(float x) float {
     float s = sigmoid(x)
     float e2 = exp_approx(2.0 * x)
     float t = (e2 - 1.0) / (e2 + 1.0)
     s * t
 }
-
 func rms_norm_tokens(float[] input, int tokens, int hidden) float[] {
     float[] out = zeros(tokens * hidden)
     int t = 0
@@ -210,7 +191,6 @@ func rms_norm_tokens(float[] input, int tokens, int hidden) float[] {
     }
     out
 }
-
 func linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) float[] {
     float[] out = zeros(rows * out_dim)
     int r = 0
@@ -230,7 +210,6 @@ func linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) fl
     }
     out
 }
-
 func add_arrays(float[] a, float[] b) float[] {
     float[] out = zeros(len(a))
     int i = 0
@@ -240,7 +219,6 @@ func add_arrays(float[] a, float[] b) float[] {
     }
     out
 }
-
 func new_gated_mla_weights(hybrid_moe_config cfg) gated_mla_weights {
     int h = cfg.hidden_dim
     int l = cfg.latent_dim
@@ -255,7 +233,6 @@ func new_gated_mla_weights(hybrid_moe_config cfg) gated_mla_weights {
         w_output: deterministic_weights(h * h, 26, 0.01),
     }
 }
-
 func gated_mla_forward(gated_mla_weights weights, float[] input, int tokens) gated_mla_result {
     hybrid_moe_config cfg = weights.config
     int h = cfg.hidden_dim
@@ -316,7 +293,6 @@ func gated_mla_forward(gated_mla_weights weights, float[] input, int tokens) gat
         gate: gate_logits,
     }
 }
-
 func new_attnres_weights(hybrid_moe_config cfg) attnres_weights {
     attnres_weights {
         config: cfg,
@@ -325,7 +301,6 @@ func new_attnres_weights(hybrid_moe_config cfg) attnres_weights {
         depth_bias: deterministic_weights(cfg.max_history, 42, 0.001),
     }
 }
-
 func attention_residual(
     attnres_weights weights,
     float[] query,
@@ -382,7 +357,6 @@ func attention_residual(
         weights: probabilities,
     }
 }
-
 func store_history(float[] history, float[] values, int depth, int width) float[] {
     float[] out = copy_floats(history)
     int i = 0
@@ -392,7 +366,6 @@ func store_history(float[] history, float[] values, int depth, int width) float[
     }
     out
 }
-
 func new_hybrid_moe_model(hybrid_moe_config cfg) hybrid_moe_model {
     moe_config sparse_cfg = new_moe_config(
         cfg.hidden_dim,
@@ -416,7 +389,6 @@ func new_hybrid_moe_model(hybrid_moe_config cfg) hybrid_moe_model {
         residual: new_attnres_weights(cfg),
     }
 }
-
 func hybrid_moe_forward(hybrid_moe_model model, float[] embeddings, int tokens) hybrid_moe_forward_result {
     hybrid_moe_config cfg = model.config
     int history_width = tokens * cfg.hidden_dim
@@ -473,7 +445,6 @@ func hybrid_moe_forward(hybrid_moe_model model, float[] embeddings, int tokens) 
         history_count: history_count,
     }
 }
-
 func finite_array(float[] values) bool {
     int i = 0
     for i < len(values) {
@@ -484,7 +455,6 @@ func finite_array(float[] values) bool {
     }
     true
 }
-
 func sum_range(float[] values, int offset, int count) float {
     float sum = 0.0
     int i = 0
@@ -494,14 +464,12 @@ func sum_range(float[] values, int offset, int count) float {
     }
     sum
 }
-
 func abs_float(float value) float {
     if value < 0.0 {
         return 0.0 - value
     }
     value
 }
-
 func assert_true(bool condition, string message) int {
     if !condition {
         println("[hybrid-moe-s] FAIL: " + message)
@@ -509,7 +477,6 @@ func assert_true(bool condition, string message) int {
     }
     0
 }
-
 func main() {
     hybrid_moe_config cfg = tiny_hybrid_moe_config()
     hybrid_moe_model model = new_hybrid_moe_model(cfg)
@@ -569,7 +536,6 @@ func main() {
     println("[hybrid-moe-s] production_experts=16/896")
     0
 }
-
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -583,7 +549,6 @@ func int_to_string(int value) string {
     }
     out
 }
-
 func string_char(int code) string {
     string(code)
 }

@@ -1,6 +1,5 @@
 package neurx.nn.activations
 use neurx.tensor.tensor
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -18,7 +17,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -31,7 +29,6 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-
 func tanh_approx(float x) float {
     float ep = exp_approx(x)
     float en = exp_approx(-x)
@@ -41,7 +38,6 @@ func tanh_approx(float x) float {
     }
     (ep - en) / denom
 }
-
 func copy_float(float[] data) float[] {
     int n = len(data)
     float[] out = float[]{cap: n}
@@ -52,7 +48,6 @@ func copy_float(float[] data) float[] {
     }
     out
 }
-
 func copy_int(int[] data) int[] {
     int n = len(data)
     int[] out = int[]{cap: n}
@@ -63,11 +58,9 @@ func copy_int(int[] data) int[] {
     }
     out
 }
-
 func get_tensor_data(tensor t, int index) float {
     t.data[index]
 }
-
 func relu(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -83,7 +76,6 @@ func relu(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func leaky_relu(tensor input, float negative_slope) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -99,7 +91,6 @@ func leaky_relu(tensor input, float negative_slope) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func elu(tensor input, float alpha) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -115,7 +106,6 @@ func elu(tensor input, float alpha) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func sigmoid(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -126,7 +116,6 @@ func sigmoid(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func tanh(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -137,7 +126,6 @@ func tanh(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func gelu(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -151,7 +139,6 @@ func gelu(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func silu(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -163,7 +150,6 @@ func silu(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func softplus(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -175,7 +161,6 @@ func softplus(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func mish(tensor input) tensor {
     tensor sp = softplus(input)
     int n = len(input.data)
@@ -187,7 +172,6 @@ func mish(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func clamp_value(float x, float min_value, float max_value) float {
     float v = x
     if v < min_value {
@@ -198,14 +182,12 @@ func clamp_value(float x, float min_value, float max_value) float {
     }
     v
 }
-
 func abs_value(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     x
 }
-
 func relu6(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -216,7 +198,6 @@ func relu6(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func hardtanh(tensor input, float min_value, float max_value) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -227,7 +208,6 @@ func hardtanh(tensor input, float min_value, float max_value) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func hardsigmoid(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -238,7 +218,6 @@ func hardsigmoid(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func hardswish(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -250,7 +229,6 @@ func hardswish(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func threshold(tensor input, float threshold_value, float value) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -265,7 +243,6 @@ func threshold(tensor input, float threshold_value, float value) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func softsign(tensor input) tensor {
     int n = len(input.data)
     float[] out = float[]{cap: n}
@@ -276,7 +253,6 @@ func softsign(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func softmax_1d(float[] values) float[] {
     int n = len(values)
     float[] out = float[]{cap: n}
@@ -306,7 +282,6 @@ func softmax_1d(float[] values) float[] {
     }
     out
 }
-
 func softmax(tensor input) tensor {
     int rows = input.shape[0]
     int cols = input.shape[1]
@@ -342,7 +317,6 @@ func softmax(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func log_softmax(tensor input) tensor {
     tensor sm = softmax(input)
     int n = len(sm.data)
@@ -358,7 +332,6 @@ func log_softmax(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return -100.0

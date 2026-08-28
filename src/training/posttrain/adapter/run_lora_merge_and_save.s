@@ -1,6 +1,5 @@
 package main
 use std.io.println
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -29,7 +28,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -66,7 +64,6 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
-
 struct merge_config {
     string base_model_path
     string adapter_checkpoint_dir
@@ -76,14 +73,12 @@ struct merge_config {
     int input_dim
     int output_dim
 }
-
 struct merged_model {
     float[] weights
     string config_json
     string model_name
     int total_size
 }
-
 func load_and_merge() merged_model {
     merged_model result
     int input_dim = 768
@@ -130,7 +125,6 @@ func load_and_merge() merged_model {
     result.total_size = total_weights
     result
 }
-
 func save_merged_model(merged_model model, string output_dir) int {
     println("💾 Saving merged model...")
     println("  Output directory: /home/shuwen/shuwen/posttrain")
@@ -163,7 +157,6 @@ func save_merged_model(merged_model model, string output_dir) int {
     println("")
     0
 }
-
 func verify_output(string output_dir) int {
     println("✅ Verifying output...")
     println("")
@@ -181,7 +174,6 @@ func verify_output(string output_dir) int {
     println("")
     0
 }
-
 func main() {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")

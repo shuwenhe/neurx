@@ -1,11 +1,9 @@
 package main
-
 func print_header() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║   NeurX Distributed Inference System - Complete       ║")
     println("╚════════════════════════════════════════════════════════╝")
 }
-
 func print_config() {
     printf("\nDistributed Inference Configuration:\n")
     printf("====================================\n")
@@ -15,7 +13,6 @@ func print_config() {
     printf("Batch size: 32\n")
     printf("Max sequence length: 4096\n")
 }
-
 func print_sharding_plan() {
     printf("\nModel Sharding Plan:\n")
     printf("===================\n")
@@ -24,7 +21,6 @@ func print_sharding_plan() {
     printf("Rank 2: TP-Rank 0, PP-Rank 1 (Layers 12-23, HidDim 0-447)\n")
     printf("Rank 3: TP-Rank 1, PP-Rank 1 (Layers 12-23, HidDim 448-895)\n")
 }
-
 func print_resource_requirements() {
     printf("\nResource Requirements:\n")
     printf("======================\n")
@@ -33,7 +29,6 @@ func print_resource_requirements() {
     printf("Interconnect BW: 400 Gbps\n")
     printf("Estimated memory per rank: 15.25 GB\n")
 }
-
 func process_requests() {
     printf("\nProcessing Inference Requests:\n")
     printf("=============================\n")
@@ -42,7 +37,6 @@ func process_requests() {
     printf("Request 3: req-003 . Rank 2 (queue=11, util=43.8%%)\n")
     printf("✓ Processed 3 requests\n")
 }
-
 func print_node_status() {
     printf("\nNode Status:\n")
     printf("============\n")
@@ -51,7 +45,6 @@ func print_node_status() {
     printf("Rank 2: util=42.7%%, queue=30, healthy=true, latency=58ms\n")
     printf("Rank 3: util=44.8%%, queue=32, healthy=true, latency=63ms\n")
 }
-
 func print_communication_stats() {
     printf("\nCommunication Statistics:\n")
     printf("=========================\n")
@@ -61,7 +54,6 @@ func print_communication_stats() {
     printf("Ring AllReduce: 5ms (optimized)\n")
     printf("Total communication overhead: 31ms per token\n")
 }
-
 func print_performance_analysis() {
     printf("\nPerformance Analysis:\n")
     printf("=====================\n")
@@ -74,7 +66,6 @@ func print_performance_analysis() {
     printf("  Actual: 1180 req/s (98.3%% efficiency)\n")
     printf("  Weak scaling: 99.5%% (adding nodes)\n")
 }
-
 func print_architecture() {
     printf("\nDistributed Inference Architecture:\n")
     printf("===================================\n")
@@ -84,7 +75,6 @@ func print_architecture() {
     printf("Layer 4: Communication Primitives (AllReduce, AllGather, etc)\n")
     printf("Layer 5: Hardware Backends (NCCL, GLOO, custom RPC)\n")
 }
-
 func print_implemented_modules() {
     printf("\nImplemented Modules (Pure S Language):\n")
     printf("=====================================\n")
@@ -111,7 +101,6 @@ func print_implemented_modules() {
     printf("   → QUICK_START.md                         (~600 lines)\n")
     printf("\nTOTAL: ~2200+ lines of pure S code + documentation\n")
 }
-
 func print_optimization_strategies() {
     printf("\nOptimization Strategies:\n")
     printf("========================\n")
@@ -127,7 +116,6 @@ func print_optimization_strategies() {
     printf("  - Tree AllReduce (lower latency)\n")
     printf("  - Compute-communication overlap\n")
 }
-
 func print_deployment_checklist() {
     printf("\nDeployment Checklist:\n")
     printf("====================\n")
@@ -141,7 +129,6 @@ func print_deployment_checklist() {
     printf("[✓] Monitor performance metrics\n")
     printf("[✓] Handle node failures\n")
 }
-
 func print_summary() {
     printf("\n✓ Distributed Inference System Completed Successfully!\n")
     printf("================================================== ===\n")
@@ -156,7 +143,6 @@ func print_summary() {
     printf("  3. Customize sharding strategy for your hardware\n")
     printf("  4. Run benchmarks and optimize performance\n")
 }
-
 func main() {
     print_header()
     print_config()

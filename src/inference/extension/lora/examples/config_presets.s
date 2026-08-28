@@ -1,48 +1,39 @@
 package neurx.lora.examples.config_presets
-
 use std.slices
 use std.map.map
 use neurx.lora.lora_config
-
 func preset_lightweight() lora_config {
     config := default()
     config.lora_rank = 4
     config.lora_alpha = 8.0
     config.lora_dropout = 0.01
     config.bias = "none"
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "v_proj")
     config.target_modules = targets
-
     config
 }
-
 func preset_balanced() lora_config {
     config := default()
     config.lora_rank = 16
     config.lora_alpha = 32.0
     config.lora_dropout = 0.05
     config.bias = "lora_only"
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
     targets = append(targets, "v_proj")
     targets = append(targets, "dense")
     config.target_modules = targets
-
     config
 }
-
 func preset_high_quality() lora_config {
     config := default()
     config.lora_rank = 64
     config.lora_alpha = 128.0
     config.lora_dropout = 0.1
     config.bias = "all"
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
@@ -50,44 +41,35 @@ func preset_high_quality() lora_config {
     targets = append(targets, "dense")
     targets = append(targets, "out_proj")
     config.target_modules = targets
-
     config
 }
-
 func preset_text_classification() lora_config {
     config := preset_balanced()
     config.task_type = "SEQUENCE_CLASSIFICATION"
     config.lora_rank = 8
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "v_proj")
     config.target_modules = targets
-
     config
 }
-
 func preset_question_answering() lora_config {
     config := preset_balanced()
     config.task_type = "QUESTION_ANSWERING"
     config.lora_rank = 16
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
     targets = append(targets, "v_proj")
     targets = append(targets, "dense")
     config.target_modules = targets
-
     config
 }
-
 func preset_machine_translation() lora_config {
     config := preset_high_quality()
     config.task_type = "TRANSLATION"
     config.lora_rank = 32
     config.lora_alpha = 64.0
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
@@ -95,55 +77,44 @@ func preset_machine_translation() lora_config {
     targets = append(targets, "dense")
     targets = append(targets, "attention")
     config.target_modules = targets
-
     config
 }
-
 func preset_code_generation() lora_config {
     config := preset_high_quality()
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 64
     config.lora_alpha = 128.0
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "v_proj")
     targets = append(targets, "dense")
     config.target_modules = targets
-
     config
 }
-
 func preset_instruction_following() lora_config {
     config := preset_balanced()
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 16
     config.lora_alpha = 32.0
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "v_proj")
     config.target_modules = targets
-
     config
 }
-
 func preset_conversational() lora_config {
     config := preset_balanced()
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 32
     config.lora_alpha = 64.0
-
     targets := string[]()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
     targets = append(targets, "v_proj")
     targets = append(targets, "dense")
     config.target_modules = targets
-
     config
 }
-
     lightweight,
     balanced,
     high_quality,
@@ -154,7 +125,6 @@ func preset_conversational() lora_config {
     instruction_following,
     conversational,
 }
-
 func load_preset(preset_type preset) lora_config {
     switch preset {
         preset_type_lightweight : preset_lightweight(),
@@ -168,7 +138,6 @@ func load_preset(preset_type preset) lora_config {
         preset_type_conversational : preset_conversational(),
     }
 }
-
 func load_preset_by_name(string name) option[lora_config] {
     switch name {
         "lightweight" : some(preset_lightweight()),
@@ -183,7 +152,6 @@ func load_preset_by_name(string name) option[lora_config] {
         _ : nil,
     }
 }
-
 func get_available_presets() string[] {
     presets := string[]()
     presets = append(presets, "lightweight")
@@ -197,7 +165,6 @@ func get_available_presets() string[] {
     presets = append(presets, "conversational")
     presets
 }
-
 func get_preset_description(string name) string {
     switch name {
         "lightweight" :
@@ -248,7 +215,6 @@ func get_preset_description(string name) string {
         _ : "未知预设",
     }
 }
-
 struct preset_performance {
     string name
     int rank
@@ -256,7 +222,6 @@ struct preset_performance {
     int estimated_inference_overhead_percent
     int recommended_batch_size
 }
-
 func get_performance_info(preset_type preset) preset_performance {
     switch preset {
         preset_type_lightweight : preset_performance {
@@ -324,15 +289,11 @@ func get_performance_info(preset_type preset) preset_performance {
         },
     }
 }
-
 func demo_presets() {
     println("=== LoRA 预设configuration演示 ===\n")
-
     presets := get_available_presets()
-
     for preset_name in presets.iter() {
         println("configuration名: " + preset_name)
-
         switch load_preset_by_name(preset_name) {
             some(config) : {
                 println("  rank: " + config.lora_rank.to_string())

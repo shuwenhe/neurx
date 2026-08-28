@@ -1,11 +1,9 @@
 package neurx.moe.trae
 import "neurx.util.math"
-
     ROUTING = 0
     FORWARD = 1
     BACKWARD = 2
 }
-
 struct trae_moe_config {
     int num_experts
     int expert_dim
@@ -21,7 +19,6 @@ struct trae_moe_config {
     float temperature
     float entropy_regularization
 }
-
 struct trae_router_state {
     float[] router_weights
     float[] router_biases
@@ -30,13 +27,11 @@ struct trae_router_state {
     int total_routed_tokens
     int routing_step
 }
-
 struct attention_gate {
     float[] gate_weights
     float[] gate_biases
     float[] alignment_scores
 }
-
 struct trae_moe_layer {
     trae_moe_config config
     trae_router_state router_state
@@ -46,7 +41,6 @@ struct trae_moe_layer {
     float[] output_weights
     float[] output_biases
 }
-
 struct trae_forward_result {
     float[] output
     float aux_loss
@@ -54,7 +48,6 @@ struct trae_forward_result {
     float entropy
     float[] expert_activations
 }
-
 func new_trae_moe_config() trae_moe_config {
     trae_moe_config {
         num_experts: 128,
@@ -72,7 +65,6 @@ func new_trae_moe_config() trae_moe_config {
         entropy_regularization: 0.01,
     }
 }
-
 func new_trae_router_state(trae_moe_config config) trae_router_state {
     trae_router_state {
         router_weights: math.allocate_float(config.hidden_dim * config.num_experts, 0.0),
@@ -83,7 +75,6 @@ func new_trae_router_state(trae_moe_config config) trae_router_state {
         routing_step: 0,
     }
 }
-
 func new_attention_gate(trae_moe_config config) attention_gate {
     attention_gate {
         gate_weights: math.allocate_float(config.hidden_dim * config.num_experts, 0.0),
@@ -91,7 +82,6 @@ func new_attention_gate(trae_moe_config config) attention_gate {
         alignment_scores: math.allocate_float(config.num_experts, 0.0),
     }
 }
-
 func new_trae_moe_layer(trae_moe_config config) trae_moe_layer {
     trae_moe_layer layer {
         config: config,
@@ -110,7 +100,6 @@ func new_trae_moe_layer(trae_moe_config config) trae_moe_layer {
     }
     layer
 }
-
 func trae_routing(trae_moe_layer layer, float[] hidden_states, int batch_size, int seq_len) (int[], float[], float[]) {
     int total_tokens = batch_size * seq_len
     int hidden_dim = layer.config.hidden_dim
@@ -172,7 +161,6 @@ func trae_routing(trae_moe_layer layer, float[] hidden_states, int batch_size, i
     layer.router_state.routing_step = layer.router_state.routing_step + 1
     (expert_indices, routing_weights, routing_probs)
 }
-
 func adaptive_routing_update(trae_moe_layer layer) trae_moe_layer {
     if !layer.config.use_adaptive_routing {
         return layer
@@ -194,7 +182,6 @@ func adaptive_routing_update(trae_moe_layer layer) trae_moe_layer {
     layer.router_state.total_routed_tokens = 0
     layer
 }
-
 func compute_load_balance_metric(float[] expert_load, int num_experts) float {
     float mean_load = math.mean_float(expert_load)
     float variance = 0.0
@@ -208,7 +195,6 @@ func compute_load_balance_metric(float[] expert_load, int num_experts) float {
     float cv = std_dev / mean_load
     1.0 - cv
 }
-
 func trae_moe_forward(trae_moe_layer layer, float[] hidden_states, int batch_size, int seq_len) trae_forward_result {
     int total_tokens = batch_size * seq_len
     int hidden_dim = layer.config.hidden_dim
@@ -299,7 +285,6 @@ func trae_moe_forward(trae_moe_layer layer, float[] hidden_states, int batch_siz
         expert_activations: expert_scales,
     }
 }
-
 func expert_forward(float[] weights, float[] biases, float[] input, int in_dim, int out_dim) float[] {
     float[] hidden = math.allocate_float(out_dim, 0.0)
     int i = 0
@@ -315,7 +300,6 @@ func expert_forward(float[] weights, float[] biases, float[] input, int in_dim, 
     }
     hidden
 }
-
 func trae_moe_backward(trae_moe_layer layer, float[] grad_output, float[] hidden_states,
                        int batch_size, int seq_len) float[] {
     int total_tokens = batch_size * seq_len
@@ -323,7 +307,6 @@ func trae_moe_backward(trae_moe_layer layer, float[] grad_output, float[] hidden
     float[] grad_input = math.allocate_float(total_tokens * hidden_dim, 0.0)
     grad_input
 }
-
 func trae_moe_compute_aux_loss(trae_moe_layer layer) float {
     int num_experts = layer.config.num_experts
     float total_load = math.sum_float(layer.router_state.expert_load)
@@ -337,11 +320,9 @@ func trae_moe_compute_aux_loss(trae_moe_layer layer) float {
     }
     aux_loss / float(num_experts) * layer.config.load_balance_factor
 }
-
 func trae_moe_get_load_balance(trae_moe_layer layer) float {
     compute_load_balance_metric(layer.router_state.expert_load, layer.config.num_experts)
 }
-
 func trae_moe_reset_load_stats(trae_moe_layer layer) trae_moe_layer {
     int i = 0
     for i < layer.config.num_experts {

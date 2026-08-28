@@ -1,9 +1,7 @@
 package neurx.deploy.request_scheduler
-
 func get_current_time_ms() int {
     0
 }
-
 struct inference_request {
     string request_id
     string model_type
@@ -16,14 +14,12 @@ struct inference_request {
     int start_time
     int end_time
 }
-
 struct batch_item {
     inference_request request
     string status
     string generated_text
     int tokens_generated
 }
-
 struct request_batch {
     []batch_item items
     int batch_size
@@ -33,7 +29,6 @@ struct request_batch {
     int end_time
     string status
 }
-
 struct request_queue {
     []inference_request pending_requests
     []request_batch active_batches
@@ -43,7 +38,6 @@ struct request_queue {
     int total_requests_processed
     int total_batches_processed
 }
-
 func init_request_queue(int max_queue_size, int max_batch_size) request_queue {
     request_queue queue
     queue.queue_max_size = max_queue_size
@@ -52,7 +46,6 @@ func init_request_queue(int max_queue_size, int max_batch_size) request_queue {
     queue.total_batches_processed = 0
     queue
 }
-
 func enqueue_request(request_queue queue, inference_request req) bool {
     if len(queue.pending_requests) >= queue.queue_max_size {
         print("❌ Queue is full! Max size: " + int_to_string(queue.queue_max_size) + "\n")
@@ -63,7 +56,6 @@ func enqueue_request(request_queue queue, inference_request req) bool {
     print("✓ Request enqueued: " + req.request_id + "\n")
     true
 }
-
 func dequeue_batch(request_queue queue) request_batch {
     request_batch batch
     batch.batch_size = 0
@@ -87,7 +79,6 @@ func dequeue_batch(request_queue queue) request_batch {
     batch.batch_size = num_to_dequeue
     batch
 }
-
 func get_queue_stats(request_queue queue) string {
     string stats = ""
     stats = stats + "📊 Queue Statistics:\n"
@@ -97,7 +88,6 @@ func get_queue_stats(request_queue queue) string {
     stats = stats + "  Total processed: " + int_to_string(queue.total_requests_processed) + "\n"
     stats
 }
-
 func process_batch(request_queue queue, request_batch batch) request_batch {
     print("\n⚙️  Processing batch:\n")
     print("  Batch size: " + int_to_string(batch.batch_size) + "\n")
@@ -123,7 +113,6 @@ func process_batch(request_queue queue, request_batch batch) request_batch {
     print("  Status: processing → completed\n")
     batch
 }
-
 func print_batch_results(request_batch batch) {
     print("\n📋 Batch Results:\n")
     print("  Batch ID: generated\n")
@@ -139,7 +128,6 @@ func print_batch_results(request_batch batch) {
         i = i + 1
     }
 }
-
 func simulate_inference_queue() {
     print("\n" + "="*60 + "\n")
     print("🔄 Simulating Request Queue & Batch Processing\n")
@@ -175,7 +163,6 @@ func simulate_inference_queue() {
     print("\n" + get_queue_stats(queue) + "\n")
     print("="*60 + "\n")
 }
-
 func main() {
     simulate_inference_queue()
 }

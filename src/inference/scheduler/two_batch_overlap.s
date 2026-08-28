@@ -1,19 +1,13 @@
 package neurx.inference.scheduler.two_batch_overlap
-
 func tbo_mode_extend() int { 1 }
-
 func tbo_mode_decode() int { 2 }
-
 func tbo_mode_target_verify() int { 3 }
-
 func tbo_mode_idle() int { 4 }
-
 struct tbo_config {
     int token_distribution_threshold_per_mille
     int minimum_tokens
     int decode_delta_stages
 }
-
 struct tbo_plan {
     bool enabled
     bool two_chunk_split
@@ -25,25 +19,21 @@ struct tbo_plan {
     int child_b_tokens
     int delta_stages
 }
-
 struct tbo_stage_schedule {
     int[] child_a_stages
     int[] child_b_stages
     int tick_count
     bool valid
 }
-
 func tbo_int_array(int capacity, int value) int[] {
     int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = value; i = i + 1 }
     values
 }
-
 func tbo_empty_plan() tbo_plan {
     tbo_plan {enabled: false, two_chunk_split: false, split_seq_index: 0, split_token_index: 0, child_a_sequences: 0, child_b_sequences: 0, child_a_tokens: 0, child_b_tokens: 0, delta_stages: 0}
 }
-
 func tbo_sum(int[] values) int {
     int total = 0
     int i = 0
@@ -53,7 +43,6 @@ func tbo_sum(int[] values) int {
     }
     total
 }
-
 func tbo_balanced_boundary(int[] lengths) int {
     int count = len(lengths)
     if count < 2 { return 0 }
@@ -71,7 +60,6 @@ func tbo_balanced_boundary(int[] lengths) int {
     }
     best
 }
-
 func tbo_prefix_sum(int[] values, int end) int {
     int total = 0
     int i = 0
@@ -81,7 +69,6 @@ func tbo_prefix_sum(int[] values, int end) int {
     }
     total
 }
-
 func tbo_split_extend(tbo_config config, int[] extend_lengths) tbo_plan {
     int count = len(extend_lengths)
     int total = tbo_sum(extend_lengths)
@@ -112,7 +99,6 @@ func tbo_split_extend(tbo_config config, int[] extend_lengths) tbo_plan {
     }
     tbo_plan {enabled: true, two_chunk_split: two_chunk, split_seq_index: boundary, split_token_index: token_boundary, child_a_sequences: child_a_sequences, child_b_sequences: child_b_sequences, child_a_tokens: token_boundary, child_b_tokens: total - token_boundary, delta_stages: 0}
 }
-
 func tbo_make_plan(tbo_config config, int mode, int[] extend_lengths, int sequence_count, int tokens_per_sequence) tbo_plan {
     if config.token_distribution_threshold_per_mille < 0 { config.token_distribution_threshold_per_mille = 0 }
     if config.token_distribution_threshold_per_mille > 500 { config.token_distribution_threshold_per_mille = 500 }
@@ -128,7 +114,6 @@ func tbo_make_plan(tbo_config config, int mode, int[] extend_lengths, int sequen
     }
     tbo_empty_plan()
 }
-
 func tbo_schedule_stages(int stages_a, int stages_b, int delta_stages) tbo_stage_schedule {
     if stages_a <= 0 || stages_b <= 0 || stages_a + stages_b > 1024 { return tbo_stage_schedule {child_a_stages: tbo_int_array(1, 0 - 1), child_b_stages: tbo_int_array(1, 0 - 1), tick_count: 0, valid: false} }
     int delta = delta_stages

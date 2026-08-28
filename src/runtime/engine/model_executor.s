@@ -1,10 +1,7 @@
 package engine
-
 import "core"
 import "tensor"
-
 type model_dtype string
-
 const (
     model_dtype_float32    model_dtype = "float32"
     model_dtype_float16    model_dtype = "float16"
@@ -12,18 +9,14 @@ const (
     model_dtype_int8       model_dtype = "int8"
     model_dtype_int4       model_dtype = "int4"
 )
-
 type model_format string
-
 const (
     model_format_safetensors  model_format = "safetensors"
     model_format_checkpoint   model_format = "checkpoint"
     model_format_onnx         model_format = "onnx"
     model_format_tensorrt     model_format = "tensorrt"
 )
-
 type loader_status int32
-
 const (
     loader_status_uninitialized loader_status = iota
     loader_status_loading
@@ -32,7 +25,6 @@ const (
     loader_status_error
     loader_status_unloading
 )
-
 struct model_weight_spec {
     string name
     int[]32 shape
@@ -43,7 +35,6 @@ struct model_weight_spec {
     bool is_quantized
     interface{} quantization_config
 }
-
 struct model_weight_map {
     map[string]*model_weight_spec weights
     int64 total_size_bytes
@@ -51,7 +42,6 @@ struct model_weight_map {
     model_dtype dtype
     string quantization_type
 }
-
 struct model_config_spec {
     string model_id
     string model_name
@@ -79,7 +69,6 @@ struct model_config_spec {
     model_dtype dtype
     interface{} quantization_config
 }
-
 struct model_load_config {
     string model_path
     string model_id
@@ -100,7 +89,6 @@ struct model_load_config {
     int32 retry_count
     bool enable_streaming_weights
 }
-
 struct model_loading_state {
     loader_status status
     int32 progress_percent
@@ -113,7 +101,6 @@ struct model_loading_state {
     int64 start_time
     int64 estimated_completion_ms
 }
-
 struct model_executor_cache {
     map[string]interface{} weights
     map[string]interface{} activations
@@ -123,7 +110,6 @@ struct model_executor_cache {
     int64 max_cache_size_bytes
     int32 num_cached_layers
 }
-
 struct model_layer_executor {
     int32 layer_id
     string layer_type
@@ -132,7 +118,6 @@ struct model_layer_executor {
     interface{} state
     string compute_capability
 }
-
 struct model_executor {
     model_config_spec config
     model_load_config load_config
@@ -145,7 +130,6 @@ struct model_executor {
     bool initialized
     bool ready
 }
-
 struct model_loader {
     model_load_config config
     map[string]*model_executor executors
@@ -156,7 +140,6 @@ struct model_loader {
     interface{} metrics
     bool initialized
 }
-
 struct weight_buffer {
     []byte data
     model_dtype dtype
@@ -165,7 +148,6 @@ struct weight_buffer {
     string device_location
     bool is_pinned
 }
-
 struct model_load_result {
     bool success
     *model_executor executor
@@ -175,7 +157,6 @@ struct model_load_result {
     int32 num_weights_loaded
     int32 total_size_mb
 }
-
 struct layer_execution_output {
     interface{} hidden_states
     interface{} attention_output
@@ -183,7 +164,6 @@ struct layer_execution_output {
     interface{} cache_outputs
     float32 computation_time_ms
 }
-
 func new_model_loader(model_load_config config) *model_loader {
     return *model_loader{
         config: config,
@@ -193,41 +173,32 @@ func new_model_loader(model_load_config config) *model_loader {
         initialized: false,
     }
 }
-
 func (model_loader* ml) initialize() error {
     if ml.initialized {
         return nil
     }
-
     if ml.config.model_path == "" {
         return "model_path is required"
     }
-
     if ml.config.dtype == "" {
         ml.config.dtype = model_dtype_float16
     }
-
     if ml.config.tensor_parallel_size <= 0 {
         ml.config.tensor_parallel_size = 1
     }
-
     if ml.config.pipeline_parallel_size <= 0 {
         ml.config.pipeline_parallel_size = 1
     }
-
     ml.initialized = true
     return nil
 }
-
 func (model_loader* ml) load_model_async(string model_id) (*model_executor, error) {
     if !ml.initialized {
         return nil, "loader not initialized"
     }
-
     if executor, exists := ml.executors[model_id]; exists {
         return executor, nil
     }
-
     executor := *model_executor{
         load_config: ml.config,
         loading_state: model_loading_state{
@@ -245,12 +216,9 @@ func (model_loader* ml) load_model_async(string model_id) (*model_executor, erro
         initialized: false,
         ready: false,
     }
-
     ml.executors[model_id] = executor
-
     return executor, nil
 }
-
 func (model_loader* ml) load_model_config(string model_id) (*model_config_spec, error) {
     config := *model_config_spec{
         model_id: model_id,
@@ -276,7 +244,6 @@ func (model_loader* ml) load_model_config(string model_id) (*model_config_spec, 
         tie_word_embeddings: false,
         dtype: ml.config.dtype,
     }
-
     if model_id == "Qwen2.5-0.5B" || model_id == "Qwen2.5-0.5B-Instruct" {
         config.model_type = "qwen2"
         config.hidden_size = 1024
@@ -287,27 +254,21 @@ func (model_loader* ml) load_model_config(string model_id) (*model_config_spec, 
         config.vocab_size = 151936
         config.rope_theta = 1000000.0
     }
-
     return config, nil
 }
-
 func (model_loader* ml) load_weights(model_executor* executor) error {
     if executor.loading_state.status != loader_status_loading {
         return "executor not in loading state"
     }
-
     executor.loading_state.current_stage = "loading_weights"
     executor.loading_state.progress_percent = 10
-
     executor.weight_map = model_weight_map{
         weights: make(map[string]*model_weight_spec),
         total_size_bytes: 0,
         num_weights: 0,
         dtype: executor.load_config.dtype,
     }
-
     executor.loading_state.progress_percent = 50
-
     num_layers := executor.config.num_hidden_layers
     for i := int32(0); i < num_layers; i++ {
         layer_exec := *model_layer_executor{
@@ -318,44 +279,35 @@ func (model_loader* ml) load_weights(model_executor* executor) error {
         }
         executor.layer_executors = append(executor.layer_executors, layer_exec)
     }
-
     executor.loading_state.progress_percent = 90
     executor.loading_state.loaded_weights = executor.loading_state.total_weights
     executor.loading_state.bytes_loaded = executor.loading_state.total_bytes
-
     executor.loading_state.progress_percent = 100
     executor.loading_state.status = loader_status_loaded
     executor.initialized = true
-
     return nil
 }
-
 func (model_loader* ml) prepare_weights(model_executor* executor) error {
     if executor.initialized == false {
         return "executor not initialized"
     }
-
     executor.loading_state.current_stage = "preparing_weights"
     executor.loading_state.status = loader_status_ready
     executor.ready = true
-
     return nil
 }
-
 func (model_loader* ml) get_loading_progress(string model_id) *model_loading_state {
     if executor, exists := ml.executors[model_id]; exists {
         return *executor.loading_state
     }
     return nil
 }
-
 func (model_loader* ml) is_model_ready(string model_id) bool {
     if executor, exists := ml.executors[model_id]; exists {
         return executor.ready
     }
     return false
 }
-
 func (model_loader* ml) unload_model(string model_id) error {
     if executor, exists := ml.executors[model_id]; exists {
         executor.loading_state.status = loader_status_unloading
@@ -369,23 +321,19 @@ func (model_loader* ml) unload_model(string model_id) error {
     }
     return "model not found"
 }
-
 func (model_loader* ml) get_model_executor(string model_id) *model_executor {
     if executor, exists := ml.executors[model_id]; exists {
         return executor
     }
     return nil
 }
-
 func (model_executor* me) execute_layer(int32 layer_id, interface{} input) (*layer_execution_output, error) {
     if layer_id < 0 || layer_id >= int32(len(me.layer_executors)) {
         return nil, "invalid layer_id"
     }
-
     if !me.ready {
         return nil, "executor not ready"
     }
-
     output := *layer_execution_output{
         hidden_states: nil,
         attention_output: nil,
@@ -393,53 +341,41 @@ func (model_executor* me) execute_layer(int32 layer_id, interface{} input) (*lay
         cache_outputs: nil,
         computation_time_ms: 0.0,
     }
-
     return output, nil
 }
-
 func (model_executor* me) forward_pass(int[]32 tokens) (interface{}, error) {
     if !me.ready {
         return nil, "executor not ready"
     }
-
     if len(tokens) == 0 {
         return nil, "empty token sequence"
     }
-
     return nil, nil
 }
-
 func (model_executor* me) get_cache_status() *model_executor_cache {
     return *me.cache
 }
-
 func (model_executor* me) clear_cache() {
     me.cache.weights = make(map[string]interface{})
     me.cache.activations = make(map[string]interface{})
     me.cache.kv_cache = make(map[string]interface{})
     me.cache.cache_size_bytes = 0
 }
-
 func (model_executor* me) get_memory_usage() int64 {
     return me.device_memory_bytes + me.cache.cache_size_bytes
 }
-
 func (model_executor* me) is_ready() bool {
     return me.ready && me.initialized
 }
-
 func (model_executor* me) get_config() *model_config_spec {
     return *me.config
 }
-
 func (model_executor* me) get_dtype() model_dtype {
     return me.config.dtype
 }
-
 func (model_executor* me) get_layer_count() int32 {
     return int32(len(me.layer_executors))
 }
-
 func load_model_with_timeout(*model_loader loader, string model_id, int32 timeout_ms) (*model_load_result, error) {
     executor, err := loader.load_model_async(model_id)
     if err != nil {
@@ -448,7 +384,6 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
             error_message: err,
         }, err
     }
-
     config, err := loader.load_model_config(model_id)
     if err != nil {
         return *model_load_result{
@@ -456,9 +391,7 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
             error_message: err,
         }, err
     }
-
     executor.config = *config
-
     err = loader.load_weights(executor)
     if err != nil {
         return *model_load_result{
@@ -466,7 +399,6 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
             error_message: err,
         }, err
     }
-
     err = loader.prepare_weights(executor)
     if err != nil {
         return *model_load_result{
@@ -474,7 +406,6 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
             error_message: err,
         }, err
     }
-
     return *model_load_result{
         success: true,
         executor: executor,
@@ -485,7 +416,6 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
         total_size_mb: int32(executor.loading_state.bytes_loaded / 1024 / 1024),
     }, nil
 }
-
 func create_default_load_config() model_load_config {
     return model_load_config{
         model_path: "/app/shuwen/model",

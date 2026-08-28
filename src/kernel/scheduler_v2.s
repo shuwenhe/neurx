@@ -1,7 +1,5 @@
 package kernel.sched
-
 use std.strings.int_to_string
-
 struct sched_entity {
     int pid
     int vruntime
@@ -10,20 +8,17 @@ struct sched_entity {
     int cpu
     string state
 }
-
 struct cfs_rq {
     int[] entities
     int min_vruntime
     int total_weight
     int nr_running
 }
-
 struct rt_rq {
     int[] rt_tasks
     int[] rt_priority_array
     int nr_running
 }
-
 struct rq {
     cfs_rq cfs
     rt_rq rt
@@ -31,9 +26,7 @@ struct rq {
     sched_entity[] active_entities
     int timestamp
 }
-
 rq g_runqueues[]
-
 func init_scheduler(int nr_cpus) int {
     g_runqueues = new rq[nr_cpus]
     var i = 0
@@ -58,38 +51,32 @@ func init_scheduler(int nr_cpus) int {
     }
     0
 }
-
 func update_load_avg(sched_entity* se, int delta) int {
     if se.weight > 0 {
         se.vruntime = se.vruntime + (delta * 1024) / se.weight
     }
     0
 }
-
 func place_entity(sched_entity* se, int min_vruntime) int {
     if min_vruntime > se.vruntime {
         se.vruntime = min_vruntime
     }
     0
 }
-
 func check_preempt_curr(rq* queue, sched_entity* se) int {
     if se.vruntime < queue.cfs.min_vruntime {
         return 1
     }
     0
 }
-
 func enqueue_task_fair(rq* queue, sched_entity* se) int {
     queue.cfs.nr_running = queue.cfs.nr_running + 1
     queue.cfs.total_weight = queue.cfs.total_weight + se.weight
-    
     if se.vruntime < queue.cfs.min_vruntime {
         queue.cfs.min_vruntime = se.vruntime
     }
     0
 }
-
 func dequeue_task_fair(rq* queue, sched_entity* se) int {
     if queue.cfs.nr_running > 0 {
         queue.cfs.nr_running = queue.cfs.nr_running - 1
@@ -99,20 +86,17 @@ func dequeue_task_fair(rq* queue, sched_entity* se) int {
     }
     0
 }
-
 func dequeue_task_rt(rq* queue, int priority) int {
     if queue.rt.nr_running > 0 {
         queue.rt.nr_running = queue.rt.nr_running - 1
     }
     0
 }
-
 func enqueue_task_rt(rq* queue, int priority) int {
     queue.rt.nr_running = queue.rt.nr_running + 1
     queue.rt.rt_priority_array[priority] = queue.rt.rt_priority_array[priority] + 1
     0
 }
-
 func pick_next_task(rq* queue) sched_entity {
     if queue.rt.nr_running > 0 {
         var i = 0
@@ -130,7 +114,6 @@ func pick_next_task(rq* queue) sched_entity {
             i = i + 1
         }
     }
-    
     var i = 0
     for i < queue.cfs.nr_running {
         if queue.active_entities[i].vruntime > 0 {
@@ -138,7 +121,6 @@ func pick_next_task(rq* queue) sched_entity {
         }
         i = i + 1
     }
-    
     sched_entity {
         pid: 0,
         vruntime: 0,
@@ -148,18 +130,15 @@ func pick_next_task(rq* queue) sched_entity {
         state: "idle",
     }
 }
-
 func context_switch(rq* queue, sched_entity* prev, sched_entity* next) int {
     prev.state = "runnable"
     next.state = "running"
     queue.timestamp = queue.timestamp + 1
     0
 }
-
 func schedule() int {
     0
 }
-
 func load_balance(int src_cpu, int dst_cpu) int {
     0
 }

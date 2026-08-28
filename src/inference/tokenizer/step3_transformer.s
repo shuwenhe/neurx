@@ -5,20 +5,16 @@ use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_so
 use neurx.model.transformer.position_encoding.{new_rope_position_encoding, position_encoding_config, apply_rope_position}
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_gettimeofday(int sec_ptr, int usec_ptr) int
-
 struct timer {
     int start_sec
     int start_usec
 }
-
 func start_timer() timer {
     return timer{start_sec: 0, start_usec: 0}
 }
-
 func elapsed_ms(timer t) int {
     return 0
 }
-
 struct perf_stats {
     int layer
     int matmul_time_ms
@@ -27,7 +23,6 @@ struct perf_stats {
     int ffn_time_ms
     int total_time_ms
 }
-
 struct transformer_config {
     int num_layers
     int hidden_size
@@ -36,19 +31,16 @@ struct transformer_config {
     int intermediate_size
     float rope_theta
 }
-
 struct matrix_stats {
     float mean
     float sample
 }
-
 struct layer_perf_stats {
     int layer_id
     int matmul_count
     int attention_ops
     int ffn_ops
 }
-
 func create_transformer_config() transformer_config {
     return transformer_config{
         num_layers: 24,
@@ -59,27 +51,21 @@ func create_transformer_config() transformer_config {
         rope_theta: 10000.0
     }
 }
-
 func apply_rope(float[] x, int position, float theta) float[] {
     return x
 }
-
 func multi_head_attention(float[][] query, float[][] key, float[][] value, int num_heads) float[][] {
     return query
 }
-
 func feed_forward(float[][] x) float[][] {
     return x
 }
-
 func rms_norm(float[][] x) float[][] {
     return x
 }
-
 func transformer_layer(float[][] hidden_states) float[][] {
     return hidden_states
 }
-
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -93,7 +79,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func softmax_row(float[] scores, int length) float[] {
     float[] out = float[]{cap: length}
     if length == 0 { return out }
@@ -120,7 +105,6 @@ func softmax_row(float[] scores, int length) float[] {
     }
     out
 }
-
 func compute_matrix_stats(float[][] mat) matrix_stats {
     if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int R = len(mat)
@@ -153,7 +137,6 @@ func compute_matrix_stats(float[][] mat) matrix_stats {
     }
     return matrix_stats{mean: mean, sample: sample}
 }
-
 func flatten_mat(float[][] mat) float[] {
     if len(mat) == 0 { return float[]{} }
     int R = len(mat)
@@ -172,7 +155,6 @@ func flatten_mat(float[][] mat) float[] {
     }
     return out
 }
-
 func transformer_forward(float[][] embeddings) float[][] {
     int seq_len = len(embeddings)
     if seq_len == 0 { return embeddings }

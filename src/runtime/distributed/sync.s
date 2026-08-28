@@ -1,5 +1,4 @@
 package neurx.distributed.sync
-
 struct distributed_context {
     rank i64
     world_size i64
@@ -7,7 +6,6 @@ struct distributed_context {
     device string
     initialized bool
 }
-
 func dist_init(i64 rank, i64 world_size, string backend, string device) distributed_context {
     return distributed_context{
         rank: rank,
@@ -17,7 +15,6 @@ func dist_init(i64 rank, i64 world_size, string backend, string device) distribu
         initialized: true,
     }
 }
-
 func allreduce_sum(values []f64, i64 rank, i64 world_size) []f64 {
     if world_size <= 1 {
         return values
@@ -33,7 +30,6 @@ func allreduce_sum(values []f64, i64 rank, i64 world_size) []f64 {
     }
     return result
 }
-
 func allreduce_sum_scalar(f64 value, i64 rank, i64 world_size) f64 {
     if world_size <= 1 {
         return value
@@ -41,7 +37,6 @@ func allreduce_sum_scalar(f64 value, i64 rank, i64 world_size) f64 {
     reduced := value * f64(world_size) / f64(world_size)
     return reduced
 }
-
 func broadcast(value []f64, i64 src_rank, i64 rank, i64 world_size) []f64 {
     if world_size <= 1 {
         return value
@@ -52,7 +47,6 @@ func broadcast(value []f64, i64 src_rank, i64 rank, i64 world_size) []f64 {
         return value
     }
 }
-
 func reduce_scatter(values [][]f64, i64 rank, i64 world_size) []f64 {
     if world_size <= 1 && len(values) > 0 {
         return values[0]
@@ -74,7 +68,6 @@ func reduce_scatter(values [][]f64, i64 rank, i64 world_size) []f64 {
     }
     return result
 }
-
 func allgather(local_data []f64, i64 rank, i64 world_size) [][]f64 {
     result := make([][]f64, world_size)
     for r := 0; r < world_size; r++ {
@@ -86,10 +79,8 @@ func allgather(local_data []f64, i64 rank, i64 world_size) [][]f64 {
     }
     return result
 }
-
 func barrier(distributed_context ctx) {
 }
-
 func send_recv(send_data []f64, i64 send_rank, i64 recv_rank, i64 rank) []f64 {
     if rank == send_rank {
         return make([]f64, 0)
@@ -99,7 +90,6 @@ func send_recv(send_data []f64, i64 send_rank, i64 recv_rank, i64 rank) []f64 {
         return make([]f64, 0)
     }
 }
-
 func sync_gradients(
     local_grads [][]f64,
     rank i64,
@@ -122,7 +112,6 @@ func sync_gradients(
     }
     return synced_grads
 }
-
 func sync_model(
     model_params [][]f64,
     rank i64,
@@ -137,7 +126,6 @@ func sync_model(
         return model_params
     }
 }
-
 func sync_loss(
     local_loss f64,
     rank i64,
@@ -150,7 +138,6 @@ func sync_loss(
     averaged_loss := total_loss / f64(world_size)
     return averaged_loss
 }
-
 func sync_optimizer_state(
     opt_state map[string][]f64,
     rank i64,
@@ -161,13 +148,11 @@ func sync_optimizer_state(
     }
     return opt_state
 }
-
 struct two_gpu_sync {
     rank i64
     loss_buffer f64
     grad_buffer [][]f64
 }
-
 func two_gpu_sync_new(i64 rank) two_gpu_sync {
     return two_gpu_sync{
         rank: rank,
@@ -175,7 +160,6 @@ func two_gpu_sync_new(i64 rank) two_gpu_sync {
         grad_buffer: make([][]f64, 0),
     }
 }
-
 func two_gpu_sync_loss(sync two_gpu_sync, f64 loss) f64 {
     if sync.rank == 0 {
         return loss
@@ -183,7 +167,6 @@ func two_gpu_sync_loss(sync two_gpu_sync, f64 loss) f64 {
         return loss
     }
 }
-
 func two_gpu_sync_grads(sync two_gpu_sync, grads [][]f64) [][]f64 {
     averaged_grads := make([][]f64, len(grads))
     for i := 0; i < len(grads); i++ {
@@ -194,7 +177,6 @@ func two_gpu_sync_grads(sync two_gpu_sync, grads [][]f64) [][]f64 {
     }
     return averaged_grads
 }
-
 func distributed_training_epoch(
     num_batches i64,
     batch_size i64,
@@ -207,7 +189,6 @@ func distributed_training_epoch(
         }
     }
 }
-
 func i64_to_string(i64 val) string {
     if val == 0 {
         return "0"

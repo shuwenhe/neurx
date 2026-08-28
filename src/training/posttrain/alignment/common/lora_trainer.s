@@ -1,5 +1,4 @@
 package neurx.posttrain.alignment.lora_trainer
-
 struct lora_config {
     int seq_len
     int hidden_size
@@ -22,7 +21,6 @@ struct lora_config {
     bool use_qlora
     string qlora_dtype
 }
-
 func default_lora_config() lora_config {
     lora_config {
         seq_len: 128,
@@ -47,7 +45,6 @@ func default_lora_config() lora_config {
         qlora_dtype: "nf4",
     }
 }
-
 struct lora_linear {
     float[] base_weight
     int out_dim
@@ -62,7 +59,6 @@ struct lora_linear {
     float[] last_input
     float[] last_ax
 }
-
 struct lora_state {
     []lora_linear layers
     int num_layers
@@ -75,7 +71,6 @@ struct lora_state {
     float current_loss
     float current_lr
 }
-
 struct lora_adamw_state {
     float lr
     float beta1
@@ -85,7 +80,6 @@ struct lora_adamw_state {
     float eps
     int step
 }
-
 func init_gaussian(int n, float std) float[] {
     float[] result = float[]{cap: n}
     int i = 0
@@ -96,7 +90,6 @@ func init_gaussian(int n, float std) float[] {
     }
     result
 }
-
 func fill_lora(int n, float val) float[] {
     float[] result = float[]{cap: n}
     int i = 0
@@ -106,7 +99,6 @@ func fill_lora(int n, float val) float[] {
     }
     result
 }
-
 func sin_approx(float x) float {
     float pi = 3.14159
     float two_pi = 2.0 * pi
@@ -121,11 +113,9 @@ func sin_approx(float x) float {
     float x5 = x3 * x2
     x - x3 / 6.0 + x5 / 120.0
 }
-
 func cos_approx(float x) float {
     sin_approx(x + 1.5708)
 }
-
 func sqrt_lora(float x) float {
     if x < 0.0 {
         return 0.0
@@ -138,7 +128,6 @@ func sqrt_lora(float x) float {
     }
     guess
 }
-
 func create_lora_linear(int in_dim, int out_dim, float[] base_weight, lora_config cfg) lora_linear {
     int r = cfg.rank
     float scale = cfg.alpha / (r as float)
@@ -159,7 +148,6 @@ func create_lora_linear(int in_dim, int out_dim, float[] base_weight, lora_confi
         last_ax: float[]{},
     }
 }
-
 func create_lora_state(lora_config cfg) lora_state {
     []lora_linear layers = []lora_linear{}
     int layer_idx = 0
@@ -196,7 +184,6 @@ func create_lora_state(lora_config cfg) lora_state {
         current_lr: cfg.learning_rate,
     }
 }
-
 func lora_forward(lora_linear layer, float[] input) float[] {
     int batch_seq_len = len(input) / layer.in_dim
     int out_size = batch_seq_len * layer.out_dim
@@ -262,12 +249,10 @@ func lora_forward(lora_linear layer, float[] input) float[] {
     }
     output
 }
-
 struct lora_backward_result {
     lora_linear updated_layer
     float[] grad_input
 }
-
 func lora_backward(lora_linear layer, float[] grad_output) lora_backward_result {
     int batch_seq_len = len(grad_output) / layer.out_dim
     float[] grad_b = fill_lora(layer.out_dim * layer.rank, 0.0)
@@ -356,7 +341,6 @@ func lora_backward(lora_linear layer, float[] grad_output) lora_backward_result 
         grad_input: grad_input,
     }
 }
-
 func lora_mse_loss(float[] predictions, float[] targets) float {
     float loss = 0.0
     int i = 0
@@ -370,7 +354,6 @@ func lora_mse_loss(float[] predictions, float[] targets) float {
     }
     loss
 }
-
 func lora_l1_loss(float[] predictions, float[] targets) float {
     float loss = 0.0
     int i = 0
@@ -387,7 +370,6 @@ func lora_l1_loss(float[] predictions, float[] targets) float {
     }
     loss
 }
-
 func get_learning_rate(int current_step, lora_config cfg) float {
     float lr = cfg.learning_rate
     if current_step < cfg.warmup_steps {
@@ -402,7 +384,6 @@ func get_learning_rate(int current_step, lora_config cfg) float {
     }
     lr
 }
-
 func clip_grad_norm(float[] grads, float max_norm) float {
     float norm = 0.0
     int i = 0
@@ -422,7 +403,6 @@ func clip_grad_norm(float[] grads, float max_norm) float {
     }
     norm
 }
-
 func lora_adamw_step(lora_linear layer, lora_adamw_state opt, int layer_idx) (lora_linear, lora_adamw_state) {
     lora_linear updated = layer
     lora_adamw_state updated_opt = opt
@@ -455,7 +435,6 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt, int layer_idx) (lo
     updated_opt.step = opt.step + 1
     (updated, updated_opt)
 }
-
 func lora_training_step(lora_state state, float[] input_ids, float[] targets) lora_state {
     lora_state updated = state
     float[] hidden = float[]{}
@@ -508,13 +487,11 @@ func lora_training_step(lora_state state, float[] input_ids, float[] targets) lo
     updated.current_step = state.current_step + 1
     updated
 }
-
 struct lora_trajectory {
     float[] input_ids
     float[] targets
     float weight
 }
-
 func start_lora_training(lora_config cfg, []lora_trajectory trajectories) lora_state {
     lora_state state = create_lora_state(cfg)
     int epoch = 0
@@ -531,7 +508,6 @@ func start_lora_training(lora_config cfg, []lora_trajectory trajectories) lora_s
     }
     state
 }
-
 func lora_reduce_gradients(lora_state state, int world_size) lora_state {
     lora_state updated = state
     if world_size > 1 {
@@ -554,14 +530,12 @@ func lora_reduce_gradients(lora_state state, int world_size) lora_state {
     }
     updated
 }
-
 struct lora_stats {
     int total_base_params
     int total_lora_params
     float trainable_ratio
     float memory_saved_percent
 }
-
 func lora_compute_stats(lora_state state) lora_stats {
     int base_params = 0
     int lora_params = 0

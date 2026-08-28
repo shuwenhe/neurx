@@ -7,7 +7,6 @@
     data_format
     custom
 }
-
 struct registry_entry {
     ComponentType component_type
     string name

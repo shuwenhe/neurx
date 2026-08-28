@@ -1,21 +1,12 @@
 package neurx.inference.speculative.registry
-
 func speculative_none() int { 0 }
-
 func speculative_ngram() int { 1 }
-
 func speculative_suffix() int { 2 }
-
 func speculative_draft_model() int { 3 }
-
 func speculative_eagle() int { 4 }
-
 func speculative_mtp() int { 5 }
-
 func speculative_medusa() int { 6 }
-
 func speculative_dflash() int { 7 }
-
 struct speculative_backend_config {
     int backend
     int num_speculative_tokens
@@ -27,7 +18,6 @@ struct speculative_backend_config {
     bool dynamic_tokens
     bool enabled
 }
-
 struct speculative_backend_state {
     speculative_backend_config config
     int proposed_tokens
@@ -39,14 +29,12 @@ struct speculative_backend_state {
     bool initialized
     string error_message
 }
-
 struct speculative_verification_result {
     speculative_backend_state state
     int[] output_tokens
     int accepted_count
     bool used_fallback
 }
-
 func speculative_backend_name(int backend) string {
     if backend == speculative_ngram() { return "ngram" }
     if backend == speculative_suffix() { return "suffix" }
@@ -57,11 +45,9 @@ func speculative_backend_name(int backend) string {
     if backend == speculative_dflash() { return "dflash" }
     "none"
 }
-
 func speculative_backend_requires_model(int backend) bool {
     backend == speculative_draft_model() || backend == speculative_eagle() || backend == speculative_mtp() || backend == speculative_medusa() || backend == speculative_dflash()
 }
-
 func speculative_config_valid(speculative_backend_config config) bool {
     if !config.enabled || config.backend == speculative_none() {
         return true
@@ -83,7 +69,6 @@ func speculative_config_valid(speculative_backend_config config) bool {
     }
     true
 }
-
 func init_speculative_backend(speculative_backend_config config) speculative_backend_state {
     bool initialized = speculative_config_valid(config)
     string error_message = ""
@@ -100,7 +85,6 @@ func init_speculative_backend(speculative_backend_config config) speculative_bac
         error_message: error_message,
     }
 }
-
 func speculative_copy_prefix(int[] values, int count) int[] {
     int output_count = count
     if output_count < 0 { output_count = 0 }
@@ -113,7 +97,6 @@ func speculative_copy_prefix(int[] values, int count) int[] {
     }
     output
 }
-
 func speculative_adapt_width(speculative_backend_state state, int proposed, int accepted) int {
     int width = state.current_speculative_tokens
     if !state.config.dynamic_tokens { return width }
@@ -126,7 +109,6 @@ func speculative_adapt_width(speculative_backend_state state, int proposed, int 
     if width > state.config.max_speculative_tokens { width = state.config.max_speculative_tokens }
     width
 }
-
 func verify_speculative_tokens(speculative_backend_state state, int[] proposed, int[] target, int fallback_token) speculative_verification_result {
     if !state.initialized || !state.config.enabled {
         return speculative_verification_result {
@@ -177,7 +159,6 @@ func verify_speculative_tokens(speculative_backend_state state, int[] proposed, 
         used_fallback: accepted == 0,
     }
 }
-
 func speculative_acceptance_percent(speculative_backend_state state) int {
     if state.proposed_tokens == 0 { return 0 }
     state.accepted_tokens * 100 / state.proposed_tokens

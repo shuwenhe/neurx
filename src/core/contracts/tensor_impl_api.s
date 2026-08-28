@@ -2,18 +2,15 @@ import "storage_api"
 import "dtype_api"
 import "layout_api"
 import "device_api"
-
 struct version_counter {
     i64 version
 }
-
 struct autograd_meta {
     bool requires_grad
     bool is_leaf
     grad_fn: func(tensor grad_output) . []tensor
     saved_tensors: []tensor
 }
-
 struct tensor_metadata {
     shape: []i64
     stride: []i64
@@ -23,7 +20,6 @@ struct tensor_metadata {
     device device
     version_counter version_counter
 }
-
 struct tensor_impl {
     i64 id
     storage storage

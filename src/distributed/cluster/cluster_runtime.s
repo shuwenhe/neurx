@@ -1,5 +1,4 @@
 package neurx.distributed.cluster
-
 struct cluster_node_capability {
     string platform
     string device_type
@@ -12,7 +11,6 @@ struct cluster_node_capability {
     bool supports_distributed
     string distributed_backend
 }
-
 struct cluster_node_record {
     int node_id
     string node_name
@@ -24,7 +22,6 @@ struct cluster_node_record {
     int load
     cluster_node_capability capability
 }
-
 struct cluster_workload_request {
     string workload_id
     string model_id
@@ -35,7 +32,6 @@ struct cluster_workload_request {
     bool require_fp8
     bool require_distributed
 }
-
 struct cluster_placement_result {
     bool scheduled
     int node_id
@@ -45,7 +41,6 @@ struct cluster_placement_result {
     string backend
     string reason
 }
-
 struct cluster_runtime_state {
     cluster_node_record[] nodes
     int node_count
@@ -54,7 +49,6 @@ struct cluster_runtime_state {
     int world_size
     string cluster_name
 }
-
 func cluster_empty_capability() cluster_node_capability {
     cluster_node_capability {
         platform: "unknown",
@@ -69,7 +63,6 @@ func cluster_empty_capability() cluster_node_capability {
         distributed_backend: ""
     }
 }
-
 func cluster_zero_nodes(int capacity) cluster_node_record[] {
     cluster_node_record[] items = cluster_node_record[]{cap: capacity}
     int i = 0
@@ -89,7 +82,6 @@ func cluster_zero_nodes(int capacity) cluster_node_record[] {
     }
     items
 }
-
 func create_cluster_runtime(string cluster_name, int world_size) cluster_runtime_state {
     if world_size <= 0 { world_size = 1 }
     cluster_runtime_state {
@@ -101,7 +93,6 @@ func create_cluster_runtime(string cluster_name, int world_size) cluster_runtime
         cluster_name: cluster_name
     }
 }
-
 func cluster_find_node(cluster_runtime_state state, int node_id) int {
     int i = 0
     for i < state.node_count {
@@ -110,7 +101,6 @@ func cluster_find_node(cluster_runtime_state state, int node_id) int {
     }
     0 - 1
 }
-
 func cluster_register_node(
     cluster_runtime_state state,
     string node_name,
@@ -143,7 +133,6 @@ func cluster_register_node(
     state.next_node_id = state.next_node_id + 1
     state
 }
-
 func cluster_mark_node_health(cluster_runtime_state state, int node_id, bool healthy, int load) cluster_runtime_state {
     int index = cluster_find_node(state, node_id)
     if index < 0 { return state }
@@ -152,11 +141,9 @@ func cluster_mark_node_health(cluster_runtime_state state, int node_id, bool hea
     state.nodes[index].load = load
     state
 }
-
 func cluster_mark_node_failed(cluster_runtime_state state, int node_id) cluster_runtime_state {
     cluster_mark_node_health(state, node_id, false, 0)
 }
-
 func cluster_node_supports(cluster_node_record node, cluster_workload_request request) bool {
     if !node.healthy { return false }
     if node.capability.device_count < request.min_device_count { return false }
@@ -167,7 +154,6 @@ func cluster_node_supports(cluster_node_record node, cluster_workload_request re
     if request.require_distributed && !node.capability.supports_distributed { return false }
     true
 }
-
 func cluster_select_node(cluster_runtime_state state, cluster_workload_request request) cluster_placement_result {
     int best_index = 0 - 1
     int best_load = 2147483647
@@ -202,7 +188,6 @@ func cluster_select_node(cluster_runtime_state state, cluster_workload_request r
         reason: ""
     }
 }
-
 func cluster_assign_request(
     cluster_runtime_state state,
     cluster_workload_request request,
@@ -215,7 +200,6 @@ func cluster_assign_request(
     }
     state
 }
-
 func cluster_release_request(cluster_runtime_state state, int node_id) cluster_runtime_state {
     int index = cluster_find_node(state, node_id)
     if index >= 0 && state.nodes[index].load > 0 {
@@ -223,7 +207,6 @@ func cluster_release_request(cluster_runtime_state state, int node_id) cluster_r
     }
     state
 }
-
 func cluster_healthy_node_count(cluster_runtime_state state) int {
     int healthy = 0
     int i = 0
@@ -233,7 +216,6 @@ func cluster_healthy_node_count(cluster_runtime_state state) int {
     }
     healthy
 }
-
 func cluster_total_device_count(cluster_runtime_state state) int {
     int total = 0
     int i = 0
@@ -243,7 +225,6 @@ func cluster_total_device_count(cluster_runtime_state state) int {
     }
     total
 }
-
 func cluster_failed_node_count(cluster_runtime_state state) int {
     int failed = 0
     int i = 0
@@ -253,7 +234,6 @@ func cluster_failed_node_count(cluster_runtime_state state) int {
     }
     failed
 }
-
 func cluster_summary(cluster_runtime_state state) string {
     string out = "cluster=" + state.cluster_name + "\n"
     out = out + "world_size=" + itoa(state.world_size) + "\n"
@@ -263,7 +243,6 @@ func cluster_summary(cluster_runtime_state state) string {
     out = out + "total_devices=" + itoa(cluster_total_device_count(state)) + "\n"
     out
 }
-
 func cluster_default_cuda_capability(int device_count, int memory_gb) cluster_node_capability {
     cluster_node_capability {
         platform: "cuda",
@@ -278,7 +257,6 @@ func cluster_default_cuda_capability(int device_count, int memory_gb) cluster_no
         distributed_backend: "nccl"
     }
 }
-
 func cluster_default_rocm_capability(int device_count, int memory_gb) cluster_node_capability {
     cluster_node_capability {
         platform: "rocm",
@@ -293,7 +271,6 @@ func cluster_default_rocm_capability(int device_count, int memory_gb) cluster_no
         distributed_backend: "rccl"
     }
 }
-
 func cluster_default_npu_capability(int device_count, int memory_gb) cluster_node_capability {
     cluster_node_capability {
         platform: "ascend",
@@ -308,7 +285,6 @@ func cluster_default_npu_capability(int device_count, int memory_gb) cluster_nod
         distributed_backend: "hccl"
     }
 }
-
 func cluster_default_cpu_capability(int memory_gb) cluster_node_capability {
     cluster_node_capability {
         platform: "cpu",

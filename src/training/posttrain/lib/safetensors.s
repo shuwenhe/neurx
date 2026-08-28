@@ -1,6 +1,5 @@
 package neurx.posttrain.lib.safetensors
 use std.io.eprintln
-
 func dtype_name_to_size(string dtype_name) int {
     if dtype_name == "F32" {
         return 4
@@ -21,7 +20,6 @@ func dtype_name_to_size(string dtype_name) int {
     }
     return 0
 }
-
 func read_uint64_le(interface file_bytes, int offset) int {
     int result = 0
     int i = 0
@@ -32,7 +30,6 @@ func read_uint64_le(interface file_bytes, int offset) int {
     }
     return result
 }
-
 func pow(int base, int exp) int {
     int result = 1
     int i = 0
@@ -42,12 +39,10 @@ func pow(int base, int exp) int {
     }
     return result
 }
-
 func parse_shape_from_json(string json_text, string tensor_name) int[] {
     int[] empty_shape
     return empty_shape
 }
-
 func shape_to_numel(int[] shape) int {
     int numel = 1
     int i = 0
@@ -57,7 +52,6 @@ func shape_to_numel(int[] shape) int {
     }
     return numel
 }
-
 struct safe_tensor_info {
     string name
     string dtype
@@ -65,14 +59,12 @@ struct safe_tensor_info {
     int byte_offset_start
     int byte_offset_end
 }
-
 struct safe_tensor_file {
     string path
     interface file_data
     int header_size
     int data_start_offset
 }
-
 func open_safetensors_file(string path) safe_tensor_file {
     interface content = readfile(path)
     safe_tensor_file file
@@ -82,18 +74,15 @@ func open_safetensors_file(string path) safe_tensor_file {
     file.data_start_offset = 8
     return file
 }
-
 func extract_tensor_info(string json_header, string tensor_name) safe_tensor_info {
     safe_tensor_info info
     info.name = tensor_name
     return info
 }
-
 func load_tensor_data(safe_tensor_file file, safe_tensor_info info) float[] {
     float[] empty_data
     return empty_data
 }
-
 func main() {
     eprintln("SafeTensors Binary Format Parser - Pure S Implementation")
     eprintln("")

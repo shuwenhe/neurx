@@ -1,6 +1,5 @@
 import "tensor/tensor.s"
 import "src/training/posttrain/alignment/rollout_correction/config.s"
-
 struct is_weights {
     Tensor weights
     ISAggregationLevel level
@@ -10,7 +9,6 @@ struct is_weights {
     f32 max_weight
     f32 min_weight
 }
-
 func compute_token_is_weights(
     Tensor new_log_probs,
     Tensor rollout_log_probs,
@@ -50,7 +48,6 @@ func compute_token_is_weights(
         min_weight: min_weight.item(),
     }
 }
-
 func compute_sequence_is_weights(
     Tensor new_log_probs,
     Tensor rollout_log_probs,
@@ -89,7 +86,6 @@ func compute_sequence_is_weights(
         min_weight: min_weight.item(),
     }
 }
-
 func batch_normalize_is_weights(ISWeights is_weights) . ISWeights {
     normalized_weights := Tensor()
     if is_weights.level == is_aggregation_level.TOKEN {
@@ -111,7 +107,6 @@ func batch_normalize_is_weights(ISWeights is_weights) . ISWeights {
         min_weight: is_weights.min_weight,
     }
 }
-
 func compute_is_weights(
     Tensor new_log_probs,
     Tensor rollout_log_probs,
@@ -161,7 +156,6 @@ func compute_is_weights(
     }
     return is_weights
 }
-
 func apply_is_weights_to_loss(
     Tensor loss,
     ISWeights is_weights,
@@ -178,7 +172,6 @@ func apply_is_weights_to_loss(
         return loss * response_mask
     }
 }
-
 func apply_is_weights_to_advantages(
     Tensor advantages,
     ISWeights is_weights,
@@ -186,7 +179,6 @@ func apply_is_weights_to_advantages(
 ) . Tensor {
     return apply_is_weights_to_loss(advantages, is_weights, response_mask)
 }
-
 func compute_is_statistics(ISWeights is_weights) . map[string]f32 {
     stats := map[string]f32{}
     stats["is_mean"] = is_weights.mean_weight
@@ -195,7 +187,6 @@ func compute_is_statistics(ISWeights is_weights) . map[string]f32 {
     stats["is_clip_fraction"] = is_weights.clip_fraction
     return stats
 }
-
 func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

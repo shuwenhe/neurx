@@ -1,6 +1,5 @@
 package neurx.posttrain.rlhf.examples
 use neurx.posttrain.rlhf.ppo_trainer.*
-
 func create_ppo_config() ppo_config {
     ppo_config {
         vocab_size: 128000,
@@ -29,7 +28,6 @@ func create_ppo_config() ppo_config {
         eval_interval: 50,
     }
 }
-
 func example_basic_ppo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic PPO Training Loop                       ║")
@@ -56,7 +54,6 @@ func example_basic_ppo_training() {
     print("  Final Value Loss:   " + float_to_string_ex(state.avg_value_loss))
     print("")
 }
-
 func example_distributed_ppo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Distributed PPO Training (Multi-GPU)          ║")
@@ -87,7 +84,6 @@ func example_distributed_ppo_training() {
     print("  Ready for distributed training")
     print("")
 }
-
 func example_hyperparameter_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Hyperparameter Comparison                     ║")
@@ -123,7 +119,6 @@ func example_hyperparameter_comparison() {
     print("  Higher entropy_coef    → More exploration, less exploitation")
     print("")
 }
-
 func example_ppo_with_reward_model() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: PPO with Reward model Integration             ║")
@@ -160,7 +155,6 @@ func example_ppo_with_reward_model() {
     print("  Advantage: 0.85 - 0.75 = 0.10 (positive, update encouraged)")
     print("")
 }
-
 func example_kl_constraint_and_early_stopping() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: KL Constraint & Early Stopping                ║")
@@ -195,7 +189,6 @@ func example_kl_constraint_and_early_stopping() {
     print("  ✓ Improves training stability")
     print("")
 }
-
 func example_complete_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Complete Alignment Pipeline                   ║")
@@ -232,7 +225,6 @@ func example_complete_alignment_pipeline() {
     print("  Total Training:     ~2 weeks")
     print("")
 }
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -249,13 +241,11 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 func float_to_string_ex(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 10000.0)
     string(i_part) + "." + string(f_part)
 }
-
 func int_to_string_ex(int i) string {
     string(i)
 }

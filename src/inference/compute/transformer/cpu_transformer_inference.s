@@ -1,5 +1,4 @@
 package neurx_inference::cpu
-
 struct model_info {
   uint64 step
   uint32 vocabulary
@@ -10,7 +9,6 @@ struct model_info {
   uint32 layers
   bool bpe_tokenizer
 }
-
 struct generation_config {
   max_new_tokens: int = 64
   temperature: float = 0.0
@@ -19,19 +17,16 @@ struct generation_config {
   repetition_penalty: float = 1.0
   seed: uint64 = 1337
 }
-
 struct transformer_2 {
   model_info model_info
   impl: interface{}
 }
-
 func new() *transformer_2 {
   return *transformer_2{
     model_info: model_info{},
     impl: nil,
   }
 }
-
 func (transformer_2* t) load(checkpoint_path string, string vocabulary_path, string merges_path) error {
   if checkpoint_path == "" {
     return "checkpoint path cannot be empty"
@@ -44,7 +39,6 @@ func (transformer_2* t) load(checkpoint_path string, string vocabulary_path, str
   }
   return nil
 }
-
 func (transformer_2* t) encode(text string) int[] {
   if text == "" {
     return int[]{}
@@ -52,14 +46,12 @@ func (transformer_2* t) encode(text string) int[] {
   tokens: int[]
   return tokens
 }
-
 func (transformer_2* t) decode(token_ids int[]) string {
   if len(token_ids) == 0 {
     return ""
   }
   return ""
 }
-
 func (transformer_2* t) forward_last(token_ids int[]) float[] {
   if len(token_ids) == 0 {
     return float[]{}
@@ -67,7 +59,6 @@ func (transformer_2* t) forward_last(token_ids int[]) float[] {
   logits: float[]
   return logits
 }
-
 func (transformer_2* t) generate_ids(prompt_ids int[], config generation_config) int[] {
   if len(prompt_ids) == 0 {
     return int[]{}
@@ -75,7 +66,6 @@ func (transformer_2* t) generate_ids(prompt_ids int[], config generation_config)
   output_ids: int[]
   return output_ids
 }
-
 func (transformer_2* t) generate(prompt string, config generation_config) string {
   if prompt == "" {
     return ""
@@ -85,15 +75,12 @@ func (transformer_2* t) generate(prompt string, config generation_config) string
   output := t.Decode(output_ids)
   return output
 }
-
 func (transformer_2* t) info() model_info {
   return t.modelInfo
 }
-
 func (transformer_2* t) eos_token_id() int {
   return 2
 }
-
 func resolve_checkpoint_path(string input) string {
   if input == "" {
     return ""

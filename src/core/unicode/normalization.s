@@ -1,19 +1,15 @@
 package neurx.core.unicode.normalization
-
 struct unicode_database {
     bool valid
     string version
     string root
 }
-
 func empty_unicode_database() unicode_database {
     unicode_database { valid: false, version: "", root: "" }
 }
-
 func load_unicode_database(string root) unicode_database {
     unicode_database { valid: true, version: "17.0.0", root: root }
 }
-
 func unicode_utf8(int codepoint) string {
     if codepoint < 128 {
         string ascii = ""
@@ -39,14 +35,12 @@ func unicode_utf8(int codepoint) string {
     output = output + string(128 + codepoint / 64 % 64)
     output + string(128 + codepoint % 64)
 }
-
 func unicode_width(int lead) int {
     if lead < 128 { return 1 }
     if lead < 224 { return 2 }
     if lead < 240 { return 3 }
     4
 }
-
 func unicode_decode_at(string text, int position) int {
     int lead = text[position]
     if lead < 128 { return lead }
@@ -61,7 +55,6 @@ func unicode_decode_at(string text, int position) int {
     }
     lead
 }
-
 func unicode_compose_pair(int base, int mark) int {
     if base == 65 && mark == 768 { return 192 }
     if base == 65 && mark == 769 { return 193 }
@@ -97,7 +90,6 @@ func unicode_compose_pair(int base, int mark) int {
     if base == 117 && mark == 769 { return 250 }
     -1
 }
-
 func unicode_nfc(unicode_database database, string text) string {
     if !database.valid { return text }
     string output = ""
@@ -134,7 +126,6 @@ func unicode_nfc(unicode_database database, string text) string {
     }
     output
 }
-
 func unicode_nfkc(unicode_database database, string text) string {
     if !database.valid { return text }
     string compatible = ""

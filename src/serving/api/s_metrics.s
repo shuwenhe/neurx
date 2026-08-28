@@ -1,21 +1,16 @@
 package neurx.api.s_metrics
-
 func int_to_string(int n) string {
     if n == 0 { return "0" }
-
     string result = ""
     bool negative = false
     int num = n
-
     if num < 0 {
         negative = true
         num = 0 - num
     }
-
     for num > 0 {
         int digit = num % 10
         string digit_str = ""
-
         if digit == 0 { digit_str = "0" }
         else if digit == 1 { digit_str = "1" }
         else if digit == 2 { digit_str = "2" }
@@ -26,18 +21,14 @@ func int_to_string(int n) string {
         else if digit == 7 { digit_str = "7" }
         else if digit == 8 { digit_str = "8" }
         else if digit == 9 { digit_str = "9" }
-
         result = digit_str + result
         num = num / 10
     }
-
     if negative {
         result = "-" + result
     }
-
     return result
 }
-
 func format_metrics_json(int total_requests, int avg_latency_ms, int p99_latency_ms, int error_rate) string {
     string json = "{"
     json = json + "\"total_requests\":" + int_to_string(total_requests)
@@ -47,7 +38,6 @@ func format_metrics_json(int total_requests, int avg_latency_ms, int p99_latency
     json = json + "}"
     return json
 }
-
 func format_endpoint_stats(string endpoint, int request_count, int success_count, int error_count) string {
     string json = "{"
     json = json + "\"endpoint\":\"" + endpoint + "\""
@@ -57,7 +47,6 @@ func format_endpoint_stats(string endpoint, int request_count, int success_count
     json = json + "}"
     return json
 }
-
 func format_latency_histogram(int p50, int p90, int p95, int p99) string {
     string json = "{"
     json = json + "\"p50_ms\":" + int_to_string(p50)
@@ -67,7 +56,6 @@ func format_latency_histogram(int p50, int p90, int p95, int p99) string {
     json = json + "}"
     return json
 }
-
 func format_alert_json(string severity, string message, string metric_name) string {
     string json = "{"
     json = json + "\"severity\":\"" + severity + "\""
@@ -77,32 +65,25 @@ func format_alert_json(string severity, string message, string metric_name) stri
     json = json + "}"
     return json
 }
-
 func json_health_check_full() string {
     return "{\"status\":\"healthy\",\"uptime_seconds\":3600,\"memory_usage_mb\":128,\"cpu_usage_percent\":15,\"active_connections\":42}"
 }
-
 func json_request_rate() string {
     return "{\"current_rps\":250,\"average_rps\":200,\"peak_rps\":500,\"min_rps\":10}"
 }
-
 func json_error_summary() string {
     return "{\"http_400\":5,\"http_404\":12,\"http_500\":2,\"timeout_errors\":1,\"parse_errors\":3}"
 }
-
 func main() {
     print("✅ pure S ity能监控系统already编译\n")
-
     string metrics = format_metrics_json(10000, 45, 200, 2)
     print("系统指标: ")
     print(metrics)
     print("\n")
-
     string endpoint_stats = format_endpoint_stats("/v1/chat/completions", 5000, 4900, 100)
     print("endpoint统计: ")
     print(endpoint_stats)
     print("\n")
-
     string latency = format_latency_histogram(20, 50, 100, 200)
     print("latency分布: ")
     print(latency)

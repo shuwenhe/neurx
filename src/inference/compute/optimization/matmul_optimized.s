@@ -1,14 +1,11 @@
 package neurx.inference.matmul_optimized
-
 extern "intrinsic" func __host_memset(int ptr, int value, int size) int
 extern "intrinsic" func __host_memcpy(int dst, int src, int size) int
-
 struct block_multiply_config {
     int block_size
     bool use_cache_locality
     int parallel_threads
 }
-
 func default_block_multiply_config() block_multiply_config {
     block_multiply_config{
         block_size: 32,
@@ -16,28 +13,23 @@ func default_block_multiply_config() block_multiply_config {
         parallel_threads: 4,
     }
 }
-
 func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b, int m, int n, int k, block_multiply_config config) bool {
     int block_size = config.block_size
-
     if block_size <= 0 || block_size > 256 {
         return false
     }
-
     int i = 0
     for i < m {
         int i_end = i + block_size
         if i_end > m {
             i_end = m
         }
-
         int j = 0
         for j < n {
             int j_end = j + block_size
             if j_end > n {
                 j_end = n
             }
-
             int ii = i
             for ii < i_end {
                 int jj = j
@@ -56,16 +48,12 @@ func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b,
                 }
                 ii = ii + 1
             }
-
             j = j_end
         }
-
         i = i_end
     }
-
     true
 }
-
 func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] vector, int rows, int cols) bool {
     int i = 0
     for i < rows {
@@ -79,10 +67,8 @@ func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] ve
         result[i] = sum
         i = i + 1
     }
-
     true
 }
-
 func fused_matmul_add(float[] result, float[] a, float[] b, float[] bias, int m, int n, int k) bool {
     int i = 0
     for i < m {
@@ -102,27 +88,22 @@ func fused_matmul_add(float[] result, float[] a, float[] b, float[] bias, int m,
         }
         i = i + 1
     }
-
     true
 }
-
 func memory_efficient_gemm(float[] result, float[] a, float[] b, int m, int n, int k, int cache_line_size) bool {
     if cache_line_size <= 0 {
         return false
     }
-
     int block = cache_line_size / 4
     if block <= 0 {
         block = 8
     }
-
     return matrix_multiply_blocked(result, a, b, m, n, k, block_multiply_config{
         block_size: block,
         use_cache_locality: true,
         parallel_threads: 1,
     })
 }
-
 func transpose_optimized(float[] result, float[] input, int rows, int cols) bool {
     int i = 0
     for i < rows {
@@ -135,15 +116,12 @@ func transpose_optimized(float[] result, float[] input, int rows, int cols) bool
         }
         i = i + 1
     }
-
     true
 }
-
 func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
     if size <= 0 {
         return false
     }
-
     float max_val = logits[0]
     int i = 1
     for i < size {
@@ -152,7 +130,6 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
         }
         i = i + 1
     }
-
     float sum = 0.0
     i = 0
     for i < size {
@@ -163,7 +140,6 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
         result[i] = exp_val
         i = i + 1
     }
-
     i = 0
     for i < size {
         float exp_approx = 1.0 + result[i] + (result[i] * result[i] / 2.0)
@@ -174,7 +150,6 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
         sum = sum + exp_approx
         i = i + 1
     }
-
     if sum > 0.0 {
         i = 0
         for i < size {
@@ -182,6 +157,5 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
             i = i + 1
         }
     }
-
     true
 }

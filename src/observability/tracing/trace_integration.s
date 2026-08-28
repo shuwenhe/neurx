@@ -75,7 +75,6 @@ func (request_tracer* rt) add_span_attribute(key string[], value string[]) {
         attr_key := "attr_" + key[0]
         rt.span_metadata[len(rt.span_metadata)-1][attr_key] = value
     }
-
 func (request_tracer* rt) record_span_event(event_name string[], event_value string[]) {
     if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
@@ -84,7 +83,6 @@ func (request_tracer* rt) record_span_event(event_name string[], event_value str
         event_key := "event_" + event_name[0]
         rt.span_metadata[len(rt.span_metadata)-1][event_key] = event_value
     }
-
 func (request_tracer* rt) record_error(error_msg string[]) {
     if len(rt.spans) == 0 {
         return
@@ -141,7 +139,6 @@ func (request_tracer* rt) export_spans() {
             }
         }
     }
-
 func (request_tracer* rt) export_to_console() {
     io.Println("=== Trace Export (Console) ===")
     io.Println("TraceID: " + (rt.trace_id[0] if len(rt.trace_id) > 0 else "unknown"))
@@ -155,7 +152,6 @@ func (request_tracer* rt) export_to_console() {
         }
         io.Println("  - " + span_name)
     }
-
 func (request_tracer* rt) export_to_jaeger() {
     io.Println("Exporting " + io.ToString(len(rt.span_metadata)) + " spans to Jaeger: " +
         (rt.config.jaeger_endpoint[0] if len(rt.config.jaeger_endpoint) > 0 else "unknown"))

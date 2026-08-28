@@ -1,6 +1,5 @@
 package main
 use std.io.println
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -29,7 +28,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -66,7 +64,6 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
-
 func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")

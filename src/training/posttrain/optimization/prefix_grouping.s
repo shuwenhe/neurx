@@ -1,24 +1,20 @@
 package neurx.posttrain.optimization.prefix_grouping
 use neurx.tensor
-
 struct prefix_group {
     int[] token_ids
     int[] sample_indices
     int prefix_len
 }
-
 struct prefix_grouping_config {
     int min_prefix_len
     int max_prefix_len
     bool enable_cache
 }
-
 struct prefix_grouping_state {
     prefix_grouping_config config
     []prefix_group groups
     int total_samples
 }
-
 func default_prefix_grouping_config() prefix_grouping_config {
     prefix_grouping_config {
         min_prefix_len: 4,
@@ -26,7 +22,6 @@ func default_prefix_grouping_config() prefix_grouping_config {
         enable_cache: true,
     }
 }
-
 func group_by_prefix(
     int[][] token_sequences,
     prefix_grouping_config config
@@ -59,7 +54,6 @@ func group_by_prefix(
     }
     return groups
 }
-
 func extract_prefix(int[] tokens, prefix_grouping_config config) int[] {
     int prefix_len = min_int(len(tokens), config.max_prefix_len)
     prefix_len = max_int(prefix_len, config.min_prefix_len)
@@ -69,7 +63,6 @@ func extract_prefix(int[] tokens, prefix_grouping_config config) int[] {
     }
     return prefix
 }
-
 func has_matching_prefix(int[] tokens, int[] prefix) bool {
     if len(tokens) < len(prefix) {
         return false
@@ -81,7 +74,6 @@ func has_matching_prefix(int[] tokens, int[] prefix) bool {
     }
     return true
 }
-
 func compute_with_prefix_cache(
     []prefix_group groups,
     tensor input_embeddings,
@@ -105,19 +97,15 @@ func compute_with_prefix_cache(
     }
     return outputs
 }
-
 func forward_prefix(tensor prefix_input) tensor {
     return prefix_input
 }
-
 func gather_embeddings(tensor embeddings, int[] token_ids) tensor {
     return embeddings
 }
-
 func copy_to_row(tensor dest, int row_idx, tensor src) tensor {
     return dest
 }
-
 func compute_prefix_savings([]prefix_group groups) float {
     int total_prefix_tokens = 0
     int saved_tokens = 0
@@ -133,7 +121,6 @@ func compute_prefix_savings([]prefix_group groups) float {
     }
     return float(saved_tokens) / float(total_prefix_tokens)
 }
-
 func new_prefix_grouping_state(prefix_grouping_config config) prefix_grouping_state {
     prefix_grouping_state {
         config: config,
@@ -141,14 +128,12 @@ func new_prefix_grouping_state(prefix_grouping_config config) prefix_grouping_st
         total_samples: 0,
     }
 }
-
 func min_int(int a, int b) int {
     if a < b {
         return a
     }
     return b
 }
-
 func max_int(int a, int b) int {
     if a > b {
         return a

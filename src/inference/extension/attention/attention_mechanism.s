@@ -2,7 +2,6 @@ package neurx.attention.mechanism
 import neurx.arch.cuda.bindings.*
 import neurx.tensor.*
 import neurx.nn.*
-
 struct attention_config {
     int hidden_size
     int num_attention_heads
@@ -32,7 +31,6 @@ struct neurx_attention {
         float memory_usage_mb
     } stats
 }
-
 func init(attention_config cfg) neurx_attention {
     int kv_dim = cfg.head_dim * cfg.num_key_value_heads
     print("🔧 Initializing NEURX Attention:")
@@ -57,7 +55,6 @@ func init(attention_config cfg) neurx_attention {
         }
     }
 }
-
 func forward(
     NeurxAttention self,
     tensor hidden_states,
@@ -304,7 +301,6 @@ struct rope_cache {
     tensor sin_vals
     int cached_max_seq
 }
-
 func compute_rope_embeddings(
     int[] position_ids,
     int head_dim,

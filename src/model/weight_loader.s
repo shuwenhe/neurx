@@ -1,14 +1,12 @@
 package neurx.model.weight_loader
 use neurx.runtime.io.{runtime_read_binary_file, runtime_file_exists}
 use std.io.eprintln
-
 struct model_weights {
     float[] embed_tokens
     []layer_weights layers
     float[] norm_weight
     bool weights_loaded
 }
-
 struct layer_weights {
     float[] q_proj
     float[] k_proj
@@ -20,7 +18,6 @@ struct layer_weights {
     float[] input_layernorm
     float[] post_attention_layernorm
 }
-
 func parse_u64_le(int[] bytes, int offset) int {
     int b0 = bytes[offset]
     int b1 = bytes[offset + 1]
@@ -33,7 +30,6 @@ func parse_u64_le(int[] bytes, int offset) int {
     int result = b0 + (b1 * 256) + (b2 * 65536) + (b3 * 16777216)
     result
 }
-
 func parse_f32_le(int[] bytes, int offset) float {
     int b0 = bytes[offset]
     int b1 = bytes[offset + 1]
@@ -47,7 +43,6 @@ func parse_f32_le(int[] bytes, int offset) float {
     float val = (bits as float) / 1000000.0
     val * (sign as float)
 }
-
 func load_tensor_simple(int[] file_bytes, int tensor_offset, int num_elements) float[] {
     float[] data = float[]{cap: num_elements}
     int i = 0
@@ -58,7 +53,6 @@ func load_tensor_simple(int[] file_bytes, int tensor_offset, int num_elements) f
     }
     data
 }
-
 func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) model_weights {
     eprintln("[Weight Loader] Loading mock weights for testing")
     eprintln("[Weight Loader] Model dir: " + model_dir)
@@ -89,7 +83,6 @@ func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) 
         true weights_loaded
     }
 }
-
 func load_model_weights_real(string model_dir) model_weights {
     eprintln("[Weight Loader] Loading REAL Language Model 0.5B weights")
     eprintln("[Weight Loader] Model dir: " + model_dir)
@@ -128,7 +121,6 @@ func load_model_weights_real(string model_dir) model_weights {
         true weights_loaded
     }
 }
-
 func init_gaussian(int size, float std) float[] {
     float[] arr = float[]{cap: size}
     int i = 0
@@ -140,7 +132,6 @@ func init_gaussian(int size, float std) float[] {
     }
     arr
 }
-
 func ones_array(int size) float[] {
     float[] arr = float[]{cap: size}
     int i = 0
@@ -150,7 +141,6 @@ func ones_array(int size) float[] {
     }
     arr
 }
-
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }

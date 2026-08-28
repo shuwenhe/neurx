@@ -1,18 +1,15 @@
 package neurx.enterprise.speculative_integration_test
 use neurx.enterprise.speculative_inference
 use neurx.enterprise.inference_system_enhanced
-
 func test_speculative_inference_config_creation() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     cfg.enable_speculative_decode && cfg.num_draft_tokens == 4
 }
-
 func test_speculative_system_initialization() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
     sys.is_initialized
 }
-
 func test_speculative_single_inference() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
@@ -20,7 +17,6 @@ func test_speculative_single_inference() bool {
     updated_sys, output := speculative_inference.speculative_inference_single(sys, input_ids, 10)
     updated_sys.is_initialized && output.len > 0
 }
-
 func test_speculative_batch_inference() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
@@ -32,7 +28,6 @@ func test_speculative_batch_inference() bool {
     updated_sys, outputs := speculative_inference.speculative_inference_batch(sys, batch_inputs, 5)
     outputs.len == 3
 }
-
 func test_adaptive_speculative_params() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
@@ -40,7 +35,6 @@ func test_adaptive_speculative_params() bool {
     updated_sys := speculative_inference.adaptive_update_speculative_params(sys)
     updated_sys.is_initialized
 }
-
 func test_speculative_statistics_tracking() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
@@ -49,18 +43,15 @@ func test_speculative_statistics_tracking() bool {
     stats_str := speculative_inference.get_speculative_performance_stats(updated_sys)
     stats_str.len > 0
 }
-
 func test_enhanced_inference_config() bool {
     cfg := inference_system_enhanced.new_inference_config()
     cfg.enable_speculative_decode
 }
-
 func test_enhanced_system_initialization() bool {
     cfg := inference_system_enhanced.new_inference_config()
     sys := inference_system_enhanced.init_enhanced_inference_system(cfg)
     sys.initialized
 }
-
 func test_enhanced_single_inference() bool {
     cfg := inference_system_enhanced.new_inference_config()
     sys := inference_system_enhanced.init_enhanced_inference_system(cfg)
@@ -72,7 +63,6 @@ func test_enhanced_single_inference() bool {
     )
     updated_sys.initialized && output.len > 0
 }
-
 func test_enhanced_batch_inference() bool {
     cfg := inference_system_enhanced.new_inference_config()
     sys := inference_system_enhanced.init_enhanced_inference_system(cfg)
@@ -84,14 +74,12 @@ func test_enhanced_batch_inference() bool {
     )
     outputs.len == 3
 }
-
 func test_adaptive_speculative_integration() bool {
     cfg := inference_system_enhanced.new_inference_config()
     sys := inference_system_enhanced.init_enhanced_inference_system(cfg)
     updated_sys := inference_system_enhanced.adaptive_speculative_inference(sys)
     updated_sys.initialized
 }
-
 func test_enable_disable_speculative() bool {
     cfg := inference_system_enhanced.new_inference_config()
     sys := inference_system_enhanced.init_enhanced_inference_system(cfg)
@@ -100,28 +88,24 @@ func test_enable_disable_speculative() bool {
     sys_enabled := inference_system_enhanced.enable_speculative_mode(sys_disabled)
     sys_enabled.config.enable_speculative_decode
 }
-
 func test_system_performance_stats() bool {
     cfg := inference_system_enhanced.new_inference_config()
     sys := inference_system_enhanced.init_enhanced_inference_system(cfg)
     stats := inference_system_enhanced.get_system_performance_stats(sys)
     stats.len > 0
 }
-
 func test_reset_statistics() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
     updated_sys := speculative_inference.reset_speculative_statistics(sys)
     updated_sys.is_initialized
 }
-
 func test_should_use_speculative() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
     should_use := speculative_inference.should_use_speculative_decoding(sys)
     should_use
 }
-
 func test_config_update() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
@@ -130,7 +114,6 @@ func test_config_update() bool {
     updated_sys.verifier_executor.config.acceptance_threshold > 0.79 &&
     updated_sys.verifier_executor.config.acceptance_threshold < 0.81
 }
-
 func run_all_speculative_integration_tests() {
     tests_passed := 0
     tests_total := 0
@@ -167,7 +150,6 @@ func run_all_speculative_integration_tests() {
     printf("║ Success Rate: %.1f%%                                 ║\n", (tests_passed as float / tests_total as float * 100.0))
     printf("╚═════════════════════════════════════════════════════╝\n")
 }
-
 func main() {
     run_all_speculative_integration_tests()
 }

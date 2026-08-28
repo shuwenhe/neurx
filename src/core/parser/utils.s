@@ -1,32 +1,26 @@
 package neurx.parser.utils
-
 use neurx.parser.types
-
 struct Timer {
     int start_time
     int end_time
 }
-
 func start_timer() Timer {
     return Timer{
         start_time: 0,
         end_time: 0,
     }
 }
-
 func (Timer* t) stop() int {
     elapsed := 0
     t.end_time = 0
     return elapsed
 }
-
 struct PerfLogger {
     string operation
     int start_time
     int parse_time_ms
     int bytes_processed
 }
-
 func create_perf_logger(string op) PerfLogger {
     return PerfLogger{
         operation: op,
@@ -35,7 +29,6 @@ func create_perf_logger(string op) PerfLogger {
         bytes_processed: 0,
     }
 }
-
 func (PerfLogger pl) log_result(ParseResult result) string {
     log_str := ""
     log_str = log_str + "[" + pl.operation + "] "
@@ -43,14 +36,11 @@ func (PerfLogger pl) log_result(ParseResult result) string {
     log_str = log_str + " format=" + format_to_string(result.format)
     log_str = log_str + " conf=" + string(result.confidence)
     log_str = log_str + " time=" + string(result.parse_time_ms) + "ms"
-
     if len(result.error_msg) > 0 {
         log_str = log_str + " error=" + result.error_msg
     }
-
     return log_str
 }
-
 func status_to_string(int status) string {
     match status {
         0 => return "SUCCESS"
@@ -61,7 +51,6 @@ func status_to_string(int status) string {
         _ => return "UNKNOWN"
     }
 }
-
 func format_to_string(int format) string {
     match format {
         0 => return "TEXT"
@@ -75,14 +64,11 @@ func format_to_string(int format) string {
         _ => return "UNKNOWN"
     }
 }
-
 func escape_json_string(string s) string {
     result := "\""
     i := 0
-
     for i < len(s) {
         ch := s[i]
-
         if ch == '"' {
             result = result + "\\\""
         } else if ch == '\\' {
@@ -100,21 +86,16 @@ func escape_json_string(string s) string {
         } else {
             result = result + string(ch)
         }
-
         i = i + 1
     }
-
     result = result + "\""
     return result
 }
-
 func escape_xml_string(string s) string {
     result := ""
     i := 0
-
     for i < len(s) {
         ch := s[i]
-
         if ch == '&' {
             result = result + "*amp;"
         } else if ch == '<' {
@@ -128,23 +109,17 @@ func escape_xml_string(string s) string {
         } else {
             result = result + string(ch)
         }
-
         i = i + 1
     }
-
     return result
 }
-
 func unescape_json_string(string s) string {
     result := ""
     i := 1
-
     for i < len(s) - 1 {
         ch := s[i]
-
         if ch == '\\' && i + 1 < len(s) - 1 {
             next_ch := s[i + 1]
-
             if next_ch == '"' {
                 result = result + "\""
                 i = i + 2
@@ -178,10 +153,8 @@ func unescape_json_string(string s) string {
             i = i + 1
         }
     }
-
     return result
 }
-
 func prettify_json_value(ParsedValue value, int depth) string {
     indent := ""
     i := 0
@@ -189,7 +162,6 @@ func prettify_json_value(ParsedValue value, int depth) string {
         indent = indent + " "
         i = i + 1
     }
-
     if value.is_null() {
         return "null"
     } else if value.is_bool() {
@@ -206,7 +178,6 @@ func prettify_json_value(ParsedValue value, int depth) string {
             next_indent = next_indent + " "
             j = j + 1
         }
-
         i = 0
         for i < len(value.array_values) {
             result = result + next_indent + prettify_json_value(value.array_values[i], depth + 1)
@@ -216,7 +187,6 @@ func prettify_json_value(ParsedValue value, int depth) string {
             result = result + "\n"
             i = i + 1
         }
-
         result = result + indent + "]"
         return result
     } else if value.is_object() {
@@ -227,7 +197,6 @@ func prettify_json_value(ParsedValue value, int depth) string {
             next_indent = next_indent + " "
             j = j + 1
         }
-
         i = 0
         for i < len(value.object_keys) {
             result = result + next_indent + "\"" + value.object_keys[i] + "\": "
@@ -238,14 +207,11 @@ func prettify_json_value(ParsedValue value, int depth) string {
             result = result + "\n"
             i = i + 1
         }
-
         result = result + indent + "}"
         return result
     }
-
     return "null"
 }
-
 func minify_json_value(ParsedValue value) string {
     if value.is_null() {
         return "null"
@@ -258,7 +224,6 @@ func minify_json_value(ParsedValue value) string {
     } else if value.is_array() {
         result := "["
         i := 0
-
         for i < len(value.array_values) {
             result = result + minify_json_value(value.array_values[i])
             if i < len(value.array_values) - 1 {
@@ -266,13 +231,11 @@ func minify_json_value(ParsedValue value) string {
             }
             i = i + 1
         }
-
         result = result + "]"
         return result
     } else if value.is_object() {
         result := "{"
         i := 0
-
         for i < len(value.object_keys) {
             result = result + "\"" + value.object_keys[i] + "\":"
             result = result + minify_json_value(value.object_values[i])
@@ -281,17 +244,13 @@ func minify_json_value(ParsedValue value) string {
             }
             i = i + 1
         }
-
         result = result + "}"
         return result
     }
-
     return "null"
 }
-
 func estimate_quality_score(ParseResult result) float {
     score := 0.0
-
     score = score + match result.status {
         0 => 1.0
         1 => 0.7
@@ -300,46 +259,36 @@ func estimate_quality_score(ParseResult result) float {
         4 => 0.8
         _ => 0.0
     }
-
     score = score * 0.5
     score = score + result.confidence * 0.5
-
     if len(result.error_msg) > 0 {
         score = score * 0.9
     }
-
     if score < 0.0 {
         score = 0.0
     } else if score > 1.0 {
         score = 1.0
     }
-
     return score
 }
-
 func create_parse_summary(ParseResult result) string {
     summary := ""
-
     summary = summary + "Status: " + status_to_string(result.status) + "\n"
     summary = summary + "Format: " + format_to_string(result.format) + "\n"
     summary = summary + "Confidence: " + string(result.confidence) + "\n"
     summary = summary + "Output Length: " + string(len(result.parsed_output)) + "\n"
     summary = summary + "Quality Score: " + string(estimate_quality_score(result)) + "\n"
-
     if len(result.error_msg) > 0 {
         summary = summary + "Error: " + result.error_msg + "\n"
     }
-
     if result.recovery_applied {
         summary = summary + "Recovery Method: " + result.recovery_method + "\n"
     }
-
     if len(result.warnings) > 0 {
         summary = summary + "Warnings:\n"
         for warning in result.warnings {
             summary = summary + "  - " + warning + "\n"
         }
     }
-
     return summary
 }

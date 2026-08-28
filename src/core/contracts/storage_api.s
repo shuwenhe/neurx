@@ -1,7 +1,6 @@
 import "device_api"
 import "dtype_api"
 import "layout_api"
-
 struct storage {
     i64 id
     i64 ptr

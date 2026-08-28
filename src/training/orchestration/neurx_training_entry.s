@@ -5,7 +5,6 @@ use neurx.distributed.training_3d.*
 use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.observability.training.training_observability.*
-
 func create_neurx_200b_model_config() model_parallel_config {
     parallel dims = create_parallel_config(64, 8, 4, 2, 0)
     model_parallel_config {
@@ -22,7 +21,6 @@ func create_neurx_200b_model_config() model_parallel_config {
         dims: dims,
     }
 }
-
 func create_moe_1t_model_config() model_parallel_config {
     parallel dims = create_parallel_config(128, 16, 4, 2, 0)
     model_parallel_config {
@@ -42,7 +40,6 @@ func create_moe_1t_model_config() model_parallel_config {
         dims: dims,
     }
 }
-
 func create_64gpu_training_config() training_config {
     training_config {
         global_batch_size: 2048,
@@ -74,7 +71,6 @@ func create_64gpu_training_config() training_config {
         rope_target_length: 131072,
     }
 }
-
 func start_neurx_training(
     model_parallel_config mcfg,
     training_config tcfg
@@ -198,27 +194,19 @@ func start_neurx_training(
     print("")
     print_training_summary(orch, mon_mgr)
 }
-
 func initialize_model_weights(orchestrator_state orch) {}
-
 func get_current_gradient_norm(orchestrator_state o) float { return 0.0 }
 model_checkpoint build_checkpoint_from_orchestrator(orchestrator_state o) {
     return model_checkpoint{}
 }
-
 func export_model_for_inference(orchestrator_state o, string path) {}
-
 func evaluate_model_async(dataloader d, orchestrator_state o) {}
-
 func cleanup_dataloader(dataloader d) {}
-
 func generate_complete_training_report(orchestrator_state o, monitoring_manager m, checkpoint_manager c, dataloader d) {}
-
 func should_log_at_step(int step, int interval) bool { return step % interval == 0 }
 performance_snapshot collect_performance_snapshot(orchestrator_state orch) {
     return performance_snapshot{}
 }
-
 func print_training_status(orchestrator_state orch, monitoring_manager mgr, float loss) {
     string progress_bar = generate_progress_bar(
         orch.current_step,
@@ -231,7 +219,6 @@ func print_training_status(orchestrator_state orch, monitoring_manager mgr, floa
           " | LR: " + string(current_learning_rate(orch), 6) +
           " | TFLOPS: " + string(mgr.current_perf.tflops_achieved, 1))
 }
-
 func generate_progress_bar(int current, int total) string {
     int width = 40
     float ratio = float_of_int(current) / float_of_int(total)
@@ -247,7 +234,6 @@ func generate_progress_bar(int current, int total) string {
     bar = bar + "]"
     return bar
 }
-
 func print_training_summary(orchestrator_state orch, monitoring_manager mgr) {
     print("╔══════════════════════════════════════════════════════╗")
     print("║              TRAINING SUMMARY                     ║")
@@ -260,12 +246,10 @@ func print_training_summary(orchestrator_state orch, monitoring_manager mgr) {
     print("║ Alerts Triggered:" + pad_right(string(len(mgr.alert_history)), 30) + "║")
     print("╚══════════════════════════════════════════════════════╝")
 }
-
 func pad_right(string s, int total_width) string {
     for len(s) < total_width { s = s + " " }
     return s
 }
-
 func create_custom_neurx_config(
     int hidden_dim,
     int layers,
@@ -290,20 +274,17 @@ func create_custom_neurx_config(
     training_config tcfg = default_training_config()
     return mcfg, tcfg
 }
-
 func test_rope_scaling_module() {
     rope_scaling_config cfg = default_rope_scaling_4k_to_128k(128)
     bool valid = validate_rope_scaling(cfg, 10000)
     print("RoPE Scaling validation: " + string(valid))
 }
-
 func test_ring_attention_module() {
     ring_attn_config cfg = default_ring_attn_config(32768, 128, 96, 4, 0)
     ring_attn_state state = init_ring_attn_state(cfg)
     ring_attn_stats stats = estimate_ring_attn_performance(cfg)
     print(print_ring_attn_summary(cfg))
 }
-
 func test_3d_parallel_module() {
     model_parallel_config mcfg = create_neurx_200b_model_config()
     bool valid = validate_model_parallel_config(mcfg)

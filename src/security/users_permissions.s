@@ -1,7 +1,5 @@
 package neurx.security
-
 use std.slices
-
 struct user {
     int uid
     string username
@@ -9,13 +7,11 @@ struct user {
     int gid
     int shell_id  
 }
-
 struct user_group {
     int gid
     string group_name
     int[] members  
 }
-
 struct file_permission {
     int file_id
     int owner_uid
@@ -23,28 +19,23 @@ struct file_permission {
     int mode  
     int acl_enabled  
 }
-
 struct acl_entry {
     int entry_id
     int subject_id  
     int subject_type  
     int permission  
 }
-
 struct user_manager {
     user[] users
     user_group[] groups
     int next_uid
     int next_gid
 }
-
 func (user_manager* um) init() (int, string) {
     um.users = user[]{}
     um.groups = user_group[]{}
     um.next_uid = 1000  
     um.next_gid = 1000
-    
-    
     root := user{
         uid: 0,
         username: "root",
@@ -53,18 +44,14 @@ func (user_manager* um) init() (int, string) {
         shell_id: 0
     }
     um.users = append(um.users, root)
-    
-    
     root_group := user_group{
         gid: 0,
         group_name: "root",
         members: int[]{}"
     }
     um.groups = append(um.groups, root_group)
-    
     return 0, ""
 }
-
 func (user_manager* um) create_user(string username, string home_dir, int gid) (user, string) {
     new_user := user{
         uid: um.next_uid,
@@ -73,23 +60,18 @@ func (user_manager* um) create_user(string username, string home_dir, int gid) (
         gid: gid,
         shell_id: 0
     }
-    
     um.users = append(um.users, new_user)
     um.next_uid = um.next_uid + 1
-    
     return new_user, ""
 }
-
 func (user_manager* um) delete_user(int uid) (int, string) {
     if uid == 0 {
         return -1, "Cannot delete root user"
     }
-    
     i := 0
     for i < len(um.users) {
         u := um.users[i]
         if u.uid == uid {
-            
             j := i
             for j < len(um.users) - 1 {
                 um.users[j] = um.users[j + 1]
@@ -99,25 +81,19 @@ func (user_manager* um) delete_user(int uid) (int, string) {
         }
         i = i + 1
     }
-    
     return -1, "User not found"
 }
-
 func (user_manager* um) create_group(string group_name) (user_group, string) {
     new_group := user_group{
         gid: um.next_gid,
         group_name: group_name,
         members: int[]{}"
     }
-    
     um.groups = append(um.groups, new_group)
     um.next_gid = um.next_gid + 1
-    
     return new_group, ""
 }
-
 func (user_manager* um) add_user_to_group(int uid, int gid) (int, string) {
-    
     user_exists := 0
     i := 0
     for i < len(um.users) {
@@ -128,12 +104,9 @@ func (user_manager* um) add_user_to_group(int uid, int gid) (int, string) {
         }
         i = i + 1
     }
-    
     if user_exists == 0 {
         return -1, "User not found"
     }
-    
-    
     i = 0
     for i < len(um.groups) {
         g := um.groups[i]
@@ -144,10 +117,8 @@ func (user_manager* um) add_user_to_group(int uid, int gid) (int, string) {
         }
         i = i + 1
     }
-    
     return -1, "Group not found"
 }
-
 func (user_manager* um) remove_user_from_group(int uid, int gid) (int, string) {
     i := 0
     for i < len(um.groups) {
@@ -157,7 +128,6 @@ func (user_manager* um) remove_user_from_group(int uid, int gid) (int, string) {
             for j < len(g.members) {
                 member_uid := g.members[j]
                 if member_uid == uid {
-                    
                     k := j
                     for k < len(g.members) - 1 {
                         g.members[k] = g.members[k + 1]
@@ -171,10 +141,8 @@ func (user_manager* um) remove_user_from_group(int uid, int gid) (int, string) {
         }
         i = i + 1
     }
-    
     return -1, "User not in group"
 }
-
 func (user_manager um) get_user(int uid) (user, string) {
     i := 0
     for i < len(um.users) {
@@ -184,10 +152,8 @@ func (user_manager um) get_user(int uid) (user, string) {
         }
         i = i + 1
     }
-    
     return user{}, "User not found"
 }
-
 func (user_manager um) get_group(int gid) (user_group, string) {
     i := 0
     for i < len(um.groups) {
@@ -197,23 +163,19 @@ func (user_manager um) get_group(int gid) (user_group, string) {
         }
         i = i + 1
     }
-    
     return user_group{}, "Group not found"
 }
-
 struct file_permission_manager {
     vec permissions
     vec acl_entries
     int next_acl_id
 }
-
 func (file_permission_manager* fpm) init() (int, string) {
     fpm.permissions = file_permission[]{}
     fpm.acl_entries = acl_entry[]{}
     fpm.next_acl_id = 0
     return 0, ""
 }
-
 func (file_permission_manager* fpm) set_file_permission(int file_id, int owner_uid, int owner_gid, int mode) (file_permission, string) {
     perm := file_permission{
         file_id: file_id,
@@ -222,11 +184,9 @@ func (file_permission_manager* fpm) set_file_permission(int file_id, int owner_u
         mode: mode,
         acl_enabled: 0
     }
-    
     fpm.permissions = append(fpm.permissions, perm)
     return perm, ""
 }
-
 func (file_permission_manager* fpm) add_acl_entry(int file_id, int subject_id, int subject_type, int permission) (int, string) {
     entry := acl_entry{
         entry_id: fpm.next_acl_id,
@@ -234,11 +194,8 @@ func (file_permission_manager* fpm) add_acl_entry(int file_id, int subject_id, i
         subject_type: subject_type,
         permission permission
     }
-    
     fpm.acl_entries = append(fpm.acl_entries, entry)
     fpm.next_acl_id = fpm.next_acl_id + 1
-    
-    
     i := 0
     for i < len(fpm.permissions) {
         perm := fpm.permissions[i]
@@ -249,26 +206,19 @@ func (file_permission_manager* fpm) add_acl_entry(int file_id, int subject_id, i
         }
         i = i + 1
     }
-    
     return entry.entry_id, ""
 }
-
 func (file_permission_manager fpm) check_permission(int file_id, int uid, int operation) (int, string) {
-    
-    
     i := 0
     for i < len(fpm.permissions) {
         perm := fpm.permissions[i]
         if perm.file_id == file_id {
-            
             if uid == perm.owner_uid {
                 owner_perm := (perm.mode >> 6) & 7  
                 if operation <= 2 && owner_perm & (1 << (2 - operation)) != 0 {
                     return 1, "Allowed"
                 }
             }
-            
-            
             if perm.acl_enabled == 1 {
                 j := 0
                 for j < len(fpm.acl_entries) {
@@ -281,15 +231,12 @@ func (file_permission_manager fpm) check_permission(int file_id, int uid, int op
                     j = j + 1
                 }
             }
-            
             return 0, "Permission denied"
         }
         i = i + 1
     }
-    
     return -1, "File not found"
 }
-
 func (user_manager um) get_user_stats() (int, int) {
     return len(um.users), len(um.groups)
 }

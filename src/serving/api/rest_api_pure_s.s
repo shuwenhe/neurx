@@ -1,26 +1,22 @@
 package neurx.inference.api
-
 struct http_request {
     string method
     string path
     string[] headers
     string body
 }
-
 struct http_response {
     int status_code
     string status_message
     string[] headers
     string body
 }
-
 struct inference_request {
     string model
     string[] messages
     int max_tokens
     float temperature
 }
-
 struct inference_response {
     string id
     string object
@@ -32,22 +28,18 @@ struct inference_response {
     int completion_tokens
     int total_tokens
 }
-
 struct api_config {
     string host
     int port
     string model_path
     bool enable_logging
 }
-
 func extract_json_value(string json, string key) string {
     int key_len = len(key)
     int search_key_len = key_len + 4
     string search_key = "\"" + key + "\":"
-
     int pos = 0
     int found_pos = -1
-
     int i = 0
     for i < len(json) {
         bool matches = true
@@ -58,71 +50,57 @@ func extract_json_value(string json, string key) string {
             }
             j = j + 1
         }
-
         if matches {
             found_pos = i + len(search_key)
             break
         }
         i = i + 1
     }
-
     if found_pos == -1 {
         return ""
     }
-
     string result = ""
     int j = found_pos
     bool in_string = false
     bool escaped = false
-
     for j < len(json) {
         string char = json[j]
-
         if escaped {
             result = result + char
             escaped = false
             j = j + 1
             continue
         }
-
         if char == "\\" {
             result = result + char
             escaped = true
             j = j + 1
             continue
         }
-
         if char == "\"" && !in_string {
             in_string = true
             j = j + 1
             continue
         }
-
         if char == "\"" && in_string {
             break
         }
-
         if in_string {
             result = result + char
         }
-
         j = j + 1
     }
-
     return result
 }
-
 func extract_string_field(string body, string field_name) string {
     string search_str = "\"" + field_name + "\":"
     return extract_json_value(body, field_name)
 }
-
 func extract_int_field(string body, string field_name) int {
     string value_str = extract_json_value(body, field_name)
     if value_str == "" {
         return 0
     }
-
     int result = 0
     int i = 0
     for i < len(value_str) {
@@ -134,27 +112,22 @@ func extract_int_field(string body, string field_name) int {
     }
     return result
 }
-
 func extract_float_field(string body, string field_name) float {
     string value_str = extract_json_value(body, field_name)
     if value_str == "" {
         return 0.0
     }
-
     float result = 0.0
     int i = 0
     bool has_dot = false
     float decimal_places = 1.0
-
     for i < len(value_str) {
         string c = value_str[i]
-
         if c == "." {
             has_dot = true
             i = i + 1
             continue
         }
-
         if c >= "0" && c <= "9" {
             int digit = c[0] - '0'[0]
             if has_dot {
@@ -166,14 +139,11 @@ func extract_float_field(string body, string field_name) float {
         }
         i = i + 1
     }
-
     return result
 }
-
 func estimate_token_count(string text) int {
     return len(text) / 4 + 1
 }
-
 func format_json_string(string s) string {
     string result = ""
     int i = 0
@@ -196,18 +166,15 @@ func format_json_string(string s) string {
     }
     return result
 }
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
-
     bool negative = false
     if n < 0 {
         negative = true
         n = -n
     }
-
     string result = ""
     for n > 0 {
         int digit = n % 10
@@ -222,45 +189,34 @@ func int_to_string(int n) string {
         else if digit == 7 { digit_char = "7" }
         else if digit == 8 { digit_char = "8" }
         else if digit == 9 { digit_char = "9" }
-
         result = digit_char + result
         n = n / 10
     }
-
     if negative {
         result = "-" + result
     }
-
     return result
 }
-
 func float_to_string(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 100.0)
-
     if frac_part < 0 {
         frac_part = -frac_part
     }
-
     string result = int_to_string(int_part)
     result = result + "."
-
     if frac_part < 10 {
         result = result + "0"
     }
-
     result = result + int_to_string(frac_part)
     return result
 }
-
 func run_inference(string prompt, int max_tokens, float temperature) string {
     print("🤖 运doinference\n")
     print("   prompt: " + prompt + "\n")
     print("   maximumtokens: " + int_to_string(max_tokens) + "\n")
     print("   温度: " + float_to_string(temperature) + "\n")
-
     string response = ""
-
     if len(prompt) < 10 {
         response = "thisisoneitem简shortpromptofresponse。"
     } else if len(prompt) < 50 {
@@ -268,48 +224,36 @@ func run_inference(string prompt, int max_tokens, float temperature) string {
     } else {
         response = "thisispairlongpromptof详细回复。modelatthisinsidegenerate更longof、更具信息ityofresponse。包括moreitem段落、解释andexample。this演示edcompleteinference流程。"
     }
-
     if max_tokens < len(response) {
         response = response[:max_tokens]
     }
-
     return response
 }
-
 func handle_chat_completion(http_request req) http_response {
     print("\n📨 processing聊天complete请求\n")
-
     string model = extract_string_field(req.body, "model")
     if model == "" {
         model = "Qwen2.5-0.5B-Instruct"
     }
-
     int max_tokens = extract_int_field(req.body, "max_tokens")
     if max_tokens == 0 {
         max_tokens = 256
     }
-
     float temperature = extract_float_field(req.body, "temperature")
     if temperature == 0.0 {
         temperature = 0.7
     }
-
     string prompt = extract_string_field(req.body, "content")
     if prompt == "" {
         prompt = "hello"
     }
-
     print("   model: " + model + "\n")
     print("   prompt内容: " + prompt + "\n")
-
     string response_text = run_inference(prompt, max_tokens, temperature)
-
     int prompt_tokens = estimate_token_count(prompt)
     int completion_tokens = estimate_token_count(response_text)
     int total_tokens = prompt_tokens + completion_tokens
-
     string escaped_response = format_json_string(response_text)
-
     string body = "{"
     body = body + "\"id\":\"chatcmpl-" + int_to_string(len(prompt)) + "\","
     body = body + "\"object\":\"chat.completion\","
@@ -329,18 +273,14 @@ func handle_chat_completion(http_request req) http_response {
     body = body + "\"total_tokens\":" + int_to_string(total_tokens)
     body = body + "}"
     body = body + "}"
-
     http_response resp
     resp.status_code = 200
     resp.status_message = "OK"
     resp.body = body
-
     return resp
 }
-
 func handle_health_check(http_request req) http_response {
     print("\n💚 processinghealthcheck\n")
-
     string body = "{"
     body = body + "\"status\":\"healthy\","
     body = body + "\"service\":\"neurx-inference\","
@@ -348,18 +288,14 @@ func handle_health_check(http_request req) http_response {
     body = body + "\"model\":\"Qwen2.5-0.5B-Instruct\","
     body = body + "\"timestamp\":1692547200"
     body = body + "}"
-
     http_response resp
     resp.status_code = 200
     resp.status_message = "OK"
     resp.body = body
-
     return resp
 }
-
 func handle_list_models(http_request req) http_response {
     print("\n📋 列出可usemodel\n")
-
     string body = "{"
     body = body + "\"object\":\"list\","
     body = body + "\"data\":["
@@ -371,15 +307,12 @@ func handle_list_models(http_request req) http_response {
     body = body + "}"
     body = body + "]"
     body = body + "}"
-
     http_response resp
     resp.status_code = 200
     resp.status_message = "OK"
     resp.body = body
-
     return resp
 }
-
 func handle_error(int status_code, string message) http_response {
     string body = "{"
     body = body + "\"error\":{"
@@ -387,22 +320,18 @@ func handle_error(int status_code, string message) http_response {
     body = body + "\"type\":\"request_error\""
     body = body + "}"
     body = body + "}"
-
     http_response resp
     resp.status_code = status_code
     resp.status_message = "Error"
     resp.body = body
-
     return resp
 }
-
 func route_request(http_request req) http_response {
     print("\n" + "="*70 + "\n")
     print("🌐 NeurX REST API - 路由请求\n")
     print("="*70 + "\n")
     print("method: " + req.method + "\n")
     print("路径: " + req.path + "\n")
-
     if req.path == "/v1/chat/completions" && req.method == "POST" {
         return handle_chat_completion(req)
     } else if req.path == "/health" && req.method == "GET" {
@@ -413,7 +342,6 @@ func route_request(http_request req) http_response {
         return handle_error(404, "endpoint未找到: " + req.path)
     }
 }
-
 func print_response(http_response resp) {
     print("\n" + "─"*70 + "\n")
     print("✅ API response\n")
@@ -423,42 +351,33 @@ func print_response(http_response resp) {
     print(resp.body + "\n")
     print("="*70 + "\n\n")
 }
-
 func main() {
     print("\n╔════════════════════════════════════════════════════════════════════╗\n")
     print("║          🚀 NeurX REST API server (pure S languageimplementation)               ║\n")
     print("╚════════════════════════════════════════════════════════════════════╝\n\n")
-
     print("📝 example 1: 聊天complete请求\n")
     http_request req1
     req1.method = "POST"
     req1.path = "/v1/chat/completions"
     req1.body = "{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"hello，请介绍onedown你自己\"}],\"max_tokens\":256,\"temperature\":0.7}"
-
     http_response resp1 = route_request(req1)
     print_response(resp1)
-
     print("📝 example 2: healthcheck\n")
     http_request req2
     req2.method = "GET"
     req2.path = "/health"
-
     http_response resp2 = route_request(req2)
     print_response(resp2)
-
     print("📝 example 3: 列tablemodel\n")
     http_request req3
     req3.method = "GET"
     req3.path = "/v1/models"
-
     http_response resp3 = route_request(req3)
     print_response(resp3)
-
     print("📝 example 4: wrong误processing\n")
     http_request req4
     req4.method = "GET"
     req4.path = "/unknown"
-
     http_response resp4 = route_request(req4)
     print_response(resp4)
 }

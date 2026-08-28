@@ -1,6 +1,5 @@
 package neurx.posttrain.core.lora_module
 use std.io.println
-
 struct lora_module_s {
     int input_dim
     int output_dim
@@ -10,13 +9,11 @@ struct lora_module_s {
     float[][] lora_b
     float scale_factor
 }
-
 struct lora_forward_result_s {
     float[][] output
     float[][] lora_a_input
     int rank
 }
-
 struct lora_layer_spec_s {
     string layer_name
     int input_dim
@@ -24,7 +21,6 @@ struct lora_layer_spec_s {
     int rank
     float alpha
 }
-
 func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lora_module_s {
     float[][] lora_a = make(float[][], 0)
     float[][] lora_b = make(float[][], 0)
@@ -60,7 +56,6 @@ func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lor
         scale_factor: alpha / float(rank),
     }
 }
-
 func matrix_multiply_s(float[][] a, float[][] b) float[][] {
     float[][] result = make(float[][], 0)
     int i = 0
@@ -86,7 +81,6 @@ func matrix_multiply_s(float[][] a, float[][] b) float[][] {
     }
     result
 }
-
 func lora_forward_s(float[][] x, lora_module_s lora) lora_forward_result_s {
     float[][] lora_out = matrix_multiply_s(x, lora.lora_a)
     lora_out = matrix_multiply_s(lora_out, lora.lora_b)
@@ -109,7 +103,6 @@ func lora_forward_s(float[][] x, lora_module_s lora) lora_forward_result_s {
         rank: lora.rank,
     }
 }
-
 func lora_merge_to_weight_s(float[][] original_weight, lora_module_s lora) float[][] {
     float[][] lora_delta = matrix_multiply_s(lora.lora_b, lora.lora_a)
     float[][] merged = make(float[][], 0)
@@ -131,7 +124,6 @@ func lora_merge_to_weight_s(float[][] original_weight, lora_module_s lora) float
     }
     merged
 }
-
 func lora_backward_s(
     float[][] grad_output,
     lora_forward_result_s forward_cache,
@@ -141,7 +133,6 @@ func lora_backward_s(
     float[][] grad_lora_a = grad_output
     grad_lora_b
 }
-
 func get_lora_trainable_params_s(lora_module_s lora) int {
     int lora_a_params = lora.input_dim * lora.rank
     int lora_b_params = lora.rank * lora.output_dim

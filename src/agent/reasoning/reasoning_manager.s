@@ -1,11 +1,9 @@
 package neurx.reasoning.reasoning_manager
-
 use neurx.reasoning.cot_config.cot_config
 use neurx.reasoning.reasoning_chain.{reasoning_chain, chain_state}
 use neurx.reasoning.reasoning_step.{reasoning_step, step_type}
 use neurx.reasoning.prompt_engineer.prompt_engineer
 use neurx.reasoning.reasoning_validator.{reasoning_validator, validation_result}
-
 struct reasoning_manager {
     map[string]reasoning_chain chains
     prompt_engineer engineer
@@ -14,7 +12,6 @@ struct reasoning_manager {
     int max_active_chains
     map[string]map[string]string] history
 }
-
 func new_reasoning_manager(cot_config config) reasoning_manager {
     reasoning_manager {
         chains: map[string]reasoning_chain{},
@@ -25,24 +22,18 @@ func new_reasoning_manager(cot_config config) reasoning_manager {
         history: map[string]map[string]string]{},
     }
 }
-
 func (reasoning_manager* mgr) start_reasoning_chain(string user_prompt, cot_config config) reasoning_chain {
     if len(mgr.chains) >= mgr.max_active_chains {
         return reasoning_chain{}
     }
-
     chain_id := "chain_" + string(mgr.next_chain_id)
     mgr.next_chain_id = mgr.next_chain_id + 1
-
     chain := new_reasoning_chain(chain_id, user_prompt, config)
     chain = chain.start()
-
     mgr.chains[chain_id] = chain
     mgr.history[chain_id] = map[string]string{}
-
     chain
 }
-
 func (reasoning_manager* mgr) add_reasoning_step(string chain_id, reasoning_step step) bool {
     if chain, exists := mgr.chains[chain_id]; exists {
         if chain.state == chain_state.running {
@@ -52,7 +43,6 @@ func (reasoning_manager* mgr) add_reasoning_step(string chain_id, reasoning_step
     }
     false
 }
-
 func (reasoning_manager* mgr) update_step(string chain_id, int step_index, string reasoning, string result, float confidence) bool {
     if chain, exists := mgr.chains[chain_id]; exists {
         if step_index >= 0 && step_index < len(chain.steps) {
@@ -65,22 +55,18 @@ func (reasoning_manager* mgr) update_step(string chain_id, int step_index, strin
     }
     false
 }
-
 func (reasoning_manager* mgr) complete_reasoning_chain(string chain_id, string final_answer) bool {
     if chain, exists := mgr.chains[chain_id]; exists {
         completed_chain := chain.complete(final_answer)
-
         validation := mgr.validator.validate_chain(completed_chain)
         if validation.is_valid {
             mgr.chains[chain_id] = completed_chain
-
             mgr.save_to_history(chain_id, completed_chain)
             return true
         }
     }
     false
 }
-
 func (reasoning_manager* mgr) fail_reasoning_chain(string chain_id, string error_msg) bool {
     if chain, exists := mgr.chains[chain_id]; exists {
         mgr.chains[chain_id] = chain.fail(error_msg)
@@ -88,14 +74,12 @@ func (reasoning_manager* mgr) fail_reasoning_chain(string chain_id, string error
     }
     false
 }
-
 func (reasoning_manager* mgr) get_chain(string chain_id) reasoning_chain {
     if chain, exists := mgr.chains[chain_id]; exists {
         return chain
     }
     reasoning_chain{}
 }
-
 func (reasoning_manager* mgr) get_active_chains() []reasoning_chain {
     chains := []reasoning_chain{}
     for _, chain := range mgr.chains {
@@ -105,11 +89,9 @@ func (reasoning_manager* mgr) get_active_chains() []reasoning_chain {
     }
     chains
 }
-
 func (reasoning_manager* mgr) get_chain_count() int {
     len(mgr.chains)
 }
-
 func (reasoning_manager* mgr) generate_next_prompt(string chain_id) string {
     if chain, exists := mgr.chains[chain_id]; exists {
         if chain.current_step_index < len(chain.steps) {
@@ -123,7 +105,6 @@ func (reasoning_manager* mgr) generate_next_prompt(string chain_id) string {
     }
     ""
 }
-
 func (reasoning_manager* mgr) validate_chain(string chain_id) validation_result {
     if chain, exists := mgr.chains[chain_id]; exists {
         return mgr.validator.validate_chain(chain)
@@ -136,7 +117,6 @@ func (reasoning_manager* mgr) validate_chain(string chain_id) validation_result 
         severity_level: 2,
     }
 }
-
 func (reasoning_manager* mgr) backtrack_chain(string chain_id, int depth) bool {
     if chain, exists := mgr.chains[chain_id]; exists {
         if chain.can_backtrack() {
@@ -146,35 +126,28 @@ func (reasoning_manager* mgr) backtrack_chain(string chain_id, int depth) bool {
     }
     false
 }
-
 func (reasoning_manager* mgr) get_reasoning_summary(string chain_id) string {
     if chain, exists := mgr.chains[chain_id]; exists {
         return chain.get_reasoning_text()
     }
     ""
 }
-
 func (reasoning_manager* mgr) cleanup_completed_chains() int {
     to_delete := string[]{}
-
     for chain_id, chain := range mgr.chains {
         if chain.state == chain_state.completed || chain.state == chain_state.failed {
             to_delete = append(to_delete, chain_id)
         }
     }
-
     i := 0
     for i < len(to_delete) {
         delete(mgr.chains, to_delete[i])
         i = i + 1
     }
-
     len(to_delete)
 }
-
 func (reasoning_manager* mgr) save_to_history(string chain_id, reasoning_chain chain) {
     step_history := map[string]string{}
-
     i := 0
     for i < len(chain.steps) {
         step := chain.steps[i]
@@ -182,25 +155,20 @@ func (reasoning_manager* mgr) save_to_history(string chain_id, reasoning_chain c
         step_history[key] = step.format_step()
         i = i + 1
     }
-
     mgr.history[chain_id] = step_history
 }
-
 func (reasoning_manager* mgr) get_history(string chain_id) map[string]string {
     if history, exists := mgr.history[chain_id]; exists {
         return history
     }
     map[string]string{}
 }
-
 func (reasoning_manager* mgr) get_statistics() map[string]string {
     stats := map[string]string{}
-
     total := len(mgr.chains)
     running := 0
     completed := 0
     failed := 0
-
     for _, chain := range mgr.chains {
         if chain.state == chain_state.running {
             running = running + 1
@@ -210,34 +178,27 @@ func (reasoning_manager* mgr) get_statistics() map[string]string {
             failed = failed + 1
         }
     }
-
     stats["total_chains"] = string(total)
     stats["running_chains"] = string(running)
     stats["completed_chains"] = string(completed)
     stats["failed_chains"] = string(failed)
-
     stats
 }
-
 func (reasoning_manager* mgr) batch_start_reasoning(string[] prompts, cot_config config) []reasoning_chain {
     chains := []reasoning_chain{}
-
     i := 0
     for i < len(prompts) {
         chain := mgr.start_reasoning_chain(prompts[i], config)
         chains = append(chains, chain)
         i = i + 1
     }
-
     chains
 }
-
 func (reasoning_manager* mgr) clear_all() {
     mgr.chains = map[string]reasoning_chain{}
     mgr.history = map[string]map[string]string]{}
     mgr.next_chain_id = 1
 }
-
 func map_values[K comparable, V any](m map[K]V) []V {
     values := []V{}
     for _, v := range m {

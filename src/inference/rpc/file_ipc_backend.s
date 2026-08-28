@@ -2,7 +2,6 @@ use std.conv.int_to_string
 package neurx.inference.file_backend
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env}
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
     int keyword_len = len(keyword)
@@ -28,7 +27,6 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
-
 func generate_response(string prompt, int max_tokens) string {
     string model_path = resolve_model_path_from_env()
     real_text_engine_state state = load_real_text_engine(model_path)
@@ -44,11 +42,9 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return result.text
 }
-
 func runtime_run_command_output(string command) string {
     ""
 }
-
 func main() {
     print("NeurX Medical AI Backend - File IPC Mode\n")
     print("Listening on: /tmp/neurx_request.txt\n")

@@ -1,13 +1,11 @@
 package neurx.inference.optimization.optimization_profiler
 use neurx.util.logger
-
 struct performance_metric {
     string metric_name
     float value
     string unit
     int64 timestamp
 }
-
 struct kernel_profile {
     string kernel_name
     int execution_count
@@ -18,7 +16,6 @@ struct kernel_profile {
     float memory_bytes
     float compute_flops
 }
-
 struct inference_profile {
     int batch_size
     int sequence_length
@@ -30,7 +27,6 @@ struct inference_profile {
     float memory_average_mb
     []kernel_profile kernels
 }
-
 struct optimization_config {
     bool enable_paged_attention
     bool enable_prefix_cache
@@ -44,7 +40,6 @@ struct optimization_config {
     bool enable_triton_kernels
     int optimization_level
 }
-
 struct profiler_state {
     []inference_profile profiles
     []performance_metric metrics
@@ -53,7 +48,6 @@ struct profiler_state {
     float total_prefill_time
     float total_decode_time
 }
-
 func new_optimization_config() optimization_config {
     optimization_config {
         enable_paged_attention: true,
@@ -69,7 +63,6 @@ func new_optimization_config() optimization_config {
         optimization_level: 1,
     }
 }
-
 func new_profiler_state() profiler_state {
     profiler_state {
         profiles: []inference_profile{},
@@ -80,7 +73,6 @@ func new_profiler_state() profiler_state {
         total_decode_time: 0.0,
     }
 }
-
 func record_inference_profile(
     profiler_state profiler,
     int batch_size,
@@ -112,7 +104,6 @@ func record_inference_profile(
     new_profiler.total_decode_time = profiler.total_decode_time + decode_time
     return new_profiler
 }
-
 func record_kernel_profile(
     inference_profile profile,
     string kernel_name,
@@ -139,7 +130,6 @@ func record_kernel_profile(
     new_profile.kernels = append(profile.kernels, kernel)
     return new_profile
 }
-
 func recommend_optimizations(
     profiler_state profiler
 ) string {
@@ -169,7 +159,6 @@ func recommend_optimizations(
     }
     return recommendations
 }
-
 func generate_performance_report(
     profiler_state profiler
 ) string {
@@ -211,7 +200,6 @@ func generate_performance_report(
     report = report + "\n" + recommend_optimizations(profiler)
     return report
 }
-
 func compare_profiles(
     inference_profile profile1,
     inference_profile profile2
@@ -236,7 +224,6 @@ func compare_profiles(
     result = result + "Peak Memory: " + string(profile1.memory_peak_mb) + " MB → " + string(profile2.memory_peak_mb) + " MB\n"
     return result
 }
-
 func scale_string(int length) string {
     result = ""
     i = 0
@@ -246,7 +233,6 @@ func scale_string(int length) string {
     }
     return result
 }
-
 func main() {
     logger.info("Optimization Profiler Initialized")
     profiler = new_profiler_state()

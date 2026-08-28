@@ -1,5 +1,4 @@
 package neurx.distributed.inference
-
 struct comm_primitive_config {
     string backend
     int rank
@@ -9,7 +8,6 @@ struct comm_primitive_config {
     bool enable_overlap
     string reduce_op
 }
-
 struct allreduce_context {
     int rank
     int world_size
@@ -18,14 +16,12 @@ struct allreduce_context {
     float[] local_data
     float[] global_data
 }
-
 struct allgather_context {
     int rank
     int world_size
     float[][] local_data
     float[][] gathered_data
 }
-
 struct collective_stats {
     int total_ops
     int total_bytes_sent
@@ -33,7 +29,6 @@ struct collective_stats {
     float avg_latency_ms
     float peak_bandwidth_gbs
 }
-
 func init_comm_config(
     string backend,
     int rank,
@@ -49,7 +44,6 @@ func init_comm_config(
     cfg.reduce_op = "sum"
     cfg
 }
-
 func allreduce_inference(
     float[] local_data,
     int rank,
@@ -69,7 +63,6 @@ func allreduce_inference(
     }
     result
 }
-
 func allgather_attention_heads(
     float[] local_heads,
     int rank,
@@ -87,7 +80,6 @@ func allgather_attention_heads(
     }
     gathered
 }
-
 func reduce_scatter_logits(
     float[] local_logits,
     int rank,
@@ -109,7 +101,6 @@ func reduce_scatter_logits(
     }
     result
 }
-
 func broadcast_from_rank(
     float[] data,
     int source_rank,
@@ -126,7 +117,6 @@ func broadcast_from_rank(
     }
     received
 }
-
 func send_recv_kv_pairs(
     float[] keys,
     float[] values,
@@ -140,7 +130,6 @@ func send_recv_kv_pairs(
     float[] received_values = values
     (received_keys, received_values)
 }
-
 func pipeline_allreduce(
     float[] data,
     int rank,
@@ -160,7 +149,6 @@ func pipeline_allreduce(
     }
     result
 }
-
 func ring_allreduce(
     float[] data,
     int rank,
@@ -176,7 +164,6 @@ func ring_allreduce(
     }
     result
 }
-
 func tree_allreduce(
     float[] data,
     int rank,
@@ -189,7 +176,6 @@ func tree_allreduce(
     }
     result
 }
-
 func get_collective_latency_ms(
     int data_size_bytes,
     int world_size,
@@ -207,7 +193,6 @@ func get_collective_latency_ms(
     }
     latency
 }
-
 func log_collective_stats(
     collective_stats stats
 ) {
@@ -218,7 +203,6 @@ func log_collective_stats(
     printf("  Avg latency: %.2f ms\n", stats.avg_latency_ms)
     printf("  Peak bandwidth: %.2f GB/s\n", stats.peak_bandwidth_gbs)
 }
-
 func main() {
     println("Distributed Communication Primitives")
     println("====================================")

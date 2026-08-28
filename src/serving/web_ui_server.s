@@ -1,5 +1,4 @@
 package neurx.serving.web_ui
-
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_setsockopt(int fd, int level, int option, int value) int
 extern "intrinsic" func __sys_bind(int sockfd, string ip, int port, int family) int
@@ -107,7 +106,6 @@ func get_html() string {
     html = html + "</body></html>\n"
     return html
 }
-
 func get_compact_html() string {
     string html = "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>NeurX Chat</title>"
     html = html + "<style>body{margin:0;background:linear-gradient(180deg,#eef1ea 0%,#e5ebe3 100%);color:#172019;font:16px Georgia,serif}.app{max-width:960px;margin:auto;min-height:100vh;display:flex;flex-direction:column;padding:24px;box-sizing:border-box}"
@@ -149,7 +147,6 @@ func get_compact_html() string {
     html = html + "document.getElementById('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendRequest()}});</script></body></html>"
     return html
 }
-
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string result = ""
@@ -162,7 +159,6 @@ func int_to_string(int value) string {
     if value < 0 { result = "-" + result }
     return result
 }
-
 func proxy_to_backend(string method, string path, string request_body) string {
     int backend_sock = __sys_socket(2, 1, 6)
     if backend_sock < 0 {
@@ -189,7 +185,6 @@ func proxy_to_backend(string method, string path, string request_body) string {
     _ = __sys_close(backend_sock)
     return response
 }
-
 func proxy_stream_to_backend(int client_fd, string request_body) {
     int backend_sock = __sys_socket(2, 1, 6)
     if backend_sock < 0 {
@@ -231,7 +226,6 @@ func proxy_stream_to_backend(int client_fd, string request_body) {
     }
     _ = __sys_close(backend_sock)
 }
-
 func __request_is_get_root(string request) bool {
     if __host_str_find(request, "GET / HTTP/1.1") == 0 {
         return true
@@ -241,14 +235,12 @@ func __request_is_get_root(string request) bool {
     }
     return false
 }
-
 func __request_is_post_infer(string request) bool {
     if __host_str_find(request, "POST /api/infer HTTP/1.1") == 0 {
         return true
     }
     return false
 }
-
 func __extract_body(string request) string {
     int sep_pos = __host_str_find(request, "\r\n\r\n")
     if sep_pos < 0 {
@@ -261,7 +253,6 @@ func __extract_body(string request) string {
     }
     return __host_slice(request, body_start, body_end)
 }
-
 func __http_response(string body, string content_type) string {
     string response = "HTTP/1.1 200 OK\r\n"
     response = response + "Content-Type: " + content_type + "\r\n"
@@ -270,15 +261,12 @@ func __http_response(string body, string content_type) string {
     response = response + body
     return response
 }
-
 func __http_json_response(string body) string {
     return __http_response(body, "application/json")
 }
-
 func __http_html_response(string body) string {
     return __http_response(body, "text/html; charset=utf-8")
 }
-
 func main() {
     _ = __sys_write_string(1, "🚀 NeurX Web UI Server starting on port 8081...\n")
     int listener = __sys_socket(2, 1, 6)
@@ -299,7 +287,7 @@ func main() {
         return 1
     }
     _ = __sys_write_string(1, "✅ HTTP server bound to 127.0.0.1:8081\n")
-    _ = __sys_write_string(1, "📌 Backend URL: http://127.0.0.1:18084\n")
+    _ = __sys_write_string(1, "📌 Backend URL: http:
     for 1 {
         int client = __sys_accept(listener)
         if client < 0 {

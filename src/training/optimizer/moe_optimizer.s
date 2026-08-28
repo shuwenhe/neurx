@@ -1,5 +1,4 @@
 module moe_optimization
-
 struct moe_config {
     hidden_size: int = 4096
     intermediate_size: int = 14336
@@ -24,7 +23,6 @@ struct moe_config {
     apply_residual: bool = true
     expert_pruning_threshold: float = 0.001
 }
-
 struct moe_forward_output {
     tensor output
     tensor aux_loss
@@ -35,7 +33,6 @@ struct moe_forward_output {
     dispatch_pattern dispatch_pattern
     list<tensor> perexpert_output
 }
-
 struct dispatch_pattern {
     int total_tokens
     list<int> tokens_per_expert
@@ -46,7 +43,6 @@ struct dispatch_pattern {
     float entropy
     int dropped_tokens
 }
-
 struct moe_expert {
     int id
     linear up_proj
@@ -56,7 +52,6 @@ struct moe_expert {
     importance_weight: float = 1.0
     is_active: bool = true
 }
-
 struct moe_router {
     linear gate_layer
     Parameter bias
@@ -419,7 +414,6 @@ struct expert_analysis_report {
     importance_range: tuple<float, float>
     bool redundancy_detected
 }
-
 struct individual_expert_report {
     int expert_id
     bool is_active
@@ -519,13 +513,11 @@ struct pruning_report {
     float threshold_used
     int remaining_active
 }
-
 struct merging_report {
     int merges_performed
     list<merge_operation> operations
     float estimated_memory_savings_pct
 }
-
 struct merge_operation {
     int layer_index
     int expert_a_id
@@ -533,7 +525,6 @@ struct merge_operation {
     float similarity
     string action
 }
-
 struct moe_efficiency_report {
     int total_experts_per_layer
     int total_moe_layers

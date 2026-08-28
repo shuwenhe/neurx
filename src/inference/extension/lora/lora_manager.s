@@ -1,10 +1,8 @@
 package neurx.lora.lora_manager
-
 use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
-
 struct lora_config {
     int lora_rank
     float lora_alpha
@@ -13,13 +11,11 @@ struct lora_config {
     string bias
     string task_type
 }
-
 struct lora_weights {
     float[][]] lora_a
     float[][]] lora_b
     float scaling
 }
-
 struct lora_adapter {
     string name
     lora_config config
@@ -27,12 +23,10 @@ struct lora_adapter {
     bool enabled
     float scale
 }
-
 struct lora_adapter_error {
     string code
     string message
 }
-
 func (lora_adapter* adapter) apply_lora(
     module_name: string,
     input: *float[],
@@ -41,7 +35,6 @@ func (lora_adapter* adapter) apply_lora(
     if !adapter.enabled {
         return output, ""
     }
-
     switch adapter.weights.get(module_name) {
         some(weights) : {
             lora_result := apply_lora_transformation(input, weights, adapter.scale)
@@ -55,7 +48,6 @@ return             (lora_result, "")
         },
     }
 }
-
 func apply_lora_transformation(
     input: *float[],
     weights: *lora_weights,
@@ -67,10 +59,8 @@ func apply_lora_transformation(
             message: "LoRA weights are empty",
         })
     }
-
     intermediate := matrix_multiply(input, weights.lora_a)
     output := matrix_multiply(intermediate, weights.lora_b)
-
     scaled_output := float[]()
     i := 0
     for i < len(output) {
@@ -78,10 +68,8 @@ func apply_lora_transformation(
         scaled_output = append(scaled_output, scaled_val)
         i = i + 1
     }
-
 return     (scaled_output, "")
 }
-
 func matrix_multiply(
     a: *float[],
     *float[][]] b
@@ -92,7 +80,6 @@ func matrix_multiply(
             message: "Matrix B is empty",
         })
     }
-
     result := float[]()
     i := 0
     for i < len(b) {
@@ -106,16 +93,13 @@ func matrix_multiply(
         result = append(result, sum)
         i = i + 1
     }
-
 return     (result, "")
 }
-
 struct lora_adapter_manager {
     adapters: map[string, lora_adapter]
     *string[] active_adapters
     float global_scale
 }
-
 func new() lora_adapter_manager {
     lora_adapter_manager {
         adapters: map[string, lora_adapter](),
@@ -123,7 +107,6 @@ func new() lora_adapter_manager {
         global_scale: 1.0,
     }
 }
-
 func (lora_adapter_manager* manager) add_adapter(
     name: string,
     *lora_adapter adapter
@@ -134,11 +117,9 @@ func (lora_adapter_manager* manager) add_adapter(
             message: "Adapter name cannot be empty",
         })
     }
-
     manager.adapters.insert(name, adapter)
     return (), ""
 }
-
 func (lora_adapter_manager* manager) remove_adapter(string name) ((), lora_adapter_error) {
     if !manager.adapters.contains(name) {
         return (lora_adapter_error {
@@ -146,9 +127,7 @@ func (lora_adapter_manager* manager) remove_adapter(string name) ((), lora_adapt
             message: "Adapter not found: " + name,
         })
     }
-
     manager.adapters.remove(name)
-
     idx := 0
     for idx < len(manager.active_adapters) {
         if manager.active_adapters[idx] == name {
@@ -157,10 +136,8 @@ func (lora_adapter_manager* manager) remove_adapter(string name) ((), lora_adapt
         }
         idx = idx + 1
     }
-
     return (), ""
 }
-
 func (lora_adapter_manager* manager) activate_adapter(string name) ((), lora_adapter_error) {
     if !manager.adapters.contains(name) {
         return (lora_adapter_error {
@@ -168,9 +145,7 @@ func (lora_adapter_manager* manager) activate_adapter(string name) ((), lora_ada
             message: "Adapter not found: " + name,
         })
     }
-
     manager.active_adapters = append(manager.active_adapters, name)
-
     switch manager.adapters.get(name) {
         some(adapter) : {
             adapter.enabled = true
@@ -184,7 +159,6 @@ func (lora_adapter_manager* manager) activate_adapter(string name) ((), lora_ada
         },
     }
 }
-
 func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_adapter_error) {
     idx := 0
     for idx < len(manager.active_adapters) {
@@ -194,7 +168,6 @@ func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_a
         }
         idx = idx + 1
     }
-
     switch manager.adapters.get(name) {
         some(adapter) : {
             adapter.enabled = false
@@ -208,18 +181,15 @@ func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_a
         },
     }
 }
-
 func (manager* manager) get_active_adapters() *string[] {
     manager.active_adapters
 }
-
 func (manager* manager) get_adapter(string name) option[lora_adapter] {
     switch manager.adapters.get(name) {
         some(adapter) : some(adapter),
         nil : nil,
     }
 }
-
 func (lora_adapter_manager* manager) set_global_scale(float scale) ((), lora_adapter_error) {
     if scale < 0.0 {
         return (lora_adapter_error {
@@ -227,16 +197,13 @@ func (lora_adapter_manager* manager) set_global_scale(float scale) ((), lora_ada
             message: "Scale must be non-negative",
         })
     }
-
     manager.global_scale = scale
     return (), ""
 }
-
 func (lora_adapter_manager* manager) merge_adapters() ((), lora_adapter_error) {
     i := 0
     for i < len(manager.active_adapters) {
         adapter_name := manager.active_adapters[i]
-
         switch manager.adapters.get(adapter_name) {
             some(adapter) : {
                 for module_name in adapter.weights.keys() {
@@ -250,25 +217,19 @@ func (lora_adapter_manager* manager) merge_adapters() ((), lora_adapter_error) {
             },
             nil : {},
         }
-
         i = i + 1
     }
-
     return (), ""
 }
-
 func (lora_adapter_manager* manager) unmerge_adapters() ((), lora_adapter_error) {
     return (), ""
 }
-
 func (manager* manager) get_memory_usage_mb() int {
     total := 0
-
     for name in manager.adapters.keys() {
         switch manager.adapters.get(name) {
             some(adapter) : {
                 adapter_size := 0
-
                 for module_name in adapter.weights.keys() {
                     switch adapter.weights.get(module_name) {
                         some(weights) : {
@@ -279,26 +240,20 @@ func (manager* manager) get_memory_usage_mb() int {
                         nil : {},
                     }
                 }
-
                 total = total + adapter_size
             },
             nil : {},
         }
     }
-
     total / 1024 / 1024
 }
-
 func (manager* manager) list_adapters() *string[] {
     names := string[]()
-
     for name in manager.adapters.keys() {
         names = append(names, name)
     }
-
     names
 }
-
 func create_default_lora_config() lora_config {
     lora_config {
         lora_rank: 8,
@@ -309,12 +264,9 @@ func create_default_lora_config() lora_config {
         task_type: "CAUSAL_LM",
     }
 }
-
 func main() {
     config := create_default_lora_config()
-
     manager := new()
-
     adapter := lora_adapter {
         name: "finetuned_lora",
         config: config,
@@ -322,7 +274,6 @@ func main() {
         enabled: false,
         scale: 1.0,
     }
-
     switch manager.add_adapter("adapter1", adapter) {
         return (), "" : {
             ""

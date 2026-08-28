@@ -1,5 +1,4 @@
 import "tensor_api"
-
     py_torch_pickle
     safe_tensor
     ONNX
@@ -8,7 +7,6 @@ import "tensor_api"
     protocol_2
     custom
 }
-
 struct serialization_config {
     SerializationFormat format
     string version
@@ -16,7 +14,6 @@ struct serialization_config {
     bool compression
     i64 compression_level
 }
-
 struct state_dict {
     map[string]tensor tensors
     map[string]string hyperparams

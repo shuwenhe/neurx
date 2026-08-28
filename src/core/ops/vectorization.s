@@ -3,26 +3,22 @@ import (
     "neurx/model"
     "neurx/nn"
 )
-
 struct matmul_config {
     int batch_size
     bool use_blocked
     int block_size
     int parallel_threads
 }
-
 struct batch_matmul_result {
     output: float[][]
     shape: [3]int
 }
-
 struct vectorization_stats {
     int ops_count
     float throughput
     float memory_bandwidth
     float compute_efficiency
 }
-
 func batch_matmul(float[][] A, float[][] B, int batch_size, int M, int K, int N) batch_matmul_result {
     result := batch_matmul_result
     output := float[][](batch_size * M * N)
@@ -55,7 +51,6 @@ func batch_matmul(float[][] A, float[][] B, int batch_size, int M, int K, int N)
     result.shape[2] = N
     return result
 }
-
 func batch_matmul_blocked(float[][] A, float[][] B, int batch_size, int M, int K, int N, int block_size) batch_matmul_result {
     result := batch_matmul_result
     output := float[][](batch_size * M * N)
@@ -115,7 +110,6 @@ func batch_matmul_blocked(float[][] A, float[][] B, int batch_size, int M, int K
     result.shape[2] = N
     return result
 }
-
 func element_wise_add(float[] A, float[] B) float[] {
     var float[] result = float[](len(A))
     i := 0
@@ -125,7 +119,6 @@ func element_wise_add(float[] A, float[] B) float[] {
     }
     return result
 }
-
 func element_wise_mul(float[] A, float[] B) float[] {
     var float[] result = float[](len(A))
     i := 0
@@ -135,7 +128,6 @@ func element_wise_mul(float[] A, float[] B) float[] {
     }
     return result
 }
-
 func element_wise_div(float[] A, float[] B, float epsilon) float[] {
     var float[] result = float[](len(A))
     i := 0
@@ -154,7 +146,6 @@ func element_wise_div(float[] A, float[] B, float epsilon) float[] {
     }
     return result
 }
-
 func element_wise_apply(float[] A, func(float) float func_ptr) float[] {
     var float[] result = float[](len(A))
     i := 0
@@ -164,7 +155,6 @@ func element_wise_apply(float[] A, func(float) float func_ptr) float[] {
     }
     return result
 }
-
 func batch_element_wise_add(float[][] A, float[][] B, int batch_size, int size_per_batch) float[][] {
     result := float[][](len(A))
     idx := 0
@@ -180,7 +170,6 @@ func batch_element_wise_add(float[][] A, float[][] B, int batch_size, int size_p
     }
     return result
 }
-
 func batch_element_wise_mul(float[][] A, float[][] B, int batch_size, int size_per_batch) float[][] {
     result := float[][](len(A))
     idx := 0
@@ -196,7 +185,6 @@ func batch_element_wise_mul(float[][] A, float[][] B, int batch_size, int size_p
     }
     return result
 }
-
 func reduce_sum(float[] A) float {
     sum := 0.0
     i := 0
@@ -206,14 +194,12 @@ func reduce_sum(float[] A) float {
     }
     return sum
 }
-
 func reduce_mean(float[] A) float {
     if len(A) == 0 {
         return 0.0
     }
     return reduce_sum(A) / float(len(A))
 }
-
 func reduce_max(float[] A) float {
     if len(A) == 0 {
         return 0.0
@@ -228,7 +214,6 @@ func reduce_max(float[] A) float {
     }
     return max_val
 }
-
 func reduce_sum_batch(float[][] A, int batch_size, int size_per_batch) float[] {
     var float[] result = float[](batch_size)
     b := 0
@@ -244,7 +229,6 @@ func reduce_sum_batch(float[][] A, int batch_size, int size_per_batch) float[] {
     }
     return result
 }
-
 func broadcast_add(float[][] A, float[] b, int rows, int cols) float[][] {
     result := float[][](len(A))
     idx := 0
@@ -260,7 +244,6 @@ func broadcast_add(float[][] A, float[] b, int rows, int cols) float[][] {
     }
     return result
 }
-
 func broadcast_mul(float[][] A, float[] b, int rows, int cols) float[][] {
     result := float[][](len(A))
     idx := 0
@@ -276,14 +259,12 @@ func broadcast_mul(float[][] A, float[] b, int rows, int cols) float[][] {
     }
     return result
 }
-
 func measure_ops_throughput(int ops_count, float time_ms) float {
     if time_ms <= 0.0 {
         return 0.0
     }
     return float(ops_count) / (time_ms / 1000.0)
 }
-
 func estimate_memory_bandwidth(int bytes_transferred, float time_ms) float {
     if time_ms <= 0.0 {
         return 0.0
@@ -291,14 +272,12 @@ func estimate_memory_bandwidth(int bytes_transferred, float time_ms) float {
     bytes_per_sec := float(bytes_transferred) / (time_ms / 1000.0)
     return bytes_per_sec / (1024.0 * 1024.0 * 1024.0)
 }
-
 func compute_efficiency(int flops, int bytes) float {
     if bytes == 0 {
         return 0.0
     }
     return float(flops) / float(bytes)
 }
-
 func new_vectorization_stats() vectorization_stats {
     stats := vectorization_stats
     stats.ops_count = 0
@@ -307,7 +286,6 @@ func new_vectorization_stats() vectorization_stats {
     stats.compute_efficiency = 0.0
     return stats
 }
-
 func gemm_blocked(float[][] A, float[][] B, int M, int K, int N, int block_size) float[][] {
     C := float[][](M * N)
     i := 0
@@ -356,7 +334,6 @@ func gemm_blocked(float[][] A, float[][] B, int M, int K, int N, int block_size)
     }
     return C
 }
-
 func transpose_in_place(float[][] A, int N) float[][] {
     i := 0
     for i < N {
@@ -371,7 +348,6 @@ func transpose_in_place(float[][] A, int N) float[][] {
     }
     return A
 }
-
 func scale_vector(float[] A, float scalar) float[] {
     var float[] result = float[](len(A))
     i := 0
@@ -381,7 +357,6 @@ func scale_vector(float[] A, float scalar) float[] {
     }
     return result
 }
-
 func dot_product(float[] A, float[] B) float {
     result := 0.0
     i := 0
@@ -391,7 +366,6 @@ func dot_product(float[] A, float[] B) float {
     }
     return result
 }
-
 func vector_norm(float[] A) float {
     sum := 0.0
     i := 0

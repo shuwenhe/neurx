@@ -2,7 +2,6 @@ package neurx.posttrain.alignment
 import neurx.model.llm.neurx.*
 import neurx.tokenizer.neurx.*
 import neurx.amp.scaler.*
-
 struct alignment_config {
     string method
     string model_name
@@ -30,7 +29,6 @@ struct alignment_config {
     string reward_model_path
     string output_dir
 }
-
 func create_dpo_config() alignment_config {
     return alignment_config {
         method: "dpo",
@@ -60,7 +58,6 @@ func create_dpo_config() alignment_config {
         output_dir: "./checkpoints/dpo/"
     }
 }
-
 func create_grpo_config() alignment_config {
     return alignment_config {
         method: "grpo",
@@ -90,7 +87,6 @@ func create_grpo_config() alignment_config {
         output_dir: "./checkpoints/grpo/"
     }
 }
-
 func create_ppo_config() alignment_config {
     return alignment_config {
         method: "ppo",
@@ -120,7 +116,6 @@ func create_ppo_config() alignment_config {
         output_dir: "./checkpoints/ppo/"
     }
 }
-
 func create_sft_config() alignment_config {
     return alignment_config {
         method: "sft",

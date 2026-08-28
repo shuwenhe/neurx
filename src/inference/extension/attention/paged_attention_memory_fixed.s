@@ -1,5 +1,4 @@
 package neurx.attention.paged_attention_memory
-
 struct physical_block {
     int block_id
     int layer_id
@@ -8,14 +7,12 @@ struct physical_block {
     int end_pos
     bool is_allocated
 }
-
 struct block_table {
     int seq_id
     int[] physical_blocks
     int num_tokens
     int num_blocks
 }
-
 struct paged_kv_cache_manager {
     []physical_block blocks
     []block_table sequences
@@ -31,7 +28,6 @@ struct paged_kv_cache_manager {
     int cache_hits
     int cache_misses
 }
-
 func new_paged_kv_cache_manager(
     int num_blocks,
     int block_size,
@@ -72,7 +68,6 @@ func new_paged_kv_cache_manager(
     result.cache_misses = 0
     return result
 }
-
 func allocate_blocks(
     paged_kv_cache_manager mgr,
     int seq_id,
@@ -103,7 +98,6 @@ func allocate_blocks(
     }
     return mgr, allocated_block_ids
 }
-
 func free_sequence_blocks(
     paged_kv_cache_manager mgr,
     int seq_id
@@ -120,7 +114,6 @@ func free_sequence_blocks(
     }
     return mgr
 }
-
 func copy_blocks(
     paged_kv_cache_manager mgr,
     int[] src_blocks,
@@ -145,7 +138,6 @@ func copy_blocks(
     }
     return mgr
 }
-
 func get_cache_stats(paged_kv_cache_manager mgr) string {
     result := "KVCache Stats:\n"
     result = result + "  Total Blocks: " + string(mgr.total_blocks) + "\n"
@@ -156,21 +148,18 @@ func get_cache_stats(paged_kv_cache_manager mgr) string {
     result = result + "  Cache Misses: " + string(mgr.cache_misses) + "\n"
     return result
 }
-
 func reset_cache_stats(paged_kv_cache_manager mgr) paged_kv_cache_manager {
     mgr.cache_hits = 0
     mgr.cache_misses = 0
     mgr.evictions = 0
     return mgr
 }
-
 func get_block_utilization(paged_kv_cache_manager mgr) float {
     if mgr.total_blocks <= 0 {
         return 0.0
     }
     return float(mgr.allocated_blocks) / float(mgr.total_blocks)
 }
-
 func can_allocate_blocks(paged_kv_cache_manager mgr, int num_tokens) bool {
     blocks_needed := (num_tokens + mgr.block_size - 1) / mgr.block_size
     available := 0

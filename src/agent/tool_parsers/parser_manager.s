@@ -1,20 +1,15 @@
 package neurx.tool_parsers
-
 use std.map
 use std.slices
-
 type ToolParserFactory = func() . ToolParser
-
 struct ToolParserManager {
     parsers: Map<str, ToolParserFactory>
     lazy_parsers: Map<str, (str, str)>
     loaded_modules: Map<str, bool>
 }
-
 struct ToolParserManagerInstance {
     ToolParserManager instance
 }
-
 _TOOL_PARSER_MANAGER := ToolParserManagerInstance {
     instance: ToolParserManager {
         parsers: map_new(),
@@ -22,7 +17,6 @@ _TOOL_PARSER_MANAGER := ToolParserManagerInstance {
         loaded_modules: map_new()
     }
 }
-
 func new() . ToolParserManager {
     ToolParserManager {
         parsers: map_new(),
@@ -30,15 +24,12 @@ func new() . ToolParserManager {
         loaded_modules: map_new()
     }
 }
-
 func register_parser(self, str name, ToolParserFactory factory) {
     self.parsers.insert(name, factory)
 }
-
 func register_lazy_parser(self, str name, str module, str class_name) {
     self.lazy_parsers.insert(name, (module, class_name))
 }
-
 func get_parser(self, str name) . Option<ToolParser> {
     match self.parsers.get(name) {
         Some(factory) => Some(factory()),
@@ -52,7 +43,6 @@ func get_parser(self, str name) . Option<ToolParser> {
         }
     }
 }
-
 func list_parsers(self) . Vec<str> {
     names := Vec_new()
     for (name, _) in self.parsers.iter() {
@@ -63,28 +53,22 @@ func list_parsers(self) . Vec<str> {
     }
     names
 }
-
 func get_parser_for_model(self, str model_name) . Option<ToolParser> {
     parser_name := infer_parser_from_model_name(model_name)
     self.get_parser(parser_name)
 }
-
 func get_manager() . ToolParserManager {
     _TOOL_PARSER_MANAGER.instance.clone()
 }
-
 func register_global_parser(str name, ToolParserFactory factory) {
     _TOOL_PARSER_MANAGER.instance.register_parser(name, factory)
 }
-
 func register_global_lazy_parser(str name, str module, str class_name) {
     _TOOL_PARSER_MANAGER.instance.register_lazy_parser(name, module, class_name)
 }
-
 func load_parser_module(str module, str class_name, str parser_name) . Option<ToolParser> {
     None
 }
-
 func infer_parser_from_model_name(str model_name) . str {
     match model_name {
         s if strings_contains_str(s, "deepseek-v3") => "deepseek_v3",

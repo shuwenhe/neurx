@@ -3,7 +3,6 @@ extern func runtime_env_get(string key, string default_value) string
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int family) int
 extern "intrinsic" func __sys_close(int fd) int
-
 func parse_int_or_default(string s, int default_val) int {
     if len(s) == 0 {
         return default_val
@@ -21,7 +20,6 @@ func parse_int_or_default(string s, int default_val) int {
     }
     result
 }
-
 func main() {
     string host = runtime_env_get("NEURX_S_HOST", "127.0.0.1")
     int port = parse_int_or_default(runtime_env_get("NEURX_S_PORT", "18083"), 18083)
@@ -30,41 +28,33 @@ func main() {
     print("[HealthCheck] Waiting for backend at " + host + ":" + runtime_env_get("NEURX_S_PORT", "18083") + "\n")
     for attempt < max_attempts {
         attempt = attempt + 1
-
         int sock = __sys_socket(2, 1, 6)
         if sock < 0 {
-
             int wait = 0
             for wait < 50000 { wait = wait + 1 }
             continue
         }
-
         int result = __sys_connect(sock, host, port, 2)
         _ = __sys_close(sock)
         if result == 0 {
-
             print("[HealthCheck] ✅ Backend ready on attempt ")
             print_number(attempt)
             print("\n")
             print("[HealthCheck] Success! Backend ready\n")
             return
         }
-
         int wait = 0
         for wait < 50000 { wait = wait + 1 }
-
         if attempt % 50 == 0 || attempt <= 5 {
             print("[HealthCheck] Attempt ")
             print_number(attempt)
             print("\n")
         }
     }
-
     print("[HealthCheck] Timeout after ")
     print_number(max_attempts)
     print(" attempts\n")
 }
-
 func print_number(int n) {
     if n < 10 {
         if n == 0 { print("0") }

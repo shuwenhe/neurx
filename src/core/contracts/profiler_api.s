@@ -1,12 +1,10 @@
 import "device_api"
 import "memory_api"
-
     disabled
     enabled
     memory_only
     time_only
 }
-
 struct kernel_profile {
     string kernel_name
     device device
@@ -18,7 +16,6 @@ struct kernel_profile {
     i64 memory_allocated
     i64 memory_freed
 }
-
 struct operator_profile {
     string op_name
     i64 call_count
@@ -28,7 +25,6 @@ struct operator_profile {
     output_shapes: [][]i64
     i64 memory_peak
 }
-
 struct profiler_summary {
     i64 total_time_us
     map[string]kernel_profile kernel_profiles

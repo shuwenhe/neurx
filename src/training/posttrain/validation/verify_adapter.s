@@ -1,5 +1,4 @@
 use std.conv.parse_int_default
-
 module posttrain_validation_verify_adapter
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_binary_file, runtime_read_text_file, runtime_run_command_output, trim}
 float MIN_ADAPTER_L1 = 1e-6
@@ -7,7 +6,6 @@ float MIN_LOSS_DROP = 1e-6
 float MAX_LOSS_STEP_INCREASE = 1e-7
 float MIN_WEIGHT_DELTA_L2 = 1e-6
 int MIN_CHANGED_ELEMENTS = 1
-
 func main() {
     string base_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string adapter_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain_adapter")
@@ -92,7 +90,6 @@ func main() {
     }
     println("posttrain adapter verification passed")
 }
-
 func extract_json_number_field(string json_text, string field_name, string fallback) string {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
@@ -120,7 +117,6 @@ func extract_json_number_field(string json_text, string field_name, string fallb
     }
     token
 }
-
 func extract_json_array_values(string json_text, string field_name) float[] {
     float[] values = float[]{}
     string needle = "\"" + field_name + "\""
@@ -157,7 +153,6 @@ func extract_json_array_values(string json_text, string field_name) float[] {
     }
     values
 }
-
 func parse_float(string s, float fallback) float {
     string text = trim(s)
     if text == "" {
@@ -233,11 +228,9 @@ func parse_float(string s, float fallback) float {
     }
     result * (sign as float)
 }
-
 func is_number_token_char(int ch) bool {
     ch >= 48 && ch <= 57 || ch == 45 || ch == 43 || ch == 46 || ch == 101 || ch == 69
 }
-
 func find_substring(string text, string pattern) int {
     if len(pattern) > len(text) {
         return -1
@@ -260,7 +253,6 @@ func find_substring(string text, string pattern) int {
     }
     -1
 }
-
 func read_u64_le(int[] bytes, int offset) int {
     int value = 0
     int i = 0
@@ -272,11 +264,9 @@ func read_u64_le(int[] bytes, int offset) int {
     }
     value
 }
-
 func string_char(int c) string {
     string(c)
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -307,7 +297,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -346,7 +335,6 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
-
 func shell_escape(string value) string {
     string out = "'"
     int i = 0

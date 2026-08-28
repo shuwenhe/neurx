@@ -1,7 +1,6 @@
 import "tensor/tensor.s"
 import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/ppo/ppo.s"
-
 struct cispo_config {
     f32 learning_rate
     i32 num_epochs
@@ -19,7 +18,6 @@ struct cispo_config {
     f32 value_clip_epsilon
     f32 kl_coeff
 }
-
 struct cispo_trainer {
     cispo_config config
     *model policy_model
@@ -30,7 +28,6 @@ struct cispo_trainer {
     i64 step_count
     ISWeightStats is_weight_stats
 }
-
 struct is_weight_stats {
     f32 mean
     f32 std
@@ -38,7 +35,6 @@ struct is_weight_stats {
     f32 max
     f32 clipped_ratio
 }
-
 func new_cispo_trainer(
     cispo_config config,
     *model policy,
@@ -67,7 +63,6 @@ func new_cispo_trainer(
         },
     }
 }
-
 func (cispo_trainer* trainer) compute_is_weights(
     []tensor new_log_probs,
     []tensor behavior_log_probs
@@ -86,7 +81,6 @@ func (cispo_trainer* trainer) compute_is_weights(
     trainer.update_is_weight_stats(is_weights)
     return is_weights
 }
-
 func (cispo_trainer* trainer) update_is_weight_stats([]tensor is_weights) {
     values := []
     clipped_count := 0
@@ -119,7 +113,6 @@ func (cispo_trainer* trainer) update_is_weight_stats([]tensor is_weights) {
     }
     trainer.is_weight_stats.clipped_ratio = f32(clipped_count) / f32(total_count)
 }
-
 func (cispo_trainer* trainer) compute_cispo_objective(
     Tensor ratio,
     Tensor advantage,
@@ -146,7 +139,6 @@ func (cispo_trainer* trainer) compute_cispo_objective(
     }
     return weighted_obj
 }
-
 func (cispo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
@@ -176,7 +168,6 @@ func (cispo_trainer* trainer) compute_gae(
     }
     return advantages, returns
 }
-
 func (cispo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
@@ -292,7 +283,6 @@ func (cispo_trainer* trainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-
 func (cispo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     value_losses := []
@@ -319,7 +309,6 @@ func (cispo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-
 func compute_mean([]f32 values) . f32 {
     if len(values) == 0 {
         return 0.0
@@ -330,7 +319,6 @@ func compute_mean([]f32 values) . f32 {
     }
     return sum / f32(len(values))
 }
-
 func compute_std([]f32 values, f32 mean) . f32 {
     if len(values) == 0 {
         return 1.0
@@ -341,7 +329,6 @@ func compute_std([]f32 values, f32 mean) . f32 {
     }
     return sqrt(sum_sq / f32(len(values)))
 }
-
 func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

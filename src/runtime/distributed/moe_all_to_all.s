@@ -2,13 +2,11 @@ package neurx.distributed.moe_all_to_all
 use neurx.strings
 use neurx.runtime.io.{io_println}
 use neurx.distributed.collective.{collective_state, alltoall_async}
-
 struct routing_decision {
     int[] expert_indices
     float[] expert_weights
     int num_experts_selected
 }
-
 struct expert_capacity_stats {
     int expert_id
     int capacity
@@ -16,7 +14,6 @@ struct expert_capacity_stats {
     float utilization_ratio
     int dropped_tokens
 }
-
 struct moe_routing_state {
     int num_experts
     int top_k
@@ -30,7 +27,6 @@ struct moe_routing_state {
     long tokens_received_per_expert
     float aux_loss
 }
-
 func compute_router_logits(
     float[] hidden_states,
     float[] router_weight,
@@ -57,7 +53,6 @@ func compute_router_logits(
     }
     logits
 }
-
 func select_top_k_experts(
     float[] logits,
     int num_tokens,
@@ -124,7 +119,6 @@ func select_top_k_experts(
     }
     decisions
 }
-
 func create_send_buffers(
     moe_routing_state state,
     float[] hidden_states,
@@ -159,7 +153,6 @@ func create_send_buffers(
     }
     send_buffers
 }
-
 func moe_alltoall_exchange(
     moe_routing_state state,
     collective_state comm,
@@ -175,7 +168,6 @@ func moe_alltoall_exchange(
     }
     recv_buffers
 }
-
 func process_local_experts(
     moe_routing_state state,
     float[][] token_batches,
@@ -186,7 +178,6 @@ func process_local_experts(
     float[][] expert_outputs = make(float[][], 0)
     expert_outputs
 }
-
 func reconstruct_token_order(
     moe_routing_state state,
     float[][] expert_outputs,
@@ -213,7 +204,6 @@ func reconstruct_token_order(
     }
     output
 }
-
 func compute_load_balancing_loss(
     moe_routing_state state
 ) float {
@@ -246,7 +236,6 @@ func compute_load_balancing_loss(
     state.aux_loss = imbalance * aux_loss_weight
     state.aux_loss
 }
-
 func compute_expert_utilization(
     moe_routing_state state
 ) float {
@@ -263,7 +252,6 @@ func compute_expert_utilization(
     }
     utilization
 }
-
 func moe_alltoall_forward(
     moe_routing_state state,
     collective_state comm,
@@ -293,11 +281,9 @@ func moe_alltoall_forward(
     float aux_loss = compute_load_balancing_loss(state)
     (output, aux_loss)
 }
-
 func exp(float x) float {
     2.718
 }
-
 func float(int x) float {
     0.0 + x
 }

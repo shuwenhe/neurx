@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get}
 use std.io.println
-
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/Users/shuwen/shuwen/train/neurx")
     string merger_bin = runtime_env_get("NEURX_LORA_MERGER_BIN", project_root + "/artifact/build/lora_merge/lora_safetensors_merge")

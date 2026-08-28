@@ -10,7 +10,6 @@ use neurx.data.dataset.corpus_loader.{corpus_state, corpus_batch_result, new_cor
 use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.strings
-
 struct real_training_state {
     tensor weights_q
     tensor weights_k
@@ -26,13 +25,11 @@ struct real_training_state {
     float total_loss
     int tokens_seen
 }
-
 func shape1(int n) int[] {
     int[] s = int[]{cap: 1}
     s[0] = n
     s
 }
-
 func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr) real_training_state {
     float[] embed_data = float[]{cap: vocab_size * hidden_dim}
     float[] q_data = float[]{cap: hidden_dim * hidden_dim}
@@ -90,20 +87,16 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
         tokens_seen: 0
     }
 }
-
 func forward_pass(real_training_state state, tensor input_ids) tensor {
     tensor hidden = ops.embedding_lookup(state.embedding, input_ids, 0)
     ops.matmul(hidden, state.lm_head)
 }
-
 func compute_loss(tensor logits, tensor targets) float {
     return cross_entropy_loss(logits, targets)
 }
-
 func backward_pass(tensor logits, tensor targets) tensor {
     return grad_logits(logits, targets)
 }
-
 func update_parameters(real_training_state state, tensor hidden, tensor grad) real_training_state {
     tensor hidden_t = transpose(hidden, 0, 1)
     tensor grad_lm_head = matmul(hidden_t, grad)
@@ -121,7 +114,6 @@ func update_parameters(real_training_state state, tensor hidden, tensor grad) re
     state.lm_head = new(next_head, state.lm_head.shape, true)
     state
 }
-
 func training_step(
     real_training_state state,
     tensor input_ids,
@@ -142,7 +134,6 @@ func training_step(
     }
     next_state
 }
-
 func run_training_loop(
     string manifest_path,
     int num_steps,
@@ -187,7 +178,6 @@ func run_training_loop(
     println("========================================")
     state
 }
-
 func one_hot_from_ints(int[] values, int vocab_size) tensor {
     if vocab_size <= 0 {
         return new(float[]{cap: 0}, shape1(0), true)
@@ -208,7 +198,6 @@ func one_hot_from_ints(int[] values, int vocab_size) tensor {
     }
     new(data, [n, vocab_size], true)
 }
-
 func new_from_ints(int[] values, int[] shape) tensor {
     float[] data = float[]{cap: len(values)}
     int i = 0

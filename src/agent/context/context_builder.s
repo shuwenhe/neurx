@@ -1,7 +1,6 @@
 package neurx.context.context_builder
 use neurx.context.context_manager
 use neurx.agent.memory
-
 func agent_context_build_from_memory(agent_context_state context, agent_memory_state memory) agent_context_state {
     agent_context_state next = context
     agent_memory_lookup_result goal = agent_memory_lookup(memory, "goal")
@@ -26,7 +25,6 @@ func agent_context_build_from_memory(agent_context_state context, agent_memory_s
     }
     agent_context_maybe_compress(next)
 }
-
 func agent_context_build_summary(agent_context_state context) string {
     "context_builder:" + agent_context_summary(context)
 }

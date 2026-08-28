@@ -2,7 +2,6 @@ package neurx.posttrain.sft.sft_trainer
 use neurx.model.llm.neurx
 use neurx.tokenizer.neurx
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
-
 struct sft_example {
     string instruction
     string input_context
@@ -11,14 +10,12 @@ struct sft_example {
     float quality_score
     int token_count
 }
-
 struct sft_batch {
     string[] texts
     int batch_size
     int seq_len
     int total_tokens
 }
-
 struct sft_dataset {
     []sft_example train_examples
     []sft_example eval_examples
@@ -27,7 +24,6 @@ struct sft_dataset {
     float quality_threshold
     string source_path
 }
-
 struct sft_train_config {
     string method
     int batch_size
@@ -59,7 +55,6 @@ struct sft_train_config {
     float eval_split_ratio
     string output_dir
 }
-
 struct sft_trainer_state {
     neurx_model model
     tokenizer_state tokenizer
@@ -82,7 +77,6 @@ struct sft_trainer_state {
     float[] eval_loss_history
     float[] perplexity_history
 }
-
 struct sft_eval_metrics {
     float eval_loss
     float perplexity
@@ -91,7 +85,6 @@ struct sft_eval_metrics {
     int total_tokens
     int correct_predictions
 }
-
 struct sft_train_result {
     bool success
     int final_step
@@ -102,13 +95,11 @@ struct sft_train_result {
     float training_time_seconds
     string checkpoint_path
 }
-
 struct sft_step_result {
     float loss
     float perplexity
     float token_accuracy
 }
-
 func create_sft_example_config() sft_train_config {
     sft_train_config {
         method: "sft",
@@ -142,7 +133,6 @@ func create_sft_example_config() sft_train_config {
         output_dir: "./outputs/sft/",
     }
 }
-
 func create_sft_dataset(string source_path) sft_dataset {
     sft_dataset {
         train_examples: builtin_sft_examples(),
@@ -153,14 +143,12 @@ func create_sft_dataset(string source_path) sft_dataset {
         source_path: source_path,
     }
 }
-
 func load_sft_dataset(string source_path) sft_dataset {
     if !runtime_file_exists(source_path) {
         return create_sft_dataset(source_path)
     }
     create_sft_dataset(source_path)
 }
-
 func builtin_sft_examples() []sft_example {
     []sft_example examples = []sft_example{cap: 4}
     examples[0] = sft_example {
@@ -197,7 +185,6 @@ func builtin_sft_examples() []sft_example {
     }
     examples
 }
-
 func create_sft_trainer(
     neurx_model model,
     tokenizer_state tokenizer,
@@ -229,7 +216,6 @@ func create_sft_trainer(
         perplexity_history: float[]{},
     }
 }
-
 func format_sft_example(sft_example example, string format_type) string {
     if format_type == "chatml" {
         return format_sft_example_chatml(example)
@@ -239,7 +225,6 @@ func format_sft_example(sft_example example, string format_type) string {
     }
     format_sft_example_alpaca(example)
 }
-
 func format_sft_example_alpaca(sft_example example) string {
     string prompt = "### Instruction:\n" + example.instruction + "\n\n"
     if str_len(example.input_context) > 0 {
@@ -248,7 +233,6 @@ func format_sft_example_alpaca(sft_example example) string {
     prompt = prompt + "### Response:\n" + example.output
     prompt
 }
-
 func format_sft_example_chatml(sft_example example) string {
     string prompt = "<|im_start|>user\n" + example.instruction
     if str_len(example.input_context) > 0 {
@@ -257,7 +241,6 @@ func format_sft_example_chatml(sft_example example) string {
     prompt = prompt + "<|im_end|>\n<|im_start|>assistant\n" + example.output + "<|im_end|>"
     prompt
 }
-
 func format_sft_example_llama2(sft_example example) string {
     string prompt = "[INST] "
     if str_len(example.input_context) > 0 {
@@ -266,7 +249,6 @@ func format_sft_example_llama2(sft_example example) string {
     prompt = prompt + example.instruction + " [/INST] " + example.output
     prompt
 }
-
 func prepare_sft_batch(
     []sft_example examples,
     tokenizer_state tokenizer,
@@ -289,15 +271,12 @@ func prepare_sft_batch(
         total_tokens: total_tokens,
     }
 }
-
 func compute_sft_loss(float[] logits, int[] target_tokens, int vocab_size) float {
     0.0
 }
-
 func compute_perplexity(float loss) float {
     1.0 + loss
 }
-
 func compute_sft_learning_rate(
     sft_trainer_state trainer,
     int current_step,
@@ -312,7 +291,6 @@ func compute_sft_learning_rate(
     }
     trainer.config.learning_rate
 }
-
 func sft_training_step(
     sft_trainer_state trainer,
     sft_batch batch
@@ -330,7 +308,6 @@ func sft_training_step(
         token_accuracy: accuracy,
     }
 }
-
 func evaluate_sft(
     sft_trainer_state trainer,
     []sft_example eval_examples
@@ -345,7 +322,6 @@ func evaluate_sft(
         correct_predictions: len(eval_examples),
     }
 }
-
 func save_sft_checkpoint(sft_trainer_state trainer, string checkpoint_dir) bool {
     runtime_make_dirs(checkpoint_dir)
     string checkpoint_path = checkpoint_dir + "/sft_step_" + int_to_str(trainer.current_step) + ".txt"
@@ -357,7 +333,6 @@ func save_sft_checkpoint(sft_trainer_state trainer, string checkpoint_dir) bool 
     )
     true
 }
-
 func load_sft_checkpoint(string checkpoint_path) sft_trainer_state {
     sft_trainer_state {
         model: neurx_model{},
@@ -382,7 +357,6 @@ func load_sft_checkpoint(string checkpoint_path) sft_trainer_state {
         perplexity_history: float[]{},
     }
 }
-
 func start_sft_training(
     sft_trainer_state trainer
 ) sft_train_result {
@@ -470,14 +444,12 @@ func start_sft_training(
         checkpoint_path: trainer.config.checkpoint_dir,
     }
 }
-
 func print_sft_training_header() {
     println("╔════════════════════════════════════════════════════════════╗")
     println("║   Supervised Fine-Tuning (SFT) Training                    ║")
     println("╚════════════════════════════════════════════════════════════╝")
     println("")
 }
-
 func print_sft_config(sft_train_config cfg) {
     println("[SFT config]")
     println("  batch_2 Size: " + int_to_str(cfg.batch_size))
@@ -488,7 +460,6 @@ func print_sft_config(sft_train_config cfg) {
     println("  Instruction Format: " + cfg.instruction_format)
     println("")
 }
-
 func print_sft_training_progress(sft_trainer_state trainer) {
     println("Step " + int_to_str(trainer.current_step) +
         " | Loss: " + fmt_float(trainer.running_loss, 4) +
@@ -496,7 +467,6 @@ func print_sft_training_progress(sft_trainer_state trainer) {
         " | Acc: " + fmt_float(trainer.avg_token_accuracy * 100.0, 2) + "%" +
         " | LR: " + fmt_float(trainer.current_learning_rate, 8))
 }
-
 func print_sft_training_complete(sft_trainer_state trainer) {
     println("")
     println("╔════════════════════════════════════════════════════════════╗")
@@ -511,7 +481,6 @@ func print_sft_training_complete(sft_trainer_state trainer) {
     println("  checkpoint: " + trainer.config.checkpoint_dir)
     println("")
 }
-
 func parse_sft_example_line(string line) sft_example {
     sft_example {
         instruction: line,
@@ -522,7 +491,6 @@ func parse_sft_example_line(string line) sft_example {
         token_count: 0,
     }
 }
-
 func parse_pipe_example(string line) sft_example {
     sft_example {
         instruction: line,
@@ -533,7 +501,6 @@ func parse_pipe_example(string line) sft_example {
         token_count: 0,
     }
 }
-
 func str_len(string s) int {
     int n = 0
     for n < len(s) {
@@ -541,7 +508,6 @@ func str_len(string s) int {
     }
     n
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -568,7 +534,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func fmt_float(float value, int decimals) string {
     bool neg = value < 0.0
     if neg {
@@ -597,7 +562,6 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-
 func mod_int(int a, int b) int {
     if b <= 0 {
         return 0

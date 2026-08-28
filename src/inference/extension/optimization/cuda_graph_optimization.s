@@ -1,7 +1,6 @@
 package optimization
 import "core"
 import "tensor"
-
 struct cuda_graph_node {
     id              int32
     kernel_name     string
@@ -9,14 +8,12 @@ struct cuda_graph_node {
     params          map[string]int32
     status          string
 }
-
 struct cuda_graph_config {
     enable_capture  bool
     max_nodes       int32
     enable_fusion   bool
     enable_coarsening bool
 }
-
 struct cuda_graph {
     config          cuda_graph_config
     nodes           []cuda_graph_node
@@ -24,7 +21,6 @@ struct cuda_graph {
     execution_order int[]32
     ready_queue     int[]32
 }
-
 func NewCUDAGraph(config cuda_graph_config) *cuda_graph {
     if config.max_nodes <= 0 {
         config.max_nodes = 1000
@@ -37,7 +33,6 @@ func NewCUDAGraph(config cuda_graph_config) *cuda_graph {
         ready_queue:     make(int[]32, 0),
     }
 }
-
 func (cuda_graph* g) AddNode(
     kernel_name string,
     dependencies int[]32,
@@ -54,7 +49,6 @@ func (cuda_graph* g) AddNode(
     g.nodes = append(g.nodes, node)
     return node_id
 }
-
 func (cuda_graph* g) BuildExecutionPlan() int[]32 {
     in_degree := make(int[]32, len(g.nodes))
     for _, node := range g.nodes {
@@ -87,7 +81,6 @@ func (cuda_graph* g) BuildExecutionPlan() int[]32 {
     g.execution_order = order
     return order
 }
-
 func (cuda_graph* g) ExecuteGraph() map[int32]float[]32 {
     if len(g.execution_order) == 0 {
         g.BuildExecutionPlan()
@@ -105,7 +98,6 @@ func (cuda_graph* g) ExecuteGraph() map[int32]float[]32 {
     }
     return results
 }
-
 func (cuda_graph* g) executeKernel(cuda_graph_node* node) float[]32 {
     switch node.kernel_name {
     case "matmul":
@@ -120,7 +112,6 @@ func (cuda_graph* g) executeKernel(cuda_graph_node* node) float[]32 {
         return make(float[]32, 0)
     }
 }
-
 func (cuda_graph* g) kernelMatmul(cuda_graph_node* node) float[]32 {
     m := node.params["m"]
     n := node.params["n"]
@@ -131,7 +122,6 @@ func (cuda_graph* g) kernelMatmul(cuda_graph_node* node) float[]32 {
     }
     return output
 }
-
 func (cuda_graph* g) kernelActivation(cuda_graph_node* node) float[]32 {
     output_size := node.params["size"]
     act_type := node.params["type"]
@@ -154,7 +144,6 @@ func (cuda_graph* g) kernelActivation(cuda_graph_node* node) float[]32 {
     }
     return output
 }
-
 func (cuda_graph* g) kernelLayernorm(cuda_graph_node* node) float[]32 {
     batch := node.params["batch"]
     size := node.params["size"]
@@ -179,7 +168,6 @@ func (cuda_graph* g) kernelLayernorm(cuda_graph_node* node) float[]32 {
     }
     return output
 }
-
 func (cuda_graph* g) kernelAttention(cuda_graph_node* node) float[]32 {
     seq_len := node.params["seq_len"]
     heads := node.params["heads"]
@@ -190,7 +178,6 @@ func (cuda_graph* g) kernelAttention(cuda_graph_node* node) float[]32 {
     }
     return output
 }
-
 func (cuda_graph* g) FuseNodes(node_id1 int32, node_id2 int32) int32 {
     if !g.config.enable_fusion {
         return -1
@@ -229,7 +216,6 @@ func (cuda_graph* g) FuseNodes(node_id1 int32, node_id2 int32) int32 {
     fused_id := g.AddNode(fused_kernel, fused_deps, fused_params)
     return fused_id
 }
-
 func (cuda_graph* g) GetMemoryReduction() float32 {
     original_buffers := int32(len(g.nodes))
     optimized_buffers := int32(len(g.nodes)) / 2
@@ -242,7 +228,6 @@ func (cuda_graph* g) GetMemoryReduction() float32 {
     }
     return reduction
 }
-
 func (cuda_graph* g) GetLatencyReduction() float32 {
     num_kernels := float32(len(g.nodes))
     launch_overhead_per_kernel := 0.0015
@@ -258,7 +243,6 @@ func (cuda_graph* g) GetLatencyReduction() float32 {
     }
     return reduction
 }
-
 func (cuda_graph* g) PrintExecutionPlan() {
     if len(g.execution_order) == 0 {
         g.BuildExecutionPlan()
@@ -276,7 +260,6 @@ func (cuda_graph* g) PrintExecutionPlan() {
         }
     }
 }
-
 func main() {
     config := cuda_graph_config{
         enable_capture: true,

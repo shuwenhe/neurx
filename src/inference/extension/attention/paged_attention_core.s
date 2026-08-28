@@ -1,5 +1,4 @@
 package neurx.attention.paged_attention_core
-
 struct paged_block {
     float[] key_data
     float[] value_data
@@ -7,12 +6,10 @@ struct paged_block {
     int num_filled
     bool is_full
 }
-
 struct slot_mapping {
     int block_id
     int offset_in_block
 }
-
 struct paged_kv_cache {
     []paged_block blocks
     []slot_mapping token_to_slot
@@ -23,7 +20,6 @@ struct paged_kv_cache {
     int allocated_blocks
     int total_tokens
 }
-
 struct paged_attention_config {
     int block_size
     int num_kv_heads
@@ -31,7 +27,6 @@ struct paged_attention_config {
     int max_blocks
     float scale
 }
-
 func new_paged_kv_cache(config paged_attention_config) paged_kv_cache {
     int normalized_block = config.block_size
     if normalized_block <= 0 {
@@ -74,12 +69,10 @@ func new_paged_kv_cache(config paged_attention_config) paged_kv_cache {
         total_tokens: 0,
     }
 }
-
 func new_float_array(int size) float[] {
     float[] arr = make(float[], size)
     return arr
 }
-
 func reserve_tokens(cache paged_kv_cache, int num_new_tokens) paged_kv_cache {
     if num_new_tokens <= 0 {
         return cache
@@ -124,14 +117,12 @@ func reserve_tokens(cache paged_kv_cache, int num_new_tokens) paged_kv_cache {
         total_tokens: new_total,
     }
 }
-
 func mod_int(int a, int b) int {
     if b == 0 {
         return 0
     }
     a - (a / b) * b
 }
-
 func release_tokens(cache paged_kv_cache, int num_release) paged_kv_cache {
     if num_release <= 0 {
         return cache
@@ -159,7 +150,6 @@ func release_tokens(cache paged_kv_cache, int num_release) paged_kv_cache {
         total_tokens: new_total,
     }
 }
-
 func reset_cache(cache paged_kv_cache) paged_kv_cache {
     paged_kv_cache{
         blocks: cache.blocks,
@@ -172,7 +162,6 @@ func reset_cache(cache paged_kv_cache) paged_kv_cache {
         total_tokens: 0,
     }
 }
-
 func write_kv_to_cache(
     cache paged_kv_cache,
     float[] keys,
@@ -217,7 +206,6 @@ func write_kv_to_cache(
     }
     return cache
 }
-
 func compute_paged_attention(
     cache paged_kv_cache,
     float[] queries,
@@ -310,7 +298,6 @@ func compute_paged_attention(
     }
     return output
 }
-
 func apply_attention_mask(
     float[] attention_scores,
     string mask_type,
@@ -325,7 +312,6 @@ func apply_attention_mask(
     }
     return attention_scores
 }
-
 func compute_softmax(float[] scores) float[] {
     if len(scores) == 0 {
         return scores
@@ -359,7 +345,6 @@ func compute_softmax(float[] scores) float[] {
     }
     return softmax_scores
 }
-
 func math_exp(float x) float {
     if x > 88.0 {
         return 6.5623733e37
@@ -383,7 +368,6 @@ func math_exp(float x) float {
     }
     return result
 }
-
 func factorial(int n) float {
     if n <= 1 {
         return 1.0
@@ -396,14 +380,12 @@ func factorial(int n) float {
     }
     return result
 }
-
 struct paged_cache_stats {
     int total_tokens
     int allocated_blocks
     int memory_used_mb
     float utilization_percent
 }
-
 func get_cache_stats(cache paged_kv_cache) paged_cache_stats {
     int bytes_per_token = cache.num_kv_heads * cache.head_size * 4 * 2
     int memory_used = cache.total_tokens * bytes_per_token
@@ -420,7 +402,6 @@ func get_cache_stats(cache paged_kv_cache) paged_cache_stats {
         utilization_percent: utilization,
     }
 }
-
 func debug_print_cache_state(cache paged_kv_cache) string {
     stats = get_cache_stats(cache)
     result = ""
@@ -431,7 +412,6 @@ func debug_print_cache_state(cache paged_kv_cache) string {
     result = result + "  Utilization: " + str(stats.utilization_percent) + "%\n"
     return result
 }
-
 func compute_paged_attention_gqa(
     cache paged_kv_cache,
     float[] queries,

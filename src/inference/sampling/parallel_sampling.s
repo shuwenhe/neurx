@@ -1,10 +1,8 @@
 package neurx.inference.sampling.parallel_sampling
-
 struct parallel_sampling_config {
     int maximum_parents
     int maximum_children
 }
-
 struct parallel_sampling_state {
     parallel_sampling_config config
     int[] parent_request_ids
@@ -21,7 +19,6 @@ struct parallel_sampling_state {
     int completed_parents
     int cancelled_children
 }
-
 struct parallel_sampling_result {
     parallel_sampling_state state
     int parent_request_id
@@ -32,21 +29,18 @@ struct parallel_sampling_result {
     bool parent_complete
     bool accepted
 }
-
 func parallel_int_array(int capacity) int[] {
     int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func parallel_float_array(int capacity) float[] {
     float[] values = float[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0.0; i = i + 1 }
     values
 }
-
 func new_parallel_sampling_state(parallel_sampling_config config) parallel_sampling_state {
     if config.maximum_parents <= 0 { config.maximum_parents = 1 }
     if config.maximum_children <= 0 { config.maximum_children = 1 }
@@ -54,7 +48,6 @@ func new_parallel_sampling_state(parallel_sampling_config config) parallel_sampl
     int child_capacity = config.maximum_parents * config.maximum_children
     parallel_sampling_state {config: config, parent_request_ids: parallel_int_array(config.maximum_parents), child_counts: parallel_int_array(config.maximum_parents), completed_children: parallel_int_array(config.maximum_parents), maximum_generated_tokens: parallel_int_array(config.maximum_parents), final_only: parallel_int_array(config.maximum_parents), active: parallel_int_array(config.maximum_parents), child_finished: parallel_int_array(child_capacity), child_cancelled: parallel_int_array(child_capacity), child_token_counts: parallel_int_array(child_capacity), child_scores: parallel_float_array(child_capacity), parent_count: 0, completed_parents: 0, cancelled_children: 0}
 }
-
 func parallel_parent_find(parallel_sampling_state state, int parent_request_id) int {
     int i = 0
     for i < state.config.maximum_parents {
@@ -63,15 +56,12 @@ func parallel_parent_find(parallel_sampling_state state, int parent_request_id) 
     }
     0 - 1
 }
-
 func parallel_child_offset(parallel_sampling_state state, int parent_slot, int child_index) int {
     parent_slot * state.config.maximum_children + child_index
 }
-
 func parallel_child_request_id(int parent_request_id, int child_index) int {
     parent_request_id * 1000 + child_index + 1
 }
-
 func parallel_sampling_create(parallel_sampling_state state, int parent_request_id, int child_count, bool final_only) parallel_sampling_state {
     if parent_request_id <= 0 || child_count <= 0 || child_count > state.config.maximum_children || parallel_parent_find(state, parent_request_id) >= 0 || state.parent_count >= state.config.maximum_parents { return state }
     int slot = 0 - 1
@@ -88,7 +78,6 @@ func parallel_sampling_create(parallel_sampling_state state, int parent_request_
     state.parent_count = state.parent_count + 1
     state
 }
-
 func parallel_best_child(parallel_sampling_state state, int parent_slot) int {
     int best = 0 - 1
     int child = 0
@@ -101,7 +90,6 @@ func parallel_best_child(parallel_sampling_state state, int parent_slot) int {
     }
     best
 }
-
 func parallel_sampling_complete_child(parallel_sampling_state state, int parent_request_id, int child_index, int generated_tokens, float score) parallel_sampling_result {
     int slot = parallel_parent_find(state, parent_request_id)
     if slot < 0 || child_index < 0 || child_index >= state.child_counts[slot] { return parallel_sampling_result {state: state, parent_request_id: parent_request_id, child_request_id: 0, child_index: child_index, best_child_index: 0 - 1, emit: false, parent_complete: false, accepted: false} }
@@ -117,7 +105,6 @@ func parallel_sampling_complete_child(parallel_sampling_state state, int parent_
     bool emit = state.final_only[slot] == 0 || complete
     parallel_sampling_result {state: state, parent_request_id: parent_request_id, child_request_id: parallel_child_request_id(parent_request_id, child_index), child_index: child_index, best_child_index: parallel_best_child(state, slot), emit: emit, parent_complete: complete, accepted: true}
 }
-
 func parallel_sampling_cancel_remaining(parallel_sampling_state state, int parent_request_id) parallel_sampling_state {
     int slot = parallel_parent_find(state, parent_request_id)
     if slot < 0 { return state }

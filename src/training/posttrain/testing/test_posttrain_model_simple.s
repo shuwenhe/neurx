@@ -4,7 +4,6 @@ use neurx.runtime.io.{
     runtime_file_exists,
     runtime_file_size
 }
-
 func test_base_model() string {
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
     bool exists = runtime_file_exists(base_path)
@@ -19,7 +18,6 @@ func test_base_model() string {
         return "✗ [loading] base_model_files: FAILED\n  → model.safetensors not found"
     }
 }
-
 func test_adapter_files() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     bool exists = runtime_file_exists(adapter_path)
@@ -34,7 +32,6 @@ func test_adapter_files() string {
         return "✗ [loading] adapter_files: FAILED\n  → adapter_config.json not found"
     }
 }
-
 func test_adapter_model() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     bool exists = runtime_file_exists(adapter_path)
@@ -49,7 +46,6 @@ func test_adapter_model() string {
         return "✗ [loading] adapter_model: FAILED\n  → adapter_model.safetensors not found"
     }
 }
-
 func test_merged_model() string {
     string merged_path = runtime_env_get("NEURX_MERGED_MODEL_PATH", "/home/shuwen/shuwen/posttrain/base-model-posttrain")
     bool exists = runtime_file_exists(merged_path)
@@ -64,7 +60,6 @@ func test_merged_model() string {
         return "✗ [loading] merged_model: FAILED\n  → Merged model.safetensors not found"
     }
 }
-
 func test_data_files() string {
     string data_path = runtime_env_get("NEURX_DATA_PATH", "/home/shuwen/shuwen/dataset/medical/test.json")
     bool exists = runtime_file_exists(data_path)
@@ -73,12 +68,10 @@ func test_data_files() string {
     }
     return "✓ [loading] data_files: PASSED\n  → Medical test dataset found"
 }
-
 func test_output_directory() string {
     string output_path = runtime_env_get("NEURX_TEST_OUTPUT_DIR", "/home/shuwen/shuwen/neurx/artifact/posttrain_test")
     return "✓ [setup] output_directory: PASSED\n  → Output directory configured: " + output_path
 }
-
 func test_model_summary() string {
     string result = "✓ [info] model_summary: PASSED"
     result = result + "\n  → Base Model: Language Model 0.5B Instruct"
@@ -87,7 +80,6 @@ func test_model_summary() string {
     result = result + "\n  → Target Modules: q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj"
     return result
 }
-
 func main() {
     println("")
     println("======================================================")

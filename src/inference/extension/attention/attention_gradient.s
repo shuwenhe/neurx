@@ -1,5 +1,4 @@
 package neurx.attention.gradient
-
 struct attention_forward_cache {
     float[] hidden_states
     float[] concatenated
@@ -17,18 +16,15 @@ struct attention_forward_cache {
     int head_dim
     float scale_factor
 }
-
 struct scaled_dot_product_attention_backward_result {
     float[] d_query
     float[] d_key
     float[] d_value
 }
-
 struct projection_backward_result {
     float[] d_input
     float[] d_weights
 }
-
 struct attention_gradients {
     float[] d_query
     float[] d_key
@@ -39,7 +35,6 @@ struct attention_gradients {
     float[] d_wo
     float[] d_hidden_states
 }
-
 func softmax_backward(
     float[] input_grad,
     float[] softmax_output,
@@ -59,7 +54,6 @@ func softmax_backward(
     }
     return output_grad
 }
-
 func scaled_dot_product_attention_backward(
     float[] d_output,
     attention_forward_cache cache
@@ -132,7 +126,6 @@ func scaled_dot_product_attention_backward(
     result.d_value = d_value
     return result
 }
-
 func projection_backward(
     float[] d_output,
     float[] input,
@@ -148,7 +141,6 @@ func projection_backward(
     result.d_weights = d_weights
     return result
 }
-
 func attention_backward(
     float[] d_output,
     attention_forward_cache cache,
@@ -198,7 +190,6 @@ func attention_backward(
     grads.d_hidden_states = d_hidden_states
     return grads
 }
-
 func slice_row(float[] matrix, int row_start, int row_len) float[] {
     float[] row = allocate_vector(row_len, 0.0)
     int i = 0
@@ -208,7 +199,6 @@ func slice_row(float[] matrix, int row_start, int row_len) float[] {
     }
     return row
 }
-
 func matrix_multiply_transpose(float[] a, float[] b, int m, int k, int n) float[] {
     float[] result = allocate_vector(m * n, 0.0)
     int i = 0
@@ -230,7 +220,6 @@ func matrix_multiply_transpose(float[] a, float[] b, int m, int k, int n) float[
     }
     return result
 }
-
 func matrix_multiply_transpose_lhs(float[] a, float[] b, int m, int k, int n) float[] {
     float[] result = allocate_vector(m * n, 0.0)
     int i = 0
@@ -252,7 +241,6 @@ func matrix_multiply_transpose_lhs(float[] a, float[] b, int m, int k, int n) fl
     }
     return result
 }
-
 func reshape_for_heads(float[] x, int seq_len, int num_heads, int head_dim) float[] {
     int size = seq_len * num_heads * head_dim
     float[] reshaped = allocate_vector(size, 0.0)
@@ -263,7 +251,6 @@ func reshape_for_heads(float[] x, int seq_len, int num_heads, int head_dim) floa
     }
     return reshaped
 }
-
 func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) float[] {
     int hidden_dim = num_heads * head_dim
     int size = seq_len * hidden_dim
@@ -275,7 +262,6 @@ func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) flo
     }
     return reshaped
 }
-
 func allocate_vector(int size, float init_val) float[] {
     float[] v = float[]{cap: size}
     int i = 0

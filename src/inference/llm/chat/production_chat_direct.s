@@ -1,11 +1,9 @@
 package neurx.inference.production_chat_direct
 use std.conv.int_to_string
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, generate_response_stream}
-
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern func runtime_env_get(string key, string default_value) string
-
 func trim(string s) string {
     int i = 0
     for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -20,11 +18,9 @@ func trim(string s) string {
     }
     return __host_slice(s, i, j + 1)
 }
-
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
-
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
     int keyword_len = len(keyword)
@@ -50,7 +46,6 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
-
 func to_lowercase(string text) string {
     string result = ""
     int i = 0
@@ -64,7 +59,6 @@ func to_lowercase(string text) string {
     }
     return result
 }
-
 func generate_medical_response(real_text_engine_state state, string prompt) string {
     if !state.ready {
         return "error: " + state.error_message
@@ -78,14 +72,12 @@ func generate_medical_response(real_text_engine_state state, string prompt) stri
     }
     return result.text
 }
-
 func stream_medical_token(string token) bool {
     if len(token) > 0 {
         print(token + " ")
     }
     true
 }
-
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))

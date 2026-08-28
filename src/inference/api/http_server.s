@@ -1,17 +1,14 @@
 use std.conv.int_to_string
 use std.result.result
-
 package neurx.inference.api.http_server
 use src.net.{listen_tcp, tcp_listener, tcp_conn}
 use src.net.http.{http_request, http_response, parse_http_request, format_http_response}
-
 struct http_server {
     int listen_fd
     int port
     string host
     bool running
 }
-
 func listener_from_server(http_server server) tcp_listener {
     tcp_listener {
         fd: server.listen_fd,
@@ -19,7 +16,6 @@ func listener_from_server(http_server server) tcp_listener {
         port: server.port,
     }
 }
-
 func conn_from_fd(int client_fd) tcp_conn {
     tcp_conn {
         fd: client_fd,
@@ -29,7 +25,6 @@ func conn_from_fd(int client_fd) tcp_conn {
         write_timeout_ms: 0,
     }
 }
-
 func write_client_data(int client_fd, string data) int {
     tcp_conn conn = conn_from_fd(client_fd)
     switch conn.write(data) {
@@ -37,7 +32,6 @@ func write_client_data(int client_fd, string data) int {
         (0, _) : -1,
     }
 }
-
 func close_client_connection(int client_fd) int {
     tcp_conn conn = conn_from_fd(client_fd)
     switch conn.close() {
@@ -45,7 +39,6 @@ func close_client_connection(int client_fd) int {
         (0, _) : -1,
     }
 }
-
 func create_http_server(string host, int port) http_server {
     listener_res := listen_tcp(host, port)
     listener := switch listener_res {
@@ -63,7 +56,6 @@ func create_http_server(string host, int port) http_server {
         running: true,
     }
 }
-
 func handle_connection(int client_fd, func(http_request) http_response handler) {
     tcp_conn conn = conn_from_fd(client_fd)
     string request_data = switch conn.read(4096) {
@@ -89,7 +81,6 @@ func handle_connection(int client_fd, func(http_request) http_response handler) 
     }
     conn.close()
 }
-
 func server_accept_loop(http_server server, func(http_request) http_response handler) {
     tcp_listener listener = listener_from_server(server)
     for server.running {
@@ -104,7 +95,6 @@ func server_accept_loop(http_server server, func(http_request) http_response han
         }
     }
 }
-
 func close_http_server(http_server server) {
     if server.listen_fd >= 0 {
         listener_from_server(server).close()

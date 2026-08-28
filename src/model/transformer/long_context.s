@@ -1,12 +1,10 @@
 package neurx.model.transformer.long_context
 import "neurx.util.math"
-
     SLIDING_WINDOW = 0
     PAGED_KV = 1
     FULL_ATTENTION = 2
     MIXED = 3
 }
-
 struct long_context_config {
     int max_context_length
     int sliding_window_size
@@ -21,7 +19,6 @@ struct long_context_config {
     float rope_scale
     int attention_chunk_size
 }
-
 struct sliding_window_state {
     float[] keys
     float[] values
@@ -31,7 +28,6 @@ struct sliding_window_state {
     int buffer_end
     int[] position_map
 }
-
 struct kv_cache_block {
     float[] keys
     float[] values
@@ -40,7 +36,6 @@ struct kv_cache_block {
     int end_position
     bool is_valid
 }
-
 struct paged_kv_cache {
     []kv_cache_block blocks
     int block_size
@@ -50,14 +45,12 @@ struct paged_kv_cache {
     int current_block_idx
     int[] block_mapping
 }
-
 struct segment_info {
     int segment_id
     int start_pos
     int end_pos
     float[] segment_embedding
 }
-
 struct long_context_state {
     long_context_config config
     sliding_window_state sw_state
@@ -65,7 +58,6 @@ struct long_context_state {
     []segment_info segments
     int current_segment_idx
 }
-
 func new_long_context_config() long_context_config {
     long_context_config {
         max_context_length: 262144,
@@ -82,7 +74,6 @@ func new_long_context_config() long_context_config {
         attention_chunk_size: 1024,
     }
 }
-
 func new_sliding_window_state(long_context_config config) sliding_window_state {
     int num_heads = 32
     int head_dim = config.max_context_length / num_heads
@@ -96,7 +87,6 @@ func new_sliding_window_state(long_context_config config) sliding_window_state {
         position_map: math.allocate_int(config.sliding_window_size, -1),
     }
 }
-
 func new_kv_cache_block(int block_size, int num_heads, int head_dim) kv_cache_block {
     kv_cache_block {
         keys: math.allocate_float(block_size * num_heads * head_dim, 0.0),
@@ -107,7 +97,6 @@ func new_kv_cache_block(int block_size, int num_heads, int head_dim) kv_cache_bl
         is_valid: false,
     }
 }
-
 func new_paged_kv_cache(long_context_config config) paged_kv_cache {
     int num_heads = 32
     int head_dim = config.max_context_length / num_heads
@@ -128,7 +117,6 @@ func new_paged_kv_cache(long_context_config config) paged_kv_cache {
     }
     cache
 }
-
 func new_long_context_state(long_context_config config) long_context_state {
     long_context_state {
         config: config,
@@ -138,7 +126,6 @@ func new_long_context_state(long_context_config config) long_context_state {
         current_segment_idx: 0,
     }
 }
-
 func compute_dynamic_position_encoding(int position, int segment_id, long_context_config config) float[] {
     int hidden_dim = 8192
     float[] encoding = math.allocate_float(hidden_dim, 0.0)
@@ -157,7 +144,6 @@ func compute_dynamic_position_encoding(int position, int segment_id, long_contex
     }
     encoding
 }
-
 func compute_segment_embedding(int segment_id, int hidden_dim) float[] {
     float[] embedding = math.allocate_float(hidden_dim, 0.0)
     float base = 10000.0
@@ -174,7 +160,6 @@ func compute_segment_embedding(int segment_id, int hidden_dim) float[] {
     }
     embedding
 }
-
 func sliding_window_attention(float[] queries, float[] keys, float[] values,
                               int num_heads, int head_dim, int seq_len,
                               int window_size, int current_position) float[] {
@@ -220,7 +205,6 @@ func sliding_window_attention(float[] queries, float[] keys, float[] values,
     }
     output
 }
-
 func paged_kv_cache_append(paged_kv_cache cache, float[] new_keys, float[] new_values,
                            int start_position, int seq_len) paged_kv_cache {
     int block_size = cache.block_size
@@ -261,7 +245,6 @@ func paged_kv_cache_append(paged_kv_cache cache, float[] new_keys, float[] new_v
     }
     cache
 }
-
 func paged_kv_cache_get_block(paged_kv_cache cache, int position) kv_cache_block {
     int block_idx = position / cache.block_size
     if block_idx >= len(cache.block_mapping) || cache.block_mapping[block_idx] < 0 {
@@ -270,7 +253,6 @@ func paged_kv_cache_get_block(paged_kv_cache cache, int position) kv_cache_block
     int physical_block_idx = cache.block_mapping[block_idx]
     cache.blocks[physical_block_idx]
 }
-
 func paged_kv_cache_attention(float[] queries, paged_kv_cache cache, int query_position,
                               int num_heads, int head_dim, int seq_len) float[] {
     int hidden_dim = num_heads * head_dim
@@ -330,7 +312,6 @@ func paged_kv_cache_attention(float[] queries, paged_kv_cache cache, int query_p
     }
     output
 }
-
 func long_context_attention(long_context_state state, float[] queries, float[] keys, float[] values,
                             int num_heads, int head_dim, int seq_len, int current_position) float[] {
     long_context_config config = state.config
@@ -379,7 +360,6 @@ func long_context_attention(long_context_state state, float[] queries, float[] k
     }
     output
 }
-
 func chunked_attention(float[] queries, float[] keys, float[] values,
                        int num_heads, int head_dim, int seq_len, int chunk_size) float[] {
     int hidden_dim = num_heads * head_dim
@@ -432,7 +412,6 @@ func chunked_attention(float[] queries, float[] keys, float[] values,
     }
     output
 }
-
 func long_context_compute_position_ids(int start_pos, int seq_len, long_context_config config) int[] {
     int[] position_ids = math.allocate_int(seq_len, 0)
     int i = 0
@@ -442,7 +421,6 @@ func long_context_compute_position_ids(int start_pos, int seq_len, long_context_
     }
     position_ids
 }
-
 func long_context_compute_segment_ids(int start_pos, int seq_len, int segment_size) int[] {
     int[] segment_ids = math.allocate_int(seq_len, 0)
     int i = 0
@@ -452,7 +430,6 @@ func long_context_compute_segment_ids(int start_pos, int seq_len, int segment_si
     }
     segment_ids
 }
-
 func long_context_update_state(long_context_state state, int new_position) long_context_state {
     state.sw_state.current_position = new_position
     state.sw_state.buffer_end = (state.sw_state.buffer_end + 1) % state.sw_state.window_size
@@ -480,7 +457,6 @@ func long_context_update_state(long_context_state state, int new_position) long_
     }
     state
 }
-
 func long_context_reset(long_context_state state) long_context_state {
     state.sw_state.current_position = 0
     state.sw_state.buffer_start = 0

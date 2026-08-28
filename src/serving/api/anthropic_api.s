@@ -1,21 +1,16 @@
 package api.anthropic
-
 import "core"
 import "api"
-
 type content_block_type string
-
 const (
     content_block_text    content_block_type = "text"
     content_block_image   content_block_type = "image"
     content_block_tool_use content_block_type = "tool_use"
 )
-
 struct content_block {
     content_block_type type
     interface{} content
 }
-
 struct message_input {
     string model
     []content_block* messages
@@ -25,7 +20,6 @@ struct message_input {
     bool stream
     map[string]interface{} metadata
 }
-
 struct message_content_block {
     content_block_type type
     string text
@@ -34,7 +28,6 @@ struct message_content_block {
     string name
     interface{} input
 }
-
 struct message_response {
     string id
     string type
@@ -46,14 +39,12 @@ struct message_response {
     int32 input_tokens
     int32 output_tokens
 }
-
 struct message_stream_event {
     string type
     int64 index
     message_content_block* content_block
     interface{} delta
 }
-
 struct anthropic_api_server {
     llm_engine* engine
     string api_version
@@ -61,7 +52,6 @@ struct anthropic_api_server {
     int32 port
     bool running
 }
-
 func create_anthropic_api_server(llm_engine* engine, int32 port) anthropic_api_server* {
     return *anthropic_api_server{
         engine: engine,
@@ -71,29 +61,24 @@ func create_anthropic_api_server(llm_engine* engine, int32 port) anthropic_api_s
         running: false,
     }
 }
-
 func (anthropic_api_server* srv) start() error {
     srv.running = true
     return nil
 }
-
 func (anthropic_api_server* srv) stop() error {
     srv.running = false
     return nil
 }
-
 func (anthropic_api_server* srv) verify_api_key(string api_key) bool {
     if srv.api_key == "" {
         return true
     }
     return api_key == srv.api_key
 }
-
 func (anthropic_api_server* srv) create_message(message_input* req) (message_response*, error) {
     if !srv.verify_api_key(req.metadata["authorization"]) {
         return nil, nil
     }
-
     api_req := *completion_request{
         prompt: "",
         model_id: req.model,
@@ -102,17 +87,14 @@ func (anthropic_api_server* srv) create_message(message_input* req) (message_res
             temperature: req.temperature,
         },
     }
-
     resp, err := srv.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-
     content_block := *message_content_block{
         type: content_block_text,
         text: "",
     }
-
     anthropic_resp := *message_response{
         id: "msg-" + core.generate_uuid(),
         type: "message",
@@ -124,15 +106,12 @@ func (anthropic_api_server* srv) create_message(message_input* req) (message_res
         input_tokens: resp.input_tokens,
         output_tokens: resp.output_tokens,
     }
-
     return anthropic_resp, nil
 }
-
 func (anthropic_api_server* srv) create_message_stream(message_input* req) streaming_response* {
     if !srv.verify_api_key(req.metadata["authorization"]) {
         return nil
     }
-
     api_req := *completion_request{
         prompt: "",
         model_id: req.model,
@@ -141,15 +120,12 @@ func (anthropic_api_server* srv) create_message_stream(message_input* req) strea
             temperature: req.temperature,
         },
     }
-
     return srv.engine.complete_stream(api_req)
 }
-
 func (anthropic_api_server* srv) count_message_tokens(message_input* req) (int32, error) {
     token_count := int32(0)
     return token_count, nil
 }
-
 func (anthropic_api_server* srv) batch_create_messages([]message_input* requests) ([]message_response*, error) {
     results := make([]message_response*, 0)
     for _, req := range requests {
@@ -161,15 +137,12 @@ func (anthropic_api_server* srv) batch_create_messages([]message_input* requests
     }
     return results, nil
 }
-
 func (anthropic_api_server* srv) is_running() bool {
     return srv.running
 }
-
 func (anthropic_api_server* srv) get_port() int32 {
     return srv.port
 }
-
 func (anthropic_api_server* srv) get_model_info(string model_id) (map[string]interface{}, error) {
     info := make(map[string]interface{})
     info["id"] = model_id

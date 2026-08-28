@@ -1,5 +1,4 @@
 module web_search_crawler
-
 struct web_search_config {
     search_engines: list<string> = ["google", "bing"]
     max_results_per_engine: int = 10
@@ -29,7 +28,6 @@ struct web_search_config {
     cache_enabled: bool = true
     cache_ttl_hours: int = 24
 }
-
 struct search_result_item {
     string url
     string title
@@ -42,7 +40,6 @@ struct search_result_item {
     string crawl_status
     string crawl_error
 }
-
 struct crawled_content {
     int raw_html_size
     string text_content
@@ -52,7 +49,6 @@ struct crawled_content {
     float extraction_timestamp
     int word_count
 }
-
 struct page_metadata {
     string title
     string description
@@ -67,13 +63,11 @@ struct page_metadata {
     list<string> keywords
     og_data: map<string, string>
 }
-
 struct page_section {
     string heading
     int level
     string content
 }
-
 struct search_response {
     string query
     string corrected_query
@@ -85,7 +79,6 @@ struct search_response {
     list<string> key_findings
     search_statistics stats
 }
-
 struct search_statistics {
     engine_query_times_ms: map<string, float>
     list<float> crawl_times_ms
@@ -99,7 +92,6 @@ interface search_engine_interface {
     name: string { get }
     search(string query, config: web_search_config)
 }
-
 struct engine_search_result {
     list<search_result_item> items
     int total_estimated

@@ -1,6 +1,5 @@
 package neurx.posttrain.core.loss_computation
 use std.io.println
-
 struct loss_state_s {
     float current_loss
     int batch_size
@@ -8,14 +7,12 @@ struct loss_state_s {
     float temperature
     bool include_kl
 }
-
 struct loss_result_s {
     float ce_loss
     float kl_loss
     float total_loss
     float[][] grad_logits
 }
-
 func new_loss_state_s(int num_classes) loss_state_s {
     loss_state_s {
         current_loss: 0.0,
@@ -25,7 +22,6 @@ func new_loss_state_s(int num_classes) loss_state_s {
         include_kl: false,
     }
 }
-
 func softmax_s(float[] logits) float[] {
     float[] probs
     float max_logit = -1000000.0
@@ -52,7 +48,6 @@ func softmax_s(float[] logits) float[] {
     }
     normalized
 }
-
 func log_softmax_s(float[] logits) float[] {
     float[] log_probs
     float[] probs = softmax_s(logits)
@@ -67,7 +62,6 @@ func log_softmax_s(float[] logits) float[] {
     }
     log_probs
 }
-
 func cross_entropy_loss_s(float[][] logits, int[][] labels) float {
     float total_loss = 0.0
     int count = 0
@@ -93,7 +87,6 @@ func cross_entropy_loss_s(float[][] logits, int[][] labels) float {
     }
     total_loss
 }
-
 func kl_divergence_loss_s(float[][] pred_logits, float[][] ref_logits) float {
     float kl_loss = 0.0
     int count = 0
@@ -117,7 +110,6 @@ func kl_divergence_loss_s(float[][] pred_logits, float[][] ref_logits) float {
     }
     kl_loss
 }
-
 func cross_entropy_backward_s(float[][] logits, int[][] labels) float[][] {
     float[][] gradients
     int batch_idx = 0
@@ -139,7 +131,6 @@ func cross_entropy_backward_s(float[][] logits, int[][] labels) float[][] {
     }
     gradients
 }
-
 func compute_loss_s(
     float[][] logits,
     int[][] labels,

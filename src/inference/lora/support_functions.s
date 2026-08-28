@@ -1,5 +1,4 @@
 package neurx.inference.lora.support_functions
-
 func create_lora_config(
     adapter_id string,
     adapter_path string,
@@ -8,7 +7,6 @@ func create_lora_config(
     input_dim int,
     output_dim int
 ) lora_adapter_config {
-
     lora_adapter_config{
         adapter_id: adapter_id,
         adapter_path: adapter_path,
@@ -27,15 +25,12 @@ func create_lora_config(
         target_modules: string[]{"q_proj", "v_proj", "k_proj", "o_proj"},
     }
 }
-
 func initialize_lora_weights(
     config lora_adapter_config
 ) lora_weights {
-
     int rank = config.rank
     int input_dim = config.input_dim
     int output_dim = config.output_dim
-
     float[] lora_a = make(float[], input_dim * rank)
     int i = 0
     for i < len(lora_a) {
@@ -48,16 +43,13 @@ func initialize_lora_weights(
         }
         i = i + 1
     }
-
     float[] lora_b = make(float[], rank * output_dim)
     i = 0
     for i < len(lora_b) {
         lora_b[i] = 0.0
         i = i + 1
     }
-
     float scaling = float(config.alpha) / float(config.rank)
-
     lora_weights{
         rank: rank,
         lora_a: lora_a,
@@ -66,25 +58,19 @@ func initialize_lora_weights(
         use_dropout: false,
     }
 }
-
 func gaussian_random(mean float, std float) float {
-
     float u1 = frand_approx()
     float u2 = frand_approx()
     float z0 = sqrt_f(-2.0 * log_f(u1)) * cos_f(6.28318530718 * u2)
     return mean + std * z0
 }
-
 func frand_approx() float {
-
     return 0.5
 }
-
 func sqrt_f(x float) float {
     if x <= 0.0 {
         return 0.0
     }
-
     float guess = x
     int iter = 0
     for iter < 10 {
@@ -93,9 +79,7 @@ func sqrt_f(x float) float {
     }
     return guess
 }
-
 func exp_f(x float) float {
-
     float result = 1.0
     float term = 1.0
     int i = 1
@@ -106,12 +90,10 @@ func exp_f(x float) float {
     }
     return result
 }
-
 func log_f(x float) float {
     if x <= 0.0 {
         return -10.0
     }
-
     float y = 0.0
     float z = (x - 1.0) / (x + 1.0)
     float z2 = z * z
@@ -124,9 +106,7 @@ func log_f(x float) float {
     }
     return 2.0 * y
 }
-
 func cos_f(x float) float {
-
     float result = 1.0
     float term = 1.0
     int i = 1
@@ -138,9 +118,7 @@ func cos_f(x float) float {
     }
     return result
 }
-
 func sin_f(x float) float {
-
     float result = 0.0
     float term = x
     result = term
@@ -153,7 +131,6 @@ func sin_f(x float) float {
     }
     return result
 }
-
 func create_adaptive_batch_config() adaptive_batch_config {
     adaptive_batch_config{
         target_batch_size: 32,
@@ -164,15 +141,12 @@ func create_adaptive_batch_config() adaptive_batch_config {
         max_batch_size: 128,
     }
 }
-
 func create_empty_stats() map[string]int {
     return map[string]int{}
 }
-
 func create_empty_float_stats() map[string]float {
     return map[string]float{}
 }
-
 func bool_to_str(b bool) string {
     if b {
         return "true"
@@ -180,27 +154,22 @@ func bool_to_str(b bool) string {
         return "false"
     }
 }
-
 func int_to_str(n int) string {
     if n == 0 {
         return "0"
     }
-
     string[] digits = make(string[], 20)
     int idx = 0
     int temp = n
-
     if temp < 0 {
         temp = -temp
     }
-
     for temp > 0 {
         int digit = temp % 10
         digits[idx] = make_digit_str(digit)
         temp = temp / 10
         idx = idx + 1
     }
-
     string[] result = make(string[], idx)
     int i = idx - 1
     int j = 0
@@ -209,17 +178,14 @@ func int_to_str(n int) string {
         i = i - 1
         j = j + 1
     }
-
     string s = ""
     i = 0
     for i < len(result) {
         s = s + result[i]
         i = i + 1
     }
-
     return s
 }
-
 func make_digit_str(d int) string {
     if d == 0 {
         return "0"
@@ -243,7 +209,6 @@ func make_digit_str(d int) string {
         return "9"
     }
 }
-
 func print_array(name string, arr float[], limit int) {
     print(name + " [" + int_to_str(len(arr)) + " elements]:")
     int i = 0
@@ -255,28 +220,20 @@ func print_array(name string, arr float[], limit int) {
         print("  ... (" + int_to_str(len(arr) - limit) + " more)")
     }
 }
-
 func float_to_str(f float) string {
-
     if f == 0.0 {
         return "0.0"
     }
-
     string result = ""
-
     if f < 0.0 {
         result = "-"
         f = -f
     }
-
     int int_part = int(f)
     result = result + int_to_str(int_part)
-
     result = result + ".0"
-
     return result
 }
-
 struct lora_adapter_config {
     string adapter_id
     string adapter_path
@@ -294,7 +251,6 @@ struct lora_adapter_config {
     string[] modules_to_save
     string[] target_modules
 }
-
 struct lora_weights {
     int rank
     float[] lora_a
@@ -302,7 +258,6 @@ struct lora_weights {
     float scaling
     bool use_dropout
 }
-
 struct lora_cache_entry {
     lora_weights weights
     int64 last_access_time
@@ -310,7 +265,6 @@ struct lora_cache_entry {
     bool is_pinned
     int size_mb
 }
-
 struct adaptive_batch_config {
     int target_batch_size
     int max_adapters_per_batch
@@ -319,7 +273,6 @@ struct adaptive_batch_config {
     int min_batch_size
     int max_batch_size
 }
-
 struct lora_request {
     string request_id
     string adapter_id
@@ -330,21 +283,18 @@ struct lora_request {
     int layer_idx
     float urgency_score
 }
-
 struct lora_inference_result {
     string request_id
     bool success
     float[] output_hidden
     int64 inference_time_ms
 }
-
 struct adapter_queue {
     string adapter_id
     []lora_request requests
     int priority
     int total_processed
 }
-
 struct lora_model_config {
     int hidden_dim
     int num_layers
@@ -355,7 +305,6 @@ struct lora_model_config {
     bool enable_weight_merging
     string inference_mode
 }
-
 func main() {
     print("✓ LoRA Support Functions Library")
     print("  - Config creation helpers")

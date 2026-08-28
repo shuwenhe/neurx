@@ -1,11 +1,9 @@
 package neurx.observability.logging
-
     DEBUG,
     INFO,
     WARNING,
     ERROR,
 }
-
     SCALAR,
     HISTOGRAM,
     IMAGE,
@@ -14,14 +12,12 @@ package neurx.observability.logging
     TABLE,
     SCALAR_LIST,
 }
-
 struct log_entry {
     float timestamp
     log_level level
     string message
     map[string]any metadata
 }
-
 struct metric_entry {
     int step
     string name

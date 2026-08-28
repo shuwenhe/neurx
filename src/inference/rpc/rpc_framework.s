@@ -1,7 +1,6 @@
 package neurx.inference.rpc
 import "core"
 import "tensor"
-
 struct rpc_message_type {
     REQUEST          int32
     RESPONSE         int32
@@ -9,7 +8,6 @@ struct rpc_message_type {
     ERROR            int32
     ACK              int32
 }
-
 func RpcMessageTypeValues() rpc_message_type {
     return rpc_message_type{
         REQUEST:   1,
@@ -19,7 +17,6 @@ func RpcMessageTypeValues() rpc_message_type {
         ACK:       5,
     }
 }
-
 struct rpc_method_type {
     FORWARD          int32
     BACKWARD         int32
@@ -29,7 +26,6 @@ struct rpc_method_type {
     HEARTBEAT_CHECK  int32
     CANCEL           int32
 }
-
 func RpcMethodTypeValues() rpc_method_type {
     return rpc_method_type{
         FORWARD:        1,
@@ -41,7 +37,6 @@ func RpcMethodTypeValues() rpc_method_type {
         CANCEL:         7,
     }
 }
-
 struct rpc_request {
     request_id      string
     method          int32
@@ -52,7 +47,6 @@ struct rpc_request {
     timeout_ms      int64
     retry_count     int32
 }
-
 struct rpc_response {
     request_id      string
     method          int32
@@ -62,7 +56,6 @@ struct rpc_response {
     latency_ms      int64
     timestamp_ms    int64
 }
-
 struct rpc_client {
     server_address  string
     port            int32
@@ -71,7 +64,6 @@ struct rpc_client {
     connection_id   string
     healthy         bool
 }
-
 struct rpc_retry_policy {
     max_retries     int32
     initial_delay   int64
@@ -79,14 +71,12 @@ struct rpc_retry_policy {
     backoff_factor  float32
     retry_on_codes  int[]32
 }
-
 struct rpc_server_handler {
     name            string
     handler_fn      func(rpc_request) rpc_response
     methods         int[]32
     max_concurrency int32
 }
-
 struct rpc_server {
     listen_address  string
     port            int32
@@ -95,7 +85,6 @@ struct rpc_server {
     max_requests    int32
     started         bool
 }
-
 func NewRpcClient(server_address string, port int32) *rpc_client {
     return *rpc_client{
         server_address: server_address,
@@ -112,7 +101,6 @@ func NewRpcClient(server_address string, port int32) *rpc_client {
         healthy:      true,
     }
 }
-
 func (rpc_client* client) SendRequest(request rpc_request) (rpc_response, bool) {
     if !client.healthy {
         return rpc_response{
@@ -132,7 +120,6 @@ func (rpc_client* client) SendRequest(request rpc_request) (rpc_response, bool) 
     }
     return response, true
 }
-
 func (rpc_client* client) HealthCheck() bool {
     heartbeat := rpc_request{
         request_id:   "health_check_" + core.ToString(core.Now().UnixMilli()),
@@ -143,7 +130,6 @@ func (rpc_client* client) HealthCheck() bool {
     _, success := client.SendRequest(heartbeat)
     return success
 }
-
 func NewRpcServer(listen_address string, port int32) *rpc_server {
     return *rpc_server{
         listen_address: listen_address,
@@ -154,7 +140,6 @@ func NewRpcServer(listen_address string, port int32) *rpc_server {
         started:        false,
     }
 }
-
 func (rpc_server* server) RegisterHandler(
     name string,
     handler func(rpc_request) rpc_response,
@@ -168,18 +153,15 @@ func (rpc_server* server) RegisterHandler(
     }
     server.handlers[name] = h
 }
-
 func (rpc_server* server) Start() bool {
     server.started = true
     core.Println("RPC Server started on", server.listen_address, ":", server.port)
     return true
 }
-
 func (rpc_server* server) Stop() {
     server.started = false
     core.Println("RPC Server stopped")
 }
-
 func (rpc_server* server) HandleRequest(request rpc_request) rpc_response {
     if !server.started {
         return rpc_response{
@@ -198,13 +180,11 @@ func (rpc_server* server) HandleRequest(request rpc_request) rpc_response {
     }
     return handler.handler_fn(request)
 }
-
 struct rpc_connection_pool {
     connections    map[string]*rpc_client
     max_pool_size  int32
     current_size   int32
 }
-
 func NewRpcConnectionPool(max_size int32) *rpc_connection_pool {
     return *rpc_connection_pool{
         connections:   make(map[string]*rpc_client),
@@ -212,7 +192,6 @@ func NewRpcConnectionPool(max_size int32) *rpc_connection_pool {
         current_size:  0,
     }
 }
-
 func (rpc_connection_pool* pool) GetConnection(address string, port int32) *rpc_client {
     key := address + ":" + core.ToString(port)
     client, exists := pool.connections[key]
@@ -227,7 +206,6 @@ func (rpc_connection_pool* pool) GetConnection(address string, port int32) *rpc_
     }
     return nil
 }
-
 func (rpc_connection_pool* pool) ReleaseConnection(address string, port int32) {
     key := address + ":" + core.ToString(port)
     client, exists := pool.connections[key]
@@ -235,7 +213,6 @@ func (rpc_connection_pool* pool) ReleaseConnection(address string, port int32) {
         client.healthy = true
     }
 }
-
 func (rpc_connection_pool* pool) CloseAll() {
     for _, client := range pool.connections {
         client.healthy = false
@@ -243,7 +220,6 @@ func (rpc_connection_pool* pool) CloseAll() {
     pool.connections = make(map[string]*rpc_client)
     pool.current_size = 0
 }
-
 func main() {
     core.Println("RPC Framework initialized")
     server := NewRpcServer("127.0.0.1", 8000)

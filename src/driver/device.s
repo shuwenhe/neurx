@@ -1,5 +1,4 @@
 package neurx.driver
-
 struct device_driver_ops {
     int probe_id
     int remove_id
@@ -10,7 +9,6 @@ struct device_driver_ops {
     int read_id
     int write_id
 }
-
 struct device_driver {
     int driver_id
     string driver_name
@@ -20,7 +18,6 @@ struct device_driver {
     int loaded
     int total_operations
 }
-
 struct device {
     int device_id
     string device_name
@@ -30,14 +27,12 @@ struct device {
     int major_num
     int minor_num
 }
-
 struct device_id_table {
     int table_id
     int device_id
     int device_class
     int vendor_id
 }
-
 struct device_driver_framework {
     vec drivers
     vec devices
@@ -49,7 +44,6 @@ struct device_driver_framework {
     int total_removes
     int total_device_operations
 }
-
 func create_device_driver(name string, version string) (device_driver, string) {
     driver := device_driver{
         driver_id: 0,
@@ -60,10 +54,8 @@ func create_device_driver(name string, version string) (device_driver, string) {
         loaded: 0,
         total_operations: 0
     }
-    
     return driver, ""
 }
-
 func create_device(name string, device_type int, major int, minor int) (device, string) {
     dev := device{
         device_id: 0,
@@ -74,82 +66,61 @@ func create_device(name string, device_type int, major int, minor int) (device, 
         major_num: major,
         minor minor_num
     }
-    
     return dev, ""
 }
-
 func (framework* device_driver_framework) register_driver(driver device_driver) (int, string) {
     driver.driver_id = framework.driver_counter
     driver.loaded = 1
-    
     framework.drivers = append(framework.drivers, driver)
     driver_id := framework.driver_counter
     framework.driver_counter = framework.driver_counter + 1
-    
     return driver_id, ""
 }
-
 func (framework* device_driver_framework) unregister_driver(driver_id int) (int, string) {
     if driver_id >= len(framework.drivers) {
         return -1, "Driver not found"
     }
-    
     driver := framework.drivers[driver_id]
     driver.loaded = 0
     framework.drivers[driver_id] = driver
-    
     return driver_id, ""
 }
-
 func (framework* device_driver_framework) register_device(device device) (int, string) {
     device.device_id = framework.device_counter
     device.state = 1  
-    
     framework.devices = append(framework.devices, device)
     device_id := framework.device_counter
     framework.device_counter = framework.device_counter + 1
-    
     return device_id, ""
 }
-
 func (framework* device_driver_framework) unregister_device(device_id int) (int, string) {
     if device_id >= len(framework.devices) {
         return -1, "Device not found"
     }
-    
     device := framework.devices[device_id]
     device.state = 0  
     framework.devices[device_id] = device
-    
     return device_id, ""
 }
-
 func (framework* device_driver_framework) probe_device(device_id int, driver_id int) (int, string) {
     if device_id >= len(framework.devices) || driver_id >= len(framework.drivers) {
         return -1, "Device or driver not found"
     }
-    
     device := framework.devices[device_id]
     driver := framework.drivers[driver_id]
-    
     device.driver_id = driver_id
     device.state = 2  
     driver.device_count = driver.device_count + 1
-    
     framework.devices[device_id] = device
     framework.drivers[driver_id] = driver
     framework.total_probes = framework.total_probes + 1
-    
     return device_id, ""
 }
-
 func (framework* device_driver_framework) remove_device(device_id int) (int, string) {
     if device_id >= len(framework.devices) {
         return -1, "Device not found"
     }
-    
     device := framework.devices[device_id]
-    
     if device.driver_id >= 0 && device.driver_id < len(framework.drivers) {
         driver := framework.drivers[device.driver_id]
         if driver.device_count > 0 {
@@ -157,47 +128,34 @@ func (framework* device_driver_framework) remove_device(device_id int) (int, str
         }
         framework.drivers[device.driver_id] = driver
     }
-    
     device.state = 0  
     device.driver_id = -1
     framework.devices[device_id] = device
     framework.total_removes = framework.total_removes + 1
-    
     return device_id, ""
 }
-
 func (framework* device_driver_framework) device_read(device_id int) (vec, string) {
     if device_id >= len(framework.devices) {
         return {}, "Device not found"
     }
-    
     device := framework.devices[device_id]
-    
     if device.state != 2 {
         return {}, "Device not active"
     }
-    
     framework.total_device_operations = framework.total_device_operations + 1
-    
     return {}, ""
 }
-
 func (framework* device_driver_framework) device_write(device_id int, data vec) (int, string) {
     if device_id >= len(framework.devices) {
         return -1, "Device not found"
     }
-    
     device := framework.devices[device_id]
-    
     if device.state != 2 {
         return -1, "Device not active"
     }
-    
     framework.total_device_operations = framework.total_device_operations + 1
-    
     return len(data), ""
 }
-
 func create_device_driver_framework() (device_driver_framework, string) {
     framework := device_driver_framework{
         drivers: {},
@@ -210,10 +168,8 @@ func create_device_driver_framework() (device_driver_framework, string) {
         total_removes: 0,
         total_device_operations: 0
     }
-    
     return framework, ""
 }
-
 func (framework* device_driver_framework) get_stats() (device_driver_framework, string) {
     return framework, ""
 }

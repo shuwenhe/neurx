@@ -58,7 +58,6 @@ func handle_requests(http_server server) {
             continue
         }
     }
-
 func print_server_status() {
     print("\n📊 Server Status:\n")
     print("   Status: ✅ Running\n")

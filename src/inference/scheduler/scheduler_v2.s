@@ -1,5 +1,4 @@
 package inference
-
     submitted
     queued
     acquiring_resources
@@ -9,21 +8,18 @@ package inference
     failed
     timeout
 }
-
     critical
     high
     normal
     low
     background
 }
-
 struct request_token {
     string request_id
     int32 token_id
     float logits_score
     int64 timestamp
 }
-
 struct batch_request {
     string request_id
     int32[] input_tokens
@@ -40,7 +36,6 @@ struct batch_request {
     bool streaming
     int64 batch_id
 }
-
 struct batch_slot {
     batch_request* request
     int32 slot_index
@@ -50,7 +45,6 @@ struct batch_slot {
     bool is_prefill
     bool is_decode
 }
-
 struct scheduler_config {
     int32 max_batch_size
     int32 max_prefill_batch_size
@@ -60,7 +54,6 @@ struct scheduler_config {
     bool enable_chunked_prefill
     int32 schedule_interval_ms
 }
-
 struct batch_context {
     int64 batch_id
     batch_slot[] slots
@@ -71,7 +64,6 @@ struct batch_context {
     int64 scheduled_time
     bool is_valid
 }
-
 func new_batch_request(string request_id, int32[] input_tokens, int32 max_tokens, request_priority priority) batch_request {
     batch_request {
         request_id: request_id,
@@ -90,10 +82,8 @@ func new_batch_request(string request_id, int32[] input_tokens, int32 max_tokens
         batch_id: -1,
     }
 }
-
 func (batch_request* req) transition_state(request_state new_state) bool {
     valid_transitions := map[request_state, bool]{}
-
     if req.state == request_state_submitted {
         valid_transitions[request_state_queued] = true
         valid_transitions[request_state_cancelled] = true
@@ -108,7 +98,6 @@ func (batch_request* req) transition_state(request_state new_state) bool {
         valid_transitions[request_state_failed] = true
         valid_transitions[request_state_timeout] = true
     }
-
     if new_state in valid_transitions && valid_transitions[new_state] {
         req.state = new_state
         true
@@ -116,28 +105,22 @@ func (batch_request* req) transition_state(request_state new_state) bool {
         false
     }
 }
-
 func (batch_request* req) is_in_final_state() bool {
     req.state == request_state_completed || req.state == request_state_cancelled || req.state == request_state_failed || req.state == request_state_timeout
 }
-
 func (batch_request* req) update_generated_tokens(int32[] new_tokens) {
     for token in new_tokens {
         req.generated_tokens = append(req.generated_tokens, token)
     }
 }
-
 func (batch_request* req) get_remaining_tokens() int32 {
     req.max_tokens - len(req.generated_tokens)
 }
-
 func (batch_request* req) is_complete() bool {
     len(req.generated_tokens) >= req.max_tokens
 }
-
 func (batch_request* req) get_priority_score() float {
     base_score := 0.0
-
     if req.priority == request_priority_critical {
         base_score = 100.0
     } else if req.priority == request_priority_high {
@@ -149,11 +132,9 @@ func (batch_request* req) get_priority_score() float {
     } else {
         base_score = 10.0
     }
-
     time_penalty := 0.0
     base_score + time_penalty
 }
-
 func new_batch_context(int64 batch_id) batch_context {
     batch_context {
         batch_id: batch_id,
@@ -166,7 +147,6 @@ func new_batch_context(int64 batch_id) batch_context {
         is_valid: true,
     }
 }
-
 func (batch_context* batch) add_slot(batch_request* request, int32 slot_index, bool is_prefill) bool {
     if slot_index >= 0 && request != nil {
         slot := batch_slot {
@@ -178,45 +158,35 @@ func (batch_context* batch) add_slot(batch_request* request, int32 slot_index, b
             is_prefill: is_prefill,
             is_decode: !is_prefill,
         }
-
         batch.slots = append(batch.slots, slot)
-
         if is_prefill {
             batch.total_prefill_tokens = batch.total_prefill_tokens + len(request.input_tokens)
         } else {
             batch.total_decode_tokens = batch.total_decode_tokens + 1
         }
-
         if len(request.input_tokens) > batch.max_seq_length {
             batch.max_seq_length = len(request.input_tokens)
         }
-
         true
     } else {
         false
     }
 }
-
 func (batch_context* batch) get_slot_count() int32 {
     len(batch.slots)
 }
-
 func (batch_context* batch) get_batch_size() int32 {
     len(batch.slots)
 }
-
 func (batch_context* batch) get_total_tokens() int32 {
     batch.total_prefill_tokens + batch.total_decode_tokens
 }
-
 func (batch_context* batch) is_prefill_heavy() bool {
     batch.total_prefill_tokens > batch.total_decode_tokens
 }
-
 func (batch_context* batch) is_decode_heavy() bool {
     batch.total_decode_tokens > batch.total_prefill_tokens
 }
-
 func (batch_context* batch) get_estimated_execution_time() int64 {
     if batch.total_prefill_tokens > 0 {
         (int64(batch.total_prefill_tokens) * 2) + (int64(batch.total_decode_tokens) * 1)
@@ -224,22 +194,18 @@ func (batch_context* batch) get_estimated_execution_time() int64 {
         int64(batch.total_decode_tokens)
     }
 }
-
 func (batch_context* batch) validate_batch() bool {
     if len(batch.slots) == 0 {
         false
     }
-
     for slot in batch.slots {
         if slot.request == nil {
             false
         }
     }
-
     batch.is_valid = true
     true
 }
-
 func (batch_context* batch) remove_slot(int32 slot_index) bool {
     idx := -1
     for i in len(0..batch.slots) {
@@ -247,7 +213,6 @@ func (batch_context* batch) remove_slot(int32 slot_index) bool {
             idx = i
         }
     }
-
     if idx >= 0 {
         batch.slots = batch_slot_vec_remove_at(batch.slots, idx)
         true
@@ -255,7 +220,6 @@ func (batch_context* batch) remove_slot(int32 slot_index) bool {
         false
     }
 }
-
 func batch_slot_vec_remove_at(batch_slot[] v, int32 idx) batch_slot[] {
     result := batch_slot[]{}
     for i in len(0..v) {
@@ -265,7 +229,6 @@ func batch_slot_vec_remove_at(batch_slot[] v, int32 idx) batch_slot[] {
     }
     result
 }
-
 func new_scheduler_config() scheduler_config {
     scheduler_config {
         max_batch_size: 256,

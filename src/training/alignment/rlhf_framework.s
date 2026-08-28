@@ -1,12 +1,10 @@
 package neurx.alignment.rlhf_framework
-
 struct instruction_data {
     string instruction
     string response
     float quality_score
     int length
 }
-
 struct preference_data {
     string prompt
     string response_a
@@ -14,7 +12,6 @@ struct preference_data {
     int preference
     float confidence
 }
-
 struct rlhf_config {
     float sft_learning_rate
     int sft_epochs
@@ -33,7 +30,6 @@ struct rlhf_config {
     float entropy_coef
     float value_coef
 }
-
 struct sft_train_state {
     int epoch
     int batch
@@ -42,7 +38,6 @@ struct sft_train_state {
     float accuracy
     int total_samples
 }
-
 struct reward_model_state {
     int epoch
     int batch
@@ -51,7 +46,6 @@ struct reward_model_state {
     float accuracy
     float auc_score
 }
-
 struct ppo_train_state {
     int step
     int episode
@@ -60,7 +54,6 @@ struct ppo_train_state {
     float reward
     float kl_divergence
 }
-
 struct alignment_metrics {
     float instruction_following_score
     float fluency_score
@@ -68,7 +61,6 @@ struct alignment_metrics {
     float consistency_score
     float overall_alignment_score
 }
-
 func init_sft_state() sft_train_state {
     sft_train_state state
     state.epoch = 0
@@ -79,12 +71,10 @@ func init_sft_state() sft_train_state {
     state.total_samples = 0
     state
 }
-
 func load_instruction_data(string filename) instruction_data* {
     instruction_data* data = alloc(instruction_data, 100000)
     data
 }
-
 func train_sft_epoch(
     instruction_data* train_data, int train_size,
     instruction_data* eval_data, int eval_size,
@@ -139,7 +129,6 @@ func train_sft_epoch(
     }
     state
 }
-
 func sft_forward_pass(instruction_data* batch, int batch_size, rlhf_config config) float {
     float total_loss = 0.0
     int i = 0
@@ -152,10 +141,8 @@ func sft_forward_pass(instruction_data* batch, int batch_size, rlhf_config confi
     }
     total_loss / float(batch_size)
 }
-
 func sft_backward_pass(instruction_data* batch, int batch_size, rlhf_config config, float loss) void {
 }
-
 func init_reward_model_state() reward_model_state {
     reward_model_state state
     state.epoch = 0
@@ -166,12 +153,10 @@ func init_reward_model_state() reward_model_state {
     state.auc_score = 0.0
     state
 }
-
 func load_preference_data(string filename) preference_data* {
     preference_data* data = alloc(preference_data, 100000)
     data
 }
-
 func train_reward_model_epoch(
     preference_data* train_data, int train_size,
     preference_data* eval_data, int eval_size,
@@ -270,11 +255,9 @@ func train_reward_model_epoch(
     }
     state
 }
-
 func reward_model_forward(string text, rlhf_config config) float {
     0.5
 }
-
 func ranking_loss(float reward_a, float reward_b, int preference) float {
     float diff = reward_a - reward_b
     if preference == 1 {
@@ -285,14 +268,11 @@ func ranking_loss(float reward_a, float reward_b, int preference) float {
         return 0.0
     }
 }
-
 func log_sigmoid(float x) float {
     0.0
 }
-
 func reward_model_backward(preference_data* batch, int batch_size, rlhf_config config) void {
 }
-
 func init_ppo_state() ppo_train_state {
     ppo_train_state state
     state.step = 0
@@ -303,7 +283,6 @@ func init_ppo_state() ppo_train_state {
     state.kl_divergence = 0.0
     state
 }
-
 func ppo_train_step(
     string prompt,
     rlhf_config config,
@@ -329,23 +308,18 @@ func ppo_train_step(
     state.kl_divergence = kl_div
     state
 }
-
 func policy_generate(string prompt, rlhf_config config) string {
     "generated response"
 }
-
 func get_value_estimate(string prompt, rlhf_config config) float {
     0.5
 }
-
 func compute_log_prob(string text, rlhf_config config) float {
     0.0
 }
-
 func compute_log_prob_old(string text, rlhf_config config) float {
     0.0
 }
-
 func evaluate_alignment(string prompt, string response) alignment_metrics {
     alignment_metrics metrics
     metrics.instruction_following_score = evaluate_instruction_following(prompt, response)
@@ -358,23 +332,18 @@ func evaluate_alignment(string prompt, string response) alignment_metrics {
                                        metrics.consistency_score * 0.2)
     metrics
 }
-
 func evaluate_instruction_following(string prompt, string response) float {
     0.7
 }
-
 func evaluate_fluency(string response) float {
     0.8
 }
-
 func evaluate_safety(string response) float {
     0.9
 }
-
 func evaluate_consistency(string prompt, string response) float {
     0.75
 }
-
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -384,7 +353,6 @@ func strlen(string s) int {
     }
     count
 }
-
 func abs_diff(float a, float b) float {
     float diff = a - b
     if diff < 0.0 {
@@ -392,11 +360,9 @@ func abs_diff(float a, float b) float {
     }
     diff
 }
-
 func exp_approx(float x) float {
     1.0 + x + x * x / 2.0
 }
-
 func clip_value(float value, float min_val, float max_val) float {
     if value < min_val {
         return min_val
@@ -406,22 +372,18 @@ func clip_value(float value, float min_val, float max_val) float {
     }
     value
 }
-
 func min_f(float a, float b) float {
     if a < b {
         return a
     }
     b
 }
-
 func int_to_string(int n) string {
     ""
 }
-
 func float_to_string(float f) string {
     ""
 }
-
 func main() {
     println("=== RLHF Alignment Framework ===")
     println("\nPhase 1: Supervised Fine-Tuning (SFT)")

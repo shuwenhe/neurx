@@ -1,5 +1,4 @@
 package neurx.observability.logging
-
 func format_percent(float value, int width, int decimals) string {
     string formatted = format_float(value, width, decimals) + "%"
     for len(formatted) < width {
@@ -10,7 +9,6 @@ func format_percent(float value, int width, int decimals) string {
     }
     formatted
 }
-
 func format_float(float value, int width, int decimals) string {
     string s = float_to_string_with_decimals(value, decimals)
     if len(s) < width {
@@ -22,7 +20,6 @@ func format_float(float value, int width, int decimals) string {
     }
     s
 }
-
 func float_to_string_with_decimals(float value, int decimals) string {
     if value == 0.0 {
         return "0." + repeat_char('0', decimals)

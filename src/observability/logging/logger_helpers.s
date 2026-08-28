@@ -1,15 +1,12 @@
 package neurx.observability.logging
-
 func current_time_seconds() float {
     float(lg.current_step * 0.1)
 }
-
 func should_log(logger lg) bool {
     if lg.config.log_frequency <= 1.0 { return true }
     int freq = int(lg.config.log_frequency)
     (lg.current_step % freq) == 0
 }
-
 func flush_if_needed(lg* logger) {
     int buffer_size = len(lg.metric_buffer)
     bool should_flush = false
@@ -23,7 +20,6 @@ func flush_if_needed(lg* logger) {
         flush_metrics(lg)
     }
 }
-
 func flush_metrics(lg* logger) {
     if len(lg.metric_buffer) == 0 {
         return

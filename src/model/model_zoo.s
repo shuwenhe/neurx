@@ -1,7 +1,5 @@
 package neurx.model.model_zoo
-
 use std.map
-
 struct model_spec {
     string name
     string model_type
@@ -20,7 +18,6 @@ struct model_spec {
     f32 initializer_range
     architectures: string[]
 }
-
 func create_llama_7b() model_spec {
     model_spec {
         name: "llama-7b",
@@ -41,7 +38,6 @@ func create_llama_7b() model_spec {
         architectures: ["LlamaForCausalLM"],
     }
 }
-
 func create_llama_13b() model_spec {
     spec := create_llama_7b()
     spec.name = "llama-13b"
@@ -52,7 +48,6 @@ func create_llama_13b() model_spec {
     spec.intermediate_size = 13824
     spec
 }
-
 func create_llama2_7b() model_spec {
     spec := create_llama_7b()
     spec.name = "llama2-7b"
@@ -60,7 +55,6 @@ func create_llama2_7b() model_spec {
     spec.max_position_embeddings = 4096
     spec
 }
-
 func create_llama2_13b() model_spec {
     spec := create_llama2_7b()
     spec.name = "llama2-13b"
@@ -71,7 +65,6 @@ func create_llama2_13b() model_spec {
     spec.intermediate_size = 13824
     spec
 }
-
 func create_llama3_8b() model_spec {
     model_spec {
         name: "llama3-8b",
@@ -92,7 +85,6 @@ func create_llama3_8b() model_spec {
         architectures: ["LlamaForCausalLM"],
     }
 }
-
 func create_qwen_7b() model_spec {
     model_spec {
         name: "qwen-7b",
@@ -113,7 +105,6 @@ func create_qwen_7b() model_spec {
         architectures: ["QwenForCausalLM"],
     }
 }
-
 func create_qwen_14b() model_spec {
     spec := create_qwen_7b()
     spec.name = "qwen-14b"
@@ -123,7 +114,6 @@ func create_qwen_14b() model_spec {
     spec.intermediate_size = 13824
     spec
 }
-
 func create_qwen2_0_5b() model_spec {
     model_spec {
         name: "qwen2-0.5b",
@@ -144,7 +134,6 @@ func create_qwen2_0_5b() model_spec {
         architectures: ["Qwen2ForCausalLM"],
     }
 }
-
 func create_qwen2_7b() model_spec {
     model_spec {
         name: "qwen2-7b",
@@ -165,7 +154,6 @@ func create_qwen2_7b() model_spec {
         architectures: ["Qwen2ForCausalLM"],
     }
 }
-
 func create_qwen2_5() model_spec {
     model_spec {
         name: "qwen2.5",
@@ -186,7 +174,6 @@ func create_qwen2_5() model_spec {
         architectures: ["Qwen2ForCausalLM"],
     }
 }
-
 func create_deepseek_7b() model_spec {
     model_spec {
         name: "deepseek-7b",
@@ -207,7 +194,6 @@ func create_deepseek_7b() model_spec {
         architectures: ["DeepseekForCausalLM"],
     }
 }
-
 func create_deepseek_moe() model_spec {
     model_spec {
         name: "deepseek-moe-16b",
@@ -228,7 +214,6 @@ func create_deepseek_moe() model_spec {
         architectures: ["DeepseekMoEForCausalLM"],
     }
 }
-
 func create_deepseek_v3() model_spec {
     model_spec {
         name: "deepseek-v3",
@@ -249,7 +234,6 @@ func create_deepseek_v3() model_spec {
         architectures: ["DeepseekV3ForCausalLM"],
     }
 }
-
 func create_mistral_7b() model_spec {
     model_spec {
         name: "mistral-7b",
@@ -270,7 +254,6 @@ func create_mistral_7b() model_spec {
         architectures: ["MistralForCausalLM"],
     }
 }
-
 func create_mixtral_8x7b() model_spec {
     model_spec {
         name: "mixtral-8x7b",
@@ -291,7 +274,6 @@ func create_mixtral_8x7b() model_spec {
         architectures: ["MixtralForCausalLM"],
     }
 }
-
 func create_mixtral_8x22b() model_spec {
     model_spec {
         name: "mixtral-8x22b",
@@ -312,7 +294,6 @@ func create_mixtral_8x22b() model_spec {
         architectures: ["MixtralForCausalLM"],
     }
 }
-
 func create_phi_2b() model_spec {
     model_spec {
         name: "phi-2b",
@@ -333,7 +314,6 @@ func create_phi_2b() model_spec {
         architectures: ["PhiForCausalLM"],
     }
 }
-
 func create_phi3_mini() model_spec {
     model_spec {
         name: "phi3-mini",
@@ -354,7 +334,6 @@ func create_phi3_mini() model_spec {
         architectures: ["Phi3ForCausalLM"],
     }
 }
-
 func create_phi3_small() model_spec {
     spec := create_phi3_mini()
     spec.name = "phi3-small"
@@ -364,7 +343,6 @@ func create_phi3_small() model_spec {
     spec.intermediate_size = 10240
     spec
 }
-
 func create_baichuan_7b() model_spec {
     model_spec {
         name: "baichuan-7b",
@@ -385,7 +363,6 @@ func create_baichuan_7b() model_spec {
         architectures: ["BaichuanForCausalLM"],
     }
 }
-
 func create_baichuan2_13b() model_spec {
     model_spec {
         name: "baichuan2-13b",
@@ -406,7 +383,6 @@ func create_baichuan2_13b() model_spec {
         architectures: ["Baichuan2ForCausalLM"],
     }
 }
-
 func create_internlm_7b() model_spec {
     model_spec {
         name: "internlm-7b",
@@ -427,7 +403,6 @@ func create_internlm_7b() model_spec {
         architectures: ["InternLMForCausalLM"],
     }
 }
-
 func create_internlm2_7b() model_spec {
     model_spec {
         name: "internlm2-7b",
@@ -448,7 +423,6 @@ func create_internlm2_7b() model_spec {
         architectures: ["InternLM2ForCausalLM"],
     }
 }
-
 func create_chatglm3_6b() model_spec {
     model_spec {
         name: "chatglm3-6b",
@@ -469,7 +443,6 @@ func create_chatglm3_6b() model_spec {
         architectures: ["ChatGLMForConditionalGeneration"],
     }
 }
-
 func create_chatglm4() model_spec {
     model_spec {
         name: "chatglm4",
@@ -490,7 +463,6 @@ func create_chatglm4() model_spec {
         architectures: ["ChatGLM4ForConditionalGeneration"],
     }
 }
-
 func create_yi_6b() model_spec {
     model_spec {
         name: "yi-6b",
@@ -511,7 +483,6 @@ func create_yi_6b() model_spec {
         architectures: ["YiForCausalLM"],
     }
 }
-
 func create_yi_34b() model_spec {
     model_spec {
         name: "yi-34b",
@@ -532,7 +503,6 @@ func create_yi_34b() model_spec {
         architectures: ["YiForCausalLM"],
     }
 }
-
 func create_openchat_3_5() model_spec {
     model_spec {
         name: "openchat-3.5",
@@ -553,7 +523,6 @@ func create_openchat_3_5() model_spec {
         architectures: ["MistralForCausalLM"],
     }
 }
-
 func create_solar_10_7b() model_spec {
     model_spec {
         name: "solar-10.7b",
@@ -574,7 +543,6 @@ func create_solar_10_7b() model_spec {
         architectures: ["LlamaForCausalLM"],
     }
 }
-
 func create_neural_chat_7b() model_spec {
     model_spec {
         name: "neural-chat-7b",
@@ -595,52 +563,40 @@ func create_neural_chat_7b() model_spec {
         architectures: ["MistralForCausalLM"],
     }
 }
-
 func get_all_models() []model_spec {
     [
-
         create_llama_7b(),
         create_llama_13b(),
         create_llama2_7b(),
         create_llama2_13b(),
         create_llama3_8b(),
-
         create_qwen_7b(),
         create_qwen_14b(),
         create_qwen2_0_5b(),
         create_qwen2_7b(),
         create_qwen2_5(),
-
         create_deepseek_7b(),
         create_deepseek_moe(),
         create_deepseek_v3(),
-
         create_mistral_7b(),
         create_mixtral_8x7b(),
         create_mixtral_8x22b(),
-
         create_phi_2b(),
         create_phi3_mini(),
         create_phi3_small(),
-
         create_baichuan_7b(),
         create_baichuan2_13b(),
-
         create_internlm_7b(),
         create_internlm2_7b(),
-
         create_chatglm3_6b(),
         create_chatglm4(),
-
         create_yi_6b(),
         create_yi_34b(),
-
         create_openchat_3_5(),
         create_solar_10_7b(),
         create_neural_chat_7b(),
     ]
 }
-
 func get_model_by_name(string name) option[model_spec] {
     models := get_all_models()
     for model in models.iter() {
@@ -650,7 +606,6 @@ func get_model_by_name(string name) option[model_spec] {
     }
     none
 }
-
 func get_model_by_type(string model_type) []model_spec {
     models := get_all_models()
     result := []()
@@ -661,7 +616,6 @@ func get_model_by_type(string model_type) []model_spec {
     }
     result
 }
-
 func list_all_model_names() string[] {
     models := get_all_models()
     names := []()
@@ -670,35 +624,28 @@ func list_all_model_names() string[] {
     }
     names
 }
-
 func main() {
     println("🚀 Model Zoo - 30+ typemodelconfiguration库")
     println("==================================")
-
     models := get_all_models()
     println(f"✅ Total Models: {len(models)}")
     println("")
-
     println("📊 modelclass型统计:")
     llama_models := get_model_by_type("llama")
     println(f"  LLaMA series: {len(llama_models)}")
-
     qwen_models := get_model_by_type("qwen")
     qwen2_models := get_model_by_type("qwen2")
     qwen25_models := get_model_by_type("qwen2.5")
     println(f"  Qwen series: {len(qwen_models) + len(qwen2_models) + len(qwen25_models)}")
-
     mistral_models := get_model_by_type("mistral")
     mixtral_models := get_model_by_type("mixtral")
     println(f"  Mistral series: {len(mistral_models) + len(mixtral_models)}")
-
     println("")
     println("📋 completemodel列table:")
     for i in len(0..models) {
         model := models[i]
         println(f"  {i + 1:2}. {model.name:20} ({model.model_type})")
     }
-
     println("")
     println("✅ Core Features:")
     println("  ✓ 30+ type主流modelsupport")

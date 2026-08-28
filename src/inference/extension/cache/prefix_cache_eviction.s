@@ -1,5 +1,4 @@
 package neurx.cache.prefix_cache_eviction
-
 struct cache_entry {
     string prefix_hash
     int tokens_count
@@ -8,21 +7,18 @@ struct cache_entry {
     int creation_time
     int memory_bytes
 }
-
 struct lru_cache_eviction {
     []cache_entry entries
     int max_cache_size
     int current_size
     int eviction_count
 }
-
 struct lfu_cache_eviction {
     []cache_entry entries
     int max_cache_size
     int current_size
     int eviction_count
 }
-
 func new_lru_eviction(int max_cache_size) lru_cache_eviction {
     lru_cache_eviction {
         entries: []cache_entry{},
@@ -31,7 +27,6 @@ func new_lru_eviction(int max_cache_size) lru_cache_eviction {
         eviction_count: 0,
     }
 }
-
 func new_lfu_eviction(int max_cache_size) lfu_cache_eviction {
     lfu_cache_eviction {
         entries: []cache_entry{},
@@ -40,7 +35,6 @@ func new_lfu_eviction(int max_cache_size) lfu_cache_eviction {
         eviction_count: 0,
     }
 }
-
 func add_cache_entry_lru(
     lru_cache_eviction cache,
     string prefix_hash,
@@ -62,7 +56,6 @@ func add_cache_entry_lru(
     }
     cache
 }
-
 func add_cache_entry_lfu(
     lfu_cache_eviction cache,
     string prefix_hash,
@@ -84,7 +77,6 @@ func add_cache_entry_lfu(
     }
     cache
 }
-
 func access_cache_entry_lru(
     lru_cache_eviction cache,
     string prefix_hash,
@@ -100,7 +92,6 @@ func access_cache_entry_lru(
     }
     cache
 }
-
 func access_cache_entry_lfu(
     lfu_cache_eviction cache,
     string prefix_hash,
@@ -116,7 +107,6 @@ func access_cache_entry_lfu(
     }
     cache
 }
-
 func evict_lru(lru_cache_eviction cache) lru_cache_eviction {
     if cache.entries.len == 0 {
         return cache
@@ -145,7 +135,6 @@ func evict_lru(lru_cache_eviction cache) lru_cache_eviction {
     cache.entries = new_entries
     cache
 }
-
 func evict_lfu_strategy(lfu_cache_eviction cache) lfu_cache_eviction {
     if cache.entries.len == 0 {
         return cache
@@ -174,7 +163,6 @@ func evict_lfu_strategy(lfu_cache_eviction cache) lfu_cache_eviction {
     cache.entries = new_entries
     cache
 }
-
 func get_cache_stats_lru(lru_cache_eviction cache) string {
     hit_rate := "0.0"
     if cache.entries.len > 0 {
@@ -182,7 +170,6 @@ func get_cache_stats_lru(lru_cache_eviction cache) string {
     }
     "LRU Cache: " + int_to_str(cache.entries.len) + " entries, " + int_to_str(cache.current_size) + " bytes, " + int_to_str(cache.eviction_count) + " evictions, hit_rate=" + hit_rate
 }
-
 func get_cache_stats_lfu(lfu_cache_eviction cache) string {
     hit_rate := "0.0"
     if cache.entries.len > 0 {
@@ -190,7 +177,6 @@ func get_cache_stats_lfu(lfu_cache_eviction cache) string {
     }
     "LFU Cache: " + int_to_str(cache.entries.len) + " entries, " + int_to_str(cache.current_size) + " bytes, " + int_to_str(cache.eviction_count) + " evictions, hit_rate=" + hit_rate
 }
-
 func append_cache_entry([]cache_entry slice, cache_entry elem) []cache_entry {
     new_slice := []cache_entry{}
     i := 0
@@ -201,7 +187,6 @@ func append_cache_entry([]cache_entry slice, cache_entry elem) []cache_entry {
     new_slice = append_cache_entry(new_slice, elem)
     new_slice
 }
-
 func append_cache_entry_lfu([]cache_entry slice, cache_entry elem) []cache_entry {
     new_slice := []cache_entry{}
     i := 0
@@ -212,15 +197,12 @@ func append_cache_entry_lfu([]cache_entry slice, cache_entry elem) []cache_entry
     new_slice = append_cache_entry_lfu(new_slice, elem)
     new_slice
 }
-
 func get_time() int {
     0
 }
-
 func int_to_str(int n) string {
     ""
 }
-
 func float_to_str(float f) string {
     ""
 }

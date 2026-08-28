@@ -1,26 +1,22 @@
 package neurx.distributed.cluster.parallel_plan
-
 struct cluster_parallel_topology {
     int tensor_parallel_size
     int pipeline_parallel_size
     int data_parallel_size
     int world_size
 }
-
 struct cluster_parallel_rank {
     int global_rank
     int tensor_rank
     int pipeline_rank
     int data_rank
 }
-
 struct cluster_parallel_stage {
     int stage_id
     int start_layer
     int end_layer
     int replica_count
 }
-
 struct cluster_parallel_request {
     string model_id
     int num_layers
@@ -31,7 +27,6 @@ struct cluster_parallel_request {
     bool require_fp8
     bool require_distributed
 }
-
 struct cluster_parallel_plan {
     cluster_parallel_topology topology
     cluster_parallel_stage[] stages
@@ -40,7 +35,6 @@ struct cluster_parallel_plan {
     string backend
     string reason
 }
-
 struct cluster_parallel_node_assignment {
     int node_id
     string node_name
@@ -52,13 +46,11 @@ struct cluster_parallel_node_assignment {
     int stage_id
     int replica_id
 }
-
 struct cluster_parallel_assignment_plan {
     cluster_parallel_node_assignment[] assignments
     bool valid
     string reason
 }
-
 struct cluster_parallel_launch_command {
     int node_id
     string node_name
@@ -66,44 +58,37 @@ struct cluster_parallel_launch_command {
     int global_rank
     string command
 }
-
 struct cluster_parallel_launch_plan {
     cluster_parallel_launch_command[] commands
     bool valid
     string reason
 }
-
 struct cluster_parallel_host_bundle {
     string host
     string node_name
     int command_count
 }
-
 struct cluster_parallel_grouped_launch_plan {
     cluster_parallel_host_bundle[] bundles
     bool valid
     string reason
 }
-
 struct cluster_parallel_execution_line {
     string host
     string node_name
     int global_rank
     string command
 }
-
 struct cluster_parallel_execution_batch {
     cluster_parallel_execution_line[] lines
     bool valid
     string reason
 }
-
 struct cluster_parallel_execution_script {
     string script
     bool valid
     string reason
 }
-
 struct cluster_parallel_rank_filter_result {
     cluster_parallel_launch_plan plan
     int kept_count
@@ -111,7 +96,6 @@ struct cluster_parallel_rank_filter_result {
     bool valid
     string reason
 }
-
 func cluster_parallel_normalize(int tp, int pp, int dp, int world_size) cluster_parallel_topology {
     if tp <= 0 { tp = 1 }
     if pp <= 0 { pp = 1 }
@@ -130,7 +114,6 @@ func cluster_parallel_normalize(int tp, int pp, int dp, int world_size) cluster_
         world_size: world_size
     }
 }
-
 func cluster_parallel_rank_of(cluster_parallel_topology topology, int global_rank) cluster_parallel_rank {
     int tp = topology.tensor_parallel_size
     int pp = topology.pipeline_parallel_size
@@ -147,7 +130,6 @@ func cluster_parallel_rank_of(cluster_parallel_topology topology, int global_ran
         data_rank: data_rank
     }
 }
-
 func cluster_parallel_build_stages(cluster_parallel_topology topology, int num_layers) cluster_parallel_stage[] {
     if topology.pipeline_parallel_size <= 0 { topology.pipeline_parallel_size = 1 }
     cluster_parallel_stage[] stages = cluster_parallel_stage[]{cap: topology.pipeline_parallel_size}
@@ -172,7 +154,6 @@ func cluster_parallel_build_stages(cluster_parallel_topology topology, int num_l
     }
     stages
 }
-
 func cluster_parallel_build_ranks(cluster_parallel_topology topology) cluster_parallel_rank[] {
     cluster_parallel_rank[] ranks = cluster_parallel_rank[]{cap: topology.world_size}
     int global_rank = 0
@@ -182,7 +163,6 @@ func cluster_parallel_build_ranks(cluster_parallel_topology topology) cluster_pa
     }
     ranks
 }
-
 func cluster_parallel_plan_for(cluster_parallel_request request, int tp, int pp, int dp, int world_size, string backend) cluster_parallel_plan {
     cluster_parallel_topology topology = cluster_parallel_normalize(tp, pp, dp, world_size)
     bool valid = true
@@ -212,7 +192,6 @@ func cluster_parallel_plan_for(cluster_parallel_request request, int tp, int pp,
         reason: reason
     }
 }
-
 func cluster_parallel_plan_summary(cluster_parallel_plan plan) string {
     string out = ""
     out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
@@ -225,11 +204,9 @@ func cluster_parallel_plan_summary(cluster_parallel_plan plan) string {
     out = out + "ranks=" + itoa(len(plan.ranks)) + "\n"
     out
 }
-
 func cluster_parallel_plan_ready(cluster_parallel_plan plan) bool {
     plan.valid && len(plan.stages) > 0 && len(plan.ranks) > 0
 }
-
 func cluster_parallel_assign_to_nodes(cluster_parallel_plan plan, int[] node_ids, string[] node_names, string[] node_hosts) cluster_parallel_assignment_plan {
     cluster_parallel_assignment_plan result
     if !cluster_parallel_plan_ready(plan) {
@@ -270,7 +247,6 @@ func cluster_parallel_assign_to_nodes(cluster_parallel_plan plan, int[] node_ids
     result.reason = ""
     result
 }
-
 func cluster_parallel_assignment_summary(cluster_parallel_assignment_plan plan) string {
     string out = ""
     out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
@@ -281,7 +257,6 @@ func cluster_parallel_assignment_summary(cluster_parallel_assignment_plan plan) 
     }
     out
 }
-
 func cluster_parallel_build_launch_plan(cluster_parallel_assignment_plan assignment, string worker_bin, string master_addr, int master_port, int world_size) cluster_parallel_launch_plan {
     cluster_parallel_launch_plan result
     if !assignment.valid {
@@ -323,7 +298,6 @@ func cluster_parallel_build_launch_plan(cluster_parallel_assignment_plan assignm
     result.reason = ""
     result
 }
-
 func cluster_parallel_launch_summary(cluster_parallel_launch_plan plan) string {
     string out = ""
     out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
@@ -334,7 +308,6 @@ func cluster_parallel_launch_summary(cluster_parallel_launch_plan plan) string {
     }
     out
 }
-
 func cluster_parallel_group_launch_plan(cluster_parallel_launch_plan plan) cluster_parallel_grouped_launch_plan {
     cluster_parallel_grouped_launch_plan result
     if !plan.valid {
@@ -372,7 +345,6 @@ func cluster_parallel_group_launch_plan(cluster_parallel_launch_plan plan) clust
     result.reason = ""
     result
 }
-
 func cluster_parallel_grouped_launch_summary(cluster_parallel_grouped_launch_plan plan) string {
     string out = ""
     out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
@@ -383,7 +355,6 @@ func cluster_parallel_grouped_launch_summary(cluster_parallel_grouped_launch_pla
     }
     out
 }
-
 func cluster_parallel_execute_launch_plan(cluster_parallel_launch_plan plan) cluster_parallel_execution_batch {
     cluster_parallel_execution_batch result
     if !plan.valid {
@@ -409,7 +380,6 @@ func cluster_parallel_execute_launch_plan(cluster_parallel_launch_plan plan) clu
     result.reason = ""
     result
 }
-
 func cluster_parallel_execution_summary(cluster_parallel_execution_batch batch) string {
     string out = ""
     out = out + "valid=" + itoa(batch.valid ? 1 : 0) + "\n"
@@ -420,7 +390,6 @@ func cluster_parallel_execution_summary(cluster_parallel_execution_batch batch) 
     }
     out
 }
-
 func cluster_parallel_build_execution_script(cluster_parallel_execution_batch batch, bool use_ssh) cluster_parallel_execution_script {
     cluster_parallel_execution_script result
     if !batch.valid {
@@ -445,7 +414,6 @@ func cluster_parallel_build_execution_script(cluster_parallel_execution_batch ba
     result.reason = ""
     result
 }
-
 func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[] failed_ranks) cluster_parallel_rank_filter_result {
     cluster_parallel_rank_filter_result meta
     if !plan.valid {
@@ -490,7 +458,6 @@ func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[
     meta.reason = ""
     meta
 }
-
 func cluster_parallel_rank_filter_summary(cluster_parallel_rank_filter_result meta) string {
     string out = ""
     out = out + "valid=" + itoa(meta.valid ? 1 : 0) + "\n"
@@ -500,7 +467,6 @@ func cluster_parallel_rank_filter_summary(cluster_parallel_rank_filter_result me
     out = out + cluster_parallel_launch_summary(meta.plan)
     out
 }
-
 func cluster_parallel_execution_script_summary(cluster_parallel_execution_script script) string {
     string out = ""
     out = out + "valid=" + itoa(script.valid ? 1 : 0) + "\n"

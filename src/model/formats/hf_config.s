@@ -1,6 +1,5 @@
 package neurx.models.formats.hf_config
 extern "intrinsic" func __host_read_binary_file(string path) []int
-
 struct hf_model_config {
     bool valid
     int hidden_size
@@ -20,7 +19,6 @@ struct hf_model_config {
     bool tie_word_embeddings
     string error_code
 }
-
 func hf_json_find(string text, string pattern) int {
     int i = 0
     for i + len(pattern) <= len(text) {
@@ -34,7 +32,6 @@ func hf_json_find(string text, string pattern) int {
     }
     -1
 }
-
 func hf_json_number_start(string text, string key) int {
     int position = hf_json_find(text, "\"" + key + "\"")
     if position < 0 { return -1 }
@@ -44,7 +41,6 @@ func hf_json_number_start(string text, string key) int {
     for position < len(text) && (text[position] == 32 || text[position] == 9 || text[position] == 10 || text[position] == 13) { position = position + 1 }
     position
 }
-
 func hf_json_int(string text, string key, int fallback) int {
     int position = hf_json_number_start(text, key)
     if position < 0 || position >= len(text) { return fallback }
@@ -57,7 +53,6 @@ func hf_json_int(string text, string key, int fallback) int {
     if !found { return fallback }
     value
 }
-
 func hf_json_float(string text, string key, float fallback) float {
     int position = hf_json_number_start(text, key)
     if position < 0 || position >= len(text) { return fallback }
@@ -75,7 +70,6 @@ func hf_json_float(string text, string key, float fallback) float {
     }
     value
 }
-
 func hf_json_number_text(string text, string key, string fallback) string {
     int position = hf_json_number_start(text, key)
     if position < 0 || position >= len(text) { return fallback }
@@ -88,7 +82,6 @@ func hf_json_number_text(string text, string key, string fallback) string {
     if value == "" { return fallback }
     value
 }
-
 func hf_json_bool(string text, string key, bool fallback) bool {
     int position = hf_json_number_start(text, key)
     if position < 0 || position >= len(text) { return fallback }
@@ -96,11 +89,9 @@ func hf_json_bool(string text, string key, bool fallback) bool {
     if position + 5 <= len(text) && text[position] == 102 && text[position + 1] == 97 && text[position + 2] == 108 && text[position + 3] == 115 && text[position + 4] == 101 { return false }
     fallback
 }
-
 func invalid_hf_config(string code) hf_model_config {
     hf_model_config { valid: false, hidden_size: 0, intermediate_size: 0, attention_heads: 0, kv_heads: 0, head_dim: 0, layers: 0, vocabulary_size: 0, max_position_embeddings: 0, rms_epsilon: 0.00001, rope_theta: 10000.0, rms_epsilon_text: "0.00001", rope_theta_text: "10000.0", attention_bias: false, mlp_bias: false, tie_word_embeddings: false, error_code: code }
 }
-
 func parse_hf_config(string text) hf_model_config {
     int hidden = hf_json_int(text, "hidden_size", 0)
     int intermediate = hf_json_int(text, "intermediate_size", 0)
@@ -131,7 +122,6 @@ func parse_hf_config(string text) hf_model_config {
         error_code: "",
     }
 }
-
 func load_hf_config(string model_dir) hf_model_config {
     []int bytes = __host_read_binary_file(model_dir + "/config.json")
     if len(bytes) == 0 { return invalid_hf_config("config_not_found") }

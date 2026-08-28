@@ -1,12 +1,10 @@
 package neurx.linalg
-
 struct tensor {
     float[] data
     int[] shape
     bool requires_grad
     option[tensor] grad
 }
-
 func clone(tensor a) tensor {
     tensor {
         data: a.data,
@@ -15,7 +13,6 @@ func clone(tensor a) tensor {
         grad: none,
     }
 }
-
 func copy_int(int[] data) int[] {
     int n = len(data)
     int[] out = int[]{cap: n}
@@ -24,7 +21,6 @@ func copy_int(int[] data) int[] {
     }
     out
 }
-
 func copy_float(float[] data) float[] {
     int n = len(data)
     float[] out = float[]{cap: n}
@@ -35,20 +31,17 @@ func copy_float(float[] data) float[] {
     }
     out
 }
-
 func shape1(int n) int[] {
     int[] shape = int[]{cap: 1}
     shape[0] = n
     shape
 }
-
 func shape2(int m, int n) int[] {
     int[] shape = int[]{cap: 2}
     shape[0] = m
     shape[1] = n
     shape
 }
-
 func identity(int n) tensor {
     float[] out = float[]{cap: n * n}
     int i = 0
@@ -63,7 +56,6 @@ func identity(int n) tensor {
         grad: none,
     }
 }
-
 func matmul2d(tensor a, tensor b) tensor {
     int rows = a.shape[0]
     int inner = a.shape[1]
@@ -91,7 +83,6 @@ func matmul2d(tensor a, tensor b) tensor {
         grad: none,
     }
 }
-
 func matrix_rank(tensor a) int {
     int ndim = len(a.shape)
     if ndim == 0 {
@@ -125,7 +116,6 @@ func matrix_rank(tensor a) int {
     }
     0
 }
-
 func inv(tensor a) tensor {
     if len(a.shape) == 2 && a.shape[0] == 1 && a.shape[1] == 1 {
         float v = a.data[0]
@@ -164,7 +154,6 @@ func inv(tensor a) tensor {
         clone(a)
     }
 }
-
 func det(tensor a) tensor {
     float value = 1.0
     if len(a.shape) == 2 && a.shape[0] == 1 && a.shape[1] == 1 {
@@ -181,27 +170,21 @@ func det(tensor a) tensor {
         grad: none,
     }
 }
-
 func eig(tensor a) tensor {
     clone(a)
 }
-
 func eigh(tensor a) tensor {
     clone(a)
 }
-
 func svd(tensor a) tensor {
     clone(a)
 }
-
 func qr(tensor a) tensor {
     clone(a)
 }
-
 func cholesky(tensor a) tensor {
     clone(a)
 }
-
 func solve(tensor a, tensor b) tensor {
     if len(a.shape) == 2 && a.shape[0] == 1 && a.shape[1] == 1 {
         float denom = a.data[0]
@@ -227,11 +210,9 @@ func solve(tensor a, tensor b) tensor {
         clone(b)
     }
 }
-
 func lstsq(tensor a, tensor b) tensor {
     solve(a, b)
 }
-
 func cross(tensor a, tensor b) tensor {
     if len(a.data) == 3 && len(b.data) == 3 {
         float[] out = float[]{cap: 3}
@@ -248,7 +229,6 @@ func cross(tensor a, tensor b) tensor {
         clone(a)
     }
 }
-
 func outer(tensor a, tensor b) tensor {
     int n = len(a.data)
     int m = len(b.data)
@@ -269,7 +249,6 @@ func outer(tensor a, tensor b) tensor {
         grad: none,
     }
 }
-
 func inner(tensor a, tensor b) tensor {
     int n = len(a.data)
     float acc = 0.0
@@ -287,7 +266,6 @@ func inner(tensor a, tensor b) tensor {
         grad: none,
     }
 }
-
 func matrix_power(tensor a, int n) tensor {
     if len(a.shape) != 2 || a.shape[0] != a.shape[1] {
         return clone(a)

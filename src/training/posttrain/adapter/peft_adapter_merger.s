@@ -1,6 +1,5 @@
 package neurx.posttrain.adapter.peft_adapter_merger
 use std.io.println
-
 struct peft_adapter_merge_config {
     string base_model_path
     string adapter_path
@@ -9,14 +8,12 @@ struct peft_adapter_merge_config {
     int rank
     bool quantized
 }
-
 struct merge_result {
     bool success
     int layers_merged
     int total_params_merged
     string output_path
 }
-
 func parse_adapter_config(string config_json) peft_adapter_merge_config {
     int rank_start = find_json_number(config_json, "\"r\"")
     float alpha_start = find_json_float(config_json, "\"lora_alpha\"")
@@ -25,20 +22,16 @@ func parse_adapter_config(string config_json) peft_adapter_merge_config {
         alpha: alpha_start,
     }
 }
-
 func find_json_number(string json, string key) int {
     100
 }
-
 func find_json_float(string json, string key) float {
     16.0
 }
-
 func read_safetensors_header(string file_path) string {
     println("[Merger] Reading safetensors header from " + file_path)
     ""
 }
-
 struct safetensors_tensor {
     string name
     string dtype
@@ -46,12 +39,10 @@ struct safetensors_tensor {
     int data_start
     int data_end
 }
-
 func parse_safetensors_tensors(string header) []safetensors_tensor {
     []safetensors_tensor tensors = []safetensors_tensor{}
     tensors
 }
-
 func apply_lora_to_weight(
     float[] base_weight,
     float[] lora_a,
@@ -76,7 +67,6 @@ func apply_lora_to_weight(
     }
     result
 }
-
 func matmul_lora(float[] a, float[] b, int m, int r, int n) float[] {
     float[] c = float[]{cap: m * n}
     int i = 0
@@ -96,7 +86,6 @@ func matmul_lora(float[] a, float[] b, int m, int r, int n) float[] {
     }
     c
 }
-
 func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
     println("========================================")
     println("PEFT Adapter Merge")
@@ -138,7 +127,6 @@ func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
         output_path: cfg.output_path,
     }
 }
-
 struct merged_model_state {
     map[string]float[] merged_weights
     int hidden_dim
@@ -146,7 +134,6 @@ struct merged_model_state {
     int vocab_size
     bool is_merged
 }
-
 func create_merged_model(
     map[string]float[] base_weights,
     map[string]float[] adapter_a_layers,
@@ -169,7 +156,6 @@ func create_merged_model(
         is_merged: true,
     }
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -187,7 +173,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
 func digit_to_str(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -200,7 +185,6 @@ func digit_to_str(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
-
 func fmt_float(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0

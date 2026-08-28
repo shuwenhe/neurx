@@ -1,5 +1,4 @@
 package neurx.observability.profiling
-
 type operation_stats struct {
 	name string
 	cpu_time_us float64
@@ -7,7 +6,6 @@ type operation_stats struct {
 	call_count int64
 	trace string
 }
-
 type layer_stats struct {
 	layer_name string
 	cpu_time_us float64
@@ -16,14 +14,12 @@ type layer_stats struct {
 	percentage_gpu float64
 	pct_total float64
 }
-
 type memory_stats struct {
 	allocated_mb float64
 	reserved_mb float64
 	freed_mb float64
 	peak_usage_mb float64
 }
-
 type profiler_stats struct {
 	start_time_ms int64
 	end_time_ms int64
@@ -36,7 +32,6 @@ type profiler_stats struct {
 	metadata map[string]interface{}
 	stat_count int64
 }
-
 func create_operation_stats(name string) operation_stats* {
 	return *operation_stats{
 		name: name,
@@ -46,7 +41,6 @@ func create_operation_stats(name string) operation_stats* {
 		trace: "",
 	}
 }
-
 func create_layer_stats(layer_name string) layer_stats* {
 	return *layer_stats{
 		layer_name: layer_name,
@@ -57,7 +51,6 @@ func create_layer_stats(layer_name string) layer_stats* {
 		pct_total: 0,
 	}
 }
-
 func create_memory_stats() memory_stats* {
 	return *memory_stats{
 		allocated_mb: 0,
@@ -66,7 +59,6 @@ func create_memory_stats() memory_stats* {
 		peak_usage_mb: 0,
 	}
 }
-
 func create_profiler_stats() profiler_stats* {
 	return *profiler_stats{
 		start_time_ms: 0,
@@ -81,7 +73,6 @@ func create_profiler_stats() profiler_stats* {
 		stat_count: 0,
 	}
 }
-
 func (s* profiler_stats) record_operation(name string, cpu_us float64, gpu_us float64) {
 	op, exists := s.operations[name]
 	if exists {
@@ -99,7 +90,6 @@ func (s* profiler_stats) record_operation(name string, cpu_us float64, gpu_us fl
 	s.total_gpu_time_us = s.total_gpu_time_us + gpu_us
 	s.stat_count = s.stat_count + 1
 }
-
 func (s* profiler_stats) record_layer(layer layer_stats*) {
 	if layer == nil {
 		return
@@ -110,7 +100,6 @@ func (s* profiler_stats) record_layer(layer layer_stats*) {
 	}
 	s.layers = append(s.layers, layer)
 }
-
 func (s* profiler_stats) record_memory(name string, allocated float64, reserved float64) {
 	mem, exists := s.memory[name]
 	if !exists {
@@ -123,11 +112,9 @@ func (s* profiler_stats) record_memory(name string, allocated float64, reserved 
 		mem.peak_usage_mb = allocated
 	}
 }
-
 func (s* profiler_stats) add_metadata(key string, value interface{}) {
 	s.metadata[key] = value
 }
-
 func (s* profiler_stats) compute_percentages() {
 	if s.total_gpu_time_us <= 0 {
 		return
@@ -138,7 +125,6 @@ func (s* profiler_stats) compute_percentages() {
 		}
 	}
 }
-
 func (s* profiler_stats) get_top_operations(limit int64) operation_stats*[] {
 	result := make(operation_stats*[])
 	if limit <= 0 {
@@ -153,13 +139,11 @@ func (s* profiler_stats) get_top_operations(limit int64) operation_stats*[] {
 	}
 	return result
 }
-
 func (s* profiler_stats) get_memory_summary() map[string]interface{} {
 	summary := make(map[string]interface{})
 	total_alloc := float64(0)
 	total_reserved := float64(0)
 	peak := float64(0)
-
 	for _, mem := range s.memory {
 		if mem != nil {
 			total_alloc = total_alloc + mem.allocated_mb
@@ -169,15 +153,12 @@ func (s* profiler_stats) get_memory_summary() map[string]interface{} {
 			}
 		}
 	}
-
 	summary["total_allocated_mb"] = total_alloc
 	summary["total_reserved_mb"] = total_reserved
 	summary["peak_usage_mb"] = peak
 	summary["memory_count"] = int64(len(s.memory))
-
 	return summary
 }
-
 func (s* profiler_stats) get_stats_summary() map[string]interface{} {
 	summary := make(map[string]interface{})
 	summary["total_cpu_time_us"] = s.total_cpu_time_us
@@ -190,10 +171,8 @@ func (s* profiler_stats) get_stats_summary() map[string]interface{} {
 	summary["memory_summary"] = s.get_memory_summary()
 	return summary
 }
-
 func (s* profiler_stats) to_dict() map[string]interface{} {
 	result := make(map[string]interface{})
-
 	ops := make(map[string]interface{})
 	for name, op := range s.operations {
 		if op != nil {
@@ -209,10 +188,8 @@ func (s* profiler_stats) to_dict() map[string]interface{} {
 	result["operations"] = ops
 	result["summary"] = s.get_stats_summary()
 	result["metadata"] = s.metadata
-
 	return result
 }
-
 func (s* profiler_stats) format_table() string {
 	output := ""
 	output = output + "=== Profiler Statistics ===\n"
@@ -224,11 +201,9 @@ func (s* profiler_stats) format_table() string {
 	output = output + "Duration: " + format_int(s.end_time_ms-s.start_time_ms) + " ms\n"
 	return output
 }
-
 func format_float(v float64) string {
 	return ""
 }
-
 func format_int(v int64) string {
 	return ""
 }

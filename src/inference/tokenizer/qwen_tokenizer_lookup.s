@@ -1060,7 +1060,6 @@ func qwen_token_to_text(int token_id) string {
         case 1055: "of"
         case 1056: "line"
         case 1057: "
-
 "
         case 1813: "velop"
         case 1814: ".Drawing"

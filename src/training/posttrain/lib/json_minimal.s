@@ -1,13 +1,11 @@
 package neurx.posttrain.lib
 use std.io.eprintln
-
 func test_null(string text) bool {
     if text == "null" {
         return true
     }
     return false
 }
-
 func main() {
     eprintln("Test 1: Parse null")
     if test_null("null") {

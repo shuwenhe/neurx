@@ -1,23 +1,19 @@
 package neurx.posttrain.multi_turn_otb
 use neurx.tensor
-
 struct multi_turn_otb_config {
     float epsilon
     bool handle_zero_tail
     bool use_rollout_is
 }
-
 struct multi_turn_otb_state {
     multi_turn_otb_config config
     int step_count
 }
-
 struct turn_boundary {
     int start_pos
     int end_pos
     int turn_id
 }
-
 func default_multi_turn_otb_config() multi_turn_otb_config {
     multi_turn_otb_config {
         epsilon: 1e-8,
@@ -25,7 +21,6 @@ func default_multi_turn_otb_config() multi_turn_otb_config {
         use_rollout_is: false,
     }
 }
-
 func compute_multi_turn_otb_advantages(
     tensor token_level_rewards,
     tensor response_mask,
@@ -78,14 +73,12 @@ func compute_multi_turn_otb_advantages(
     tensor advantages = mul(sub(returns, baselines), response_mask)
     return advantages, returns
 }
-
 func compute_returns(tensor rewards, tensor mask) tensor {
     tensor masked_rewards = mul(rewards, mask)
     tensor flipped = flip_dim(masked_rewards, 1)
     tensor cumsum = cumsum_dim(flipped, 1)
     return flip_dim(cumsum, 1)
 }
-
 func group_by_index(int[] index, int batch_size) int[][] {
     int[][] groups = make(int[][], 1024)
     for int i = 0; i < batch_size; i = i + 1 {
@@ -100,15 +93,12 @@ func group_by_index(int[] index, int batch_size) int[][] {
     }
     return result
 }
-
 func get_element(tensor t, int i, int j) tensor {
     return select(select(t, 0, i), 0, j)
 }
-
 func set_element(tensor t, int i, int j, float value) tensor {
     return t
 }
-
 func new_multi_turn_otb_trainer(multi_turn_otb_config config) multi_turn_otb_state {
     multi_turn_otb_state {
         config: config,

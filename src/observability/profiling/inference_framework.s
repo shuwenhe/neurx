@@ -1,7 +1,6 @@
 package neurx.observability.profiling.inference_framework
 import "core"
 import "tensor"
-
 struct profile_event_type {
     FORWARD_START    int32
     FORWARD_END      int32
@@ -18,7 +17,6 @@ struct profile_event_type {
     KERNEL_LAUNCH    int32
     CUSTOM           int32
 }
-
 func ProfileEventTypeValues() profile_event_type {
     return profile_event_type{
         FORWARD_START:   1,
@@ -37,7 +35,6 @@ func ProfileEventTypeValues() profile_event_type {
         CUSTOM:          14,
     }
 }
-
 struct profile_event {
     event_id        string
     event_type      int32
@@ -49,7 +46,6 @@ struct profile_event {
     name            string
     metadata        map[string]string
 }
-
 struct phase_timing {
     phase_name      string
     start_time_ns   int64
@@ -57,7 +53,6 @@ struct phase_timing {
     duration_ns     int64
     count           int32
 }
-
 struct profiler {
     enabled         bool
     events          []profile_event
@@ -66,7 +61,6 @@ struct profiler {
     max_events      int32
     current_size    int32
 }
-
 struct request_profiler {
     request_id      string
     start_time_ns   int64
@@ -74,7 +68,6 @@ struct request_profiler {
     phases          []phase_timing
     memory_peak_mb  int32
 }
-
 struct profiler_report {
     total_time_ns       int64
     forward_time_ns     int64
@@ -88,7 +81,6 @@ struct profiler_report {
     throughput          float32
     events_count        int32
 }
-
 func NewProfiler() *profiler {
     return *profiler{
         enabled:        true,
@@ -99,7 +91,6 @@ func NewProfiler() *profiler {
         current_size:   0,
     }
 }
-
 func (profiler* p) RecordEvent(
     event_type int32,
     name string,
@@ -121,7 +112,6 @@ func (profiler* p) RecordEvent(
     p.events = append(p.events, event)
     p.current_size++
 }
-
 func (profiler* p) StartPhase(phase_name string) {
     if !p.enabled {
         return
@@ -132,7 +122,6 @@ func (profiler* p) StartPhase(phase_name string) {
         count:         0,
     }
 }
-
 func (profiler* p) EndPhase(phase_name string) {
     if !p.enabled {
         return
@@ -147,14 +136,12 @@ func (profiler* p) EndPhase(phase_name string) {
     timing.count++
     p.phase_timings[phase_name] = timing
 }
-
 func (profiler* p) StartRequestProfile(request_id string) {
     if !p.enabled {
         return
     }
     p.request_traces[request_id] = make([]profile_event, 0)
 }
-
 func (profiler* p) RecordRequestEvent(
     request_id string,
     event_type int32,
@@ -176,7 +163,6 @@ func (profiler* p) RecordRequestEvent(
     trace = append(trace, event)
     p.request_traces[request_id] = trace
 }
-
 func (profiler* p) GetPhaseMetrics(phase_name string) phase_timing {
     timing, exists := p.phase_timings[phase_name]
     if !exists {
@@ -186,7 +172,6 @@ func (profiler* p) GetPhaseMetrics(phase_name string) phase_timing {
     }
     return timing
 }
-
 func (profiler* p) GenerateReport() profiler_report {
     report := profiler_report{}
     for _, timing := range p.phase_timings {
@@ -207,7 +192,6 @@ func (profiler* p) GenerateReport() profiler_report {
     report.events_count = p.current_size
     return report
 }
-
 func (profiler* p) PrintProfile() {
     core.Println("╔═════════════════════════════════════╗")
     core.Println("║  Performance Profiler Report        ║")
@@ -231,23 +215,19 @@ func (profiler* p) PrintProfile() {
     core.Println("  Communication time:", float32(report.communication_ns)/1e6, "ms")
     core.Println("\nEvents Recorded:", report.events_count)
 }
-
 struct timeline_analyzer {
     traces          map[string][]profile_event
     critical_paths  map[string][]profile_event
 }
-
 func NewTimelineAnalyzer() *timeline_analyzer {
     return *timeline_analyzer{
         traces:         make(map[string][]profile_event),
         critical_paths: make(map[string][]profile_event),
     }
 }
-
 func (timeline_analyzer* ta) AddTrace(request_id string, events []profile_event) {
     ta.traces[request_id] = events
 }
-
 func (timeline_analyzer* ta) FindCriticalPath(request_id string) []profile_event {
     events, exists := ta.traces[request_id]
     if !exists {
@@ -267,7 +247,6 @@ func (timeline_analyzer* ta) FindCriticalPath(request_id string) []profile_event
     ta.critical_paths[request_id] = critical
     return critical
 }
-
 func (timeline_analyzer* ta) IdentifyBottleneck(request_id string) string {
     events, exists := ta.traces[request_id]
     if !exists {
@@ -284,7 +263,6 @@ func (timeline_analyzer* ta) IdentifyBottleneck(request_id string) string {
     }
     return bottleneck + " (" + core.ToString(max_gap/1e6) + "ms)"
 }
-
 func main() {
     profiler := NewProfiler()
     profiler.StartPhase("forward")

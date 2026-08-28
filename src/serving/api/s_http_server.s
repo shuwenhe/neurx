@@ -1,19 +1,16 @@
 package neurx.server.core
-
 struct http_request {
     string method
     string path
     string headers
     string body
 }
-
 struct http_response {
     int status
     string reason
     string headers
     string body
 }
-
 struct server_config {
     string host
     int port
@@ -21,24 +18,19 @@ struct server_config {
     int timeout_sec
     bool debug_mode
 }
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
-
     string result = ""
     bool negative = false
-
     if n < 0 {
         negative = true
         n = 0 - n
     }
-
     for n > 0 {
         int digit = n % 10
         string digit_str = ""
-
         if digit == 0 { digit_str = "0" }
         else if digit == 1 { digit_str = "1" }
         else if digit == 2 { digit_str = "2" }
@@ -49,18 +41,14 @@ func int_to_string(int n) string {
         else if digit == 7 { digit_str = "7" }
         else if digit == 8 { digit_str = "8" }
         else if digit == 9 { digit_str = "9" }
-
         result = digit_str + result
         n = n / 10
     }
-
     if negative {
         result = "-" + result
     }
-
     return result
 }
-
 func create_http_response(int status, string reason, string body) http_response {
     http_response resp
     resp.status = status
@@ -71,14 +59,12 @@ func create_http_response(int status, string reason, string body) http_response 
     resp.headers = resp.headers + "Access-Control-Allow-Origin: *\r\n"
     return resp
 }
-
 func format_http_response(http_response resp) string {
     string result = "HTTP/1.1 " + int_to_string(resp.status) + " " + resp.reason + "\r\n"
     result = result + resp.headers
     result = result + "\r\n" + resp.body
     return result
 }
-
 func print_config(server_config config) {
     print("╔════════════════════════════════════════════════════════════╗\n")
     print("║         🚀 NeurX pure S language REST API server               ║\n")
@@ -89,7 +75,6 @@ func print_config(server_config config) {
     print("   监听team列: " + int_to_string(config.backlog) + "\n")
     print("   超时: " + int_to_string(config.timeout_sec) + " 秒\n\n")
 }
-
 func main() {
     server_config config
     config.host = "0.0.0.0"
@@ -97,7 +82,6 @@ func main() {
     config.backlog = 128
     config.timeout_sec = 30
     config.debug_mode = true
-
     print_config(config)
     print("✅ NeurX S languageserveralready初始ization\n")
 }

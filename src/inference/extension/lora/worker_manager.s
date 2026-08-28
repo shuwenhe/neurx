@@ -1,7 +1,5 @@
 package lora
-
 type worker_status string
-
 const (
     worker_idle        worker_status = "idle"
     worker_busy        worker_status = "busy"
@@ -9,9 +7,7 @@ const (
     worker_failed      worker_status = "failed"
     worker_terminated  worker_status = "terminated"
 )
-
 type task_type string
-
 const (
     task_load_adapter      task_type = "load_adapter"
     task_unload_adapter    task_type = "unload_adapter"
@@ -19,7 +15,6 @@ const (
     task_training          task_type = "training"
     task_merge_adapters    task_type = "merge_adapters"
 )
-
 struct worker_task {
     string task_id
     task_type type
@@ -29,7 +24,6 @@ struct worker_task {
     int32 retry_count
     int32 max_retries
 }
-
 struct worker_process {
     int32 worker_id
     worker_status status
@@ -38,7 +32,6 @@ struct worker_process {
     int32 failed_tasks
     float32 avg_task_time_us
 }
-
 struct worker_manager {
     map[string]worker_process* workers
     map[string]worker_task* task_queue
@@ -47,7 +40,6 @@ struct worker_manager {
     int32 completed_tasks
     bool enable_load_balancing
 }
-
 func create_worker_manager(int32 num_workers) worker_manager* {
     mgr := worker_manager{
         workers: make(map[string]worker_process*),
@@ -57,7 +49,6 @@ func create_worker_manager(int32 num_workers) worker_manager* {
         completed_tasks: 0,
         enable_load_balancing: true,
     }
-
     for i := 0; i < num_workers; i = i + 1 {
         worker_id := "worker_" + string(i)
         worker := *worker_process{
@@ -70,15 +61,12 @@ func create_worker_manager(int32 num_workers) worker_manager* {
         }
         mgr.workers[worker_id] = worker
     }
-
     return *mgr
 }
-
 func (worker_manager* mgr) submit_task(string task_id, task_type type, string adapter_name, float32 priority) bool {
     if _, exists := mgr.task_queue[task_id]; exists {
         return false
     }
-
     task := *worker_task{
         task_id: task_id,
         type: type,
@@ -88,37 +76,28 @@ func (worker_manager* mgr) submit_task(string task_id, task_type type, string ad
         retry_count: 0,
         max_retries: 3,
     }
-
     mgr.task_queue[task_id] = task
     mgr.total_tasks = mgr.total_tasks + 1
-
     return true
 }
-
 func (worker_manager* mgr) cancel_task(string task_id) bool {
     if _, exists := mgr.task_queue[task_id]; exists {
         delete(mgr.task_queue, task_id)
         return true
     }
-
     return false
 }
-
 func (worker_manager* mgr) assign_task(string worker_id, string task_id) bool {
     if worker, exists := mgr.workers[worker_id]; exists {
         if task, task_exists := mgr.task_queue[task_id]; task_exists {
             worker.assigned_task_id = task_id
             worker.status = worker_processing
-
             task.retry_count = 0
-
             return true
         }
     }
-
     return false
 }
-
 func (worker_manager* mgr) complete_task(string worker_id, string task_id, bool success) bool {
     if worker, exists := mgr.workers[worker_id]; exists {
         if worker.assigned_task_id == task_id {
@@ -128,23 +107,17 @@ func (worker_manager* mgr) complete_task(string worker_id, string task_id, bool 
             } else {
                 worker.failed_tasks = worker.failed_tasks + 1
             }
-
             worker.assigned_task_id = ""
             worker.status = worker_idle
-
             delete(mgr.task_queue, task_id)
-
             return true
         }
     }
-
     return false
 }
-
 func (worker_manager* mgr) get_idle_worker() string {
     min_load := 999999
     idle_worker := ""
-
     for worker_id := range mgr.workers {
         worker := mgr.workers[worker_id]
         if worker.status == worker_idle {
@@ -154,28 +127,21 @@ func (worker_manager* mgr) get_idle_worker() string {
             }
         }
     }
-
     return idle_worker
 }
-
 func (worker_manager* mgr) get_worker_status(string worker_id) worker_status {
     if worker, exists := mgr.workers[worker_id]; exists {
         return worker.status
     }
-
     return worker_terminated
 }
-
 func (worker_manager* mgr) get_pending_tasks() string[] {
     tasks := make(string[])
-
     for task_id := range mgr.task_queue {
         tasks = append(tasks, task_id)
     }
-
     return tasks
 }
-
 func (worker_manager* mgr) retry_failed_task(string task_id) bool {
     if task, exists := mgr.task_queue[task_id]; exists {
         if task.retry_count < task.max_retries {
@@ -183,27 +149,21 @@ func (worker_manager* mgr) retry_failed_task(string task_id) bool {
             return true
         }
     }
-
     return false
 }
-
 func (worker_manager* mgr) set_load_balancing(bool enable) {
     mgr.enable_load_balancing = enable
 }
-
 func (worker_manager* mgr) process_queue() {
     for task_id := range mgr.task_queue {
         idle_worker := mgr.get_idle_worker()
-
         if idle_worker != "" {
             mgr.assign_task(idle_worker, task_id)
         }
     }
 }
-
 func (worker_manager* mgr) get_worker_stats(string worker_id) map[string]interface{} {
     stats := make(map[string]interface{})
-
     if worker, exists := mgr.workers[worker_id]; exists {
         stats["worker_id"] = worker.worker_id
         stats["status"] = worker.status
@@ -212,23 +172,18 @@ func (worker_manager* mgr) get_worker_stats(string worker_id) map[string]interfa
         stats["failed_tasks"] = worker.failed_tasks
         stats["avg_task_time"] = worker.avg_task_time_us
     }
-
     return stats
 }
-
 func (worker_manager* mgr) get_manager_stats() map[string]interface{} {
     stats := make(map[string]interface{})
-
     stats["num_workers"] = mgr.num_workers
     stats["total_tasks"] = mgr.total_tasks
     stats["completed_tasks"] = mgr.completed_tasks
     stats["pending_tasks"] = len(mgr.task_queue)
     stats["load_balancing_enabled"] = mgr.enable_load_balancing
-
     idle_count := 0
     busy_count := 0
     processing_count := 0
-
     for worker_id := range mgr.workers {
         worker := mgr.workers[worker_id]
         if worker.status == worker_idle {
@@ -239,20 +194,16 @@ func (worker_manager* mgr) get_manager_stats() map[string]interface{} {
             processing_count = processing_count + 1
         }
     }
-
     stats["idle_workers"] = idle_count
     stats["busy_workers"] = busy_count
     stats["processing_workers"] = processing_count
-
     return stats
 }
-
 func (worker_manager* mgr) shutdown() {
     for worker_id := range mgr.workers {
         worker := mgr.workers[worker_id]
         worker.status = worker_terminated
     }
-
     for task_id := range mgr.task_queue {
         delete(mgr.task_queue, task_id)
     }

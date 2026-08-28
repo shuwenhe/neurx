@@ -1,5 +1,4 @@
 module longwriter_engine
-
 struct long_writer_config {
     max_total_tokens: int = 32000
     max_section_tokens: int = 4096
@@ -28,7 +27,6 @@ struct long_writer_config {
     enable_cross_references: bool = false
     string template_id
 }
-
 struct outline_node {
     string id
     string title
@@ -44,14 +42,12 @@ struct outline_node {
     status: SectionStatus = section_status.PENDING
     revisions: int = 0
 }
-
     PENDING
     GENERATING
     COMPLETED
     REVISION_NEEDED
     REVISED
 }
-
 struct writing_plan {
     string topic
     outline_node outline
@@ -61,14 +57,12 @@ struct writing_plan {
     plan_metadata metadata
     writing_constraints constraints
 }
-
 struct plan_metadata {
     float created_at
     string model_used
     float planning_time_ms
     version: int = 1
 }
-
 struct writing_constraints {
     int min_total_words
     int max_total_words
@@ -77,7 +71,6 @@ struct writing_constraints {
     list<string> style_requirements
     audience_level: string = "general"
 }
-
 struct long_document {
     string title
     writing_plan plan
@@ -87,12 +80,10 @@ struct long_document {
     document_statistics statistics
     generation_metadata generation_metadata
 }
-
 struct table_of_contents {
     list<toc_entry> entries
     string format
 }
-
 struct toc_entry {
     int level
     string number
@@ -100,7 +91,6 @@ struct toc_entry {
     string page_ref
     int word_count
 }
-
 struct document_statistics {
     int total_words
     int total_characters
@@ -113,7 +103,6 @@ struct document_statistics {
     int revision_count
     quality_scores: map<string, float>
 }
-
 struct generation_metadata {
     string model_name
     int total_tokens_generated
@@ -413,7 +402,6 @@ struct generation_context {
     list<string> completed_sections
     global_constraints: map<string, string>
 }
-
 struct generated_section {
     outline_node section
     string raw_text
@@ -425,7 +413,6 @@ struct generated_section {
     string quality_feedback
     revision_suggested: bool = false
 }
-
 struct post_process_result {
     string text
     list<string> formatting_changes
@@ -522,7 +509,6 @@ struct quality_check_result {
     list<string> specific_improvements
     string feedback
 }
-
 struct coherence_check_result {
     string feedback
     bool smooth_transition
@@ -799,7 +785,6 @@ struct usage_info {
     int prompt_tokens
     int completion_tokens
 }
-
 struct llm_response {
     string text
     usage_info usage

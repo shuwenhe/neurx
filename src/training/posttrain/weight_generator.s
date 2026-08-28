@@ -1,5 +1,4 @@
 package posttrain.weight_generator
-
 func float_to_str(float f) string {
     int i_part = int(f)
     float frac = f - float(i_part)
@@ -9,7 +8,6 @@ func float_to_str(float f) string {
     int frac_int = int(frac * 1000000.0)
     return int_to_string(i_part) + "." + int_to_string(frac_int)
 }
-
 func sin_approx(float x) float {
     float pi = 3.14159265
     x = x - 2.0 * pi * float(int(x / (2.0 * pi)))
@@ -23,7 +21,6 @@ func sin_approx(float x) float {
     }
     return result
 }
-
 func main() {
     println("======================================================")
     println("Weight Generator for base-model Minimum Configuration")

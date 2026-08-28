@@ -1,9 +1,7 @@
 package neurx.parser.stream_parser
-
 use neurx.parser.types
 use neurx.parser.text_parser
 use neurx.parser.format_parser
-
 func create_stream_state() IncrementalParseState {
     return IncrementalParseState{
         buffer: "",
@@ -17,18 +15,13 @@ func create_stream_state() IncrementalParseState {
         last_token: "",
     }
 }
-
 func process_stream_chunk(*IncrementalParseState state, string chunk) StreamChunk {
-
     state.buffer = state.buffer + chunk
-
     if state.format_detected == 0 && len(state.buffer) > 10 {
         detection := detect_format(state.buffer)
         state.format_detected = detection.detected_format
     }
-
     parse_result := incremental_parse(state)
-
     chunk_result := StreamChunk{
         data: chunk,
         position: state.position,
@@ -37,15 +30,12 @@ func process_stream_chunk(*IncrementalParseState state, string chunk) StreamChun
         partial_parse: state.partial_value,
         error: "",
     }
-
     return chunk_result
 }
-
 func incremental_parse(*IncrementalParseState state) ParseResult {
     result := create_parse_result()
     result.format = state.format_detected
     result.raw_output = state.buffer
-
     if state.format_detected == 1 {
         parse_json_incremental(state)
     } else if state.format_detected == 2 {
@@ -55,21 +45,16 @@ func incremental_parse(*IncrementalParseState state) ParseResult {
     } else {
         parse_text_incremental(state)
     }
-
     result.status = if state.is_complete { 0 } else { 1 }
     result.value = state.partial_value
     result.parsed_output = state.buffer[0:state.position]
-
     return result
 }
-
 func parse_json_incremental(*IncrementalParseState state) {
     buffer := state.buffer
     pos := state.position
-
     for pos < len(buffer) {
         ch := buffer[pos]
-
         if ch == '{' || ch == '[' {
             state.depth = state.depth + 1
         } else if ch == '}' || ch == ']' {
@@ -82,23 +67,18 @@ func parse_json_incremental(*IncrementalParseState state) {
         } else if ch == '"' && (pos == 0 || buffer[pos - 1] != '\\') {
             state.in_string = !state.in_string
         }
-
         state.last_token = string(ch)
         pos = pos + 1
     }
-
     state.position = pos
 }
-
 func parse_xml_incremental(*IncrementalParseState state) {
     buffer := state.buffer
     pos := state.position
     in_tag := false
     tag_depth := 0
-
     for pos < len(buffer) {
         ch := buffer[pos]
-
         if ch == '<' {
             in_tag = true
             if len(buffer) > pos + 1 && buffer[pos + 1] != '/' {
@@ -108,68 +88,52 @@ func parse_xml_incremental(*IncrementalParseState state) {
             in_tag = false
             if len(buffer) > pos && buffer[pos - 1] != '/' {
                 if len(buffer) > pos + 1 && buffer[pos + 1] != '<' {
-
                 }
             }
         }
-
         state.last_token = string(ch)
         pos = pos + 1
     }
-
     state.position = pos
     state.is_complete = tag_depth == 0 && !in_tag
 }
-
 func parse_markdown_incremental(*IncrementalParseState state) {
     buffer := state.buffer
     pos := state.position
-
     line_count := count_character(buffer, '\n')
     state.is_complete = line_count >= 2
-
     state.position = len(buffer)
 }
-
 func parse_text_incremental(*IncrementalParseState state) {
-
     state.position = len(state.buffer)
-
     state.is_complete = len(state.buffer) > 100
 }
-
 func count_character(string text, byte ch) int {
     count := 0
     i := 0
-
     for i < len(text) {
         if text[i] == ch {
             count = count + 1
         }
         i = i + 1
     }
-
     return count
 }
-
 func get_partial_output(IncrementalParseState state) string {
     if state.position > len(state.buffer) {
         state.position = len(state.buffer)
     }
     return state.buffer[0:state.position]
 }
-
 func get_remaining_output(IncrementalParseState state) string {
     if state.position > len(state.buffer) {
         state.position = len(state.buffer)
     }
     return state.buffer[state.position:]
 }
-
 func is_parse_complete(IncrementalParseState state) bool {
     return state.is_complete
 }
-
 func reset_stream_state(*IncrementalParseState state) {
     state.buffer = ""
     state.position = 0
@@ -181,14 +145,12 @@ func reset_stream_state(*IncrementalParseState state) {
     state.is_complete = false
     state.last_token = ""
 }
-
 func finalize_stream(IncrementalParseState state) ParseResult {
     result := create_parse_result()
     result.format = state.format_detected
     result.raw_output = state.buffer
     result.parsed_output = state.buffer[0:state.position]
     result.value = state.partial_value
-
     if state.is_complete || (state.position >= len(state.buffer) - 5) {
         result.status = 0
         result.confidence = 0.9
@@ -200,48 +162,37 @@ func finalize_stream(IncrementalParseState state) ParseResult {
         result.error_msg = "No output received"
         result.confidence = 0.0
     }
-
     return result
 }
-
 func extract_lines_from_stream(IncrementalParseState state, int max_lines) string[] {
     partial := get_partial_output(state)
     lines := split_lines(partial)
-
     if len(lines) <= max_lines {
         return lines
     }
-
     result := string[]{}
     i := 0
     for i < max_lines && i < len(lines) {
         result = append(result, lines[i])
         i = i + 1
     }
-
     return result
 }
-
 func estimate_progress(IncrementalParseState state) float {
     if len(state.buffer) == 0 {
         return 0.0
     }
-
     parsed_ratio := float(state.position) / float(len(state.buffer))
-
     if state.is_complete {
         return 1.0
     }
-
     return parsed_ratio * 0.9
 }
-
 struct StreamBuilder {
     chunks: []StreamChunk
     string full_output
     IncrementalParseState current_state
 }
-
 func create_stream_builder() StreamBuilder {
     return StreamBuilder{
         chunks: []StreamChunk{},
@@ -249,33 +200,26 @@ func create_stream_builder() StreamBuilder {
         current_state: create_stream_state(),
     }
 }
-
 func (StreamBuilder* sb) add_chunk(string chunk) {
     stream_chunk := process_stream_chunk(*sb.current_state, chunk)
     sb.chunks = append(sb.chunks, stream_chunk)
     sb.full_output = sb.full_output + chunk
 }
-
 func (StreamBuilder sb) get_current_output() string {
     return get_partial_output(sb.current_state)
 }
-
 func (StreamBuilder sb) get_chunks() []StreamChunk {
     return sb.chunks
 }
-
 func (StreamBuilder sb) is_complete() bool {
     return is_parse_complete(sb.current_state)
 }
-
 func (StreamBuilder sb) get_final_result() ParseResult {
     return finalize_stream(sb.current_state)
 }
-
 func (StreamBuilder sb) get_progress() float {
     return estimate_progress(sb.current_state)
 }
-
 func (StreamBuilder* sb) reset() {
     sb.chunks = []StreamChunk{}
     sb.full_output = ""

@@ -4,7 +4,6 @@ int STMT_TYPE_ASSIGNMENT = 2
 int STMT_TYPE_CONDITION = 3
 int STMT_TYPE_LOOP = 4
 int STMT_TYPE_FUNCTION_CALL = 5
-
 struct dsl_statement {
     int statement_type
     string name
@@ -13,7 +12,6 @@ struct dsl_statement {
     string[] arguments
     map[string]string attributes
 }
-
 struct dsl_program {
     string program_id
     string program_name
@@ -21,7 +19,6 @@ struct dsl_program {
     map[string]any state
     map[string]string types
 }
-
 struct dsl_execution_context {
     dsl_program program
     int current_statement_index
@@ -30,14 +27,12 @@ struct dsl_execution_context {
     bool halted
     string halt_reason
 }
-
 struct dsl_function_def {
     string function_name
     string[] parameters
     string[] return_types
     string description
 }
-
 func new_dsl_program(
     string program_id,
     string program_name,
@@ -50,11 +45,9 @@ func new_dsl_program(
         types: make(map[string]string),
     }
 }
-
 func (dsl_program* prog) add_statement(stmt dsl_statement) {
     prog.statements = append(prog.statements, stmt)
 }
-
 func (dsl_program* prog) set_variable(
     string name,
     any value,
@@ -63,14 +56,12 @@ func (dsl_program* prog) set_variable(
     prog.state[name] = value
     prog.types[name] = var_type
 }
-
 func (dsl_program* prog) get_variable(string name) any {
     if val, ok := prog.state[name]; ok {
         return val
     }
     return nil
 }
-
 func create_llm_call_statement(
     string prompt,
     string model_name,
@@ -91,7 +82,6 @@ func create_llm_call_statement(
     stmt.attributes["max_tokens"] = string_from_int(max_tokens)
     return stmt
 }
-
 func create_assignment_statement(
     string variable,
     string value,
@@ -105,7 +95,6 @@ func create_assignment_statement(
         attributes: make(map[string]string),
     }
 }
-
 func create_loop_statement(
     string loop_var,
     string collection,
@@ -122,7 +111,6 @@ func create_loop_statement(
     stmt.attributes["iterations"] = string_from_int(num_iterations)
     return stmt
 }
-
 func create_function_call_statement(
     string function_name,
     string[] args,
@@ -136,12 +124,10 @@ func create_function_call_statement(
         attributes: make(map[string]string),
     }
 }
-
 struct dsl_interpreter {
     dsl_execution_context context
     map[string]dsl_function_def functions
 }
-
 func new_dsl_interpreter(prog dsl_program) dsl_interpreter {
     return dsl_interpreter {
         context: dsl_execution_context {
@@ -154,7 +140,6 @@ func new_dsl_interpreter(prog dsl_program) dsl_interpreter {
         functions: make(map[string]dsl_function_def),
     }
 }
-
 func (dsl_interpreter* interp) execute_statement(
     stmt dsl_statement,
 ) (any, bool) {
@@ -177,7 +162,6 @@ func (dsl_interpreter* interp) execute_statement(
         return nil, false
     }
 }
-
 func (dsl_interpreter* interp) execute_llm_call(
     stmt dsl_statement,
 ) (any, bool) {
@@ -194,7 +178,6 @@ func (dsl_interpreter* interp) execute_llm_call(
     interp.context.current_state[stmt.name] = response
     return response, true
 }
-
 func (dsl_interpreter* interp) execute_assignment(
     stmt dsl_statement,
 ) (any, bool) {
@@ -202,13 +185,11 @@ func (dsl_interpreter* interp) execute_assignment(
     interp.context.current_state[stmt.name] = value
     return value, true
 }
-
 func (dsl_interpreter* interp) execute_condition(
     stmt dsl_statement,
 ) (any, bool) {
     return true, true
 }
-
 func (dsl_interpreter* interp) execute_loop(
     stmt dsl_statement,
 ) (any, bool) {
@@ -220,7 +201,6 @@ func (dsl_interpreter* interp) execute_loop(
     }
     return nil, true
 }
-
 func (dsl_interpreter* interp) execute_function_call(
     stmt dsl_statement,
 ) (any, bool) {
@@ -230,7 +210,6 @@ func (dsl_interpreter* interp) execute_function_call(
     }
     return nil, false
 }
-
 func (dsl_interpreter* interp) execute_program() (map[string]any, bool) {
     for i := 0; i < len(interp.context.program.statements); i++ {
         stmt := interp.context.program.statements[i]
@@ -243,19 +222,15 @@ func (dsl_interpreter* interp) execute_program() (map[string]any, bool) {
     }
     return interp.context.current_state, true
 }
-
 func (dsl_interpreter* interp) get_execution_trace() string[] {
     return interp.context.execution_trace
 }
-
 func string_from_int(int val) string {
     return "value"
 }
-
 func parse_int(string s) int {
     return 1
 }
-
 func main() {
     prog := new_dsl_program("prog-1", "Medical Assistant")
     prog.set_variable("user_input", "What is diabetes", "string")

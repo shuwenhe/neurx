@@ -1,5 +1,4 @@
 package neurx.inference.sampling.thinking_budget_state
-
 struct thinking_budget_config {
     int capacity
     int start_token_id
@@ -7,7 +6,6 @@ struct thinking_budget_config {
     int speculative_width
     bool enabled
 }
-
 struct thinking_budget_state {
     thinking_budget_config config
     int[] request_ids
@@ -19,26 +17,22 @@ struct thinking_budget_state {
     int forced_end_count
     bool initialized
 }
-
 struct thinking_budget_update {
     thinking_budget_state state
     bool accepted
     bool force_end_token
     int forced_token_id
 }
-
 func thinking_zero_array(int capacity) int[] {
     int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func init_thinking_budget(thinking_budget_config config) thinking_budget_state {
     bool initialized = !config.enabled || (config.capacity > 0 && config.start_token_id >= 0 && config.end_token_id >= 0 && config.speculative_width >= 0)
     thinking_budget_state {config: config, request_ids: thinking_zero_array(config.capacity), budgets: thinking_zero_array(config.capacity), used_tokens: thinking_zero_array(config.capacity), in_thinking: thinking_zero_array(config.capacity), force_end: thinking_zero_array(config.capacity), tracked_requests: 0, forced_end_count: 0, initialized: initialized}
 }
-
 func thinking_find_request(thinking_budget_state state, int request_id) int {
     int i = 0
     for i < state.config.capacity {
@@ -47,7 +41,6 @@ func thinking_find_request(thinking_budget_state state, int request_id) int {
     }
     0 - 1
 }
-
 func add_thinking_request(thinking_budget_state state, int request_id, int budget, bool prompt_in_thinking, int prompt_thinking_tokens) thinking_budget_update {
     if !state.initialized || !state.config.enabled || request_id <= 0 || budget < 0 || thinking_find_request(state, request_id) >= 0 { return thinking_budget_update {state: state, accepted: false, force_end_token: false, forced_token_id: 0} }
     int slot = 0
@@ -61,7 +54,6 @@ func add_thinking_request(thinking_budget_state state, int request_id, int budge
     state.tracked_requests = state.tracked_requests + 1
     thinking_budget_update {state: state, accepted: true, force_end_token: state.force_end[slot] == 1, forced_token_id: state.config.end_token_id}
 }
-
 func update_thinking_token(thinking_budget_state state, int request_id, int token_id) thinking_budget_update {
     int slot = thinking_find_request(state, request_id)
     if slot < 0 { return thinking_budget_update {state: state, accepted: false, force_end_token: false, forced_token_id: 0} }
@@ -76,7 +68,6 @@ func update_thinking_token(thinking_budget_state state, int request_id, int toke
     }
     thinking_budget_update {state: state, accepted: true, force_end_token: state.force_end[slot] == 1, forced_token_id: state.config.end_token_id}
 }
-
 func remove_thinking_request(thinking_budget_state state, int request_id) thinking_budget_state {
     int slot = thinking_find_request(state, request_id)
     if slot < 0 { return state }

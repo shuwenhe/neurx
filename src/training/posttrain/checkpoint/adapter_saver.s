@@ -1,12 +1,10 @@
 package neurx.posttrain.checkpoint.adapter_saver
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_binary_file, runtime_file_exists, runtime_write_text_file, trim}
-
 struct safetensors_header {
     string version
     int num_tensors
     int total_size
 }
-
 struct safetensors_tensor_info {
     string name
     string dtype
@@ -14,7 +12,6 @@ struct safetensors_tensor_info {
     int offset
     int size
 }
-
 func create_safetensors_header() safetensors_header {
     safetensors_header header
     header.version = "0.0.1"
@@ -22,7 +19,6 @@ func create_safetensors_header() safetensors_header {
     header.total_size = 0
     return header
 }
-
 func float_to_bytes_le(float f) []byte {
     []byte bytes = []byte{cap: 4}
     int i = 0
@@ -32,7 +28,6 @@ func float_to_bytes_le(float f) []byte {
     }
     return bytes
 }
-
 func save_tensor_to_safetensors(float[] tensor_data, string tensor_name) []byte {
     []byte result = []byte{}
     int i = 0
@@ -47,7 +42,6 @@ func save_tensor_to_safetensors(float[] tensor_data, string tensor_name) []byte 
     }
     return result
 }
-
 func save_adapter_model_safetensors(string output_path, float[][] lora_a_weights, float[][] lora_b_weights, string[] module_names) bool {
     if !runtime_file_exists(output_path) {
         if !runtime_make_dirs(output_path) {
@@ -93,7 +87,6 @@ func save_adapter_model_safetensors(string output_path, float[][] lora_a_weights
     println("Adapter config saved to: " + config_file)
     return true
 }
-
 func create_adapter_config_json(int rank, float alpha, float dropout, string[] target_modules) string {
     string json = "{\n"
     json = concat2(json, "  \"base_model_name_or_path\": \"model\",\n")
@@ -120,7 +113,6 @@ func create_adapter_config_json(int rank, float alpha, float dropout, string[] t
     json = concat2(json, "}\n")
     return json
 }
-
 func save_training_artifacts(string output_path, float[] loss_history, float[] eval_loss_history, int final_step) bool {
     if !runtime_file_exists(output_path) {
         if !runtime_make_dirs(output_path) {
@@ -145,7 +137,6 @@ func save_training_artifacts(string output_path, float[] loss_history, float[] e
     }
     return true
 }
-
 func load_adapter_config_json(string config_file) string {
     if !runtime_file_exists(config_file) {
         println("Error: adapter config file not found: " + config_file)
@@ -153,7 +144,6 @@ func load_adapter_config_json(string config_file) string {
     }
     return ""
 }
-
 func load_adapter_model(string adapter_path, int expected_rank, int hidden_size) float[][] {
     float[][] loaded_adapters = float[][]{cap: 7}
     if !runtime_file_exists(adapter_path) {
@@ -176,7 +166,6 @@ func load_adapter_model(string adapter_path, int expected_rank, int hidden_size)
     println("Adapter loaded successfully")
     return loaded_adapters
 }
-
 func save_checkpoint(
     string checkpoint_dir,
     float[][] lora_a_matrices,
@@ -201,7 +190,6 @@ func save_checkpoint(
     println("Checkpoint saved successfully to: " + checkpoint_dir)
     return true
 }
-
 func load_checkpoint(string checkpoint_dir, int expected_rank, int hidden_size) float[][] {
     string adapter_file = checkpoint_dir + "/adapter_model.safetensors"
     string config_file = checkpoint_dir + "/adapter_config.json"

@@ -1,10 +1,8 @@
 package models
-
 import (
 	"sync"
 	"time"
 )
-
 type model_type int32
 const (
 	TYPE_QWEN model_type = iota
@@ -40,7 +38,6 @@ const (
 	TYPE_DEEPSEEK
 	TYPE_CUSTOM
 )
-
 type model_state int32
 const (
 	STATE_UNINITIALIZED model_state = iota
@@ -56,7 +53,6 @@ const (
 	STATE_UNLOADING
 	STATE_ERROR
 )
-
 type model_capability int32
 const (
 	CAP_CHAT model_capability = iota
@@ -70,7 +66,6 @@ const (
 	CAP_FUNCTION_CALLING
 	CAP_TOOL_USE
 )
-
 type model_quantization_type int32
 const (
 	QUANT_NONE quantization_type = iota
@@ -81,7 +76,6 @@ const (
 	QUANT_GGUF
 	QUANT_AWQUANT
 )
-
 type model_precision_type int32
 const (
 	PRECISION_FP32 model_precision_type = iota
@@ -91,7 +85,6 @@ const (
 	PRECISION_INT4
 	PRECISION_MIXED
 )
-
 type model_device_type int32
 const (
 	DEVICE_CPU model_device_type = iota
@@ -103,7 +96,6 @@ const (
 	DEVICE_METAL
 	DEVICE_ONEAPI
 )
-
 struct model_memory_config {
 	float64 max_memory_gb
 	float64 cache_size_gb
@@ -111,7 +103,6 @@ struct model_memory_config {
 	bool enable_offloading
 	model_device_type offload_device
 }
-
 struct model_generation_config {
 	int32 max_tokens
 	int32 min_tokens
@@ -128,7 +119,6 @@ struct model_generation_config {
 	int32 eos_token_id
 	int32 bos_token_id
 }
-
 struct model_metadata {
 	string model_id
 	string model_name
@@ -153,7 +143,6 @@ struct model_metadata {
 	string[] tags
 	map[string]interface{} capabilities_map
 }
-
 struct model_stats {
 	int64 total_tokens
 	int64 total_requests
@@ -164,7 +153,6 @@ struct model_stats {
 	time.Time loaded_at
 	time.Time last_used_at
 }
-
 struct model_interface {
 	sync.Mutex mu
 	string model_id
@@ -186,7 +174,6 @@ struct model_interface {
 	time.Time last_error_time
 	int64 initialization_time_ms
 }
-
 struct model_input {
 	string input_type
 	string prompt
@@ -196,7 +183,6 @@ struct model_input {
 	[]byte video_data
 	map[string]interface{} additional_params
 }
-
 struct model_output {
 	string output_type
 	string text
@@ -205,14 +191,12 @@ struct model_output {
 	float[]32 embedding
 	map[string]interface{} metadata
 }
-
 struct model_batch {
 	string batch_id
 	[]*model_input inputs
 	int32 batch_size
 	time.Time created_at
 }
-
 struct model_performance_metrics {
 	float64 throughput_tokens_per_sec
 	float64 latency_p50_ms
@@ -223,7 +207,6 @@ struct model_performance_metrics {
 	float64 gpu_utilization
 	float64 cpu_utilization
 }
-
 func create_model_interface(model_id string, model_name string, model_type model_type) *model_interface {
 	return *model_interface{
 		model_id: model_id,
@@ -259,7 +242,6 @@ func create_model_interface(model_id string, model_name string, model_type model
 		device: DEVICE_CUDA,
 	}
 }
-
 func (model_interface* m) set_state(state model_state) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -268,13 +250,11 @@ func (model_interface* m) set_state(state model_state) {
 		m.stats.loaded_at = time.Now()
 	}
 }
-
 func (model_interface* m) get_state() model_state {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.state
 }
-
 func (model_interface* m) add_capability(cap model_capability) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -285,7 +265,6 @@ func (model_interface* m) add_capability(cap model_capability) {
 	}
 	m.metadata.capabilities = append(m.metadata.capabilities, cap)
 }
-
 func (model_interface* m) has_capability(cap model_capability) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -296,7 +275,6 @@ func (model_interface* m) has_capability(cap model_capability) bool {
 	}
 	return false
 }
-
 func (model_interface* m) set_generation_config(model_generation_config* config) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -304,7 +282,6 @@ func (model_interface* m) set_generation_config(model_generation_config* config)
 		m.generation_config = config
 	}
 }
-
 func (model_interface* m) set_memory_config(model_memory_config* config) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -312,7 +289,6 @@ func (model_interface* m) set_memory_config(model_memory_config* config) {
 		m.memory_config = config
 	}
 }
-
 func (model_interface* m) record_error(error_msg string, error_code int32) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -322,20 +298,17 @@ func (model_interface* m) record_error(error_msg string, error_code int32) {
 	m.last_error_time = time.Now()
 	m.stats.total_errors++
 }
-
 func (model_interface* m) clear_error() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.error_message = ""
 	m.error_code = 0
 }
-
 func (model_interface* m) get_error() (string, int32) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.error_message, m.error_code
 }
-
 func (model_interface* m) update_stats(tokens_generated int64, latency_ms float64, memory_mb float64) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -347,49 +320,41 @@ func (model_interface* m) update_stats(tokens_generated int64, latency_ms float6
 	}
 	m.stats.last_used_at = time.Now()
 }
-
 func (model_interface* m) get_stats() *model_stats {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.stats
 }
-
 func (model_interface* m) get_metadata() *model_metadata {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.metadata
 }
-
 func (model_interface* m) set_device(device model_device_type) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.device = device
 }
-
 func (model_interface* m) set_precision(precision model_precision_type) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.precision = precision
 }
-
 func (model_interface* m) set_quantization(quant model_quantization_type) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.quantization = quant
 }
-
 func (model_interface* m) set_max_batch_size(size int32) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.max_batch_size = size
 }
-
 func (model_interface* m) get_capabilities() []model_capability {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.metadata.capabilities
 }
-
 func (model_interface* m) set_initialization_time(time_ms int64) {
 	m.mu.Lock()
 	defer m.mu.Unlock()

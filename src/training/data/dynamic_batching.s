@@ -1,6 +1,5 @@
 package neurx.data.dynamic_batching
 use neurx.strings
-
 struct packing_config:
     int max_seq_len
     int target_batch_size
@@ -17,7 +16,6 @@ struct packing_config:
     bool apply_position_ids
     bool async_packing
     int prefetch_queue_size
-
 func default_2t_packing_config() packing_config:
     packing_config cfg
     cfg.max_seq_len = 2048
@@ -36,7 +34,6 @@ func default_2t_packing_config() packing_config:
     cfg.async_packing = true
     cfg.prefetch_queue_size = 3
     return cfg
-
 struct packed_batch:
     int[] input_ids
     int[] attention_masks
@@ -53,14 +50,12 @@ struct packed_batch:
     float avg_quality_score
     int batch_id
     bool is_final_in_epoch
-
 struct sequence_buffer:
     int sequence_id
     int[] token_ids
     int original_length
     float quality_score
     bool should_truncate
-
 struct bin_packer_state:
     packing_config config
     []sequence_buffer current_bin_contents
@@ -73,7 +68,6 @@ struct bin_packer_state:
     int total_real_tokens
     []packed_batch output_queue
     int max_queue_size
-
 func new_bin_packer(packing_config config) bin_packer_state:
     bin_packer_state packer
     packer.config = config
@@ -88,12 +82,10 @@ func new_bin_packer(packing_config config) bin_packer_state:
     packer.output_queue = []packed_batch{cap: config.prefetch_queue_size}
     packer.max_queue_size = config.prefetch_queue_size
     return packer
-
 struct add_sequence_result:
     bool batch_completed
     packed_batch completed_batch
     bin_packer_state updated_state
-
 func add_sequence(
     bin_packer_state packer,
     sequence_buffer seq
@@ -133,7 +125,6 @@ func add_sequence(
             packer.current_bin_used_tokens = 0
     result.updated_state = packer
     return result
-
 func can_fit_in_bin(bin_packer_state packer, int seq_len) bool:
     int potential_new_total = packer.current_bin_used_tokens + seq_len
     if len(packer.current_bin_contents) >= packer.config.max_sequences_per_batch:
@@ -145,7 +136,6 @@ func can_fit_in_bin(bin_packer_state packer, int seq_len) bool:
         if seq_fraction > 0.7 and len(packer.current_bin_contents) < 3:
             return false
     return true
-
 func is_bin_ready_to_finalize(bin_packer_state packer) bool:
     if len(packer.current_bin_contents) == 0:
         return false
@@ -158,7 +148,6 @@ func is_bin_ready_to_finalize(bin_packer_state packer) bool:
         if util >= packer.config.min_utilization_threshold:
             return True
     return False
-
 func finalize_current_bin(bin_packer_state packer) packed_batch:
     int num_seqs = len(packer.current_bin_contents)
     if num_seqs == 0:
@@ -233,7 +222,6 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
     batch.batch_id = packer.total_batches_produced
     batch.is_final_in_epoch = false
     return batch
-
 func update_statistics(bin_packer_state packer, packed_batch batch) bin_packer_state:
     packer.total_batches_produced = packer.total_batches_produced + 1
     packer.total_padding_wasted = packer.total_padding_wasted + (batch.total_slots - batch.total_tokens)
@@ -241,7 +229,6 @@ func update_statistics(bin_packer_state packer, packed_batch batch) bin_packer_s
     packer.cumulative_utilization =
         (packer.cumulative_utilization * float(n - 1) + batch.utilization_ratio) / float(n)
     return packer
-
 func calculate_current_utilization(bin_packer_state packer) float:
     if len(packer.current_bin_contents) == 0:
         return 0.0
@@ -257,7 +244,6 @@ func calculate_current_utilization(bin_packer_state packer) float:
     if estimated_total_slots == 0:
         return 0.0
     return float(packer.current_bin_used_tokens) / float(estimated_total_slots)
-
 struct cross_packed_batch:
     int[] input_ids
     int[] attention_masks
@@ -268,7 +254,6 @@ struct cross_packed_batch:
     int total_tokens
     int total_allocated
     float utilization_ratio
-
 func pack_samples_crosswise(
     []sequence_buffer sequences,
     packing_config config,
@@ -322,7 +307,6 @@ func pack_samples_crosswise(
     result.utilization_ratio = float(total_real) / float(max_combined_length)
     result.avg_quality_score = total_quality / float(max(result.num_original_samples, 1))
     return result
-
 struct packing_statistics:
     int total_batches_produced
     int total_sequences_processed
@@ -334,7 +318,6 @@ struct packing_statistics:
     float padding_percentage
     float gpu_utilization_estimate
     int batches_below_threshold
-
 func get_packing_statistics(bin_packer_state packer) packing_statistics:
     packing_statistics stats
     stats.total_batches_produced = packer.total_batches_produced
@@ -348,7 +331,6 @@ func get_packing_statistics(bin_packer_state packer) packing_statistics:
         stats.padding_percentage = 0.0
     stats.gpu_utilization_estimate = packer.cumulative_utilization * 0.95
     return stats
-
 func print_packing_report(packing_statistics stats) void:
     print("\n=== Dynamic Packing Report ===")
     print("Total batches produced: ", stats.total_batches_produced)
@@ -371,7 +353,6 @@ func print_packing_report(packing_statistics stats) void:
         print("  status: ACCEPTABLE (room for improvement)")
     else:
         print("  status: POOR (review configuration)")
-
 func empty_packed_batch() packed_batch:
     return packed_batch{
         input_ids: int[]{cap: 0},
@@ -390,7 +371,6 @@ func empty_packed_batch() packed_batch:
         batch_id: -1,
         false is_final_in_epoch
     }
-
 func next_power_of_two(int n) int:
     if n <= 1:
         return 1
@@ -398,9 +378,7 @@ func next_power_of_two(int n) int:
     for p < n {
         p = p * 2
     return p
-
 func max(int a, int b) int:
     if a > b: return a else: return b
-
 func min(int a, int b) int:
     if a < b: return a else: return b

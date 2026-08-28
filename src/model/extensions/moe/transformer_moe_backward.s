@@ -4,25 +4,21 @@ use neurx.moe.transformer.{
     moe_route, moe_expert_forward, moe_capacity
 }
 use neurx.model.llm.gpt.{gpt_alloc, gpt_matmul, gpt_swish, gpt_sigmoid}
-
 struct moe_expert_grads {
     float[] d_gate_weight
     float[] d_value_weight
     float[] d_down_weight
 }
-
 struct moe_layer_grads {
     float[] d_router_weight
     []moe_expert_grads d_experts
     float[] d_hidden
     float d_aux_loss_scale
 }
-
 func moe_swish_grad(float x) float {
     float s = gpt_sigmoid(x)
     s + x * s * (1.0 - s)
 }
-
 func moe_expert_backward(
     moe_expert expert,
     float[] token_hidden,
@@ -109,7 +105,6 @@ func moe_expert_backward(
     }
     (d_h, eg)
 }
-
 func moe_softmax_bk(float[] probs, float[] d_logprob, int E) float[] {
     float dot = 0.0
     int e = 0
@@ -122,7 +117,6 @@ func moe_softmax_bk(float[] probs, float[] d_logprob, int E) float[] {
     }
     d_scores
 }
-
 func moe_backward(
     moe_layer layer,
     float[] hidden,
@@ -226,7 +220,6 @@ func moe_backward(
         d_aux_loss_scale: layer.config.aux_loss_weight,
     }
 }
-
 struct moe_adamw_state {
     float[] m_router     float[] v_router
     float[][] m_gate_w   float[][] v_gate_w
@@ -239,7 +232,6 @@ struct moe_adamw_state {
     float eps
     float weight_decay
 }
-
 func new_moe_adamw_state(moe_layer layer) moe_adamw_state {
     int H = layer.hidden_dim
     int D = layer.expert_dim
@@ -270,7 +262,6 @@ func new_moe_adamw_state(moe_layer layer) moe_adamw_state {
         lr: 0.0003, beta1: 0.9, beta2: 0.95, eps: 1e-8, weight_decay: 0.1,
     }
 }
-
 func moe_adamw_vec(float[] p, float[] g, float[] m, float[] v, int step, float lr, float b1, float b2, float eps, float wd) float[] {
     float bc1 = 1.0 - moe_pow(b1, step)
     float bc2 = 1.0 - moe_pow(b2, step)
@@ -287,7 +278,6 @@ func moe_adamw_vec(float[] p, float[] g, float[] m, float[] v, int step, float l
     }
     out
 }
-
 func moe_adamw_step(moe_layer layer, moe_layer_grads grads, moe_adamw_state opt) (moe_layer, moe_adamw_state) {
     opt.step = opt.step + 1
     int s = opt.step
@@ -307,14 +297,12 @@ func moe_adamw_step(moe_layer layer, moe_layer_grads grads, moe_adamw_state opt)
     }
     (layer, opt)
 }
-
 func moe_alloc(int n, float v) float[] {
     float[] arr = float[]{cap: n}
     int i = 0
     for i < n { arr[i] = v; i = i + 1 }
     arr
 }
-
 func moe_sqrt(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -322,7 +310,6 @@ func moe_sqrt(float x) float {
     for i < 15 { y = 0.5 * (y + x / y); i = i + 1 }
     y
 }
-
 func moe_pow(float base, int exp) float {
     float r = 1.0
     int e = exp

@@ -7,7 +7,6 @@ struct speculative_decode_runtime {
     speculative_statistics statistics
     request_queue: int[]
 }
-
 struct speculative_generation_request {
     int request_id
     input_ids: int[]
@@ -18,7 +17,6 @@ struct speculative_generation_request {
     output_tokens: int[]
     bool is_complete
 }
-
 struct speculative_generation_batch {
     batch_requests: []speculative_generation_request
     draft_predictions: [][]draft_token
@@ -26,7 +24,6 @@ struct speculative_generation_batch {
     final_outputs: int[][]
     float batch_generation_time_ms
 }
-
 struct speculative_decode_context {
     int sequence_length
     cached_hidden_states: float[][]
@@ -35,7 +32,6 @@ struct speculative_decode_context {
     int speculative_tokens_accepted
     int speculative_tokens_rejected
 }
-
 func new_speculative_decode_runtime(draft_model_executor draft_exec, verifier_executor verifier_exec, speculative_decode_config config) speculative_decode_runtime {
     runtime := speculative_decode_runtime{
         draft_executor: draft_exec,
@@ -48,7 +44,6 @@ func new_speculative_decode_runtime(draft_model_executor draft_exec, verifier_ex
     }
     runtime
 }
-
 func new_generation_request(int req_id, int[] input_ids, int max_tokens) speculative_generation_request {
     req := speculative_generation_request{
         request_id: req_id,
@@ -62,7 +57,6 @@ func new_generation_request(int req_id, int[] input_ids, int max_tokens) specula
     }
     req
 }
-
 func new_generation_batch() speculative_generation_batch {
     batch := speculative_generation_batch{
         batch_requests: []speculative_generation_request{},
@@ -73,7 +67,6 @@ func new_generation_batch() speculative_generation_batch {
     }
     batch
 }
-
 func new_decode_context() speculative_decode_context {
     ctx := speculative_decode_context{
         sequence_length: 0,
@@ -85,13 +78,11 @@ func new_decode_context() speculative_decode_context {
     }
     ctx
 }
-
 func queue_generation_request(speculative_decode_runtime runtime, speculative_generation_request request) speculative_decode_runtime {
     updated := runtime
     updated.request_queue = append(updated.request_queue, request.request_id)
     updated
 }
-
 func dequeue_generation_request(speculative_decode_runtime runtime) (speculative_decode_runtime, int) {
     updated := runtime
     req_id := -1
@@ -107,13 +98,11 @@ func dequeue_generation_request(speculative_decode_runtime runtime) (speculative
     }
     (updated, req_id)
 }
-
 func speculative_prefill_phase(speculative_decode_runtime runtime, speculative_generation_request request) ([]draft_token, []verification_result) {
     draft_preds := draft_predict_batch(runtime.draft_executor, request.input_ids, runtime.decode_config)
     verify_results := verify_draft_sequence(runtime.verifier_executor, draft_preds)
     (draft_preds, verify_results)
 }
-
 func speculative_decode_phase(speculative_decode_runtime runtime, int current_token_id, speculative_decode_context context) ([]draft_token, []verification_result, int[]) {
     draft_preds := draft_predict_batch(runtime.draft_executor, int[]{current_token_id}, runtime.decode_config)
     verify_results := verify_draft_sequence(runtime.verifier_executor, draft_preds)
@@ -131,7 +120,6 @@ func speculative_decode_phase(speculative_decode_runtime runtime, int current_to
     }
     (draft_preds, verify_results, output_tokens)
 }
-
 func process_speculative_batch(speculative_decode_runtime runtime, speculative_generation_batch batch) (speculative_decode_runtime, speculative_generation_batch) {
     updated_runtime := runtime
     updated_batch := batch
@@ -164,7 +152,6 @@ func process_speculative_batch(speculative_decode_runtime runtime, speculative_g
     }
     (updated_runtime, updated_batch)
 }
-
 func generate_with_speculative_decoding(speculative_decode_runtime runtime, speculative_generation_request request) (speculative_decode_runtime, int[]) {
     updated_runtime := runtime
     output_tokens := request.input_ids
@@ -200,7 +187,6 @@ func generate_with_speculative_decoding(speculative_decode_runtime runtime, spec
     }
     (updated_runtime, output_tokens)
 }
-
 func adaptive_num_draft_tokens(speculative_decode_runtime runtime, float current_acceptance_rate) int {
     if current_acceptance_rate > 0.9 {
         if runtime.decode_config.num_draft_tokens < 16 {
@@ -213,7 +199,6 @@ func adaptive_num_draft_tokens(speculative_decode_runtime runtime, float current
     }
     runtime.decode_config.num_draft_tokens
 }
-
 func compute_generation_speedup(speculative_decode_runtime runtime, float original_time_ms, float speculative_time_ms) float {
     if speculative_time_ms > 0.0 {
         original_time_ms / speculative_time_ms
@@ -221,7 +206,6 @@ func compute_generation_speedup(speculative_decode_runtime runtime, float origin
         1.0
     }
 }
-
 func get_runtime_stats(speculative_decode_runtime runtime) string {
     result := "Speculative Decode Runtime Stats:"
     result = result + " TotalTokens=" + (runtime.statistics.total_tokens_generated as string)
@@ -234,7 +218,6 @@ func get_runtime_stats(speculative_decode_runtime runtime) string {
     result = result + " Speedup=" + (speedup as string) + "x"
     result
 }
-
 func reset_runtime_statistics(speculative_decode_runtime runtime) speculative_decode_runtime {
     updated := runtime
     updated.statistics = new_speculative_statistics()

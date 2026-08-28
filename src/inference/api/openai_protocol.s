@@ -1,5 +1,4 @@
 package neurx.inference.api.openai_protocol
-
 struct openai_request {
     string request_id
     string model
@@ -14,14 +13,12 @@ struct openai_request {
     string adapter_id
     string user
 }
-
 struct openai_request_result {
     openai_request request
     bool valid
     int status_code
     string error_message
 }
-
 func openai_substring(string text, int start, int end) string {
     string result = ""
     int i = start
@@ -31,7 +28,6 @@ func openai_substring(string text, int start, int end) string {
     }
     result
 }
-
 func openai_find(string text, string pattern, int start) int {
     int i = start
     for i + len(pattern) <= len(text) {
@@ -51,11 +47,9 @@ func openai_find(string text, string pattern, int start) int {
     }
     -1
 }
-
 func openai_is_space(int ch) bool {
     ch == 32 || ch == 10 || ch == 13 || ch == 9
 }
-
 func openai_skip_space(string text, int start) int {
     int i = start
     for i < len(text) && openai_is_space(int(text[i])) {
@@ -63,7 +57,6 @@ func openai_skip_space(string text, int start) int {
     }
     i
 }
-
 func openai_field_start(string body, string key) int {
     int key_start = openai_find(body, "\"" + key + "\"", 0)
     if key_start < 0 {
@@ -75,7 +68,6 @@ func openai_field_start(string body, string key) int {
     }
     openai_skip_space(body, colon + 1)
 }
-
 func openai_json_string(string body, string key) string {
     int start = openai_field_start(body, key)
     if start < 0 || start >= len(body) || int(body[start]) != 34 {
@@ -100,7 +92,6 @@ func openai_json_string(string body, string key) string {
     }
     ""
 }
-
 func openai_json_int(string body, string key, int default_value) int {
     int start = openai_field_start(body, key)
     if start < 0 {
@@ -127,7 +118,6 @@ func openai_json_int(string body, string key, int default_value) int {
     }
     value
 }
-
 func openai_json_bool(string body, string key, bool default_value) bool {
     int start = openai_field_start(body, key)
     if start < 0 {
@@ -141,7 +131,6 @@ func openai_json_bool(string body, string key, bool default_value) bool {
     }
     default_value
 }
-
 func openai_json_decimal_milli(string body, string key, int default_value) int {
     int start = openai_field_start(body, key)
     if start < 0 {
@@ -183,7 +172,6 @@ func openai_json_decimal_milli(string body, string key, int default_value) int {
     }
     value
 }
-
 func openai_latest_message_content(string body) string {
     int messages = openai_find(body, "\"messages\"", 0)
     if messages < 0 {
@@ -203,7 +191,6 @@ func openai_latest_message_content(string body) string {
     }
     latest
 }
-
 func openai_model_uses_qwen_style(string model) bool {
     if openai_find(model, "Qwen", 0) >= 0 {
         return true
@@ -213,7 +200,6 @@ func openai_model_uses_qwen_style(string model) bool {
     }
     false
 }
-
 func openai_chat_template(string body, string model) string {
     int messages = openai_find(body, "\"messages\"", 0)
     if messages < 0 {
@@ -223,12 +209,10 @@ func openai_chat_template(string body, string model) string {
         }
         return prompt
     }
-
     bool qwen_style = openai_model_uses_qwen_style(model)
     string system_prompt = "You are a helpful AI assistant."
     string conversation = ""
     int search_from = messages
-
     for true {
         int role_pos = openai_find(body, "\"role\"", search_from)
         if role_pos < 0 {
@@ -251,13 +235,11 @@ func openai_chat_template(string body, string model) string {
         }
         search_from = content_pos + len("\"content\"")
     }
-
     if qwen_style {
         return "<|im_start|>system\n" + system_prompt + "\n<|im_end|>\n" + conversation + "<|im_start|>assistant\n"
     }
     return "System: " + system_prompt + "\n" + conversation + "assistant: "
 }
-
 func openai_response_format(string body) string {
     int start = openai_field_start(body, "response_format")
     if start < 0 {
@@ -273,7 +255,6 @@ func openai_response_format(string body) string {
     }
     format_type
 }
-
 func new_openai_request_result(openai_request request, bool valid, int status_code, string error_message) openai_request_result {
     openai_request_result result
     result.request = request
@@ -282,7 +263,6 @@ func new_openai_request_result(openai_request request, bool valid, int status_co
     result.error_message = error_message
     result
 }
-
 func parse_openai_request(string body, string request_id) openai_request_result {
     openai_request request
     request.request_id = request_id
@@ -317,7 +297,6 @@ func parse_openai_request(string body, string request_id) openai_request_result 
     }
     new_openai_request_result(request, true, 200, "")
 }
-
 func openai_json_escape(string text) string {
     string escaped = ""
     int i = 0
@@ -340,7 +319,6 @@ func openai_json_escape(string text) string {
     }
     escaped
 }
-
 func openai_chat_chunk(string request_id, string model, string content, string finish_reason) string {
     string finish = "null"
     if finish_reason != "" {
@@ -349,15 +327,12 @@ func openai_chat_chunk(string request_id, string model, string content, string f
     string json = "{\"id\":\"" + openai_json_escape(request_id) + "\",\"object\":\"chat.completion.chunk\",\"model\":\"" + openai_json_escape(model) + "\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"" + openai_json_escape(content) + "\"},\"finish_reason\":" + finish + "}]}"
     "data: " + json + "\n\n"
 }
-
 func openai_done_event() string {
     "data: [DONE]\n\n"
 }
-
 func openai_error_body(string message, string error_type, string code) string {
     "{\"error\":{\"message\":\"" + openai_json_escape(message) + "\",\"type\":\"" + openai_json_escape(error_type) + "\",\"code\":\"" + openai_json_escape(code) + "\"}}"
 }
-
 func openai_embedding_body(string model, float[] embedding, int prompt_tokens) string {
     string values = ""
     int i = 0

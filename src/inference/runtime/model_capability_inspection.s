@@ -1,17 +1,10 @@
 package neurx.inference.runtime.model_capability_inspection
-
 func model_task_generate() int { 1 }
-
 func model_task_pooling() int { 2 }
-
 func model_task_embed() int { 4 }
-
 func model_task_classify() int { 8 }
-
 func model_task_reward() int { 16 }
-
 func model_task_transcription() int { 32 }
-
 struct model_capability_manifest {
     string architecture
     string model_family
@@ -28,7 +21,6 @@ struct model_capability_manifest {
     bool supports_lora
     bool supports_prefix_cache
 }
-
 struct model_inspection_request {
     int required_task
     int requested_context_length
@@ -36,23 +28,19 @@ struct model_inspection_request {
     bool require_lora
     bool require_prefix_cache
 }
-
 struct model_inspection_result {
     bool supported
     int error_code
     int parameter_shape_score
     int effective_context_length
 }
-
 func model_task_supported(int task_mask, int task) bool {
     int quotient = task_mask / task
     quotient - (quotient / 2) * 2 == 1
 }
-
 func model_manifest_valid(model_capability_manifest manifest) bool {
     manifest.architecture != "" && manifest.model_family != "" && manifest.task_mask > 0 && manifest.max_model_length > 0 && manifest.vocabulary_size > 0 && manifest.hidden_size > 0 && manifest.layer_count > 0 && manifest.attention_head_count > 0 && manifest.kv_head_count > 0 && manifest.kv_head_count <= manifest.attention_head_count
 }
-
 func inspect_model_capability(model_capability_manifest manifest, model_inspection_request request) model_inspection_result {
     if !model_manifest_valid(manifest) { return model_inspection_result {supported: false, error_code: 1, parameter_shape_score: 0, effective_context_length: 0} }
     if !model_task_supported(manifest.task_mask, request.required_task) { return model_inspection_result {supported: false, error_code: 2, parameter_shape_score: 0, effective_context_length: manifest.max_model_length} }

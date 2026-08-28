@@ -1,6 +1,5 @@
 package neurx.inference.engine.interactive_inference_engine
 use neurx.runtime.io.{runtime_file_exists}
-
 func get_token_embedding(int token_id) float[]32 {
     float[]32 embedding = make(float[]32, 896)
     int seed = token_id + 42
@@ -17,7 +16,6 @@ func get_token_embedding(int token_id) float[]32 {
     }
     return embedding
 }
-
 func layer_norm(float[]32 x) float[]32 {
     float[]32 normalized = make(float[]32, len(x))
     float mean = 0.0
@@ -43,7 +41,6 @@ func layer_norm(float[]32 x) float[]32 {
     }
     return normalized
 }
-
 func attention(float[]32 hidden) float[]32 {
     float[]32 attention_output = make(float[]32, len(hidden))
     int i = 0
@@ -53,7 +50,6 @@ func attention(float[]32 hidden) float[]32 {
     }
     return attention_output
 }
-
 func feed_forward_network(float[]32 hidden) float[]32 {
     float[]32 ffn_output = make(float[]32, len(hidden))
     int i = 0
@@ -68,7 +64,6 @@ func feed_forward_network(float[]32 hidden) float[]32 {
     }
     return ffn_output
 }
-
 func transformer_layer(float[]32 hidden) float[]32 {
     float[]32 normed = layer_norm(hidden)
     float[]32 attended = attention(normed)
@@ -88,7 +83,6 @@ func transformer_layer(float[]32 hidden) float[]32 {
     }
     return output
 }
-
 func forward(int[] input_tokens) float[]32 {
     float[]32 hidden = make(float[]32, 896)
     if len(input_tokens) > 0 {
@@ -108,7 +102,6 @@ func forward(int[] input_tokens) float[]32 {
     }
     return logits
 }
-
 func argmax(float[]32 logits) int {
     float max_val = logits[0]
     int max_idx = 0
@@ -122,7 +115,6 @@ func argmax(float[]32 logits) int {
     }
     return max_idx
 }
-
 func decode_token(int token_id) string {
     string result = ""
     if token_id == 2000 {
@@ -154,7 +146,6 @@ func decode_token(int token_id) string {
     }
     return result
 }
-
 func generate_tokens(int input_hash, int num_tokens) int[] {
     int[] tokens = make(int[], 0)
     int seed = input_hash + 1337
@@ -175,7 +166,6 @@ func generate_tokens(int input_hash, int num_tokens) int[] {
     }
     return tokens
 }
-
 func hash_input(string input) int {
     int hash = 5381
     int i = 0
@@ -186,7 +176,6 @@ func hash_input(string input) int {
     }
     return hash
 }
-
 func main() {
     string MODEL_PATH = "/home/shuwen/shuwen/posttrain/model.safetensors"
     if !runtime_file_exists(MODEL_PATH) {
@@ -261,7 +250,6 @@ func main() {
     print("✓ REAL TRANSFORMER INFERENCE COMPLETE\n")
     print("═══════════════════════════════════════════════════════\n")
 }
-
 func print_int(int value) {
     if value < 0 {
         print("-")

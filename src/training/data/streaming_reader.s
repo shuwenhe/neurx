@@ -1,6 +1,5 @@
 package neurx.data.streaming_reader
 use neurx.strings
-
 struct stream_reader_config {
     int64 chunk_size_bytes
     int read_ahead_buffers
@@ -12,7 +11,6 @@ struct stream_reader_config {
     bool enable_direct_io
     int io_thread_count
 }
-
 func default_tb_stream_reader_config() stream_reader_config {
     stream_reader_config cfg
     cfg.chunk_size_bytes = 256 * 1024 * 1024
@@ -26,7 +24,6 @@ func default_tb_stream_reader_config() stream_reader_config {
     cfg.io_thread_count = 4
     return cfg
 }
-
 struct file_metadata {
     string filepath
     int64 file_size_bytes
@@ -38,7 +35,6 @@ struct file_metadata {
     string checksum_md5
     float quality_score
 }
-
 struct data_chunk {
     int chunk_id
     int64 start_byte_offset
@@ -50,7 +46,6 @@ struct data_chunk {
     int access_count
     int last_access_time
 }
-
 struct streaming_reader_state {
     file_metadata meta
     stream_reader_config config
@@ -68,7 +63,6 @@ struct streaming_reader_state {
     bool error_state
     string last_error_message
 }
-
 func init_streaming_reader(
     string filepath,
     stream_reader_config config

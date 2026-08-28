@@ -1,18 +1,13 @@
 package neurx.serving.router.cache_aware_router
-
 func cache_route_none() int { 0 }
-
 func cache_route_affinity() int { 1 }
-
 func cache_route_load() int { 2 }
-
 struct cache_aware_router_config {
     int cache_threshold_per_mille
     int balance_absolute_threshold
     int balance_relative_percent
     int max_affinity_entries
 }
-
 struct cache_aware_router_state {
     cache_aware_router_config config
     int[] worker_ids
@@ -33,7 +28,6 @@ struct cache_aware_router_state {
     int load_routes
     int cold_routes
 }
-
 struct cache_route_result {
     cache_aware_router_state state
     int worker_id
@@ -41,14 +35,12 @@ struct cache_route_result {
     int strategy
     bool routed
 }
-
 func cache_router_int_array(int capacity) int[] {
     int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func new_cache_aware_router(cache_aware_router_config config) cache_aware_router_state {
     if config.cache_threshold_per_mille < 0 { config.cache_threshold_per_mille = 0 }
     if config.cache_threshold_per_mille > 1000 { config.cache_threshold_per_mille = 1000 }
@@ -63,7 +55,6 @@ func new_cache_aware_router(cache_aware_router_config config) cache_aware_router
         logical_clock: 1, affinity_routes: 0, load_routes: 0, cold_routes: 0,
     }
 }
-
 func cache_router_find_worker(cache_aware_router_state state, int worker_id) int {
     int i = 0
     for i < state.worker_count {
@@ -72,7 +63,6 @@ func cache_router_find_worker(cache_aware_router_state state, int worker_id) int
     }
     0 - 1
 }
-
 func cache_router_register_worker(cache_aware_router_state state, int worker_id, int pool_id, int model_id, int load) cache_aware_router_state {
     if worker_id <= 0 || pool_id <= 0 || model_id <= 0 || state.worker_count >= 64 || cache_router_find_worker(state, worker_id) >= 0 { return state }
     int normalized = load
@@ -86,7 +76,6 @@ func cache_router_register_worker(cache_aware_router_state state, int worker_id,
     state.worker_count = state.worker_count + 1
     state
 }
-
 func cache_router_set_worker(cache_aware_router_state state, int worker_id, int load, bool healthy) cache_aware_router_state {
     int index = cache_router_find_worker(state, worker_id)
     if index < 0 { return state }
@@ -96,11 +85,9 @@ func cache_router_set_worker(cache_aware_router_state state, int worker_id, int 
     if healthy { state.worker_healthy[index] = 1 } else { state.worker_healthy[index] = 0 }
     state
 }
-
 func cache_router_worker_matches(cache_aware_router_state state, int index, int pool_id, int model_id) bool {
     index >= 0 && index < state.worker_count && state.worker_healthy[index] == 1 && state.worker_pool_ids[index] == pool_id && state.worker_model_ids[index] == model_id
 }
-
 func cache_router_upsert_affinity(cache_aware_router_state state, int pool_id, int model_id, int prefix_hash, int prefix_tokens, int worker_id) cache_aware_router_state {
     state.logical_clock = state.logical_clock + 1
     int i = 0
@@ -130,9 +117,7 @@ func cache_router_upsert_affinity(cache_aware_router_state state, int pool_id, i
     state.affinity_last_access[slot] = state.logical_clock
     state
 }
-
 func cache_router_empty_result(cache_aware_router_state state) cache_route_result { cache_route_result {state state, 0 worker_id, 0 matched_prefix_tokens, cache_route_none strategy(), false routed} }
-
 func cache_router_route(cache_aware_router_state state, int pool_id, int model_id, int prefix_hash, int prefix_tokens, int prompt_tokens) cache_route_result {
     int selected = 0 - 1
     int min_load = 2147483647
@@ -171,7 +156,6 @@ func cache_router_route(cache_aware_router_state state, int pool_id, int model_i
     cache_aware_router_state routed_state = cache_router_upsert_affinity(state, pool_id, model_id, prefix_hash, prefix_tokens, worker_id)
     cache_route_result {state: routed_state, worker_id: worker_id, matched_prefix_tokens: matched, strategy: strategy, routed: true}
 }
-
 func cache_router_complete(cache_aware_router_state state, int worker_id) cache_aware_router_state {
     int index = cache_router_find_worker(state, worker_id)
     if index >= 0 && state.worker_loads[index] > 0 { state.worker_loads[index] = state.worker_loads[index] - 1 }

@@ -1,19 +1,16 @@
 package neurx.reasoning.reasoning_step
-
     pending
     processing
     completed
     failed
     backtracked
 }
-
     analysis
     deduction
     verification
     synthesis
     correction
 }
-
 struct reasoning_step {
     int id
     int order
@@ -31,7 +28,6 @@ struct reasoning_step {
     bool is_valid
     string validation_message
 }
-
 func new_reasoning_step(int id, int order, step_type step_type) reasoning_step {
     reasoning_step {
         id: id,
@@ -51,12 +47,10 @@ func new_reasoning_step(int id, int order, step_type step_type) reasoning_step {
         validation_message: "",
     }
 }
-
 func (reasoning_step* step) start_processing() reasoning_step {
     step.state = step_state.processing
     step
 }
-
 func (reasoning_step* step) complete(string reasoning, string result, float confidence) reasoning_step {
     step.state = step_state.completed
     step.reasoning = reasoning
@@ -64,30 +58,25 @@ func (reasoning_step* step) complete(string reasoning, string result, float conf
     step.confidence = confidence
     step
 }
-
 func (reasoning_step* step) fail(string error) reasoning_step {
     step.state = step_state.failed
     step.error_message = error
     step.retry_count = step.retry_count + 1
     step
 }
-
 func (reasoning_step* step) mark_backtracked() reasoning_step {
     step.state = step_state.backtracked
     step
 }
-
 func (reasoning_step* step) validate(bool is_valid, string message) reasoning_step {
     step.is_valid = is_valid
     step.validation_message = message
     step
 }
-
 func (reasoning_step* step) update_token_count(int count) reasoning_step {
     step.token_count = count
     step
 }
-
 func (reasoning_step* step) get_state_string() string {
     match step.state {
         step_state.pending: "pending",
@@ -98,7 +87,6 @@ func (reasoning_step* step) get_state_string() string {
         default: "unknown",
     }
 }
-
 func (reasoning_step* step) get_type_string() string {
     match step.step_type {
         step_type.analysis: "analysis",
@@ -109,15 +97,12 @@ func (reasoning_step* step) get_type_string() string {
         default: "unknown",
     }
 }
-
 func (reasoning_step* step) can_retry(int max_retries) bool {
     step.state == step_state.failed && step.retry_count < max_retries
 }
-
 func (reasoning_step* step) is_completed() bool {
     step.state == step_state.completed && step.is_valid
 }
-
 func (reasoning_step* step) add_child_step(int child_id) reasoning_step {
     child_ids := int[]{cap: len(step.child_step_ids) + 1}
     i := 0
@@ -129,7 +114,6 @@ func (reasoning_step* step) add_child_step(int child_id) reasoning_step {
     step.child_step_ids = child_ids
     step
 }
-
 func (reasoning_step* step) clone() reasoning_step {
     child_ids := int[]{cap: len(step.child_step_ids)}
     i := 0
@@ -137,7 +121,6 @@ func (reasoning_step* step) clone() reasoning_step {
         child_ids[i] = step.child_step_ids[i]
         i = i + 1
     }
-
     reasoning_step {
         id: step.id,
         order: step.order,
@@ -156,7 +139,6 @@ func (reasoning_step* step) clone() reasoning_step {
         validation_message: step.validation_message,
     }
 }
-
 func (reasoning_step* step) format_step() string {
     string result = "Step " + string(step.order) + ": " + step.get_type_string() + "\n"
     result = result + "State: " + step.get_state_string() + "\n"

@@ -1,8 +1,6 @@
 package engine
-
 import "core"
 import "tensor"
-
 struct inference_request {
     int[]32 token_ids
     int32 batch_size
@@ -12,14 +10,12 @@ struct inference_request {
     int32 top_k
     string sampling_strategy
 }
-
 struct inference_response {
     int[]32 generated_tokens
     float[]32 logits
     float32 inference_time_ms
     map[string]interface{} metadata
 }
-
 struct model_executor_integrated {
     model_executor* executor
     weight_loader* wl
@@ -29,7 +25,6 @@ struct model_executor_integrated {
     bool is_initialized
     bool is_warmed_up
 }
-
 func create_integrated_model_executor(model_config_spec* config) model_executor_integrated* {
     return *model_executor_integrated{
         executor: nil,
@@ -41,24 +36,19 @@ func create_integrated_model_executor(model_config_spec* config) model_executor_
         is_warmed_up: false,
     }
 }
-
 func (model_executor_integrated* mei) initialize_model(string model_path) error {
     return nil
 }
-
 func (model_executor_integrated* mei) load_model(string model_path) error {
     return nil
 }
-
 func (model_executor_integrated* mei) warmup_model(warmup_config* config) error {
     mei.is_warmed_up = true
     return nil
 }
-
 func (model_executor_integrated* mei) forward_pass(int[]32 token_ids, interface{} past_key_values) (interface{}, error) {
     return nil, nil
 }
-
 func (model_executor_integrated* mei) generate_tokens(inference_request* req) (inference_response*, error) {
     resp := *inference_response{
         generated_tokens: make(int[]32, 0),
@@ -68,81 +58,62 @@ func (model_executor_integrated* mei) generate_tokens(inference_request* req) (i
     }
     return resp, nil
 }
-
 func (model_executor_integrated* mei) inference_with_streaming(inference_request* req) (int[]erface{}, error) {
     return make(int[]erface{}, 0), nil
 }
-
 func (model_executor_integrated* mei) optimize_for_latency() error {
     return nil
 }
-
 func (model_executor_integrated* mei) optimize_for_throughput() error {
     return nil
 }
-
 func (model_executor_integrated* mei) optimize_for_memory() error {
     return nil
 }
-
 func (model_executor_integrated* mei) prefetch_layers(int32 num_layers) error {
     return nil
 }
-
 func (model_executor_integrated* mei) offload_inactive_layers() error {
     return nil
 }
-
 func (model_executor_integrated* mei) benchmark(int32 batch_size, int32 seq_len, int32 num_iterations) (float32, error) {
     return 0.0, nil
 }
-
 func (model_executor_integrated* mei) get_execution_stats() map[string]interface{} {
     return make(map[string]interface{})
 }
-
 func (model_executor_integrated* mei) validate_model_state() error {
     return nil
 }
-
 func (model_executor_integrated* mei) set_tensor_parallel_degree(int32 degree) error {
     return nil
 }
-
 func (model_executor_integrated* mei) set_pipeline_parallel_stages(int32 stages) error {
     return nil
 }
-
 func (model_executor_integrated* mei) get_model_config() model_config_spec {
     return model_config_spec{}
 }
-
 func (model_executor_integrated* mei) get_memory_usage() int64 {
     return 0
 }
-
 func (model_executor_integrated* mei) get_peak_memory_usage() int64 {
     return 0
 }
-
 func (model_executor_integrated* mei) get_throughput() float32 {
     return 0.0
 }
-
 func (model_executor_integrated* mei) get_latency() float32 {
     return 0.0
 }
-
 func (model_executor_integrated* mei) unload_model() error {
     mei.is_initialized = false
     mei.is_warmed_up = false
     return nil
 }
-
 func (model_executor_integrated* mei) reset_cache() error {
     return nil
 }
-
 func (model_executor_integrated* mei) shutdown() error {
     return mei.unload_model()
 }

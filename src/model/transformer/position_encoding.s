@@ -1,31 +1,26 @@
 package neurx.model.transformer.position_encoding
-
 struct position_encoding_config {
     int hidden_dim
     int max_seq_len
     string encoding_type
     float rope_base
 }
-
 struct absolute_position_encoding {
     int hidden_dim
     int max_seq_len
     float[] sin_encoding
     float[] cos_encoding
 }
-
 struct learned_position_encoding {
     int hidden_dim
     int max_seq_len
     float[] embeddings
 }
-
 struct rope_position_encoding {
     int hidden_dim
     float rope_base
     float[] frequencies
 }
-
 func allocate_vector(int size, float init_val) float[] {
     float[] v = float[]{cap: size}
     int i = 0
@@ -35,7 +30,6 @@ func allocate_vector(int size, float init_val) float[] {
     }
     v
 }
-
 func copy_vector(float[] src) float[] {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
@@ -45,7 +39,6 @@ func copy_vector(float[] src) float[] {
     }
     out
 }
-
 func sin_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
@@ -67,7 +60,6 @@ func sin_approx(float x) float {
     }
     result
 }
-
 func cos_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
@@ -89,7 +81,6 @@ func cos_approx(float x) float {
     }
     result
 }
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -107,7 +98,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -120,7 +110,6 @@ func sqrt_approx(float x) float {
     }
     y
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -141,7 +130,6 @@ func log_approx(float x) float {
     }
     result * 2.0
 }
-
 func new_absolute_position_encoding(position_encoding_config cfg) absolute_position_encoding {
     int hidden_dim = cfg.hidden_dim
     int max_seq_len = cfg.max_seq_len
@@ -173,7 +161,6 @@ func new_absolute_position_encoding(position_encoding_config cfg) absolute_posit
         cos_encoding: cos_encoding,
     }
 }
-
 func get_position_encoding(
     absolute_position_encoding enc,
     int position,
@@ -202,7 +189,6 @@ func get_position_encoding(
     }
     output
 }
-
 func new_learned_position_encoding(position_encoding_config cfg) learned_position_encoding {
     int hidden_dim = cfg.hidden_dim
     int max_seq_len = cfg.max_seq_len
@@ -213,7 +199,6 @@ func new_learned_position_encoding(position_encoding_config cfg) learned_positio
         embeddings: embeddings,
     }
 }
-
 func get_learned_position_encoding(
     learned_position_encoding enc,
     int position,
@@ -238,7 +223,6 @@ func get_learned_position_encoding(
     }
     output
 }
-
 func new_rope_position_encoding(position_encoding_config cfg) rope_position_encoding {
     int hidden_dim = cfg.hidden_dim
     float rope_base = cfg.rope_base
@@ -255,7 +239,6 @@ func new_rope_position_encoding(position_encoding_config cfg) rope_position_enco
         frequencies: frequencies,
     }
 }
-
 func apply_rope_position(
     rope_position_encoding enc,
     float[] query,
@@ -296,7 +279,6 @@ func apply_rope_position(
     result[1] = k_out
     result
 }
-
 func add_position_encoding_to_hidden(
     float[] hidden_states,
     float[] position_encoding,

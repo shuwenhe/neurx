@@ -1,5 +1,4 @@
 package neurx.runtime.distributed.topology
-
 struct hetero_chip_capability {
     string vendor
     string chip_type
@@ -10,7 +9,6 @@ struct hetero_chip_capability {
     bool supports_data_parallel
     bool supports_allreduce
 }
-
 struct hetero_topology_node {
     int node_id
     string node_name
@@ -19,7 +17,6 @@ struct hetero_topology_node {
     hetero_chip_capability capability
     bool healthy
 }
-
 struct hetero_topology {
     string cluster_name
     hetero_topology_node[] nodes
@@ -29,7 +26,6 @@ struct hetero_topology {
     bool valid
     string reason
 }
-
 struct hetero_placement_result {
     bool launchable
     int node_id
@@ -40,7 +36,6 @@ struct hetero_placement_result {
     string chip_type
     string reason
 }
-
 struct hetero_launch_plan {
     hetero_placement_result placement
     string worker_bin
@@ -51,7 +46,6 @@ struct hetero_launch_plan {
     bool valid
     string reason
 }
-
 struct hetero_launch_command {
     int node_id
     string node_name
@@ -64,7 +58,6 @@ struct hetero_launch_command {
     string chip_type
     string command
 }
-
 struct hetero_multi_launch_plan {
     hetero_placement_result[] placements
     hetero_launch_command[] commands
@@ -72,7 +65,6 @@ struct hetero_multi_launch_plan {
     bool valid
     string reason
 }
-
 func hetero_default_capability(string vendor, string chip_type, int device_count, int memory_gb) hetero_chip_capability {
     hetero_chip_capability {
         vendor: vendor,
@@ -85,7 +77,6 @@ func hetero_default_capability(string vendor, string chip_type, int device_count
         supports_allreduce: true,
     }
 }
-
 func hetero_topology_node_new(int node_id, string node_name, string host, int port, hetero_chip_capability capability, bool healthy) hetero_topology_node {
     hetero_topology_node {
         node_id: node_id,
@@ -96,7 +87,6 @@ func hetero_topology_node_new(int node_id, string node_name, string host, int po
         healthy: healthy,
     }
 }
-
 func hetero_topology_new(string cluster_name) hetero_topology {
     hetero_topology {
         cluster_name: cluster_name,
@@ -108,7 +98,6 @@ func hetero_topology_new(string cluster_name) hetero_topology {
         reason: "empty topology",
     }
 }
-
 func hetero_topology_add_node(hetero_topology topo, hetero_topology_node node) hetero_topology {
     topo.nodes = append(topo.nodes, node)
     if node.healthy {
@@ -120,7 +109,6 @@ func hetero_topology_add_node(hetero_topology topo, hetero_topology_node node) h
     topo.reason = ""
     topo
 }
-
 func hetero_topology_mark_failed(hetero_topology topo, int node_id) hetero_topology {
     int i = 0
     for i < len(topo.nodes) {
@@ -136,7 +124,6 @@ func hetero_topology_mark_failed(hetero_topology topo, int node_id) hetero_topol
     }
     topo
 }
-
 func hetero_topology_select_node(hetero_topology topo, string vendor, string chip_type, int min_devices, int min_memory_gb) int {
     if min_devices <= 0 { min_devices = 1 }
     if min_memory_gb <= 0 { min_memory_gb = 1 }
@@ -154,7 +141,6 @@ func hetero_topology_select_node(hetero_topology topo, string vendor, string chi
     }
     0 - 1
 }
-
 func hetero_topology_place_workload(hetero_topology topo, string vendor, string chip_type, int min_devices, int min_memory_gb) hetero_placement_result {
     int node_id = hetero_topology_select_node(topo, vendor, chip_type, min_devices, min_memory_gb)
     hetero_placement_result result
@@ -183,7 +169,6 @@ func hetero_topology_place_workload(hetero_topology topo, string vendor, string 
     }
     result
 }
-
 func hetero_topology_summary(hetero_topology topo) string {
     string out = ""
     out = out + "cluster=" + topo.cluster_name + "\n"
@@ -195,7 +180,6 @@ func hetero_topology_summary(hetero_topology topo) string {
     out = out + "reason=" + topo.reason + "\n"
     out
 }
-
 func hetero_placement_summary(hetero_placement_result placement) string {
     string out = ""
     out = out + "launchable=" + itoa(placement.launchable ? 1 : 0) + "\n"
@@ -208,7 +192,6 @@ func hetero_placement_summary(hetero_placement_result placement) string {
     out = out + "reason=" + placement.reason + "\n"
     out
 }
-
 func hetero_build_launch_plan(hetero_placement_result placement, string worker_bin, string master_addr, int master_port, int world_size) hetero_launch_plan {
     hetero_launch_plan plan
     plan.placement = placement
@@ -235,7 +218,6 @@ func hetero_build_launch_plan(hetero_placement_result placement, string worker_b
     plan.reason = ""
     plan
 }
-
 func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string chip_type, string worker_bin, string master_addr, int master_port, int min_devices, int min_memory_gb) hetero_multi_launch_plan {
     hetero_multi_launch_plan plan
     plan.placements = hetero_placement_result[]{cap: len(topo.nodes)}
@@ -316,7 +298,6 @@ func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string 
     }
     plan
 }
-
 func hetero_launch_summary(hetero_launch_plan plan) string {
     string out = ""
     out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
@@ -327,7 +308,6 @@ func hetero_launch_summary(hetero_launch_plan plan) string {
     out = out + "reason=" + plan.reason + "\n"
     out
 }
-
 func hetero_multi_launch_summary(hetero_multi_launch_plan plan) string {
     string out = ""
     out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
@@ -337,7 +317,6 @@ func hetero_multi_launch_summary(hetero_multi_launch_plan plan) string {
     out = out + "reason=" + plan.reason + "\n"
     out
 }
-
 func hetero_multi_launch_script(hetero_multi_launch_plan plan) string {
     string out = "#!/bin/sh\nset -e\n"
     if !plan.valid {

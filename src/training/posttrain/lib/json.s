@@ -1,6 +1,5 @@
 package neurx.posttrain.lib.json
 use std.io.eprintln
-
 func check_prefix(string text, int pos, string prefix) bool {
     int end = pos + len(prefix)
     if end > len(text) {
@@ -15,7 +14,6 @@ func check_prefix(string text, int pos, string prefix) bool {
     }
     return true
 }
-
 func skip_whitespace(string text, int pos) int {
     int current = pos
     for current < len(text) {
@@ -28,28 +26,24 @@ func skip_whitespace(string text, int pos) int {
     }
     return current
 }
-
 func parse_null(string text, int pos) int {
     if check_prefix(text, pos, "null") {
         return pos + 4
     }
     return -1
 }
-
 func parse_true(string text, int pos) int {
     if check_prefix(text, pos, "true") {
         return pos + 4
     }
     return -1
 }
-
 func parse_false(string text, int pos) int {
     if check_prefix(text, pos, "false") {
         return pos + 5
     }
     return -1
 }
-
 func parse_number(string text, int pos) int {
     int start = pos
     int current = pos
@@ -70,7 +64,6 @@ func parse_number(string text, int pos) int {
     }
     return current
 }
-
 func parse_string(string text, int pos) int {
     if pos >= len(text) || byte(text[pos]) != byte(34) {
         return -1
@@ -89,7 +82,6 @@ func parse_string(string text, int pos) int {
     }
     return -1
 }
-
 func parse_array(string text, int pos) int {
     if pos >= len(text) || byte(text[pos]) != byte(91) {
         return -1
@@ -127,7 +119,6 @@ func parse_array(string text, int pos) int {
     }
     return -1
 }
-
 func parse_object(string text, int pos) int {
     if pos >= len(text) || byte(text[pos]) != byte(123) {
         return -1
@@ -179,7 +170,6 @@ func parse_object(string text, int pos) int {
     }
     return -1
 }
-
 func parse_value(string text, int pos) int {
     int current = skip_whitespace(text, pos)
     if current >= len(text) {
@@ -209,7 +199,6 @@ func parse_value(string text, int pos) int {
     }
     return -1
 }
-
 func parse(string text) bool {
     int pos = parse_value(text, 0)
     if pos == -1 {
@@ -220,7 +209,6 @@ func parse(string text) bool {
     }
     return true
 }
-
 func main() {
     eprintln("JSON Parser Test Suite")
     eprintln("")

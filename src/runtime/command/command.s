@@ -1,8 +1,6 @@
 package neurx.runtime.command
-
 extern "intrinsic" func runtime_env_get(string name, string default_value) string
 extern "intrinsic" func runtime_run_command_exit_code(string command) int
-
 func runtime_parse_int(string text, int fallback) int {
     if text == "" { return fallback }
     int sign = 1
@@ -21,7 +19,6 @@ func runtime_parse_int(string text, int fallback) int {
     }
     value * sign
 }
-
 func runtime_shell_escape(string value) string {
     string out = "'"
     int i = 0

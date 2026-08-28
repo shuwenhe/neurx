@@ -1,6 +1,5 @@
 package neurx.posttrain.trainer
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
-
 struct reference_trainer {
     trainer_config config
     trainer_state state
@@ -8,7 +7,6 @@ struct reference_trainer {
     weight_delta_stats delta_stats_data
     loss_stats loss_stats_data
 }
-
 func reference_init_lora_matrices(int rank, int hidden_size, int v_out) reference_trainer {
     reference_trainer trainer
     int q_a_len = rank * hidden_size
@@ -25,7 +23,6 @@ func reference_init_lora_matrices(int rank, int hidden_size, int v_out) referenc
     trainer.state.lora_v_b = reference_fill_f32(v_b_len, 0.0)
     return trainer
 }
-
 func reference_simulate_updates(reference_trainer trainer) reference_trainer {
     int i = 0
     for i < trainer.state.q_b_len {
@@ -47,7 +44,6 @@ func reference_simulate_updates(reference_trainer trainer) reference_trainer {
     }
     return trainer
 }
-
 func reference_compute_adapter_stats(reference_trainer trainer) reference_trainer {
     float adapter_l1 = 0.0
     float adapter_l2_sq = 0.0
@@ -87,7 +83,6 @@ func reference_compute_adapter_stats(reference_trainer trainer) reference_traine
     trainer.adapter_stats_data = stats
     return trainer
 }
-
 func reference_compute_delta_stats(reference_trainer trainer) reference_trainer {
     float delta_l1 = trainer.adapter_stats_data.l1_norm
     float delta_l2 = trainer.adapter_stats_data.l2_norm
@@ -103,7 +98,6 @@ func reference_compute_delta_stats(reference_trainer trainer) reference_trainer 
     trainer.delta_stats_data = delta
     return trainer
 }
-
 func reference_compute_loss_stats(reference_trainer trainer, float loss0, float loss2) reference_trainer {
     float improvement = 0.0
     if loss0 > 0.0 {
@@ -117,7 +111,6 @@ func reference_compute_loss_stats(reference_trainer trainer, float loss0, float 
     trainer.loss_stats_data = stats
     return trainer
 }
-
 func reference_initialize(trainer_config config) trainer_state {
     trainer_state state
     state.step = 0
@@ -130,7 +123,6 @@ func reference_initialize(trainer_config config) trainer_state {
     state.v_b_len = 0
     return state
 }
-
 func reference_step(trainer_config config, trainer_state state) trainer_state {
     state.step = state.step + 1
     if state.step == 1 {
@@ -147,11 +139,9 @@ func reference_step(trainer_config config, trainer_state state) trainer_state {
     }
     return state
 }
-
 func reference_save_adapter(trainer_state state, string output_dir) int {
     return 0
 }
-
 func reference_get_stats(trainer_state state) trainer_report {
     trainer_report report
     adapter_stats astats
@@ -176,14 +166,12 @@ func reference_get_stats(trainer_state state) trainer_report {
     report.loss = lstats
     return report
 }
-
 func abs_float(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     return x
 }
-
 func sqrt_lora(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -200,7 +188,6 @@ func sqrt_lora(float x) float {
     }
     return guess
 }
-
 func reference_fill_f32(int size, float value) float[] {
     float[] arr = float[]{cap: size}
     int i = 0
@@ -210,7 +197,6 @@ func reference_fill_f32(int size, float value) float[] {
     }
     return arr
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -232,7 +218,6 @@ func int_to_str(int n) string {
     }
     return result
 }
-
 func float_to_str(float f, int precision) string {
     int int_part = f as int
     float frac_part = f - (int_part as float)

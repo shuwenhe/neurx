@@ -1,5 +1,4 @@
 package neurx.observability.logging
-
 func new_logger(logger_config cfg) logger {
     logger {
         config: cfg,
@@ -8,7 +7,6 @@ func new_logger(logger_config cfg) logger {
         message_buffer: [],
     }
 }
-
 func log_scalar(
     logger *lg,
     string name,
@@ -33,7 +31,6 @@ func log_scalar(
     }
     flush_if_needed(lg)
 }
-
 func log_histogram(
     logger *lg,
     string name,
@@ -54,7 +51,6 @@ func log_histogram(
     }
     lg.metric_buffer = append(lg.metric_buffer, entry)
 }
-
 func log_text(
     logger *lg,
     string name,
@@ -75,7 +71,6 @@ func log_text(
     entry.metadata["text"] = text
     lg.metric_buffer = append(lg.metric_buffer, entry)
 }
-
 func log_message(
     logger *lg,
     log_level level,

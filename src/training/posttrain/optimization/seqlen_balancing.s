@@ -1,19 +1,16 @@
 package neurx.posttrain.optimization.seqlen_balancing
 use neurx.tensor
-
 struct seqlen_balance_config {
     int target_num_batches
     bool sort_descending
     float balance_tolerance
 }
-
 struct batch_assignment {
     int[][] sample_indices
     int[] batch_sizes
     int[] total_tokens_per_batch
     float balance_score
 }
-
 func default_seqlen_balance_config() seqlen_balance_config {
     seqlen_balance_config {
         target_num_batches: 8,
@@ -21,7 +18,6 @@ func default_seqlen_balance_config() seqlen_balance_config {
         balance_tolerance: 0.1,
     }
 }
-
 func largest_differencing_method(
     int[] sequence_lengths,
     int num_batches
@@ -48,7 +44,6 @@ func largest_differencing_method(
         balance_score: balance,
     }
 }
-
 func argsort_descending(int[] values) int[] {
     int[] indices = make(int[], len(values))
     for int i = 0; i < len(values); i = i + 1 {
@@ -65,7 +60,6 @@ func argsort_descending(int[] values) int[] {
     }
     return indices
 }
-
 func find_min_batch(int[] batch_totals) int {
     int min_idx = 0
     int min_val = batch_totals[0]
@@ -77,7 +71,6 @@ func find_min_batch(int[] batch_totals) int {
     }
     return min_idx
 }
-
 func compute_balance_score(int[] batch_totals) float {
     if len(batch_totals) == 0 {
         return 0.0
@@ -98,7 +91,6 @@ func compute_balance_score(int[] batch_totals) float {
     }
     return sqrt_approx(variance) / mean
 }
-
 func greedy_bin_packing(
     int[] sequence_lengths,
     int max_tokens_per_batch
@@ -137,14 +129,12 @@ func greedy_bin_packing(
         balance_score: balance,
     }
 }
-
 func balance_sequences(
     int[] sequence_lengths,
     seqlen_balance_config config
 ) batch_assignment {
     return largest_differencing_method(sequence_lengths, config.target_num_batches)
 }
-
 func compute_padding_savings(
     batch_assignment assignment,
     int[] sequence_lengths
@@ -170,7 +160,6 @@ func compute_padding_savings(
     int padding_tokens = total_tokens_with_padding - total_actual_tokens
     return float(padding_tokens) / float(total_tokens_with_padding)
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0

@@ -1,5 +1,4 @@
 package attention
-
     cuda_sm_70
     cuda_sm_80
     cuda_sm_90
@@ -8,7 +7,6 @@ package attention
     cpu
     unknown
 }
-
 struct backend_capability {
     string backend_name
     string[] supported_dtypes
@@ -19,7 +17,6 @@ struct backend_capability {
     bool supports_paged_cache
     bool supports_sparse
 }
-
 struct attention_backend_manager {
     map[string, attention_backend] backends
     string default_backend
@@ -27,11 +24,9 @@ struct attention_backend_manager {
     hardware_type detected_hardware
     map[string, backend_capability] capabilities
 }
-
 func detect_hardware() hardware_type {
     hardware_type_unknown
 }
-
 func get_backend_capability(attention_backend_type backend_type) backend_capability {
     switch backend_type {
         attention_backend_type_standard : backend_capability {
@@ -86,10 +81,8 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
     }
 }
-
 func new_attention_backend_manager() attention_backend_manager {
     hw := detect_hardware()
-
     attention_backend_manager {
         backends: map[string, attention_backend]{},
         default_backend: "standard",
@@ -98,38 +91,30 @@ func new_attention_backend_manager() attention_backend_manager {
         capabilities: map[string, backend_capability]{},
     }
 }
-
 func (attention_backend_manager* mgr) register_backend(string backend_name, attention_backend backend) bool {
     mgr.backends[backend_name] = backend
     true
 }
-
 func (attention_backend_manager* mgr) has_backend(string backend_name) bool {
     backend_name in mgr.backends
 }
-
 func (attention_backend_manager* mgr) get_backend(string backend_name) attention_backend {
     if backend_name in mgr.backends {
         mgr.backends[backend_name]
     }
-
     config := new_attention_config(8, 64)
     new_attention_backend(attention_backend_type_standard, config)
 }
-
 func (attention_backend_manager* mgr) set_current_backend(string backend_name) bool {
     if !mgr.has_backend(backend_name) {
         false
     }
-
     mgr.current_backend = backend_name
     true
 }
-
 func (attention_backend_manager* mgr) get_current_backend() attention_backend {
     mgr.get_backend(mgr.current_backend)
 }
-
 func (attention_backend_manager* mgr) auto_select_backend(int seq_length, string precision) string {
     if mgr.detected_hardware == hardware_type_cuda_sm_90 {
         if seq_length > 16384 && precision == "float16" {
@@ -143,7 +128,6 @@ func (attention_backend_manager* mgr) auto_select_backend(int seq_length, string
         "standard"
     }
 }
-
 func (attention_backend_manager* mgr) initialize_all() bool {
     for name in mgr.backends.keys() {
         backend := mgr.get_backend(name)
@@ -151,10 +135,8 @@ func (attention_backend_manager* mgr) initialize_all() bool {
             false
         }
     }
-
     true
 }
-
 func (attention_backend_manager* mgr) finalize_all() bool {
     for name in mgr.backends.keys() {
         backend := mgr.get_backend(name)
@@ -162,10 +144,8 @@ func (attention_backend_manager* mgr) finalize_all() bool {
             false
         }
     }
-
     true
 }
-
 func (attention_backend_manager* mgr) list_backends() string[] {
     result := string[]{}
     for name in mgr.backends.keys() {
@@ -173,7 +153,6 @@ func (attention_backend_manager* mgr) list_backends() string[] {
     }
     result
 }
-
 func (attention_backend_manager* mgr) get_detected_hardware() string {
     switch mgr.detected_hardware {
         hardware_type_cuda_sm_70 : "cuda_sm_70",

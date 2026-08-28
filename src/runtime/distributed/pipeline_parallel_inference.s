@@ -1,7 +1,6 @@
 package distributed
 import "core"
 import "tensor"
-
 struct pipeline_parallel_config {
     pp_size             int32
     world_size          int32
@@ -14,14 +13,12 @@ struct pipeline_parallel_config {
     enable_activation_ckpt bool
     backend             string
 }
-
 struct pipeline_stage {
     stage_rank          int32
     layers              string[]
     start_layer         int32
     end_layer           int32
 }
-
 struct micro_batch {
     batch_id            int32
     input_data          float[]32
@@ -29,20 +26,17 @@ struct micro_batch {
     loss                float32
     processed           bool
 }
-
 struct pipeline_schedule {
     forward_ops         []schedule_op
     backward_ops        []schedule_op
     bubble_fraction     float32
 }
-
 struct schedule_op {
     op_type             string
     stage_rank          int32
     micro_batch_id      int32
     layer_id            int32
 }
-
 struct pipeline_parallel_inference {
     config              pipeline_parallel_config
     stage               *pipeline_stage
@@ -50,7 +44,6 @@ struct pipeline_parallel_inference {
     schedule            *pipeline_schedule
     recv_buffer         map[int32]float[]32
 }
-
 func NewPipelineParallelInference(config pipeline_parallel_config) *pipeline_parallel_inference {
     if config.pp_size <= 0 {
         config.pp_size = 1
@@ -77,7 +70,6 @@ func NewPipelineParallelInference(config pipeline_parallel_config) *pipeline_par
     engine.generateSchedule()
     return engine
 }
-
 func (pipeline_parallel_inference* pp) generateSchedule() {
     schedule := *pipeline_schedule{
         forward_ops:  []schedule_op{},
@@ -92,7 +84,6 @@ func (pipeline_parallel_inference* pp) generateSchedule() {
     }
     pp.schedule = schedule
 }
-
 func (pipeline_parallel_inference* pp) generateOneFlushed1B() *pipeline_schedule {
     schedule := *pipeline_schedule{
         forward_ops:  []schedule_op{},
@@ -132,7 +123,6 @@ func (pipeline_parallel_inference* pp) generateOneFlushed1B() *pipeline_schedule
     }
     return schedule
 }
-
 func (pipeline_parallel_inference* pp) generateGPipeSchedule() *pipeline_schedule {
     schedule := *pipeline_schedule{
         forward_ops:  []schedule_op{},
@@ -153,7 +143,6 @@ func (pipeline_parallel_inference* pp) generateGPipeSchedule() *pipeline_schedul
     }
     return schedule
 }
-
 func (pipeline_parallel_inference* pp) ForwardPass(
     input float[]32,
     micro_batch_id int32,
@@ -164,7 +153,6 @@ func (pipeline_parallel_inference* pp) ForwardPass(
     }
     return output
 }
-
 func (pipeline_parallel_inference* pp) ReceiveActivation(
     layer_id int32,
 ) float[]32 {
@@ -173,7 +161,6 @@ func (pipeline_parallel_inference* pp) ReceiveActivation(
     }
     return float[]32{}
 }
-
 func (pipeline_parallel_inference* pp) SendActivation(
     activations float[]32,
     layer_id int32,
@@ -185,7 +172,6 @@ func (pipeline_parallel_inference* pp) SendActivation(
     }
     return false
 }
-
 func (pipeline_parallel_inference* pp) ProcessMicroBatches(
     input float[][]32,
 ) float[][]32 {
@@ -208,7 +194,6 @@ func (pipeline_parallel_inference* pp) ProcessMicroBatches(
     }
     return results
 }
-
 func (pipeline_parallel_inference* pp) GetPipelineBubble() float32 {
     numerator := pp.config.pp_size - 1
     denominator := pp.config.pp_size * pp.config.num_micro_batches
@@ -218,7 +203,6 @@ func (pipeline_parallel_inference* pp) GetPipelineBubble() float32 {
     bubble := float32(numerator) / float32(denominator)
     return bubble
 }
-
 func (pipeline_parallel_inference* pp) GetOptimalMicroBatchSize(
     memory_per_stage_gb float32,
     activation_size_mb float32,
@@ -231,18 +215,15 @@ func (pipeline_parallel_inference* pp) GetOptimalMicroBatchSize(
     }
     return optimal
 }
-
 func (pipeline_parallel_inference* pp) GetCommunicationOverhead() float32 {
     bubble := pp.GetPipelineBubble()
     return bubble
 }
-
 func (pipeline_parallel_inference* pp) GetSpeedup() float32 {
     bubble := pp.GetPipelineBubble()
     speedup := float32(pp.config.pp_size) * (1.0 - bubble)
     return speedup
 }
-
 func (pipeline_parallel_inference* pp) GetStats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["pp_size"] = pp.config.pp_size
@@ -255,7 +236,6 @@ func (pipeline_parallel_inference* pp) GetStats() map[string]interface{} {
     stats["communication_overhead"] = pp.GetCommunicationOverhead()
     return stats
 }
-
 func main() {
     config := pipeline_parallel_config{
         pp_size:        4,

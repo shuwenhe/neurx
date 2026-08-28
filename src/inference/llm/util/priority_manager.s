@@ -1,12 +1,10 @@
 package inference
-
     p0_critical
     p1_high
     p2_normal
     p3_low
     p4_background
 }
-
 struct priority_entry {
     string request_id
     priority_level level
@@ -15,14 +13,12 @@ struct priority_entry {
     int64 deadline
     float sla_multiplier
 }
-
 struct sla_config {
     priority_level priority
     int64 max_latency_ms
     int32 throughput_threshold
     float priority_boost
 }
-
 struct priority_queue_stats {
     int32 critical_count
     int32 high_count
@@ -32,7 +28,6 @@ struct priority_queue_stats {
     float avg_wait_time
     int64 total_priority_points
 }
-
 struct priority_manager {
     priority_entry[] queue
     map[string, priority_level] request_priority_map
@@ -42,10 +37,8 @@ struct priority_manager {
     bool enable_sla_enforcement
     int32 max_queue_size
 }
-
 func new_priority_manager(int32 max_queue_size) priority_manager {
     configs := sla_config[]{}
-
     p0_config := sla_config {
         priority: priority_level_p0_critical,
         max_latency_ms: 100,
@@ -53,7 +46,6 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
         priority_boost: 10.0,
     }
     configs = append(configs, p0_config)
-
     p1_config := sla_config {
         priority: priority_level_p1_high,
         max_latency_ms: 500,
@@ -61,7 +53,6 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
         priority_boost: 5.0,
     }
     configs = append(configs, p1_config)
-
     p2_config := sla_config {
         priority: priority_level_p2_normal,
         max_latency_ms: 2000,
@@ -69,7 +60,6 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
         priority_boost: 1.0,
     }
     configs = append(configs, p2_config)
-
     p3_config := sla_config {
         priority: priority_level_p3_low,
         max_latency_ms: 5000,
@@ -77,7 +67,6 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
         priority_boost: 0.5,
     }
     configs = append(configs, p3_config)
-
     p4_config := sla_config {
         priority: priority_level_p4_background,
         max_latency_ms: 10000,
@@ -85,7 +74,6 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
         priority_boost: 0.1,
     }
     configs = append(configs, p4_config)
-
     priority_manager {
         queue: priority_entry[]{},
         request_priority_map: map[string, priority_level]{},
@@ -96,14 +84,11 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
         max_queue_size: max_queue_size,
     }
 }
-
 func (priority_manager* pm) add_request(string request_id, priority_level level, int64 deadline) bool {
     if len(pm.queue) >= pm.max_queue_size {
         false
     }
-
     priority_score := calculate_priority_score(level, 0, deadline)
-
     entry := priority_entry {
         request_id: request_id,
         level: level,
@@ -112,17 +97,13 @@ func (priority_manager* pm) add_request(string request_id, priority_level level,
         deadline: deadline,
         sla_multiplier: get_sla_multiplier(pm.sla_configs, level),
     }
-
     pm.queue = append(pm.queue, entry)
     pm.request_priority_map[request_id] = level
-
     insert_by_priority(pm.queue, entry)
     true
 }
-
 func calculate_priority_score(priority_level level, int64 wait_time, int64 deadline) int64 {
     base_score := 0
-
     if level == priority_level_p0_critical {
         base_score = 1000
     } else if level == priority_level_p1_high {
@@ -134,37 +115,30 @@ func calculate_priority_score(priority_level level, int64 wait_time, int64 deadl
     } else {
         base_score = 100
     }
-
     int64(base_score) + (wait_time / 10)
 }
-
 func get_sla_multiplier(sla_config[] configs, priority_level level) float {
     for config in configs {
         if config.priority == level {
             config.priority_boost
         }
     }
-
     1.0
 }
-
 func insert_by_priority(priority_entry[]* queue, priority_entry new_entry) {
     insert_idx := len(queue)
-
     for i in len(0..queue) {
         if queue[i].priority_score < new_entry.priority_score {
             insert_idx = i
         }
     }
 }
-
 func (priority_manager* pm) get_next_request() priority_entry {
     if len(pm.queue) > 0 {
         result := pm.queue[0]
         pm.queue = priority_entry_vec_remove_at(pm.queue, 0)
         result
     }
-
     priority_entry {
         request_id: "",
         level: priority_level_p4_background,
@@ -174,7 +148,6 @@ func (priority_manager* pm) get_next_request() priority_entry {
         sla_multiplier: 0.0,
     }
 }
-
 func priority_entry_vec_remove_at(priority_entry[] v, int32 idx) priority_entry[] {
     result := priority_entry[]{}
     for i in len(0..v) {
@@ -184,29 +157,23 @@ func priority_entry_vec_remove_at(priority_entry[] v, int32 idx) priority_entry[
     }
     result
 }
-
 func (priority_manager* pm) update_request_priority(string request_id, priority_level new_level) bool {
     if !(request_id in pm.request_priority_map) {
         false
     }
-
     for i in len(0..pm.queue) {
         if pm.queue[i].request_id == request_id {
             old_level := pm.queue[i].level
             pm.queue[i].level = new_level
             pm.queue[i].priority_score = calculate_priority_score(new_level, pm.current_time - pm.queue[i].submission_time, pm.queue[i].deadline)
-
             if old_level != new_level {
                 pm.request_priority_map[request_id] = new_level
             }
-
             true
         }
     }
-
     false
 }
-
 func (priority_manager* pm) remove_request(string request_id) bool {
     idx := -1
     for i in len(0..pm.queue) {
@@ -214,7 +181,6 @@ func (priority_manager* pm) remove_request(string request_id) bool {
             idx = i
         }
     }
-
     if idx >= 0 {
         pm.queue = priority_entry_vec_remove_at(pm.queue, idx)
         delete(pm.request_priority_map, request_id)
@@ -223,7 +189,6 @@ func (priority_manager* pm) remove_request(string request_id) bool {
         false
     }
 }
-
 func (priority_manager* pm) get_queue_stats() priority_queue_stats {
     critical_cnt := 0
     high_cnt := 0
@@ -231,7 +196,6 @@ func (priority_manager* pm) get_queue_stats() priority_queue_stats {
     low_cnt := 0
     bg_cnt := 0
     total_priority := 0
-
     for entry in pm.queue {
         if entry.level == priority_level_p0_critical {
             critical_cnt = critical_cnt + 1
@@ -244,10 +208,8 @@ func (priority_manager* pm) get_queue_stats() priority_queue_stats {
         } else {
             bg_cnt = bg_cnt + 1
         }
-
         total_priority = total_priority + entry.priority_score
     }
-
     avg_wait := 0.0
     if len(pm.queue) > 0 {
         total_wait := 0
@@ -256,7 +218,6 @@ func (priority_manager* pm) get_queue_stats() priority_queue_stats {
         }
         avg_wait = float(total_wait) / float(len(pm.queue))
     }
-
     priority_queue_stats {
         critical_count: critical_cnt,
         high_count: high_cnt,
@@ -267,13 +228,10 @@ func (priority_manager* pm) get_queue_stats() priority_queue_stats {
         total_priority_points: int64(total_priority),
     }
 }
-
 func (priority_manager* pm) check_sla_violations() string[] {
     violations := string[]{}
-
     for entry in pm.queue {
         wait_time := pm.current_time - entry.submission_time
-
         for config in pm.sla_configs {
             if config.priority == entry.level {
                 if wait_time > config.max_latency_ms {
@@ -282,17 +240,13 @@ func (priority_manager* pm) check_sla_violations() string[] {
             }
         }
     }
-
     violations
 }
-
 func (priority_manager* pm) boost_aging_requests() {
     for i in len(0..pm.queue) {
         wait_time := pm.current_time - pm.queue[i].submission_time
-
         if wait_time > 1000 {
             old_priority := pm.queue[i].level
-
             if old_priority != priority_level_p0_critical {
                 new_level := old_priority
                 if old_priority == priority_level_p4_background {
@@ -302,27 +256,22 @@ func (priority_manager* pm) boost_aging_requests() {
                 } else if old_priority == priority_level_p2_normal {
                     new_level = priority_level_p1_high
                 }
-
                 pm.queue[i].level = new_level
                 pm.queue[i].priority_score = calculate_priority_score(new_level, wait_time, pm.queue[i].deadline)
             }
         }
     }
 }
-
 func (priority_manager* pm) get_queue_size() int32 {
     len(pm.queue)
 }
-
 func (priority_manager* pm) is_queue_full() bool {
     len(pm.queue) >= pm.max_queue_size
 }
-
 func (priority_manager* pm) clear_queue() {
     pm.queue = priority_entry[]{}
     pm.request_priority_map = map[string, priority_level]{}
 }
-
 func (priority_manager* pm) update_current_time(int64 time_ms) {
     pm.current_time = time_ms
 }

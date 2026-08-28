@@ -1,10 +1,8 @@
 package neurx.model.loader
-
 use std.slices
 use std.option.option
 use std.result.result
 use std.map.map
-
 struct model_config {
     string name
     int hidden_size
@@ -19,18 +17,15 @@ struct model_config {
     bool attention_bias
     bool use_cache
 }
-
 struct model_architecture {
     string model_type
     model_config config
     weight_map: map[string, string]
 }
-
 struct model_loader_error {
     string code
     string message
 }
-
 func create_llama_config() model_config {
     model_config {
         name: "llama",
@@ -47,13 +42,11 @@ func create_llama_config() model_config {
         use_cache: true,
     }
 }
-
 func create_llama2_config() model_config {
     config := create_llama_config()
     config.max_position_embeddings = 4096
     config
 }
-
 func create_qwen_config() model_config {
     model_config {
         name: "qwen",
@@ -70,7 +63,6 @@ func create_qwen_config() model_config {
         use_cache: true,
     }
 }
-
 func create_qwen2_config() model_config {
     config := create_qwen_config()
     config.num_hidden_layers = 24
@@ -80,7 +72,6 @@ func create_qwen2_config() model_config {
     config.num_key_value_heads = 16
     config
 }
-
 func create_deepseek_config() model_config {
     model_config {
         name: "deepseek",
@@ -97,7 +88,6 @@ func create_deepseek_config() model_config {
         use_cache: true,
     }
 }
-
 func create_mistral_config() model_config {
     model_config {
         name: "mistral",
@@ -114,7 +104,6 @@ func create_mistral_config() model_config {
         use_cache: true,
     }
 }
-
 func create_phi_config() model_config {
     model_config {
         name: "phi",
@@ -131,7 +120,6 @@ func create_phi_config() model_config {
         use_cache: true,
     }
 }
-
 func create_baichuan_config() model_config {
     model_config {
         name: "baichuan",
@@ -148,7 +136,6 @@ func create_baichuan_config() model_config {
         use_cache: true,
     }
 }
-
 func create_internlm_config() model_config {
     model_config {
         name: "internlm",
@@ -165,7 +152,6 @@ func create_internlm_config() model_config {
         use_cache: true,
     }
 }
-
 func create_glm_config() model_config {
     model_config {
         name: "glm",
@@ -182,7 +168,6 @@ func create_glm_config() model_config {
         use_cache: true,
     }
 }
-
 func create_mixtral_config() model_config {
     model_config {
         name: "mixtral",
@@ -199,7 +184,6 @@ func create_mixtral_config() model_config {
         use_cache: true,
     }
 }
-
 func create_yi_config() model_config {
     model_config {
         name: "yi",
@@ -216,7 +200,6 @@ func create_yi_config() model_config {
         use_cache: true,
     }
 }
-
 func create_openchat_config() model_config {
     model_config {
         name: "openchat",
@@ -233,7 +216,6 @@ func create_openchat_config() model_config {
         use_cache: true,
     }
 }
-
 func create_neural_chat_config() model_config {
     model_config {
         name: "neural_chat",
@@ -250,7 +232,6 @@ func create_neural_chat_config() model_config {
         use_cache: true,
     }
 }
-
 func create_solar_config() model_config {
     model_config {
         name: "solar",
@@ -267,7 +248,6 @@ func create_solar_config() model_config {
         use_cache: true,
     }
 }
-
 func create_model_config(string model_name) (model_config, model_loader_error) {
     switch model_name {
         "llama" : (create_llama_config(, "")),
@@ -291,27 +271,21 @@ func create_model_config(string model_name) (model_config, model_loader_error) {
         }),
     }
 }
-
 func (model_config* config) get_num_layers() int {
     config.num_hidden_layers
 }
-
 func (model_config* config) get_hidden_size() int {
     config.hidden_size
 }
-
 func (model_config* config) get_vocab_size() int {
     config.vocab_size
 }
-
 func (model_config* config) get_num_heads() int {
     config.num_attention_heads
 }
-
 func (model_config* config) get_intermediate_size() int {
     config.intermediate_size
 }
-
 func (model_config* config) is_valid() ((), model_loader_error) {
     if config.hidden_size <= 0 {
         return (model_loader_error {
@@ -319,49 +293,41 @@ func (model_config* config) is_valid() ((), model_loader_error) {
             message: "Hidden size must be positive",
         })
     }
-
     if config.num_hidden_layers <= 0 {
         return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Number of layers must be positive",
         })
     }
-
     if config.vocab_size <= 0 {
         return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Vocab size must be positive",
         })
     }
-
     if config.num_attention_heads <= 0 {
         return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Number of attention heads must be positive",
         })
     }
-
     if config.hidden_size % config.num_attention_heads != 0 {
         return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Hidden size must be divisible by number of attention heads",
         })
     }
-
     return (), ""
 }
-
 func load_model_architecture(string model_name) (model_architecture, model_loader_error) {
     config := create_model_config(model_name)
     config.is_valid()
-
     (model_architecture {
         model_type: model_name,
         config: config,
         weight_map: map[string, string](),
     })
 }
-
 func main() {
     model_names := string[]()
     model_names = append(model_names, "llama")
@@ -369,7 +335,6 @@ func main() {
     model_names = append(model_names, "deepseek")
     model_names = append(model_names, "mistral")
     model_names = append(model_names, "phi")
-
     i := 0
     for i < len(model_names) {
         name := model_names[i]

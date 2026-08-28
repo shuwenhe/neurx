@@ -1,35 +1,19 @@
 package neurx.quantization.backend_registry
-
 func quant_none() int { 0 }
-
 func quant_fp8() int { 1 }
-
 func quant_mxfp8() int { 2 }
-
 func quant_mxfp4() int { 3 }
-
 func quant_nvfp4() int { 4 }
-
 func quant_int8() int { 5 }
-
 func quant_int4() int { 6 }
-
 func quant_awq() int { 7 }
-
 func quant_gptq() int { 8 }
-
 func quant_gguf() int { 9 }
-
 func quant_bitsandbytes() int { 10 }
-
 func quant_torchao() int { 11 }
-
 func quant_modelopt() int { 12 }
-
 func quant_quark() int { 13 }
-
 func quant_compressed_tensors() int { 14 }
-
 struct quantization_backend_capability {
     int backend
     string name
@@ -42,7 +26,6 @@ struct quantization_backend_capability {
     bool supports_online
     bool supports_quantized_kv
 }
-
 struct quantization_request {
     int backend
     string platform
@@ -50,13 +33,11 @@ struct quantization_request {
     bool online_quantization
     bool quantized_kv_cache
 }
-
 struct quantization_selection {
     int backend
     bool supported
     string error_message
 }
-
 func quantization_backend_name(int backend) string {
     if backend == quant_fp8() { return "fp8" }
     if backend == quant_mxfp8() { return "mxfp8" }
@@ -74,7 +55,6 @@ func quantization_backend_name(int backend) string {
     if backend == quant_compressed_tensors() { return "compressed_tensors" }
     "none"
 }
-
 func quantization_capability_for(int backend) quantization_backend_capability {
     if backend == quant_fp8() { return quantization_backend_capability {backend: backend, name: "fp8", weight_bits: 8, activation_bits: 8, supports_cuda: true, supports_rocm: true, supports_cpu: true, supports_moe: true, supports_online: true, supports_quantized_kv: true} }
     if backend == quant_mxfp8() { return quantization_backend_capability {backend: backend, name: "mxfp8", weight_bits: 8, activation_bits: 8, supports_cuda: true, supports_rocm: true, supports_cpu: true, supports_moe: true, supports_online: true, supports_quantized_kv: true} }
@@ -92,7 +72,6 @@ func quantization_capability_for(int backend) quantization_backend_capability {
     if backend == quant_compressed_tensors() { return quantization_backend_capability {backend: backend, name: "compressed_tensors", weight_bits: 8, activation_bits: 8, supports_cuda: true, supports_rocm: true, supports_cpu: true, supports_moe: true, supports_online: false, supports_quantized_kv: true} }
     quantization_backend_capability {backend: quant_none(), name: "none", weight_bits: 16, activation_bits: 16, supports_cuda: true, supports_rocm: true, supports_cpu: true, supports_moe: true, supports_online: false, supports_quantized_kv: false}
 }
-
 func select_quantization_backend(quantization_request request) quantization_selection {
     bool supported = request.backend >= quant_none() && request.backend <= quant_compressed_tensors()
     if request.platform == "cuda" && request.backend == quant_quark() { supported = false }

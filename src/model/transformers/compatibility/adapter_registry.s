@@ -1,5 +1,4 @@
 package neurx.transformers_utils.compatibility.adapter_registry
-
 struct model_adapter_entry {
     string model_type
     string display_name
@@ -7,10 +6,8 @@ struct model_adapter_entry {
     string adapter_module
     int popularity_rank
 }
-
 func get_model_registry() []model_adapter_entry {
     []model_adapter_entry registry
-
     registry.append(model_adapter_entry {
         model_type: "llama",
         display_name: "Meta LLaMA",
@@ -24,7 +21,6 @@ func get_model_registry() []model_adapter_entry {
         adapter_module: "neurx.transformers_utils.model_adapters.llama_adapter",
         popularity_rank: 1,
     })
-
     registry.append(model_adapter_entry {
         model_type: "qwen",
         display_name: "Alibaba Qwen",
@@ -39,7 +35,6 @@ func get_model_registry() []model_adapter_entry {
         adapter_module: "neurx.transformers_utils.model_adapters.qwen_adapter",
         popularity_rank: 2,
     })
-
     registry.append(model_adapter_entry {
         model_type: "mistral",
         display_name: "Mistral AI",
@@ -52,7 +47,6 @@ func get_model_registry() []model_adapter_entry {
         adapter_module: "neurx.transformers_utils.model_adapters.mistral_adapter",
         popularity_rank: 3,
     })
-
     registry.append(model_adapter_entry {
         model_type: "deepseek",
         display_name: "DeepSeek",
@@ -64,7 +58,6 @@ func get_model_registry() []model_adapter_entry {
         adapter_module: "neurx.transformers_utils.model_adapters.deepseek_adapter",
         popularity_rank: 4,
     })
-
     registry.append(model_adapter_entry {
         model_type: "phi",
         display_name: "Microsoft Phi",
@@ -76,7 +69,6 @@ func get_model_registry() []model_adapter_entry {
         adapter_module: "neurx.transformers_utils.model_adapters.phi_adapter",
         popularity_rank: 5,
     })
-
     registry.append(model_adapter_entry {
         model_type: "chatglm",
         display_name: "ChatGLM",
@@ -88,13 +80,10 @@ func get_model_registry() []model_adapter_entry {
         adapter_module: "neurx.transformers_utils.model_adapters.chatglm_adapter",
         popularity_rank: 6,
     })
-
     registry
 }
-
 func get_adapter_by_model_id(string model_id) model_adapter_entry {
     []model_adapter_entry registry = get_model_registry()
-
     for entry in registry {
         for supported_id in entry.supported_model_ids {
             if supported_id == model_id {
@@ -102,7 +91,6 @@ func get_adapter_by_model_id(string model_id) model_adapter_entry {
             }
         }
     }
-
     model_adapter_entry {
         model_type: "llama",
         display_name: "Unknown (fallback to LLaMA)",
@@ -111,16 +99,13 @@ func get_adapter_by_model_id(string model_id) model_adapter_entry {
         popularity_rank: 99,
     }
 }
-
 func get_adapter_by_model_type(string model_type) model_adapter_entry {
     []model_adapter_entry registry = get_model_registry()
-
     for entry in registry {
         if entry.model_type == model_type {
             return entry
         }
     }
-
     model_adapter_entry {
         model_type: "llama",
         display_name: "Unknown (fallback to LLaMA)",
@@ -129,33 +114,25 @@ func get_adapter_by_model_type(string model_type) model_adapter_entry {
         popularity_rank: 99,
     }
 }
-
 func list_all_supported_models() string {
     []model_adapter_entry registry = get_model_registry()
-
     string output = ""
     output = output + "╔════════════════════════════════════════════════╗\n"
     output = output + "║  🤗 Supported HuggingFace Models              ║\n"
     output = output + "╚════════════════════════════════════════════════╝\n\n"
-
     for entry in registry {
         output = output + "📦 " + entry.display_name + " (" + entry.model_type + ")\n"
         output = output + "   Rank: " + int_to_string(entry.popularity_rank) + "\n"
         output = output + "   Models:\n"
-
         for model_id in entry.supported_model_ids {
             output = output + "     ✓ " + model_id + "\n"
         }
-
         output = output + "\n"
     }
-
     output
 }
-
 func is_model_supported(string model_id) bool {
     []model_adapter_entry registry = get_model_registry()
-
     for entry in registry {
         for supported_id in entry.supported_model_ids {
             if supported_id == model_id {
@@ -163,25 +140,19 @@ func is_model_supported(string model_id) bool {
             }
         }
     }
-
     false
 }
-
 func count_supported_models() int {
     []model_adapter_entry registry = get_model_registry()
     int total = 0
-
     for entry in registry {
         total = total + len(entry.supported_model_ids)
     }
-
     total
 }
-
 func get_popular_models() string[] {
     []model_adapter_entry registry = get_model_registry()
     string[] popular
-
     for entry in registry {
         if entry.popularity_rank <= 5 {
             for model_id in entry.supported_model_ids {
@@ -191,6 +162,5 @@ func get_popular_models() string[] {
             }
         }
     }
-
     popular
 }

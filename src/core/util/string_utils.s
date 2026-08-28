@@ -1,8 +1,6 @@
 package neurx.util.string_utils
 use std.conv.string_to_int
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func string_split(string text, string delimiter) string[] {
     string[] result = string[]{cap: 1000}
     int result_count = 0
@@ -38,11 +36,9 @@ func string_split(string text, string delimiter) string[] {
     }
     return result
 }
-
 func string_contains(string text, string substr) bool {
     return string_index_of(text, substr) >= 0
 }
-
 func string_index_of(string text, string substr) int {
     if len(substr) == 0 {
         return 0
@@ -58,7 +54,6 @@ func string_index_of(string text, string substr) int {
     }
     return -1
 }
-
 func string_last_index_of(string text, string ch) int {
     int last_idx = -1
     int i = 0
@@ -70,7 +65,6 @@ func string_last_index_of(string text, string ch) int {
     }
     return last_idx
 }
-
 func string_trim(string text) string {
     int start = 0
     int end = len(text)
@@ -90,21 +84,18 @@ func string_trim(string text) string {
     }
     return __host_slice(text, start, end)
 }
-
 func string_starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) {
         return false
     }
     return __host_slice(text, 0, len(prefix)) == prefix
 }
-
 func string_ends_with(string text, string suffix) bool {
     if len(suffix) > len(text) {
         return false
     }
     return __host_slice(text, len(text) - len(suffix), len(text)) == suffix
 }
-
 func string_to_lower(string text) string {
     string result = ""
     int i = 0
@@ -120,7 +111,6 @@ func string_to_lower(string text) string {
     }
     return result
 }
-
 func string_to_upper(string text) string {
     string result = ""
     int i = 0
@@ -136,7 +126,6 @@ func string_to_upper(string text) string {
     }
     return result
 }
-
 func int_to_string(int num) string {
     if num == 0 {
         return "0"
@@ -169,7 +158,6 @@ func int_to_string(int num) string {
     }
     return result
 }
-
 func string_join(string[] parts, string separator) string {
     string result = ""
     int i = 0
@@ -182,7 +170,6 @@ func string_join(string[] parts, string separator) string {
     }
     return result
 }
-
 func string_replace(string text, string old_str, string new_str) string {
     string result = ""
     int i = 0

@@ -1,11 +1,9 @@
 package neurx.amp.training
 import "neurx.autograd"
-
     FP32 = 0
     FP16 = 1
     BF16 = 2
 }
-
 struct amp_config {
     amp_dtype dtype
     bool enable_grad_scaling
@@ -16,7 +14,6 @@ struct amp_config {
     float max_scale
     int growth_interval
 }
-
 struct amp_state {
     float scale
     int growth_step
@@ -25,19 +22,16 @@ struct amp_state {
     fp16_grads: []autograd.tensor
     fp32_params: []autograd.tensor
 }
-
 struct mixed_precision_model {
     pointer model
     amp_config amp_config
     amp_state amp_state
     param_groups: [][]autograd.tensor
 }
-
 struct autocast_state {
     bool enabled
     int dtype
 }
-
 struct grad_scaler_state {
     float scale
     float growth_factor
@@ -45,32 +39,27 @@ struct grad_scaler_state {
     int growth_interval
     bool found_inf
 }
-
 func new_autocast_state(bool enabled, int dtype) autocast_state {
     autocast_state {
         enabled: enabled,
         dtype: dtype,
     }
 }
-
 func autocast_enter(autocast_state state) autocast_state {
     autocast_state {
         enabled: true,
         dtype: state.dtype,
     }
 }
-
 func autocast_exit(autocast_state state) autocast_state {
     autocast_state {
         enabled: false,
         dtype: state.dtype,
     }
 }
-
 func is_autocast_enabled(autocast_state state) bool {
     state.enabled
 }
-
 func new_grad_scaler(float scale, float growth_factor, float backoff_factor, int growth_interval, bool enabled) grad_scaler_state {
     grad_scaler_state {
         scale: scale,
@@ -80,7 +69,6 @@ func new_grad_scaler(float scale, float growth_factor, float backoff_factor, int
         found_inf: false,
     }
 }
-
 func grad_scaler_step(grad_scaler_state scaler, float value) grad_scaler_state {
     bool found_inf = value > 1000000000000000000000000000000000000.0 || value < -1000000000000000000000000000000000000.0 || value != value
     float next_scale = scaler.scale
@@ -95,15 +83,12 @@ func grad_scaler_step(grad_scaler_state scaler, float value) grad_scaler_state {
         found_inf: found_inf,
     }
 }
-
 func grad_scaler_get_scale(grad_scaler_state scaler) float {
     scaler.scale
 }
-
 func grad_scaler_found_inf(grad_scaler_state scaler) bool {
     scaler.found_inf
 }
-
 func new_amp_config(amp_dtype dtype, bool enable_grad_scaling) amp_config {
     amp_config config {
         dtype: dtype,
@@ -117,7 +102,6 @@ func new_amp_config(amp_dtype dtype, bool enable_grad_scaling) amp_config {
     }
     config
 }
-
 func new_amp_state(amp_config config, int num_params) amp_state {
     amp_state state {
         scale: config.initial_scale,
@@ -129,7 +113,6 @@ func new_amp_state(amp_config config, int num_params) amp_state {
     }
     state
 }
-
 func amp_init_params([]autograd.tensor params, amp_config config) amp_state {
     int n = len(params)
     amp_state state = new_amp_state(config, n)
@@ -142,7 +125,6 @@ func amp_init_params([]autograd.tensor params, amp_config config) amp_state {
     }
     state
 }
-
 func amp_cast_to_fp16(mixed_precision_model model) mixed_precision_model {
     for i := 0; i < len(model.amp_state.fp32_params); i += 1 {
         model.amp_state.fp16_params[i] = autograd.tensor_cast(
@@ -152,7 +134,6 @@ func amp_cast_to_fp16(mixed_precision_model model) mixed_precision_model {
     }
     model
 }
-
 func amp_cast_grad_to_fp32(mixed_precision_model model) mixed_precision_model {
     for i := 0; i < len(model.amp_state.fp16_grads); i += 1 {
         autograd.tensor fp32_grad = autograd.tensor_cast(
@@ -166,14 +147,12 @@ func amp_cast_grad_to_fp32(mixed_precision_model model) mixed_precision_model {
     }
     model
 }
-
 func amp_scale_loss(float loss, amp_state state) float {
     if state.last_overflow {
         return loss
     }
     loss * state.scale
 }
-
 func amp_check_overflow([]autograd.tensor grads) bool {
     for i := 0; i < len(grads); i += 1 {
         if autograd.tensor_has_nan(grads[i]) || autograd.tensor_has_inf(grads[i]) {
@@ -182,7 +161,6 @@ func amp_check_overflow([]autograd.tensor grads) bool {
     }
     false
 }
-
 func amp_update_scale(amp_state state, amp_config config, bool has_overflow) amp_state {
     if has_overflow {
         state.scale = max(state.scale / config.scale_factor, config.min_scale)
@@ -200,7 +178,6 @@ func amp_update_scale(amp_state state, amp_config config, bool has_overflow) amp
     }
     state
 }
-
 func amp_step(mixed_precision_model model) bool {
     bool overflow = amp_check_overflow(model.amp_state.fp16_grads)
     if overflow {
@@ -212,7 +189,6 @@ func amp_step(mixed_precision_model model) bool {
     model.amp_state = amp_update_scale(model.amp_state, model.amp_config, false)
     true
 }
-
 func amp_grad_scaling(mixed_precision_model model) mixed_precision_model {
     if !model.amp_config.enable_grad_scaling {
         return model
@@ -223,7 +199,6 @@ func amp_grad_scaling(mixed_precision_model model) mixed_precision_model {
     }
     model
 }
-
 func amp_sync_params(mixed_precision_model model) mixed_precision_model {
     for i := 0; i < len(model.amp_state.fp32_params); i += 1 {
         model.amp_state.fp16_params[i] = autograd.tensor_cast(
@@ -233,7 +208,6 @@ func amp_sync_params(mixed_precision_model model) mixed_precision_model {
     }
     model
 }
-
 func amp_zero_grad(mixed_precision_model model) mixed_precision_model {
     autograd.zero_grad(model.amp_state.fp32_params)
     for i := 0; i < len(model.amp_state.fp16_grads); i += 1 {
@@ -241,7 +215,6 @@ func amp_zero_grad(mixed_precision_model model) mixed_precision_model {
     }
     model
 }
-
 func mixed_precision_forward(mixed_precision_model model, func f) float {
     amp_cast_to_fp16(model)
     float loss = f()
@@ -250,7 +223,6 @@ func mixed_precision_forward(mixed_precision_model model, func f) float {
     }
     loss
 }
-
 func mixed_precision_backward(mixed_precision_model model, float loss) mixed_precision_model {
     autograd.backward(loss)
     for i := 0; i < len(model.amp_state.fp16_params); i += 1 {
@@ -259,14 +231,12 @@ func mixed_precision_backward(mixed_precision_model model, float loss) mixed_pre
     amp_grad_scaling(model)
     model
 }
-
 func max(float a, float b) float {
     if a > b {
         return a
     }
     b
 }
-
 func min(float a, float b) float {
     if a < b {
         return a

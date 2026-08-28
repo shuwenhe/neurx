@@ -2,7 +2,6 @@ package neurx.posttrain.alignment.dapo
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
 use neurx.posttrain.rl.{rollout, reward_manager}
-
 struct dapo_config {
     float learning_rate
     int batch_size
@@ -22,7 +21,6 @@ struct dapo_config {
     bool use_self_improvement
     int num_iterations
 }
-
 struct dapo_state {
     tensor policy_logits
     tensor value_estimates
@@ -37,7 +35,6 @@ struct dapo_state {
     float total_loss
     int iteration
 }
-
 struct dapo_rollout_result {
     []tensor states
     []tensor actions
@@ -49,7 +46,6 @@ struct dapo_rollout_result {
     float max_reward
     int num_correct
 }
-
 func new_dapo_config() dapo_config {
     dapo_config {
         learning_rate: 1e-5,
@@ -71,7 +67,6 @@ func new_dapo_config() dapo_config {
         num_iterations: 100,
     }
 }
-
 func dapo_compute_advantages(
     []tensor rewards,
     []tensor values,
@@ -115,7 +110,6 @@ func dapo_compute_advantages(
     }
     (advantages, returns)
 }
-
 func dapo_select_top_k_trajectories(
     dapo_rollout_result rollouts,
     int k
@@ -176,7 +170,6 @@ func dapo_select_top_k_trajectories(
         num_correct: rollouts.num_correct,
     }
 }
-
 func dapo_compute_policy_loss(
     tensor log_probs,
     tensor old_log_probs,
@@ -207,7 +200,6 @@ func dapo_compute_policy_loss(
     ) / old_log_probs.shape[0]
     (policy_loss, kl_div)
 }
-
 func dapo_compute_value_loss(
     tensor values,
     tensor returns,
@@ -235,7 +227,6 @@ func dapo_compute_value_loss(
         tensor_ops.pow(tensor_ops.sub(values, returns), 2.0)
     )
 }
-
 func dapo_step(
     module policy,
     module value_model,

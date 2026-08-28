@@ -1,7 +1,5 @@
 package neurx.multimodal.types
-
 import "neurx.tensor.types"
-
     image,
     text,
     audio,
@@ -9,26 +7,22 @@ import "neurx.tensor.types"
     depth,
     unknown
 }
-
     rgb,
     rgba,
     bgr,
     gray,
     yuv
 }
-
     pcm16,
     pcm32,
     float32,
     mu_law
 }
-
     pad,
     resize,
     dynamic,
     multi_crop
 }
-
 struct ImageData {
     id: string,
     raw_data: []i8,
@@ -38,7 +32,6 @@ struct ImageData {
     format: ImageFormat,
     metadata: map[string, string]
 }
-
 struct AudioData {
     id: string,
     samples: []f32,
@@ -47,7 +40,6 @@ struct AudioData {
     duration_ms: i32,
     AudioFormat format
 }
-
 struct VideoData {
     id: string,
     frames: []ImageData,
@@ -55,7 +47,6 @@ struct VideoData {
     duration_ms: i32,
     i32 total_frames
 }
-
 struct DepthData {
     id: string,
     depth_map: *types.Tensor,
@@ -63,7 +54,6 @@ struct DepthData {
     min_depth: f32,
     f32 max_depth
 }
-
 struct MultimodalInput {
     id: string,
     text: string,
@@ -74,7 +64,6 @@ struct MultimodalInput {
     timestamp: i64,
     sequence_order: []i32
 }
-
 struct ImageFeatures {
     id: string,
     embeddings: *types.Tensor,
@@ -82,7 +71,6 @@ struct ImageFeatures {
     spatial_resolution: (i32, i32),
     i32 temporal_index
 }
-
 struct PatchInfo {
     num_patches: i32,
     patch_size: i32,
@@ -91,7 +79,6 @@ struct PatchInfo {
     cls_token_idx: i32,
     spatial_shape: (i32, i32)
 }
-
 struct AudioFeatures {
     id: string,
     embeddings: *types.Tensor,
@@ -99,14 +86,12 @@ struct AudioFeatures {
     num_frames: i32,
     i32 segment_length
 }
-
 struct VideoFeatures {
     id: string,
     frame_features: []ImageFeatures,
     temporal_embeddings: *types.Tensor,
     video_embedding: *types.Tensor
 }
-
 struct FusedFeatures {
     id: string,
     fused_embedding: *types.Tensor,
@@ -114,7 +99,6 @@ struct FusedFeatures {
     attention_weights: map[Modality, *types.Tensor],
     string fusion_type
 }
-
 struct MultimodalConfig {
     vision_model: string,
     audio_model: string,
@@ -133,7 +117,6 @@ struct MultimodalConfig {
     cache_encoded_features: bool,
     string device
 }
-
 struct ProcessingState {
     input_id: string,
     stage: string,

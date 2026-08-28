@@ -1,11 +1,9 @@
 package neurx.inference.tokenizer.byte_tokenizer
-
 struct byte_tokenization_result {
     bool ok
     int[] token_ids
     string error_code
 }
-
 func tokenize_bytes(string prompt, int vocabulary_size, int maximum_tokens) byte_tokenization_result {
     if prompt == "" { return byte_tokenization_result { ok: false, token_ids: [], error_code: "empty_prompt" } }
     if vocabulary_size <= 0 { return byte_tokenization_result { ok: false, token_ids: [], error_code: "invalid_vocabulary" } }

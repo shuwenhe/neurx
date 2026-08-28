@@ -1,5 +1,4 @@
 package neurx.model.reward.minimal_reward
-
 struct minimal_reward_state {
     string name
     string family
@@ -9,7 +8,6 @@ struct minimal_reward_state {
     float train_accuracy
     bool trained
 }
-
 func new_minimal_reward_state() minimal_reward_state {
     minimal_reward_state {
         name: "minimal_reward",
@@ -21,15 +19,12 @@ func new_minimal_reward_state() minimal_reward_state {
         trained: true,
     }
 }
-
 func minimal_reward_score(minimal_reward_state state, float preference_score) float {
     preference_score + state.hidden_size
 }
-
 func minimal_reward_state_dict(minimal_reward_state state) minimal_reward_state {
     state
 }
-
 func minimal_reward_load_state_dict(minimal_reward_state state, minimal_reward_state other) minimal_reward_state {
     other
 }

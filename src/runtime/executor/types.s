@@ -1,5 +1,4 @@
 const (
-
     EXECUTOR_STATE_IDLE         = 0
     EXECUTOR_STATE_INITIALIZING = 1
     EXECUTOR_STATE_RUNNING      = 2
@@ -7,26 +6,21 @@ const (
     EXECUTOR_STATE_DRAINING     = 4
     EXECUTOR_STATE_ERROR        = 5
     EXECUTOR_STATE_SHUTDOWN     = 6
-
     PHASE_PREFILL               = 0
     PHASE_DECODE                = 1
     PHASE_MIXED                 = 2
-
     EVICTION_LRU                = 0
     EVICTION_LFU                = 1
     EVICTION_FIFO               = 2
     EVICTION_ADAPTIVE           = 3
-
     SCHEDULE_FCFS               = 0
     SCHEDULE_PRIORITY           = 1
     SCHEDULE_SJF                = 2
     SCHEDULE_DYNAMIC            = 3
-
     ITERATION_TYPE_PREFILL      = 0
     ITERATION_TYPE_DECODE_STEP  = 1
     ITERATION_TYPE_ENCODE       = 2
     ITERATION_TYPE_SPECULATIVE  = 3
-
     ERROR_SUCCESS               = 0
     ERROR_EXECUTION_FAILED      = 201
     ERROR_INSUFFICIENT_CACHE    = 202
@@ -38,7 +32,6 @@ const (
     ERROR_DISTRIBUTED_SYNC_FAILED = 208
     ERROR_STEP_TIMEOUT          = 209
     ERROR_UNKNOWN               = 999
-
     DEFAULT_CACHE_SIZE_GB       = 20
     DEFAULT_MAX_ITERATIONS      = 1000
     DEFAULT_MAX_SEQ_LENGTH      = 8192
@@ -47,7 +40,6 @@ const (
     DEFAULT_PREFILL_BATCH_SIZE  = 256
     DEFAULT_DECODE_BATCH_SIZE   = 512
 )
-
 struct ExecutorConfig {
     executor_id         i32
     model_name          string
@@ -63,7 +55,6 @@ struct ExecutorConfig {
     pipeline_parallel   i32
     timeout_ms          i32
 }
-
 struct ExecutionIteration {
     iteration_id    i64
     phase           i32
@@ -76,7 +67,6 @@ struct ExecutionIteration {
     output_tokens   i32
     error_code      i32
 }
-
 struct SequenceStatus {
     sequence_id     string
     phase           i32
@@ -88,7 +78,6 @@ struct SequenceStatus {
     arrival_time    i64
     estimated_finish i64
 }
-
 struct KVCacheBlock {
     block_id        i32
     sequence_id     string
@@ -99,7 +88,6 @@ struct KVCacheBlock {
     last_access     i64
     access_count    i64
 }
-
 struct KVCacheManager {
     total_size_gb   f64
     allocated_mb    i32
@@ -109,7 +97,6 @@ struct KVCacheManager {
     eviction_policy i32
     max_blocks      i32
 }
-
 struct ExecutionResult {
     iteration_id    i64
     success         i32
@@ -121,7 +108,6 @@ struct ExecutionResult {
     throughput      f64
     cache_hit_rate  f64
 }
-
 struct ExecutorStatistics {
     total_iterations    i64
     completed_iterations i64
@@ -136,7 +122,6 @@ struct ExecutorStatistics {
     throughput          f64
     memory_peak         i32
 }
-
 struct PrefillConfig {
     max_batch_size  i32
     max_tokens      i32
@@ -144,7 +129,6 @@ struct PrefillConfig {
     enable_swap     i32
     block_size      i32
 }
-
 struct DecodeConfig {
     max_batch_size  i32
     beam_width      i32
@@ -152,7 +136,6 @@ struct DecodeConfig {
     enable_swap     i32
     num_beams       i32
 }
-
 struct DistributedConfig {
     rank            i32
     world_size      i32
@@ -160,7 +143,6 @@ struct DistributedConfig {
     pipeline_parallel i32
     sync_timeout_ms i32
 }
-
 struct IterationSchedule {
     iteration_id    i64
     prefill_batch   string[]
@@ -171,7 +153,6 @@ struct IterationSchedule {
     mixed_count     i32
     priority_order  []i32
 }
-
 struct ExecutorMetrics {
     current_state   i32
     active_sequences i32
@@ -184,7 +165,6 @@ struct ExecutorMetrics {
     gpu_memory_mb   i32
     gpu_util        f64
 }
-
 struct AttentionMask {
     sequence_id     string
     mask_data       []u8
@@ -192,7 +172,6 @@ struct AttentionMask {
     is_causal       i32
     enable_prefix   i32
 }
-
 struct CacheEvictionPolicy {
     policy_type     i32
     max_block_age   i64

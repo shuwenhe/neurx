@@ -6,12 +6,10 @@ import "neurx.distributed.zero"
 import "neurx.amp.training"
 import "neurx.checkpoint.gradient"
 import "neurx.checkpoint.checkpoint_training"
-
     TRAIN = 0
     VALIDATE = 1
     TEST = 2
 }
-
 struct training_config {
     int epochs
     int batch_size
@@ -32,7 +30,6 @@ struct training_config {
     int zero_stage
     int seed
 }
-
 struct training_state {
     int epoch
     int step
@@ -46,7 +43,6 @@ struct training_state {
     float best_val_loss
     bool is_training
 }
-
 struct training_stats {
     train_loss: float[]
     val_loss: float[]
@@ -55,7 +51,6 @@ struct training_stats {
     learning_rates: float[]
     throughput: float[]
 }
-
 struct training_loop {
     pointer model
     optimizer: opt.adamw_optimizer
@@ -67,7 +62,6 @@ struct training_loop {
     zero_state: zero.zero_state
     checkpoint_config: gradient.checkpoint_config
 }
-
 func new_training_config() training_config {
     training_config config {
         epochs: 10,
@@ -91,7 +85,6 @@ func new_training_config() training_config {
     }
     config
 }
-
 func new_training_state(training_config config) training_state {
     training_state state {
         epoch: 0,
@@ -108,7 +101,6 @@ func new_training_state(training_config config) training_state {
     }
     state
 }
-
 func new_training_loop(
     pointer model,
     opt.adamw_optimizer optimizer,
@@ -153,7 +145,6 @@ func new_training_loop(
     }
     loop
 }
-
 func compute_lr(training_loop loop) float {
     int step = loop.state.global_step
     int warmup = loop.config.warmup_steps
@@ -165,7 +156,6 @@ func compute_lr(training_loop loop) float {
     float cos_decay = 0.5 * (1.0 + cos(progress * 3.14159))
     loop.config.learning_rate * cos_decay
 }
-
 func train_step(training_loop loop, []autograd.tensor batch, int[] labels) float {
     if loop.config.enable_amp {
         training.amp_zero_grad(loop.amp)
@@ -215,7 +205,6 @@ func train_step(training_loop loop, []autograd.tensor batch, int[] labels) float
     loop.state.samples_processed = loop.state.samples_processed + len(batch)
     total_loss
 }
-
 func validate_step(training_loop loop, []autograd.tensor batch, int[] labels) float {
     autograd.disable_grad()
     []autograd.tensor logits = loop.model.forward(batch)
@@ -223,7 +212,6 @@ func validate_step(training_loop loop, []autograd.tensor batch, int[] labels) fl
     autograd.enable_grad()
     loss
 }
-
 func run_epoch(training_loop loop, func get_train_batch, func get_val_batch) training_loop {
     loop.state.epoch = loop.state.epoch + 1
     float epoch_loss = 0.0
@@ -255,7 +243,6 @@ func run_epoch(training_loop loop, func get_train_batch, func get_val_batch) tra
     loop.stats.learning_rates = append(loop.stats.learning_rates, loop.state.lr)
     loop
 }
-
 func validate(training_loop loop, func get_val_batch) training_loop {
     float val_loss = 0.0
     int num_batches = 0
@@ -281,7 +268,6 @@ func validate(training_loop loop, func get_val_batch) training_loop {
     print_validation_log(loop, val_loss, val_ppl)
     loop
 }
-
 func run_training(training_loop loop, func get_train_batch, func get_val_batch) training_loop {
     for epoch := 0; epoch < loop.config.epochs; epoch += 1 {
         loop = run_epoch(loop, get_train_batch, get_val_batch)
@@ -297,7 +283,6 @@ func run_training(training_loop loop, func get_train_batch, func get_val_batch) 
     )
     loop
 }
-
 func print_training_log(training_loop loop, float loss, float ppl) {
     string log = "[TRAIN] Epoch: " + string(loop.state.epoch) +
                  " Step: " + string(loop.state.global_step) +
@@ -306,7 +291,6 @@ func print_training_log(training_loop loop, float loss, float ppl) {
                  " LR: " + string(format_float(loop.state.lr, 8))
     print(log)
 }
-
 func print_validation_log(training_loop loop, float loss, float ppl) {
     string log = "[VALID] Epoch: " + string(loop.state.epoch) +
                  " Step: " + string(loop.state.global_step) +
@@ -315,7 +299,6 @@ func print_validation_log(training_loop loop, float loss, float ppl) {
                  " Best: " + string(format_float(loop.state.best_val_loss, 6))
     print(log)
 }
-
 func format_float(float x, int decimals) string {
     string s = string(x)
     int dot_pos = 0
@@ -334,7 +317,6 @@ func format_float(float x, int decimals) string {
     }
     s[0..needed]
 }
-
 func make_string(int n, char c) string {
     string s = ""
     for i := 0; i < n; i += 1 {
@@ -342,7 +324,6 @@ func make_string(int n, char c) string {
     }
     s
 }
-
 func exp(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -360,7 +341,6 @@ func exp(float x) float {
     }
     result
 }
-
 func cos(float x) float {
     float term = 1.0
     float result = 1.0
@@ -379,7 +359,6 @@ func cos(float x) float {
     }
     result
 }
-
 func pow(float x, int n) float {
     float result = 1.0
     for i := 0; i < n; i += 1 {

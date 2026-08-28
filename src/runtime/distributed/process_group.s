@@ -1,5 +1,4 @@
 package distributed
-
 struct process_group {
     int group_id
     int[] ranks
@@ -8,13 +7,11 @@ struct process_group {
     comm_backend backend
     bool initialized
 }
-
 struct process_group_manager {
     map[int, process_group] groups
     int next_group_id
     string default_backend
 }
-
 func new_process_group(int group_id, int[] ranks, string name, comm_backend backend) process_group {
     process_group {
         group_id: group_id,
@@ -25,7 +22,6 @@ func new_process_group(int group_id, int[] ranks, string name, comm_backend back
         initialized: false,
     }
 }
-
 func new_process_group_manager(string default_backend) process_group_manager {
     process_group_manager {
         groups: map[int, process_group]{},
@@ -33,22 +29,17 @@ func new_process_group_manager(string default_backend) process_group_manager {
         default_backend: default_backend,
     }
 }
-
 func (process_group_manager* mgr) create_group(int[] ranks, string name, comm_backend backend) int {
     group_id := mgr.next_group_id
     mgr.next_group_id = mgr.next_group_id + 1
-
     group := new_process_group(group_id, ranks, name, backend)
     mgr.groups[group_id] = group
-
     group_id
 }
-
 func (process_group_manager* mgr) get_group(int group_id) process_group {
     if group_id in mgr.groups {
         mgr.groups[group_id]
     }
-
     process_group {
         group_id: -1,
         ranks: int[]{},
@@ -58,20 +49,16 @@ func (process_group_manager* mgr) get_group(int group_id) process_group {
         initialized: false,
     }
 }
-
 func (process_group_manager* mgr) has_group(int group_id) bool {
     group_id in mgr.groups
 }
-
 func (process_group_manager* mgr) delete_group(int group_id) bool {
     if group_id in mgr.groups {
         del mgr.groups[group_id]
         true
     }
-
     false
 }
-
 func (process_group_manager* mgr) list_groups() int[] {
     result := int[]{}
     for gid in mgr.groups.keys() {
@@ -79,25 +66,20 @@ func (process_group_manager* mgr) list_groups() int[] {
     }
     result
 }
-
 func (process_group* group) initialize() bool {
     if group.initialized {
         false
     }
-
     group.initialized = true
     true
 }
-
 func (process_group* group) finalize() bool {
     if !group.initialized {
         false
     }
-
     group.initialized = false
     true
 }
-
 func (process_group* group) contains_rank(int rank) bool {
     i := 0
     for i < len(group.ranks) {
@@ -106,10 +88,8 @@ func (process_group* group) contains_rank(int rank) bool {
         }
         i = i + 1
     }
-
     false
 }
-
 func (process_group* group) get_rank_index(int rank) int {
     i := 0
     for i < len(group.ranks) {
@@ -118,14 +98,11 @@ func (process_group* group) get_rank_index(int rank) int {
         }
         i = i + 1
     }
-
     -1
 }
-
 func (process_group* group) get_ranks() int[] {
     group.ranks
 }
-
 func (process_group* group) get_size() int {
     group.world_size
 }

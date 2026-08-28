@@ -1,36 +1,29 @@
 use std.conv.int_to_string
-
 package neurx.inference.transformer_layer
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 struct tensor_one_d {
     float[] data
     int size
 }
-
 struct tensor_two_d {
     float[][] data
     int rows
     int cols
 }
-
 func create_tensor_one_d(int size) tensor_one_d {
     return tensor_one_d{
         size size
     }
 }
-
 func create_tensor_two_d(int rows, int cols) tensor_two_d {
     return tensor_two_d{
         rows: rows,
         cols cols
     }
 }
-
 func float_to_string(float value) string {
     "0.0"
 }
-
 func sqrt_approx(float value) float {
     if value <= 0.0 {
         return 0.0
@@ -43,7 +36,6 @@ func sqrt_approx(float value) float {
     }
     estimate
 }
-
 func rms_norm(float[] hidden, int hidden_size) float[] {
     print("[RMSNorm] Input shape: [" + int_to_string(hidden_size) + "]\n")
     if hidden_size <= 0 {
@@ -70,7 +62,6 @@ func rms_norm(float[] hidden, int hidden_size) float[] {
     }
     output
 }
-
 func compute_query_key_value_stub(
     float[] hidden,
     int hidden_size
@@ -94,7 +85,6 @@ func compute_query_key_value_stub(
     }
     result
 }
-
 func multihead_attention(
     float[] q,
     float[] k,
@@ -117,7 +107,6 @@ func multihead_attention(
     }
     output
 }
-
 func attention_output_projection(
     float[] attn_output,
     float[][] w_o,
@@ -135,7 +124,6 @@ func attention_output_projection(
     }
     output
 }
-
 func feedforward_network(
     float[] hidden,
     float[][] w_gate,
@@ -163,7 +151,6 @@ func feedforward_network(
     }
     output
 }
-
 func transformer_layer_1_forward(
     float[] input_hidden,
     float[][] norm_gamma,
@@ -226,7 +213,6 @@ func transformer_layer_1_forward(
     print("╚════════════════════════════════════════════════╝\n\n")
     output
 }
-
 func main() {
     print("\n╔════════════════════════════════════════════════════════╗\n")
     print("║  Transformer Layer 1 Forward Pass - Phase 1          ║\n")

@@ -1,7 +1,6 @@
 package neurx.inference.runtime.device_transformer
 use neurx.runtime.device.device_ops.{device_op, op_embedding, op_rms_norm, op_linear, op_rope, op_paged_attention, op_swiglu, op_residual_add}
 use neurx.runtime.device.vendor_lowering.{lowered_op, lower_device_op, lower_vendor_name}
-
 struct transformer_device_config {
     int layers
     int hidden
@@ -15,7 +14,6 @@ struct transformer_device_config {
     string rope_theta
     bool attention_bias
 }
-
 struct transformer_schedule {
     string backend
     []lowered_op operations
@@ -24,7 +22,6 @@ struct transformer_schedule {
     bool valid
     string error_message
 }
-
 func transformer_schedule_build(string backend, bool available, transformer_device_config config, bool prefill) transformer_schedule {
     if !available { return transformer_schedule {backend: backend, operations: [], vendor_operations: [], layer_operations: 0, valid: false, error_message: "backend_unavailable"} }
     if config.layers <= 0 || config.hidden <= 0 || config.intermediate <= 0 || config.query_heads <= 0 || config.kv_heads <= 0 || config.head_dim <= 0 {
@@ -78,15 +75,12 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
     vendor_operations[2 + config.layers * 14] = lower_vendor_name(backend, "linear")
     transformer_schedule {backend: backend, operations: operations, vendor_operations: vendor_operations, layer_operations: 14, valid: true, error_message: ""}
 }
-
 func transformer_prefill_schedule(string backend, bool available, transformer_device_config config) transformer_schedule {
     transformer_schedule_build(backend, available, config, true)
 }
-
 func transformer_decode_schedule(string backend, bool available, transformer_device_config config) transformer_schedule {
     transformer_schedule_build(backend, available, config, false)
 }
-
 func transformer_vendor_at(transformer_schedule schedule, int index) string {
     if index < 0 || index >= len(schedule.vendor_operations) { return "" }
     schedule.vendor_operations[index]

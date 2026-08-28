@@ -32,7 +32,6 @@ func create_default_optimization_config() optimization_config {
         enable_model_download: false,
         optimization_level: "high"
     }
-
 func print_header() {
     println("")
     println("╔════════════════════════════════════════════════════════════╗")

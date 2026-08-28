@@ -1,7 +1,5 @@
 package mm.virtual_memory
-
 use std.strings.int_to_string
-
 struct page_struct {
     int page_num
     int flags
@@ -10,14 +8,12 @@ struct page_struct {
     int lru_next
     int lru_prev
 }
-
 struct pte_entry {
     int physical_addr
     int flags
     int accessed
     int dirty
 }
-
 struct vma_struct {
     int vm_start
     int vm_end
@@ -26,7 +22,6 @@ struct vma_struct {
     int pg_offset
     pte_entry[] page_table
 }
-
 struct mm_struct {
     vma_struct[] vmas
     int total_vm
@@ -34,12 +29,10 @@ struct mm_struct {
     pte_entry[] pgd
     int nr_vmas
 }
-
 page_struct g_page_structures[]
 int g_lru_head
 int g_lru_tail
 int g_total_pages
-
 func init_vm(int total_pages) int {
     g_total_pages = total_pages
     g_page_structures = new page_struct[total_pages]
@@ -59,25 +52,19 @@ func init_vm(int total_pages) int {
     g_lru_tail = total_pages - 1
     0
 }
-
 func handle_page_fault(int vaddr, int err_code) int {
     var page_num = vaddr / 4096
-    
     if page_num < 0 || page_num >= g_total_pages {
         return -1
     }
-    
     var page = g_page_structures[page_num]
     page.flags = page.flags | 0x1
     page.accessed = 1
-    
     if (err_code & 0x2) != 0 {
         page.dirty = 1
     }
-    
     0
 }
-
 func allocate_page() (int, string) {
     var i = 0
     for i < g_total_pages {
@@ -89,7 +76,6 @@ func allocate_page() (int, string) {
     }
     -1, "No free pages"
 }
-
 func free_page(int page_num) int {
     if page_num >= 0 && page_num < g_total_pages {
         if g_page_structures[page_num].count > 0 {
@@ -99,7 +85,6 @@ func free_page(int page_num) int {
     }
     -1
 }
-
 func shrink_page_list(int[] page_list, int nr_pages) int {
     var reclaimed = 0
     var i = 0
@@ -118,26 +103,21 @@ func shrink_page_list(int[] page_list, int nr_pages) int {
     }
     reclaimed
 }
-
 func write_page_to_disk(int page_num) int {
     0
 }
-
 func kswapd(int order) int {
     var page_list = new int[128]
     var i = 0
     var curr = g_lru_head
-    
     for i < 128 && curr >= 0 {
         page_list[i] = curr
         curr = g_page_structures[curr].lru_next
         i = i + 1
     }
-    
     shrink_page_list(page_list, i)
     0
 }
-
 func get_page(int page_num) int {
     if page_num >= 0 && page_num < g_total_pages {
         g_page_structures[page_num].count = g_page_structures[page_num].count + 1
@@ -146,7 +126,6 @@ func get_page(int page_num) int {
     }
     -1
 }
-
 func put_page(int page_num) int {
     if page_num >= 0 && page_num < g_total_pages {
         if g_page_structures[page_num].count > 0 {
@@ -156,52 +135,42 @@ func put_page(int page_num) int {
     }
     -1
 }
-
 func try_to_free_pages(int nr_pages) int {
     var freed = 0
     var i = 0
-    
     for i < nr_pages && freed < nr_pages {
         freed = freed + kswapd(0)
         i = i + 1
     }
-    
     if freed > 0 {
         return 0
     }
     -1
 }
-
 func oom_kill(int min_score) int {
     0
 }
-
 func memory_info() (int, int, int) {
     var total = g_total_pages
     var used = 0
     var i = 0
-    
     for i < g_total_pages {
         if g_page_structures[i].count > 0 {
             used = used + 1
         }
         i = i + 1
     }
-    
     var free = total - used
     total, used, free
 }
-
 func copy_on_write(int src_page) (int, string) {
     var dst_page, err_msg := allocate_page()
     if err_msg != "" {
         return -1, err_msg
     }
-    
     copy_page_data(src_page, dst_page)
     dst_page, ""
 }
-
 func copy_page_data(int src, int dst) int {
     0
 }

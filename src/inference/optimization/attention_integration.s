@@ -1,7 +1,5 @@
 package neurx.inference.optimization.attention_integration
-
 use neurx.inference.optimization.attention_layers
-
 struct attention_layer_manager {
     flash_attention_config flash_config
     mla_config mla_config
@@ -12,7 +10,6 @@ struct attention_layer_manager {
     int total_skipped_calls
     float[] method_timings
 }
-
 func new_attention_layer_manager(
     int head_dim,
     int num_heads,
@@ -20,7 +17,6 @@ func new_attention_layer_manager(
     bool causal_mask,
     int seq_len
 ) attention_layer_manager {
-
     flash_cfg := new_flash_attention_config(
         head_dim,
         num_heads,
@@ -28,14 +24,12 @@ func new_attention_layer_manager(
         causal_mask,
         "cpu"
     )
-
     mla_cfg := new_mla_config(
         head_dim * num_heads,
         num_heads,
         64,
         64
     )
-
     lightning_cfg := lightning_attention_config{
         block_size: 128,
         head_dim: head_dim,
@@ -44,7 +38,6 @@ func new_attention_layer_manager(
         use_cache: true,
         precision: "fp32",
     }
-
     sparse_cfg := sparse_attention_config{
         block_size: 64,
         head_dim: head_dim,
@@ -53,7 +46,6 @@ func new_attention_layer_manager(
         sparsity_ratio: 75,
         use_token_budget: false,
     }
-
     method := "flash"
     if seq_len > 4096 {
         method = "sparse"
@@ -62,7 +54,6 @@ func new_attention_layer_manager(
     } else if head_dim > 256 {
         method = "mla"
     }
-
     attention_layer_manager{
         flash_config: flash_cfg,
         mla_config: mla_cfg,
@@ -74,14 +65,12 @@ func new_attention_layer_manager(
         method_timings: float[]{},
     }
 }
-
 func (attention_layer_manager* mgr) forward(
     float[] queries,
     float[] keys,
     float[] values
 ) float[] {
     mgr.total_forward_calls = mgr.total_forward_calls + 1
-
     if mgr.current_method == "flash" {
         return flash_attention_forward(
             queries,
@@ -104,7 +93,6 @@ func (attention_layer_manager* mgr) forward(
             mgr.sparse_config
         )
     } else {
-
         return flash_attention_forward(
             queries,
             keys,
@@ -113,18 +101,15 @@ func (attention_layer_manager* mgr) forward(
         )
     }
 }
-
 func (attention_layer_manager* mgr) set_method(method string) {
     mgr.current_method = method
 }
-
 func (attention_layer_manager* mgr) get_stats() map[string]float {
     stats := map[string]float{}
     stats["total_calls"] = float(mgr.total_forward_calls)
     stats["skipped_calls"] = float(mgr.total_skipped_calls)
     return stats
 }
-
 struct layer_attention_config {
     int layer_id
     string attention_type
@@ -136,7 +121,6 @@ struct layer_attention_config {
     lightning_attention_config lightning_cfg
     sparse_attention_config sparse_cfg
 }
-
 struct transformer_layer_with_optimized_attention {
     layer_attention_config attn_config
     float[] layer_norm_weight
@@ -145,7 +129,6 @@ struct transformer_layer_with_optimized_attention {
     float[] mlp_weight1
     float[] mlp_weight2
 }
-
 func create_layer_with_optimized_attention(
     int layer_id,
     int head_dim,
@@ -154,14 +137,12 @@ func create_layer_with_optimized_attention(
     int seq_len,
     int hidden_dim
 ) transformer_layer_with_optimized_attention {
-
     attention_type := "flash"
     if seq_len > 4096 {
         attention_type = "sparse"
     } else if seq_len > 2048 {
         attention_type = "lightning"
     }
-
     flash_cfg := new_flash_attention_config(
         head_dim,
         num_heads,
@@ -169,9 +150,7 @@ func create_layer_with_optimized_attention(
         true,
         "cpu"
     )
-
     mla_cfg := new_mla_config(hidden_dim, num_heads, 64, 64)
-
     lightning_cfg := lightning_attention_config{
         block_size: 128,
         head_dim: head_dim,
@@ -180,7 +159,6 @@ func create_layer_with_optimized_attention(
         use_cache: true,
         precision: "fp32",
     }
-
     sparse_cfg := sparse_attention_config{
         block_size: 64,
         head_dim: head_dim,
@@ -189,7 +167,6 @@ func create_layer_with_optimized_attention(
         sparsity_ratio: 75,
         use_token_budget: false,
     }
-
     layer_attn_cfg := layer_attention_config{
         layer_id: layer_id,
         attention_type: attention_type,
@@ -201,7 +178,6 @@ func create_layer_with_optimized_attention(
         lightning_cfg: lightning_cfg,
         sparse_cfg: sparse_cfg,
     }
-
     transformer_layer_with_optimized_attention{
         attn_config: layer_attn_cfg,
         layer_norm_weight: make(float[], hidden_dim),
@@ -211,20 +187,16 @@ func create_layer_with_optimized_attention(
         mlp_weight2: make(float[], 4 * hidden_dim * hidden_dim),
     }
 }
-
 func (transformer_layer_with_optimized_attention* layer) forward(
     float[] hidden_states,
     float[] position_ids
 ) float[] {
-
     normalized := apply_layer_norm(
         hidden_states,
         layer.layer_norm_weight,
         layer.layer_norm_bias
     )
-
     var attn_output float[]
-
     if layer.attn_config.attention_type == "flash" {
         attn_output = flash_attention_forward(
             normalized,
@@ -247,16 +219,13 @@ func (transformer_layer_with_optimized_attention* layer) forward(
             layer.attn_config.sparse_cfg
         )
     }
-
     int i = 0
     for i < len(hidden_states) {
         hidden_states[i] = hidden_states[i] + attn_output[i]
         i = i + 1
     }
-
     return hidden_states
 }
-
 struct attention_optimized_model_config {
     int hidden_dim
     int num_layers
@@ -268,33 +237,25 @@ struct attention_optimized_model_config {
     string attention_strategy
     string[] per_layer_attention
 }
-
 func new_attention_optimized_config(
     int hidden_dim,
     int num_layers,
     int num_heads,
     int max_seq_len
 ) attention_optimized_model_config {
-
     int head_dim = hidden_dim / num_heads
-
     string[] per_layer = make(string[], num_layers)
-
     int i = 0
     for i < num_layers {
         if i < num_layers / 3 {
-
             per_layer[i] = "lightning"
         } else if i < 2 * num_layers / 3 {
-
             per_layer[i] = "flash"
         } else {
-
             per_layer[i] = "sparse"
         }
         i = i + 1
     }
-
     attention_optimized_model_config{
         hidden_dim: hidden_dim,
         num_layers: num_layers,
@@ -307,7 +268,6 @@ func new_attention_optimized_config(
         per_layer_attention: per_layer,
     }
 }
-
 struct attention_performance_report {
     string method_name
     float memory_usage_mb
@@ -317,16 +277,13 @@ struct attention_performance_report {
     int head_dim
     float speedup_vs_baseline
 }
-
 func benchmark_attention_methods(
     float[] queries,
     float[] keys,
     float[] values,
     int num_iterations
 ) []attention_performance_report {
-
     reports := []attention_performance_report{}
-
     flash_report := attention_performance_report{
         method_name: "Flash Attention v3",
         memory_usage_mb: 256.0,
@@ -337,7 +294,6 @@ func benchmark_attention_methods(
         speedup_vs_baseline: 2.8,
     }
     reports = append(reports, flash_report)
-
     mla_report := attention_performance_report{
         method_name: "MLA (Multi-head Latent)",
         memory_usage_mb: 200.0,
@@ -348,7 +304,6 @@ func benchmark_attention_methods(
         speedup_vs_baseline: 2.3,
     }
     reports = append(reports, mla_report)
-
     lightning_report := attention_performance_report{
         method_name: "Lightning Attention",
         memory_usage_mb: 220.0,
@@ -359,7 +314,6 @@ func benchmark_attention_methods(
         speedup_vs_baseline: 2.5,
     }
     reports = append(reports, lightning_report)
-
     sparse_report := attention_performance_report{
         method_name: "Sparse Attention",
         memory_usage_mb: 180.0,
@@ -370,10 +324,8 @@ func benchmark_attention_methods(
         speedup_vs_baseline: 3.1,
     }
     reports = append(reports, sparse_report)
-
     return reports
 }
-
 func append([]attention_performance_report arr, attention_performance_report val) []attention_performance_report {
     []attention_performance_report new_arr = make([]attention_performance_report, len(arr) + 1)
     int i = 0
@@ -384,7 +336,6 @@ func append([]attention_performance_report arr, attention_performance_report val
     new_arr[len(arr)] = val
     return new_arr
 }
-
 func apply_layer_norm(
     float[] x,
     float[] weight,
@@ -394,15 +345,11 @@ func apply_layer_norm(
     if dim <= 0 {
         return x
     }
-
     float[] output = make(float[], len(x))
     int seq_len = len(x) / dim
-
     float eps = 1e-5
-
     int i = 0
     for i < seq_len {
-
         float mean = 0.0
         int j = 0
         for j < dim {
@@ -410,7 +357,6 @@ func apply_layer_norm(
             j = j + 1
         }
         mean = mean / float(dim)
-
         float var = 0.0
         j = 0
         for j < dim {
@@ -419,7 +365,6 @@ func apply_layer_norm(
             j = j + 1
         }
         var = var / float(dim)
-
         float std = sqrt_f(var + eps)
         j = 0
         for j < dim {
@@ -432,10 +377,8 @@ func apply_layer_norm(
         }
         i = i + 1
     }
-
     return output
 }
-
 func sqrt_f(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -448,7 +391,6 @@ func sqrt_f(float x) float {
     }
     return y
 }
-
 func main() {
     print("🔄 Attention Layer Integration Module")
     print("✓ Unified attention layer manager")

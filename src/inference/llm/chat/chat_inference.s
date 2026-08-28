@@ -3,7 +3,6 @@ use std.io
 use std.math
 use std.time
 use std.strings
-
 struct chat_config {
     i32 vocab_size
     i32 hidden_dim
@@ -14,27 +13,23 @@ struct chat_config {
     i32 max_new_tokens
     f64 temperature
 }
-
 struct chat_request {
     string user_input
     conversation_history: string[]
     i32 max_tokens
     f64 temperature
 }
-
 struct chat_response {
     string assistant_reply
     i32 tokens_generated
     f64 latency_ms
 }
-
 struct simple_transformer {
     chat_config config
     i32 embedding_dim
     i32 head_dim
     i64 total_params
 }
-
 func create_chat_config() chat_config {
     config := chat_config
     config.vocab_size = 32000
@@ -47,7 +42,6 @@ func create_chat_config() chat_config {
     config.temperature = 0.7
     return config
 }
-
 func init_model(chat_config config) simple_transformer {
     model := simple_transformer
     model.config = config
@@ -59,7 +53,6 @@ func init_model(chat_config config) simple_transformer {
     model.total_params = embedding_params + layer_params + ffn_params
     return model
 }
-
 func tokenize_input(string text) []i32 {
     tokens := []i32
     var string[] words = strings.split(text, " ")
@@ -71,7 +64,6 @@ func tokenize_input(string text) []i32 {
     }
     return tokens
 }
-
 func generate_token(simple_transformer model, []i32 context) i32 {
     if len(context) == 0 {
         return 0
@@ -102,7 +94,6 @@ func generate_token(simple_transformer model, []i32 context) i32 {
     }
     return next_token
 }
-
 func decode_tokens([]i32 tokens) string {
     result := ""
     i := 0
@@ -168,7 +159,6 @@ func decode_tokens([]i32 tokens) string {
     }
     return strings.trim_space(result)
 }
-
 func process_chat_request(simple_transformer model, chat_request request) chat_response {
     var i64 start_time = time.now_ms()
     input_tokens := tokenize_input(request.user_input)
@@ -212,7 +202,6 @@ func process_chat_request(simple_transformer model, chat_request request) chat_r
     response.latency_ms = latency
     return response
 }
-
 func main() {
     io.println("")
     io.println("╔════════════════════════════════════════════════════════════════════╗")

@@ -1,14 +1,12 @@
 package neurx.optimizer.swa_utils
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct averaged_model_state {
     tensor averaged_params
     int num_averaged
     string avg_mode
     float ema_decay
 }
-
 func new_averaged_model(tensor initial_params, string avg_mode, float ema_decay) averaged_model_state {
     averaged_model_state {
         averaged_params: initial_params,
@@ -17,7 +15,6 @@ func new_averaged_model(tensor initial_params, string avg_mode, float ema_decay)
         ema_decay: ema_decay,
     }
 }
-
 func update_averaged_model(averaged_model_state state, tensor model_params) averaged_model_state {
     int n = len(model_params.data)
     float[] out = float[]{cap: n}
@@ -50,7 +47,6 @@ func update_averaged_model(averaged_model_state state, tensor model_params) aver
     state.num_averaged = state.num_averaged + 1
     return state
 }
-
 func averaged_model_parameters(averaged_model_state state) tensor {
     return state.averaged_params
 }

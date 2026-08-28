@@ -1,5 +1,4 @@
 package neurx.distributed.inference
-
 struct distributed_inference_full_config {
     int world_size
     int rank
@@ -25,14 +24,12 @@ struct distributed_inference_full_config {
     bool enable_profiling
     string profiling_level
 }
-
 struct resource_requirement {
     float min_gpu_memory_gb
     float min_cpu_memory_gb
     int min_interconnect_bw_gbps
     int min_cpu_cores
 }
-
 func init_full_config() distributed_inference_full_config {
     distributed_inference_full_config cfg
     cfg.world_size = 4
@@ -60,12 +57,10 @@ func init_full_config() distributed_inference_full_config {
     cfg.profiling_level = "basic"
     cfg
 }
-
 func load_config_from_file(string config_path) distributed_inference_full_config {
     println(f"Loading config from {config_path}")
     init_full_config()
 }
-
 func validate_config(distributed_inference_full_config cfg) bool {
     if cfg.world_size <= 0 {
         println("Invalid world_size")
@@ -81,7 +76,6 @@ func validate_config(distributed_inference_full_config cfg) bool {
     }
     true
 }
-
 func check_resource_availability(
     distributed_inference_full_config cfg
 ) resource_requirement {
@@ -102,7 +96,6 @@ func check_resource_availability(
     req.min_cpu_cores = 8
     req
 }
-
 func print_config(distributed_inference_full_config cfg) {
     printf("Distributed Inference Configuration\n")
     printf("====================================\n")
@@ -127,7 +120,6 @@ func print_config(distributed_inference_full_config cfg) {
     printf("  Recompute: %v\n", cfg.enable_recompute)
     printf("Profiling: %v (%s)\n", cfg.enable_profiling, cfg.profiling_level)
 }
-
 func print_resource_requirements(resource_requirement req) {
     printf("Resource Requirements\n")
     printf("=====================\n")
@@ -136,7 +128,6 @@ func print_resource_requirements(resource_requirement req) {
     printf("CPU cores: >= %d\n", req.min_cpu_cores)
     printf("Interconnect BW: >= %d Gbps\n", req.min_interconnect_bw_gbps)
 }
-
 func get_config_hash(distributed_inference_full_config cfg) string {
     string hash = "cfg"
     hash = hash + "_ws" + string(cfg.world_size)
@@ -145,7 +136,6 @@ func get_config_hash(distributed_inference_full_config cfg) string {
     hash = hash + "_bs" + string(cfg.batch_size)
     hash
 }
-
 func should_recreate_engine(
     distributed_inference_full_config old_cfg,
     distributed_inference_full_config new_cfg
@@ -164,7 +154,6 @@ func should_recreate_engine(
     }
     false
 }
-
 func create_per_rank_config(
     distributed_inference_full_config global_cfg,
     int rank
@@ -180,7 +169,6 @@ func create_per_rank_config(
     }
     rank_cfg
 }
-
 func main() {
     println("Distributed Inference Configuration Manager")
     println("==========================================")

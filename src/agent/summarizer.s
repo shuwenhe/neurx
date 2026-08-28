@@ -1,11 +1,9 @@
 package neurx.agent.summarizer
-
 struct agent_summary_result {
     string text
     int original_len
     bool clipped
 }
-
 func agent_summary_result_make(string text, int orig_len, bool clipped) agent_summary_result {
     agent_summary_result {
         text: text,
@@ -13,7 +11,6 @@ func agent_summary_result_make(string text, int orig_len, bool clipped) agent_su
         clipped: clipped,
     }
 }
-
 func agent_summarize_to_result(string text, int max_chars) agent_summary_result {
     int n = len(text)
     if n <= max_chars {
@@ -27,24 +24,19 @@ func agent_summarize_to_result(string text, int max_chars) agent_summary_result 
     }
     agent_summary_result_make(out + "...[truncated]", n, true)
 }
-
 func agent_summarize(string text, int max_chars) string {
     agent_summary_result r = agent_summarize_to_result(text, max_chars)
     r.text
 }
-
 func agent_summarize_for_context(string text) string {
     agent_summarize(text, 1024)
 }
-
 func agent_summarize_for_memory(string text) string {
     agent_summarize(text, 256)
 }
-
 func agent_summarize_for_prompt(string text) string {
     agent_summarize(text, 512)
 }
-
 func agent_summarize_count_sentences(string text) int {
     int count = 0
     int i = 0
@@ -59,7 +51,6 @@ func agent_summarize_count_sentences(string text) int {
     }
     count
 }
-
 func agent_summarize_first_sentence(string text) string {
     string out = ""
     int i = 0
@@ -78,7 +69,6 @@ func agent_summarize_first_sentence(string text) string {
     }
     out
 }
-
 func agent_summarize_keyword_line(string text, string keyword) string {
     string kw = lower(trim(keyword))
     string haystack = lower(text)
@@ -119,7 +109,6 @@ func agent_summarize_keyword_line(string text, string keyword) string {
     }
     ""
 }
-
 func agent_summary_result_format(agent_summary_result result) string {
     string clipped_str = "no"
     if result.clipped {

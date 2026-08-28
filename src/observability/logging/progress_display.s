@@ -1,5 +1,4 @@
 package neurx.observability.logging
-
 func print_progress_bar(
     training_metrics metrics,
     logger_config cfg

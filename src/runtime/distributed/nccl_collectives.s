@@ -1,5 +1,4 @@
 package neurx.distributed
-
 func nccl_allreduce(
     nccl_communicator *comm,
     uint64 buffer_ptr,

@@ -1,19 +1,11 @@
 package neurx.inference.runtime.engine_lifecycle
-
 func engine_awake_status() int { 1 }
-
 func engine_sleeping_status() int { 2 }
-
 func engine_asleep_status() int { 3 }
-
 func engine_waking_status() int { 4 }
-
 func segment_device_residency() int { 1 }
-
 func segment_host_residency() int { 2 }
-
 func segment_discarded_residency() int { 3 }
-
 struct engine_memory_segment {
     string segment_id
     string tag
@@ -25,7 +17,6 @@ struct engine_memory_segment {
     string snapshot_checksum
     int generation
 }
-
 struct engine_memory_transfer {
     string segment_id
     string tag
@@ -34,7 +25,6 @@ struct engine_memory_transfer {
     int transition_id
     int generation
 }
-
 struct engine_lifecycle_state {
     bool enabled
     string backend_name
@@ -56,7 +46,6 @@ struct engine_lifecycle_state {
     bool preserves_compiled_artifacts
     string last_error
 }
-
 struct engine_lifecycle_result {
     engine_lifecycle_state state
     []engine_memory_transfer transfers
@@ -66,7 +55,6 @@ struct engine_lifecycle_result {
     int transition_id
     string error_message
 }
-
 func new_engine_lifecycle_result(engine_lifecycle_state state, bool accepted, bool pending, string error_message) engine_lifecycle_result {
     engine_lifecycle_result result
     result.state = state
@@ -78,7 +66,6 @@ func new_engine_lifecycle_result(engine_lifecycle_state state, bool accepted, bo
     result.error_message = error_message
     result
 }
-
 func new_engine_lifecycle(bool enabled, string backend_name, bool preserves_communicators, bool preserves_compiled_artifacts) engine_lifecycle_state {
     engine_lifecycle_state state
     state.enabled = enabled
@@ -102,7 +89,6 @@ func new_engine_lifecycle(bool enabled, string backend_name, bool preserves_comm
     state.last_error = ""
     state
 }
-
 func engine_string_contains(string[] values, string expected) bool {
     int i = 0
     for i < len(values) {
@@ -111,12 +97,10 @@ func engine_string_contains(string[] values, string expected) bool {
     }
     false
 }
-
 func engine_string_append_unique(string[] values, string value) string[] {
     if value == "" || engine_string_contains(values, value) { return values }
     append(values, value)
 }
-
 func engine_string_remove(string[] values, string expected) string[] {
     string[] result = string[]{cap: len(values)}
     int i = 0
@@ -126,11 +110,9 @@ func engine_string_remove(string[] values, string expected) string[] {
     }
     result
 }
-
 func engine_segment_at(engine_lifecycle_state state, int index) engine_memory_segment {
     state.segments[index]
 }
-
 func engine_find_segment(engine_lifecycle_state state, string segment_id) int {
     int i = 0
     for i < len(state.segments) {
@@ -139,7 +121,6 @@ func engine_find_segment(engine_lifecycle_state state, string segment_id) int {
     }
     -1
 }
-
 func engine_recount_memory(engine_lifecycle_state state) engine_lifecycle_state {
     state.device_bytes = 0
     state.host_bytes = 0
@@ -155,7 +136,6 @@ func engine_recount_memory(engine_lifecycle_state state) engine_lifecycle_state 
     }
     state
 }
-
 func engine_register_segment(engine_lifecycle_state state, string segment_id, string tag, int byte_count, bool reloadable, bool mutable, string snapshot_checksum) engine_lifecycle_result {
     if segment_id == "" || tag == "" || byte_count < 0 || engine_find_segment(state, segment_id) >= 0 {
         return new_engine_lifecycle_result(state, false, false, "invalid or duplicate memory segment")
@@ -177,7 +157,6 @@ func engine_register_segment(engine_lifecycle_state state, string segment_id, st
     state = engine_recount_memory(state)
     new_engine_lifecycle_result(state, true, false, "")
 }
-
 func engine_begin_request(engine_lifecycle_state state, string request_id) engine_lifecycle_result {
     if request_id == "" || engine_string_contains(state.active_request_ids, request_id) {
         return new_engine_lifecycle_result(state, false, false, "invalid or duplicate request")
@@ -188,7 +167,6 @@ func engine_begin_request(engine_lifecycle_state state, string request_id) engin
     state.active_request_ids = append(state.active_request_ids, request_id)
     new_engine_lifecycle_result(state, true, false, "")
 }
-
 func engine_end_request(engine_lifecycle_state state, string request_id) engine_lifecycle_result {
     if !engine_string_contains(state.active_request_ids, request_id) {
         return new_engine_lifecycle_result(state, false, false, "active request not found")
@@ -196,13 +174,11 @@ func engine_end_request(engine_lifecycle_state state, string request_id) engine_
     state.active_request_ids = engine_string_remove(state.active_request_ids, request_id)
     new_engine_lifecycle_result(state, true, false, "")
 }
-
 func engine_sleep_target(engine_memory_segment segment, int level) int {
     if level == 1 && segment.tag == "weights" { return segment_host_residency() }
     if level == 2 && segment.mutable && !segment.reloadable { return segment_host_residency() }
     segment_discarded_residency()
 }
-
 func engine_transfer_for(engine_memory_segment segment, int target, int transition_id) engine_memory_transfer {
     engine_memory_transfer transfer
     transfer.segment_id = segment.segment_id
@@ -221,7 +197,6 @@ func engine_transfer_for(engine_memory_segment segment, int target, int transiti
     transfer.generation = segment.generation
     transfer
 }
-
 func engine_begin_sleep(engine_lifecycle_state state, int level, string mode) engine_lifecycle_result {
     engine_lifecycle_result result = new_engine_lifecycle_result(state, false, false, "")
     if !state.enabled { return new_engine_lifecycle_result(state, false, false, "sleep mode is disabled") }
@@ -256,11 +231,9 @@ func engine_begin_sleep(engine_lifecycle_state state, int level, string mode) en
     result.transition_id = state.transition_id
     result
 }
-
 func engine_tag_selected(string[] tags, string tag) bool {
     len(tags) == 0 || engine_string_contains(tags, tag)
 }
-
 func engine_begin_wake(engine_lifecycle_state state, string[] tags) engine_lifecycle_result {
     engine_lifecycle_result result = new_engine_lifecycle_result(state, false, false, "")
     if state.status == engine_awake_status() { return new_engine_lifecycle_result(state, true, false, "") }
@@ -299,7 +272,6 @@ func engine_begin_wake(engine_lifecycle_state state, string[] tags) engine_lifec
     result.transition_id = state.transition_id
     result
 }
-
 func engine_clear_pending(engine_lifecycle_state state) engine_lifecycle_state {
     int i = 0
     for i < len(state.segments) {
@@ -311,7 +283,6 @@ func engine_clear_pending(engine_lifecycle_state state) engine_lifecycle_state {
     state.pending_sleep_level = 0
     state
 }
-
 func engine_rebuild_sleeping_tags(engine_lifecycle_state state) engine_lifecycle_state {
     state.sleeping_tags = []
     int i = 0
@@ -324,7 +295,6 @@ func engine_rebuild_sleeping_tags(engine_lifecycle_state state) engine_lifecycle
     }
     state
 }
-
 func engine_commit_transition(engine_lifecycle_state state, int transition_id, bool success, string error_message) engine_lifecycle_result {
     if state.status != engine_sleeping_status() && state.status != engine_waking_status() {
         return new_engine_lifecycle_result(state, false, false, "no lifecycle transition is active")
@@ -373,15 +343,12 @@ func engine_commit_transition(engine_lifecycle_state state, int transition_id, b
     state.last_error = ""
     new_engine_lifecycle_result(state, true, false, "")
 }
-
 func engine_is_available(engine_lifecycle_state state) bool {
     state.status == engine_awake_status()
 }
-
 func engine_is_sleeping(engine_lifecycle_state state) bool {
     state.status == engine_sleeping_status() || state.status == engine_asleep_status()
 }
-
 func engine_status_name(engine_lifecycle_state state) string {
     if state.status == engine_awake_status() { return "awake" }
     if state.status == engine_sleeping_status() { return "sleeping" }

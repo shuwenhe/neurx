@@ -5,7 +5,6 @@ import neurx.pretrain.pipeline.*
 import neurx.attention.*
 import neurx.posttrain.alignment.*
 import neurx.inference.engine.*
-
 struct system_status {
     bool model_loaded
     bool tokenizer_ready
@@ -22,7 +21,6 @@ struct system_status {
     string[] warnings
     string[] errors
 }
-
 func check_system_status() {
     print("\n" + "="*70)
     print("🔍 Checking NEURX-5.2 Training System status")

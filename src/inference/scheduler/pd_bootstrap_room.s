@@ -1,23 +1,15 @@
 package neurx.inference.scheduler.pd_bootstrap_room
-
 func pd_room_empty() int { 0 }
-
 func pd_room_bootstrapping() int { 1 }
-
 func pd_room_waiting_for_input() int { 2 }
-
 func pd_room_transferring() int { 3 }
-
 func pd_room_success() int { 4 }
-
 func pd_room_failed() int { 5 }
-
 struct pd_bootstrap_config {
     int capacity
     int bootstrap_timeout_ms
     int waiting_timeout_ms
 }
-
 struct pd_bootstrap_state {
     pd_bootstrap_config config
     int[] room_ids
@@ -33,21 +25,18 @@ struct pd_bootstrap_state {
     int completed_rooms
     int failed_rooms
 }
-
 struct pd_room_result {
     pd_bootstrap_state state
     int room_slot
     int status
     bool accepted
 }
-
 func pd_room_int_array(int capacity) int[] {
     int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func new_pd_bootstrap_state(pd_bootstrap_config config) pd_bootstrap_state {
     if config.capacity <= 0 { config.capacity = 1 }
     if config.capacity > 1024 { config.capacity = 1024 }
@@ -55,7 +44,6 @@ func new_pd_bootstrap_state(pd_bootstrap_config config) pd_bootstrap_state {
     if config.waiting_timeout_ms <= 0 { config.waiting_timeout_ms = 1 }
     pd_bootstrap_state {config: config, room_ids: pd_room_int_array(config.capacity), request_ids: pd_room_int_array(config.capacity), statuses: pd_room_int_array(config.capacity), expected_peers: pd_room_int_array(config.capacity), ready_peers: pd_room_int_array(config.capacity), reserved_pages: pd_room_int_array(config.capacity), created_ms: pd_room_int_array(config.capacity), status_changed_ms: pd_room_int_array(config.capacity), failure_codes: pd_room_int_array(config.capacity), active_rooms: 0, completed_rooms: 0, failed_rooms: 0}
 }
-
 func pd_find_room(pd_bootstrap_state state, int room_id) int {
     int i = 0
     for i < state.config.capacity {
@@ -64,13 +52,11 @@ func pd_find_room(pd_bootstrap_state state, int room_id) int {
     }
     0 - 1
 }
-
 func pd_room_result_of(pd_bootstrap_state state, int slot, bool accepted) pd_room_result {
     int status = pd_room_empty()
     if slot >= 0 { status = state.statuses[slot] }
     pd_room_result {state: state, room_slot: slot, status: status, accepted: accepted}
 }
-
 func pd_create_room(pd_bootstrap_state state, int room_id, int request_id, int expected_peers, int reserved_pages, int now_ms) pd_room_result {
     if room_id <= 0 || request_id <= 0 || expected_peers <= 0 || reserved_pages < 0 || pd_find_room(state, room_id) >= 0 { return pd_room_result_of(state, -1, false) }
     int slot = 0 - 1
@@ -92,7 +78,6 @@ func pd_create_room(pd_bootstrap_state state, int room_id, int request_id, int e
     state.active_rooms = state.active_rooms + 1
     pd_room_result_of(state, slot, true)
 }
-
 func pd_room_peer_ready(pd_bootstrap_state state, int room_id, int now_ms) pd_room_result {
     int slot = pd_find_room(state, room_id)
     if slot < 0 || state.statuses[slot] != pd_room_bootstrapping() { return pd_room_result_of(state, slot, false) }
@@ -103,7 +88,6 @@ func pd_room_peer_ready(pd_bootstrap_state state, int room_id, int now_ms) pd_ro
     }
     pd_room_result_of(state, slot, true)
 }
-
 func pd_room_start_transfer(pd_bootstrap_state state, int room_id, int now_ms) pd_room_result {
     int slot = pd_find_room(state, room_id)
     if slot < 0 || state.statuses[slot] != pd_room_waiting_for_input() { return pd_room_result_of(state, slot, false) }
@@ -111,7 +95,6 @@ func pd_room_start_transfer(pd_bootstrap_state state, int room_id, int now_ms) p
     state.status_changed_ms[slot] = now_ms
     pd_room_result_of(state, slot, true)
 }
-
 func pd_room_complete(pd_bootstrap_state state, int room_id, bool success, int failure_code, int now_ms) pd_room_result {
     int slot = pd_find_room(state, room_id)
     if slot < 0 || state.statuses[slot] != pd_room_transferring() { return pd_room_result_of(state, slot, false) }
@@ -127,7 +110,6 @@ func pd_room_complete(pd_bootstrap_state state, int room_id, bool success, int f
     state.active_rooms = state.active_rooms - 1
     pd_room_result_of(state, slot, true)
 }
-
 func pd_room_poll(pd_bootstrap_state state, int room_id, int now_ms) pd_room_result {
     int slot = pd_find_room(state, room_id)
     if slot < 0 { return pd_room_result_of(state, slot, false) }
@@ -143,7 +125,6 @@ func pd_room_poll(pd_bootstrap_state state, int room_id, int now_ms) pd_room_res
     }
     pd_room_result_of(state, slot, true)
 }
-
 func pd_room_release(pd_bootstrap_state state, int room_id) pd_bootstrap_state {
     int slot = pd_find_room(state, room_id)
     if slot < 0 { return state }

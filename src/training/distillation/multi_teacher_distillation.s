@@ -2,7 +2,6 @@ import "tensor/tensor.s"
 import "src/training/optimizer/optimizer.s"
 import "src/core/loss/kl_divergence.s"
 import "src/training/distillation/knowledge_distillation.s"
-
 struct multi_teacher_config {
     i32 num_teachers
     teacher_weights: []f32
@@ -18,14 +17,12 @@ struct multi_teacher_config {
     bool use_layer_distill
     f32 layer_loss_weight
 }
-
 struct teacher {
     *model model
     f32 weight
     string name
     f32 performance_score
 }
-
 struct multi_teacher_distillation {
     multi_teacher_config config
     *model student
@@ -34,7 +31,6 @@ struct multi_teacher_distillation {
     teacher_losses: [][]f32
     teacher_contributions: []f32
 }
-
 func new_multi_teacher_distillation(
     multi_teacher_config config,
     *model student,
@@ -77,7 +73,6 @@ func new_multi_teacher_distillation(
         teacher_contributions: teacher_contributions,
     }
 }
-
 func (multi_teacher_distillation* distill) compute_distillation_loss(
     tensor input,
     tensor targets
@@ -115,7 +110,6 @@ func (multi_teacher_distillation* distill) compute_distillation_loss(
     }
     return total_loss
 }
-
 func (multi_teacher_distillation* distill) average_distillation(
     tensor student_logits,
     []tensor teacher_logits
@@ -131,7 +125,6 @@ func (multi_teacher_distillation* distill) average_distillation(
         temperature: distill.config.temperature
     )
 }
-
 func (multi_teacher_distillation* distill) weighted_distillation(
     tensor student_logits,
     []tensor teacher_logits
@@ -149,7 +142,6 @@ func (multi_teacher_distillation* distill) weighted_distillation(
     }
     return total_loss
 }
-
 func (multi_teacher_distillation* distill) ensemble_distillation(
     tensor student_logits,
     []tensor teacher_logits
@@ -168,7 +160,6 @@ func (multi_teacher_distillation* distill) ensemble_distillation(
     kl := -(ensemble_probs * student_log_probs).sum(dim: -1).mean()
     return kl * (distill.config.temperature * distill.config.temperature)
 }
-
 func (multi_teacher_distillation* distill) dynamic_distillation(
     tensor student_logits,
     []tensor teacher_logits
@@ -189,7 +180,6 @@ func (multi_teacher_distillation* distill) dynamic_distillation(
     }
     return total_loss
 }
-
 func (multi_teacher_distillation* distill) update_teacher_weights() {
     scores := []
     for teacher in distill.teachers {
@@ -206,7 +196,6 @@ func (multi_teacher_distillation* distill) update_teacher_weights() {
         distill.teacher_contributions[i] = exp_scores[i] / sum_exp
     }
 }
-
 func (multi_teacher_distillation* distill) compute_layer_distillation_loss(
     tensor input
 ) . tensor {
@@ -229,7 +218,6 @@ func (multi_teacher_distillation* distill) compute_layer_distillation_loss(
     }
     return total_layer_loss / f32(num_layers)
 }
-
 func (multi_teacher_distillation* distill) train_step(Batch batch) . f32 {
     input := batch.input
     targets := batch.targets
@@ -240,7 +228,6 @@ func (multi_teacher_distillation* distill) train_step(Batch batch) . f32 {
     distill.optimizer.zero_grad()
     return loss.item()
 }
-
 func (multi_teacher_distillation* distill) train(DataLoader train_data) . []f32 {
     losses := []
     step := 0
@@ -262,7 +249,6 @@ func (multi_teacher_distillation* distill) train(DataLoader train_data) . []f32 
     }
     return losses
 }
-
 func (multi_teacher_distillation* distill) print_teacher_contributions() {
     println("Teacher Contributions:")
     for i in len(0..distill.teachers) {
@@ -273,7 +259,6 @@ func (multi_teacher_distillation* distill) print_teacher_contributions() {
                f"performance={teacher.performance_score:.4f}")
     }
 }
-
 func kl_divergence_loss(tensor student_logits, tensor teacher_logits, f32 temperature) . tensor {
     student_log_probs := log_softmax(student_logits / temperature, dim: -1)
     teacher_probs := softmax(teacher_logits / temperature, dim: -1)

@@ -1,7 +1,5 @@
 package v1
-
 type request_status string
-
 const (
     status_pending      request_status = "pending"
     status_running      request_status = "running"
@@ -9,9 +7,7 @@ const (
     status_aborted      request_status = "aborted"
     status_failed       request_status = "failed"
 )
-
 type sampling_method string
-
 const (
     method_greedy       sampling_method = "greedy"
     method_top_k        sampling_method = "top_k"
@@ -19,7 +15,6 @@ const (
     method_temperature  sampling_method = "temperature"
     method_beam_search  sampling_method = "beam_search"
 )
-
 struct sampling_params {
     sampling_method method
     float32 temperature
@@ -34,7 +29,6 @@ struct sampling_params {
     string stop_str
     bool skip_special_tokens
 }
-
 struct request_output {
     string request_id
     string[] output_texts
@@ -43,35 +37,25 @@ struct request_output {
     bool is_finished
     map[string]interface{} metadata
 }
-
 struct v1_request {
     string request_id
     string prompt
     int32[] prompt_token_ids
-
     int32 arrival_time
     int32 start_time
     int32 finish_time
-
     request_status status
-
     sampling_params* sampling
-
     int32 max_tokens
     float32 timeout_seconds
-
     bool stream
     bool echo_prompt
-
     string[] output_texts
     int32[] output_token_ids
-
     int32 num_completed_tokens
     int32 num_total_tokens
-
     map[string]interface{} extra_params
 }
-
 func create_v1_request(string request_id, string prompt) v1_request* {
     req := *v1_request{
         request_id: request_id,
@@ -107,19 +91,15 @@ func create_v1_request(string request_id, string prompt) v1_request* {
     }
     return req
 }
-
 func (v1_request* req) set_status(request_status status) {
     req.status = status
 }
-
 func (v1_request* req) get_status() request_status {
     return req.status
 }
-
 func (v1_request* req) is_finished() bool {
     return req.status == status_completed || req.status == status_failed || req.status == status_aborted
 }
-
 func (v1_request* req) get_output() request_output {
     return request_output{
         request_id: req.request_id,
@@ -130,16 +110,13 @@ func (v1_request* req) get_output() request_output {
         metadata: req.extra_params,
     }
 }
-
 func (v1_request* req) add_output_token(int32 token_id) {
     req.output_token_ids = append(req.output_token_ids, token_id)
     req.num_completed_tokens = req.num_completed_tokens + 1
 }
-
 func (v1_request* req) add_output_text(string text) {
     req.output_texts = append(req.output_texts, text)
 }
-
 func (v1_request* req) get_elapsed_time() int32 {
     if req.start_time == 0 {
         return 0

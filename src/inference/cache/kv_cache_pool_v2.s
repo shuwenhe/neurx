@@ -1,7 +1,6 @@
 package inference
 import "core"
 import "tensor"
-
 struct kv_block {
     block_id          int
     tokens_per_block  int32
@@ -10,14 +9,12 @@ struct kv_block {
     request_ids       int[]64
     is_prefix_block   bool
 }
-
 struct kv_allocation {
     block_table       int[]
     block_offsets     int[]32
     num_tokens        int32
     request_id        int64
 }
-
 struct kv_cache_config {
     num_blocks        int
     block_size        int32
@@ -27,7 +24,6 @@ struct kv_cache_config {
     dtype             string
     enable_prefix_cache bool
 }
-
 struct kv_cache_pool_v2 {
     config            kv_cache_config
     blocks            []*kv_block
@@ -39,7 +35,6 @@ struct kv_cache_pool_v2 {
     total_free        int32
     eviction_count    int64
 }
-
 func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
     if config.num_blocks <= 0 {
         config.num_blocks = 1024
@@ -71,7 +66,6 @@ func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
     }
     return pool
 }
-
 func (kv_cache_pool_v2* p) Allocate(request_id int64, num_tokens int32) *kv_allocation {
     blocks_needed := (num_tokens + p.config.block_size - 1) / p.config.block_size
     if int32(len(p.free_blocks)) < blocks_needed {
@@ -101,7 +95,6 @@ func (kv_cache_pool_v2* p) Allocate(request_id int64, num_tokens int32) *kv_allo
     p.total_free = p.total_free - int32(len(allocation.block_table))
     return allocation
 }
-
 func (kv_cache_pool_v2* p) SharePrefix(source_id int64, target_id int64, prefix_tokens int32) bool {
     source_alloc, exists := p.request_allocations[source_id]
     if !exists {
@@ -160,7 +153,6 @@ func (kv_cache_pool_v2* p) SharePrefix(source_id int64, target_id int64, prefix_
     }
     return true
 }
-
 func (kv_cache_pool_v2* p) Release(request_id int64) {
     alloc, exists := p.request_allocations[request_id]
     if !exists {
@@ -186,25 +178,20 @@ func (kv_cache_pool_v2* p) Release(request_id int64) {
     p.total_allocated = p.total_allocated - int32(len(alloc.block_table))
     p.total_free = p.total_free + int32(len(alloc.block_table))
 }
-
 func (kv_cache_pool_v2* p) GetAllocation(request_id int64) *kv_allocation {
     return p.request_allocations[request_id]
 }
-
 func (kv_cache_pool_v2* p) GetFreeBlocks() int {
     return len(p.free_blocks)
 }
-
 func (kv_cache_pool_v2* p) GetUsedBlocks() int {
     return p.config.num_blocks - len(p.free_blocks)
 }
-
 func (kv_cache_pool_v2* p) GetMemoryUsage() int64 {
     block_size_bytes := p.config.block_size * p.config.hidden_size * 2 * 4
     used := p.config.num_blocks - len(p.free_blocks)
     return int64(used) * int64(block_size_bytes)
 }
-
 func (kv_cache_pool_v2* p) evictLRU() {
     if len(p.free_blocks) > 0 {
         return
@@ -229,7 +216,6 @@ func (kv_cache_pool_v2* p) evictLRU() {
         }
     }
 }
-
 func (kv_cache_pool_v2* p) GetStats() map[string]int64 {
     stats := make(map[string]int64)
     stats["total_blocks"] = int64(p.config.num_blocks)
@@ -239,7 +225,6 @@ func (kv_cache_pool_v2* p) GetStats() map[string]int64 {
     stats["evictions"] = p.eviction_count
     return stats
 }
-
 func main() {
     config := kv_cache_config{
         num_blocks:      256,

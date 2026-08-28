@@ -47,7 +47,6 @@ func (resource* r) add_attribute(key string[], value string[]) {
     if len(key) > 0 && len(value) > 0 && len(r.attributes) > 0 {
         r.attributes[0][key[0]] = value[0]
     }
-
 func new_instrumentation_scope(name string[], version string[]) instrumentation_scope {
     scope := instrumentation_scope{}
     scope.name = name
@@ -87,7 +86,6 @@ func (otlp_exporter* exporter) add_span(span interface{}) {
     if len(exporter.pending_spans) >= exporter.batch_size[0] {
         _ = exporter.export()
     }
-
 func (otlp_exporter* exporter) export() bool[] {
     if len(exporter.pending_spans) == 0 {
         return append(bool[]{}, true)

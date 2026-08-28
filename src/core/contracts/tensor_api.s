@@ -2,7 +2,6 @@ import "tensor_impl_api"
 import "storage_api"
 import "device_api"
 import "dtype_api"
-
 struct tensor {
     tensor_impl impl
 }

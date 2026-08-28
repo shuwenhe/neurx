@@ -1,6 +1,5 @@
 package neurx.autograd
 use neurx.tensor.tensor
-
 func backward_matmul(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }
@@ -16,7 +15,6 @@ func backward_matmul(node n, tensor grad_output) backward_result {
         success: true,
     }
 }
-
 func matmul_transpose_b(float[] grad, float[] b, int[] shape_grad, int[] shape_b) tensor {
     int M = shape_grad[0]
     int K = shape_grad[1] if len(shape_grad) > 1 else shape_b[0]
@@ -36,7 +34,6 @@ func matmul_transpose_b(float[] grad, float[] b, int[] shape_grad, int[] shape_b
     }
     tensor { data: result, grad: [], shape: [M, N], requires_grad: true }
 }
-
 func matmul_transpose_a(float[] a, float[] grad, int[] shape_a, int[] shape_grad) tensor {
     int M = shape_a[0]
     int K = shape_a[1] if len(shape_a) > 1 else shape_grad[0]
@@ -56,7 +53,6 @@ func matmul_transpose_a(float[] a, float[] grad, int[] shape_a, int[] shape_grad
     }
     tensor { data: result, grad: [], shape: [M, N], requires_grad: true }
 }
-
 func backward_add(node n, tensor grad_output) backward_result {
     []tensor grads
     if len(n.inputs) == 1 {
@@ -81,7 +77,6 @@ func backward_add(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: grads, success: true }
 }
-
 func copy_tensor_with_grad(tensor t) tensor {
     float[] data = float[]{cap: len(t.data)}
     for i in 0..len(t.data) {
@@ -89,7 +84,6 @@ func copy_tensor_with_grad(tensor t) tensor {
     }
     tensor { data: data, grad: [], shape: copy_shape(t.shape), requires_grad: true }
 }
-
 func copy_shape(int[] s) int[] {
     int[] out = int[]{cap: len(s)}
     for i in 0..len(s) {
@@ -97,7 +91,6 @@ func copy_shape(int[] s) int[] {
     }
     out
 }
-
 func shapes_equal(int[] a, int[] b) bool {
     if len(a) != len(b) { return false }
     for i in 0..len(a) {
@@ -105,7 +98,6 @@ func shapes_equal(int[] a, int[] b) bool {
     }
     true
 }
-
 func backward_mul(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [copy_tensor_with_grad(grad_output)], success: true }
@@ -118,7 +110,6 @@ func backward_mul(node n, tensor grad_output) backward_result {
     tensor grad_b { data: grad_b_data, grad: [], shape: b.shape, requires_grad: true }
     backward_result { input_grads: [grad_a, grad_b], success: true }
 }
-
 func elementwise_mul(float[] a, float[] b) float[] {
     int n = min_len(a, b)
     float[] out = float[]{cap: n}
@@ -127,11 +118,9 @@ func elementwise_mul(float[] a, float[] b) float[] {
     }
     out
 }
-
 func min_len(float[] a, float[] b) int {
     if len(a) < len(b) { len(a) } else { len(b) }
 }
-
 func backward_sub(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [copy_tensor_with_grad(grad_output)], success: true }
@@ -141,7 +130,6 @@ func backward_sub(node n, tensor grad_output) backward_result {
     tensor grad_b { data: neg_grad, grad: [], shape: n.inputs[1].shape, requires_grad: true }
     backward_result { input_grads: [grad_a, grad_b], success: true }
 }
-
 func negate(float[] data) float[] {
     float[] out = float[]{cap: len(data)}
     for i in 0..len(data) {
@@ -149,7 +137,6 @@ func negate(float[] data) float[] {
     }
     out
 }
-
 func backward_div(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [copy_tensor_with_grad(grad_output)], success: true }
@@ -164,7 +151,6 @@ func backward_div(node n, tensor grad_output) backward_result {
     tensor grad_b { data: grad_b_data, grad: [], shape: b.shape, requires_grad: true }
     backward_result { input_grads: [grad_a, grad_b], success: true }
 }
-
 func elementwise_div(float[] a, float[] b) float[] {
     int n = min_len(a, b)
     float[] out = float[]{cap: n}
@@ -177,7 +163,6 @@ func elementwise_div(float[] a, float[] b) float[] {
     }
     out
 }
-
 func abs_float(float x) float {
     if x < 0.0 { -x } else { x }
 }

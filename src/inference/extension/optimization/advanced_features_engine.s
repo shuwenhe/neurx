@@ -1,18 +1,15 @@
 package optimization
 import "core"
 import "tensor"
-
 struct speculative_config {
     draft_model_scale   float32
     num_draft_tokens    int32
     verification_batch  int32
 }
-
 struct draft_request {
     prompt_tokens       int[]32
     max_length          int32
 }
-
 struct speculative_decoding_engine {
     config              speculative_config
     main_model_tokens   int32
@@ -20,7 +17,6 @@ struct speculative_decoding_engine {
     accepted_count      int32
     rejected_count      int32
 }
-
 func NewSpeculativeDecodingEngine(config speculative_config) *speculative_decoding_engine {
     return *speculative_decoding_engine{
         config:             config,
@@ -30,7 +26,6 @@ func NewSpeculativeDecodingEngine(config speculative_config) *speculative_decodi
         rejected_count:     0,
     }
 }
-
 func (speculative_decoding_engine* sde) DraftTokens(
     context int[]32,
     num_tokens int32,
@@ -43,7 +38,6 @@ func (speculative_decoding_engine* sde) DraftTokens(
     }
     return drafted
 }
-
 func (speculative_decoding_engine* sde) VerifyDraftTokens(
     context int[]32,
     drafted_tokens int[]32,
@@ -66,7 +60,6 @@ func (speculative_decoding_engine* sde) VerifyDraftTokens(
     }
     return verified
 }
-
 func (speculative_decoding_engine* sde) getMainModelLogits(
     context int[]32,
     position int32,
@@ -77,7 +70,6 @@ func (speculative_decoding_engine* sde) getMainModelLogits(
     }
     return logits
 }
-
 func (speculative_decoding_engine* sde) computeAcceptanceProbability(
     main_logits float[]32,
     token_id int32,
@@ -100,7 +92,6 @@ func (speculative_decoding_engine* sde) computeAcceptanceProbability(
     prob := float32(token_exp / sum_exp)
     return prob
 }
-
 func (speculative_decoding_engine* sde) resampleFromMainModel(
     logits float[]32,
 ) int32 {
@@ -114,19 +105,16 @@ func (speculative_decoding_engine* sde) resampleFromMainModel(
     }
     return max_idx
 }
-
 func (speculative_decoding_engine* sde) GetSpeedup() float32 {
     acceptance_rate := 0.65
     effective_speedup := 1.0 + float32(sde.config.num_draft_tokens)*float32(acceptance_rate)
     return effective_speedup
 }
-
 struct vision_language_model_adapter {
     vision_encoder_dim   int32
     language_model_dim   int32
     bridge_layer_dim     int32
 }
-
 func NewVisionLanguageModelAdapter(
     vision_dim int32,
     language_dim int32,
@@ -137,7 +125,6 @@ func NewVisionLanguageModelAdapter(
         bridge_layer_dim:   language_dim,
     }
 }
-
 func (vision_language_model_adapter* vlm) EncodeImage(
     image_features float[]32,
     num_patches int32,
@@ -150,7 +137,6 @@ func (vision_language_model_adapter* vlm) EncodeImage(
     }
     return visual_tokens
 }
-
 func (vision_language_model_adapter* vlm) BridgeVisionToLanguage(
     visual_tokens float[]32,
 ) float[]32 {
@@ -158,19 +144,16 @@ func (vision_language_model_adapter* vlm) BridgeVisionToLanguage(
     copy(bridged, visual_tokens)
     return bridged
 }
-
 struct lo_ra_config {
     rank                int32
     alpha               float32
     target_modules      string[]
 }
-
 struct lo_ra_adapter {
     config              lo_ra_config
     rank                int32
     adapters            map[string]float[][]32
 }
-
 func NewLoRAAdapter(config lo_ra_config) *lo_ra_adapter {
     return *lo_ra_adapter{
         config:    config,
@@ -178,7 +161,6 @@ func NewLoRAAdapter(config lo_ra_config) *lo_ra_adapter {
         adapters:  make(map[string]float[][]32),
     }
 }
-
 func (lo_ra_adapter* la) AddLoRAWeight(
     layer_name string,
     weight_a float[]32,
@@ -186,7 +168,6 @@ func (lo_ra_adapter* la) AddLoRAWeight(
 ) {
     la.adapters[layer_name] = float[][]32{weight_a, weight_b}
 }
-
 func (lo_ra_adapter* la) ApplyLoRA(
     layer_name string,
     x float[]32,
@@ -207,13 +188,11 @@ func (lo_ra_adapter* la) ApplyLoRA(
     }
     return output
 }
-
 struct multi_model_serving_manager {
     loaded_models       map[string]bool
     model_cache         map[string]float[]32
     max_memory_mb       int32
 }
-
 func NewMultiModelServingManager(max_memory_mb int32) *multi_model_serving_manager {
     return *multi_model_serving_manager{
         loaded_models: make(map[string]bool),
@@ -221,7 +200,6 @@ func NewMultiModelServingManager(max_memory_mb int32) *multi_model_serving_manag
         max_memory_mb: max_memory_mb,
     }
 }
-
 func (multi_model_serving_manager* mms) LoadModel(
     model_name string,
     model_data float[]32,
@@ -235,17 +213,14 @@ func (multi_model_serving_manager* mms) LoadModel(
     mms.model_cache[model_name] = model_data
     return true
 }
-
 func (multi_model_serving_manager* mms) GetModel(model_name string) (float[]32, bool) {
     data, exists := mms.model_cache[model_name]
     return data, exists
 }
-
 func (multi_model_serving_manager* mms) UnloadModel(model_name string) {
     delete(mms.loaded_models, model_name)
     delete(mms.model_cache, model_name)
 }
-
 func (multi_model_serving_manager* mms) GetLoadedModels() string[] {
     models := make(string[], 0)
     for name := range mms.loaded_models {
@@ -253,14 +228,12 @@ func (multi_model_serving_manager* mms) GetLoadedModels() string[] {
     }
     return models
 }
-
 struct advanced_features_engine {
     speculative_decoder *speculative_decoding_engine
     vl_adapter          *vision_language_model_adapter
     lora_manager        *lo_ra_adapter
     multi_model_server  *multi_model_serving_manager
 }
-
 func NewAdvancedFeaturesEngine() *advanced_features_engine {
     spec_config := speculative_config{
         draft_model_scale:  0.25,
@@ -279,7 +252,6 @@ func NewAdvancedFeaturesEngine() *advanced_features_engine {
         multi_model_server:  NewMultiModelServingManager(24000),
     }
 }
-
 func (advanced_features_engine* afe) PrintAdvancedFeaturesReport() {
     core.Println("Advanced Features Report")
     core.Println("=======================")
@@ -294,7 +266,6 @@ func (advanced_features_engine* afe) PrintAdvancedFeaturesReport() {
     core.Println("✓ Multi-Model Serving")
     core.Println("  Max memory:", afe.multi_model_server.max_memory_mb, "MB")
 }
-
 func main() {
     engine := NewAdvancedFeaturesEngine()
     engine.PrintAdvancedFeaturesReport()

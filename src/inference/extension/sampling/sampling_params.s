@@ -1,5 +1,4 @@
 package neurx.sampling.sampling_params
-
 func apply_temperature(float[] logits, float temperature) float[] {
     if temperature <= 0.0 {
         return logits
@@ -13,7 +12,6 @@ func apply_temperature(float[] logits, float temperature) float[] {
     }
     return scaled
 }
-
 func top_k_filter(float[] logits, int k) float[] {
     if k <= 0 {
         return logits
@@ -33,7 +31,6 @@ func top_k_filter(float[] logits, int k) float[] {
     }
     return result
 }
-
 func top_p_filter(float[] logits, float top_p) float[] {
     if top_p >= 1.0 {
         return logits
@@ -73,7 +70,6 @@ func top_p_filter(float[] logits, float top_p) float[] {
     }
     return result
 }
-
 func apply_repetition_penalty(float[] logits, int[] prev_tokens, float penalty) float[] {
     if penalty <= 0.0 {
         return logits
@@ -103,7 +99,6 @@ func apply_repetition_penalty(float[] logits, int[] prev_tokens, float penalty) 
     }
     return penalized
 }
-
 func apply_frequency_penalty(float[] logits, int[] prev_tokens, float alpha) float[] {
     if alpha <= 0.0 {
         return logits
@@ -133,7 +128,6 @@ func apply_frequency_penalty(float[] logits, int[] prev_tokens, float alpha) flo
     }
     return penalized
 }
-
 func min_p_filter(float[] logits, float min_p) float[] {
     if min_p <= 0.0 {
         return logits
@@ -159,7 +153,6 @@ func min_p_filter(float[] logits, float min_p) float[] {
     }
     return result
 }
-
 func contains_stop_sequence(int[] tokens, int[] stop_seq) bool {
     if len(stop_seq) > len(tokens) {
         return false
@@ -179,7 +172,6 @@ func contains_stop_sequence(int[] tokens, int[] stop_seq) bool {
     }
     return true
 }
-
 func filter_bad_words(float[] logits, int[] bad_tokens) float[] {
     float[] filtered = float[]{}
     int i = 0
@@ -202,52 +194,41 @@ func filter_bad_words(float[] logits, int[] bad_tokens) float[] {
     }
     return filtered
 }
-
 func new_sampling_config(float temp, int top_k, float top_p) float[] {
     float top_k_float = float(top_k)
     float[] config = float[]{temp, top_k_float, top_p, 0.0, 0.0, 0.0}
     return config
 }
-
 func set_repetition_penalty(float[] config, float penalty) float[] {
     config[3] = penalty
     return config
 }
-
 func set_frequency_penalty(float[] config, float alpha) float[] {
     config[4] = alpha
     return config
 }
-
 func set_min_p(float[] config, float min_p) float[] {
     config[5] = min_p
     return config
 }
-
 func get_temperature(float[] config) float {
     return config[0]
 }
-
 func get_top_k(float[] config) int {
     return int(config[1])
 }
-
 func get_top_p(float[] config) float {
     return config[2]
 }
-
 func get_repetition_penalty(float[] config) float {
     return config[3]
 }
-
 func get_frequency_penalty(float[] config) float {
     return config[4]
 }
-
 func get_min_p(float[] config) float {
     return config[5]
 }
-
 func apply_all_sampling(float[] logits, float[] config, int[] prev_tokens, int[] bad_tokens) float[] {
     float[] result = logits
     float temp = get_temperature(config)
@@ -265,7 +246,6 @@ func apply_all_sampling(float[] logits, float[] config, int[] prev_tokens, int[]
     result = filter_bad_words(result, bad_tokens)
     return result
 }
-
 func softmax_logits(float[] logits) float[] {
     float max_logit = logits[0]
     int i = 1
@@ -297,7 +277,6 @@ func softmax_logits(float[] logits) float[] {
     }
     return probs
 }
-
 func select_token_by_probability(float[] probs) int {
     float rand_val = 0.5
     float cumsum = 0.0
@@ -311,7 +290,6 @@ func select_token_by_probability(float[] probs) int {
     }
     return len(probs) - 1
 }
-
 func format_sampling_config(float[] config) string {
     string result = "SamplingParams: temp="
     result = result + string(get_temperature(config))

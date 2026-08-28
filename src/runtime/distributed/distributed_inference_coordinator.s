@@ -1,7 +1,6 @@
 package distributed
 import "core"
 import "tensor"
-
 struct coordinator_config {
     num_nodes           int32
     gpus_per_node       int32
@@ -17,7 +16,6 @@ struct coordinator_config {
     enable_checkpointing bool
     checkpoint_interval  int64
 }
-
 struct node_info {
     node_id             int32
     node_rank           int32
@@ -29,7 +27,6 @@ struct node_info {
     is_alive            bool
     last_heartbeat      int64
 }
-
 struct distributed_request {
     request_id          int64
     primary_node        int32
@@ -39,14 +36,12 @@ struct distributed_request {
     current_stage       int32
     state               string
 }
-
 struct load_balance_state {
     gpu_loads           float[]32
     node_loads          float[]32
     queue_lengths       int[]32
     network_congestion  float[]32
 }
-
 struct distributed_inference_coordinator {
     config              coordinator_config
     nodes               map[int32]*node_info
@@ -61,7 +56,6 @@ struct distributed_inference_coordinator {
     total_requests      int64
     total_completed     int64
 }
-
 func NewDistributedInferenceCoordinator(config coordinator_config) *distributed_inference_coordinator {
     coordinator := *distributed_inference_coordinator{
         config:            config,
@@ -89,7 +83,6 @@ func NewDistributedInferenceCoordinator(config coordinator_config) *distributed_
     coordinator.hybrid_engine = NewHybrid3DParallelInference(hybrid_config)
     return coordinator
 }
-
 func (distributed_inference_coordinator* d) RegisterNode(
     node_id int32,
     ip_address string,
@@ -110,7 +103,6 @@ func (distributed_inference_coordinator* d) RegisterNode(
     d.nodes[node_id] = node
     return true
 }
-
 func (distributed_inference_coordinator* d) SubmitRequest(
     input_tokens int[]32,
     max_output_tokens int32,
@@ -128,7 +120,6 @@ func (distributed_inference_coordinator* d) SubmitRequest(
     d.total_requests = d.total_requests + 1
     return req.request_id
 }
-
 func (distributed_inference_coordinator* d) selectPrimaryNode() int32 {
     if len(d.nodes) == 0 {
         return 0
@@ -143,7 +134,6 @@ func (distributed_inference_coordinator* d) selectPrimaryNode() int32 {
     }
     return selected
 }
-
 func (distributed_inference_coordinator* d) ScheduleRequest(distributed_request* req) bool {
     target_nodes := int[]32{}
     for i := int32(0); i < d.config.tp_size; i++ {
@@ -164,7 +154,6 @@ func (distributed_inference_coordinator* d) ScheduleRequest(distributed_request*
     d.active_requests[req.request_id] = req
     return true
 }
-
 func (distributed_inference_coordinator* d) ProcessPrefillBatch() {
     for req_id, req := range d.active_requests {
         if req.current_stage == 0 {
@@ -173,7 +162,6 @@ func (distributed_inference_coordinator* d) ProcessPrefillBatch() {
         }
     }
 }
-
 func (distributed_inference_coordinator* d) ProcessDecodeBatch() {
     completed := int[]64{}
     for req_id, req := range d.active_requests {
@@ -191,7 +179,6 @@ func (distributed_inference_coordinator* d) ProcessDecodeBatch() {
         delete(d.active_requests, req_id)
     }
 }
-
 func (distributed_inference_coordinator* d) UpdateLoadState() {
     for node_id, node := range d.nodes {
         avg_util := 0.0
@@ -205,7 +192,6 @@ func (distributed_inference_coordinator* d) UpdateLoadState() {
         d.load_state.queue_lengths[node_id] = int32(0)
     }
 }
-
 func (distributed_inference_coordinator* d) RebalanceLoad() bool {
     if !d.config.enable_load_balance {
         return false
@@ -235,7 +221,6 @@ func (distributed_inference_coordinator* d) RebalanceLoad() bool {
     }
     return false
 }
-
 func (distributed_inference_coordinator* d) HandleNodeFailure(node_id int32) bool {
     node, exists := d.nodes[node_id]
     if !exists {
@@ -257,7 +242,6 @@ func (distributed_inference_coordinator* d) HandleNodeFailure(node_id int32) boo
     }
     return true
 }
-
 func (distributed_inference_coordinator* d) GetClusterMetrics() map[string]interface{} {
     metrics := make(map[string]interface{})
     avg_gpu_util := 0.0
@@ -283,7 +267,6 @@ func (distributed_inference_coordinator* d) GetClusterMetrics() map[string]inter
     metrics["failed_nodes"] = failed_nodes
     return metrics
 }
-
 func (distributed_inference_coordinator* d) EstimateLatency(
     seq_len int32,
     output_tokens int32,
@@ -294,7 +277,6 @@ func (distributed_inference_coordinator* d) EstimateLatency(
     total := prefill_latency + decode_latency + comm_overhead
     return total
 }
-
 func (distributed_inference_coordinator* d) GetStats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["num_nodes"] = d.config.num_nodes
@@ -308,7 +290,6 @@ func (distributed_inference_coordinator* d) GetStats() map[string]interface{} {
     }
     return stats
 }
-
 func main() {
     config := coordinator_config{
         num_nodes:        8,

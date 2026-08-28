@@ -348,7 +348,6 @@ func run_inference(string prompt, int max_tokens, float temperature) inference_r
         success: true,
         error: result.error_message,
     }
-
 func create_json_response(string status, string model, string content, int prompt_tokens, int completion_tokens) string {
     string id = "chatcmpl-" + int_to_string(12345)
     string created = int_to_string(1786879972)
@@ -408,7 +407,6 @@ func handle_health_check(http_request req) http_response {
         headers: [],
         body: body,
     }
-
 func handle_models_list(http_request req) http_response {
     string body = create_models_response()
     return http_response{
@@ -416,7 +414,6 @@ func handle_models_list(http_request req) http_response {
         headers: [],
         body: body,
     }
-
 func handle_chat_completions(http_request req) http_response {
     if req.method != "POST" {
         string body = create_error_response("Method not allowed")
@@ -442,7 +439,6 @@ func handle_chat_completions(http_request req) http_response {
         headers: [],
         body: body,
     }
-
 func route_request(http_request req) http_response {
     if req.path == "/health" {
         return handle_health_check(req)
@@ -458,7 +454,6 @@ func route_request(http_request req) http_response {
             body: body,
         }
     }
-
 func main() {
     print("\n╔════════════════════════════════════════════════════════════════╗\n")
     print("║       NeurX REST API Server (Pure S Language)                ║\n")

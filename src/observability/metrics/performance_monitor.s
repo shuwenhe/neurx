@@ -1,12 +1,10 @@
 package neurx.observability.metrics.performance_monitor
-
 struct performance_metric {
     string metric_name
     float metric_value
     string unit
     int timestamp
 }
-
 struct inference_metrics {
     int total_requests
     int successful_requests
@@ -23,7 +21,6 @@ struct inference_metrics {
     float gpu_memory_usage_mb
     float cpu_utilization_percent
 }
-
 struct model_performance {
     string model_name
     string model_type
@@ -34,7 +31,6 @@ struct model_performance {
     int vocab_size
     float model_size_gb
 }
-
 struct system_metrics {
     float cpu_usage_percent
     float memory_usage_mb
@@ -44,7 +40,6 @@ struct system_metrics {
     int total_requests_processed
     int uptime_seconds
 }
-
 struct monitoring_dashboard {
     inference_metrics inference_stats
     model_performance text_model_perf
@@ -52,7 +47,6 @@ struct monitoring_dashboard {
     system_metrics system_stats
     []performance_metric metric_history
 }
-
 func init_inference_metrics() inference_metrics {
     inference_metrics metrics
     metrics.total_requests = 0
@@ -71,7 +65,6 @@ func init_inference_metrics() inference_metrics {
     metrics.cpu_utilization_percent = 0.0
     metrics
 }
-
 func init_text_model_performance() model_performance {
     model_performance perf
     perf.model_name = "Qwen2.5-0.5B-Instruct"
@@ -84,7 +77,6 @@ func init_text_model_performance() model_performance {
     perf.model_size_gb = 1.0
     perf
 }
-
 func init_vl_model_performance() model_performance {
     model_performance perf
     perf.model_name = "Qwen2.5-VL-7B"
@@ -97,7 +89,6 @@ func init_vl_model_performance() model_performance {
     perf.model_size_gb = 14.0
     perf
 }
-
 func init_system_metrics() system_metrics {
     system_metrics metrics
     metrics.cpu_usage_percent = 25.3
@@ -109,7 +100,6 @@ func init_system_metrics() system_metrics {
     metrics.uptime_seconds = 0
     metrics
 }
-
 func init_monitoring_dashboard() monitoring_dashboard {
     monitoring_dashboard dashboard
     dashboard.inference_stats = init_inference_metrics()
@@ -118,7 +108,6 @@ func init_monitoring_dashboard() monitoring_dashboard {
     dashboard.system_stats = init_system_metrics()
     dashboard
 }
-
 func record_metric(monitoring_dashboard dashboard, string metric_name, float value, string unit) {
     performance_metric metric
     metric.metric_name = metric_name
@@ -129,7 +118,6 @@ func record_metric(monitoring_dashboard dashboard, string metric_name, float val
         dashboard.metric_history = append(dashboard.metric_history, metric)
     }
 }
-
 func print_inference_metrics(inference_metrics metrics) {
     print("\n📊 Inference Performance Metrics\n")
     print("─────────────────────────────────────────────\n")
@@ -150,7 +138,6 @@ func print_inference_metrics(inference_metrics metrics) {
     print("  • Avg Batch Size: 3.2\n")
     print("  • Total Tokens Generated: " + int_to_string(metrics.total_tokens_generated) + "\n")
 }
-
 func print_model_performance(model_performance perf) {
     print("\n🧠 Model Performance: " + perf.model_name + "\n")
     print("─────────────────────────────────────────────\n")
@@ -166,7 +153,6 @@ func print_model_performance(model_performance perf) {
     print("  • Max Batch Size: 4\n")
     print("  • Recommended Batch Size: 2\n")
 }
-
 func print_system_metrics(system_metrics metrics) {
     print("\n💻 System Metrics\n")
     print("─────────────────────────────────────────────\n")
@@ -179,7 +165,6 @@ func print_system_metrics(system_metrics metrics) {
     print("  • Total Requests: " + int_to_string(metrics.total_requests_processed) + "\n")
     print("  • Uptime: " + int_to_string(metrics.uptime_seconds) + " seconds\n")
 }
-
 func print_monitoring_dashboard(monitoring_dashboard dashboard) {
     print("\n" + "="*60 + "\n")
     print("📊 NeurX Production Monitoring Dashboard\n")
@@ -200,7 +185,6 @@ func print_monitoring_dashboard(monitoring_dashboard dashboard) {
     print("[2026-08-13 14:30:30] Health check: OK\n")
     print("\n" + "="*60 + "\n\n")
 }
-
 func main() {
     monitoring_dashboard dashboard = init_monitoring_dashboard()
     print_monitoring_dashboard(dashboard)

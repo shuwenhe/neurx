@@ -1,5 +1,4 @@
 module multimodal_vision
-
 struct vision_config {
     image_size: int = 336
     patch_size: int = 14
@@ -20,14 +19,12 @@ struct vision_config {
     image_resolution_adaptive: bool = true
     support_video: bool = true
 }
-
 struct image_input {
     tensor pixel_values
     string image_path
     string image_url
     metadata: map<string, any>
 }
-
 struct video_input {
     list<tensor> frames
     string video_path
@@ -35,7 +32,6 @@ struct video_input {
     float duration_seconds
     tensor audio_track
 }
-
 struct vision_output {
     tensor image_features
     tensor pooled_features
@@ -44,7 +40,6 @@ struct vision_output {
     multimodal_embedding: tensor,
     vision_metadata metadata
 }
-
 struct vision_metadata {
     int num_patches_h
     int num_patches_w
@@ -151,7 +146,6 @@ struct vi_t_patch_embeddings {
         }
     }
 }
-
 struct embeddings_output {
     tensor hidden_states
     tensor attention_mask
@@ -190,7 +184,6 @@ struct vi_t_encoder_blocks {
         }
     }
 }
-
 struct encoder_output {
     tensor last_hidden_state
     list<tensor> attentions
@@ -221,7 +214,6 @@ struct vi_t_layer {
         }
     }
 }
-
 struct layer_output {
     tensor hidden_states
     tensor attention_weights
@@ -266,7 +258,6 @@ struct vi_t_attention {
         }
     }
 }
-
 struct attention_output {
     tensor hidden_states
     tensor attention_weights
@@ -296,7 +287,6 @@ struct output {
         return x + residual
     }
 }
-
     CLS_TOKEN
     MEAN_POOLING
     MAX_POOLING
@@ -430,7 +420,6 @@ struct clip_contrastive_model {
         return (loss_i2t + loss_t2i) / 2
     }
 }
-
 struct clipoutput {
     tensor image_features
     tensor text_features
@@ -548,7 +537,6 @@ struct video_processor {
         }
     }
 }
-
 struct video_vision_output {
     tensor per_frame_features
     tensor temporal_encoded
@@ -683,7 +671,6 @@ struct multi_image_processor {
         }
     }
 }
-
 struct multimodal_embedding_result {
     list<tensor> per_image_features
     tensor fused_multimodal_embedding
@@ -856,7 +843,6 @@ struct multimodal_vision_model {
         }
     }
 }
-
 struct vision_language_output {
     string answer
     tensor visual_tokens

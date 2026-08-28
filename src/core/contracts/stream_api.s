@@ -1,17 +1,14 @@
 import "device_api"
 import "event_api"
-
     high
     normal
     low
 }
-
     compute
     transfer
     communication
     default
 }
-
 struct stream {
     i64 id
     device device
