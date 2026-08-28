@@ -1,5 +1,19 @@
 # NeurX Boot Gates Architecture (G0 vs G1)
 
+## 🔒 FORMAL BASELINE DEFINITION
+
+**Baseline Name**: `NeurX Boot Ownership Baseline`  
+**Baseline Commit**: `5049146d` (frozen 2026-08-28)  
+**Semantic Freeze Point**: `c89e135f` (prior documentation baseline)  
+
+**Why 5049146d is the reproducible baseline**:
+- Includes final Gate PASS criteria definitions
+- Includes ExitBootServices marker #3 control flow enforcement
+- All three documentation refinements applied and verified
+- Ready for execution and runtime validation
+
+---
+
 **Date**: 2026-08-28 (G1 BOOTX64.EFI + ESP boot harness complete)  
 **Status**: Build-time: Framework Ready | Runtime: Execution Blocked  
 **Key Principle**: Build success ≠ Runtime success. ABI correctness only proven at execution.
@@ -703,6 +717,133 @@ Missing marker 3 (BOOT_SERVICES_EXITED) = no ownership transfer = G1 FAIL
 **Critical**: Marker #3 has evidential value ONLY because it's strictly gated by EFI_SUCCESS verification
 
 ---
+
+## Current Gate Status (Post-Baseline Freeze at 5049146d)
+
+**G0 Status**:
+```
+✅ Build PASS        — 14KB kernel.elf compiles, Multiboot2 format verified
+⏳ Runtime UNPROVEN  — Awaiting QEMU execution
+   ↓
+   Execute: bash boot/test_g0.sh
+```
+
+**G1 Status**:
+```
+✅ Build PASS               — BOOTX64.EFI compiles
+✅ PE/COFF Format PASS      — file/objdump confirm correct executable format
+✅ ESP Directory PASS       — build/esp/EFI/BOOT/BOOTX64.EFI structure valid
+⏳ Runtime ABI UNPROVEN     — efi_minimal.h struct offsets unvalidated
+⏳ Boot Ownership UNPROVEN  — ExitBootServices success not proven
+   ↓
+   Execute: bash boot/test_g1.sh
+```
+
+**G2 Status**:
+```
+🔒 LOCKED — Requires both G0 PASS and G1 PASS with serial evidence
+```
+
+---
+
+## Next Phase: Runtime Debugging Via Serial Log
+
+**Stop adding code or refining frameworks.**  
+Execute only:
+```bash
+bash boot/test_g0.sh   # When QEMU available
+bash boot/test_g1.sh   # When QEMU + OVMF available
+```
+
+**Then analyze real serial output.**
+
+### Debugging Methodology
+
+Serial output will show one of these progressions:
+
+#### Case 1: Missing MEMORY_MAP_READY
+```
+NEURX_G1_EFI_ENTRY        ✓ (entry point callable)
+NEURX_G1_MEMORY_MAP_READY ✗ (missing)
+
+Failure layer: SystemTable / BootServices struct ABI
+Fix focus: efi_minimal.h
+  - EFI_SYSTEM_TABLE field offsets
+  - EFI_BOOT_SERVICES field offsets
+  - GetMemoryMap function pointer signature
+```
+
+#### Case 2: Missing BOOT_SERVICES_EXITED
+```
+NEURX_G1_EFI_ENTRY           ✓ (entry point callable)
+NEURX_G1_MEMORY_MAP_READY    ✓ (memory map working)
+NEURX_G1_BOOT_SERVICES_EXITED ✗ (missing)
+
+Failure layer: ExitBootServices call or return handling
+Fix focus: ExitBootServices flow in efi_main.c
+  - map_key variable mutation
+  - memory map refresh logic
+  - retry on EFI_INVALID_PARAMETER
+  - Status comparison for EFI_SUCCESS
+```
+
+#### Case 3: Missing KERNEL_ENTRY
+```
+NEURX_G1_EFI_ENTRY              ✓ (entry point callable)
+NEURX_G1_MEMORY_MAP_READY       ✓ (memory map working)
+NEURX_G1_BOOT_SERVICES_EXITED   ✓ (ExitBootServices == SUCCESS)
+NEURX_G1_KERNEL_ENTRY           ✗ (missing)
+
+Failure layer: Post-ExitBootServices control transfer
+Fix focus: Code after ExitBootServices in efi_main.c
+  - Post-EBS execution path
+  - Control flow after ownership boundary
+  - Possible instruction format issue
+  - Possible memory layout assumption error
+
+Note: We have already crossed UEFI ownership boundary here.
+This is bare-metal code execution failure, not UEFI ABI failure.
+```
+
+#### Case 4: All 6 Markers Appear ✅
+```
+NEURX_G1_EFI_ENTRY              ✓
+NEURX_G1_MEMORY_MAP_READY       ✓
+NEURX_G1_BOOT_SERVICES_EXITED   ✓ (ownership boundary crossed)
+NEURX_G1_KERNEL_ENTRY           ✓
+NEURX_G1_COM1_OWNED             ✓
+NEURX_G1_PASS                   ✓
+
+Result: G1 Boot Ownership PROVEN
+
+Archive evidence:
+  cp /tmp/neurx_g1_serial.log boot/G1_SERIAL_EVIDENCE.txt
+  git add boot/G1_SERIAL_EVIDENCE.txt
+  git commit -m "G1 runtime execution evidence - boot ownership proven"
+```
+
+---
+
+## FREEZE POLICY (After Baseline 5049146d)
+
+**Until new runtime evidence appears**:
+- Do NOT change Gate status in documentation
+- Do NOT add new code to G0/G1 boot paths
+- Do NOT "refine" or "complete" G1 ABI definitions
+- Do NOT add G2 code
+
+**The ONLY valid state transitions**:
+```
+G0 Build PASS → (run test_g0.sh) → G0 Runtime PROVEN/FAILED
+G1 Build PASS → (run test_g1.sh) → G1 Runtime PROVEN/FAILED
+G2 LOCKED → (G0 PASS + G1 PASS?) → G2 UNLOCKED
+```
+
+Each marker in serial log is real hardware evidence.
+No more theory. No more refinements.
+
+---
+
 
 ---
 
