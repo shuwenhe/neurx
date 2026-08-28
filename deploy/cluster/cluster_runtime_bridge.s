@@ -26,6 +26,16 @@ struct cluster_runtime_bridge_result {
     string recovery_summary
 }
 
+struct cluster_fault_injection_result {
+    cluster_heartbeat_scan_result heartbeat_scan
+    cluster_parallel_rank_filter_result filter_meta
+    cluster_parallel_launch_plan relaunch_plan
+    cluster_parallel_execution_batch relaunch_execution_batch
+    cluster_parallel_execution_script relaunch_execution_script
+    string recovery_summary
+    string scan_summary
+}
+
 func bridge_seed_runtime(cluster_orchestration_state state) cluster_runtime_state {
     cluster_runtime_state runtime = create_cluster_runtime(state.cluster_name, cluster_recommended_world_size(state))
     int i = 0
@@ -89,9 +99,9 @@ func bridge_probe_runtime(cluster_orchestration_state state) cluster_runtime_bri
     cluster_parallel_execution_script execution_script = cluster_parallel_build_execution_script(execution_batch, true)
     cluster_heartbeat_state heartbeat = create_cluster_heartbeat_state(state.cluster_name, "/tmp/neurx_cluster/heartbeat")
     cluster_heartbeat_scan_result heartbeat_scan = cluster_heartbeat_scan(heartbeat, plan.topology.world_size)
-    cluster_parallel_launch_plan filtered_launch
     cluster_parallel_rank_filter_result filter_meta
-    filtered_launch, filter_meta = cluster_parallel_filter_launch_plan(launch_plan, heartbeat_scan.failed_rank_ids)
+    filter_meta = cluster_parallel_filter_launch_plan(launch_plan, heartbeat_scan.failed_rank_ids)
+    cluster_parallel_launch_plan filtered_launch = filter_meta.plan
     cluster_parallel_grouped_launch_plan filtered_grouped = cluster_parallel_group_launch_plan(filtered_launch)
     cluster_parallel_execution_batch filtered_execution = cluster_parallel_execute_launch_plan(filtered_launch)
     cluster_parallel_execution_script filtered_script = cluster_parallel_build_execution_script(filtered_execution, true)
@@ -338,6 +348,67 @@ func bridge_recover_failed_nodes(cluster_orchestration_state state) string {
     string out = ""
     out = out + "[bridge-recovery] " + cluster_heartbeat_scan_summary(scan)
     out = out + cluster_summary(runtime)
-    out = out + cluster_parallel_rank_filter_summary(cluster_parallel_filter_launch_plan(launch_plan, scan.failed_rank_ids).2)
+    cluster_parallel_rank_filter_result filter_meta = cluster_parallel_filter_launch_plan(launch_plan, scan.failed_rank_ids)
+    out = out + cluster_parallel_rank_filter_summary(filter_meta)
     out
+}
+
+func bridge_fault_injection_recovery(cluster_orchestration_state state) cluster_fault_injection_result {
+    cluster_runtime_state runtime = bridge_seed_runtime(state)
+    cluster_heartbeat_state heartbeat = create_cluster_heartbeat_state(state.cluster_name, "/tmp/neurx_cluster/heartbeat")
+    cluster_heartbeat_scan_result scan = cluster_heartbeat_scan(heartbeat, cluster_recommended_world_size(state))
+    int i = 0
+    for i < len(scan.failed_rank_ids) {
+        runtime = cluster_mark_node_failed(runtime, scan.failed_rank_ids[i] + 1)
+        i = i + 1
+    }
+    cluster_parallel_request parallel_request = cluster_parallel_request {
+        model_id: "neurx-fault-injection",
+        num_layers: 80,
+        min_device_count: 1,
+        min_memory_gb: 1,
+        require_graph_capture: false,
+        require_speculative_decode: false,
+        require_fp8: false,
+        require_distributed: true,
+    }
+    cluster_workload_request request = cluster_workload_request {
+        workload_id: "bridge-fault-injection",
+        model_id: "neurx-fault-injection",
+        min_device_count: 1,
+        min_memory_gb: 1,
+        require_graph_capture: false,
+        require_speculative_decode: false,
+        require_fp8: false,
+        require_distributed: true,
+    }
+    cluster_placement_result placement = cluster_select_node(runtime, request)
+    cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
+    int[] node_ids = int[]{}
+    string[] node_names = string[]{}
+    string[] node_hosts = string[]{}
+    int j = 0
+    for j < len(state.nodes) {
+        if state.nodes[j].healthy {
+            node_ids = append(node_ids, state.nodes[j].node_id)
+            node_names = append(node_names, state.nodes[j].node_name)
+            node_hosts = append(node_hosts, state.nodes[j].ip_address)
+        }
+        j = j + 1
+    }
+    cluster_parallel_assignment_plan assignment = cluster_parallel_assign_to_nodes(plan, node_ids, node_names, node_hosts)
+    cluster_parallel_launch_plan launch_plan = cluster_parallel_build_launch_plan(assignment, "neurx-worker", "127.0.0.1", 29500, plan.topology.world_size)
+    cluster_parallel_rank_filter_result filter_meta = cluster_parallel_filter_launch_plan(launch_plan, scan.failed_rank_ids)
+    cluster_parallel_launch_plan filtered_launch = filter_meta.plan
+    cluster_parallel_execution_batch filtered_execution = cluster_parallel_execute_launch_plan(filtered_launch)
+    cluster_parallel_execution_script filtered_script = cluster_parallel_build_execution_script(filtered_execution, true)
+    cluster_fault_injection_result {
+        heartbeat_scan: scan,
+        filter_meta: filter_meta,
+        relaunch_plan: filtered_launch,
+        relaunch_execution_batch: filtered_execution,
+        relaunch_execution_script: filtered_script,
+        recovery_summary: cluster_heartbeat_scan_summary(scan) + cluster_parallel_rank_filter_summary(filter_meta) + cluster_parallel_launch_summary(filtered_launch) + cluster_parallel_execution_summary(filtered_execution) + cluster_parallel_execution_script_summary(filtered_script),
+        scan_summary: cluster_heartbeat_scan_summary(scan)
+    }
 }

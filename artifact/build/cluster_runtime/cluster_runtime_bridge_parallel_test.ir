@@ -1,0 +1,59 @@
+SSEED-TARGET-V1
+FUNC_BEGIN|expect|_|_
+PARAM|condition|_|_
+PARAM|name|_|_
+JUMP_IF_FALSE|L0|condition|_
+ARG|"PASS "|_|_
+CALL|t0|print|1
+ARG|name|_|_
+CALL|t1|print|1
+RET|0|_|_
+JUMP|L1|_|_
+LABEL|L0|_|_
+LABEL|L1|_|_
+ARG|"FAIL "|_|_
+CALL|t2|print|1
+ARG|name|_|_
+CALL|t3|print|1
+RET|1|_|_
+RET|0|_|_
+FUNC_END|expect|_|_
+FUNC_BEGIN|main|_|_
+CALL|t4|new_demo_cluster_state|0
+MOV|state|t4|_
+ARG|state|_|_
+CALL|t5|bridge_probe_runtime|1
+MOV|probe|t5|_
+MOV|failures|0|_
+ARG|probe.ready|_|_
+ARG|"bridge ready"|_|_
+CALL|t6|expect|2
+ADD|t7|failures|t6
+MOV|failures|t7|_
+ARG|probe.parallel_plan.valid|_|_
+ARG|"parallel plan valid"|_|_
+CALL|t8|expect|2
+ADD|t9|failures|t8
+MOV|failures|t9|_
+ARG|state|_|_
+CALL|t10|bridge_parallel_plan_summary|1
+ARG|t10|_|_
+CALL|t11|len|1
+CMP_GT|t12|t11|0
+ARG|t12|_|_
+ARG|"parallel summary"|_|_
+CALL|t13|expect|2
+ADD|t14|failures|t13
+MOV|failures|t14|_
+CMP_EQ|t15|failures|0
+JUMP_IF_FALSE|L2|t15|_
+ARG|"PASS bridge parallel"|_|_
+CALL|t16|println|1
+RET|0|_|_
+JUMP|L3|_|_
+LABEL|L2|_|_
+LABEL|L3|_|_
+ARG|"FAIL bridge parallel"|_|_
+CALL|t17|println|1
+RET|1|_|_
+FUNC_END|main|_|_

@@ -105,9 +105,11 @@ struct cluster_parallel_execution_script {
 }
 
 struct cluster_parallel_rank_filter_result {
+    cluster_parallel_launch_plan plan
     int kept_count
     int dropped_count
     bool valid
+    string reason
 }
 
 func cluster_parallel_normalize(int tp, int pp, int dp, int world_size) cluster_parallel_topology {
@@ -444,17 +446,17 @@ func cluster_parallel_build_execution_script(cluster_parallel_execution_batch ba
     result
 }
 
-func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[] failed_ranks) (cluster_parallel_launch_plan, cluster_parallel_rank_filter_result) {
-    cluster_parallel_launch_plan filtered
+func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[] failed_ranks) cluster_parallel_rank_filter_result {
     cluster_parallel_rank_filter_result meta
     if !plan.valid {
-        filtered.commands = cluster_parallel_launch_command[]{cap: 0}
-        filtered.valid = false
-        filtered.reason = plan.reason
+        meta.plan.commands = cluster_parallel_launch_command[]{cap: 0}
+        meta.plan.valid = false
+        meta.plan.reason = plan.reason
         meta.kept_count = 0
         meta.dropped_count = 0
         meta.valid = false
-        return filtered, meta
+        meta.reason = plan.reason
+        return meta
     }
     cluster_parallel_launch_command[] commands = cluster_parallel_launch_command[]{}
     int kept = 0
@@ -479,20 +481,23 @@ func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[
         }
         i = i + 1
     }
-    filtered.commands = commands
-    filtered.valid = true
-    filtered.reason = ""
+    meta.plan.commands = commands
+    meta.plan.valid = true
+    meta.plan.reason = ""
     meta.kept_count = kept
     meta.dropped_count = dropped
     meta.valid = true
-    filtered, meta
+    meta.reason = ""
+    meta
 }
 
 func cluster_parallel_rank_filter_summary(cluster_parallel_rank_filter_result meta) string {
     string out = ""
     out = out + "valid=" + itoa(meta.valid ? 1 : 0) + "\n"
+    out = out + "reason=" + meta.reason + "\n"
     out = out + "kept_count=" + itoa(meta.kept_count) + "\n"
     out = out + "dropped_count=" + itoa(meta.dropped_count) + "\n"
+    out = out + cluster_parallel_launch_summary(meta.plan)
     out
 }
 

@@ -2484,7 +2484,7 @@ numeric-alignment-test:
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" test/numeric_alignment_pytorch.py \
 		artifact/build/numeric_alignment/numeric_alignment_probe
-.PHONY: inference-feature-gap-check cluster-runtime-test cluster-parallel-plan-test cluster-runtime-bridge-parallel-test cluster-parallel-assignment-test cluster-launch-plan-test cluster-parallel-launch-test cluster-parallel-grouped-launch-test cluster-parallel-execution-test cluster-execute-launch-plan-test cluster-parallel-execution-script-test cluster-remote-execution-test cluster-heartbeat-test cluster-heartbeat-scan-test cluster-recovery-test
+.PHONY: inference-feature-gap-check cluster-runtime-test cluster-parallel-plan-test cluster-runtime-bridge-parallel-test cluster-parallel-assignment-test cluster-launch-plan-test cluster-parallel-launch-test cluster-parallel-grouped-launch-test cluster-parallel-execution-test cluster-execute-launch-plan-test cluster-parallel-execution-script-test cluster-remote-execution-test cluster-heartbeat-test cluster-heartbeat-scan-test cluster-recovery-test cluster-fault-injection-recovery-test cluster-fault-injection-e2e-test
 S_INFERENCE_CHECK_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../../s/bin/s /home/shuwen/s/bin/s) $(S_COMPILER))
 INFERENCE_FEATURE_GAP_S_MODULES := \
 	src/serving/lifecycle/inference_request.s \
@@ -2587,6 +2587,16 @@ cluster-recovery-test:
 	@$(S_SEED_COMPILER) test/distributed/cluster_recovery_test.s \
 		artifact/build/cluster_runtime/cluster_recovery_test.ir
 	@echo "✅ Cluster recovery S test compiled"
+cluster-fault-injection-recovery-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_fault_injection_recovery_test.s \
+		artifact/build/cluster_runtime/cluster_fault_injection_recovery_test.ir
+	@echo "✅ Cluster fault injection recovery S test compiled"
+cluster-fault-injection-e2e-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/cluster_fault_injection_e2e_test.s \
+		artifact/build/cluster_runtime/cluster_fault_injection_e2e_test.ir
+	@echo "✅ Cluster fault injection e2e S test compiled"
 inference-runtime-test:
 	@mkdir -p artifact/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \

@@ -1,0 +1,82 @@
+SSEED-TARGET-V1
+FUNC_BEGIN|expect|_|_
+PARAM|condition|_|_
+PARAM|name|_|_
+JUMP_IF_FALSE|L0|condition|_
+ARG|"PASS "|_|_
+CALL|t0|print|1
+ARG|name|_|_
+CALL|t1|print|1
+RET|0|_|_
+JUMP|L1|_|_
+LABEL|L0|_|_
+LABEL|L1|_|_
+ARG|"FAIL "|_|_
+CALL|t2|print|1
+ARG|name|_|_
+CALL|t3|print|1
+RET|1|_|_
+RET|0|_|_
+FUNC_END|expect|_|_
+FUNC_BEGIN|main|_|_
+CALL|t4|new_demo_cluster_state|0
+MOV|state|t4|_
+ARG|state|_|_
+CALL|t5|cluster_elastic_recover|1
+MOV|recovered_state|t5|_
+ARG|recovered_state|_|_
+CALL|t6|bridge_fault_injection_recovery|1
+MOV|result|t6|_
+MOV|failures|0|_
+CMP_GT|t7|result.heartbeat_scan.total_ranks|0
+ARG|t7|_|_
+ARG|"scan total ranks"|_|_
+CALL|t8|expect|2
+ADD|t9|failures|t8
+MOV|failures|t9|_
+CMP_GE|t10|result.heartbeat_scan.failed_ranks|0
+ARG|t10|_|_
+ARG|"scan failed ranks"|_|_
+CALL|t11|expect|2
+ADD|t12|failures|t11
+MOV|failures|t12|_
+ARG|result.filter_meta.valid|_|_
+ARG|"filter meta valid"|_|_
+CALL|t13|expect|2
+ADD|t14|failures|t13
+MOV|failures|t14|_
+ARG|result.relaunch_plan.valid|_|_
+ARG|"relaunch plan valid"|_|_
+CALL|t15|expect|2
+ADD|t16|failures|t15
+MOV|failures|t16|_
+ARG|result.relaunch_execution_batch.valid|_|_
+ARG|"relaunch execution batch valid"|_|_
+CALL|t17|expect|2
+ADD|t18|failures|t17
+MOV|failures|t18|_
+ARG|result.relaunch_execution_script.valid|_|_
+ARG|"relaunch execution script valid"|_|_
+CALL|t19|expect|2
+ADD|t20|failures|t19
+MOV|failures|t20|_
+ARG|result.recovery_summary|_|_
+CALL|t21|len|1
+CMP_GT|t22|t21|0
+ARG|t22|_|_
+ARG|"recovery summary present"|_|_
+CALL|t23|expect|2
+ADD|t24|failures|t23
+MOV|failures|t24|_
+CMP_EQ|t25|failures|0
+JUMP_IF_FALSE|L2|t25|_
+ARG|"PASS cluster fault injection e2e"|_|_
+CALL|t26|println|1
+RET|0|_|_
+JUMP|L3|_|_
+LABEL|L2|_|_
+LABEL|L3|_|_
+ARG|"FAIL cluster fault injection e2e"|_|_
+CALL|t27|println|1
+RET|1|_|_
+FUNC_END|main|_|_
