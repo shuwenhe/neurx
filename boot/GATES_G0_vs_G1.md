@@ -569,13 +569,19 @@ What we defined:
   - Possible crash or undefined behavior
 
 **Verification timeline**:
-  1. Build succeeds → Binary format valid (current)
-  2. OVMF loads BOOTX64.EFI → ABI entry point correct (future)
-  3. efi_main() executes → First marker appears (future)
-  4. GetMemoryMap() returns data → Struct offsets correct (future)
-  5. ExitBootServices() returns EFI_SUCCESS → Full ABI validated (future)
+  1. Build succeeds → Binary format valid (current) ✅
+  2. OVMF loads + entry callable → EFI image format/load correct (future)
+  3. NEURX_G1_EFI_ENTRY → Entry point reachable, partial ABI working (future)
+  4. NEURX_G1_MEMORY_MAP_READY → SystemTable/BootServices offsets correct (future)
+  5. **NEURX_G1_BOOT_SERVICES_EXITED** → **ExitBootServices() == SUCCESS** (future) ⚠️ CRITICAL
+  6. NEURX_G1_KERNEL_ENTRY → Post-EBS kernel path works (future)
+  7. NEURX_G1_COM1_OWNED → Direct port I/O post-EBS (future)
+  8. NEURX_G1_PASS → Full ownership transfer proven (future) ✅
 
-Currently at step 1. Steps 2-5 require OVMF execution.
+**Most critical step**: Step 5. If ExitBootServices returns EFI_SUCCESS, ownership transfer 
+is real. This is the boundary between UEFI control and NeurX control.
+
+Currently at step 1. Steps 2-8 require OVMF execution.
 
 ---
 
@@ -612,27 +618,111 @@ sudo apt install -y qemu-system-x86_64 ovmf
 
 ## Next Steps (When QEMU Available)
 
-1. **Execute G0 first** (simpler boot path):
-   ```bash
-   bash boot/test_g0.sh
-   ```
-   Expected: "G0 VERIFICATION: PASS ✅"
+**IMPORTANT**: Do NOT add G2 code yet. Next engineering goal is execution and validation, not implementation.
 
-2. **Then execute G1** (UEFI boot ownership):
-   ```bash
-   bash boot/test_g1.sh
-   ```
-   Expected: "G1 VERIFICATION: PASS ✅"
+### Step 1: Execute G0 (simpler boot path)
 
-3. **Save evidence**:
-   ```bash
-   cp /tmp/neurx_g0_serial.log boot/G0_SERIAL_EVIDENCE.txt
-   cp /tmp/neurx_g1_serial.log boot/G1_SERIAL_EVIDENCE.txt
-   git add boot/*_EVIDENCE.txt && git commit -m "G0/G1 execution evidence"
-   ```
+```bash
+bash boot/test_g0.sh
+```
 
-4. **Then proceed to G2** (real memory/interrupt handling)
+Expected: "G0 VERIFICATION: PASS ✅" with markers in order
 
-**Key Achievement**: Clear, non-overlapping boot chains with separate verification proofs.
+### Step 2: Execute G1 (UEFI boot ownership)
 
-Never again will a Multiboot2 test be confused with a UEFI test. Each gate proves exactly what it claims.
+```bash
+bash boot/test_g1.sh
+```
+
+Expected: All 6 G1 markers in order, with NEURX_G1_BOOT_SERVICES_EXITED proving ownership transfer
+
+### Step 3: Save evidence
+
+```bash
+cp /tmp/neurx_g0_serial.log boot/G0_SERIAL_EVIDENCE.txt
+cp /tmp/neurx_g1_serial.log boot/G1_SERIAL_EVIDENCE.txt
+git add boot/*_EVIDENCE.txt
+git commit -m "G0/G1 runtime evidence - execution validation"
+git push origin main
+```
+
+### Step 4: Analyze Results
+
+- If all markers appear: Ownership transfer proven, proceed to G2
+- If markers missing: Adjust efi_minimal.h based on which marker fails
+- If no output: Debug entry point and UEFI ABI layout
+
+### DO NOT Proceed to G2 Until
+
+- ✅ G0 produces all markers (KERNEL_ENTRY → PASS)
+- ✅ G1 produces all markers (EFI_ENTRY → PASS)
+- ✅ Both serial logs archived in repository
+- ✅ No further boot chain issues
+
+**Key principle**: Runtime evidence, not more code, is what's needed next.
+
+---
+
+## What Truly Defines G1 PASS
+
+**Not**:
+- BOOTX64.EFI exists
+- PE/COFF format recognized by `file` command
+- First marker appears
+- Some markers visible
+
+**Truly**:
+```
+ExitBootServices() returned EFI_SUCCESS
+              ↓
+Boot Services are genuinely unavailable
+              ↓
+Post-EBS direct port I/O works (COM1)
+              ↓
+All 6 markers appear in strict order:
+  1. NEURX_G1_EFI_ENTRY
+  2. NEURX_G1_MEMORY_MAP_READY
+  3. NEURX_G1_BOOT_SERVICES_EXITED ← CRITICAL: ownership boundary
+  4. NEURX_G1_KERNEL_ENTRY
+  5. NEURX_G1_COM1_OWNED
+  6. NEURX_G1_PASS
+              ↓
+     G1 Boot Ownership PROVEN ✅
+```
+
+Each marker validates a progressive layer of the UEFI ABI:
+- Marker 1-2: Entry point and SystemTable/BootServices structs
+- Marker 3: ExitBootServices call and return value
+- Marker 4-6: Kernel execution and hardware control
+
+Missing marker 3 (BOOT_SERVICES_EXITED) = no ownership transfer = G1 FAIL
+
+---
+
+---
+
+## FREEZE BASELINE: 2026-08-28
+
+**Architecture Status**: G0/G1 framework complete and separated  
+**Build Status**: Both gates compile successfully  
+**Runtime Status**: Blocked on QEMU/OVMF environment  
+**ABI Status**: CRITICAL - efi_minimal.h unvalidated, awaits first OVMF serial output  
+
+**Commits in this baseline**:
+- f80cf9c2: Architecture refactor - Separate G0/G1 gates
+- 4d5719d3: G1 UEFI boot harness - BOOTX64.EFI PE/COFF + ESP
+- 0120736c: Update architecture doc - G1 framework ready status
+- af8f59ca: Documentation - Build vs runtime evidence separation
+
+**Decision for next phase**: 
+- NO G2 code until G0 and G1 pass execution
+- Next goal is runtime validation, not implementation
+- Each missing marker in G1 points to specific ABI issue
+- efi_minimal.h will be validated/debugged at execution time
+
+**Operational principle for G1 testing**:
+- First marker (EFI_ENTRY) = partial ABI validated
+- Marker #3 (BOOT_SERVICES_EXITED) = ownership boundary crossed
+- All 6 markers = full ownership transfer proven
+
+Do not claim G1 success without all 6 markers in sequence.
