@@ -58,12 +58,17 @@ struct hetero_launch_command {
     string host
     int port
     int global_rank
+    int local_rank
+    int device_id
+    string vendor
+    string chip_type
     string command
 }
 
 struct hetero_multi_launch_plan {
     hetero_placement_result[] placements
     hetero_launch_command[] commands
+    int world_size
     bool valid
     string reason
 }
@@ -234,7 +239,8 @@ func hetero_build_launch_plan(hetero_placement_result placement, string worker_b
 func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string chip_type, string worker_bin, string master_addr, int master_port, int min_devices, int min_memory_gb) hetero_multi_launch_plan {
     hetero_multi_launch_plan plan
     plan.placements = hetero_placement_result[]{cap: len(topo.nodes)}
-    plan.commands = hetero_launch_command[]{cap: len(topo.nodes)}
+    plan.commands = hetero_launch_command[]{cap: topo.total_devices}
+    plan.world_size = 0
     plan.valid = false
     plan.reason = ""
     if !topo.valid || worker_bin == "" || master_addr == "" || master_port <= 0 {
@@ -242,6 +248,20 @@ func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string 
         return plan
     }
     int i = 0
+    for i < len(topo.nodes) {
+        hetero_topology_node candidate = topo.nodes[i]
+        bool vendor_ok = vendor == "" || candidate.capability.vendor == vendor
+        bool chip_ok = chip_type == "" || candidate.capability.chip_type == chip_type
+        if candidate.healthy && vendor_ok && chip_ok && candidate.capability.device_count >= min_devices && candidate.capability.memory_gb >= min_memory_gb {
+            plan.world_size = plan.world_size + candidate.capability.device_count
+        }
+        i = i + 1
+    }
+    if plan.world_size <= 0 {
+        plan.reason = "no launchable devices"
+        return plan
+    }
+    i = 0
     int world_rank = 0
     for i < len(topo.nodes) {
         hetero_topology_node node = topo.nodes[i]
@@ -259,21 +279,33 @@ func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string 
                 placement.chip_type = node.capability.chip_type
                 placement.reason = ""
                 plan.placements = append(plan.placements, placement)
-                hetero_launch_command command
-                command.node_id = node.node_id
-                command.node_name = node.node_name
-                command.host = node.host
-                command.port = node.port
-                command.global_rank = world_rank
-                command.command = ""
-                command.command = command.command + "WORLD_SIZE=" + itoa(topo.world_size)
-                command.command = command.command + " RANK=" + itoa(world_rank)
-                command.command = command.command + " LOCAL_RANK=0"
-                command.command = command.command + " MASTER_ADDR=" + master_addr
-                command.command = command.command + " MASTER_PORT=" + itoa(master_port)
-                command.command = command.command + " exec " + worker_bin
-                plan.commands = append(plan.commands, command)
-                world_rank = world_rank + 1
+                int local_rank = 0
+                for local_rank < node.capability.device_count {
+                    hetero_launch_command command
+                    command.node_id = node.node_id
+                    command.node_name = node.node_name
+                    command.host = node.host
+                    command.port = node.port
+                    command.global_rank = world_rank
+                    command.local_rank = local_rank
+                    command.device_id = local_rank
+                    command.vendor = node.capability.vendor
+                    command.chip_type = node.capability.chip_type
+                    command.command = ""
+                    command.command = command.command + "WORLD_SIZE=" + itoa(plan.world_size)
+                    command.command = command.command + " RANK=" + itoa(world_rank)
+                    command.command = command.command + " LOCAL_RANK=" + itoa(local_rank)
+                    command.command = command.command + " NEURX_DEVICE_ID=" + itoa(local_rank)
+                    command.command = command.command + " NEURX_DEVICE_VENDOR=" + node.capability.vendor
+                    command.command = command.command + " NEURX_DEVICE_TYPE=" + node.capability.chip_type
+                    command.command = command.command + " NEURX_NODE_ID=" + itoa(node.node_id)
+                    command.command = command.command + " MASTER_ADDR=" + master_addr
+                    command.command = command.command + " MASTER_PORT=" + itoa(master_port)
+                    command.command = command.command + " exec " + worker_bin
+                    plan.commands = append(plan.commands, command)
+                    world_rank = world_rank + 1
+                    local_rank = local_rank + 1
+                }
             }
         }
         i = i + 1
@@ -301,6 +333,7 @@ func hetero_multi_launch_summary(hetero_multi_launch_plan plan) string {
     out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
     out = out + "placements=" + itoa(len(plan.placements)) + "\n"
     out = out + "commands=" + itoa(len(plan.commands)) + "\n"
+    out = out + "world_size=" + itoa(plan.world_size) + "\n"
     out = out + "reason=" + plan.reason + "\n"
     out
 }
@@ -312,8 +345,9 @@ func hetero_multi_launch_script(hetero_multi_launch_plan plan) string {
     }
     int i = 0
     for i < len(plan.commands) {
-        out = out + "ssh " + plan.commands[i].host + " '" + plan.commands[i].command + "'\n"
+        out = out + "ssh " + plan.commands[i].host + " '" + plan.commands[i].command + "' &\n"
         i = i + 1
     }
+    out = out + "wait\n"
     out
 }

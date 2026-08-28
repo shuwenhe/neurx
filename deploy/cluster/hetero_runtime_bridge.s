@@ -1,6 +1,7 @@
 package neurx.deployment.hetero_runtime_bridge
 
 use neurx.runtime.distributed.topology.{hetero_topology, hetero_placement_result, hetero_topology_new, hetero_topology_add_node, hetero_topology_node_new, hetero_default_capability, hetero_topology_place_workload, hetero_build_launch_plan, hetero_build_multi_launch_plan, hetero_launch_summary, hetero_multi_launch_summary, hetero_multi_launch_script, hetero_placement_summary, hetero_topology_summary}
+use neurx.runtime.command.{runtime_run_command_exit_code, runtime_shell_escape}
 
 struct hetero_runtime_bridge_result {
     hetero_placement_result placement
@@ -41,4 +42,12 @@ func bridge_hetero_demo_script(string worker_bin, string master_addr, int master
     topo = hetero_topology_add_node(topo, hetero_topology_node_new(3, "npu-01", "10.0.0.3", 9002, hetero_default_capability("huawei", "ascend", 8, 32), true))
     hetero_multi_launch_plan plan = hetero_build_multi_launch_plan(topo, "", "", worker_bin, master_addr, master_port, 1, 1)
     hetero_multi_launch_script(plan)
+}
+
+func bridge_hetero_demo_execute(string worker_bin, string master_addr, int master_port) int {
+    string script = bridge_hetero_demo_script(worker_bin, master_addr, master_port)
+    string script_path = "/tmp/neurx_cluster/hetero_launch.sh"
+    runtime_run_command_exit_code("mkdir -p /tmp/neurx_cluster")
+    runtime_run_command_exit_code("printf %s " + runtime_shell_escape(script) + " > " + runtime_shell_escape(script_path))
+    runtime_run_command_exit_code("sh " + runtime_shell_escape(script_path))
 }

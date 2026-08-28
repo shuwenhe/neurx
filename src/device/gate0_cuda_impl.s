@@ -17,6 +17,9 @@ struct gate0_cuda_state {
     int64 default_stream
     int64 total_allocations
     int64 total_bytes_allocated
+    int64 total_events
+    int64 device_memory_total
+    int64 device_memory_free
 }
 
 func gate0_cuda_state_init() gate0_cuda_state {
@@ -26,6 +29,9 @@ func gate0_cuda_state_init() gate0_cuda_state {
         default_stream: 0,
         total_allocations: 0,
         total_bytes_allocated: 0,
+        total_events: 0,
+        device_memory_total: 16000000000,  // 16GB
+        device_memory_free: 16000000000,   // 16GB
     }
     return state
 }
@@ -326,5 +332,108 @@ func gate0_print_device_info(state* gate0_cuda_state) (bool, string) {
     //        state.device_id, total_mem, free_mem, state.total_allocations)
     
     return true, ""
+}
+
+// ============================================================================
+// Event 管理
+// ============================================================================
+
+func cuda_runtime_create_event() (int64, bool, string) {
+    // 外部调用：cuEventCreate
+    // 返回：event handle
+    event_handle := 1000000  // 模拟 event ID
+    return event_handle, true, ""
+}
+
+func cuda_runtime_destroy_event(event_handle: int64) (bool, string) {
+    // 外部调用：cuEventDestroy
+    if event_handle <= 0 {
+        return false, "Invalid event handle"
+    }
+    return true, ""
+}
+
+func cuda_runtime_record_event(event_handle: int64, stream_handle: int64) (bool, string) {
+    // 外部调用：cuEventRecord
+    if event_handle <= 0 || stream_handle < 0 {
+        return false, "Invalid event or stream handle"
+    }
+    return true, ""
+}
+
+func cuda_runtime_event_synchronize(event_handle: int64) (bool, string) {
+    // 外部调用：cuEventSynchronize
+    if event_handle <= 0 {
+        return false, "Invalid event handle"
+    }
+    return true, ""
+}
+
+func cuda_runtime_stream_wait_event(stream_handle: int64, event_handle: int64) (bool, string) {
+    // 外部调用：cuStreamWaitEvent
+    if stream_handle < 0 || event_handle <= 0 {
+        return false, "Invalid stream or event handle"
+    }
+    return true, ""
+}
+
+// ============================================================================
+// 内存操作（memset）
+// ============================================================================
+
+func cuda_runtime_memset(device_address: int64, value: int, num_bytes: int64) (bool, string) {
+    // 外部调用：cuMemsetD8
+    if device_address <= 0 || num_bytes <= 0 {
+        return false, "Invalid memory address or size"
+    }
+    return true, ""
+}
+
+// ============================================================================
+// 设备查询
+// ============================================================================
+
+func cuda_runtime_get_device_count() (int, bool, string) {
+    // 外部调用：cuDeviceGetCount
+    return 1, true, ""
+}
+
+func cuda_runtime_get_device_properties(device_id: int) (int, int, int, bool, string) {
+    // 外部调用：cuDeviceGetAttribute
+    if device_id < 0 {
+        return 0, 0, 0, false, "Invalid device ID"
+    }
+    // 返回：(compute_capability_major, compute_capability_minor, max_threads_per_block)
+    return 8, 0, 1024, true, ""
+}
+
+// ============================================================================
+// 初始化和清理
+// ============================================================================
+
+func cuda_runtime_backend_init() (bool, string) {
+    // 外部调用：cuInit, cuDeviceGet, cuCtxCreate
+    return true, ""
+}
+
+func cuda_runtime_backend_finalize() (bool, string) {
+    // 外部调用：cuCtxDestroy
+    return true, ""
+}
+
+// ============================================================================
+// Device wrapper 函数
+// ============================================================================
+
+func gate0_device_memset(
+    state* gate0_cuda_state,
+    device_ptr: int64,
+    value: int,
+    num_bytes: int64
+) (bool, string) {
+    if !state.initialized {
+        return false, "Device not initialized"
+    }
+    return cuda_runtime_memset(device_ptr, value, num_bytes)
 }
 

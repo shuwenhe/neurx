@@ -2632,6 +2632,11 @@ hetero-runtime-bridge-demo-test:
 	@$(S_SEED_COMPILER) test/distributed/hetero_runtime_bridge_demo_test.s \
 		artifact/build/cluster_runtime/hetero_runtime_bridge_demo_test.ir
 	@echo "✅ Hetero runtime bridge demo S test compiled"
+hetero-runtime-bridge-execute-test:
+	@mkdir -p artifact/build/cluster_runtime
+	@$(S_SEED_COMPILER) test/distributed/hetero_runtime_bridge_execute_test.s \
+		artifact/build/cluster_runtime/hetero_runtime_bridge_execute_test.ir
+	@echo "✅ Hetero runtime bridge execute S test compiled"
 inference-runtime-test:
 	@mkdir -p artifact/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \

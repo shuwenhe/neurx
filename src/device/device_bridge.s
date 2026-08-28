@@ -184,3 +184,171 @@ func device_bridge_get_cuda_state() gate0_cuda_impl.gate0_cuda_state {
     return g_device_bridge.cuda_state
 }
 
+// ============================================================================
+// Event 管理 (5 个函数)
+// ============================================================================
+
+func device_bridge_create_event(device_id: int) (abi.event_handle, bool, string) {
+    if !g_device_bridge.is_initialized {
+        return abi.event_handle{}, false, "Device bridge not initialized"
+    }
+    
+    event_id, success, err := gate0_cuda_impl.cuda_runtime_create_event()
+    if !success {
+        return abi.event_handle{}, false, err
+    }
+    
+    handle := abi.event_handle {
+        handle: event_id,
+        device_id: device_id,
+    }
+    
+    return handle, true, ""
+}
+
+func device_bridge_destroy_event(event: abi.event_handle) (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    return gate0_cuda_impl.cuda_runtime_destroy_event(event.handle)
+}
+
+func device_bridge_record_event(event: abi.event_handle, stream: abi.stream_handle) (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    return gate0_cuda_impl.cuda_runtime_record_event(event.handle, stream.handle)
+}
+
+func device_bridge_sync_event(event: abi.event_handle) (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    return gate0_cuda_impl.cuda_runtime_event_synchronize(event.handle)
+}
+
+func device_bridge_stream_wait_event(stream: abi.stream_handle, event: abi.event_handle) (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    return gate0_cuda_impl.cuda_runtime_stream_wait_event(stream.handle, event.handle)
+}
+
+// ============================================================================
+// 内存操作 (1 个函数)
+// ============================================================================
+
+func device_bridge_memset(
+    ptr: abi.device_ptr,
+    value: int,
+    num_bytes: int64,
+    stream: abi.stream_handle
+) (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    return gate0_cuda_impl.gate0_device_memset(&g_device_bridge.cuda_state, ptr.address, value, num_bytes)
+}
+
+// ============================================================================
+// 张量便捷操作 (3 个函数)
+// ============================================================================
+
+func device_bridge_copy_tensor_h2d(
+    dst: abi.device_tensor,
+    host_src: int64,
+    stream: abi.stream_handle
+) (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    
+    total_bytes := dst.element_count * abi.device_get_dtype_size(dst.dtype)
+    return device_bridge_memcpy_h2d(dst.data, host_src, int64(total_bytes), stream)
+}
+
+func device_bridge_copy_tensor_d2h(
+    host_dst: int64,
+    src: abi.device_tensor,
+    stream: abi.stream_handle
+) (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    
+    total_bytes := src.element_count * abi.device_get_dtype_size(src.dtype)
+    return device_bridge_memcpy_d2h(host_dst, src.data, int64(total_bytes), stream)
+}
+
+func device_bridge_copy_tensor_d2d(
+    dst: abi.device_tensor,
+    src: abi.device_tensor,
+    stream: abi.stream_handle
+) (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    
+    if dst.element_count != src.element_count {
+        return false, "Tensor size mismatch"
+    }
+    if dst.dtype != src.dtype {
+        return false, "Tensor dtype mismatch"
+    }
+    
+    total_bytes := src.element_count * abi.device_get_dtype_size(src.dtype)
+    return device_bridge_memcpy_d2d(dst.data, src.data, int64(total_bytes), stream)
+}
+
+// ============================================================================
+// 设备查询 (2 个函数)
+// ============================================================================
+
+func device_bridge_get_device_count() (int, bool, string) {
+    if !g_device_bridge.is_initialized {
+        return 0, false, "Device bridge not initialized"
+    }
+    return gate0_cuda_impl.cuda_runtime_get_device_count()
+}
+
+func device_bridge_get_device_properties(device_id: int) (int, int, int, bool, string) {
+    if !g_device_bridge.is_initialized {
+        return 0, 0, 0, false, "Device bridge not initialized"
+    }
+    return gate0_cuda_impl.cuda_runtime_get_device_properties(device_id)
+}
+
+// ============================================================================
+// 后端生命周期 (2 个函数)
+// ============================================================================
+
+func device_bridge_backend_init() (bool, string) {
+    if g_device_bridge.is_initialized {
+        return false, "Device bridge already initialized"
+    }
+    
+    g_device_bridge = device_bridge_state_init()
+    success, err := gate0_cuda_impl.cuda_runtime_backend_init()
+    if !success {
+        return false, err
+    }
+    
+    success, err = gate0_cuda_impl.gate0_device_backend_init(&g_device_bridge.cuda_state)
+    if !success {
+        return false, err
+    }
+    
+    g_device_bridge.is_initialized = true
+    return true, ""
+}
+
+func device_bridge_backend_finalize() (bool, string) {
+    if !g_device_bridge.is_initialized {
+        return false, "Device bridge not initialized"
+    }
+    
+    success, err := gate0_cuda_impl.cuda_runtime_backend_finalize()
+    g_device_bridge.is_initialized = false
+    return success, err
+}
+

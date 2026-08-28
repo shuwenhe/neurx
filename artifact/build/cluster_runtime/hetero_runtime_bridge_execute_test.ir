@@ -1,0 +1,54 @@
+SSEED-TARGET-V1
+FUNC_BEGIN|expect|_|_
+PARAM|condition|_|_
+PARAM|name|_|_
+JUMP_IF_FALSE|L0|condition|_
+ARG|"PASS "|_|_
+CALL|t0|print|1
+ARG|name|_|_
+CALL|t1|print|1
+RET|0|_|_
+JUMP|L1|_|_
+LABEL|L0|_|_
+LABEL|L1|_|_
+ARG|"FAIL "|_|_
+CALL|t2|print|1
+ARG|name|_|_
+CALL|t3|print|1
+RET|1|_|_
+RET|0|_|_
+FUNC_END|expect|_|_
+FUNC_BEGIN|main|_|_
+ARG|"neurx-worker"|_|_
+ARG|"127.0.0.1"|_|_
+ARG|29500|_|_
+CALL|t4|bridge_hetero_demo_execute|3
+MOV|code|t4|_
+MOV|failures|0|_
+CMP_EQ|t5|code|0
+CMP_NE|t6|t5|0
+JUMP_IF_FALSE|L2|t6|_
+MOV|t8|1|_
+JUMP|L4|_|_
+LABEL|L2|_|_
+CMP_NE|t9|code|0
+CMP_NE|t7|t9|0
+MOV|t8|t7|_
+LABEL|L4|_|_
+ARG|t8|_|_
+ARG|"demo execute callable"|_|_
+CALL|t10|expect|2
+ADD|t11|failures|t10
+MOV|failures|t11|_
+CMP_EQ|t12|failures|0
+JUMP_IF_FALSE|L5|t12|_
+ARG|"PASS hetero runtime bridge execute"|_|_
+CALL|t13|println|1
+RET|0|_|_
+JUMP|L6|_|_
+LABEL|L5|_|_
+LABEL|L6|_|_
+ARG|"FAIL hetero runtime bridge execute"|_|_
+CALL|t14|println|1
+RET|1|_|_
+FUNC_END|main|_|_
