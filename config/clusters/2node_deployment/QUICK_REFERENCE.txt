@@ -1,0 +1,260 @@
+# 🚀 NeurX 2-Node 分布式推理 - 快速部署卡
+
+## 三句话总结
+
+> 在 Controller (192.168.10.39) 上运行 `NEURX_ROLE=controller bash deploy.sh`
+> 
+> 在 Worker (192.168.10.75) 上运行 `NEURX_ROLE=worker bash deploy.sh`
+> 
+> 验证集群状态并测试推理 ✅
+
+---
+
+## 📍 机器信息
+
+| 角色 | IP | 用户 | 密码 | 用途 |
+|-----|----|----|------|------|
+| **Controller** | 192.168.10.39 | shuwen | * | 编排 + API |
+| **Worker** | 192.168.10.75 | shuwen | Linux@_2026.. | GPU 推理 |
+
+---
+
+## 🎯 3 步部署
+
+### 1️⃣ Controller 上启动
+
+**在 192.168.10.39 上**：
+
+```bash
+ssh shuwen@192.168.10.39
+cd ~/neurx
+NEURX_ROLE=controller bash config/clusters/2node_deployment/deploy.sh
+```
+
+**保持这个窗口打开** ✋
+
+---
+
+### 2️⃣ Worker 上启动
+
+**在新窗口中连接 192.168.10.75**：
+
+```bash
+ssh shuwen@192.168.10.75
+cd ~/neurx
+NEURX_ROLE=worker bash config/clusters/2node_deployment/deploy.sh
+```
+
+**保持这个窗口打开** ✋
+
+---
+
+### 3️⃣ 验证和测试
+
+**在第三个窗口中**：
+
+```bash
+# 监控集群状态
+bash ~/neurx/config/clusters/2node_deployment/monitor.sh
+
+# 测试推理
+curl -X POST http://192.168.10.39:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "prompt": "What is machine learning?",
+    "max_tokens": 100
+  }'
+```
+
+---
+
+## 📊 预期结果
+
+✅ **Controller 输出**:
+```
+[neurx-controller] discovery result:
+[neurx-controller] listening on 0.0.0.0:8000
+```
+
+✅ **Worker 输出**:
+```
+[neurx-worker] rank=0 local_rank=0
+[neurx-worker] master=192.168.10.39:29500
+```
+
+✅ **Monitor 输出**:
+```
+✅ NCCL Port (29500):    LISTENING
+✅ API Server (8000):    LISTENING
+✅ NCCL Port (29501):    LISTENING
+💓 HEARTBEAT: 1 file(s) found
+```
+
+✅ **推理测试**:
+```json
+{
+  "output": "Machine learning is a subset of artificial intelligence...",
+  "tokens": 100
+}
+```
+
+---
+
+## 🔗 关键命令集
+
+### 启动
+
+```bash
+# Controller
+ssh shuwen@192.168.10.39 'cd ~/neurx && NEURX_ROLE=controller bash config/clusters/2node_deployment/deploy.sh'
+
+# Worker
+ssh shuwen@192.168.10.75 'cd ~/neurx && NEURX_ROLE=worker bash config/clusters/2node_deployment/deploy.sh'
+```
+
+### 监控
+
+```bash
+# 集群状态
+bash ~/neurx/config/clusters/2node_deployment/monitor.sh
+
+# 实时日志
+ssh shuwen@192.168.10.39 'tail -f /tmp/neurx_cluster/logs/*.log'
+ssh shuwen@192.168.10.75 'tail -f /tmp/neurx_cluster/logs/*.log'
+
+# 心跳检查
+ssh shuwen@192.168.10.39 'ls -la /tmp/neurx_cluster/heartbeat/'
+ssh shuwen@192.168.10.75 'ls -la /tmp/neurx_cluster/heartbeat/'
+```
+
+### 测试
+
+```bash
+# 模型列表
+curl http://192.168.10.39:8000/v1/models
+
+# 推理
+curl -X POST http://192.168.10.39:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "Qwen/Qwen2.5-0.5B-Instruct", "prompt": "Hi!", "max_tokens": 50}'
+
+# 流式推理
+curl -X POST http://192.168.10.39:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "Qwen/Qwen2.5-0.5B-Instruct", "prompt": "Hello", "stream": true}'
+```
+
+### 停止
+
+```bash
+# Kill processes
+ssh shuwen@192.168.10.39 'killall neurx-controller'
+ssh shuwen@192.168.10.75 'killall neurx-worker'
+```
+
+---
+
+## 🐛 快速故障排查
+
+| 问题 | 解决 |
+|------|------|
+| Worker 无法连接 | `ssh shuwen@192.168.10.75 'telnet 192.168.10.39 29500'` |
+| GPU 不可用 | `ssh shuwen@192.168.10.39 'nvidia-smi'` |
+| 模型未找到 | `ssh shuwen@192.168.10.39 'ls /model/'` |
+| API 无响应 | `curl http://192.168.10.39:8000/v1/models` |
+| 查看错误 | `tail -f /tmp/neurx_cluster/logs/*.log` |
+
+---
+
+## 📁 文件位置
+
+```
+~/neurx/config/clusters/2node_deployment/
+├── controller.env              ← Controller 配置
+├── worker_rank0.env            ← Worker 配置
+├── deploy.sh                   ← 部署脚本（主要）
+├── monitor.sh                  ← 监控脚本
+├── README.md                   ← 快速参考
+├── DEPLOYMENT_GUIDE.md         ← 详细指南
+├── EXECUTION_GUIDE.md          ← 执行说明
+└── QUICK_REFERENCE.txt         ← 本文档
+```
+
+---
+
+## ⏱️ 时间估算
+
+| 步骤 | 时间 |
+|-----|------|
+| 1. 启动 Controller | 30 秒 |
+| 2. 启动 Worker | 30 秒 |
+| 3. 验证集群 | 1 分钟 |
+| 4. 测试推理 | 30 秒 |
+| **总计** | **~3 分钟** |
+
+---
+
+## 💾 系统架构
+
+```
+┌─ Controller (192.168.10.39) ─┐
+│ • Master Node                │
+│ • REST API :8000             │
+│ • NCCL :29500                │
+│ • Task Scheduling            │
+└──────────┬─────────────────────┘
+           │
+      NCCL Protocol
+           │
+    ┌──────▼────────────┐
+    │ Worker (192.168.10.75)
+    │ • Slave Node      │
+    │ • GPU Inference   │
+    │ • NCCL :29501     │
+    │ • Model Serving   │
+    └───────────────────┘
+```
+
+---
+
+## 🎓 下一步
+
+- ✅ 完成基本部署
+- 📈 扩展到多个 Worker
+- 🔐 配置认证和 SSL
+- 📊 启用监控和告警
+- ⚡ 性能优化和调参
+
+---
+
+## 📞 获得帮助
+
+- 📖 详细指南：`DEPLOYMENT_GUIDE.md`
+- 🔍 执行说明：`EXECUTION_GUIDE.md`
+- 📚 项目文档：`~/neurx/README.md`
+- 🐛 检查日志：`/tmp/neurx_cluster/logs/`
+
+---
+
+**现在就开始吧！** 🚀
+
+```bash
+# 一键复制粘贴：
+
+# 终端 1 - Controller
+ssh shuwen@192.168.10.39
+cd ~/neurx
+NEURX_ROLE=controller bash config/clusters/2node_deployment/deploy.sh
+
+# 终端 2 - Worker
+ssh shuwen@192.168.10.75
+cd ~/neurx
+NEURX_ROLE=worker bash config/clusters/2node_deployment/deploy.sh
+
+# 终端 3 - 测试
+curl -X POST http://192.168.10.39:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "Qwen/Qwen2.5-0.5B-Instruct", "prompt": "Hello!", "max_tokens": 100}'
+```
+

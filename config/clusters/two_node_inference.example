@@ -1,0 +1,15 @@
+# Two-node distributed inference bootstrap for NeurX.
+# Update GPU counts after verifying with `nvidia-smi -L` on each host.
+NEURX_CLUSTER_NAME=neurx-inference-two-node
+NEURX_CONTROLLER_APPLY=0
+NEURX_DISCOVERY_HOSTS=192.168.10.39,192.168.10.75
+NEURX_DISCOVERY_PORT=8888
+NEURX_SSH_USER=shuwen
+NEURX_REMOTE_WORKER_BIN=/opt/neurx/bin/training-worker
+NEURX_SSH_KNOWN_HOSTS=/etc/neurx/ssh_known_hosts
+MASTER_ADDR=192.168.10.39
+MASTER_PORT=29500
+WORLD_SIZE=2
+NEURX_WORKER_RANK=0
+NEURX_ENABLE_HETERO_LAUNCH=0
+NEURX_ENABLE_RELAUNCH_EXECUTION=0

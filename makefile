@@ -1,6 +1,8 @@
 .DEFAULT_GOAL := help
 
 .PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt streaming-chat web-ui backend backend-stop backend-logs backend-tail backend-cpu frontend real-inference check-bash check-nvcc shard split logs log logs-tail log-gpu log-web start-inference build-start-inference gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference verify-vl-model build-vl-inference start-vl-inference deploy-vl-local vllm-distributed-test vllm-missing-capabilities-test vllm-remaining-capabilities-test sglang-capabilities-test \
+	inference \
+	inference-sync \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -1506,6 +1508,12 @@ build-start-inference: build-s-ir-runner
 
 start-inference:
 	@bash '$(CURDIR_UNIX)/scripts/start_inference.sh'
+
+inference:
+	@bash '$(CURDIR_UNIX)/scripts/deploy_two_node_inference.sh'
+
+inference-sync:
+	@bash '$(CURDIR_UNIX)/scripts/deploy_two_node_inference.sh' sync-only
 
 chat-npu: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
