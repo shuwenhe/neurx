@@ -312,7 +312,7 @@
             <h1>🤖 NeurX AI 对话</h1>
             <div class="status">
                 <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">连接中...</span>
+                <span id="statusText">远端两节点 GPU 集群检查中...</span>
             </div>
         </div>
         
@@ -374,16 +374,7 @@
         
         // 获取参数值的基础路径 - 支持不同的部署方式
         function getApiBaseUrl() {
-            const protocol = window.location.protocol;
-            const host = window.location.host;
-            const path = window.location.pathname;
-            
-            // 如果访问的是 /neurx 开头的路径
-            if (path.startsWith('/neurx')) {
-                return `${protocol}//${host}/neurx`;
-            }
-            
-            return `${protocol}//${host}`;
+            return window.NEURX_API_BASE || 'http://192.168.10.39:8000';
         }
         
         const API_BASE = getApiBaseUrl();
@@ -417,10 +408,10 @@
         function updateStatus() {
             if (backendHealthy) {
                 statusDot.classList.remove('offline');
-                statusText.textContent = '✓ 后端在线';
+                statusText.textContent = '✓ 远端两节点 GPU 后端在线';
             } else {
                 statusDot.classList.add('offline');
-                statusText.textContent = '✗ 后端离线';
+                statusText.textContent = '✗ 远端两节点 GPU 后端离线';
             }
         }
         

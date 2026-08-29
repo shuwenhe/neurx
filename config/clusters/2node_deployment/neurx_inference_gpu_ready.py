@@ -75,6 +75,25 @@ class GPUDetector:
 class NeurXInferenceAPI(BaseHTTPRequestHandler):
     """GPU-Ready OpenAI 兼容推理 API 服务器"""
     
+    def do_OPTIONS(self):
+        """处理 CORS preflight 请求"""
+        self.send_response(200)
+        self._add_cors_headers()
+        self.send_header('Access-Control-Max-Age', '86400')
+        BaseHTTPRequestHandler.end_headers(self)
+        logger.info(f"[CORS] OPTIONS {self.path}")
+    
+    def _add_cors_headers(self):
+        """添加 CORS 响应头"""
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    
+    def end_headers(self):
+        """在所有响应中添加 CORS 头部"""
+        self._add_cors_headers()
+        BaseHTTPRequestHandler.end_headers(self)
+    
     def do_GET(self):
         if self.path == '/v1/models':
             self._send_models_response()

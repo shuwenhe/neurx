@@ -471,7 +471,7 @@
         <h1 style="font-size: 18px;">NeurX AI 推理引擎</h1>
         <div class="status-indicator">
           <div class="status-dot" id="statusIndicator"></div>
-          <span id="statusText">检查连接...</span>
+          <span id="statusText">远端两节点 GPU 集群检查中...</span>
         </div>
       </div>
 
@@ -479,7 +479,7 @@
         <div class="empty-state">
           <div class="empty-state-icon">🤖</div>
           <div class="empty-state-title">NeurX AI助手</div>
-          <div class="empty-state-subtitle">高性能LLM推理引擎 · 实时对话</div>
+          <div class="empty-state-subtitle">连接远端 GPU 后端: 192.168.10.39 + 192.168.10.75 两台组网推理</div>
         </div>
       </div>
 
@@ -502,6 +502,15 @@
 
     <div class="params-panel" id="paramsPanel">
       <button class="params-close" onclick="app.toggleParams()">✕</button>
+
+      <div class="param-group">
+        <div class="param-label">推理服务器</div>
+        <select id="serverSelect" onchange="app.state.server = this.value">
+          <option value="auto">自动选择</option>
+          <option value="Controller">Controller (192.168.10.39)</option>
+          <option value="Worker">Worker (192.168.10.75)</option>
+        </select>
+      </div>
 
       <div class="param-group">
         <div class="param-label">模型</div>
@@ -537,7 +546,8 @@
   </div>
 
   <script>
-    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`;
+    // 连接到本地 SSH 代理而不是直接连接到远端
+    const API_BASE = window.NEURX_API_BASE || 'http://127.0.0.1:9000';
     console.log('API_BASE configured to:', API_BASE);
 
     window.app = {
@@ -549,7 +559,8 @@
         maxTokens: 256,
         topP: 0.9,
         topK: 40,
-        model: 'default'
+        model: 'default',
+        server: 'auto'  // 服务器选择: auto | Controller | Worker
       },
 
       async init() {
@@ -599,13 +610,13 @@
 
         indicator.classList.remove('offline', 'loading');
         if (status === 'online') {
-          text.textContent = '后端在线';
+          text.textContent = '✓ 远端两节点 GPU 后端在线';
         } else if (status === 'offline') {
           indicator.classList.add('offline');
-          text.textContent = '后端离线';
+          text.textContent = '✗ 远端两节点 GPU 后端离线';
         } else {
           indicator.classList.add('loading');
-          text.textContent = '检查连接...';
+          text.textContent = '检查远端两节点连接...';
         }
       },
 
@@ -646,7 +657,8 @@
             max_tokens: this.state.maxTokens,
             temperature: this.state.temperature,
             top_p: this.state.topP,
-            top_k: this.state.topK
+            top_k: this.state.topK,
+            server: this.state.server  // 添加服务器选择参数
           };
           console.log('[sendMessage] POST to:', url);
           console.log('[sendMessage] Payload:', payload);
@@ -709,7 +721,7 @@
             <div class="empty-state">
               <div class="empty-state-icon">🤖</div>
               <div class="empty-state-title">NeurX AI助手</div>
-              <div class="empty-state-subtitle">高性能LLM推理引擎 · 实时对话</div>
+              <div class="empty-state-subtitle">连接远端 GPU 后端: 192.168.10.39 + 192.168.10.75 两台组网推理</div>
             </div>
           `;
         } else {
