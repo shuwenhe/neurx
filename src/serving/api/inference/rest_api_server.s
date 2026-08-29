@@ -2,6 +2,7 @@ package neurx.inference.api.rest_server
 use std.conv.int_to_string
 use neurx.inference.api.http_server.{http_server, create_http_server, close_http_server, write_client_data}
 use neurx.inference.api.openai_protocol.{openai_request, openai_request_result, parse_openai_request, openai_chat_chunk, openai_done_event, openai_error_body}
+use neurx.runtime.command.{runtime_parse_int}
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, generate_response_stream}
 use neurx.serving.protocol.transport.native_socket.{neurx_net_accept}
@@ -393,6 +394,29 @@ func create_models_response() string {
     json = json + "}]"
     json = json + "}"
     return json
+func create_node_info_response() string {
+    string node_name = runtime_env_get("NEURX_NODE_NAME", runtime_env_get("HOSTNAME", "worker"))
+    string node_host = runtime_env_get("NEURX_NODE_HOST", runtime_env_get("HOSTNAME", "127.0.0.1"))
+    int node_port = runtime_parse_int(runtime_env_get("NEURX_NODE_PORT", "8888"), 8888)
+    int gpu_count = runtime_parse_int(runtime_env_get("NEURX_NODE_GPU_COUNT", "1"), 1)
+    string gpu_type = runtime_env_get("NEURX_NODE_GPU_TYPE", "unknown")
+    int cpu_cores = runtime_parse_int(runtime_env_get("NEURX_NODE_CPU_CORES", "8"), 8)
+    int memory_gb = runtime_parse_int(runtime_env_get("NEURX_NODE_MEMORY_GB", "32"), 32)
+    string status = runtime_env_get("NEURX_NODE_STATUS", "healthy")
+    string utilization = runtime_env_get("NEURX_NODE_UTILIZATION", "0.0")
+    string json = "{"
+    json = json + "\"node_name\": \"" + json_escape(node_name) + "\","
+    json = json + "\"ip_address\": \"" + json_escape(node_host) + "\","
+    json = json + "\"port\": " + int_to_string(node_port) + ","
+    json = json + "\"gpu_count\": " + int_to_string(gpu_count) + ","
+    json = json + "\"gpu_type\": \"" + json_escape(gpu_type) + "\","
+    json = json + "\"cpu_cores\": " + int_to_string(cpu_cores) + ","
+    json = json + "\"memory_gb\": " + int_to_string(memory_gb) + ","
+    json = json + "\"status\": \"" + json_escape(status) + "\","
+    json = json + "\"utilization\": " + utilization + ","
+    json = json + "\"api_version\": \"v1\""
+    json = json + "}"
+    return json
 func create_error_response(string error_msg) string {
     string json = "{"
     json = json + "\"error\": {"
@@ -411,6 +435,14 @@ func handle_health_check(http_request req) http_response {
 
 func handle_models_list(http_request req) http_response {
     string body = create_models_response()
+    return http_response{
+        status_code: 200,
+        headers: [],
+        body: body,
+    }
+
+func handle_node_info(http_request req) http_response {
+    string body = create_node_info_response()
     return http_response{
         status_code: 200,
         headers: [],
@@ -448,6 +480,8 @@ func route_request(http_request req) http_response {
         return handle_health_check(req)
     } else if req.path == "/v1/models" {
         return handle_models_list(req)
+    } else if req.path == "/v1/node/info" || req.path == "/node/info" {
+        return handle_node_info(req)
     } else if req.path == "/v1/chat/completions" {
         return handle_chat_completions(req)
     } else {
@@ -478,6 +512,7 @@ func main() {
     print("📚 API Endpoints:\n")
     print("  GET  /health                     - Health check\n")
     print("  GET  /v1/models                  - List models\n")
+    print("  GET  /v1/node/info               - Node discovery metadata\n")
     print("  POST /v1/chat/completions       - Chat completion (OpenAI compatible)\n")
     print("\n")
     print("🎯 Server is running. Press Ctrl+C to stop.\n")

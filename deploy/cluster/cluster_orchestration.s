@@ -1,5 +1,12 @@
 package neurx.deployment.cluster_orchestration
+use neurx.runtime.command.{runtime_env_get}
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
+extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
+extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int family) int
+extern "intrinsic" func __sys_read_string(int fd, int count) string
+extern "intrinsic" func __sys_write_string(int fd, string data) int
+extern "intrinsic" func __sys_close(int fd) int
 
 struct cluster_node_spec {
     int node_id
@@ -266,6 +273,230 @@ func cluster_parse_node_record(string line) cluster_node_spec {
     new_cluster_node_spec(0, node_name, ip_address, gpu_count, gpu_type, cpu_cores, memory_gb, status, utilization)
 }
 
+func cluster_split_csv(string text) string[] {
+    string[] items = string[]{cap: 0}
+    string current = ""
+    int i = 0
+    for i < len(text) {
+        if text[i] == 44 {
+            items = append(items, cluster_trim(current))
+            current = ""
+        } else {
+            current = current + chr(text[i])
+        }
+        i = i + 1
+    }
+    if current != "" {
+        items = append(items, cluster_trim(current))
+    }
+    items
+}
+
+func cluster_http_response_body(string response) string {
+    int separator = cluster_find_substring(response, "\r\n\r\n")
+    if separator < 0 {
+        return ""
+    }
+    __host_slice(response, separator + 4, len(response))
+}
+
+func cluster_http_success(string response) bool {
+    if len(response) < 12 {
+        return false
+    }
+    __host_slice(response, 0, 12) == "HTTP/1.1 200"
+}
+
+func cluster_http_request(string host, int port, string method, string path, string body) string {
+    int conn_fd = __sys_socket(2, 1, 6)
+    if conn_fd < 0 {
+        return ""
+    }
+    if __sys_connect(conn_fd, host, port, 2) < 0 {
+        _ = __sys_close(conn_fd)
+        return ""
+    }
+    string request = method + " " + path + " HTTP/1.1\r\n" +
+        "Host: " + host + "\r\n" +
+        "Connection: close\r\n" +
+        "Content-Length: " + cluster_int_to_string(len(body)) + "\r\n\r\n" +
+        body
+    int offset = 0
+    for offset < len(request) {
+        string remaining = __host_slice(request, offset, len(request))
+        int written = __sys_write_string(conn_fd, remaining)
+        if written <= 0 {
+            _ = __sys_close(conn_fd)
+            return ""
+        }
+        offset = offset + written
+    }
+    string response = ""
+    for true {
+        string chunk = __sys_read_string(conn_fd, 65536)
+        if len(chunk) == 0 {
+            break
+        }
+        response = response + chunk
+    }
+    _ = __sys_close(conn_fd)
+    response
+}
+
+func cluster_json_find_key(string json, string key) int {
+    string search = "\"" + key + "\":"
+    int i = 0
+    for i + len(search) <= len(json) {
+        bool found = true
+        int j = 0
+        for j < len(search) {
+            if json[i + j] != search[j] {
+                found = false
+                break
+            }
+            j = j + 1
+        }
+        if found {
+            return i + len(search)
+        }
+        i = i + 1
+    }
+    -1
+}
+
+func cluster_json_extract_raw(string json, string key) string {
+    int start = cluster_json_find_key(json, key)
+    if start < 0 {
+        return ""
+    }
+    for start < len(json) && (json[start] == 32 || json[start] == 9 || json[start] == 10 || json[start] == 13) {
+        start = start + 1
+    }
+    if start >= len(json) {
+        return ""
+    }
+    if json[start] == 34 {
+        start = start + 1
+        int end = start
+        bool escaped = false
+        for end < len(json) {
+            if escaped {
+                escaped = false
+            } else if json[end] == 92 {
+                escaped = true
+            } else if json[end] == 34 {
+                return __host_slice(json, start, end)
+            }
+            end = end + 1
+        }
+        return ""
+    }
+    int end = start
+    for end < len(json) && json[end] != 44 && json[end] != 125 && json[end] != 93 {
+        end = end + 1
+    }
+    cluster_trim(__host_slice(json, start, end))
+}
+
+func cluster_json_extract_int(string json, string key, int fallback) int {
+    string raw = cluster_json_extract_raw(json, key)
+    if raw == "" {
+        return fallback
+    }
+    cluster_parse_int(raw, fallback)
+}
+
+func cluster_json_extract_float(string json, string key, float fallback) float {
+    string raw = cluster_json_extract_raw(json, key)
+    if raw == "" {
+        return fallback
+    }
+    cluster_parse_float(raw, fallback)
+}
+
+func cluster_discover_node_from_http(string host, int port) cluster_node_spec {
+    string response = cluster_http_request(host, port, "GET", "/v1/node/info", "")
+    if !cluster_http_success(response) {
+        response = cluster_http_request(host, port, "GET", "/health", "")
+    }
+    if !cluster_http_success(response) {
+        return new_cluster_node_spec(0, "", "", 0, "", 0, 0, "down", 0.0)
+    }
+    string body = cluster_http_response_body(response)
+    string node_name = cluster_json_extract_raw(body, "node_name")
+    if node_name == "" {
+        node_name = cluster_json_extract_raw(body, "name")
+    }
+    if node_name == "" {
+        node_name = host
+    }
+    string ip_address = cluster_json_extract_raw(body, "ip_address")
+    if ip_address == "" {
+        ip_address = cluster_json_extract_raw(body, "host")
+    }
+    if ip_address == "" {
+        ip_address = host
+    }
+    int gpu_count = cluster_json_extract_int(body, "gpu_count", 1)
+    string gpu_type = cluster_json_extract_raw(body, "gpu_type")
+    if gpu_type == "" {
+        gpu_type = "unknown"
+    }
+    int cpu_cores = cluster_json_extract_int(body, "cpu_cores", 8)
+    int memory_gb = cluster_json_extract_int(body, "memory_gb", 32)
+    string status = cluster_json_extract_raw(body, "status")
+    if status == "" {
+        status = "healthy"
+    }
+    float utilization = cluster_json_extract_float(body, "utilization", 0.0)
+    new_cluster_node_spec(0, node_name, ip_address, gpu_count, gpu_type, cpu_cores, memory_gb, status, utilization)
+}
+
+func cluster_discover_nodes_from_network() []cluster_node_spec {
+    string host_list = runtime_env_get("NEURX_DISCOVERY_HOSTS", "")
+    string prefix_list = runtime_env_get("NEURX_DISCOVERY_PREFIXES", runtime_env_get("NEURX_DISCOVERY_PREFIX", ""))
+    int port = cluster_parse_int(runtime_env_get("NEURX_DISCOVERY_PORT", runtime_env_get("NEURX_NODE_PORT", "8888")), 8888)
+    []cluster_node_spec nodes = []cluster_node_spec{cap: 0}
+    if host_list != "" {
+        string[] hosts = cluster_split_csv(host_list)
+        int i = 0
+        for i < len(hosts) {
+            string host = cluster_trim(hosts[i])
+            if host != "" {
+                cluster_node_spec node = cluster_discover_node_from_http(host, port)
+                if node.node_name != "" {
+                    node.node_id = len(nodes)
+                    nodes = append(nodes, node)
+                }
+            }
+            i = i + 1
+        }
+        return nodes
+    }
+    if prefix_list == "" {
+        return nodes
+    }
+    string[] prefixes = cluster_split_csv(prefix_list)
+    int p = 0
+    for p < len(prefixes) {
+        string prefix = cluster_trim(prefixes[p])
+        if prefix != "" {
+            int host_id = 1
+            for host_id <= 254 {
+                string host = prefix + "." + cluster_int_to_string(host_id)
+                cluster_node_spec node = cluster_discover_node_from_http(host, port)
+                if node.node_name != "" {
+                    node.node_id = len(nodes)
+                    nodes = append(nodes, node)
+                }
+                host_id = host_id + 1
+            }
+        }
+        p = p + 1
+    }
+    nodes
+}
+
 func cluster_node_manifest_path() string {
     "./artifact/cluster_nodes.manifest"
 }
@@ -300,10 +531,15 @@ func cluster_discover_local_fallback() []cluster_node_spec {
 func cluster_discover_nodes(cluster_orchestration_state state) cluster_orchestration_state {
     cluster_orchestration_state next = state
     []cluster_node_spec discovered = cluster_discover_nodes_from_manifest()
+    []cluster_node_spec network_discovered = cluster_discover_nodes_from_network()
+    if len(network_discovered) > 0 {
+        discovered = network_discovered
+        next.discovery_source = "network"
+    }
     if len(discovered) == 0 {
         discovered = cluster_discover_local_fallback()
         next.discovery_source = "local"
-    } else {
+    } else if next.discovery_source == "" {
         next.discovery_source = "env_or_manifest"
     }
     next.nodes = discovered
@@ -612,6 +848,23 @@ func cluster_state_summary(cluster_orchestration_state state, cluster_deployment
     out = out + "checkpoint_dir=" + spec.checkpoint_dir + "\n"
     out = out + "data_dir=" + spec.data_dir + "\n"
     out = out + "output_dir=" + spec.output_dir + "\n"
+    out
+}
+
+func cluster_discovery_summary(cluster_orchestration_state state) string {
+    string out = ""
+    out = out + "discovery_source=" + state.discovery_source + "\n"
+    out = out + "discovered_nodes=" + cluster_int_to_string(len(state.nodes)) + "\n"
+    int i = 0
+    for i < len(state.nodes) {
+        out = out + "node[" + cluster_int_to_string(i) + "]="
+        out = out + state.nodes[i].node_name
+        out = out + " ip=" + state.nodes[i].ip_address
+        out = out + " gpu_count=" + cluster_int_to_string(state.nodes[i].gpu_count)
+        out = out + " status=" + state.nodes[i].status
+        out = out + "\n"
+        i = i + 1
+    }
     out
 }
 
