@@ -43,11 +43,11 @@ func gemm_config_create(gemm_params params) gemm_config {
 
 func gpu_gemm_validate(abi.device_tensor a_tensor, abi.device_tensor b_tensor, abi.device_tensor c_tensor, gemm_config config) (bool, string) {
     if a_tensor.element_count <= 0 || b_tensor.element_count <= 0 || c_tensor.element_count <= 0 {
-        return false, "Invalid tensor element counts"
+        return false "Invalid tensor element counts"
     }
 
     if a_tensor.shape.len() != 2 || b_tensor.shape.len() != 2 || c_tensor.shape.len() != 2 {
-        return false, "GEMM requires 2D matrices"
+        return false "GEMM requires 2D matrices"
     }
 
     a_m := a_tensor.shape[0]
@@ -58,14 +58,14 @@ func gpu_gemm_validate(abi.device_tensor a_tensor, abi.device_tensor b_tensor, a
     c_n := c_tensor.shape[1]
 
     if a_m != config.m || a_k != config.k || b_k != config.k || b_n != config.n {
-        return false, "GEMM shape mismatch"
+        return false "GEMM shape mismatch"
     }
 
     if c_m != config.m || c_n != config.n {
-        return false, "GEMM output shape mismatch"
+        return false "GEMM output shape mismatch"
     }
 
-    return true, ""
+    return true ""
 }
 
 func gpu_gemm(
@@ -74,9 +74,9 @@ func gpu_gemm(
     abi.device_tensor c_tensor,
     gemm_config config
 ) (abi.device_tensor, bool, string) {
-    valid, err := gpu_gemm_validate(a_tensor, b_tensor, c_tensor, config)
+    (valid, err) := gpu_gemm_validate(a_tensor, b_tensor, c_tensor, config)
     if !valid {
-        return abi.device_tensor{}, false, err
+        return abi.device_tensor{} false err
     }
 
     m := config.m
@@ -102,7 +102,7 @@ func gpu_gemm(
         is_view: false,
     }
 
-    return output_tensor, true, ""
+    return output_tensor true ""
 }
 
 func cuda_kernel_gemm(
@@ -119,14 +119,14 @@ func cuda_kernel_gemm(
     int ldc
 ) (bool, string) {
     if m <= 0 || n <= 0 || k <= 0 {
-        return false, "Invalid GEMM dimensions"
+        return false "Invalid GEMM dimensions"
     }
 
     if a_data <= 0 || b_data <= 0 || c_data <= 0 {
-        return false, "Invalid GPU memory pointers"
+        return false "Invalid GPU memory pointers"
     }
 
-    return true, ""
+    return true ""
 }
 
 func cuda_kernel_gemm_batch(
@@ -141,29 +141,29 @@ func cuda_kernel_gemm_batch(
     float beta
 ) (bool, string) {
     if m <= 0 || n <= 0 || k <= 0 || batch_size <= 0 {
-        return false, "Invalid batch GEMM dimensions"
+        return false "Invalid batch GEMM dimensions"
     }
 
-    return true, ""
+    return true ""
 }
 
 func gpu_gemm_get_workspace_size(int m, int n, int k) (int64, bool, string) {
     if m <= 0 || n <= 0 || k <= 0 {
-        return 0, false, "Invalid dimensions"
+        return 0 false "Invalid dimensions"
     }
 
     workspace_bytes := int64(m * n * 4)
-    return workspace_bytes, true, ""
+    return workspace_bytes true ""
 }
 
 func gpu_gemm_allocate_workspace(int64 bytes, int device_id) (bool, string) {
     if bytes <= 0 {
-        return false, "Invalid workspace size"
+        return false "Invalid workspace size"
     }
 
     return true, ""
 }
 
 func gpu_gemm_free_workspace() (bool, string) {
-    return true, ""
+    return true ""
 }
