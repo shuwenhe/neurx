@@ -4,6 +4,7 @@
 #include "../../s/src/cmd/compile/seed/runtime/memory.h"
 #include <signal.h>
 #include <sys/prctl.h>
+
 static void print_compile_error(const compile_error *err) {
     if (!err || !error_is_set(err)) {
         return;
@@ -11,6 +12,7 @@ static void print_compile_error(const compile_error *err) {
     fprintf(stderr, "error[%d] at %zu:%zu: %s\n",
             (int)err->code, err->line, err->column, err->message);
 }
+
 bool emit_native_from_ir_file(const char *input_ir_path, const char *output_binary_path, compile_error *err) {
     (void)input_ir_path;
     (void)output_binary_path;
@@ -18,6 +20,7 @@ bool emit_native_from_ir_file(const char *input_ir_path, const char *output_bina
     error_set(err, ERR_SEMANTIC, 0, 0, "native emission is not available in the portable runner");
     return false;
 }
+
 bool seed_bootstrap_two_stage_check(const char *compiler_source_path, const char *output_dir, compile_error *err) {
     (void)compiler_source_path;
     (void)output_dir;
@@ -25,6 +28,7 @@ bool seed_bootstrap_two_stage_check(const char *compiler_source_path, const char
     error_set(err, ERR_SEMANTIC, 0, 0, "bootstrap is not available in the portable runner");
     return false;
 }
+
 int main(int argc, char **argv) {
     compile_error err;
     long ret = 0;
