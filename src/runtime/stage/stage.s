@@ -4,6 +4,7 @@ use neurx.runtime.control
 use neurx.strings
 use neurx.autograd.function
 use neurx.strings
+use neurx.compile.backend.direct_codegen
 struct stage_state {
     string name
     string backend
@@ -21,6 +22,7 @@ struct stage_state {
     int control_iterations
     string[] control_branches
     string[] control_params
+    machine_code_blob_state native_blob
 }
 
 func join_strings(string[] values) string {
@@ -54,6 +56,7 @@ func new_stage_state(string name, string backend, string mode) stage_state {
         control_iterations: 0,
         control_branches: [],
         control_params: [],
+        native_blob: new_machine_code_blob_state(name),
     }
 }
 
@@ -135,6 +138,7 @@ func stage_add_stage(stage_state state, string value) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -158,6 +162,7 @@ func stage_add_param(stage_state state, string value) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -179,6 +184,7 @@ func stage_set_jit_enabled(stage_state state, bool enabled) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -200,6 +206,7 @@ func stage_set_lowered(stage_state state, bool lowered) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -221,6 +228,7 @@ func stage_set_compiled(stage_state state, bool compiled) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -242,6 +250,7 @@ func stage_set_executed(stage_state state, bool executed) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -263,6 +272,7 @@ func stage_clear_stages(stage_state state) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -284,6 +294,7 @@ func stage_clear_params(stage_state state) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -401,6 +412,7 @@ func stage_set_control_enabled(stage_state state, bool enabled) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -422,6 +434,7 @@ func stage_set_control_cond_enabled(stage_state state, bool enabled) stage_state
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -548,11 +561,30 @@ func stage_state_dict(stage_state state) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
 func stage_load_state_dict(stage_state state, stage_state other) stage_state {
-    other
+    stage_state {
+        name: other.name,
+        backend: other.backend,
+        mode: other.mode,
+        jit_enabled: other.jit_enabled,
+        lowered: other.lowered,
+        compiled: other.compiled,
+        executed: other.executed,
+        stages: copy_strings(other.stages),
+        params: copy_strings(other.params),
+        control_enabled: other.control_enabled,
+        control_cond_enabled: other.control_cond_enabled,
+        control_loop_enabled: other.control_loop_enabled,
+        control_scan_enabled: other.control_scan_enabled,
+        control_iterations: other.control_iterations,
+        control_branches: copy_strings(other.control_branches),
+        control_params: copy_strings(other.control_params),
+        native_blob: other.native_blob,
+    }
 }
 
 func stage_control_state_dict(stage_state state) stage_state {
@@ -573,6 +605,7 @@ func stage_control_state_dict(stage_state state) stage_state {
         control_iterations: state.control_iterations,
         control_branches: copy_strings(state.control_branches),
         control_params: copy_strings(state.control_params),
+        native_blob: state.native_blob,
     }
 }
 
@@ -606,6 +639,7 @@ func control_state_to_stage(control_state state, string backend, string mode) st
         control_iterations: state.iterations,
         control_branches: copy_strings(state.branches),
         control_params: copy_strings(state.params),
+        native_blob: new_machine_code_blob_state(state.name),
     }
 }
 

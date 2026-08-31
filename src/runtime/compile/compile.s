@@ -2,6 +2,7 @@ package neurx.runtime.compile
 use neurx.strings
 use neurx.runtime.stage
 use neurx.strings
+use neurx.compile.backend.direct_codegen
 struct compile_state {
     string name
     string backend
@@ -25,6 +26,7 @@ struct compile_state {
     string[] passes
     string[] cache_keys
     string[] tags
+    machine_code_blob_state native_blob
 }
 
 func join_strings(string[] values) string {
@@ -100,6 +102,7 @@ func new_compile_state(string name, string backend, string mode) compile_state {
         passes: [],
         cache_keys: [],
         tags: [],
+        native_blob: new_machine_code_blob_state(name),
     }
 }
 
@@ -237,6 +240,7 @@ func compile_add_edge(compile_state state, string edge) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -282,6 +286,7 @@ func compile_add_node_with_io(compile_state state, string node, string op, strin
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -315,6 +320,7 @@ func compile_add_input(compile_state state, string input) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -344,6 +350,7 @@ func compile_add_output(compile_state state, string output) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -373,6 +380,7 @@ func compile_add_pass(compile_state state, string pass) compile_state {
         passes: passes,
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -426,6 +434,7 @@ func compile_set_linearized(compile_state state, bool linearized) compile_state 
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -455,6 +464,7 @@ func compile_add_param(compile_state state, string param) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -540,6 +550,7 @@ func compile_set_captured(compile_state state, bool captured) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -567,6 +578,7 @@ func compile_set_lowered(compile_state state, bool lowered) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -594,6 +606,7 @@ func compile_set_compiled(compile_state state, bool compiled) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -621,6 +634,7 @@ func compile_set_executed(compile_state state, bool executed) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -648,6 +662,7 @@ func compile_set_dynamic(compile_state state, bool dynamic) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -675,6 +690,7 @@ func compile_set_fullgraph(compile_state state, bool fullgraph) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -702,6 +718,7 @@ func compile_set_debug(compile_state state, bool debug) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
@@ -729,11 +746,36 @@ func compile_state_dict(compile_state state) compile_state {
         passes: copy_strings(state.passes),
         cache_keys: copy_strings(state.cache_keys),
         tags: copy_strings(state.tags),
+        native_blob: state.native_blob,
     }
 }
 
 func compile_load_state_dict(compile_state state, compile_state other) compile_state {
-    other
+    compile_state {
+        name: other.name,
+        backend: other.backend,
+        mode: other.mode,
+        captured: other.captured,
+        lowered: other.lowered,
+        compiled: other.compiled,
+        executed: other.executed,
+        ready: other.ready,
+        linearized: other.linearized,
+        dynamic: other.dynamic,
+        fullgraph: other.fullgraph,
+        debug: other.debug,
+        node_count: other.node_count,
+        nodes: copy_strings(other.nodes),
+        ops: copy_strings(other.ops),
+        params: copy_strings(other.params),
+        inputs: copy_strings(other.inputs),
+        outputs: copy_strings(other.outputs),
+        edges: copy_strings(other.edges),
+        passes: copy_strings(other.passes),
+        cache_keys: copy_strings(other.cache_keys),
+        tags: copy_strings(other.tags),
+        native_blob: other.native_blob,
+    }
 }
 
 func compile_to_stage(compile_state state) stage_state {
@@ -754,6 +796,7 @@ func compile_to_stage(compile_state state) stage_state {
         control_iterations: 1,
         control_branches: [],
         control_params: [],
+        native_blob: state.native_blob,
     }
 }
 
@@ -781,5 +824,6 @@ func stage_to_compile(stage_state state) compile_state {
         passes: copy_strings(state.stages),
         cache_keys: [],
         tags: [],
+        native_blob: state.native_blob,
     }
 }

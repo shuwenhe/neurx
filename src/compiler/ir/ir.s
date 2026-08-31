@@ -119,3 +119,41 @@ func ir_graph_state_dict(ir_graph_state graph) ir_graph_state {
 func ir_graph_load_state_dict(ir_graph_state graph, ir_graph_state other) ir_graph_state {
     other
 }
+
+func ir_graph_to_text(ir_graph_state graph) string {
+    string out = ""
+    out = out + "graph " + graph.name + "\n"
+    out = out + "valid " + (graph.valid ? "true" : "false") + "\n"
+    int i = 0
+    for i < len(graph.inputs) {
+        out = out + "input " + graph.inputs[i] + "\n"
+        i = i + 1
+    }
+    i = 0
+    for i < len(graph.outputs) {
+        out = out + "output " + graph.outputs[i] + "\n"
+        i = i + 1
+    }
+    i = 0
+    for i < len(graph.edges) {
+        out = out + "edge " + graph.edges[i] + "\n"
+        i = i + 1
+    }
+    i = 0
+    for i < len(graph.nodes) {
+        ir_node_state node = graph.nodes[i]
+        out = out + "node " + node.name + " " + node.op + "\n"
+        int j = 0
+        while j < len(node.inputs) {
+            out = out + "  in " + node.inputs[j] + "\n"
+            j = j + 1
+        }
+        j = 0
+        while j < len(node.outputs) {
+            out = out + "  out " + node.outputs[j] + "\n"
+            j = j + 1
+        }
+        i = i + 1
+    }
+    out
+}
