@@ -29,7 +29,7 @@ struct gemm_workspace {
 
 gemm_workspace g_gemm_workspace
 
-func gemm_config_create(params: gemm_params) gemm_config {
+func gemm_config_create(gemm_params params) gemm_config {
     return gemm_config {
         m: params.m,
         n: params.n,
@@ -41,7 +41,7 @@ func gemm_config_create(params: gemm_params) gemm_config {
     }
 }
 
-func gpu_gemm_validate(a_tensor: abi.device_tensor, b_tensor: abi.device_tensor, c_tensor: abi.device_tensor, config: gemm_config) (bool, string) {
+func gpu_gemm_validate(abi.device_tensor a_tensor, abi.device_tensor b_tensor, abi.device_tensor c_tensor, gemm_config config) (bool, string) {
     if a_tensor.element_count <= 0 || b_tensor.element_count <= 0 || c_tensor.element_count <= 0 {
         return false, "Invalid tensor element counts"
     }
@@ -69,10 +69,10 @@ func gpu_gemm_validate(a_tensor: abi.device_tensor, b_tensor: abi.device_tensor,
 }
 
 func gpu_gemm(
-    a_tensor: abi.device_tensor,
-    b_tensor: abi.device_tensor,
-    c_tensor: abi.device_tensor,
-    config: gemm_config
+    abi.device_tensor a_tensor,
+    abi.device_tensor b_tensor,
+    abi.device_tensor c_tensor,
+    gemm_config config
 ) (abi.device_tensor, bool, string) {
     valid, err := gpu_gemm_validate(a_tensor, b_tensor, c_tensor, config)
     if !valid {
@@ -147,7 +147,7 @@ func cuda_kernel_gemm_batch(
     return true, ""
 }
 
-func gpu_gemm_get_workspace_size(m: int, n: int, k: int) (int64, bool, string) {
+func gpu_gemm_get_workspace_size(int m, int n, int k) (int64, bool, string) {
     if m <= 0 || n <= 0 || k <= 0 {
         return 0, false, "Invalid dimensions"
     }
@@ -156,7 +156,7 @@ func gpu_gemm_get_workspace_size(m: int, n: int, k: int) (int64, bool, string) {
     return workspace_bytes, true, ""
 }
 
-func gpu_gemm_allocate_workspace(bytes: int64, device_id: int) (bool, string) {
+func gpu_gemm_allocate_workspace(int64 bytes, int device_id) (bool, string) {
     if bytes <= 0 {
         return false, "Invalid workspace size"
     }
