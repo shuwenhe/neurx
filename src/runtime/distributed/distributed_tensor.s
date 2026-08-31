@@ -46,7 +46,7 @@ func new_distributed_tensor(string tensor_id, int64[] shape, string dtype, tenso
         rank: len(shape),
     }
     local_handle := new_tensor_handle(0, "cuda", 0, 1, dtype)
-    shard_locs := int[]{}
+    shard_locs := []int{}
     distributed_tensor {
         tensor_id: tensor_id,
         metadata: metadata,
@@ -74,7 +74,7 @@ func (distributed_tensor* dtensor) is_synced() bool {
     !dtensor.requires_sync
 }
 
-func (distributed_tensor* dtensor) get_shape() int64[] {
+func (distributed_tensor* dtensor) get_shape() []int64 {
     dtensor.metadata.shape
 }
 
@@ -108,7 +108,7 @@ func (distributed_tensor_manager* mgr) get_tensor(string tensor_id) distributed_
     if tensor_id in mgr.tensors {
         mgr.tensors[tensor_id]
     }
-    new_distributed_tensor("", int64[]{}, "float32", tensor_layout_dense)
+    new_distributed_tensor("", []int64{}, "float32", tensor_layout_dense)
 }
 
 func (distributed_tensor_manager* mgr) has_tensor(string tensor_id) bool {
@@ -143,7 +143,7 @@ func (distributed_tensor_manager* mgr) all_gather_tensor(string tensor_id) bool 
     }
     dtensor := mgr.get_tensor(tensor_id)
     comm := mgr.ctx.get_communicator()
-    recv_tensors := tensor_handle[]{}
+    recv_tensors := []tensor_handle{}
     i := 0
     for i < mgr.ctx.get_world_size() {
         recv_tensors = append(recv_tensors, dtensor.local_shard)

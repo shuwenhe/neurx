@@ -56,9 +56,9 @@ func new_distillation_state(distillation_config config) distillation_state {
     }
 }
 
-func distillation_softmax(float[] logits, float temperature) float[] {
+func distillation_softmax(float[] logits, float temperature) []float {
     int n = len(logits)
-    float[] probs = float[]{cap: n}
+    float[] probs = make([]float, n)
     if n == 0 {
         return probs
     }

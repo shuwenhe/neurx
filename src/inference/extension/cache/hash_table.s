@@ -37,12 +37,12 @@ func create_hash_table(int bucket_count, int max_entries_val) hash_table {
     ht.collision_count = 0
     ht.load_factor_threshold = 0.75
     ht.current_time = 0
-    ht.buckets = []hash_entry{cap: bucket_count * 10}
+    ht.buckets = make([]hash_entry, bucket_count * 10)
     int i = 0
     for i < bucket_count {
         hash_entry entry = hash_entry{}
         entry.key = ""
-        entry.block_ids = int[]{cap: 32}
+        entry.block_ids = make([]int, 32)
         entry.next_idx = -1
         entry.timestamp = 0
         entry.access_count = 0
@@ -102,7 +102,7 @@ func hash_table_insert(hash_table ht, string key, int[] block_ids) int {
     return 1
 }
 
-func hash_table_lookup(hash_table ht, string key) int[] {
+func hash_table_lookup(hash_table ht, string key) []int {
     int index = hash_function(key, ht.num_buckets)
     int entry_idx = index
     for entry_idx >= 0 && entry_idx < len(ht.buckets) {
@@ -116,7 +116,7 @@ func hash_table_lookup(hash_table ht, string key) int[] {
         entry_idx = current.next_idx
     }
     print("[HashTable] MISS for key " + key + "\n")
-    return int[]{cap: 0}
+    return []int{}
 }
 
 func hash_table_remove(hash_table ht, string key) int {

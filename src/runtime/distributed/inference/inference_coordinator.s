@@ -145,9 +145,9 @@ func broadcast_request_to_ranks(
 func collect_results_from_ranks(
     int[] source_ranks,
     string reduce_op
-) float[] {
+) []float {
     printf("Collecting results from %d ranks with %s\n", len(source_ranks), reduce_op)
-    float[] result = float[]{}
+    float[] result = []float{}
     for i = 0; i < 10; i = i + 1 {
         result = append(result, 0.5)
     }

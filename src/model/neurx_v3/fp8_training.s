@@ -11,7 +11,7 @@ struct fp8_config {
 }
 
 func new_fp8_config() fp8_config {
-    string[] no_quant = string[]{cap: 4}
+    string[] no_quant = make([]string, 4)
     no_quant[0] = "embedding"
     no_quant[1] = "attention_softmax"
     no_quant[2] = "norm"
@@ -160,8 +160,8 @@ func quantize_matrix_blockwise(
     int tiles_m = (M + tile_m - 1) / tile_m
     int tiles_n = (N + tile_n - 1) / tile_n
     int total_tiles = tiles_m * tiles_n
-    int[] fp8_data = int[]{cap: M * N}
-    float[] scales = float[]{cap: total_tiles}
+    int[] fp8_data = make([]int, M * N)
+    float[] scales = make([]float, total_tiles)
     float global_max = 0.0
     int overflow_count = 0
     int underflow_count = 0
@@ -183,7 +183,7 @@ func quantize_matrix_blockwise(
             int n_end = n_start + tile_n
             if n_end > N { n_end = N }
             int tile_elems = (m_end - m_start) * (n_end - n_start)
-            float[] tile_data = float[]{cap: tile_elems}
+            float[] tile_data = make([]float, tile_elems)
             int idx = 0
             int mi = m_start
             for mi < m_end {
@@ -243,12 +243,12 @@ func quantize_matrix_blockwise(
     (tensor, stats)
 }
 
-func dequantize_matrix_blockwise(fp8_tensor t, bool is_e5m2) float[] {
+func dequantize_matrix_blockwise(fp8_tensor t, bool is_e5m2) []float {
     int M = t.rows
     int N = t.cols
     int tiles_m = (M + t.tile_m - 1) / t.tile_m
     int tiles_n = (N + t.tile_n - 1) / t.tile_n
-    float[] result = float[]{cap: M * N}
+    float[] result = make([]float, M * N)
     int ti = 0
     for ti < tiles_m {
         int m_start = ti * t.tile_m
@@ -285,8 +285,8 @@ func dequantize_matrix_blockwise(fp8_tensor t, bool is_e5m2) float[] {
 func fp8_gemm(
     fp8_tensor a, fp8_tensor b, int M, int K, int N,
     bool is_e5m2
-) float[] {
-    float[] c = float[]{cap: M * N}
+) []float {
+    float[] c = make([]float, M * N)
     int idx = 0
     for idx < M * N { c[idx] = 0.0; idx = idx + 1 }
     int tiles_m = (M + a.tile_m - 1) / a.tile_m
@@ -355,7 +355,7 @@ func new_fp8_training_state(fp8_config cfg) fp8_training_state {
     fp8_training_state {
         config: cfg,
         step: 0,
-        quant_stats_history: []fp8_quant_stats{cap: 0},
+        quant_stats_history: make([]fp8_quant_stats, 0),
         grad_scale: 1.0,
         grad_scale_growth: 2.0,
         grad_scale_backoff: 0.5,
@@ -365,7 +365,7 @@ func new_fp8_training_state(fp8_config cfg) fp8_training_state {
 func fp8_linear_forward(
     fp8_training_state state, float[] input, float[] weight,
     int M, int K, int N
-) float[] {
+) []float {
     fp8_config cfg = state.config
     bool use_e5m2 = cfg.forward_dtype == "e5m2"
     (fp8_tensor input_fp8, fp8_quant_stats stat_i) = quantize_matrix_blockwise(

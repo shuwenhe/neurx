@@ -201,13 +201,13 @@ func init_dataloader(dataloader_config cfg) dataloader {
     dataloader_stats init_stats
     int raw_buf_size = cfg.batch_size * cfg.prefetch_factor * 4
     sample_buffer raw_buf
-    raw_buf.samples = []raw_sample{cap: raw_buf_size}
+    raw_buf.samples = make([]raw_sample, raw_buf_size)
     raw_buf.count = 0
     raw_buf.capacity = raw_buf_size
     raw_buf.is_full = false
     int tok_buf_size = cfg.batch_size * cfg.prefetch_factor * 2
     tokenized_buffer tok_buf
-    tok_buf.samples = []tokenized_sample{cap: tok_buf_size}
+    tok_buf.samples = make([]tokenized_sample, tok_buf_size)
     tok_buf.count = 0
     tok_buf.capacity = tok_buf_size
     tok_buf.is_ready = false
@@ -232,7 +232,7 @@ func init_dataloader(dataloader_config cfg) dataloader {
     loader.current_file_index = 0
     loader.raw_buffer = raw_buf
     loader.tokenized_buffer = tok_buf
-    loader.gpu_queue = []training_batch{cap: cfg.prefetch_factor}
+    loader.gpu_queue = make([]training_batch, cfg.prefetch_factor)
     loader.sampler = samp
     loader.packer = pk
     loader.stats = init_stats
@@ -244,16 +244,16 @@ func init_dataloader(dataloader_config cfg) dataloader {
     return loader
 }
 
-func scan_data_files(string[] paths, data_format fmt) string[] {
-    return string[]{}
+func scan_data_files(string[] paths, data_format fmt) []string {
+    return []string{}
 }
 
 func estimate_total_samples(string[] files) int {
     return 100000000
 }
 
-func generate_shuffled_indices(int n, uint64 seed) int[] {
-    int[] indices = int[]{cap: n}
+func generate_shuffled_indices(int n, uint64 seed) []int {
+    int[] indices = make([]int, n)
     int i = 0
     for i < n {
         indices[i] = i;
@@ -303,7 +303,7 @@ func prepare_next_batches(ref dataloader loader) {
 }
 
 func fetch_samples_from_tokenized_buffer(dataloader loader, int count) []tokenized_sample {
-    []tokenized_sample result = []tokenized_sample{cap: count}
+    []tokenized_sample result = make([]tokenized_sample, count)
     int available = min_int(count, loader.tokenized_buffer.count)
     int i = 0
     for i < available {
@@ -392,24 +392,24 @@ func tokenize_single(raw_sample raw, dataloader_config cfg) tokenized_sample {
     return result
 }
 
-func run_tokenizer(string text, dataloader_config cfg) int[] {
+func run_tokenizer(string text, dataloader_config cfg) []int {
     int estimated_len = len(text) / 4
-    int[] ids = int[]{cap: estimated_len}
+    int[] ids = make([]int, estimated_len)
     int i = 0
     for i < estimated_len { ids[i] = i % 128000; i = i + 1 }
     return ids
 }
 
-func truncate(int[] ids, int max_len) int[] {
-    int[] result = int[]{cap: max_len}
+func truncate(int[] ids, int max_len) []int {
+    int[] result = make([]int, max_len)
     int i = 0
     for i < max_len && i < len(ids) { result[i] = ids[i]; i = i + 1 }
     return result
 }
 
-func add_special_tokens(int[] ids) int[] {
+func add_special_tokens(int[] ids) []int {
     int new_len = len(ids) + 2
-    int[] result = int[]{cap: new_len}
+    int[] result = make([]int, new_len)
     result[0] = 1
     int i = 0
     for i < len(ids) { result[i+1] = ids[i]; i = i + 1 }
@@ -417,15 +417,15 @@ func add_special_tokens(int[] ids) int[] {
     return result
 }
 
-func create_attention_mask(int seq_len) int[] {
-    int[] mask = int[]{cap: seq_len}
+func create_attention_mask(int seq_len) []int {
+    int[] mask = make([]int, seq_len)
     int i = 0
     for i < seq_len { mask[i] = 1; i = i + 1 }
     return mask
 }
 
-func create_position_ids(int seq_len) int[] {
-    int[] pos = int[]{cap: seq_len}
+func create_position_ids(int seq_len) []int {
+    int[] pos = make([]int, seq_len)
     int i = 0
     for i < seq_len { pos[i] = i; i = i + 1 }
     return pos
@@ -580,8 +580,8 @@ func calculate_token_repetition_ratio(int[] tokens) float {
     return float_of_int(max_count) / float_of_int(len(tokens))
 }
 
-func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed) int[] {
-    int[] local_indices = int[]{cap: num_samples_needed}
+func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed) []int {
+    int[] local_indices = make([]int, num_samples_needed)
     int fetched = 0
     for fetched < num_samples_needed {
         int global_idx = samp.shuffled_indices[samp.current_index]
@@ -643,9 +643,9 @@ func float_of_int(int n) float {
 func string(int i) string { return "" }
 
 func allocate_2d_int(int rows, int cols) int[][] {
-    int[][] m = int[][]{cap: rows}
+    int[][] m = intmake([][], rows)
     int i = 0
-    for i < rows { m[i] = int[]{cap: cols}; i = i + 1 }
+    for i < rows { m[i] = make([]int, cols); i = i + 1 }
     return m
 }
 
@@ -664,9 +664,9 @@ func set_consecutive(int[] arr, int start, int count, int from_val) {
     for i < count { arr[start+i] = from_val+i; i = i + 1 }
 }
 
-func build_labels(int[][][] input_ids, int batch, int seq) float[] {
+func build_labels(int[][][] input_ids, int batch, int seq) []float {
     int total = batch * seq
-    float[] labels = float[]{cap: total}
+    float[] labels = make([]float, total)
     int b = 0
     for b < batch {
         int t = 0

@@ -28,7 +28,7 @@ func parse_medical_sample_json(string json_line) medical_sample {
     medical_sample sample
     sample.question = ""
     sample.answer = ""
-    sample.options = string[]{}
+    sample.options = []string{}
     sample.correct_option = 0
     sample.subject = ""
     sample.explanation = ""
@@ -45,8 +45,8 @@ func load_medical_dataset_from_json(string file_path, int max_samples) medical_d
     return dataset
 }
 
-func tokenize_text(string text, int vocab_size) int[] {
-    int[] token_ids = int[]{}
+func tokenize_text(string text, int vocab_size) []int {
+    int[] token_ids = []int{}
     int i = 0
     for i < len(text) && len(token_ids) < 512 {
         string ch = substring(text, i, i + 1)
@@ -60,7 +60,7 @@ func tokenize_text(string text, int vocab_size) int[] {
 func create_batch_from_samples([]medical_sample samples, int batch_size, int seq_len, int vocab_size) int[][] {
     int[][] batches = int[][]{}
     int batch_count = 0
-    int[] current_batch = int[]{}
+    int[] current_batch = []int{}
     int sample_idx = 0
     for sample_idx < len(samples) {
         int[] input_ids = tokenize_text(samples[sample_idx].question + " " + samples[sample_idx].answer, vocab_size)
@@ -71,7 +71,7 @@ func create_batch_from_samples([]medical_sample samples, int batch_size, int seq
         }
         if len(current_batch) >= batch_size * seq_len {
             batches = append(batches, current_batch)
-            current_batch = int[]{}
+            current_batch = []int{}
             batch_count = batch_count + 1
         }
         sample_idx = sample_idx + 1

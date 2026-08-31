@@ -67,7 +67,7 @@ func create_logprobs_manager(logprobs_config config) logprobs_manager* {
     return *mgr
 }
 
-func (logprobs_manager* mgr) compute_logprobs(float32[] logits, int32[] selected_token_ids) logprob_output[] {
+func (logprobs_manager* mgr) compute_logprobs(float32[] logits, int32[] selected_token_ids) []logprob_output {
     outputs := make(logprob_output[])
     max_logit := logits[0]
     for i := 1; i < len(logits); i = i + 1 {
@@ -163,7 +163,7 @@ func (logprobs_manager* mgr) add_token_output(logprob_output output) {
     mgr.token_outputs = append(mgr.token_outputs, output)
 }
 
-func (logprobs_manager* mgr) get_token_outputs(int32 start, int32 end) logprob_output[] {
+func (logprobs_manager* mgr) get_token_outputs(int32 start, int32 end) []logprob_output {
     result := make(logprob_output[])
     for i := start; i < end && int32(i) < int32(len(mgr.token_outputs)); i = i + 1 {
         result = append(result, mgr.token_outputs[i])

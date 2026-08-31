@@ -103,7 +103,7 @@ func (c_binding_manager* mgr) call_kernel_matmul(string kernel_name, float32[[]]
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_attention(string kernel_name, float32[] query, float32[] key, float32[] value) float32[] {
+func (c_binding_manager* mgr) call_kernel_attention(string kernel_name, float32[] query, float32[] key, float32[] value) []float32 {
     result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
@@ -120,7 +120,7 @@ func (c_binding_manager* mgr) call_kernel_attention(string kernel_name, float32[
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_rope(string kernel_name, float32[] input, int32 seq_len) float32[] {
+func (c_binding_manager* mgr) call_kernel_rope(string kernel_name, float32[] input, int32 seq_len) []float32 {
     result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
@@ -135,7 +135,7 @@ func (c_binding_manager* mgr) call_kernel_rope(string kernel_name, float32[] inp
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_softmax(string kernel_name, float32[] logits) float32[] {
+func (c_binding_manager* mgr) call_kernel_softmax(string kernel_name, float32[] logits) []float32 {
     result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
@@ -150,7 +150,7 @@ func (c_binding_manager* mgr) call_kernel_softmax(string kernel_name, float32[] 
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_norm(string kernel_name, float32[] input, float32 epsilon) float32[] {
+func (c_binding_manager* mgr) call_kernel_norm(string kernel_name, float32[] input, float32 epsilon) []float32 {
     result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
@@ -165,7 +165,7 @@ func (c_binding_manager* mgr) call_kernel_norm(string kernel_name, float32[] inp
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_activation(string kernel_name, float32[] input, string activation_type) float32[] {
+func (c_binding_manager* mgr) call_kernel_activation(string kernel_name, float32[] input, string activation_type) []float32 {
     result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
@@ -207,7 +207,7 @@ func (c_binding_manager* mgr) get_kernel_wrapper_info(string kernel_name) map[st
     return info
 }
 
-func (c_binding_manager* mgr) list_available_kernels() string[] {
+func (c_binding_manager* mgr) list_available_kernels() []string {
     kernels := make(string[])
 
     for name := range mgr.kernel_wrappers {

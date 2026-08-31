@@ -103,7 +103,7 @@ func (helion_accelerator* accel) accelerate_attention(int32 batch_size, int32 se
     return result
 }
 
-func (helion_accelerator* accel) accelerate_softmax(float32[] logits) float32[] {
+func (helion_accelerator* accel) accelerate_softmax(float32[] logits) []float32 {
     output := make(float32[])
 
     max_val := 0.0
@@ -143,7 +143,7 @@ func (helion_accelerator* accel) set_optimization_level(int32 level) {
     }
 }
 
-func (helion_accelerator* accel) apply_quantization(float32[] data, int32 bits) int32[] {
+func (helion_accelerator* accel) apply_quantization(float32[] data, int32 bits) []int32 {
     quantized := make(int32[])
 
     scale := float32((1 << uint32(bits - 1)) - 1)
@@ -156,7 +156,7 @@ func (helion_accelerator* accel) apply_quantization(float32[] data, int32 bits) 
     return quantized
 }
 
-func (helion_accelerator* accel) dequantize(int32[] data, int32 bits) float32[] {
+func (helion_accelerator* accel) dequantize(int32[] data, int32 bits) []float32 {
     dequantized := make(float32[])
 
     scale := float32((1 << uint32(bits - 1)) - 1)

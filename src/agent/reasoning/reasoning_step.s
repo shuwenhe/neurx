@@ -117,7 +117,7 @@ func (reasoning_step* step) is_completed() bool {
 }
 
 func (reasoning_step* step) add_child_step(int child_id) reasoning_step {
-    child_ids := int[]{cap: len(step.child_step_ids) + 1}
+    child_ids := make([]int, len(step.child_step_ids) + 1)
     i := 0
     for i < len(step.child_step_ids) {
         child_ids[i] = step.child_step_ids[i]
@@ -129,7 +129,7 @@ func (reasoning_step* step) add_child_step(int child_id) reasoning_step {
 }
 
 func (reasoning_step* step) clone() reasoning_step {
-    child_ids := int[]{cap: len(step.child_step_ids)}
+    child_ids := make([]int, len(step.child_step_ids))
     i := 0
     for i < len(step.child_step_ids) {
         child_ids[i] = step.child_step_ids[i]

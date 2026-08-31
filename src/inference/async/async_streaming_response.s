@@ -49,7 +49,7 @@ func new_async_streaming_response_manager(buffer_size int, flush_interval int64,
     }
 }
 
-func (AsyncStreamingResponseManager* manager) start_stream(request_id string[], response_id string[]) bool {
+func (AsyncStreamingResponseManager* manager) start_stream(request_id []string, response_id string[]) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) == 0 || len(response_id) == 0 {
@@ -77,7 +77,7 @@ func (AsyncStreamingResponseManager* manager) start_stream(request_id string[], 
     return true
 }
 
-func (AsyncStreamingResponseManager* manager) add_token_to_stream(request_id string[], token int, text string[]) bool {
+func (AsyncStreamingResponseManager* manager) add_token_to_stream(request_id []string, token int, text string[]) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) == 0 {
@@ -100,13 +100,13 @@ func (AsyncStreamingResponseManager* manager) add_token_to_stream(request_id str
     return true
 }
 
-func (AsyncStreamingResponseManager* manager) flush_stream(request_id string[]) bool {
+func (AsyncStreamingResponseManager* manager) flush_stream(request_id []string) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     return manager.flush_stream_internal(request_id)
 }
 
-func (AsyncStreamingResponseManager* manager) flush_stream_internal(request_id string[]) bool {
+func (AsyncStreamingResponseManager* manager) flush_stream_internal(request_id []string) bool {
     if len(request_id) == 0 {
         return false
     }
@@ -126,7 +126,7 @@ func (AsyncStreamingResponseManager* manager) flush_stream_internal(request_id s
     return true
 }
 
-func (AsyncStreamingResponseManager* manager) complete_stream(request_id string[]) bool {
+func (AsyncStreamingResponseManager* manager) complete_stream(request_id []string) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) == 0 {
@@ -149,7 +149,7 @@ func (AsyncStreamingResponseManager* manager) complete_stream(request_id string[
     return true
 }
 
-func (AsyncStreamingResponseManager* manager) report_stream_error(request_id string[], error_msg string[]) bool {
+func (AsyncStreamingResponseManager* manager) report_stream_error(request_id []string, error_msg string[]) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) == 0 {
@@ -165,7 +165,7 @@ func (AsyncStreamingResponseManager* manager) report_stream_error(request_id str
     return true
 }
 
-func (AsyncStreamingResponseManager* manager) get_stream_status(request_id string[]) map[string]interface{} {
+func (AsyncStreamingResponseManager* manager) get_stream_status(request_id []string) map[string]interface{} {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) == 0 {
@@ -183,7 +183,7 @@ func (AsyncStreamingResponseManager* manager) get_stream_status(request_id strin
     return status
 }
 
-func (AsyncStreamingResponseManager* manager) on_token_ready_callback(request_id string[], callback string[]) {
+func (AsyncStreamingResponseManager* manager) on_token_ready_callback(request_id []string, callback string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) > 0 && len(callback) > 0 {
@@ -191,7 +191,7 @@ func (AsyncStreamingResponseManager* manager) on_token_ready_callback(request_id
     }
 }
 
-func (AsyncStreamingResponseManager* manager) on_stream_end_callback(request_id string[], callback string[]) {
+func (AsyncStreamingResponseManager* manager) on_stream_end_callback(request_id []string, callback string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) > 0 && len(callback) > 0 {
@@ -199,7 +199,7 @@ func (AsyncStreamingResponseManager* manager) on_stream_end_callback(request_id 
     }
 }
 
-func (AsyncStreamingResponseManager* manager) on_error_callback(request_id string[], callback string[]) {
+func (AsyncStreamingResponseManager* manager) on_error_callback(request_id []string, callback string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) > 0 && len(callback) > 0 {
@@ -225,7 +225,7 @@ func (AsyncStreamingResponseManager* manager) get_streaming_statistics() map[str
     return stats
 }
 
-func (AsyncStreamingResponseManager* manager) cleanup_stream(request_id string[]) {
+func (AsyncStreamingResponseManager* manager) cleanup_stream(request_id []string) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) > 0 {

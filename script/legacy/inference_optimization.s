@@ -207,7 +207,7 @@ func (inference_engine* engine) sample_token(logits float[]64, temperature float
 
 func (inference_engine* engine) generate(request inference_request) inference_response {
     start_time := time.Now()
-    generated_tokens := int[]{}
+    generated_tokens := []int{}
     current_tokens := request.prompt
     for len(generated_tokens) < request.max_tokens {
         use_cache := engine.config.use_kv_cache
@@ -239,7 +239,7 @@ func (inference_engine* engine) generate(request inference_request) inference_re
     }
 }
 
-func (inference_engine* engine) model_forward(tokens int[]) float[]64 {
+func (inference_engine* engine) model_forward(tokens []int) float[]64 {
     logits := make(float[]64, 128000)
     for i := range logits {
         logits[i] = math.Sin(float64(i) / 1000.0)

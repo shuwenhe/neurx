@@ -650,7 +650,7 @@ func get_model_by_type(string model_type) []model_spec {
     result
 }
 
-func list_all_model_names() string[] {
+func list_all_model_names() []string {
     models := get_all_models()
     names := []()
     for model in models.iter() {

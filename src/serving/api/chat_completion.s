@@ -123,7 +123,7 @@ func (h chat_completion_handler*) handle_streaming_chat(
 }
 
 func (h chat_completion_handler*) build_prompt_from_messages(
-	messages chat_message[],
+	messages []chat_message,
 ) string {
 	prompt := ""
 	for msg := range messages {
@@ -239,7 +239,7 @@ func (s chat_completion_stream*) finish_stream(finish_reason string) bool {
 	return true
 }
 
-func (s chat_completion_stream*) get_pending_chunks() chat_completion_response[] {
+func (s chat_completion_stream*) get_pending_chunks() []chat_completion_response {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.current_position >= int32(len(s.stream_buffer)) {
@@ -317,7 +317,7 @@ func (bp chat_completion_batch_processor*) process_batch() int32 {
 	return processed
 }
 
-func (bp chat_completion_batch_processor*) get_results() chat_completion_response[] {
+func (bp chat_completion_batch_processor*) get_results() []chat_completion_response {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 	results := make(chat_completion_response[], 0, len(bp.results))

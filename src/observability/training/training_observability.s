@@ -225,7 +225,7 @@ func init_monitoring(monitoring_config cfg) monitoring_manager {
     console_writer cw
     cw.verbose = true
     moving_window lw
-    lw.values = float[]{cap: 100}
+    lw.values = make([]float, 100)
     lw.window_size = 100
     lw.current_index = 0
     lw.is_filled_once = false
@@ -731,8 +731,8 @@ func compute_histogram_statistics(float[] values, ref histogram_metric hist) {
     hist.mean = mean
     hist.std_dev = std
     int num_bins = 50
-    hist.bins = float[]{cap: num_bins + 1}
-    hist.counts = int[]{cap: num_bins}
+    hist.bins = make([]float, num_bins + 1)
+    hist.counts = make([]int, num_bins)
     float range = max_val - min_val
     if range == 0 { range = 1.0 }
     float bin_width = range / float_of_int(num_bins)

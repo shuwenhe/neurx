@@ -104,7 +104,7 @@ func (triton_engine* engine) matmul_fp16(float32[[]] matrix_a, float32[[]] matri
     return engine.matmul_fp32(matrix_a, matrix_b)
 }
 
-func (triton_engine* engine) rope_forward(float32[] q_input, int32 seq_len, float32 base) float32[] {
+func (triton_engine* engine) rope_forward(float32[] q_input, int32 seq_len, float32 base) []float32 {
     rope_output := make(float32[])
 
     dim := len(q_input)
@@ -131,7 +131,7 @@ func (triton_engine* engine) rope_forward(float32[] q_input, int32 seq_len, floa
     return rope_output
 }
 
-func (triton_engine* engine) softmax_forward(float32[] logits) float32[] {
+func (triton_engine* engine) softmax_forward(float32[] logits) []float32 {
     output := make(float32[])
 
     if len(logits) == 0 {
@@ -165,7 +165,7 @@ func (triton_engine* engine) softmax_forward(float32[] logits) float32[] {
     return output
 }
 
-func (triton_engine* engine) gelu_forward(float32[] input) float32[] {
+func (triton_engine* engine) gelu_forward(float32[] input) []float32 {
     output := make(float32[])
 
     for i := 0; i < len(input); i = i + 1 {
@@ -177,7 +177,7 @@ func (triton_engine* engine) gelu_forward(float32[] input) float32[] {
     return output
 }
 
-func (triton_engine* engine) fused_attention(float32[] query, float32[] key, float32[] value) float32[] {
+func (triton_engine* engine) fused_attention(float32[] query, float32[] key, float32[] value) []float32 {
     q_len := len(query)
     k_len := len(key)
 

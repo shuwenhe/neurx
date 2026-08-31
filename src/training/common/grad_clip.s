@@ -15,7 +15,7 @@ func new_grad_clip_config(string clip_mode, float max_norm) grad_clip_config {
     }
 }
 
-func clip_grad_norm(float[] grads, float max_norm) float[] {
+func clip_grad_norm(float[] grads, float max_norm) []float {
     if max_norm <= 0.0 {
         return grads
     }
@@ -34,7 +34,7 @@ func clip_grad_norm(float[] grads, float max_norm) float[] {
         return grads
     }
     float scale = max_norm / (total_norm + 0.0000001)
-    float[] clipped = float[]{cap: len(grads)}
+    float[] clipped = make([]float, len(grads))
     i = 0
     for i < len(grads) {
         clipped[i] = grads[i] * scale
@@ -43,8 +43,8 @@ func clip_grad_norm(float[] grads, float max_norm) float[] {
     return clipped
 }
 
-func clip_grad_value(float[] grads, float clip_value) float[] {
-    float[] clipped = float[]{cap: len(grads)}
+func clip_grad_value(float[] grads, float clip_value) []float {
+    float[] clipped = make([]float, len(grads))
     int i = 0
     for i < len(grads) {
         float g = grads[i]
@@ -62,8 +62,8 @@ func clip_grad_value(float[] grads, float clip_value) float[] {
     return clipped
 }
 
-func clip_grad_by_norm(float[] grads, float max_norm, int[] param_indices) float[] {
-    float[] subgrads = float[]{cap: len(param_indices)}
+func clip_grad_by_norm(float[] grads, float max_norm, int[] param_indices) []float {
+    float[] subgrads = make([]float, len(param_indices))
     int i = 0
     for i < len(param_indices) {
         int idx = param_indices[i]
@@ -89,7 +89,7 @@ func clip_grad_by_norm(float[] grads, float max_norm, int[] param_indices) float
         return grads
     }
     float scale = max_norm / (total_norm + 0.0000001)
-    float[] clipped = float[]{cap: len(grads)}
+    float[] clipped = make([]float, len(grads))
     i = 0
     for i < len(grads) {
         clipped[i] = grads[i]

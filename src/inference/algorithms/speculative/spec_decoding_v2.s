@@ -107,7 +107,7 @@ func new_draft_generator(string generator_id, draft_model_manager model_manager)
 }
 
 func (draft_generator* gen) generate_draft_tokens(int num_tokens) draft_sequence {
-    tokens := draft_token[]{}
+    tokens := []draft_token{}
     i := 0
     for i < num_tokens {
         token := draft_token {
@@ -146,8 +146,8 @@ func new_token_verifier(string verifier_id, float threshold) token_verifier {
 }
 
 func (token_verifier* verifier) verify_tokens(draft_sequence draft_tokens, float[] target_logits) verification_result {
-    accepted_positions := int[]{}
-    rejected_positions := int[]{}
+    accepted_positions := []int{}
+    rejected_positions := []int{}
     i := 0
     all_accepted := true
     for i < len(draft_tokens.tokens) {
@@ -210,7 +210,7 @@ func new_speculative_decoder(string decoder_id, draft_generator gen, token_verif
 
 func (speculative_decoder* decoder) generate_and_verify(int sequence_length) bool {
     draft_seq := decoder.draft_gen.generate_draft_tokens(decoder.config.num_draft_tokens)
-    target_logits := float[]{}
+    target_logits := []float{}
     i := 0
     for i < draft_seq.num_tokens {
         target_logits = append(target_logits, 0.9)

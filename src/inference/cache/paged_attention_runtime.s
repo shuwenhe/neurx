@@ -114,7 +114,7 @@ func compute_paged_attention_output(
     runtime paged_attention_runtime,
     float[] queries,
     string attention_type
-) float[] {
+) []float {
     num_tokens = compute_seq_len(queries, runtime.config.num_kv_heads, runtime.config.head_size)
     head_size = runtime.config.head_size
     output_size = num_tokens * runtime.config.num_kv_heads * head_size
@@ -191,9 +191,9 @@ func update_batched_prefill(
         batched.runtimes[seq_idx] = run_prefill(
             batched.runtimes[seq_idx],
             prompt_embeddings,
-            float[]{},
-            float[]{},
-            float[]{},
+            []float{},
+            []float{},
+            []float{},
         )
     }
     return batched

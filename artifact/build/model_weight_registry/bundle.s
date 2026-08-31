@@ -217,8 +217,8 @@ func tensor_numel(int[] shape) int {
     elements
 }
 
-func tensor_contiguous_strides(int[] shape) int[] {
-    int[] strides = int[]{cap: len(shape)}
+func tensor_contiguous_strides(int[] shape) []int {
+    int[] strides = make([]int, len(shape))
     int stride = 1
     int i = len(shape) - 1
     for i >= 0 {
@@ -283,7 +283,7 @@ func new_model_weight_registry(int context, string backend, string dtype, int ca
     if context <= 0 || capacity <= 0 || len(backend) == 0 || len(dtype) == 0 {
         return model_weight_registry {context: context, backend: backend, dtype: dtype, name: [], buffer: [], element: [], count: 0, capacity: capacity, sealed: false, valid: false, error_message: "invalid_weight_registry"}
     }
-    model_weight_registry {context: context, backend: backend, dtype: dtype, name: string[]{cap: capacity}, buffer: int[]{cap: capacity}, element: int[]{cap: capacity}, count: 0, capacity: capacity, sealed: false, valid: true, error_message: ""}
+    model_weight_registry {context: context, backend: backend, dtype: dtype, name: make([]string, capacity), buffer: make([]int, capacity), element: make([]int, capacity), count: 0, capacity: capacity, sealed: false, valid: true, error_message: ""}
 }
 
 func model_weight_find(model_weight_registry registry, string name) int {

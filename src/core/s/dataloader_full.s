@@ -92,7 +92,7 @@ func next_batch(dataloader dl) (batch, bool) {
 }
 
 func load_samples_for_indices(dataset ds, int[] indices) []sample {
-    []sample samples = int[]{cap: len(indices)}
+    []sample samples = make([]int, len(indices))
     for idx in indices {
         (sample s, error err) = get_sample(ds, idx)
         if err == nil {
@@ -165,7 +165,7 @@ func assign_to_bucket(int seq_len, bucket_config bcfg) int {
     bucket
 }
 
-func generate_bucket_order(map[int]int[] buckets) int[] {
+func generate_bucket_order(map[int]int[] buckets) []int {
     int[] order = []
     for key in buckets {
         order = append(order, key)

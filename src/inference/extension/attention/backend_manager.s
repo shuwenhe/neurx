@@ -160,8 +160,8 @@ func (attention_backend_manager* mgr) finalize_all() bool {
     true
 }
 
-func (attention_backend_manager* mgr) list_backends() string[] {
-    result := string[]{}
+func (attention_backend_manager* mgr) list_backends() []string {
+    result := []string{}
     for name in mgr.backends.keys() {
         result = append(result, name)
     }

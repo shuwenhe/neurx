@@ -43,7 +43,7 @@ func (g* greedy_sampler) sample(float32[] logits) int32 {
 	return int32(max_idx)
 }
 
-func (g* greedy_sampler) batch_sample(float32[][]] batch_logits) int32[] {
+func (g* greedy_sampler) batch_sample(float32[][]] batch_logits) []int32 {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
 		token := g.sample(batch_logits[i])
@@ -52,7 +52,7 @@ func (g* greedy_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	return results
 }
 
-func (g* greedy_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) float32[] {
+func (g* greedy_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) []float32 {
 	return logits
 }
 
@@ -132,7 +132,7 @@ func (t* top_k_sampler) sample(float32[] logits) int32 {
 	return 0
 }
 
-func (t* top_k_sampler) batch_sample(float32[][]] batch_logits) int32[] {
+func (t* top_k_sampler) batch_sample(float32[][]] batch_logits) []int32 {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
 		token := t.sample(batch_logits[i])
@@ -141,7 +141,7 @@ func (t* top_k_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	return results
 }
 
-func (t* top_k_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) float32[] {
+func (t* top_k_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) []float32 {
 	return logits
 }
 
@@ -241,7 +241,7 @@ func (t* top_p_sampler) sample(float32[] logits) int32 {
 	return 0
 }
 
-func (t* top_p_sampler) batch_sample(float32[][]] batch_logits) int32[] {
+func (t* top_p_sampler) batch_sample(float32[][]] batch_logits) []int32 {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
 		token := t.sample(batch_logits[i])
@@ -250,7 +250,7 @@ func (t* top_p_sampler) batch_sample(float32[][]] batch_logits) int32[] {
 	return results
 }
 
-func (t* top_p_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) float32[] {
+func (t* top_p_sampler) apply_penalties(float32[] logits, int32[] generated_tokens) []float32 {
 	return logits
 }
 

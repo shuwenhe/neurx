@@ -52,7 +52,7 @@ func (b* beam_search_state) init_beams(int32[] initial_tokens) {
 	b.step = 1
 }
 
-func (b* beam_search_state) expand_beams(float32[] logits) beam_hypothesis[] {
+func (b* beam_search_state) expand_beams(float32[] logits) []beam_hypothesis {
 	candidates := make(beam_hypothesis[])
 	for beam_idx := 0; beam_idx < len(b.current_beams); beam_idx = beam_idx + 1 {
 		beam := b.current_beams[beam_idx]
@@ -74,7 +74,7 @@ func (b* beam_search_state) expand_beams(float32[] logits) beam_hypothesis[] {
 	return candidates
 }
 
-func (b* beam_search_state) select_top_beams(beam_hypothesis[] candidates) beam_hypothesis[] {
+func (b* beam_search_state) select_top_beams(beam_hypothesis[] candidates) []beam_hypothesis {
 	if len(candidates) <= 0 {
 		return make(beam_hypothesis[])
 	}
@@ -201,7 +201,7 @@ func (d* diverse_beam_search_state) step(float32[] logits) bool {
 	return true
 }
 
-func calculate_beam_search_probs(float32[] logits) float32[] {
+func calculate_beam_search_probs(float32[] logits) []float32 {
 	max_logit := logits[0]
 	for i := 1; i < len(logits); i = i + 1 {
 		if logits[i] > max_logit {

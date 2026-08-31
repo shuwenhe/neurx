@@ -140,7 +140,7 @@ func (ExecutionScheduler* es) GetScheduleStatistics() map[string]i64 {
     return stats
 }
 
-func (ExecutionScheduler* es) ClearCompleted(completed_ids string[]) {
+func (ExecutionScheduler* es) ClearCompleted(completed_ids []string) {
     for i := 0; i < len(completed_ids); i++ {
         completed := completed_ids[i]
         new_prefill := make(string[], 0)
@@ -170,7 +170,7 @@ func (ExecutionScheduler* es) EstimateLatency(schedule IterationSchedule) i32 {
     return total
 }
 
-func (ExecutionScheduler* es) GetNextBatch(batch_type i32, batch_size i32) string[] {
+func (ExecutionScheduler* es) GetNextBatch(batch_type i32, batch_size i32) []string {
     batch := make(string[], 0)
     if batch_type == PHASE_PREFILL {
         for i := 0; i < len(es.prefill_sequences) && i < int(batch_size); i++ {

@@ -37,7 +37,7 @@ func vector_sum_product(
     float[] attention_weights,
     float[][] values,
     float[] output
-) float[] {
+) []float {
     if len(attention_weights) == 0 || len(values) == 0 {
         return output
     }
@@ -70,7 +70,7 @@ func compute_head_attention(
     int head_idx,
     attention_config config,
     float[][] values_buffer
-) float[] {
+) []float {
     if len(query) != config.head_size {
         return make(float[], config.head_size)
     }
@@ -98,7 +98,7 @@ func compute_multi_head_attention(
     float[] queries,
     paged_kv_cache kv_cache,
     attention_config config
-) float[] {
+) []float {
     if len(queries) == 0 {
         return queries
     }
@@ -128,7 +128,7 @@ func compute_multi_head_attention(
     return output
 }
 
-func apply_causal_mask(float[] scores, int seq_len) float[] {
+func apply_causal_mask(float[] scores, int seq_len) []float {
     int i = 0
     for i < len(scores) {
         i = i + 1
@@ -136,7 +136,7 @@ func apply_causal_mask(float[] scores, int seq_len) float[] {
     return scores
 }
 
-func apply_softmax_cap(float[] weights, float cap_value) float[] {
+func apply_softmax_cap(float[] weights, float cap_value) []float {
     if cap_value <= 0.0 {
         return weights
     }
@@ -173,7 +173,7 @@ func compute_grouped_query_attention(
     int num_kv_heads,
     int head_size,
     float scale
-) float[] {
+) []float {
     int group_size = num_heads / num_kv_heads
     float[] output = make(float[], len(queries))
     return output
@@ -184,7 +184,7 @@ func compute_chunked_attention(
     paged_kv_cache kv_cache,
     int chunk_size,
     attention_config config
-) float[] {
+) []float {
     if len(queries) == 0 || chunk_size <= 0 {
         return queries
     }
@@ -309,7 +309,7 @@ func str_float(float x) string {
     return "0.0"
 }
 
-func compute_softmax_for_attention(float[] scores) float[] {
+func compute_softmax_for_attention(float[] scores) []float {
     if len(scores) == 0 {
         return scores
     }

@@ -216,8 +216,8 @@ func tensor_numel(int[] shape) int {
     elements
 }
 
-func tensor_contiguous_strides(int[] shape) int[] {
-    int[] strides = int[]{cap: len(shape)}
+func tensor_contiguous_strides(int[] shape) []int {
+    int[] strides = make([]int, len(shape))
     int stride = 1
     int i = len(shape) - 1
     for i >= 0 {
@@ -452,8 +452,8 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
     if config.layers <= 0 || config.hidden <= 0 || config.intermediate <= 0 || config.query_heads <= 0 || config.kv_heads <= 0 || config.head_dim <= 0 {
         return transformer_schedule {backend: backend, operations: [], vendor_operations: [], layer_operations: 0, valid: false, error_message: "invalid_transformer_config"}
     }
-    []lowered_op operations = []lowered_op{cap: config.layers * 14 + 3}
-    string[] vendor_operations = string[]{cap: config.layers * 14 + 3}
+    []lowered_op operations = make([]lowered_op, config.layers * 14 + 3)
+    string[] vendor_operations = make([]string, config.layers * 14 + 3)
     int operation_index = 0
     operations[operation_index] = lower_device_op(backend, available, op_embedding(config.dtype, config.hidden)); operation_index = operation_index + 1
     int layer = 0
@@ -544,7 +544,7 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int stream_handle = device_stream_open_handle(context.handle, stream_priority)
     if stream_handle <= 0 { return transformer_plan_invalid(backend, "stream_create_failed") }
     int count = len(descriptor)
-    int[] compiled = int[]{cap: count}
+    int[] compiled = make([]int, count)
     int index = 0
     for index < count {
         if len(descriptor[index]) == 0 {
@@ -623,10 +623,10 @@ func main() {
         tensor_release(output); tensor_release(right); tensor_release(left); device_close(context); return
     }
     lowered_op lowered = lower_device_op("cuda", true, op_residual_add("bf16", 1024))
-    string[] descriptor = string[]{cap: 1}
+    string[] descriptor = make([]string, 1)
     descriptor[0] = lowered.descriptor
     transformer_execution_plan plan = transformer_descriptor_plan_compile(context, "cuda", descriptor, 0)
-    string[] binding = string[]{cap: 1}
+    string[] binding = make([]string, 1)
     binding[0] = residual_add_binding(left.buffer, right.buffer, output.buffer, 1024)
     transformer_execution_result result = transformer_plan_execute(plan, binding, true)
     if result.success { print("PASS: S Transformer Executor launched CUDA BF16 Kernel\n") }

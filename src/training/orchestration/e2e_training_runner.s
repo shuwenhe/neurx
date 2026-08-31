@@ -287,7 +287,7 @@ func compute_learning_rate(
     }
 }
 
-func initialize_normal(int size, float mean, float std) float[] {
+func initialize_normal(int size, float mean, float std) []float {
     data := make(float[], size)
     for i := 0; i < size; i += 1 {
         data[i] = mean + std * (float(i%1000) / 1000.0 - 0.5)
@@ -295,7 +295,7 @@ func initialize_normal(int size, float mean, float std) float[] {
     data
 }
 
-func initialize_ones(int size) float[] {
+func initialize_ones(int size) []float {
     data := make(float[], size)
     for i := 0; i < size; i += 1 {
         data[i] = 1.0

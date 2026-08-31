@@ -239,7 +239,7 @@ func string_contains(string s, char c) bool {
     false
 }
 
-func string_split(string s, string delimiter) string[] {
+func string_split(string s, string delimiter) []string {
     result := string[]()
     if string_len(s) == 0 {
         return result

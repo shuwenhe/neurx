@@ -73,7 +73,7 @@ func (peft_model_wrapper* wrapper) prepare_inputs_for_generation(int32[] input_i
     return inputs
 }
 
-func (peft_model_wrapper* wrapper) forward_pass(float32[] hidden_states) float32[] {
+func (peft_model_wrapper* wrapper) forward_pass(float32[] hidden_states) []float32 {
     output := make(float32[])
     for i := 0; i < len(hidden_states); i = i + 1 {
         output = append(output, hidden_states[i])
@@ -87,7 +87,7 @@ func (peft_model_wrapper* wrapper) forward_pass(float32[] hidden_states) float32
     return output
 }
 
-func (peft_model_wrapper* wrapper) inference(float32[] input_data) float32[] {
+func (peft_model_wrapper* wrapper) inference(float32[] input_data) []float32 {
     if !wrapper.is_compiled {
         wrapper.compile_model()
     }

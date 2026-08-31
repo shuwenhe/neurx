@@ -57,7 +57,7 @@ func launch_cluster_training(
     print("  - Master node: " + config.master_node_address + ":" + itoa(config.master_port))
     print("  - SSH user: " + config.ssh_user)
     print("  - Working directory: " + config.working_dir)
-    []node_process_handle handles = []node_process_handle{cap: config.num_nodes}
+    []node_process_handle handles = make([]node_process_handle, config.num_nodes)
     int node_idx = 0
     for node_idx < config.num_nodes {
         string node_addr = config.node_addresses[node_idx]
@@ -218,8 +218,8 @@ func main() {
     print("[MAIN] Multi-node training completed!")
 }
 
-func split_string(string s, string sep) string[] {
-    string[] parts = string[]{cap: 10}
+func split_string(string s, string sep) []string {
+    string[] parts = make([]string, 10)
     int part_idx = 0
     int i = 0
     string current = ""

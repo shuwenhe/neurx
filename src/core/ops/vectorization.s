@@ -115,7 +115,7 @@ func batch_matmul_blocked(float[][] A, float[][] B, int batch_size, int M, int K
     return result
 }
 
-func element_wise_add(float[] A, float[] B) float[] {
+func element_wise_add(float[] A, float[] B) []float {
     var float[] result = float[](len(A))
     i := 0
     for i < len(A) {
@@ -125,7 +125,7 @@ func element_wise_add(float[] A, float[] B) float[] {
     return result
 }
 
-func element_wise_mul(float[] A, float[] B) float[] {
+func element_wise_mul(float[] A, float[] B) []float {
     var float[] result = float[](len(A))
     i := 0
     for i < len(A) {
@@ -135,7 +135,7 @@ func element_wise_mul(float[] A, float[] B) float[] {
     return result
 }
 
-func element_wise_div(float[] A, float[] B, float epsilon) float[] {
+func element_wise_div(float[] A, float[] B, float epsilon) []float {
     var float[] result = float[](len(A))
     i := 0
     for i < len(A) {
@@ -154,7 +154,7 @@ func element_wise_div(float[] A, float[] B, float epsilon) float[] {
     return result
 }
 
-func element_wise_apply(float[] A, func(float) float func_ptr) float[] {
+func element_wise_apply(float[] A, func(float) float func_ptr) []float {
     var float[] result = float[](len(A))
     i := 0
     for i < len(A) {
@@ -228,7 +228,7 @@ func reduce_max(float[] A) float {
     return max_val
 }
 
-func reduce_sum_batch(float[][] A, int batch_size, int size_per_batch) float[] {
+func reduce_sum_batch(float[][] A, int batch_size, int size_per_batch) []float {
     var float[] result = float[](batch_size)
     b := 0
     for b < batch_size {
@@ -371,7 +371,7 @@ func transpose_in_place(float[][] A, int N) float[][] {
     return A
 }
 
-func scale_vector(float[] A, float scalar) float[] {
+func scale_vector(float[] A, float scalar) []float {
     var float[] result = float[](len(A))
     i := 0
     for i < len(A) {

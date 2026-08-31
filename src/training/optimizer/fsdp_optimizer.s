@@ -124,8 +124,8 @@ func init_fsdp(
         my_start_offset = my_start_offset + cnt
         j = j + 1
     }
-    state.local_param_shard = []double{cap: my_local_count}
-    state.local_grad_shard = []double{cap: my_local_count}
+    state.local_param_shard = make([]double, my_local_count)
+    state.local_grad_shard = make([]double, my_local_count)
     int k = 0
     for k < my_local_count {
         if cfg.dp_rank == 0 {
@@ -135,7 +135,7 @@ func init_fsdp(
         }
         k = k + 1
     }
-    state.param_shards = []fsdp_param_shard{cap: len(param_sizes)}
+    state.param_shards = make([]fsdp_param_shard, len(param_sizes))
     int running_global_offset = 0
     int running_local_offset = 0
     int m = 0
@@ -161,9 +161,9 @@ func init_fsdp(
         }
         m = m + 1
     }
-    state.full_param_buffer = []double{cap: total_global}
-    state.optimizer.exp_avg = []double{cap: my_local_count}
-    state.optimizer.exp_avg_sq = []double{cap: my_local_count}
+    state.full_param_buffer = make([]double, total_global)
+    state.optimizer.exp_avg = make([]double, my_local_count)
+    state.optimizer.exp_avg_sq = make([]double, my_local_count)
     state.optimizer.step_count = 0
     return state
 }
@@ -225,7 +225,7 @@ func get_full_param(fsdp_unit_state state, string param_name) []double {
         perform_allgather(state)
         state.full_buffer_is_valid = true
     }
-    []double result = []double{cap: ps.num_elements}
+    []double result = make([]double, ps.num_elements)
     int k = 0
     for k < ps.num_elements {
         result[k] = state.full_param_buffer[ps.global_offset + k]

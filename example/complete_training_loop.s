@@ -128,7 +128,7 @@ func init_transformer_model(training_config cfg) transformer_model {
     println("  FF dim: " + str(cfg.d_ff))
     tensor token_emb = randn_tensor([cfg.vocab_size, cfg.d_model]) * 0.02
     tensor pos_emb = randn_tensor([cfg.max_seq_length, cfg.d_model]) * 0.02
-    transformer_layer[] layers = transformer_layer[]{}
+    transformer_layer[] layers = []transformer_layer{}
     for layer_idx in 0..cfg.n_layers {
         transformer_layer layer = init_transformer_layer(cfg.d_model, cfg.d_ff)
         layers = append(layers, layer)
@@ -650,7 +650,7 @@ func make_tensor(float[] data, int[] shape, bool requires_grad) tensor:
         grad: none,
     }
 func copy_int_shape(int[] shape) int[]:
-    int[] out = int[]{cap: len(shape)}
+    int[] out = make([]int, len(shape))
     int i = 0
     for i < len(shape) {
         out[i] = shape[i]
@@ -664,7 +664,7 @@ func embedding_lookup(tensor emb, int[] ids) tensor:
     }
     int vocab_size = emb.shape[0]
     int emb_dim = emb.shape[1]
-    float[] out_data = float[]{cap: len(ids) * emb_dim}
+    float[] out_data = make([]float, len(ids) * emb_dim)
     int row = 0
     for row < len(ids) {
         int token_id = ids[row]
@@ -685,7 +685,7 @@ func embedding_lookup(tensor emb, int[] ids) tensor:
 func add_tensors(tensor a, tensor b) tensor:
     """Element-wise addition"""
     if len(a.data) == len(b.data) {
-        float[] out_data = float[]{cap: len(a.data)}
+        float[] out_data = make([]float, len(a.data))
         int i = 0
         for i < len(a.data) {
             out_data[i] = a.data[i] + b.data[i]
@@ -696,7 +696,7 @@ func add_tensors(tensor a, tensor b) tensor:
     if len(a.shape) == 3 && len(b.shape) == 1 && a.shape[2] == b.shape[0] {
         int total = len(a.data)
         int d = b.shape[0]
-        float[] out_data = float[]{cap: total}
+        float[] out_data = make([]float, total)
         int i = 0
         for i < total {
             out_data[i] = a.data[i] + b.data[i - (i / d) * d]
@@ -714,7 +714,7 @@ func apply_dropout(tensor x, float p) tensor:
     if keep_prob <= 0.0 {
         keep_prob = 0.000001
     }
-    float[] out_data = float[]{cap: len(x.data)}
+    float[] out_data = make([]float, len(x.data))
     int i = 0
     for i < len(x.data) {
         if (i - (i / 7) * 7) == 0 {
@@ -735,7 +735,7 @@ func layer_norm(tensor x, tensor params) tensor:
         return x
     }
     int outer = len(x.data) / hidden
-    float[] out_data = float[]{cap: len(x.data)}
+    float[] out_data = make([]float, len(x.data))
     float eps = 0.00001
     int row = 0
     for row < outer {
@@ -780,7 +780,7 @@ func matmul(tensor a, tensor b) tensor:
         return a
     }
     int outer = len(a.data) / a_inner
-    float[] out_data = float[]{cap: outer * out_cols}
+    float[] out_data = make([]float, outer * out_cols)
     int row = 0
     for row < outer {
         int col = 0
@@ -796,7 +796,7 @@ func matmul(tensor a, tensor b) tensor:
         }
         row = row + 1
     }
-    int[] out_shape = int[]{cap: len(a.shape)}
+    int[] out_shape = make([]int, len(a.shape))
     int i = 0
     for i < len(a.shape) - 1 {
         out_shape[i] = a.shape[i]
@@ -812,13 +812,13 @@ func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, int[] mask)
     int batch = q.shape[0]
     int seq_len = q.shape[1]
     int hidden = q.shape[2]
-    float[] out_data = float[]{cap: len(q.data)}
+    float[] out_data = make([]float, len(q.data))
     float inv_scale = 1.0 / sqrt(hidden * 1.0)
     int b = 0
     for b < batch {
         int i = 0
         for i < seq_len {
-            float[] scores = float[]{cap: seq_len}
+            float[] scores = make([]float, seq_len)
             float max_score = -1000000000.0
             int j = 0
             for j < seq_len {
@@ -873,7 +873,7 @@ func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, int[] mask)
     make_tensor(out_data, copy_int_shape(q.shape), q.requires_grad || k.requires_grad || v.requires_grad)
 func swiglu(tensor gate, tensor up) tensor:
     """SwiGLU activation: gate * SiLU(up)"""
-    float[] out_data = float[]{cap: len(gate.data)}
+    float[] out_data = make([]float, len(gate.data))
     int i = 0
     for i < len(gate.data) {
         float x = up.data[i]
@@ -941,7 +941,7 @@ func slice_tensor(tensor t, int[] start, int[] end) tensor:
             finish = begin
         }
         int n = finish - begin
-        float[] out_data = float[]{cap: n}
+        float[] out_data = make([]float, n)
         int i = 0
         for i < n {
             out_data[i] = t.data[begin + i]
@@ -962,7 +962,7 @@ func slice_tensor(tensor t, int[] start, int[] end) tensor:
         int out_b = b1 - b0
         int out_t = t1 - t0
         int out_v = v1 - v0
-        float[] out_data = float[]{cap: out_b * out_t * out_v}
+        float[] out_data = make([]float, out_b * out_t * out_v)
         int bb = 0
         for bb < out_b {
             int tt = 0
@@ -983,7 +983,7 @@ func slice_tensor(tensor t, int[] start, int[] end) tensor:
     t
 func create_labels_from_tokens(int[] tokens, int offset) tensor:
     """Create label tensor shifted by offset positions"""
-    float[] label_data = float[]{cap: len(tokens)}
+    float[] label_data = make([]float, len(tokens))
     int i = 0
     for i < len(tokens) {
         if i + offset < len(tokens) {
@@ -996,7 +996,7 @@ func create_labels_from_tokens(int[] tokens, int offset) tensor:
     make_tensor(label_data, [len(tokens)], false)
 func create_position_indices(int length) tensor:
     """Create position index tensor [0, 1, 2, ..., length-1]"""
-    float[] pos_data = float[]{cap: length}
+    float[] pos_data = make([]float, length)
     int i = 0
     for i < length {
         pos_data[i] = float(i)
@@ -1014,7 +1014,7 @@ func create_attention_mask(int length) int[]:
     return mask
 func backward(computation_graph graph, tensor loss) []tensor:
     """Run backward pass through computation graph"""
-    []tensor grads = []tensor{cap: 1}
+    []tensor grads = make([]tensor, 1)
     grads[0] = loss
     grads
 func compute_global_gradient_norm([]tensor grads) float:
@@ -1039,7 +1039,7 @@ func extract_last_token_logits(tensor logits) float[]:
     int seq_len = logits.shape[1]
     int vocab_size = logits.shape[2]
     int start = (seq_len - 1) * vocab_size
-    float[] out = float[]{cap: vocab_size}
+    float[] out = make([]float, vocab_size)
     int i = 0
     for i < vocab_size {
         out[i] = logits.data[start + i]

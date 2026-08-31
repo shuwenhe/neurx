@@ -41,7 +41,7 @@ struct multihead_attention_state {
 func xavier_init_attention(int in_dim, int out_dim) tensor {
     float limit = sqrt(6.0 / float_from_int(in_dim + out_dim))
     int total = in_dim * out_dim
-    float[] data = float[]{cap: total}
+    float[] data = make([]float, total)
     int i = 0
     for i < total {
         float val = limit * (2.0 * (float_from_int(i % 1000) / 1000.0) - 1.0)
@@ -223,7 +223,7 @@ func float_from_int(int x) float {
 
 func sum_columns(tensor x) tensor {
     int cols = x.shape[1]
-    float[] out = float[]{cap: cols}
+    float[] out = make([]float, cols)
     int j = 0
     for j < cols {
         out[j] = 0.0

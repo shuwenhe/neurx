@@ -41,8 +41,8 @@ func new_phi_failure_detector(
     detector := phi_failure_detector {
         my_rank: my_rank,
         world_size: world_size,
-        histories: heartbeat_history[]{cap: world_size},
-        suspicions: failure_suspicion[]{cap: world_size},
+        histories: make([]heartbeat_history, world_size),
+        suspicions: make([]failure_suspicion, world_size),
         phi_threshold: phi_threshold,
         last_check_time_ns: 0,
         check_interval_ms: check_interval_ms,
@@ -52,7 +52,7 @@ func new_phi_failure_detector(
     for i < world_size {
         history := heartbeat_history {
             rank: i,
-            timestamps_ns: int64[]{cap: 1000},
+            timestamps_ns: make([]int64, 1000),
             max_samples: 1000,
             current_idx: 0,
             mean_interval_ms: 100.0,
@@ -142,9 +142,9 @@ func abs(float x) float {
     return x
 }
 
-func (phi_failure_detector* detector) check_and_detect_failures(int64 now_ns) int[] {
+func (phi_failure_detector* detector) check_and_detect_failures(int64 now_ns) []int {
     detector.now_ns = now_ns
-    int[] suspected_ranks = int[]{cap: detector.world_size}
+    int[] suspected_ranks = make([]int, detector.world_size)
     int rank = 0
     for rank < detector.world_size {
         if rank == detector.my_rank {
@@ -318,12 +318,12 @@ func (phi_failure_detector* detector) ping_rank(int rank, int timeout_ms) bool {
     return true
 }
 
-func (phi_failure_detector* detector) get_suspicions() failure_suspicion[] {
+func (phi_failure_detector* detector) get_suspicions() []failure_suspicion {
     return detector.suspicions
 }
 
-func (phi_failure_detector* detector) get_suspected_ranks() int[] {
-    suspected := int[]{cap: detector.world_size}
+func (phi_failure_detector* detector) get_suspected_ranks() []int {
+    suspected := make([]int, detector.world_size)
     int i = 0
     for i < len(detector.suspicions) {
         if detector.suspicions[i].is_suspected {

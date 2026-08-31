@@ -98,7 +98,7 @@ func (tot_framework* t) add_root_node(content string) string {
 func (tot_framework* t) expand_node(
 	parent_id string,
 	child_contents string[],
-) string[] {
+) []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	parent_index := int32(-1)
@@ -193,7 +193,7 @@ func (tot_framework* t) prune_descendants(parent_index int32) bool {
 	return true
 }
 
-func (tot_framework* t) breadth_first_traversal() string[] {
+func (tot_framework* t) breadth_first_traversal() []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	traversal := make(string[], 0, len(t.all_nodes))
@@ -221,7 +221,7 @@ func (tot_framework* t) breadth_first_traversal() string[] {
 	return traversal
 }
 
-func (tot_framework* t) depth_first_traversal() string[] {
+func (tot_framework* t) depth_first_traversal() []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	traversal := make(string[], 0, len(t.all_nodes))
@@ -250,7 +250,7 @@ func (tot_framework* t) depth_first_traversal() string[] {
 	return traversal
 }
 
-func (tot_framework* t) best_first_traversal() string[] {
+func (tot_framework* t) best_first_traversal() []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	traversal := make(string[], 0, len(t.all_nodes))
@@ -281,7 +281,7 @@ func (tot_framework* t) best_first_traversal() string[] {
 	return traversal
 }
 
-func (tot_framework* t) beam_search_traversal(beam_width int32) string[] {
+func (tot_framework* t) beam_search_traversal(beam_width int32) []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	traversal := make(string[], 0, beam_width*t.max_depth)
@@ -317,7 +317,7 @@ func (tot_framework* t) beam_search_traversal(beam_width int32) string[] {
 	return traversal
 }
 
-func (tot_framework* t) sort_by_score(indices int32[]) int32[] {
+func (tot_framework* t) sort_by_score(indices []int32) []int32 {
 	sorted := make(int32[], 0, len(indices))
 	for idx := range indices {
 		sorted = append(sorted, idx)
@@ -335,7 +335,7 @@ func (tot_framework* t) sort_by_score(indices int32[]) int32[] {
 	return sorted
 }
 
-func (tot_framework* t) get_best_path() string[] {
+func (tot_framework* t) get_best_path() []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	path := make(string[], 0, t.max_depth)
@@ -375,7 +375,7 @@ func (tot_framework* t) get_node_by_id(node_id string) (tree_node, bool) {
 	return tree_node{}, false
 }
 
-func (tot_framework* t) get_children(parent_id string) tree_node[] {
+func (tot_framework* t) get_children(parent_id string) []tree_node {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	children := make(tree_node[], 0)

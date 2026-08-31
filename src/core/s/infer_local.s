@@ -254,7 +254,7 @@ func parse_pair_right(string text) int {
 }
 
 func parse_csv_floats_fixed(string text, int expected_count) tensor {
-    float[] data = float[]{cap: expected_count}
+    float[] data = make([]float, expected_count)
     string current = ""
     int i = 0
     int out_i = 0

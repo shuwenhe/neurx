@@ -25,7 +25,7 @@ func new_loss_state_s(int num_classes) loss_state_s {
     }
 }
 
-func softmax_s(float[] logits) float[] {
+func softmax_s(float[] logits) []float {
     float[] probs
     float max_logit = -1000000.0
     int i = 0
@@ -52,7 +52,7 @@ func softmax_s(float[] logits) float[] {
     normalized
 }
 
-func log_softmax_s(float[] logits) float[] {
+func log_softmax_s(float[] logits) []float {
     float[] log_probs
     float[] probs = softmax_s(logits)
     int i = 0

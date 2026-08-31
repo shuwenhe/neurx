@@ -29,7 +29,7 @@ func get_reasoning_trace_sample(reasoning_trace_dataset_state state, int index) 
 }
 
 func copy_reasoning_trace_samples([]reasoning_trace_sample_state samples) []reasoning_trace_sample_state {
-    []reasoning_trace_sample_state out = []reasoning_trace_sample_state{cap: len(samples)}
+    []reasoning_trace_sample_state out = make([]reasoning_trace_sample_state, len(samples))
     int i = 0
     for i < len(samples) {
         out[i] = reasoning_trace_sample_state {
@@ -82,7 +82,7 @@ func reasoning_trace_sample_render(reasoning_trace_sample_state sample) string {
 
 func reasoning_trace_dataset_add_sample(reasoning_trace_dataset_state state, reasoning_trace_sample_state sample) reasoning_trace_dataset_state {
     int size = len(state.samples)
-    []reasoning_trace_sample_state samples = []reasoning_trace_sample_state{cap: size + 1}
+    []reasoning_trace_sample_state samples = make([]reasoning_trace_sample_state, size + 1)
     int i = 0
     for i < size {
         samples[i] = state.samples[i]

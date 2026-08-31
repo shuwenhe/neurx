@@ -69,7 +69,7 @@ func calculate_bloom_params(
     return m, k
 func new_bloom_filter(int64 size_bits, int num_hashes) bloom_filter:
     int64 array_size = (size_bits + 7) / 8
-    []byte bit_array = []byte{cap: array_size}
+    []byte bit_array = make([]byte, array_size)
     int i = 0
     for i < array_size {
         bit_array = append(bit_array, 0)
@@ -148,7 +148,7 @@ func new_quality_scorer(quality_filter_config config) quality_scorer_state:
     scorer.total_samples_seen = 0
     scorer.total_samples_kept = 0
     scorer.total_samples_rejected = 0
-    scorer.rejection_reasons = string[]{cap: 1000}
+    scorer.rejection_reasons = make([]string, 1000)
     if config.enable_dedup and config.dedup_method == "bloom_filter":
         int64 estimated_items = int64(10 * 1024 * 1024 * 1024)
         (int64 bits, int hashes) = calculate_bloom_params(

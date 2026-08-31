@@ -49,8 +49,8 @@ func exp_approx(float x) float {
     result
 }
 
-func init_weights(int size, float std) float[] {
-    float[] arr = float[]{cap: size}
+func init_weights(int size, float std) []float {
+    float[] arr = make([]float, size)
     int i = 0
     for i < size {
         float val = ((i * 12345 + 67890) - ((i * 12345 + 67890) / 100000) * 100000) as float
@@ -61,8 +61,8 @@ func init_weights(int size, float std) float[] {
     arr
 }
 
-func matmul(float[] A, float[] B, int M, int K, int N) float[] {
-    float[] C = float[]{cap: M * N}
+func matmul(float[] A, float[] B, int M, int K, int N) []float {
+    float[] C = make([]float, M * N)
     int m = 0
     for m < M {
         int n = 0
@@ -81,8 +81,8 @@ func matmul(float[] A, float[] B, int M, int K, int N) float[] {
     C
 }
 
-func rms_norm(float[] x, float[] weight, int batch_seq, int hidden) float[] {
-    float[] output = float[]{cap: batch_seq * hidden}
+func rms_norm(float[] x, float[] weight, int batch_seq, int hidden) []float {
+    float[] output = make([]float, batch_seq * hidden)
     int i = 0
     for i < batch_seq {
         int offset = i * hidden
@@ -104,8 +104,8 @@ func rms_norm(float[] x, float[] weight, int batch_seq, int hidden) float[] {
     output
 }
 
-func embedding(int[] token_ids, float[] embed_weight, int batch_seq, int hidden, int vocab) float[] {
-    float[] output = float[]{cap: batch_seq * hidden}
+func embedding(int[] token_ids, float[] embed_weight, int batch_seq, int hidden, int vocab) []float {
+    float[] output = make([]float, batch_seq * hidden)
     int i = 0
     for i < batch_seq {
         int token_id = token_ids[i]
@@ -121,9 +121,9 @@ func embedding(int[] token_ids, float[] embed_weight, int batch_seq, int hidden,
     output
 }
 
-func add_arrays(float[] a, float[] b) float[] {
+func add_arrays(float[] a, float[] b) []float {
     int size = len(a)
-    float[] output = float[]{cap: size}
+    float[] output = make([]float, size)
     int i = 0
     for i < size {
         output[i] = a[i] + b[i]
@@ -140,7 +140,7 @@ func simple_transformer_layer(
     float[] o_proj,
     int batch_seq,
     int hidden
-) float[] {
+) []float {
     float[] normed = rms_norm(hidden_states, ln_weight, batch_seq, hidden)
     float[] q = matmul(normed, q_proj, batch_seq, hidden, hidden)
     float[] v = matmul(normed, v_proj, batch_seq, hidden, hidden)
@@ -218,8 +218,8 @@ func main() {
     eprintln("[Step 1/4] Weights initialized")
     eprintln("")
     eprintln("[Step 2/4] Creating training data...")
-    int[] input_ids = int[]{cap: batch_seq}
-    int[] labels = int[]{cap: batch_seq}
+    int[] input_ids = make([]int, batch_seq)
+    int[] labels = make([]int, batch_seq)
     int i = 0
     for i < batch_seq {
         input_ids[i] = (i * 7 + 3) - (((i * 7 + 3) / vocab) * vocab)

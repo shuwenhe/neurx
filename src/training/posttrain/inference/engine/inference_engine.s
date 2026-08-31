@@ -114,8 +114,8 @@ func free_block(block_cache_table table, int block_id) {
 func schedule_sequences(
     inference_engine engine
 ) scheduler_output {
-    int[] scheduled = int[]{cap: engine.config.max_num_seqs}
-    int[] num_tokens = int[]{cap: engine.config.max_num_seqs}
+    int[] scheduled = make([]int, engine.config.max_num_seqs)
+    int[] num_tokens = make([]int, engine.config.max_num_seqs)
     int total_tokens = 0
     bool is_prompt = false
     int i = 0
@@ -165,7 +165,7 @@ func paged_attention(
         int[] blocks = block_tables[b]
         int context_len = context_lens[b]
         int num_blocks = (context_len + block_size - 1) / block_size
-        []tensor attn_scores = []tensor{cap: num_blocks}
+        []tensor attn_scores = make([]tensor, num_blocks)
         int block_idx = 0
         for block_idx < num_blocks {
             int block_id = blocks[block_idx]
@@ -258,7 +258,7 @@ func generate(
             j = j + 1
         }
     }
-    int[][] outputs = int[][]{cap: prompts.len}
+    int[][] outputs = intmake([][], prompts.len)
     i = 0
     for i < engine.sequences.len {
         outputs[i] = engine.sequences[i].token_ids
@@ -268,12 +268,12 @@ func generate(
 }
 
 func new_inference_engine(module model, inference_config config) inference_engine {
-    []cache_block blocks = []cache_block{cap: config.num_gpu_blocks + config.num_cpu_blocks}
+    []cache_block blocks = make([]cache_block, config.num_gpu_blocks + config.num_cpu_blocks)
     int i = 0
     for i < config.num_gpu_blocks {
         blocks[i] = cache_block {
             block_id: i,
-            token_ids: int[]{cap: config.block_size},
+            token_ids: make([]int, config.block_size),
             ref_count: 0,
             is_gpu: true,
         }
@@ -282,7 +282,7 @@ func new_inference_engine(module model, inference_config config) inference_engin
     for i < config.num_gpu_blocks + config.num_cpu_blocks {
         blocks[i] = cache_block {
             block_id: i,
-            token_ids: int[]{cap: config.block_size},
+            token_ids: make([]int, config.block_size),
             ref_count: 0,
             is_gpu: false,
         }
@@ -298,7 +298,7 @@ func new_inference_engine(module model, inference_config config) inference_engin
         model: model,
         config: config,
         block_table: table,
-        sequences: []inference_sequence{cap: config.max_num_seqs},
+        sequences: make([]inference_sequence, config.max_num_seqs),
         next_seq_id: 0,
     }
 }

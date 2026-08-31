@@ -56,8 +56,8 @@ func compile_neurx_code(compile_config config) (bool, ir_module) {
     ir.name = "train_forward_backward"
     ir.version = "1.0"
     ir.optimization_level = config.optimization_level
-    ir.instructions = string[]{}
-    ir.data_section = string[]{}
+    ir.instructions = []string{}
+    ir.data_section = []string{}
     ir.instructions = append(ir.instructions, "module_init()")
     ir.instructions = append(ir.instructions, "alloc_tensor([32, 256], FP32)")
     ir.instructions = append(ir.instructions, "load_weights(embedding_table)")

@@ -319,7 +319,7 @@ func (checkpoint_manager* manager) run_full_checkpoint_cycle() {
     recovery := *recovery_manager{
         manager:            manager,
         recovery_points:    []checkpoint_metadata{},
-        backup_locations:   string[]{},
+        backup_locations:   []string{},
         verification_status: make(map[string]bool),
     }
     recovery.handle_training_interruption()

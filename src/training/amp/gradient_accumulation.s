@@ -40,8 +40,8 @@ func should_update_params(gradient_accumulator acc) bool {
     return acc.current_step >= acc.accumulation_steps
 }
 
-func get_accumulated_grads(gradient_accumulator acc) float[] {
-    float[] grads = float[]{cap: len(acc.accumulated_grads)}
+func get_accumulated_grads(gradient_accumulator acc) []float {
+    float[] grads = make([]float, len(acc.accumulated_grads))
     int i = 0
     for i < len(acc.accumulated_grads) {
         grads[i] = acc.accumulated_grads[i][0]
@@ -50,8 +50,8 @@ func get_accumulated_grads(gradient_accumulator acc) float[] {
     return grads
 }
 
-func average_accumulated_grads(gradient_accumulator acc) float[] {
-    float[] grads = float[]{cap: len(acc.accumulated_grads)}
+func average_accumulated_grads(gradient_accumulator acc) []float {
+    float[] grads = make([]float, len(acc.accumulated_grads))
     float denom = float(acc.accumulation_steps)
     if denom < 1.0 {
         denom = 1.0
@@ -74,8 +74,8 @@ func reset_accumulator(gradient_accumulator acc) gradient_accumulator {
     return acc
 }
 
-func make_zero_array(int n) float[] {
-    float[] arr = float[]{cap: n}
+func make_zero_array(int n) []float {
+    float[] arr = make([]float, n)
     int i = 0
     for i < n {
         arr[i] = 0.0

@@ -163,7 +163,7 @@ func (plugin_lifecycle_manager* m) emit_lifecycle_event(event lifecycle_event) {
 	}
 }
 
-func (plugin_lifecycle_manager* m) get_event_history(plugin_id string) lifecycle_event[] {
+func (plugin_lifecycle_manager* m) get_event_history(plugin_id string) []lifecycle_event {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	result := make(lifecycle_event[], 0)
@@ -175,7 +175,7 @@ func (plugin_lifecycle_manager* m) get_event_history(plugin_id string) lifecycle
 	return result
 }
 
-func (plugin_lifecycle_manager* m) get_all_events() lifecycle_event[] {
+func (plugin_lifecycle_manager* m) get_all_events() []lifecycle_event {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	result := make(lifecycle_event[], 0)

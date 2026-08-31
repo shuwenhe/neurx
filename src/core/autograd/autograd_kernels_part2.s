@@ -19,7 +19,7 @@ func backward_softmax(node n, tensor grad_output) backward_result {
         }
         int row_size = vocab_size
         int total_rows = len(softmax_output.data) / row_size
-        float[] grad_input = float[]{cap: len(softmax_output.data)}
+        float[] grad_input = make([]float, len(softmax_output.data))
         for row in 0..total_rows {
             float dot_product = 0.0
             for col in 0..row_size {
@@ -34,7 +34,7 @@ func backward_softmax(node n, tensor grad_output) backward_result {
         tensor result { data: grad_input, grad: [], shape: shape, requires_grad: true }
         return backward_result { input_grads: [result], success: true }
     }
-    float[] grad_data = float[]{cap: len(input.data)}
+    float[] grad_data = make([]float, len(input.data))
     for i in 0..len(input.data) {
         float y = softmax_output.data[i]
         grad_data[i] = y * (grad_output.data[i] - y * grad_output.data[i])
@@ -54,7 +54,7 @@ func backward_log_softmax(node n, tensor grad_output) backward_result {
     int row_size = shape[dim]
     int total_elements = len(softmax_output.data)
     int num_rows = total_elements / row_size
-    float[] grad_input = float[]{cap: total_elements}
+    float[] grad_input = make([]float, total_elements)
     for row in 0..num_rows {
         float grad_sum = 0.0
         for col in 0..row_size {
@@ -75,7 +75,7 @@ func backward_relu(node n, tensor grad_output) backward_result {
         return backward_result { input_grads: [], success: false }
     }
     tensor input = n.inputs[0]
-    float[] grad_data = float[]{cap: len(input.data)}
+    float[] grad_data = make([]float, len(input.data))
     for i in 0..len(input.data) {
         if input.data[i] > 0.0 {
             grad_data[i] = grad_output.data[i]
@@ -92,7 +92,7 @@ func backward_gelu(node n, tensor grad_output) backward_result {
         return backward_result { input_grads: [], success: false }
     }
     tensor input = n.inputs[0]
-    float[] grad_data = float[]{cap: len(input.data)}
+    float[] grad_data = make([]float, len(input.data))
     float sqrt_2_over_pi = 0.7978845608028654
     float coeff = 0.044715
     for i in 0..len(input.data) {
@@ -144,7 +144,7 @@ func float_to_int(float x) int {
     int(x)
 }
 
-func float_to_array(float x) float[] {
+func float_to_array(float x) []float {
     float[]{x}
 }
 
@@ -153,7 +153,7 @@ func backward_silu(node n, tensor grad_output) backward_result {
         return backward_result { input_grads: [], success: false }
     }
     tensor input = n.inputs[0]
-    float[] grad_data = float[]{cap: len(input.data)}
+    float[] grad_data = make([]float, len(input.data))
     for i in 0..len(input.data) {
         float x = input.data[i]
         float sig = sigmoid_approx(x)

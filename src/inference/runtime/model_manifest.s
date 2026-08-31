@@ -367,8 +367,8 @@ func model_matching_end(string text, int start, int open_char, int close_char) i
     -1
 }
 
-func model_json_int_array(string object_text, string key) int[] {
-    int[] values = int[]{cap: 8}
+func model_json_int_array(string object_text, string key) []int {
+    int[] values = make([]int, 8)
     int start = model_json_value_start(object_text, key)
     if start < 0 || start >= len(object_text) || object_text[start] != 91 { return [] }
     int end = model_matching_end(object_text, start, 91, 93)

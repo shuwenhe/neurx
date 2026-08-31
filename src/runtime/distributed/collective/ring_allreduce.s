@@ -38,7 +38,7 @@ func new_ring_topology(int rank, int world_size) ring_topology {
 func new_ring_allreduce_engine(int rank, int world_size) ring_allreduce_engine {
     engine := ring_allreduce_engine {
         topology: new_ring_topology(rank, world_size),
-        chunk_ranks: int[]{cap: world_size},
+        chunk_ranks: make([]int, world_size),
         pending_sends: 0,
         pending_recvs: 0,
         current_request: allreduce_request {
@@ -63,7 +63,7 @@ func (ring_allreduce_engine* engine) allreduce_reduce_scatter(
     int op_type
 ) (float[], bool) {
     if len(data) == 0 {
-        return float[]{}, false
+        return []float{}, false
     }
     chunk_size := (len(data) + engine.topology.num_chunks - 1) / engine.topology.num_chunks
     float[] local_data = make(float[], len(data))
@@ -110,7 +110,7 @@ func (ring_allreduce_engine* engine) allreduce_broadcast(
     float[] reduced_data
 ) (float[], bool) {
     if len(reduced_data) == 0 {
-        return float[]{}, false
+        return []float{}, false
     }
     chunk_size := (len(reduced_data) + engine.topology.num_chunks - 1) / engine.topology.num_chunks
     float[] broadcast_data = make(float[], len(reduced_data))
@@ -157,11 +157,11 @@ func (ring_allreduce_engine* engine) ring_allreduce(
     int op_type
 ) (float[], bool) {
     if len(data) == 0 {
-        return float[]{}, false
+        return []float{}, false
     }
     reduced_data, success := engine.allreduce_reduce_scatter(data, op_type)
     if !success {
-        return float[]{}, false
+        return []float{}, false
     }
     final_data, broadcast_success := engine.allreduce_broadcast(reduced_data)
     return final_data, broadcast_success
@@ -171,7 +171,7 @@ func (ring_allreduce_engine* engine) isend_to_right_neighbor(float[] data) {
     engine.pending_sends = engine.pending_sends + 1
 }
 
-func (ring_allreduce_engine* engine) irecv_from_left_neighbor(int size) float[] {
+func (ring_allreduce_engine* engine) irecv_from_left_neighbor(int size) []float {
     recv_data := make(float[], size)
     int i = 0
     for i < size {

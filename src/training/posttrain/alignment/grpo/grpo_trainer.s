@@ -178,7 +178,7 @@ func compute_group_advantages(
     if std_reward < advantage_eps {
         std_reward = advantage_eps
     }
-    float[] advantages = float[]{}
+    float[] advantages = []float{}
     i = 0
     for i < G {
         float adv = (outputs[i].total_reward - mean_reward) / std_reward
@@ -481,7 +481,7 @@ func create_dummy_grpo_group() grpo_generation_group {
         prompt: "What is 2+2",
         reference_answer: "4",
         outputs: []generation_output{},
-        advantages: float[]{},
+        advantages: []float{},
         group_mean_reward: 0.0,
         group_std_reward: 0.0,
         accepted_outputs: 0,

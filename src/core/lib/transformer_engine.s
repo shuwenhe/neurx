@@ -56,7 +56,7 @@ func embedding_forward(int[] token_ids, int hidden_size) float[][] {
 }
 
 func attention_forward(float[] query, float[] key, float[] value,
-                      int num_heads, int head_dim) float[] {
+                      int num_heads, int head_dim) []float {
     float[] output
     float scale = 1.0 / sqrt(float(head_dim))
     for i in 0..len(query) {
@@ -69,7 +69,7 @@ func attention_forward(float[] query, float[] key, float[] value,
     return output
 }
 
-func mlp_forward(float[] hidden, int intermediate_size) float[] {
+func mlp_forward(float[] hidden, int intermediate_size) []float {
     float[] output
     for i in 0..len(hidden) {
         float gate_val = hidden[i] * 0.5
@@ -80,7 +80,7 @@ func mlp_forward(float[] hidden, int intermediate_size) float[] {
     return output
 }
 
-func rms_norm_forward(float[] hidden, float eps) float[] {
+func rms_norm_forward(float[] hidden, float eps) []float {
     float[] output
     float sum_sq = 0.0
     for i in 0..len(hidden) {
@@ -94,7 +94,7 @@ func rms_norm_forward(float[] hidden, float eps) float[] {
 }
 
 func transformer_block_forward(float[] hidden,
-                              transformer_config config) float[] {
+                              transformer_config config) []float {
     float[] normed = rms_norm_forward(hidden, config.rms_norm_eps)
     int head_dim = config.hidden_size / config.num_heads
     float[] attn_out = attention_forward(normed, normed, normed,
@@ -113,7 +113,7 @@ func transformer_block_forward(float[] hidden,
     return output
 }
 
-func forward_pass(transformer_state state, int[] token_ids) float[] {
+func forward_pass(transformer_state state, int[] token_ids) []float {
     float[][] embeddings = embedding_forward(token_ids, state.config.hidden_size)
     float[] hidden = embeddings[len(embeddings) - 1]
     for layer in 0..state.config.num_layers {

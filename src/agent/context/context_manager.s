@@ -49,8 +49,8 @@ func agent_context_is_full(agent_context_state state) bool {
 func agent_context_append(agent_context_state state, string text) agent_context_state {
     int tokens = agent_context_estimate_tokens(text)
     int n = len(state.segments)
-    string[] segs = string[]{cap: n + 1}
-    int[] seg_tokens = int[]{cap: n + 1}
+    string[] segs = make([]string, n + 1)
+    int[] seg_tokens = make([]int, n + 1)
     int i = 0
     for i < n {
         segs[i] = state.segments[i]
@@ -80,8 +80,8 @@ func agent_context_compress(agent_context_state state, int keep_last) agent_cont
         keep = 1
     }
     int start = total - keep
-    string[] segs = string[]{cap: keep}
-    int[] seg_tokens = int[]{cap: keep}
+    string[] segs = make([]string, keep)
+    int[] seg_tokens = make([]int, keep)
     int new_total = 0
     int i = 0
     for i < keep {
@@ -142,8 +142,8 @@ func agent_context_compress_with_summary(agent_context_state state, string summa
     }
     string summary_seg = "[context_summary] " + trim(summary)
     int new_size = keep + 1
-    string[] segs = string[]{cap: new_size}
-    int[] seg_tokens = int[]{cap: new_size}
+    string[] segs = make([]string, new_size)
+    int[] seg_tokens = make([]int, new_size)
     segs[0] = summary_seg
     seg_tokens[0] = agent_context_estimate_tokens(summary_seg)
     int start = total - keep

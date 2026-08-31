@@ -196,7 +196,7 @@ func (sse_stream* s) add_event(event sse_event) bool {
 	return true
 }
 
-func (sse_stream* s) get_events() sse_event[] {
+func (sse_stream* s) get_events() []sse_event {
 	return s.events
 }
 

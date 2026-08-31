@@ -79,7 +79,7 @@ func (punica_wrapper* wrapper) compile_kernel(string kernel_name) bool {
     return false
 }
 
-func (punica_wrapper* wrapper) add_lora(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
+func (punica_wrapper* wrapper) add_lora(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) []float32 {
     output := make(float32[])
     for i := 0; i < len(input); i = i + 1 {
         output = append(output, input[i])
@@ -107,7 +107,7 @@ func (punica_wrapper* wrapper) add_lora(float32[] input, float32[][]] lora_a, fl
     return output
 }
 
-func (punica_wrapper* wrapper) mul_lora(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
+func (punica_wrapper* wrapper) mul_lora(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) []float32 {
     output := make(float32[])
     for i := 0; i < len(input); i = i + 1 {
         output = append(output, input[i])
@@ -135,7 +135,7 @@ func (punica_wrapper* wrapper) mul_lora(float32[] input, float32[][]] lora_a, fl
     return output
 }
 
-func (punica_wrapper* wrapper) fused_lora_add(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
+func (punica_wrapper* wrapper) fused_lora_add(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) []float32 {
     return wrapper.add_lora(input, lora_a, lora_b, scaling)
 }
 

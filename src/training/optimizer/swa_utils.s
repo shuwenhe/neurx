@@ -19,7 +19,7 @@ func new_averaged_model(tensor initial_params, string avg_mode, float ema_decay)
 
 func update_averaged_model(averaged_model_state state, tensor model_params) averaged_model_state {
     int n = len(model_params.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     if state.num_averaged == 0 {
         int i0 = 0
         for i0 < n {

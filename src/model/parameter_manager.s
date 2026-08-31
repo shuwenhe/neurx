@@ -76,8 +76,8 @@ func (model_parameter_manager* mgr) get_total_memory() int64 {
     mgr.total_memory_bytes
 }
 
-func (model_parameter_manager* mgr) list_layers() string[] {
-    result := string[]{}
+func (model_parameter_manager* mgr) list_layers() []string {
+    result := []string{}
     for layer_id in mgr.layers.keys() {
         result = append(result, layer_id)
     }

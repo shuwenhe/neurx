@@ -62,9 +62,9 @@ func quantize_with_awq(
     if weights.len % group_size != 0 {
         num_groups = num_groups + 1
     }
-    qweight := int[]{}
-    qzeros := int[]{}
-    scales := float[]{}
+    qweight := []int{}
+    qzeros := []int{}
+    scales := []float{}
     g := 0
     for g < num_groups {
         start := g * group_size
@@ -128,10 +128,10 @@ func quantize_with_gptq(
     if weights.len % group_size != 0 {
         num_groups = num_groups + 1
     }
-    qweight := int[]{}
-    qzeros := int[]{}
-    scales := float[]{}
-    h := float[]{}
+    qweight := []int{}
+    qzeros := []int{}
+    scales := []float{}
+    h := []float{}
     g := 0
     for g < num_groups {
         start := g * group_size
@@ -182,8 +182,8 @@ func quantize_with_gptq(
     }
 }
 
-func dequantize_awq(awq_quantized_weight quant) float[] {
-    deq := float[]{}
+func dequantize_awq(awq_quantized_weight quant) []float {
+    deq := []float{}
     group_idx := 0
     i := 0
     for i < quant.qweight.len {
@@ -199,8 +199,8 @@ func dequantize_awq(awq_quantized_weight quant) float[] {
     deq
 }
 
-func dequantize_gptq(gptq_quantized_weight quant) float[] {
-    deq := float[]{}
+func dequantize_gptq(gptq_quantized_weight quant) []float {
+    deq := []float{}
     group_idx := 0
     i := 0
     for i < quant.qweight.len {
@@ -228,8 +228,8 @@ func get_gptq_compression_ratio(gptq_quantized_weight quant) float {
     original_bits / quantized_bits
 }
 
-func append_float(float[] slice, float elem) float[] {
-    new_slice := float[]{}
+func append_float(float[] slice, float elem) []float {
+    new_slice := []float{}
     i := 0
     for i < slice.len {
         new_slice = append_float(new_slice, slice[i])
@@ -239,8 +239,8 @@ func append_float(float[] slice, float elem) float[] {
     new_slice
 }
 
-func append_int(int[] slice, int elem) int[] {
-    new_slice := int[]{}
+func append_int(int[] slice, int elem) []int {
+    new_slice := []int{}
     i := 0
     for i < slice.len {
         new_slice = append_int(new_slice, slice[i])

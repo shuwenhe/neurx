@@ -105,7 +105,7 @@ func new_vision_encoder(vision_encoder_config config) vision_encoder {
     encoder
 }
 
-func compute_2d_rope_embedding(int row, int col, vision_encoder_config config) float[] {
+func compute_2d_rope_embedding(int row, int col, vision_encoder_config config) []float {
     float[] embedding = math.allocate_float(config.hidden_dim, 0.0)
     float theta = config.rope_theta
     float scale = config.rope_scale
@@ -174,7 +174,7 @@ func adaptive_resolution_scaling(float[] image, int original_width, int original
     (scaled_image, new_width, new_height)
 }
 
-func patchify_image(float[] image, int width, int height, vision_encoder_config config) float[] {
+func patchify_image(float[] image, int width, int height, vision_encoder_config config) []float {
     int patch_size = config.patch_size
     int num_channels = config.num_channels
     int hidden_dim = config.hidden_dim
@@ -226,7 +226,7 @@ func patchify_image(float[] image, int width, int height, vision_encoder_config 
 }
 
 func multihead_attention_2d(float[] queries, float[] keys, float[] values,
-                            int num_heads, int head_dim, int seq_len) float[] {
+                            int num_heads, int head_dim, int seq_len) []float {
     int hidden_dim = num_heads * head_dim
     float[] output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int head = 0
@@ -298,7 +298,7 @@ func multihead_attention_2d(float[] queries, float[] keys, float[] values,
 
 func transformer_layer_forward(float[] input, float[] weights_qkv, float[] weights_out,
                                float[] biases_qkv, float[] biases_out,
-                               int num_heads, int head_dim, int seq_len) float[] {
+                               int num_heads, int head_dim, int seq_len) []float {
     int hidden_dim = num_heads * head_dim
     float[] qkv = math.matmul_bias(input, weights_qkv, biases_qkv, seq_len, hidden_dim, hidden_dim * 3)
     float[] queries = math.allocate_float(seq_len * hidden_dim, 0.0)
@@ -327,7 +327,7 @@ func transformer_layer_forward(float[] input, float[] weights_qkv, float[] weigh
 }
 
 func extract_multi_scale_features(float[] features, int width, int height,
-                                  vision_encoder_config config) float[] {
+                                  vision_encoder_config config) []float {
     int hidden_dim = config.hidden_dim
     int num_scales = config.num_scales
     float[] scale_features = math.allocate_float(num_scales * hidden_dim, 0.0)
@@ -405,7 +405,7 @@ func encode_image(vision_encoder encoder, float[] image, int original_width, int
 }
 
 func project_to_text_space(image_feature feature, float[] projection_weights, float[] projection_biases,
-                           int text_dim) float[] {
+                           int text_dim) []float {
     int num_tokens = feature.num_patches
     float[] projected = math.allocate_float(num_tokens * text_dim, 0.0)
     projected = math.matmul_flat(feature.features, projection_weights, num_tokens, len(feature.features) / num_tokens, text_dim)
@@ -417,7 +417,7 @@ func vision_encoder_get_num_tokens(int width, int height, int patch_size) int {
     (width / patch_size) * (height / patch_size)
 }
 
-func vision_encoder_compute_spatial_positions(int width, int height, int patch_size) int[] {
+func vision_encoder_compute_spatial_positions(int width, int height, int patch_size) []int {
     int num_patches_x = width / patch_size
     int num_patches_y = height / patch_size
     int num_patches = num_patches_x * num_patches_y

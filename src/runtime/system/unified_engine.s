@@ -1,5 +1,5 @@
 package neurx.system.unified_engine
-func new_engine_state(int total_blocks, int block_size, int max_prefill, int max_decode) int[] {
+func new_engine_state(int total_blocks, int block_size, int max_prefill, int max_decode) []int {
     int[] state = int[]{total_blocks, block_size, max_prefill, max_decode, 0, 0, 0, 0}
     return state
 }
@@ -36,22 +36,22 @@ func get_engine_cache_hits(int[] state) int {
     return state[7]
 }
 
-func increment_iterations(int[] state) int[] {
+func increment_iterations(int[] state) []int {
     state[4] = state[4] + 1
     return state
 }
 
-func add_tokens_generated(int[] state, int tokens) int[] {
+func add_tokens_generated(int[] state, int tokens) []int {
     state[5] = state[5] + tokens
     return state
 }
 
-func set_memory_used(int[] state, int memory) int[] {
+func set_memory_used(int[] state, int memory) []int {
     state[6] = memory
     return state
 }
 
-func record_cache_event(int[] state, int is_hit) int[] {
+func record_cache_event(int[] state, int is_hit) []int {
     if is_hit > 0 {
         state[7] = state[7] + 1
     }

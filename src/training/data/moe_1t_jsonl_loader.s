@@ -12,7 +12,7 @@ struct jsonl_document {
 }
 
 func read_jsonl_file(string filepath) []jsonl_document {
-    []jsonl_document docs = []jsonl_document{cap: 0}
+    []jsonl_document docs = make([]jsonl_document, 0)
     if !runtime_file_exists(filepath) {
         return docs
     }
@@ -39,8 +39,8 @@ func parse_json_document(string json_line) jsonl_document {
         text: "",
         source: "unknown",
         document_id: 0,
-        metadata_keys: string[]{cap: 0},
-        metadata_values: string[]{cap: 0},
+        metadata_keys: []string{},
+        metadata_values: []string{},
     }
     string extracted = extract_json_string_field(json_line, "text")
     if len(extracted) > 0 {
@@ -108,8 +108,8 @@ func jsonl_data_loader_new(
         tokenizer: tok,
         current_shard_idx: 0,
         current_doc_idx: 0,
-        current_shard_docs: []jsonl_document{cap: 0},
-        token_buffer: int[]{cap: 0},
+        current_shard_docs: make([]jsonl_document, 0),
+        token_buffer: []int{},
         buffer_start_idx: 0,
         buffer_end_idx: 0,
         total_tokens_processed: 0,
@@ -123,8 +123,8 @@ func get_shard_indices_for_rank(
     int dp_rank,
     int dp_size,
     int num_shards
-) int[] {
-    int[] shard_indices = int[]{cap: 0}
+) []int {
+    int[] shard_indices = []int{}
     int shard = dp_rank
     for shard < num_shards {
         shard_indices = append_int(shard_indices, shard)
@@ -139,12 +139,12 @@ func pack_tokens_into_batch(
     int batch_size,
     int seq_len
 ) jsonl_batch {
-    int[] batch_token_ids = int[]{cap: batch_size * seq_len}
-    int[] batch_attention_mask = int[]{cap: batch_size * seq_len}
+    int[] batch_token_ids = make([]int, batch_size * seq_len)
+    int[] batch_attention_mask = make([]int, batch_size * seq_len)
     int i = 0
     for i < batch_size {
-        int[] tokens = int[]{cap: seq_len}
-        int[] mask = int[]{cap: seq_len}
+        int[] tokens = make([]int, seq_len)
+        int[] mask = make([]int, seq_len)
         int j = 0
         for j < seq_len {
             int token_idx = i * seq_len + j
@@ -169,8 +169,8 @@ func pack_tokens_into_batch(
     jsonl_batch batch = jsonl_batch {
         token_ids: batch_token_ids,
         attention_mask: batch_attention_mask,
-        document_ids: []long{cap: 0},
-        metadata: string[]{cap: 0},
+        document_ids: make([]long, 0),
+        metadata: []string{},
     }
     batch
 }
@@ -181,7 +181,7 @@ func get_next_batch(
     if loader.current_doc_idx >= len(loader.current_shard_docs) {
         load_next_shard(loader)
     }
-    int[] accumulated_tokens = int[]{cap: 0}
+    int[] accumulated_tokens = []int{}
     for len(accumulated_tokens) < (loader.config.batch_size * loader.config.seq_len) {
         if loader.current_doc_idx >= len(loader.current_shard_docs) {
             load_next_shard(loader)
@@ -191,7 +191,7 @@ func get_next_batch(
         }
         jsonl_document doc = loader.current_shard_docs[loader.current_doc_idx]
         int[] tokens = encode(loader.tokenizer, doc.text)
-        int[] doc_tokens = int[]{cap: 0}
+        int[] doc_tokens = []int{}
         doc_tokens = append_int(doc_tokens, loader.tokenizer.bos_token_id)
         int i = 0
         for i < len(tokens) {
@@ -225,7 +225,7 @@ func load_next_shard(jsonl_data_loader loader) {
         loader.config.num_shards
     )
     if loader.current_shard_idx >= len(shard_indices) {
-        loader.current_shard_docs = []jsonl_document{cap: 0}
+        loader.current_shard_docs = make([]jsonl_document, 0)
         return
     }
     int shard_id = shard_indices[loader.current_shard_idx]
@@ -244,8 +244,8 @@ func get_loader_stats(jsonl_data_loader loader) string {
     stats
 }
 
-func append_int(int[] arr, int val) int[] {
-    int[] out = int[]{cap: len(arr) + 1}
+func append_int(int[] arr, int val) []int {
+    int[] out = make([]int, len(arr) + 1)
     int i = 0
     for i < len(arr) {
         out = append(out, arr[i])
@@ -255,8 +255,8 @@ func append_int(int[] arr, int val) int[] {
     out
 }
 
-func append_string(string[] arr, string val) string[] {
-    string[] out = string[]{cap: len(arr) + 1}
+func append_string(string[] arr, string val) []string {
+    string[] out = make([]string, len(arr) + 1)
     int i = 0
     for i < len(arr) {
         out = append(out, arr[i])
@@ -293,8 +293,8 @@ func long_to_string(long x) string {
     int_to_string(value)
 }
 
-func split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func split_lines(string text) []string {
+    string[] lines = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -423,8 +423,8 @@ func find_substring(string text, string pattern) int {
     -1
 }
 
-func build_default_vocab() string[] {
-    string[] vocab = string[]{cap: 0}
+func build_default_vocab() []string {
+    string[] vocab = []string{}
     vocab = append(vocab, "<pad>")
     vocab = append(vocab, "<bos>")
     vocab = append(vocab, "<eos>")

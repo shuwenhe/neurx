@@ -59,7 +59,7 @@ struct prefetch_queue {
 
 func new_prefetch_queue(int capacity) prefetch_queue {
     prefetch_queue q
-    q.buffer = []prefetched_batch{cap: capacity}
+    q.buffer = make([]prefetched_batch, capacity)
     q.capacity = capacity
     q.head = 0
     q.tail = 0
@@ -241,10 +241,10 @@ func tokenize_batch(
     int start_time = get_time_milliseconds()
     int tokens_per_line = mgr.reader.config.seq_len
     int total_tokens = line_count * tokens_per_line
-    int[] input_ids = int[]{cap: total_tokens}
-    int[] target_ids = int[]{cap: total_tokens}
-    int[] attention_masks = int[]{cap: total_tokens}
-    float[] loss_weights = float[]{cap: line_count}
+    int[] input_ids = make([]int, total_tokens)
+    int[] target_ids = make([]int, total_tokens)
+    int[] attention_masks = make([]int, total_tokens)
+    float[] loss_weights = make([]float, line_count)
     int valid_samples = 0
     int global_token_idx = 0
     int line_idx = 0
@@ -332,10 +332,10 @@ func get_prefetch_stats(async_prefetch_manager mgr) prefetch_stats:
 func empty_prefetched_batch() prefetched_batch:
     return prefetched_batch{
         batch_id: -1,
-        input_ids: int[]{cap: 0},
-        target_ids: int[]{cap: 0},
-        attention_masks: int[]{cap: 0},
-        loss_weights: float[]{cap: 0},
+        input_ids: []int{},
+        target_ids: []int{},
+        attention_masks: []int{},
+        loss_weights: []float{},
         batch_size: 0,
         seq_len: 0,
         preprocessing_time_ms: 0,
@@ -350,7 +350,7 @@ func empty_prefetched_batch() prefetched_batch:
 func tokenize_single_line(async_prefetch_manager mgr, string line, int max_tokens) int[]:
     int[] token_ids = encode(mgr.tokenizer, line)
     if len(token_ids) > max_tokens:
-        int[] truncated = int[]{cap: max_tokens}
+        int[] truncated = make([]int, max_tokens)
         int i = 0
         for i < max_tokens {
             truncated[i] = token_ids[i]

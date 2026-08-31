@@ -85,8 +85,8 @@ struct lora_adamw_state {
     int step
 }
 
-func init_gaussian(int n, float std) float[] {
-    float[] result = float[]{cap: n}
+func init_gaussian(int n, float std) []float {
+    float[] result = make([]float, n)
     int i = 0
     for i < n {
         float val = sin_approx((i as float) * 0.1) * std
@@ -96,8 +96,8 @@ func init_gaussian(int n, float std) float[] {
     result
 }
 
-func fill_lora(int n, float val) float[] {
-    float[] result = float[]{cap: n}
+func fill_lora(int n, float val) []float {
+    float[] result = make([]float, n)
     int i = 0
     for i < n {
         result = append(result, val)
@@ -154,8 +154,8 @@ func create_lora_linear(int in_dim, int out_dim, float[] base_weight, lora_confi
         rank: r,
         scaling: scale,
         dropout_rate: cfg.dropout_rate,
-        last_input: float[]{},
-        last_ax: float[]{},
+        last_input: []float{},
+        last_ax: []float{},
     }
 }
 
@@ -196,7 +196,7 @@ func create_lora_state(lora_config cfg) lora_state {
     }
 }
 
-func lora_forward(lora_linear layer, float[] input) float[] {
+func lora_forward(lora_linear layer, float[] input) []float {
     int batch_seq_len = len(input) / layer.in_dim
     int out_size = batch_seq_len * layer.out_dim
     float[] output = fill_lora(out_size, 0.0)
@@ -457,7 +457,7 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt, int layer_idx) (lo
 
 func lora_training_step(lora_state state, float[] input_ids, float[] targets) lora_state {
     lora_state updated = state
-    float[] hidden = float[]{}
+    float[] hidden = []float{}
     int i = 0
     for i < len(input_ids) {
         hidden = append(hidden, input_ids[i] * 0.01)

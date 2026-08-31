@@ -119,8 +119,8 @@ func extract_json_number_field(string json_text, string field_name, string fallb
     token
 }
 
-func extract_json_array_values(string json_text, string field_name) float[] {
-    float[] values = float[]{}
+func extract_json_array_values(string json_text, string field_name) []float {
+    float[] values = []float{}
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
     if pos < 0 {

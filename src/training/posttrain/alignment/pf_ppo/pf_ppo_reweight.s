@@ -81,7 +81,7 @@ func clamp_lower(tensor x, float min_val) tensor {
     return x
 }
 
-func multinomial_sample(tensor weights, int num_samples) int[] {
+func multinomial_sample(tensor weights, int num_samples) []int {
     int[] indices = make(int[], num_samples)
     for int i = 0; i < num_samples; i = i + 1 {
         indices[i] = i

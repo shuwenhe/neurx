@@ -1,6 +1,6 @@
 package neurx.posttrain.lib.transformer_inference
 use std.io.eprintln
-func vec_add(float[] a, float[] b) float[] {
+func vec_add(float[] a, float[] b) []float {
     float[] result
     int len_a = len(a)
     int len_b = len(b)
@@ -14,7 +14,7 @@ func vec_add(float[] a, float[] b) float[] {
     return result
 }
 
-func vec_mul_scalar(float[] v, float scalar) float[] {
+func vec_mul_scalar(float[] v, float scalar) []float {
     float[] result
     int i = 0
     for i < len(v) {
@@ -36,7 +36,7 @@ func vec_dot(float[] a, float[] b) float {
     return result
 }
 
-func rms_norm(float[] x, float[] weight, float epsilon) float[] {
+func rms_norm(float[] x, float[] weight, float epsilon) []float {
     float[] result
     float sum_sq = 0.0
     int i = 0
@@ -84,7 +84,7 @@ func exp_approx(float x) float {
     return result
 }
 
-func softmax(float[] logits) float[] {
+func softmax(float[] logits) []float {
     float[] result
     float max_val = 0.0
     int i = 0
@@ -110,7 +110,7 @@ func softmax(float[] logits) float[] {
     return result
 }
 
-func matvec(float[] matrix, []vector float, int rows, int cols) float[] {
+func matvec(float[] matrix, []vector float, int rows, int cols) []float {
     float[] result
     int i = 0
     for i < rows {
@@ -128,7 +128,7 @@ func matvec(float[] matrix, []vector float, int rows, int cols) float[] {
     return result
 }
 
-func embedding_lookup(float[] embed_weight, int token_id, int hidden_size) float[] {
+func embedding_lookup(float[] embed_weight, int token_id, int hidden_size) []float {
     float[] result
     int start = token_id * hidden_size
     int i = 0
@@ -145,7 +145,7 @@ func attention_forward(
     float[] value,
     int num_heads,
     int head_dim
-) float[] {
+) []float {
     float[] result
     if len(query) == 0 || len(key) == 0 || len(value) == 0 {
         return result
@@ -196,7 +196,7 @@ func attention_forward(
     return result
 }
 
-func ffn(float[] x, float[] gate_w, float[] up_w, float[] down_w, int hidden_size, int intermediate_size) float[] {
+func ffn(float[] x, float[] gate_w, float[] up_w, float[] down_w, int hidden_size, int intermediate_size) []float {
     float[] result
     float[] gate = matvec(gate_w, x, intermediate_size, hidden_size)
     float[] up = matvec(up_w, x, intermediate_size, hidden_size)
@@ -221,7 +221,7 @@ func transformer_block_forward(
     int num_heads,
     int head_dim,
     float rms_eps
-) float[] {
+) []float {
     float[] attn_norm = rms_norm(hidden, norm_w, rms_eps)
     float[] q = matvec(q_w, attn_norm, hidden_size, hidden_size)
     float[] k = matvec(k_w, attn_norm, hidden_size, hidden_size)
@@ -248,7 +248,7 @@ func model_forward(
     int head_dim,
     int vocab_size,
     float rms_norm_eps
-) float[] {
+) []float {
     float[] hidden = embedding_lookup(embed_weight, token_id, hidden_size)
     int layer = 0
     for layer < num_layers && layer < len(layer_weights) {

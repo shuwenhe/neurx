@@ -223,7 +223,7 @@ func update_parse_context(string output, *schema_types.parse_context context) {
     context.current_value = output
 }
 
-func apply_constraint_to_logits(float[] logits, *token_constraint constraint) float[] {
+func apply_constraint_to_logits(float[] logits, *token_constraint constraint) []float {
     result := logits
     i := 0
     for i < len(result) {

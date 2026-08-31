@@ -12,10 +12,10 @@ func test_training_config() {
 
 func test_batch_preparation() {
     println("Test 2: batch_2 preparation")
-    int[][] data = int[][]{cap: 5}
+    int[][] data = intmake([][], 5)
     i := 0
     for i < 5 {
-        int[] seq = int[]{cap: 10}
+        int[] seq = make([]int, 10)
         j := 0
         for j < 10 {
             seq = append(seq, j)
@@ -53,14 +53,14 @@ func test_lr_scheduling() {
 
 func test_gradient_clipping() {
     println("Test 5: Gradient clipping")
-    float[][] grads = float[][]{cap: 3}
-    float[] g1 = float[]{cap: 2}
+    float[][] grads = floatmake([][], 3)
+    float[] g1 = make([]float, 2)
     g1 = append(g1, 0.5)
     g1 = append(g1, 0.5)
-    float[] g2 = float[]{cap: 2}
+    float[] g2 = make([]float, 2)
     g2 = append(g2, 2.0)
     g2 = append(g2, 2.0)
-    float[] g3 = float[]{cap: 2}
+    float[] g3 = make([]float, 2)
     g3 = append(g3, 1.0)
     g3 = append(g3, 1.0)
     grads = append(grads, g1)
@@ -126,7 +126,7 @@ func test_monitor_init() {
 
 func test_loss_tracking() {
     println("Test 11: Loss tracking over steps")
-    float[] losses = float[]{cap: 5}
+    float[] losses = make([]float, 5)
     losses = append(losses, 1.0)
     losses = append(losses, 0.8)
     losses = append(losses, 0.6)
@@ -147,7 +147,7 @@ func test_loss_tracking() {
 
 func test_accuracy_tracking() {
     println("Test 12: Accuracy tracking over steps")
-    float[] accuracies = float[]{cap: 4}
+    float[] accuracies = make([]float, 4)
     accuracies = append(accuracies, 0.5)
     accuracies = append(accuracies, 0.6)
     accuracies = append(accuracies, 0.7)
@@ -172,12 +172,12 @@ func test_integration_ready() {
 
 func test_data_pipeline() {
     println("Test 14: Data pipeline components")
-    int[][] tokenized = int[][]{cap: 2}
-    int[] seq1 = int[]{cap: 5}
+    int[][] tokenized = intmake([][], 2)
+    int[] seq1 = make([]int, 5)
     seq1 = append(seq1, 1)
     seq1 = append(seq1, 2)
     seq1 = append(seq1, 3)
-    int[] seq2 = int[]{cap: 5}
+    int[] seq2 = make([]int, 5)
     seq2 = append(seq2, 4)
     seq2 = append(seq2, 5)
     seq2 = append(seq2, 6)

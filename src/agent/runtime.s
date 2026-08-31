@@ -645,7 +645,7 @@ func new_agent_runtime_state(string goal, string initial_task, int step_budget) 
     new_agent_runtime_state_with_model(goal, initial_task, step_budget, "")
 }
 
-func agent_runtime_append_task(string[] queue, string task) string[] {
+func agent_runtime_append_task(string[] queue, string task) []string {
     if trim(task) == "" {
         return queue
     }
@@ -653,8 +653,8 @@ func agent_runtime_append_task(string[] queue, string task) string[] {
     queue
 }
 
-func agent_runtime_code_agent_task_queue(agent_tool_registry_state tools) string[] {
-    string[] queue = string[]{cap: 12}
+func agent_runtime_code_agent_task_queue(agent_tool_registry_state tools) []string {
+    string[] queue = make([]string, 12)
     if agent_tool_registry_has_enabled(tools, "git_status") {
         queue = agent_runtime_append_task(queue, "git_status")
     }

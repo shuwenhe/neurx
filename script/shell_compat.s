@@ -81,7 +81,7 @@ func copy_file(string src, string dst) error {
 func list_dir(string path) (string[], error) {
     entries, err := os.ReadDir(path)
     if err != nil {
-        return string[]{}, fmt.Errorf("failed to list directory %s: %w", path, err)
+        return []string{}, fmt.Errorf("failed to list directory %s: %w", path, err)
     }
     var results string[]
     for _, entry := range entries {
@@ -299,7 +299,7 @@ func join(string sep, strs ...string) string {
     return strings.Join(strs, sep)
 }
 
-func split(string str, string sep) string[] {
+func split(string str, string sep) []string {
     return strings.Split(str, sep)
 }
 

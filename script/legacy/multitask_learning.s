@@ -56,7 +56,7 @@ func (multi_task_learner* mtl) register_task(task_name string, int data_size, we
     return task_id
 }
 
-func (multi_task_learner* mtl) shared_forward(input int[]) float[]64 {
+func (multi_task_learner* mtl) shared_forward(input []int) float[]64 {
     hidden := make(float[]64, mtl.config.shared_hidden_size)
     for i := 0; i < mtl.config.shared_hidden_size; i++ {
         hidden[i] = math.Sin(float64(i) / 100.0)
@@ -173,7 +173,7 @@ func (multi_task_learner* mtl) train(num_steps int) {
     for step := 0; step < num_steps; step++ {
         batch_inputs := int[][]{}
         batch_targets := int[][]{}
-        task_ids := int[]{}
+        task_ids := []int{}
         batch_size := 32
         for i := 0; i < batch_size; i++ {
             task_id := i % len(mtl.tasks)

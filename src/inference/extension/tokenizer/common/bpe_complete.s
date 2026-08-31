@@ -1,6 +1,6 @@
 package neurx.tokenizer.common.bpe_complete
 use std.encoding.bytes_to_string
-func new_vocab() int[] {
+func new_vocab() []int {
     int[] vocab = []
     int i = 0
     for i < 1000 {
@@ -47,7 +47,7 @@ func is_special_token(int token_id) bool {
     return false
 }
 
-func char_to_bytes(string text) int[] {
+func char_to_bytes(string text) []int {
     int[] bytes = []
     int i = 0
     for i < len(text) {
@@ -83,7 +83,7 @@ func find_most_frequent_pair(int[] tokens) int {
     return max_idx
 }
 
-func merge_tokens(int[] tokens, int merge_idx, int new_token) int[] {
+func merge_tokens(int[] tokens, int merge_idx, int new_token) []int {
     int[] result = []
     int i = 0
     for i < len(tokens) {
@@ -98,7 +98,7 @@ func merge_tokens(int[] tokens, int merge_idx, int new_token) int[] {
     return result
 }
 
-func apply_merges(int[] tokens, int num_merges) int[] {
+func apply_merges(int[] tokens, int num_merges) []int {
     int[] current = tokens
     int merge = 0
     for merge < num_merges {
@@ -112,13 +112,13 @@ func apply_merges(int[] tokens, int num_merges) int[] {
     return current
 }
 
-func tokenize_text(string text, int num_merges) int[] {
+func tokenize_text(string text, int num_merges) []int {
     int[] byte_tokens = char_to_bytes(text)
     int[] merged = apply_merges(byte_tokens, num_merges)
     return merged
 }
 
-func tokenize_with_padding(int[] tokens, int target_len) int[] {
+func tokenize_with_padding(int[] tokens, int target_len) []int {
     int pad_token = get_pad_token()
     if len(tokens) >= target_len {
         int i = 0
@@ -138,10 +138,10 @@ func tokenize_with_padding(int[] tokens, int target_len) int[] {
     return padded
 }
 
-func tokenize_add_special_tokens(int[] tokens) int[] {
+func tokenize_add_special_tokens(int[] tokens) []int {
     int sos = get_sos_token()
     int eos = get_eos_token()
-    int[] with_special = int[]{}
+    int[] with_special = []int{}
     int i = 0
     i = 0
     int first_elem = sos
@@ -155,7 +155,7 @@ func tokenize_add_special_tokens(int[] tokens) int[] {
     return with_special
 }
 
-func ids_to_tokens(int[] token_ids) int[] {
+func ids_to_tokens(int[] token_ids) []int {
     return token_ids
 }
 
@@ -339,7 +339,7 @@ func format_tokenization_result(int[] tokens, int input_chars) string {
     return result
 }
 
-func reserve_token_ids(int count, int start_id) int[] {
+func reserve_token_ids(int count, int start_id) []int {
     int[] ids = []
     int i = 0
     for i < count {
@@ -349,7 +349,7 @@ func reserve_token_ids(int count, int start_id) int[] {
     return ids
 }
 
-func add_new_tokens(int[] existing_vocab, int[] new_tokens) int[] {
+func add_new_tokens(int[] existing_vocab, int[] new_tokens) []int {
     int[] combined = existing_vocab
     int i = 0
     for i < len(new_tokens) {

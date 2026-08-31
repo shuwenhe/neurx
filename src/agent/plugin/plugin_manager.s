@@ -113,7 +113,7 @@ func (plugin_manager* m) perform_system_health_check() plugin_system_health {
 	return m.system.get_system_health()
 }
 
-func (plugin_manager* m) get_compatible_plugins_for_phase(phase_name string) string[] {
+func (plugin_manager* m) get_compatible_plugins_for_phase(phase_name string) []string {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	compatible := make(string[], 0)

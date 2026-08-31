@@ -77,7 +77,7 @@ struct node_launch_plan {
 func generate_launch_plan(
     multi_node_config config,
 ) node_launch_plan {
-    []rank_info ranks = []rank_info{cap: config.world_size}
+    []rank_info ranks = make([]rank_info, config.world_size)
     int rank_idx = 0
     int node = 0
     for node < config.num_nodes {
@@ -163,8 +163,8 @@ func detect_failed_ranks(
     int world_size,
     string shared_storage_path,
     int timeout_sec,
-) int[] {
-    int[] failed_ranks = int[]{cap: 10}
+) []int {
+    int[] failed_ranks = make([]int, 10)
     int failed_count = 0
     int rank = 0
     for rank < world_size {

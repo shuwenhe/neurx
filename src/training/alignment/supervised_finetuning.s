@@ -74,8 +74,8 @@ func compute_sft_loss(float[] logits, int[] target_tokens) float {
 func create_sft_batch([]sft_example examples, int batch_size, int max_seq_len) sft_batch {
     sft_batch batch = sft_batch {
         examples: examples,
-        tokenized_inputs: int[]{cap: batch_size * max_seq_len},
-        tokenized_targets: int[]{cap: batch_size * max_seq_len},
+        tokenized_inputs: make([]int, batch_size * max_seq_len),
+        tokenized_targets: make([]int, batch_size * max_seq_len),
         total_tokens: 0,
     }
     batch

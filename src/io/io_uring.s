@@ -38,8 +38,8 @@ func io_uring_setup(queue_depth int) (io_uring, string) {
         return io_uring{}, "queue_depth must be positive"
     }
     uring := io_uring{
-        sq: io_uring_sqe[]{},
-        cq: io_uring_cqe[]{},
+        sq: []io_uring_sqe{},
+        cq: []io_uring_cqe{},
         sq_head: 0,
         sq_tail: 0,
         cq_head: 0,
@@ -57,7 +57,7 @@ func (uring* io_uring) prep_read(fd int, offset int, len int) (int, string) {
         fd: fd,
         offset: offset,
         length: len,
-        buffer: int[]{},
+        buffer: []int{},
         flags: 0,
         user_data: uring.sq_tail
     }
@@ -89,7 +89,7 @@ func (uring* io_uring) prep_fsync(fd int) (int, string) {
         fd: fd,
         offset: 0,
         length: 0,
-        buffer: int[]{},
+        buffer: []int{},
         flags: 0,
         user_data: uring.sq_tail
     }
@@ -105,7 +105,7 @@ func (uring* io_uring) prep_poll(fd int, events int) (int, string) {
         fd: fd,
         offset: events,
         length: 0,
-        buffer: int[]{},
+        buffer: []int{},
         flags: 0,
         user_data: uring.sq_tail
     }
@@ -148,7 +148,7 @@ func (uring* io_uring) wait_cqe(wait_nr int) (io_uring_cqe, string) {
 }
 
 func (uring* io_uring) cqe_get_all() (io_uring_cqe[], string) {
-    results := io_uring_cqe[]{}
+    results := []io_uring_cqe{}
     i := uring.cq_head
     for i < len(uring.cq) {
         results = append(results, uring.cq[i])
@@ -200,7 +200,7 @@ struct uring_manager {
 func create_uring_manager(max_rings int) (uring_manager, string) {
     mgr := uring_manager{
         num_rings: 0,
-        rings: io_uring[]{},
+        rings: []io_uring{},
         total_submissions: 0,
         total_completions: 0,
         total_operations: 0

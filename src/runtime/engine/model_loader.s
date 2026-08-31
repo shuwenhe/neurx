@@ -354,8 +354,8 @@ func (dynamic_model_loader* dml) get_metrics() *model_loader_metrics {
     return *dml.metrics
 }
 
-func (dynamic_model_loader* dml) get_loaded_models() string[] {
-    models := string[]{}
+func (dynamic_model_loader* dml) get_loaded_models() []string {
+    models := []string{}
     for model_id := range dml.executors {
         models = append(models, model_id)
     }

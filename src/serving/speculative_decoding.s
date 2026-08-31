@@ -27,7 +27,7 @@ func default_spec_decode_config(int vocab_size) spec_decode_config {
     }
 }
 
-func spec_softmax(float[] logits, int V) float[] {
+func spec_softmax(float[] logits, int V) []float {
     float m = logits[0]
     int i = 0
     for i < V {
@@ -52,7 +52,7 @@ func spec_softmax(float[] logits, int V) float[] {
     probs
 }
 
-func spec_softmax_temp(float[] logits, int V, float temp) float[] {
+func spec_softmax_temp(float[] logits, int V, float temp) []float {
     float[] scaled = []
     int i = 0
     for i < V {
@@ -273,7 +273,7 @@ func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
     }
 }
 
-func medusa_head_forward(medusa_head head, float[] hidden, int H, int V) float[] {
+func medusa_head_forward(medusa_head head, float[] hidden, int H, int V) []float {
     float[] logits = zeros_spec(V)
     int j = 0
     for j < V {
@@ -341,7 +341,7 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
     }
 }
 
-func zeros_spec(int n) float[] {
+func zeros_spec(int n) []float {
     float[] out = []
     int i = 0
     for i < n {

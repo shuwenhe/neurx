@@ -94,7 +94,7 @@ func (long_context_handler* handler) estimate_memory_mb(token_count int) float64
 }
 
 func (long_context_handler* handler) chunk_sequence(
-    tokens int[],
+    tokens []int,
     chunk_size int) int[][] {
     chunks := int[][]{}
     for i := 0; i < len(tokens); i += chunk_size {
@@ -108,7 +108,7 @@ func (long_context_handler* handler) chunk_sequence(
 }
 
 func (long_context_handler* handler) process_with_overlap(
-    tokens int[],
+    tokens []int,
     process_func func(int[]) float[]64) float[]64 {
     if len(tokens) <= handler.config.chunk_size {
         handler.record_cache_request(false, 0.0)
@@ -200,7 +200,7 @@ func (long_context_handler* handler) expand_context_window(
 }
 
 func (long_context_handler* handler) process_long_sequence(
-    tokens int[],
+    tokens []int,
     model_forward func(int[]) float[]64) float[]64 {
     if len(tokens) <= handler.config.max_seq_length {
         return model_forward(tokens)
@@ -215,7 +215,7 @@ func (long_context_handler* handler) process_long_sequence(
 }
 
 func (long_context_handler* handler) process_with_sliding_window(
-    tokens int[],
+    tokens []int,
     model_forward func(int[]) float[]64) float[]64 {
     result := make(float[]64, 0)
     for i := 0; i < len(tokens); i += handler.config.window_size {
@@ -232,7 +232,7 @@ func (long_context_handler* handler) process_with_sliding_window(
 }
 
 func (long_context_handler* handler) process_with_chunks(
-    tokens int[],
+    tokens []int,
     model_forward func(int[]) float[]64) float[]64 {
     return handler.process_with_overlap(tokens, model_forward)
 }

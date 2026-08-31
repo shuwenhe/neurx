@@ -76,13 +76,13 @@ func build_safetensors_header(map[string]tensor_metadata tensors_meta, string me
     header
 }
 
-func float_to_bytes(float val, int byte_order) int[] {
+func float_to_bytes(float val, int byte_order) []int {
     int bits = 0
     if val < 0.0 {
         bits = bits | 0x80000000
         val = 0.0 - val
     }
-    int[] bytes = int[]{cap: 4}
+    int[] bytes = make([]int, 4)
     bytes[0] = (bits >> 0) & 0x_ff
     bytes[1] = (bits >> 8) & 0x_ff
     bytes[2] = (bits >> 16) & 0x_ff
@@ -90,8 +90,8 @@ func float_to_bytes(float val, int byte_order) int[] {
     bytes
 }
 
-func write_float_tensor_data(float[] data, int count) int[] {
-    int[] binary = int[]{}
+func write_float_tensor_data(float[] data, int count) []int {
+    int[] binary = []int{}
     int i = 0
     for i < count {
         int[] bytes = float_to_bytes(data[i], 0)
@@ -137,7 +137,7 @@ struct adapter_checkpoint {
 
 func write_adapter_safetensors(adapter_checkpoint ckpt, string output_file) bool {
     println("[PEFT Saver] Writing adapter_model.safetensors to " + output_file)
-    int[] total_binary = int[]{}
+    int[] total_binary = []int{}
     string tensor_list = ""
     int offset = 0
     int tensor_index = 0

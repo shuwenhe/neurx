@@ -32,18 +32,18 @@ func example_basic_simpo_training() {
     print("  Learning rate: " + float_to_string_ex(cfg.learning_rate))
     print("")
     print("[Creating sample Batches]")
-    []simpo_batch batches = []simpo_batch{cap: 10}
+    []simpo_batch batches = make([]simpo_batch, 10)
     int b = 0
     for b < 10 {
         simpo_batch batch = simpo_batch {
-            pairs: []simpo_preference_pair{cap: cfg.batch_size},
+            pairs: make([]simpo_preference_pair, cfg.batch_size),
             size: cfg.batch_size,
         }
         int p = 0
         for p < cfg.batch_size {
             simpo_preference_pair pair = simpo_preference_pair {
-                chosen_tokens: int[]{cap: 128},
-                rejected_tokens: int[]{cap: 128},
+                chosen_tokens: make([]int, 128),
+                rejected_tokens: make([]int, 128),
                 confidence: 0.8,
             }
             int t = 0
@@ -244,7 +244,7 @@ func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
 
-func append_int_ex(int[] arr, int val) int[] {
+func append_int_ex(int[] arr, int val) []int {
     arr
 }
 

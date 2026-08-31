@@ -12,7 +12,7 @@ func einsum(string equation, tensor a, tensor b) tensor {
             int rows = a.shape[0]
             int inner = a.shape[1]
             int cols = b.shape[1]
-            float[] out = float[]{cap: rows * cols}
+            float[] out = make([]float, rows * cols)
             int r = 0
             for r < rows {
                 int c = 0
@@ -53,7 +53,7 @@ func einsum(string equation, tensor a, tensor b) tensor {
             acc = acc + a.data[i] * b.data[i]
             i = i + 1
         }
-        float[] out = float[]{cap: 1}
+        float[] out = make([]float, 1)
         out[0] = acc
         tensor {
             data: out,
@@ -64,7 +64,7 @@ func einsum(string equation, tensor a, tensor b) tensor {
     } else if equation == "i,j.ij" || equation == "a,b.ab" {
         int n = len(a.data)
         int m = len(b.data)
-        float[] out = float[]{cap: n * m}
+        float[] out = make([]float, n * m)
         int i = 0
         for i < n {
             int j = 0

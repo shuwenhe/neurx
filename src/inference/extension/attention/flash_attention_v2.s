@@ -70,7 +70,7 @@ func float_of_int(int n) float {
     result
 }
 
-func zeros(int n) float[] {
+func zeros(int n) []float {
     float[] out = []
     int i = 0
     for i < n {
@@ -80,7 +80,7 @@ func zeros(int n) float[] {
     out
 }
 
-func fill(int n, float val) float[] {
+func fill(int n, float val) []float {
     float[] out = []
     int i = 0
     for i < n {
@@ -115,7 +115,7 @@ func flash_attn_forward_head(
     int seq_len, int kv_len, int head_dim,
     int block_q, int block_kv,
     float scale, bool causal
-) float[] {
+) []float {
     float[] out = zeros(seq_len * head_dim)
     float[] row_max = fill(seq_len, -1e9)
     float[] row_sum = zeros(seq_len)
@@ -479,7 +479,7 @@ func new_flash_mha(int hidden_dim, int num_q_heads, int num_kv_heads, bool causa
     }
 }
 
-func flash_mha_forward(flash_mha_state mha, float[] x, int seq_len) float[] {
+func flash_mha_forward(flash_mha_state mha, float[] x, int seq_len) []float {
     int h_q  = mha.cfg.num_q_heads
     int h_kv = mha.cfg.num_kv_heads
     int D    = mha.cfg.head_dim
@@ -496,7 +496,7 @@ func flash_mha_forward(flash_mha_state mha, float[] x, int seq_len) float[] {
     matmul_2d(merged, mha.wo, seq_len, hidden, hidden)
 }
 
-func matmul_2d(float[] a, float[] b, int M, int K, int N) float[] {
+func matmul_2d(float[] a, float[] b, int M, int K, int N) []float {
     float[] c = zeros(M * N)
     int i = 0
     for i < M {
@@ -516,10 +516,10 @@ func matmul_2d(float[] a, float[] b, int M, int K, int N) float[] {
     c
 }
 
-func reshape_to_heads(float[] x, int seq, int heads, int D) float[] {
+func reshape_to_heads(float[] x, int seq, int heads, int D) []float {
     x
 }
 
-func merge_heads(float[] x, int seq, int heads, int D) float[] {
+func merge_heads(float[] x, int seq, int heads, int D) []float {
     x
 }

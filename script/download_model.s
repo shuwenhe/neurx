@@ -69,7 +69,7 @@ func trim_string(string s) string {
     }
     string_slice(s, start, end + 1)
 func get_model_files() []model_file_info {
-    []model_file_info files = []model_file_info{cap: 6}
+    []model_file_info files = make([]model_file_info, 6)
     files[0] = model_file_info{
         name: "model.safetensors",
         size_bytes: 1945505792,

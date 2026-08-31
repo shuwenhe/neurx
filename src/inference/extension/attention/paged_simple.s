@@ -19,7 +19,7 @@ func new_cache_stats(int total) cache_stats {
     return stats
 }
 
-func allocate_kv_blocks_impl(int block_size, int num_tokens, int currently_allocated) int[] {
+func allocate_kv_blocks_impl(int block_size, int num_tokens, int currently_allocated) []int {
     int blocks_needed
     blocks_needed = (num_tokens + block_size - 1) / block_size
     int[] block_ids = []

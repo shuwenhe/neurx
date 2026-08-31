@@ -45,7 +45,7 @@ func new_attention_layer(string layer_id, int layer_index, int num_heads, int he
     backend_mgr.register_backend("flash_attention", flash)
     backend_mgr.register_backend("dsa", dsa)
     backend_mgr.register_backend("paged_attention", paged)
-    kv_cache := new_kv_cache(layer_id + "_cache", "float16", int64[]{}, false)
+    kv_cache := new_kv_cache(layer_id + "_cache", "float16", []int64{}, false)
     attention_layer {
         layer_id: layer_id,
         layer_index: layer_index,
@@ -134,7 +134,7 @@ func (attention_layer* layer) enable_cache() bool {
     true
 }
 
-func (attention_layer* layer) list_available_backends() string[] {
+func (attention_layer* layer) list_available_backends() []string {
     layer.backend_manager.list_backends()
 }
 
@@ -146,7 +146,7 @@ struct attention_layer_stack {
 }
 
 func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) attention_layer_stack {
-    layers := attention_layer[]{}
+    layers := []attention_layer{}
     i := 0
     for i < num_layers {
         layer_id := "attn_layer_" + string(i)

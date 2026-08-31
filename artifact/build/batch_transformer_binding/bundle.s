@@ -217,8 +217,8 @@ func tensor_numel(int[] shape) int {
     elements
 }
 
-func tensor_contiguous_strides(int[] shape) int[] {
-    int[] strides = int[]{cap: len(shape)}
+func tensor_contiguous_strides(int[] shape) []int {
+    int[] strides = make([]int, len(shape))
     int stride = 1
     int i = len(shape) - 1
     for i >= 0 {
@@ -424,7 +424,7 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int stream_handle = device_stream_open_handle(context.handle, stream_priority)
     if stream_handle <= 0 { return transformer_plan_invalid(backend, "stream_create_failed") }
     int count = len(descriptor)
-    int[] compiled = int[]{cap: count}
+    int[] compiled = make([]int, count)
     int index = 0
     for index < count {
         if len(descriptor[index]) == 0 {
@@ -550,8 +550,8 @@ struct production_admission_result {
     string error_message
 }
 
-func production_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func production_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int index = 0
     for index < capacity { values[index] = 0; index = index + 1 }
     values
@@ -775,7 +775,7 @@ func batch_upload_i32(device_context context, int[] values) device_tensor {
     int bytes = len(values) * 4
     int host = device_buffer_alloc(context.handle, bytes, "host")
     if host <= 0 { return tensor_invalid(context.backend, "int32", "host_allocation_failed") }
-    int[] upload_shape = int[]{cap: 1}
+    int[] upload_shape = make([]int, 1)
     upload_shape[0] = len(values)
     device_tensor output = tensor_empty(context, upload_shape, "int32")
     if !output.valid || batch_write_i32(context.handle, host, values) != 0 || neurx_device_copy(context.handle, output.buffer, host, bytes, device_copy_host_to_device()) != 0 {
@@ -794,11 +794,11 @@ func pack_batch_tensor(device_context context, production_batch_runtime runtime,
     int total = 0
     int sequence = 0
     for sequence < selected_count { total = total + token_count[sequence]; sequence = sequence + 1 }
-    int[] tokens = int[]{cap: total}
-    int[] positions = int[]{cap: total}
-    int[] slots = int[]{cap: total}
-    int[] offsets = int[]{cap: selected_count}
-    int[] table = int[]{cap: selected_count * runtime.config.maximum_pages_per_request}
+    int[] tokens = make([]int, total)
+    int[] positions = make([]int, total)
+    int[] slots = make([]int, total)
+    int[] offsets = make([]int, selected_count)
+    int[] table = make([]int, selected_count * runtime.config.maximum_pages_per_request)
     int packed = 0
     sequence = 0
     for sequence < selected_count {
@@ -866,7 +866,7 @@ func new_model_weight_registry(int context, string backend, string dtype, int ca
     if context <= 0 || capacity <= 0 || len(backend) == 0 || len(dtype) == 0 {
         return model_weight_registry {context: context, backend: backend, dtype: dtype, name: [], buffer: [], element: [], count: 0, capacity: capacity, sealed: false, valid: false, error_message: "invalid_weight_registry"}
     }
-    model_weight_registry {context: context, backend: backend, dtype: dtype, name: string[]{cap: capacity}, buffer: int[]{cap: capacity}, element: int[]{cap: capacity}, count: 0, capacity: capacity, sealed: false, valid: true, error_message: ""}
+    model_weight_registry {context: context, backend: backend, dtype: dtype, name: make([]string, capacity), buffer: make([]int, capacity), element: make([]int, capacity), count: 0, capacity: capacity, sealed: false, valid: true, error_message: ""}
 }
 
 func model_weight_find(model_weight_registry registry, string name) int {
@@ -940,8 +940,8 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
     if config.layers <= 0 || config.hidden <= 0 || config.intermediate <= 0 || config.query_heads <= 0 || config.kv_heads <= 0 || config.head_dim <= 0 {
         return transformer_schedule {backend: backend, operations: [], vendor_operations: [], layer_operations: 0, valid: false, error_message: "invalid_transformer_config"}
     }
-    []lowered_op operations = []lowered_op{cap: config.layers * 16 + 3}
-    string[] vendor_operations = string[]{cap: config.layers * 16 + 3}
+    []lowered_op operations = make([]lowered_op, config.layers * 16 + 3)
+    string[] vendor_operations = make([]string, config.layers * 16 + 3)
     int operation_index = 0
     operations[operation_index] = lower_device_op(backend, available, op_embedding(config.dtype, config.hidden)); operation_index = operation_index + 1
     int layer = 0
@@ -1043,7 +1043,7 @@ func transformer_batch_binding_build(transformer_device_config config, model_wei
                                      physical_paged_kv cache, packed_batch_tensor batch,
                                      transformer_batch_buffer buffer, int block_size, int max_sequence) transformer_batch_binding {
     int operation_count = config.layers * 16 + 3
-    string[] binding = string[]{cap: operation_count}
+    string[] binding = make([]string, operation_count)
     if !weight.valid || !weight.sealed || !cache.valid || !batch.valid || !buffer.valid || block_size <= 0 || max_sequence <= 0 {
         return transformer_batch_binding {binding: binding, operation_count: operation_count, valid: false, error_message: "invalid_transformer_batch_resource"}
     }

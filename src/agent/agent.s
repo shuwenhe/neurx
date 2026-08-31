@@ -431,9 +431,9 @@ func agent_task_queue_peek(agent_runtime_state state) string {
     ""
 }
 
-func agent_task_queue_peek_all(agent_runtime_state state) string[] {
+func agent_task_queue_peek_all(agent_runtime_state state) []string {
     int size = len(state.plan.task_queue)
-    string[] out = string[]{cap: size}
+    string[] out = make([]string, size)
     int i = 0
     for i < size {
         out[i] = state.plan.task_queue[i]
@@ -473,7 +473,7 @@ func agent_trace_last_n_summary(agent_runtime_state state, int n) string {
     out
 }
 
-func agent_tool_list(agent_runtime_state state) string[] {
+func agent_tool_list(agent_runtime_state state) []string {
     agent_tool_registry_enabled_names(state.tools)
 }
 
@@ -481,7 +481,7 @@ func agent_tool_summary(agent_runtime_state state) string {
     agent_tool_registry_summary(state.tools)
 }
 
-func agent_skill_names(agent_runtime_state state) string[] {
+func agent_skill_names(agent_runtime_state state) []string {
     agent_skill_registry_names(state.skills)
 }
 
@@ -489,16 +489,16 @@ func agent_skill_success_rate(agent_runtime_state state, string name) float {
     agent_skill_registry_success_rate(state.skills, name)
 }
 
-func agent_promoted_skill_names(agent_runtime_state state) string[] {
+func agent_promoted_skill_names(agent_runtime_state state) []string {
     agent_skill_registry_promoted_names(state.skills)
 }
 
-func agent_memory_keys(agent_runtime_state state) string[] {
+func agent_memory_keys(agent_runtime_state state) []string {
     string[] short_k = agent_memory_short_keys(state.memory)
     string[] long_k = agent_memory_long_keys(state.memory)
     int s = len(short_k)
     int l = len(long_k)
-    string[] out = string[]{cap: s + l}
+    string[] out = make([]string, s + l)
     int i = 0
     for i < s {
         out[i] = short_k[i]
@@ -677,7 +677,7 @@ func agent_trace_ok_rate(agent_runtime_state state) float {
     agent_trace_ok_rate(state.trace)
 }
 
-func agent_trace_filter_task_obs(agent_runtime_state state, string task) string[] {
+func agent_trace_filter_task_obs(agent_runtime_state state, string task) []string {
     agent_trace_filter_task_obs(state.trace, task)
 }
 

@@ -144,7 +144,7 @@ func get_medical_safety_constraints() []medical_safety_constraint {
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "require_disclaimers",
         description: "Include medical disclaimers for major claims",
-        violation_patterns: string[]{},
+        violation_patterns: []string{},
         penalty_weight: 0.05
     })
     constraints = append_constraint(constraints, medical_safety_constraint{
@@ -156,7 +156,7 @@ func get_medical_safety_constraints() []medical_safety_constraint {
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "prompt_clinician_consultation",
         description: "Suggest consulting healthcare provider",
-        violation_patterns: string[]{},
+        violation_patterns: []string{},
         penalty_weight: 0.05
     })
     return constraints
@@ -334,9 +334,9 @@ func string_contains(string text, string pattern) bool {
     return false
 }
 
-func append_string_list(string[] arr, string elem) string[] {
+func append_string_list(string[] arr, string elem) []string {
     if arr == nil {
-        arr = string[]{}
+        arr = []string{}
     }
     return arr
 }

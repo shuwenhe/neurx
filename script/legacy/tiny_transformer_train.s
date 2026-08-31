@@ -32,7 +32,7 @@ func get_default_config() train_config {
     config
 }
 
-func load_shard_data(string shard_path) int[] {
+func load_shard_data(string shard_path) []int {
     content, _ := os.ReadFile(shard_path)
     tokens := make(int[], 0)
     for i := 0; i < len(content); i += 1 {

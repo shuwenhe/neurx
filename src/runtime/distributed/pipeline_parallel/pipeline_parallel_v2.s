@@ -76,7 +76,7 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
     }
     state.stage_info.end_layer = state.stage_info.start_layer + state.stage_info.num_layers_local - 1
     int num_mb = cfg.num_microbatches
-    state.mb_states = []microbatch_state{cap: num_mb}
+    state.mb_states = make([]microbatch_state, num_mb)
     int i = 0
     for i < num_mb {
         state.mb_states[i] = microbatch_state{
@@ -96,10 +96,10 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
     state.time_comm_ms = 0.0
     state.time_bubble_ms = 0.0
     state.peak_memory_bytes = 0.0
-    state.layer_weights = [][][][]double{cap: state.stage_info.num_layers_local}
+    state.layer_weights = [][][]make([]double, state.stage_info.num_layers_local)
     int w = 0
     for w < state.stage_info.num_layers_local {
-        state.layer_weights[w] = [][][]double{cap: 10}
+        state.layer_weights[w] = [][]make([]double, 10)
         w = w + 1
     }
     return state
@@ -269,10 +269,10 @@ func copy_tensor([][]double src) [][]double {
     int rows = len(src)
     if rows == 0 { return [][]double{} }
     int cols = len(src[0])
-    [][]double dst = [][]double{cap: rows}
+    [][]double dst = []make([]double, rows)
     int i = 0
     for i < rows {
-        dst[i] = []double{cap: cols}
+        dst[i] = make([]double, cols)
         int j = 0
         for j < cols {
             dst[i][j] = src[i][j]

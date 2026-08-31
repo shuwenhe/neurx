@@ -112,7 +112,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if !router.adapter_mgr.switch_adapter(req.adapter_id) {
         return lora_inference_result{
             request_id: req.request_id,
-            output: float[]{},
+            output: []float{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,
@@ -123,7 +123,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if lora.rank <= 0 {
         return lora_inference_result{
             request_id: req.request_id,
-            output: float[]{},
+            output: []float{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,
@@ -140,7 +140,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if len(output) != len(req.input_hidden) {
         return lora_inference_result{
             request_id: req.request_id,
-            output: float[]{},
+            output: []float{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,

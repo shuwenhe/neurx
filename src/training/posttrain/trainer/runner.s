@@ -226,8 +226,8 @@ struct runtime_module_step_result {
     float loss
 }
 
-func runtime_fill_f32(int size, float value) float[] {
-    float[] arr = float[]{cap: size}
+func runtime_fill_f32(int size, float value) []float {
+    float[] arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = value
@@ -349,7 +349,7 @@ func runtime_parse_medmcqa_sample(string line) runtime_training_sample {
 
 func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batch {
     runtime_sample_batch batch
-    batch.samples = []runtime_training_sample{cap: limit}
+    batch.samples = make([]runtime_training_sample, limit)
     batch.count = 0
     string current_line = ""
     int i = 0
@@ -386,7 +386,7 @@ func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batc
     batch
 }
 
-func runtime_text_vector(string text, int size, float scale, int salt) float[] {
+func runtime_text_vector(string text, int size, float scale, int salt) []float {
     float[] vec = runtime_fill_f32(size, 0.0)
     if size <= 0 {
         return vec
@@ -765,7 +765,7 @@ func runtime_write_adapter_checkpoint(
     int module_idx = 0
     for module_idx < len(modules) {
         runtime_lora_module module = modules[module_idx]
-        int[] a_shape = int[]{cap: 2}
+        int[] a_shape = make([]int, 2)
         a_shape[0] = module.rank
         a_shape[1] = module.in_dim
         float[] a_data = runtime_fill_f32(len(module.lora_A), 0.0)
@@ -782,7 +782,7 @@ func runtime_write_adapter_checkpoint(
         a_tensor.shape_count = 2
         a_tensor.data_count = len(a_data)
         safetensors_writer_add_tensor(writer, a_tensor)
-        int[] b_shape = int[]{cap: 2}
+        int[] b_shape = make([]int, 2)
         b_shape[0] = module.out_dim
         b_shape[1] = module.rank
         float[] b_data = runtime_fill_f32(len(module.lora_B), 0.0)
@@ -854,7 +854,7 @@ func run_runtime_training(trainer_config config) int {
     println("Dataset bytes: " + int_to_str(len(dataset_text)))
     println("Parsed samples: " + int_to_str(batch.count))
     int module_count = config.num_layers * 2
-    []runtime_lora_module modules = []runtime_lora_module{cap: module_count}
+    []runtime_lora_module modules = make([]runtime_lora_module, module_count)
     int layer_idx = 0
     int module_idx = 0
     for layer_idx < config.num_layers {
@@ -870,7 +870,7 @@ func run_runtime_training(trainer_config config) int {
     println("Vectorizing prompt")
     println("Vectorizing target")
     println("Training loop start")
-    float[] loss_history = float[]{cap: config.total_steps}
+    float[] loss_history = make([]float, config.total_steps)
     float initial_loss = 0.0
     float best_loss = 999999.0
     float final_loss = 0.0
@@ -915,7 +915,7 @@ func run_runtime_training(trainer_config config) int {
         println("error: training loop produced no steps")
         return 1
     }
-    float[] trimmed_loss_history = float[]{cap: step}
+    float[] trimmed_loss_history = make([]float, step)
     int loss_idx = 0
     for loss_idx < step {
         trimmed_loss_history[loss_idx] = loss_history[loss_idx]
@@ -1009,8 +1009,8 @@ func sqrt_lora(float x) float {
     return guess
 }
 
-func reference_fill_f32(int size, float value) float[] {
-    float[] arr = float[]{cap: size}
+func reference_fill_f32(int size, float value) []float {
+    float[] arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = value

@@ -207,7 +207,7 @@ func evaluate_model(
     return total_loss / float(num_eval_batches)
 }
 
-func create_dummy_batch(int batch_size, int seq_len) int[] {
+func create_dummy_batch(int batch_size, int seq_len) []int {
     var int[] batch = int[](batch_size * seq_len)
     i := 0
     for i < batch_size * seq_len {

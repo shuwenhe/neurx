@@ -37,8 +37,8 @@ struct user_manager {
 }
 
 func (user_manager* um) init() (int, string) {
-    um.users = user[]{}
-    um.groups = user_group[]{}
+    um.users = []user{}
+    um.groups = []user_group{}
     um.next_uid = 1000  
     um.next_gid = 1000
     root := user{
@@ -52,7 +52,7 @@ func (user_manager* um) init() (int, string) {
     root_group := user_group{
         gid: 0,
         group_name: "root",
-        members: int[]{}"
+        members: []int{}"
     }
     um.groups = append(um.groups, root_group)
     return 0, ""
@@ -95,7 +95,7 @@ func (user_manager* um) create_group(string group_name) (user_group, string) {
     new_group := user_group{
         gid: um.next_gid,
         group_name: group_name,
-        members: int[]{}"
+        members: []int{}"
     }
     um.groups = append(um.groups, new_group)
     um.next_gid = um.next_gid + 1
@@ -185,8 +185,8 @@ struct file_permission_manager {
 }
 
 func (file_permission_manager* fpm) init() (int, string) {
-    fpm.permissions = file_permission[]{}
-    fpm.acl_entries = acl_entry[]{}
+    fpm.permissions = []file_permission{}
+    fpm.acl_entries = []acl_entry{}
     fpm.next_acl_id = 0
     return 0, ""
 }

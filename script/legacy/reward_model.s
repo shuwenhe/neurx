@@ -102,9 +102,9 @@ func (reward_model_trainer* trainer) preprocess_example(example preference_data)
     return combined, example.preferred
 }
 
-func (reward_model_trainer* trainer) tokenize(text string) int[] {
+func (reward_model_trainer* trainer) tokenize(text string) []int {
     words := strings.Split(text, " ")
-    tokens := int[]{}
+    tokens := []int{}
     for i, word := range words {
         token := (len(word) + i*73) % trainer.config.vocab_size
         tokens = append(tokens, token)
@@ -112,7 +112,7 @@ func (reward_model_trainer* trainer) tokenize(text string) int[] {
     return tokens
 }
 
-func (reward_model_trainer* trainer) embed_tokens(tokens int[]) float[]64 {
+func (reward_model_trainer* trainer) embed_tokens(tokens []int) float[]64 {
     embeddings := float[]64{}
     for i, token := range tokens {
         emb := math.Sin(float64(token) / 1000.0) * math.Cos(float64(i) / 100.0)
@@ -181,7 +181,7 @@ func (reward_model_trainer* trainer) evaluate(dataset preference_dataset) traini
     total_loss := 0.0
     correct := 0
     logits := float[]64{}
-    labels := int[]{}
+    labels := []int{}
     for _, example := range dataset.examples {
         reward_a := trainer.predict_reward(example.response_a)
         reward_b := trainer.predict_reward(example.response_b)

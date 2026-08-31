@@ -21,7 +21,7 @@ struct tiered_storage {
 
 func create_tiered_storage() tiered_storage {
     tiered_storage ts = tiered_storage{}
-    ts.tiers = []storage_tier{cap: 3}
+    ts.tiers = make([]storage_tier, 3)
     ts.num_tiers = 0
     ts.l1_tier_idx = -1
     ts.l2_tier_idx = -1

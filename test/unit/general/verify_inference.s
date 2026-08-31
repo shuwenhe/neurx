@@ -67,7 +67,7 @@ func string_char_from_code(int code) string {
 }
 
 func create_test_cases() []inference_test_case {
-    []inference_test_case tests = []inference_test_case{cap: 5}
+    []inference_test_case tests = make([]inference_test_case, 5)
 
     tests[0] = inference_test_case{
         name: "Basic Greeting",
@@ -189,7 +189,7 @@ func run_all_tests([]inference_test_case test_cases) inference_verification_repo
         total_tests: 0,
         passed_tests: 0,
         failed_tests: 0,
-        results: []inference_test_result{cap: len(test_cases)},
+        results: make([]inference_test_result, len(test_cases)),
         total_latency_ms: 0.0
     }
 

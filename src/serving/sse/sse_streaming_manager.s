@@ -318,7 +318,7 @@ func (streaming_pipeline* p) get_pipeline_stats() map[string]interface{} {
 	return pipeline_stats
 }
 
-func (streaming_pipeline* p) get_event_logs() stream_event_log[] {
+func (streaming_pipeline* p) get_event_logs() []stream_event_log {
 	return p.event_logs
 }
 

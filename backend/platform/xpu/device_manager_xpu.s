@@ -92,7 +92,7 @@ func xpu_get_memory_info(xpu_device device) [int, int] {
     [device.free_memory_bytes, device.total_memory_bytes]
 }
 
-func xpu_supported_compute_capabilities() string[] {
+func xpu_supported_compute_capabilities() []string {
     ["gen12", "dg1", "alchemist"]
 }
 

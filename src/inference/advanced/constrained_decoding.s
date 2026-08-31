@@ -213,7 +213,7 @@ func (constrained_sampler* sampler) ValidateOutput(
             constraint.schema_definition,
         )
     case CONSTRAINT_CHOICE_SET:
-        valid, errors = validate_choice(output, string[]{})
+        valid, errors = validate_choice(output, []string{})
     case CONSTRAINT_INTEGER_RANGE:
         valid, errors = validate_integer_range(output, 0, 100)
     }
@@ -228,7 +228,7 @@ func (constrained_sampler* sampler) ValidateOutput(
 func (constrained_sampler* sampler) FilterLogits(
     float[] logits,
     output_constraint constraint,
-) float[] {
+) []float {
     filtered := make(float[], len(logits))
     for i := 0; i < len(logits); i++ {
         filtered[i] = logits[i]

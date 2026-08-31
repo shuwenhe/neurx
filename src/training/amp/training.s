@@ -122,9 +122,9 @@ func new_amp_state(amp_config config, int num_params) amp_state {
         scale: config.initial_scale,
         growth_step: 0,
         last_overflow: false,
-        fp16_params: []autograd.tensor{cap: num_params},
-        fp16_grads: []autograd.tensor{cap: num_params},
-        fp32_params: []autograd.tensor{cap: num_params},
+        fp16_params: make([]autograd.tensor, num_params),
+        fp16_grads: make([]autograd.tensor, num_params),
+        fp32_params: make([]autograd.tensor, num_params),
     }
     state
 }

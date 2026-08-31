@@ -172,7 +172,7 @@ func (experiment_manager* manager) get_metrics_summary(experiment_id string) {
 }
 
 func (experiment_manager* manager) compare_experiments(
-    exp_ids string[],
+    exp_ids []string,
     metric string) experiment_comparison {
     fmt.Printf("\n[Comparison] Comparing %d experiments on metric: %s\n", len(exp_ids), metric)
     comparison := experiment_comparison{

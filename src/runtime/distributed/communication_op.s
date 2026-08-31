@@ -14,8 +14,8 @@ struct collective_result {
     string error_message
 }
 
-func copy_tensor_floats(float[] values) float[] {
-    float[] copied = float[]{cap: len(values)}
+func copy_tensor_floats(float[] values) []float {
+    float[] copied = make([]float, len(values))
     int i = 0
     for i < len(values) {
         copied[i] = values[i]
@@ -24,8 +24,8 @@ func copy_tensor_floats(float[] values) float[] {
     copied
 }
 
-func copy_tensor_shape(int[] shape) int[] {
-    int[] copied = int[]{cap: len(shape)}
+func copy_tensor_shape(int[] shape) []int {
+    int[] copied = make([]int, len(shape))
     int i = 0
     for i < len(shape) {
         copied[i] = shape[i]
@@ -142,7 +142,7 @@ func tensor_model_parallel_all_gather(group_coordinator group, distributed_tenso
     int inner = tensor_inner_size(input.shape, normalized_dim)
     int[] output_shape = copy_tensor_shape(input.shape)
     output_shape[normalized_dim] = axis * group.world_size
-    float[] output = float[]{cap: len(input.data) * group.world_size}
+    float[] output = make([]float, len(input.data) * group.world_size)
     int outer_index = 0
     for outer_index < outer {
         int member = 0
@@ -183,7 +183,7 @@ func tensor_model_parallel_reduce_scatter(group_coordinator group, distributed_t
     int local_axis = axis / group.world_size
     int[] output_shape = copy_tensor_shape(input.shape)
     output_shape[normalized_dim] = local_axis
-    float[] output = float[]{cap: len(input.data) / group.world_size}
+    float[] output = make([]float, len(input.data) / group.world_size)
     int outer_index = 0
     for outer_index < outer {
         int local_axis_index = 0
@@ -212,8 +212,8 @@ func tensor_model_parallel_gather(group_coordinator group, distributed_tensor in
         return gathered
     }
     if group.rank_in_group != destination {
-        gathered.tensor.data = float[]{}
-        gathered.tensor.shape = int[]{}
+        gathered.tensor.data = []float{}
+        gathered.tensor.shape = []int{}
         gathered.present = false
     }
     gathered
@@ -237,7 +237,7 @@ func all_to_all_single(group_coordinator group, distributed_tensor input) collec
         return failed_collective(input, "all-to-all tensor size must be divisible by group size")
     }
     int chunk = len(input.data) / group.world_size
-    float[] output = float[]{cap: len(input.data)}
+    float[] output = make([]float, len(input.data))
     int source = 0
     for source < group.world_size {
         int i = 0

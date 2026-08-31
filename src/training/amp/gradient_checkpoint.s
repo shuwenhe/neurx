@@ -20,12 +20,12 @@ func checkpoint_save_activation(
     return ctx
 }
 
-func checkpoint_get_activation(checkpoint_context ctx, int layer_id) float[] {
+func checkpoint_get_activation(checkpoint_context ctx, int layer_id) []float {
     if layer_id < 0 {
-        return float[]{}
+        return []float{}
     }
     if layer_id >= len(ctx.saved_activations) {
-        return float[]{}
+        return []float{}
     }
     return clone_activation(ctx.saved_activations[layer_id])
 }
@@ -51,8 +51,8 @@ func checkpoint_get_memory_saved(checkpoint_context ctx) int {
     return total
 }
 
-func clone_activation(float[] act) float[] {
-    float[] cloned = float[]{cap: len(act)}
+func clone_activation(float[] act) []float {
+    float[] cloned = make([]float, len(act))
     int i = 0
     for i < len(act) {
         cloned[i] = act[i]

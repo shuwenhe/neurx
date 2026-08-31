@@ -163,7 +163,7 @@ func load_preset_by_name(string name) option[lora_config] {
     }
 }
 
-func get_available_presets() string[] {
+func get_available_presets() []string {
     presets := string[]()
     presets = append(presets, "lightweight")
     presets = append(presets, "balanced")

@@ -43,7 +43,7 @@ struct priority_manager {
 }
 
 func new_priority_manager(int32 max_queue_size) priority_manager {
-    configs := sla_config[]{}
+    configs := []sla_config{}
     p0_config := sla_config {
         priority: priority_level_p0_critical,
         max_latency_ms: 100,
@@ -80,7 +80,7 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
     }
     configs = append(configs, p4_config)
     priority_manager {
-        queue: priority_entry[]{},
+        queue: []priority_entry{},
         request_priority_map: map[string, priority_level]{},
         sla_configs: configs,
         current_time: 0,
@@ -159,8 +159,8 @@ func (priority_manager* pm) get_next_request() priority_entry {
     }
 }
 
-func priority_entry_vec_remove_at(priority_entry[] v, int32 idx) priority_entry[] {
-    result := priority_entry[]{}
+func priority_entry_vec_remove_at(priority_entry[] v, int32 idx) []priority_entry {
+    result := []priority_entry{}
     for i in len(0..v) {
         if i != idx {
             result = append(result, v[i])
@@ -243,8 +243,8 @@ func (priority_manager* pm) get_queue_stats() priority_queue_stats {
     }
 }
 
-func (priority_manager* pm) check_sla_violations() string[] {
-    violations := string[]{}
+func (priority_manager* pm) check_sla_violations() []string {
+    violations := []string{}
     for entry in pm.queue {
         wait_time := pm.current_time - entry.submission_time
         for config in pm.sla_configs {
@@ -288,7 +288,7 @@ func (priority_manager* pm) is_queue_full() bool {
 }
 
 func (priority_manager* pm) clear_queue() {
-    pm.queue = priority_entry[]{}
+    pm.queue = []priority_entry{}
     pm.request_priority_map = map[string, priority_level]{}
 }
 

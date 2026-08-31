@@ -35,8 +35,8 @@ struct huge_page_pool {
 
 func new_huge_page_pool() (*huge_page_pool, string) {
     pool := *huge_page_pool{
-        pages_2m: huge_page[]{},
-        pages_1g: huge_page[]{},
+        pages_2m: []huge_page{},
+        pages_1g: []huge_page{},
         lock: spinlock_new(),
         total_allocated: 0,
     } as *huge_page_pool

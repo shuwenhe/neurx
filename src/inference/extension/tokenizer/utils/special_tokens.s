@@ -104,7 +104,7 @@ func (SpecialTokenManager* m) GetTokenType(i32 token_id) string {
     return "unknown"
 }
 
-func (SpecialTokenManager* m) RemoveSpecialTokens(i32[] tokens) i32[] {
+func (SpecialTokenManager* m) RemoveSpecialTokens(i32[] tokens) []i32 {
     result := make(i32[], 0)
     for i := 0; i < len(tokens); i += 1 {
         if !m.IsSpecialToken(tokens[i]) {
@@ -114,7 +114,7 @@ func (SpecialTokenManager* m) RemoveSpecialTokens(i32[] tokens) i32[] {
     return result
 }
 
-func (SpecialTokenManager* m) KeepOnlySpecialTokens(i32[] tokens) i32[] {
+func (SpecialTokenManager* m) KeepOnlySpecialTokens(i32[] tokens) []i32 {
     result := make(i32[], 0)
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -124,7 +124,7 @@ func (SpecialTokenManager* m) KeepOnlySpecialTokens(i32[] tokens) i32[] {
     return result
 }
 
-func (SpecialTokenManager* m) GetSpecialTokenPositions(i32[] tokens) i32[] {
+func (SpecialTokenManager* m) GetSpecialTokenPositions(i32[] tokens) []i32 {
     positions := make(i32[], 0)
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -134,7 +134,7 @@ func (SpecialTokenManager* m) GetSpecialTokenPositions(i32[] tokens) i32[] {
     return positions
 }
 
-func (SpecialTokenManager* m) CreateSpecialTokenMask(i32[] tokens) i32[] {
+func (SpecialTokenManager* m) CreateSpecialTokenMask(i32[] tokens) []i32 {
     mask := make(i32[], len(tokens))
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -146,7 +146,7 @@ func (SpecialTokenManager* m) CreateSpecialTokenMask(i32[] tokens) i32[] {
     return mask
 }
 
-func (SpecialTokenManager* m) ReplaceSpecialTokens(i32[] tokens, i32 substitute_id) i32[] {
+func (SpecialTokenManager* m) ReplaceSpecialTokens(i32[] tokens, i32 substitute_id) []i32 {
     result := make(i32[], len(tokens))
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -158,7 +158,7 @@ func (SpecialTokenManager* m) ReplaceSpecialTokens(i32[] tokens, i32 substitute_
     return result
 }
 
-func (SpecialTokenManager* m) ReplaceSpecialTokensByType(i32[] tokens, string token_type, i32 substitute_id) i32[] {
+func (SpecialTokenManager* m) ReplaceSpecialTokensByType(i32[] tokens, string token_type, i32 substitute_id) []i32 {
     result := make(i32[], len(tokens))
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) && m.GetTokenType(tokens[i]) == token_type {
@@ -170,7 +170,7 @@ func (SpecialTokenManager* m) ReplaceSpecialTokensByType(i32[] tokens, string to
     return result
 }
 
-func (SpecialTokenManager* m) InsertSpecialToken(i32[] tokens, i32 token_id, i32 position) i32[] {
+func (SpecialTokenManager* m) InsertSpecialToken(i32[] tokens, i32 token_id, i32 position) []i32 {
     if position < 0 || position > i32(len(tokens)) {
         return tokens
     }
@@ -186,7 +186,7 @@ func (SpecialTokenManager* m) InsertSpecialToken(i32[] tokens, i32 token_id, i32
     return result
 }
 
-func (SpecialTokenManager* m) AddBeginSpecialToken(i32[] tokens, i32 token_id) i32[] {
+func (SpecialTokenManager* m) AddBeginSpecialToken(i32[] tokens, i32 token_id) []i32 {
     result := make(i32[], 1 + len(tokens))
     result[0] = token_id
     for i := 0; i < len(tokens); i += 1 {
@@ -195,16 +195,16 @@ func (SpecialTokenManager* m) AddBeginSpecialToken(i32[] tokens, i32 token_id) i
     return result
 }
 
-func (SpecialTokenManager* m) AddEndSpecialToken(i32[] tokens, i32 token_id) i32[] {
+func (SpecialTokenManager* m) AddEndSpecialToken(i32[] tokens, i32 token_id) []i32 {
     result := append(tokens, token_id)
     return result
 }
 
-func (SpecialTokenManager* m) GetAllSpecialTokens() string[] {
+func (SpecialTokenManager* m) GetAllSpecialTokens() []string {
     return m.special_tokens_list
 }
 
-func (SpecialTokenManager* m) GetAllSpecialTokenIds() i32[] {
+func (SpecialTokenManager* m) GetAllSpecialTokenIds() []i32 {
     return m.reserved_tokens
 }
 

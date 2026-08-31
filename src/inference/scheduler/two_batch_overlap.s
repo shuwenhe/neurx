@@ -32,8 +32,8 @@ struct tbo_stage_schedule {
     bool valid
 }
 
-func tbo_int_array(int capacity, int value) int[] {
-    int[] values = int[]{cap: capacity}
+func tbo_int_array(int capacity, int value) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = value; i = i + 1 }
     values

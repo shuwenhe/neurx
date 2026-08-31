@@ -276,7 +276,7 @@ func (reasoning_engine* e) add_stream_chunk(
 
 func (reasoning_engine* e) get_stream_chunks(
 	request_id string,
-) reasoning_stream_chunk[] {
+) []reasoning_stream_chunk {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	chunks, exists := e.stream_buffers[request_id]

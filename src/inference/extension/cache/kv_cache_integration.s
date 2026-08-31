@@ -13,9 +13,9 @@ func init_kv_cache_system(int max_blocks, int hidden_dim, int num_layers, int ma
     return 1
 }
 
-func kv_cache_try_get_cached_blocks(int[] prompt_tokens) int[] {
+func kv_cache_try_get_cached_blocks(int[] prompt_tokens) []int {
     if g_cache_enabled == 0 {
-        return int[]{cap: 0}
+        return []int{}
     }
     return kv_cache_engine_query_kv(g_kv_cache_engine, prompt_tokens)
 }

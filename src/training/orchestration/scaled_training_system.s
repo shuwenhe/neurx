@@ -60,8 +60,8 @@ func scaled_hash_token(string token, int vocab_size) int {
     scaled_positive_mod(hash, vocab_size)
 }
 
-func scaled_split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func scaled_split_lines(string text) []string {
+    string[] lines = []string{}
     string current = ""
     int i = 0
     for i < len(text) {

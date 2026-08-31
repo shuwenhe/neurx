@@ -16,7 +16,7 @@ func main() {
     }
     string help_text = runtime_run_command_output(runtime_shell_escape(s_bin) + " --help 2>&1")
     bool legacy_mode = contains_text(help_text, "<input.s> <output.ir>")
-    string[] roots = string[]{cap: 0}
+    string[] roots = []string{}
     roots = append(roots, "agent")
     roots = append(roots, "s")
     roots = append(roots, "ops")
@@ -172,8 +172,8 @@ func compile_one(string s_bin, bool legacy_mode, string src) bool {
     return runtime_run_command(runtime_shell_escape(s_bin) + " ir " + runtime_shell_escape(src) + " -o " + runtime_shell_escape(target)).ok
 }
 
-func split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func split_lines(string text) []string {
+    string[] lines = []string{}
     string current = ""
     int i = 0
     for i < len(text) {

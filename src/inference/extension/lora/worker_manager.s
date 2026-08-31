@@ -145,7 +145,7 @@ func (worker_manager* mgr) get_worker_status(string worker_id) worker_status {
     return worker_terminated
 }
 
-func (worker_manager* mgr) get_pending_tasks() string[] {
+func (worker_manager* mgr) get_pending_tasks() []string {
     tasks := make(string[])
     for task_id := range mgr.task_queue {
         tasks = append(tasks, task_id)

@@ -33,7 +33,7 @@ func new_agent_session_state(string session_id, string system_prompt) agent_sess
 
 func agent_session_add_turn(agent_session_state state, string role, string content) agent_session_state {
     int n = state.count
-    []agent_session_turn turns = []agent_session_turn{cap: n + 1}
+    []agent_session_turn turns = make([]agent_session_turn, n + 1)
     int i = 0
     for i < n {
         turns[i] = state.turns[i]

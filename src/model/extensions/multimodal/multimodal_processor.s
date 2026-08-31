@@ -141,7 +141,7 @@ func (multimodal_processor* proc) process_audio(string content_id, audio_data* a
     return result
 }
 
-func (multimodal_processor* proc) process_multimodal(string content_id, interface{}[] modalities) processing_result[] {
+func (multimodal_processor* proc) process_multimodal(string content_id, interface{}[] modalities) []processing_result {
     results := make(processing_result[])
     proc.budget_mgr.allocate_budgets()
     for i := 0; i < len(modalities); i = i + 1 {

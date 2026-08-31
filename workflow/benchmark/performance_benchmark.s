@@ -126,7 +126,7 @@ func benchmark_model(model_config model) performance_report {
     println("  FF dimension: " + strings.from_i32(model.ff_dim))
     println("  Total parameters: " + format_large_number(model.num_params))
     println("")
-    benchmarks := gpu_benchmark[]{}
+    benchmarks := []gpu_benchmark{}
     gpu_counts := [1, 4, 16, 64]
     for count in gpu_counts {
         benchmark := benchmark_multi_gpu(model, count)

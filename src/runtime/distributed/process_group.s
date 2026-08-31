@@ -47,7 +47,7 @@ func (process_group_manager* mgr) get_group(int group_id) process_group {
     }
     process_group {
         group_id: -1,
-        ranks: int[]{},
+        ranks: []int{},
         world_size: 0,
         name: "",
         backend: comm_backend_cpu_only,
@@ -67,8 +67,8 @@ func (process_group_manager* mgr) delete_group(int group_id) bool {
     false
 }
 
-func (process_group_manager* mgr) list_groups() int[] {
-    result := int[]{}
+func (process_group_manager* mgr) list_groups() []int {
+    result := []int{}
     for gid in mgr.groups.keys() {
         result = append(result, gid)
     }
@@ -113,7 +113,7 @@ func (process_group* group) get_rank_index(int rank) int {
     -1
 }
 
-func (process_group* group) get_ranks() int[] {
+func (process_group* group) get_ranks() []int {
     group.ranks
 }
 

@@ -17,7 +17,7 @@ struct ir_graph_state {
 }
 
 func copy_nodes([]ir_node_state values) []ir_node_state {
-    []ir_node_state out = []ir_node_state{cap: len(values)}
+    []ir_node_state out = make([]ir_node_state, len(values))
     int i = 0
     for i < len(values) {
         ir_node_state n = values[i]

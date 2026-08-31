@@ -28,7 +28,7 @@ struct cache_manager {
 
 func new_cache_manager(string cache_dir, int max_size_mb) cache_manager {
     cache_manager {
-        entries: []cache_entry{cap: 10000},
+        entries: make([]cache_entry, 10000),
         stats: cache_stats {
             total_entries: 0,
             hits: 0,
@@ -94,6 +94,6 @@ func get_cache_stats(cache_manager mgr) cache_stats {
 func clear_cache(cache_manager mgr) cache_manager {
     mgr.stats.total_entries = 0
     mgr.stats.total_size_bytes = 0
-    mgr.entries = []cache_entry{cap: 10000}
+    mgr.entries = make([]cache_entry, 10000)
     mgr
 }

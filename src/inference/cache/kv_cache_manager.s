@@ -1,6 +1,6 @@
 package neurx.inference.kv_cache_manager
-func kv_cache_remove_int(int[] values, int expected) int[] {
-    int[] result = int[]{}
+func kv_cache_remove_int(int[] values, int expected) []int {
+    int[] result = []int{}
     int i = 0
     for i < len(values) {
         if values[i] != expected {
@@ -22,7 +22,7 @@ func kv_cache_contains_int(int[] values, int expected) bool {
     false
 }
 
-func kv_cache_append_unique(int[] values, int value) int[] {
+func kv_cache_append_unique(int[] values, int value) []int {
     if kv_cache_contains_int(values, value) {
         return values
     }
@@ -94,8 +94,8 @@ func new_paged_kv_cache(kv_cache_config cfg) paged_kv_cache {
     if num_pages <= 0 {
         num_pages = 1
     }
-    []cache_page pages = []cache_page{cap: num_pages}
-    int[] free_pages = int[]{cap: num_pages}
+    []cache_page pages = make([]cache_page, num_pages)
+    int[] free_pages = make([]int, num_pages)
     int i = 0
     for i < num_pages {
         pages[i] = cache_page {
@@ -104,8 +104,8 @@ func new_paged_kv_cache(kv_cache_config cfg) paged_kv_cache {
             capacity_tokens: cfg.page_size_tokens,
             is_full: false,
             last_accessed_step: 0,
-            k_data: float[]{cap: cfg.page_size_tokens * 128},
-            v_data: float[]{cap: cfg.page_size_tokens * 128},
+            k_data: make([]float, cfg.page_size_tokens * 128),
+            v_data: make([]float, cfg.page_size_tokens * 128),
         }
         free_pages[i] = i
         i = i + 1
@@ -113,7 +113,7 @@ func new_paged_kv_cache(kv_cache_config cfg) paged_kv_cache {
     paged_kv_cache {
         pages: pages,
         free_pages: free_pages,
-        allocated_pages: int[]{},
+        allocated_pages: []int{},
         config: page_config {
             page_size_tokens: cfg.page_size_tokens,
             num_pages: num_pages,
@@ -124,12 +124,12 @@ func new_paged_kv_cache(kv_cache_config cfg) paged_kv_cache {
     }
 }
 
-func allocate_pages(paged_kv_cache cache, int num_tokens_needed) int[] {
+func allocate_pages(paged_kv_cache cache, int num_tokens_needed) []int {
     int pages_needed = (num_tokens_needed + cache.config.page_size_tokens - 1) / cache.config.page_size_tokens
     if pages_needed <= 0 {
-        return int[]{}
+        return []int{}
     }
-    int[] allocated = int[]{}
+    int[] allocated = []int{}
     int[] free_pool = kv_cache_remove_int(cache.free_pages, -1)
     int[] allocated_pool = kv_cache_remove_int(cache.allocated_pages, -1)
     int i = 0
@@ -222,8 +222,8 @@ func get_cache_stats(paged_kv_cache cache) map[string]int {
 }
 
 func compress_kv_cache(paged_kv_cache cache) paged_kv_cache {
-    int[] rebuilt_free = int[]{}
-    int[] rebuilt_allocated = int[]{}
+    int[] rebuilt_free = []int{}
+    int[] rebuilt_allocated = []int{}
     int total_tokens = 0
     int i = 0
     for i < len(cache.pages) {

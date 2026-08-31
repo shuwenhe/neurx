@@ -243,7 +243,7 @@ func (dsl_interpreter* interp) execute_program() (map[string]any, bool) {
     return interp.context.current_state, true
 }
 
-func (dsl_interpreter* interp) get_execution_trace() string[] {
+func (dsl_interpreter* interp) get_execution_trace() []string {
     return interp.context.execution_trace
 }
 

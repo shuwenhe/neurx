@@ -22,7 +22,7 @@ func parse_jsonl_question(string line) question_data {
     question_data q = question_data{
         qid: "",
         question: "",
-        options: string[]{},
+        options: []string{},
         correct_answer: 0,
         category: "medical",
         explanation: ""
@@ -65,8 +65,8 @@ func parse_jsonl_question(string line) question_data {
     q
 }
 
-func extract_options_from_json(string line) string[] {
-    string[] opts = string[]{}
+func extract_options_from_json(string line) []string {
+    string[] opts = []string{}
     int opt_start = find_substring(line, "\"options\":[")
     if opt_start < 0 {
         opts = string[]{"Option A", "Option B", "Option C", "Option D"}
@@ -294,7 +294,7 @@ func main() {
     }
     println("✓ Read " + len(file_content) + " bytes")
     println("Parsing questions...")
-    string[] lines = string[]{}
+    string[] lines = []string{}
     string current_line = ""
     for i in 0..len(file_content)-1 {
         if file_content[i] == 10 {

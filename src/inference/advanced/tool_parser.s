@@ -308,7 +308,7 @@ func parse_tool_call(tool_parser_registry registry, string parser_name, string t
     tool_validate(registry, choice, call)
 }
 
-func split_reasoning_content(string text, string end_marker) string[] {
+func split_reasoning_content(string text, string end_marker) []string {
     int end = tool_find_substring(text, end_marker, 0)
     if end < 0 {
         return [text, ""]

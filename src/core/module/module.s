@@ -37,7 +37,7 @@ func module_parameters(nn.module m) []tensor {
     neurx.nn.module_parameters(m)
 }
 
-func module_named_parameters(nn.module m) string[] {
+func module_named_parameters(nn.module m) []string {
     neurx.nn.module_named_parameters(m)
 }
 
@@ -45,7 +45,7 @@ func module_buffers(nn.module m) []tensor {
     neurx.nn.module_buffers(m)
 }
 
-func module_named_buffers(nn.module m) string[] {
+func module_named_buffers(nn.module m) []string {
     neurx.nn.module_named_buffers(m)
 }
 
@@ -53,7 +53,7 @@ func module_children(nn.module m) []nn.module {
     neurx.nn.module_children(m)
 }
 
-func module_named_children(nn.module m) string[] {
+func module_named_children(nn.module m) []string {
     neurx.nn.module_named_children(m)
 }
 

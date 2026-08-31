@@ -57,7 +57,7 @@ struct driver_registry {
 }
 
 driver_registry global_driver_registry = driver_registry {
-    drivers: registered_driver[]{cap: 64},
+    drivers: make([]registered_driver, 64),
     driver_count: 0,
 }
 
@@ -346,8 +346,8 @@ func driver_get(string driver_name) registered_driver {
 }
 
 // List all registered drivers
-func driver_list_all() string[] {
-    string[] result = string[]{cap: 64}
+func driver_list_all() []string {
+    string[] result = make([]string, 64)
     int i = 0
     for i < global_driver_registry.driver_count {
         result[i] = global_driver_registry.drivers[i].driver_name

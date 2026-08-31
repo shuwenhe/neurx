@@ -153,8 +153,8 @@ func load_nccl_id_from_distributed_store(
     (nccl_unique_id{}, false)
 }
 
-func split_string(string s, string sep) string[] {
-    string[] parts = string[]{cap: 10}
+func split_string(string s, string sep) []string {
+    string[] parts = make([]string, 10)
     int part_idx = 0
     int i = 0
     string current = ""

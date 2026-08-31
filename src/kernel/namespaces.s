@@ -45,10 +45,10 @@ struct namespace_manager {
 }
 
 func (namespace_manager* nm) init() (int, string) {
-    nm.pid_namespaces = pid_namespace[]{}
-    nm.network_namespaces = network_namespace[]{}
-    nm.mount_namespaces = mount_namespace[]{}
-    nm.user_namespaces = user_namespace[]{}
+    nm.pid_namespaces = []pid_namespace{}
+    nm.network_namespaces = []network_namespace{}
+    nm.mount_namespaces = []mount_namespace{}
+    nm.user_namespaces = []user_namespace{}
     nm.next_ns_id = 0
     return 0, ""
 }
@@ -57,7 +57,7 @@ func (namespace_manager* nm) create_pid_namespace(int parent_pid) (pid_namespace
     pidns := pid_namespace{
         ns_id: nm.next_ns_id,
         parent_pid: parent_pid,
-        pids: int[]{},
+        pids: []int{},
         max_pid: 32768,
         current_pid_counter: 1
     }
@@ -84,7 +84,7 @@ func (namespace_manager* nm) create_network_namespace() (network_namespace, stri
     netns := network_namespace{
         ns_id: nm.next_ns_id,
         max_interfaces: 256,
-        interfaces: int[]{},
+        interfaces: []int{},
         loopback_address: 0x7F000001  
     }
     nm.network_namespaces = append(nm.network_namespaces, netns)
@@ -109,7 +109,7 @@ func (namespace_manager* nm) create_mount_namespace() (mount_namespace, string) 
     mntns := mount_namespace{
         ns_id: nm.next_ns_id,
         root_mount_id: 0,
-        mount_points: int[]{}
+        mount_points: []int{}
     }
     nm.mount_namespaces = append(nm.mount_namespaces, mntns)
     nm.next_ns_id = nm.next_ns_id + 1

@@ -261,7 +261,7 @@ func (f* ffn_layer) forward(float[]32 hidden_states) float[]32 {
     return float[]32{}
 }
 
-func supported_models() string[] {
+func supported_models() []string {
     return string[]{
         "llama", "llama2", "llama3", "llama4",
         "qwen", "qwen2", "qwen2.5",

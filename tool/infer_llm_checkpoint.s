@@ -97,7 +97,7 @@ func pad_float(float val, int w, int d) string {
     s
 }
 
-func split_lines(string s) string[] {
+func split_lines(string s) []string {
     int capacity = 1
     int j = 0
     for j < len(s) {
@@ -106,7 +106,7 @@ func split_lines(string s) string[] {
         }
         j = j + 1
     }
-    string[] out = string[]{cap: capacity}
+    string[] out = make([]string, capacity)
     string line = ""
     int idx = 0
     int i = 0
@@ -129,7 +129,7 @@ func split_lines(string s) string[] {
     out
 }
 
-func parse_csv_floats(string s) float[] {
+func parse_csv_floats(string s) []float {
     int capacity = 1
     int j = 0
     for j < len(s) {
@@ -138,7 +138,7 @@ func parse_csv_floats(string s) float[] {
         }
         j = j + 1
     }
-    float[] out = float[]{cap: capacity}
+    float[] out = make([]float, capacity)
     string cur = ""
     int idx = 0
     int i = 0
@@ -160,7 +160,7 @@ func parse_csv_floats(string s) float[] {
     out
 }
 
-func parse_csv_ints(string s) int[] {
+func parse_csv_ints(string s) []int {
     int capacity = 1
     int j = 0
     for j < len(s) {
@@ -169,7 +169,7 @@ func parse_csv_ints(string s) int[] {
         }
         j = j + 1
     }
-    int[] out = int[]{cap: capacity}
+    int[] out = make([]int, capacity)
     string cur = ""
     int idx = 0
     int i = 0
@@ -390,7 +390,7 @@ func main() {
         prev_id = seed[len(seed) - 1] - (seed[len(seed) - 1] / vocab) * vocab
     }
     int cached_row_id = -1
-    float[] cached_row = float[]{cap: 0}
+    float[] cached_row = []float{}
     int token = 0
     for token < max_new {
         if cached_row_id != prev_id {

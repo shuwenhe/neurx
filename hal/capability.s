@@ -37,7 +37,7 @@ func detect_platform_capability() (platform_capability, string) {
     gpu_count := detect_gpu_count()
     total_memory := detect_total_memory()
     
-    accelerators := device_capability[]{}
+    accelerators := []device_capability{}
     
     for i in 0..gpu_count {
         gpu_cap := detect_compute_device(i)

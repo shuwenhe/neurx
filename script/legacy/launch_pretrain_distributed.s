@@ -54,7 +54,7 @@ func parse_args() launcher_config {
 }
 
 func query_gpu_info() []gpu_info {
-    []gpu_info gpus = []gpu_info{cap: 16}
+    []gpu_info gpus = make([]gpu_info, 16)
     gpu_info gpu0 = gpu_info {
         device_id: 0,
         name: "NVIDIA RTX 4090",
@@ -153,7 +153,7 @@ func launch_all_processes(
     launcher_config config,
     int world_size,
 ) []process_handle {
-    []process_handle handles = []process_handle{cap: world_size}
+    []process_handle handles = make([]process_handle, world_size)
     int rank = 0
     for rank < world_size {
         process_handle handle = launch_rank_process(config, rank, world_size)

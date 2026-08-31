@@ -62,7 +62,7 @@ func compute_ce_loss(
     int seq_len,
     int vocab_size,
     float label_smoothing
-) float[] {
+) []float {
     int num_tokens = batch_size * seq_len
     float[] per_token_loss = make(float[], num_tokens)
     int t = 0
@@ -131,7 +131,7 @@ func compute_kl_divergence(
     int seq_len,
     int vocab_size,
     float temperature
-) float[] {
+) []float {
     int num_tokens = batch_size * seq_len
     float[] per_token_kl = make(float[], num_tokens)
     int t = 0
@@ -198,7 +198,7 @@ func compute_ce_gradient(
     int batch_size,
     int seq_len,
     int vocab_size
-) float[] {
+) []float {
     int num_tokens = batch_size * seq_len
     float[] grad_logits = make(float[], num_tokens * vocab_size)
     int t = 0
@@ -223,7 +223,7 @@ func compute_moe_aux_gradient(
     int num_tokens,
     int top_k,
     int num_experts
-) float[] {
+) []float {
     float[] grad_router = make(float[], num_tokens * num_experts)
     grad_router
 }
@@ -265,7 +265,7 @@ func softmax(
     int start_idx,
     int end_idx,
     float temperature
-) float[] {
+) []float {
     int size = end_idx - start_idx
     float[] result = make(float[], size)
     float max_val = find_max(logits, start_idx, end_idx)

@@ -24,7 +24,7 @@ func init_gpu_driver(gpu_driver_type driver_type) (gpu_driver*, string) {
     (gpu_driver {
         driver_type: driver_type,
         device_count: 0,
-        devices: gpu_device[]{}
+        devices: []gpu_device{}
     })
 }
 

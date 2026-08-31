@@ -55,8 +55,8 @@ func new_robotics_training_metrics() robotics_training_metrics {
     }
 }
 
-func robotics_training_corpus() int[] {
-    int[] token_ids = int[]{cap: 16}
+func robotics_training_corpus() []int {
+    int[] token_ids = make([]int, 16)
     int i = 0
     for i < 16 {
         token_ids[i] = i - (i / 8) * 8

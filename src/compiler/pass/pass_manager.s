@@ -8,7 +8,7 @@ struct pass_plan_state {
     bool has_lowering
 }
 
-func default_passes(string mode, bool dynamic, bool fullgraph) string[] {
+func default_passes(string mode, bool dynamic, bool fullgraph) []string {
     string[] passes = []
     passes = append(passes, "normalize")
     passes = append(passes, "shape_infer")

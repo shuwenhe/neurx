@@ -25,7 +25,7 @@ struct fault_tolerance_state {
 
 func new_fault_tolerance_state(int checkpoint_interval) fault_tolerance_state {
     fault_tolerance_state {
-        checkpoints: []checkpoint_state{cap: 1000},
+        checkpoints: make([]checkpoint_state, 1000),
         config: recovery_config {
             checkpoint_interval_steps: checkpoint_interval,
             max_recovery_time_ms: 300000,
@@ -44,7 +44,7 @@ func save_distributed_checkpoint(fault_tolerance_state state, int step, string c
         timestamp_ms: 0,
         checkpoint_path: checkpoint_dir,
         data_size_bytes: 0,
-        rank_versions: int[]{cap: 100},
+        rank_versions: make([]int, 100),
         is_complete: false,
     }
     ckpt
@@ -55,12 +55,12 @@ func restore_from_checkpoint(fault_tolerance_state state) fault_tolerance_state 
     state
 }
 
-func detect_stragglers(int[] iteration_times_ms) int[] {
-    int[]{cap: 10}
+func detect_stragglers(int[] iteration_times_ms) []int {
+    make([]int, 10)
 }
 
-func rebalance_work_for_stragglers(int[] straggler_ranks, int world_size) int[] {
-    int[]{cap: world_size}
+func rebalance_work_for_stragglers(int[] straggler_ranks, int world_size) []int {
+    make([]int, world_size)
 }
 
 func add_rank_elastic(fault_tolerance_state state, int new_rank_id) fault_tolerance_state {
@@ -115,8 +115,8 @@ func init_multi_node_fault_tolerance(
     fault_tolerance_multi_node {
         world_size: world_size,
         num_nodes: num_nodes,
-        heartbeats: []heartbeat_entry{cap: world_size},
-        recovery_plans: []multi_node_recovery_plan{cap: num_nodes},
+        heartbeats: make([]heartbeat_entry, world_size),
+        recovery_plans: make([]multi_node_recovery_plan, num_nodes),
         heartbeat_timeout_sec: 30,
         max_recovery_retries: 3,
         checkpoint_dir: checkpoint_dir,
@@ -144,8 +144,8 @@ func record_rank_heartbeat(
 func detect_failed_ranks_multi_node(
     fault_tolerance_multi_node& ft_mn,
     int current_time_sec,
-) int[] {
-    int[] failed = int[]{cap: 10}
+) []int {
+    int[] failed = make([]int, 10)
     int failed_count = 0
     int rank = 0
     for rank < ft_mn.world_size {

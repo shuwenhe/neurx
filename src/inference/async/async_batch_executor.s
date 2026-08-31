@@ -116,7 +116,7 @@ func (AsyncBatchExecutor* executor) execute_batch() []ExecutionResult {
     return results
 }
 
-func (AsyncBatchExecutor* executor) execute_prefill_phase(req InferenceRequest) int[] {
+func (AsyncBatchExecutor* executor) execute_prefill_phase(req InferenceRequest) []int {
     output := make(int[], len(req.input_ids))
     for i := 0; i < len(req.input_ids); i++ {
         output[i] = req.input_ids[i]
@@ -129,7 +129,7 @@ func (AsyncBatchExecutor* executor) execute_decode_step(req InferenceRequest, re
     return token
 }
 
-func (AsyncBatchExecutor* executor) stream_token(request_id string[], token int) {
+func (AsyncBatchExecutor* executor) stream_token(request_id []string, token int) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
     if len(request_id) == 0 {
@@ -143,7 +143,7 @@ func (AsyncBatchExecutor* executor) stream_token(request_id string[], token int)
     executor.stream_buffers[request_id[0]] = append(executor.stream_buffers[request_id[0]], token_str)
 }
 
-func (AsyncBatchExecutor* executor) get_streamed_tokens(request_id string[]) string[][] {
+func (AsyncBatchExecutor* executor) get_streamed_tokens(request_id []string) string[][] {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
     if len(request_id) == 0 {
@@ -152,7 +152,7 @@ func (AsyncBatchExecutor* executor) get_streamed_tokens(request_id string[]) str
     return executor.stream_buffers[request_id[0]]
 }
 
-func (AsyncBatchExecutor* executor) clear_stream_buffer(request_id string[]) {
+func (AsyncBatchExecutor* executor) clear_stream_buffer(request_id []string) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
     if len(request_id) > 0 {
@@ -168,7 +168,7 @@ func (AsyncBatchExecutor* executor) store_result(result ExecutionResult) {
     }
 }
 
-func (AsyncBatchExecutor* executor) get_result(request_id string[]) ExecutionResult {
+func (AsyncBatchExecutor* executor) get_result(request_id []string) ExecutionResult {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
     if len(request_id) == 0 {

@@ -32,7 +32,7 @@ func adamax_step(adamax_optimizer optimizer, tensor params, tensor grads) adamax
     optimizer.exp_inf = ensure_adamax_state(optimizer.exp_inf, n)
     float bias_correction = 1.0 - adamax_pow(optimizer.beta1, optimizer.step)
     float clr = optimizer.lr / bias_correction
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         float grad = grads.data[i]
@@ -57,8 +57,8 @@ struct adamax_optimizer_step_output {
     tensor params
 }
 
-func ensure_adamax_state(float[] values, int n) float[] {
-    float[] out = float[]{cap: n}
+func ensure_adamax_state(float[] values, int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         if i < len(values) {

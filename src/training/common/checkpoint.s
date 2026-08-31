@@ -61,8 +61,8 @@ func clone_weights(float[][] weights) float[][] {
     return cloned
 }
 
-func clone_float_array(float[] arr) float[] {
-    float[] cloned = float[]{cap: len(arr)}
+func clone_float_array(float[] arr) []float {
+    float[] cloned = make([]float, len(arr))
     int i = 0
     for i < len(arr) {
         cloned[i] = arr[i]

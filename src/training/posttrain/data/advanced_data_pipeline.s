@@ -46,7 +46,7 @@ func new_data_pipeline(int batch_size, int num_workers, prefetch_strategy strate
             shuffle: true,
             strategy: strategy,
         },
-        prefetch_buffer: []data_batch{cap: 100},
+        prefetch_buffer: make([]data_batch, 100),
         current_batch_id: 0,
         total_batches_loaded: 0,
         total_samples_loaded: 0,
@@ -86,8 +86,8 @@ func pipeline_prefetch_batch(data_pipeline_state state, data_batch batch) data_p
 func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, data_batch) {
     data_batch empty_batch = data_batch {
         batch_id: -1,
-        input_ids: string[]{cap: 0},
-        labels: string[]{cap: 0},
+        input_ids: []string{},
+        labels: []string{},
         num_samples: 0,
         num_tokens: 0,
     }
@@ -96,7 +96,7 @@ func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, da
         return state, empty_batch
     }
     data_batch batch = state.prefetch_buffer[0]
-    []data_batch new_buffer = []data_batch{cap: len(state.prefetch_buffer) - 1}
+    []data_batch new_buffer = make([]data_batch, len(state.prefetch_buffer) - 1)
     int buf_len = len(state.prefetch_buffer)
     for i in range(buf_len) {
         if i > 0 {
@@ -114,8 +114,8 @@ func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, da
 func pipeline_create_batch(batch_id, num_samples, int num_tokens) data_batch {
     data_batch {
         batch_id: batch_id,
-        input_ids: string[]{cap: num_samples},
-        labels: string[]{cap: num_samples},
+        input_ids: make([]string, num_samples),
+        labels: make([]string, num_samples),
         num_samples: num_samples,
         num_tokens: num_tokens,
     }
@@ -200,7 +200,7 @@ func float_to_string_3(float f) string {
     ""
 }
 
-func range_helper(int end) int[] {
-    int[] r = int[]{cap: end}
+func range_helper(int end) []int {
+    int[] r = make([]int, end)
     r
 }

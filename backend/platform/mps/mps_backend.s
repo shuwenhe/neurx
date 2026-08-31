@@ -35,7 +35,7 @@ func mps_available() bool {
 
 func mps_get_devices() []mps_device {
     metal_devices := mtl_copy_all_devices()
-    []mps_device result = []mps_device{cap: metal_devices.count}
+    []mps_device result = make([]mps_device, metal_devices.count)
     for i in 0..<metal_devices.count {
         device := metal_devices[i]
         mps_device mps_dev {
@@ -74,7 +74,7 @@ func mps_allocate_tensor(int[] shape, mps_device device) mps_tensor {
         size = size * shape[i]
     }
     mps_tensor tensor {
-        data: float[]{cap: size},
+        data: make([]float, size),
         shape: shape,
         device: device,
         gpu_buffer: nil,
@@ -93,7 +93,7 @@ func mps_copy_to_device(mps_tensor tensor, float[] data) mps_tensor {
     tensor
 }
 
-func mps_copy_from_device(mps_tensor tensor) float[] {
+func mps_copy_from_device(mps_tensor tensor) []float {
     copy_vector(tensor.data)
 }
 
@@ -278,18 +278,18 @@ func mps_get_device_info(mps_device device) string {
     "Device " + string(device.id) + ": " + device.name + " (Max Mem: " + string(device.max_memory) + ")"
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     int n = len(src)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i := 0; i < n; i += 1 {
         out[i] = src[i]
     }
     out
 }
 
-func copy_int(int[] src) int[] {
+func copy_int(int[] src) []int {
     int n = len(src)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     for i := 0; i < n; i += 1 {
         out[i] = src[i]
     }

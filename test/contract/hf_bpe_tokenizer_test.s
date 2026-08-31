@@ -30,11 +30,11 @@ func main() {
     if !result.ok || len(result.token_ids) != 2 || result.token_ids[0] != 5 || result.token_ids[1] != 5 { return 1 }
     decoded = hf_bpe_decode(metaspace, result.token_ids)
     if !decoded.ok || decoded.text != "Hi Hi" { return 1 }
-    int[] f16 = int[]{cap: 2}
+    int[] f16 = make([]int, 2)
     f16[0] = 0
     f16[1] = 60
     if st_f16_le(f16, 0) != 1.0 { return 1 }
-    int[] bf16 = int[]{cap: 2}
+    int[] bf16 = make([]int, 2)
     bf16[0] = 128
     bf16[1] = 63
     if st_bf16_le(bf16, 0) != 1.0 { return 1 }

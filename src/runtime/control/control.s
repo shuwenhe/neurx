@@ -244,7 +244,7 @@ func while_loop(control_state state, tensor value, int steps, string op) tensor 
 func scan_sum(control_state state, tensor value) tensor {
     del state
     int n = len(value.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     float acc = 0.0
     int i = 0
     for i < n {
@@ -258,7 +258,7 @@ func scan_sum(control_state state, tensor value) tensor {
 func scan_prod(control_state state, tensor value) tensor {
     del state
     int n = len(value.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     float acc = 1.0
     int i = 0
     for i < n {
@@ -290,8 +290,8 @@ func transform_chain_to_control(transform_chain chain, string name, int iteratio
     string[] branches = copy_strings(chain.steps)
     string[] params = copy_strings(chain.params)
     if len(chain.eqns) > 0 {
-        branches = string[]{cap: len(chain.eqns)}
-        params = string[]{cap: len(chain.eqns)}
+        branches = make([]string, len(chain.eqns))
+        params = make([]string, len(chain.eqns))
         int i = 0
         for i < len(chain.eqns) {
             branches[i] = chain.eqns[i].primitive

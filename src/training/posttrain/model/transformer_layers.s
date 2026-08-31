@@ -98,7 +98,7 @@ func create_rms_norm(int hidden_size) rms_norm {
     return norm
 }
 
-func rms_norm_forward(rms_norm norm, float[] hidden_state) float[] {
+func rms_norm_forward(rms_norm norm, float[] hidden_state) []float {
     float[] normalized = fill_model_tensor(len(hidden_state), 0.0)
     float sum_sq = 0.0
     int i = 0
@@ -124,7 +124,7 @@ func create_linear(int in_features, int out_features) linear_layer {
     return linear
 }
 
-func linear_forward(linear_layer layer, float[] input) float[] {
+func linear_forward(linear_layer layer, float[] input) []float {
     float[] output = fill_model_tensor(layer.out_features, 0.0)
     int out_idx = 0
     for out_idx < layer.out_features {
@@ -151,7 +151,7 @@ func create_rope_config(int dim, int max_seq_len) rope_config {
     return config
 }
 
-func rope_apply(rope_config config, float[] query, int position) float[] {
+func rope_apply(rope_config config, float[] query, int position) []float {
     float[] rotated = fill_model_tensor(len(query), 0.0)
     int i = 0
     for i < len(query) && i < config.dim {
@@ -184,7 +184,7 @@ func create_multi_head_attention(int hidden_size, int num_heads) multi_head_atte
     return attn
 }
 
-func scaled_dot_product_attention(float[] query, float[] key, float[] value, float scale) float[] {
+func scaled_dot_product_attention(float[] query, float[] key, float[] value, float scale) []float {
     float[] attention = fill_model_tensor(len(query), 0.0)
     float dot_product = 0.0
     int i = 0
@@ -202,7 +202,7 @@ func scaled_dot_product_attention(float[] query, float[] key, float[] value, flo
     return attention
 }
 
-func multi_head_attention_forward(multi_head_attention attn, float[] hidden_state, float[] context) float[] {
+func multi_head_attention_forward(multi_head_attention attn, float[] hidden_state, float[] context) []float {
     float[] q = linear_forward(attn.q_proj, hidden_state)
     float[] k = linear_forward(attn.k_proj, context)
     float[] v = linear_forward(attn.v_proj, context)
@@ -222,7 +222,7 @@ func create_mlp(int hidden_size, int intermediate_size) mlp_layer {
     return mlp
 }
 
-func mlp_forward(mlp_layer mlp, float[] hidden_state) float[] {
+func mlp_forward(mlp_layer mlp, float[] hidden_state) []float {
     float[] gate = linear_forward(mlp.gate_proj, hidden_state)
     float[] up = linear_forward(mlp.up_proj, hidden_state)
     float[] gated = fill_model_tensor(len(gate), 0.0)
@@ -245,7 +245,7 @@ func create_transformer_block(int hidden_size, int intermediate_size, int num_he
     return block
 }
 
-func transformer_block_forward(transformer_block block, float[] hidden_state) float[] {
+func transformer_block_forward(transformer_block block, float[] hidden_state) []float {
     float[] normed_hidden = rms_norm_forward(block.attention_norm, hidden_state)
     float[] attention_output = multi_head_attention_forward(block.attention, normed_hidden, normed_hidden)
     float[] residual1 = fill_model_tensor(len(hidden_state), 0.0)

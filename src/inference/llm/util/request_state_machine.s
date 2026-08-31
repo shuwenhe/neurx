@@ -53,7 +53,7 @@ func new_request_lifecycle(string request_id) request_lifecycle {
     request_lifecycle {
         request_id: request_id,
         current_state: request_state_submitted,
-        transitions: state_transition[]{},
+        transitions: []state_transition{},
         created_at: 0,
         started_at: 0,
         completed_at: 0,
@@ -66,7 +66,7 @@ func new_request_lifecycle(string request_id) request_lifecycle {
 func new_state_machine(int32 max_requests) state_machine {
     state_machine {
         active_requests: map[string, request_lifecycle]{},
-        all_transitions: state_transition[]{},
+        all_transitions: []state_transition{},
         max_concurrent_requests: max_requests,
         track_detailed_timeline: true,
     }
@@ -240,11 +240,11 @@ func (state_machine* sm) get_request_state(string request_id) request_state {
     request_state_submitted
 }
 
-func (state_machine* sm) get_transition_history(string request_id) state_transition[] {
+func (state_machine* sm) get_transition_history(string request_id) []state_transition {
     if request_id in sm.active_requests {
         sm.active_requests[request_id].transitions
     }
-    state_transition[]{}
+    []state_transition{}
 }
 
 func (state_machine* sm) get_active_count() int32 {

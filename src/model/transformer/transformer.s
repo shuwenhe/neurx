@@ -68,8 +68,8 @@ struct transformer_block {
     string position_encoding_type
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -78,7 +78,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -88,7 +88,7 @@ func copy_vector(float[] src) float[] {
     out
 }
 
-func add_vectors(float[] a, float[] b) float[] {
+func add_vectors(float[] a, float[] b) []float {
     float[] out = copy_vector(a)
     int i = 0
     for i < len(out) {
@@ -98,7 +98,7 @@ func add_vectors(float[] a, float[] b) float[] {
     out
 }
 
-func matmul_flat(float[] a, float[] b, int m, int k, int n) float[] {
+func matmul_flat(float[] a, float[] b, int m, int k, int n) []float {
     float[] result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
@@ -118,7 +118,7 @@ func matmul_flat(float[] a, float[] b, int m, int k, int n) float[] {
     result
 }
 
-func fill_ramp(int size, float scale) float[] {
+func fill_ramp(int size, float scale) []float {
     float[] values = allocate_vector(size, 0.0)
     int i = 0
     for i < size {
@@ -196,7 +196,7 @@ func new_transformer_layer(transformer_layer_config cfg) transformer_layer {
 }
 
 func new_transformer_model(transformer_config cfg) transformer_model {
-    []transformer_layer layers = []transformer_layer{cap: cfg.num_layers}
+    []transformer_layer layers = make([]transformer_layer, cfg.num_layers)
     int i = 0
     for i < cfg.num_layers {
         transformer_layer_config layer_cfg = new_transformer_layer_config()
@@ -233,18 +233,18 @@ func new_transformer_block(transformer_layer_config cfg) transformer_block {
     }
 }
 
-func residual_add(float[] a, float[] b) float[] {
+func residual_add(float[] a, float[] b) []float {
     return add_vectors(a, b)
 }
 
-func apply_transformer_norm(transformer_layer layer, float[] hidden_states, int batch_size, int seq_len) float[] {
+func apply_transformer_norm(transformer_layer layer, float[] hidden_states, int batch_size, int seq_len) []float {
     if layer.use_rmsnorm {
         return rms_normalize(layer.rn1, hidden_states, batch_size, seq_len)
     }
     return layer_normalize(layer.ln1, hidden_states, batch_size, seq_len)
 }
 
-func apply_transformer_norm2(transformer_layer layer, float[] hidden_states, int batch_size, int seq_len) float[] {
+func apply_transformer_norm2(transformer_layer layer, float[] hidden_states, int batch_size, int seq_len) []float {
     if layer.use_rmsnorm {
         return rms_normalize(layer.rn2, hidden_states, batch_size, seq_len)
     }
@@ -268,7 +268,7 @@ func forward_transformer_layer(
     float[] hidden_states,
     int batch_size,
     int seq_len
-) float[] {
+) []float {
     float[] x = copy_vector(hidden_states)
     float[] attn_input = x
     if layer.config.pre_norm {
@@ -316,7 +316,7 @@ func forward_transformer_block(
     float[] hidden_states,
     int batch_size,
     int seq_len
-) float[] {
+) []float {
     forward_transformer_layer(block.layer, hidden_states, batch_size, seq_len)
 }
 

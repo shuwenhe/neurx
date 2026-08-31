@@ -57,8 +57,8 @@ struct offload_lookup_result {
     int slot
 }
 
-func offload_zero_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func offload_zero_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

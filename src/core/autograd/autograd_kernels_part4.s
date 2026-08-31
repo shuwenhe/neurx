@@ -16,15 +16,15 @@ func backward_sum(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-func broadcast_scalar(float value, int size) float[] {
-    float[] out = float[]{cap: size}
+func broadcast_scalar(float value, int size) []float {
+    float[] out = make([]float, size)
     for i in 0..size {
         out[i] = value
     }
     out
 }
 
-func broadcast_to_shape(float[] grad, int[] target_shape, int dim) float[] {
+func broadcast_to_shape(float[] grad, int[] target_shape, int dim) []float {
     int total_size = 1
     for s in target_shape {
         total_size = total_size * s
@@ -32,7 +32,7 @@ func broadcast_to_shape(float[] grad, int[] target_shape, int dim) float[] {
     if dim == -1 || len(target_shape) == 0 {
         return broadcast_scalar(grad[0], total_size)
     }
-    float[] out = float[]{cap: total_size}
+    float[] out = make([]float, total_size)
     int reduced_dim_size = target_shape[dim]
     int num_repeats = total_size / (len(grad) * reduced_dim_size) if len(grad) > 0 else 1
     for i in 0..total_size {
@@ -63,16 +63,16 @@ func backward_mean(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-func scale_array(float[] data, float scale) float[] {
-    float[] out = float[]{cap: len(data)}
+func scale_array(float[] data, float scale) []float {
+    float[] out = make([]float, len(data))
     for i in 0..len(data) {
         out[i] = data[i] * scale
     }
     out
 }
 
-func zeros_like_array(int size) float[] {
-    float[] out = float[]{cap: size}
+func zeros_like_array(int size) []float {
+    float[] out = make([]float, size)
     for i in 0..size {
         out[i] = 0.0
     }
@@ -102,7 +102,7 @@ func max_int(int a, int b) int {
     if a > b { a } else { b }
 }
 
-func transpose_2d(float[] data, int[] shape, int d0, int d1) float[] {
+func transpose_2d(float[] data, int[] shape, int d0, int d1) []float {
     if len(shape) < 2 {
         return copy_tensor(data)
     }
@@ -114,7 +114,7 @@ func transpose_2d(float[] data, int[] shape, int d0, int d1) float[] {
             other_dims = other_dims * shape[i]
         }
     }
-    float[] result = float[]{cap: len(data)}
+    float[] result = make([]float, len(data))
     for outer in 0..other_dims {
         for i in 0..dim0_size {
             for j in 0..dim1_size {
@@ -156,7 +156,7 @@ func backward_pow(node n, tensor grad_output) backward_result {
     bool is_constant_exponent = len(exponent.data) == 1  !exponent.requires_grad
     if is_constant_exponent {
         float exp_val = exponent.data[0]
-        float[] grad_base_data = float[]{cap: len(base.data)}
+        float[] grad_base_data = make([]float, len(base.data))
         for i in 0..len(base.data) {
             grad_base_data[i] = exp_val * pow_approx(base.data[i], exp_val - 1.0) * grad_output.data[i]
         }
@@ -164,15 +164,14 @@ func backward_pow(node n, tensor grad_output) backward_result {
         tensor grad_exp_zeros { data: [0.0], grad: [], shape: [1], requires_grad: false }
         return backward_result { input_grads: [grad_base, grad_exp_zeros], success: true }
     }
-    float[] grad_a_data = float[]{cap: len(base.data)}
-    float[] grad_b_data = float[]{cap: len(exponent.data)]
+    float[] grad_a_data = make([]float, len(base.data))
+    float[] grad_b_data = make([]float, len(exponent.data)]
     for i in 0..min_len(base.data, exponent.data) {
         float a = base.data[i]
         float b = exponent.data[i]
         grad_a_data[i] = b * pow_approx(a, b - 1.0) * grad_output.data[i]
         if a > 0.0 {
-            grad_b_data[i] = pow_approx(a, b) * log_approx(a) * grad_output.data[i]
-        } else {
+            grad_b_data[i] = pow_approx(a, b) * log_approx(a) * grad_output.data[i]) else {
             grad_b_data[i] = 0.0
         }
     }

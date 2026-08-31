@@ -31,7 +31,7 @@ func scheduler_state_dict_add_state(
 func scheduler_state_dict_get_state(
     scheduler_state_dict state,
     string key
-) float[] {
+) []float {
     int i = 0
     for i < len(state.state_keys) {
         if state.state_keys[i] == key {
@@ -39,7 +39,7 @@ func scheduler_state_dict_get_state(
         }
         i = i + 1
     }
-    return float[]{}
+    return []float{}
 }
 
 func scheduler_load_state_dict(
@@ -52,12 +52,12 @@ func scheduler_load_state_dict(
     return current_epoch
 }
 
-func scheduler_get_last_lr(float[] current_lrs) float[] {
+func scheduler_get_last_lr(float[] current_lrs) []float {
     return clone_lr_array(current_lrs)
 }
 
-func clone_lr_array(float[] values) float[] {
-    float[] out = float[]{cap: len(values)}
+func clone_lr_array(float[] values) []float {
+    float[] out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]

@@ -17,7 +17,7 @@ func create_top_k_processor(int k) top_k_processor {
 func apply_top_k(
     logits: float[],
     top_k_processor processor
-) float[] {
+) []float {
     int vocab_size = len(logits)
     int k_actual = processor.k
     if k_actual > vocab_size {
@@ -52,7 +52,7 @@ func apply_adaptive_top_k(
     logits: float[],
     base_k: int,
     float entropy_threshold
-) float[] {
+) []float {
     float[] probs = processor_utils.softmax(logits)
     float entropy = 0.0
     for prob in probs {
@@ -72,7 +72,7 @@ func apply_top_k_with_threshold(
     logits: float[],
     k: int,
     float min_prob
-) float[] {
+) []float {
     int vocab_size = len(logits)
     float[] probs = processor_utils.softmax(logits)
     bool[] mask

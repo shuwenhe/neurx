@@ -69,8 +69,8 @@ func cluster_empty_capability() cluster_node_capability {
     }
 }
 
-func cluster_zero_nodes(int capacity) cluster_node_record[] {
-    cluster_node_record[] items = cluster_node_record[]{cap: capacity}
+func cluster_zero_nodes(int capacity) []cluster_node_record {
+    cluster_node_record[] items = make([]cluster_node_record, capacity)
     int i = 0
     for i < capacity {
         items[i] = cluster_node_record {

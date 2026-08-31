@@ -8,7 +8,7 @@ struct matrix {
 
 func matrix_new(int rows, int cols) matrix {
     matrix m
-    m.data = float[]{cap: rows * cols}
+    m.data = make([]float, rows * cols)
     m.rows = rows
     m.cols = cols
     m
@@ -83,8 +83,8 @@ func matrix_mult_blocked(matrix A, matrix B) matrix {
     result
 }
 
-func matvec_optimized(float[] v, matrix W) float[] {
-    float[] result = float[]{cap: W.cols}
+func matvec_optimized(float[] v, matrix W) []float {
+    float[] result = make([]float, W.cols)
     int j = 0
     for j < W.cols {
         float sum = 0.0
@@ -99,8 +99,8 @@ func matvec_optimized(float[] v, matrix W) float[] {
     result
 }
 
-func matvec_row_major(float[] v, float[] W_data, int W_rows, int W_cols) float[] {
-    float[] result = float[]{cap: W_cols}
+func matvec_row_major(float[] v, float[] W_data, int W_rows, int W_cols) []float {
+    float[] result = make([]float, W_cols)
     int i = 0
     for i < W_rows {
         float sum = 0.0

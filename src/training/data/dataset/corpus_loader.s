@@ -33,7 +33,7 @@ struct corpus_config {
 }
 
 func default_pretraining_corpus() corpus_config {
-    []data_source srcs = []data_source{cap: 6}
+    []data_source srcs = make([]data_source, 6)
     srcs[0] = data_source {
         name: "web", path: "src/training/data/web",
         weight: 0.45, text_field: "text", is_code: false,
@@ -92,7 +92,7 @@ struct corpus_state {
 
 func new_corpus_state(corpus_config cfg) corpus_state {
     bpe_tokenizer_state tok = init_bpe_tokenizer(default_llm_tokenizer_config())
-    []streaming_reader_state readers = []streaming_reader_state{cap: cfg.num_sources}
+    []streaming_reader_state readers = make([]streaming_reader_state, cfg.num_sources)
     int i = 0
     for i < cfg.num_sources {
         stream_reader_config rc = default_tb_stream_reader_config()
@@ -102,8 +102,8 @@ func new_corpus_state(corpus_config cfg) corpus_state {
         }
         i = i + 1
     }
-    string[] buf = string[]{cap: cfg.shuffle_buffer}
-    int[] hashes = int[]{cap: 1000000}
+    string[] buf = make([]string, cfg.shuffle_buffer)
+    int[] hashes = make([]int, 1000000)
     corpus_state {
         config: cfg,
         tokenizer: tok,
@@ -135,7 +135,7 @@ func new_corpus_state_from_paths(string[] paths, int batch_size, int seq_len, bo
     if len(paths) == 0 {
         return new_corpus_state(default_pretraining_corpus())
     }
-    []data_source sources = []data_source{cap: len(paths)}
+    []data_source sources = make([]data_source, len(paths))
     int i = 0
     for i < len(paths) {
         data_source src = data_source {
@@ -285,7 +285,7 @@ struct packing_buffer {
 }
 
 func new_packing_buffer(int capacity) packing_buffer {
-    int[] buf = int[]{cap: capacity}
+    int[] buf = make([]int, capacity)
     packing_buffer { tokens: buf, length: 0, capacity: capacity }
 }
 
@@ -301,8 +301,8 @@ func pb_is_full(packing_buffer buf) bool {
     buf.length >= buf.capacity
 }
 
-func pb_flush(packing_buffer buf) int[] {
-    int[] out = int[]{cap: buf.capacity}
+func pb_flush(packing_buffer buf) []int {
+    int[] out = make([]int, buf.capacity)
     int i = 0
     for i < buf.capacity {
         if i < buf.length {
@@ -438,9 +438,9 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
     int batch_size = state.config.batch_size
     int bos = state.config.bos_token_id
     int eos = state.config.eos_token_id
-    int[] all_input = int[]{cap: batch_size * seq_len}
-    int[] all_target = int[]{cap: batch_size * seq_len}
-    string[] src_names = string[]{cap: batch_size}
+    int[] all_input = make([]int, batch_size * seq_len)
+    int[] all_target = make([]int, batch_size * seq_len)
+    string[] src_names = make([]string, batch_size)
     packing_buffer buf = new_packing_buffer(seq_len)
     int seqs_ready = 0
     for seqs_ready < batch_size {
@@ -507,7 +507,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
 }
 
 func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_stream_result {
-    int[] collected = int[]{cap: max_tokens}
+    int[] collected = make([]int, max_tokens)
     int batches_read = 0
     int tokens_collected = 0
     int target_tokens = max_tokens

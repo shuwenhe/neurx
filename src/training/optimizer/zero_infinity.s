@@ -54,22 +54,22 @@ func new_zero_infinity_state(
     int total_size_mb) zero_infinity_state {
     cpu_offload_buffer cpu_buf
     cpu_buf.capacity = config.cpu_buffer_size_mb * 1024 * 1024 / 4
-    cpu_buf.data = float[]{cap: cpu_buf.capacity}
+    cpu_buf.data = make([]float, cpu_buf.capacity)
     cpu_buf.used = 0
-    cpu_buf.is_valid = bool[]{cap: total_params}
+    cpu_buf.is_valid = make([]bool, total_params)
     nvme_offload_buffer nvme_buf
     if config.enable_nvme_offload {
         nvme_buf.file_path = config.nvme_swap_dir + "/zero_infinity_swap.bin"
         nvme_buf.capacity_mb = config.nvme_buffer_size_mb
         nvme_buf.used_mb = 0
-        nvme_buf.block_mapping = int[]{cap: total_params}
+        nvme_buf.block_mapping = make([]int, total_params)
         int i = 0
         for i < total_params {
             nvme_buf.block_mapping[i] = -1
             i = i + 1
         }
     }
-    []offload_param_metadata metadata = []offload_param_metadata{cap: total_params}
+    []offload_param_metadata metadata = make([]offload_param_metadata, total_params)
     int param_idx = 0
     for param_idx < total_params {
         metadata[param_idx] = offload_param_metadata {
@@ -129,7 +129,7 @@ func zero_infinity_evict_cpu_to_nvme(
     if !state.config.enable_nvme_offload {
         return state
     }
-    int[] lru_candidates = int[]{cap: state.total_params}
+    int[] lru_candidates = make([]int, state.total_params)
     int candidate_count = 0
     int param_idx = 0
     for param_idx < state.total_params {
@@ -180,12 +180,12 @@ func zero_infinity_prefetch_param(
     zero_infinity_state state,
     int param_idx) prefetch_result {
     offload_param_metadata meta = state.param_metadata[param_idx]
-    float[] dummy = float[]{cap: 0}
+    float[] dummy = []float{}
     if meta.on_gpu {
         return prefetch_result{state: state, param_data: dummy}
     }
     int param_size = meta.size_bytes / 4
-    float[] param_data = float[]{cap: param_size}
+    float[] param_data = make([]float, param_size)
     if meta.on_cpu {
         int cpu_offset = meta.cpu_offset
         int i = 0

@@ -55,7 +55,7 @@ func vapo_compute_value_augmented_advantages(
     []tensor rewards,
     vapo_config cfg
 ) []tensor {
-    []tensor augmented = []tensor{cap: advantages.len}
+    []tensor augmented = make([]tensor, advantages.len)
     int i = 0
     for i < advantages.len {
         tensor adv = advantages[i]
@@ -81,8 +81,8 @@ func vapo_compute_advantages_with_gae(
     float gae_lambda
 ) ([]tensor, []tensor) {
     int T = rewards.len
-    []tensor advantages = []tensor{cap: T}
-    []tensor returns = []tensor{cap: T}
+    []tensor advantages = make([]tensor, T)
+    []tensor returns = make([]tensor, T)
     tensor gae = tensor_ops.zeros_like(values[T - 1])
     int t = T - 1
     for t >= 0 {

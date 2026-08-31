@@ -157,7 +157,7 @@ func (page_table* pt) clone_page_table() (*page_table, string) {
 return     (cloned, "")
 }
 
-func make_entries() page_directory_entry[] {
+func make_entries() []page_directory_entry {
     page_directory_entry[]()
 }
 

@@ -85,8 +85,8 @@ func swa_lr_get_lr(swa_lr_state sched, int group_index) float {
     return sched.current_lrs[group_index]
 }
 
-func clone_float_array(float[] values) float[] {
-    float[] out = float[]{cap: len(values)}
+func clone_float_array(float[] values) []float {
+    float[] out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]

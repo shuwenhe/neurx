@@ -80,8 +80,8 @@ func dapo_compute_advantages(
     float gae_lambda
 ) ([]tensor, []tensor) {
     int T = rewards.len
-    []tensor advantages = []tensor{cap: T}
-    []tensor returns = []tensor{cap: T}
+    []tensor advantages = make([]tensor, T)
+    []tensor returns = make([]tensor, T)
     tensor gae = tensor_ops.zeros_like(values[T - 1])
     int t = T - 1
     for t >= 0 {
@@ -124,7 +124,7 @@ func dapo_select_top_k_trajectories(
     if k >= n {
         return rollouts
     }
-    int[] indices = int[]{cap: n}
+    int[] indices = make([]int, n)
     int i = 0
     for i < n {
         indices[i] = i
@@ -147,12 +147,12 @@ func dapo_select_top_k_trajectories(
         indices[max_idx] = temp
         i = i + 1
     }
-    []tensor top_states = []tensor{cap: k}
-    []tensor top_actions = []tensor{cap: k}
-    []tensor top_rewards = []tensor{cap: k}
-    []tensor top_log_probs = []tensor{cap: k}
-    []tensor top_values = []tensor{cap: k}
-    bool[] top_dones = bool[]{cap: k}
+    []tensor top_states = make([]tensor, k)
+    []tensor top_actions = make([]tensor, k)
+    []tensor top_rewards = make([]tensor, k)
+    []tensor top_log_probs = make([]tensor, k)
+    []tensor top_values = make([]tensor, k)
+    bool[] top_dones = make([]bool, k)
     i = 0
     for i < k {
         int idx = indices[i]

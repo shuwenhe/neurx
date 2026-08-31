@@ -27,7 +27,7 @@ func create_kv_cache_engine(int max_blocks, int hidden_dim_val, int num_layers_v
     engine.memory_pool.num_blocks = 0
     engine.memory_pool.total_memory_bytes = int64(max_blocks * hidden_dim_val * 2 * 4 * 100)
     engine.memory_pool.used_memory_bytes = 0
-    engine.memory_pool.blocks = []kv_cache_block{cap: max_blocks}
+    engine.memory_pool.blocks = make([]kv_cache_block, max_blocks)
     engine.index = create_cache_index(max_cache_entries)
     print("[KVCacheEngine] Initialized: max_blocks=" + int_to_string(max_blocks) + ", hidden_dim=" + int_to_string(hidden_dim_val) + ", layers=" + int_to_string(num_layers_val) + "\n")
     return engine
@@ -74,20 +74,20 @@ func kv_cache_engine_store_kv(kv_cache_engine engine, int[] prompt_tokens, float
     kv_cache_block block = engine.memory_pool.blocks[cached_block_id]
     block.kv_data = kv_data
     engine.memory_pool.blocks[cached_block_id] = block
-    int[] block_ids = int[]{cap: 1}
+    int[] block_ids = make([]int, 1)
     block_ids[0] = cached_block_id
     cache_index_store_blocks(engine.index, prefix_hash, block_ids)
     print("[KVCacheEngine] Stored KV for prefix " + prefix_hash + " in block " + int_to_string(cached_block_id) + "\n")
     return cached_block_id
 }
 
-func kv_cache_engine_query_kv(kv_cache_engine engine, int[] prompt_tokens) int[] {
+func kv_cache_engine_query_kv(kv_cache_engine engine, int[] prompt_tokens) []int {
     string prefix_hash = compute_prefix_hash(prompt_tokens, 100)
     int[] cached_blocks = cache_index_get_blocks(engine.index, prefix_hash)
     if len(cached_blocks) == 0 {
         engine.total_misses = engine.total_misses + 1
         print("[KVCacheEngine] Cache miss for prefix " + prefix_hash + "\n")
-        return int[]{cap: 0}
+        return []int{}
     }
     engine.total_hits = engine.total_hits + 1
     print("[KVCacheEngine] Cache hit! Found " + int_to_string(len(cached_blocks)) + " blocks\n")

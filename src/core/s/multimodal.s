@@ -1,9 +1,9 @@
 package neurx.multimodal
 use neurx.tensor.tensor
 use neurx.tensor.new
-func copy_float(float[] data) float[] {
+func copy_float(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -12,9 +12,9 @@ func copy_float(float[] data) float[] {
     out
 }
 
-func copy_int(int[] data) int[] {
+func copy_int(int[] data) []int {
     int n = len(data)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]

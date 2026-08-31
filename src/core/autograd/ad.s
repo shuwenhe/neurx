@@ -33,11 +33,11 @@ struct linearize_state {
     []dual_record records
 }
 
-func copy_float(float[] data) float[] {
+func copy_float(float[] data) []float {
     neurx.autograd.engine.copy_float(data)
 }
 
-func copy_int(int[] data) int[] {
+func copy_int(int[] data) []int {
     neurx.autograd.engine.copy_int(data)
 }
 
@@ -89,11 +89,11 @@ func set_detect_anomaly(autograd_state state, bool enabled) autograd_state {
     neurx.autograd.engine.set_detect_anomaly(state, enabled)
 }
 
-func zeros_like(float[] data) float[] {
+func zeros_like(float[] data) []float {
     neurx.autograd.engine.zeros_like(data)
 }
 
-func ones_like(float[] data) float[] {
+func ones_like(float[] data) []float {
     neurx.autograd.engine.ones_like(data)
 }
 
@@ -125,7 +125,7 @@ func accumulate_grad(autograd_state state, int id, float[] grad) autograd_state 
     neurx.autograd.engine.accumulate_grad(state, id, grad)
 }
 
-func grad_of(autograd_state state, int id) float[] {
+func grad_of(autograd_state state, int id) []float {
     neurx.autograd.engine.grad_of(state, id)
 }
 
@@ -173,7 +173,7 @@ func copy_dual_record(dual_record record) dual_record {
 }
 
 func copy_dual_records([]dual_record records) []dual_record {
-    []dual_record out = []dual_record{cap: len(records)}
+    []dual_record out = make([]dual_record, len(records))
     int i = 0
     for i < len(records) {
         out[i] = copy_dual_record(records[i])
@@ -263,7 +263,7 @@ func linearize_has_record(linearize_state state, int id) bool {
     false
 }
 
-func linearize_shape_of(linearize_state state, int id) int[] {
+func linearize_shape_of(linearize_state state, int id) []int {
     int i = 0
     for i < len(state.records) {
         if state.records[i].id == id {
@@ -285,7 +285,7 @@ func linearize_requires_grad(linearize_state state, int id) bool {
     false
 }
 
-func linearize_primal_of(linearize_state state, int id) float[] {
+func linearize_primal_of(linearize_state state, int id) []float {
     int i = 0
     for i < len(state.records) {
         if state.records[i].id == id {
@@ -296,7 +296,7 @@ func linearize_primal_of(linearize_state state, int id) float[] {
     []
 }
 
-func linearize_tangent_of(linearize_state state, int id) float[] {
+func linearize_tangent_of(linearize_state state, int id) []float {
     int i = 0
     for i < len(state.records) {
         if state.records[i].id == id {
@@ -307,7 +307,7 @@ func linearize_tangent_of(linearize_state state, int id) float[] {
     []
 }
 
-func linearize_cotangent_of(linearize_state state, int id) float[] {
+func linearize_cotangent_of(linearize_state state, int id) []float {
     int i = 0
     for i < len(state.records) {
         if state.records[i].id == id {
@@ -424,7 +424,7 @@ func linearize_load_state_dict(linearize_state state, linearize_state other) lin
     other
 }
 
-func jvp_seed_data(tensor value) float[] {
+func jvp_seed_data(tensor value) []float {
     if value.requires_grad {
         return ones_like(value.data)
     }
@@ -511,7 +511,7 @@ func function_backward_pass_state(function_record f) function_record {
 }
 
 func function_tagged_linearize(function_record f, string tag, tensor value) linearize_state {
-    []dual_record records = []dual_record{cap: 1}
+    []dual_record records = make([]dual_record, 1)
     records.push(
         dual_record {
             id: 0,
@@ -850,7 +850,7 @@ func function_ready_for_linearize(function_record f, linearize_state state) bool
 }
 
 func function_to_linearize_state(function_record f, tensor value) linearize_state {
-    []dual_record records = []dual_record{cap: 1}
+    []dual_record records = make([]dual_record, 1)
     records.push(
         dual_record {
             id: 0,
@@ -882,7 +882,7 @@ func linearize_state_to_function(linearize_state state, string name, int arity) 
 }
 
 func function_capture(function_record f, tensor value) linearize_state {
-    []dual_record records = []dual_record{cap: 1}
+    []dual_record records = make([]dual_record, 1)
     records.push(
         dual_record {
             id: 0,
@@ -901,7 +901,7 @@ func function_capture(function_record f, tensor value) linearize_state {
 }
 
 func function_jvp_capture(function_record f, tensor value) linearize_state {
-    []dual_record records = []dual_record{cap: 1}
+    []dual_record records = make([]dual_record, 1)
     records.push(
         dual_record {
             id: 0,
@@ -920,7 +920,7 @@ func function_jvp_capture(function_record f, tensor value) linearize_state {
 }
 
 func function_vjp_capture(function_record f, tensor value) linearize_state {
-    []dual_record records = []dual_record{cap: 1}
+    []dual_record records = make([]dual_record, 1)
     records.push(
         dual_record {
             id: 0,
@@ -939,7 +939,7 @@ func function_vjp_capture(function_record f, tensor value) linearize_state {
 }
 
 func function_linearize_capture(function_record f, tensor value) linearize_state {
-    []dual_record records = []dual_record{cap: 1}
+    []dual_record records = make([]dual_record, 1)
     records.push(
         dual_record {
             id: 0,

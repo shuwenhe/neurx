@@ -198,7 +198,7 @@ func backward_rule_mean(tensor a, tensor upstream) backward_rule {
     }
 }
 
-func copy_transform_steps(string[] steps) string[] {
+func copy_transform_steps(string[] steps) []string {
     copy_strings(steps)
 }
 
@@ -534,13 +534,13 @@ func function_load_state_dict(function_record f, function_record other) function
 }
 
 func function_transform_chain(function_record f) transform_chain {
-    []jaxpr_eqn eqns = []jaxpr_eqn{cap: len(f.tags)}
+    []jaxpr_eqn eqns = make([]jaxpr_eqn, len(f.tags))
     int i = 0
     for i < len(f.tags) {
-        string[] params = string[]{cap: 0}
+        string[] params = []string{}
         string param_val = get_function_param(f, i)
         if i < len(f.params) && param_val != "" {
-            params = string[]{cap: 1}
+            params = make([]string, 1)
             params[0] = param_val
         }
         string tag_val = get_function_tag(f, i)
@@ -567,8 +567,8 @@ func transform_chain_to_function(transform_chain chain, string name, int arity) 
     string[] params = copy_strings(chain.params)
     string[] tags = copy_strings(chain.steps)
     if len(chain.eqns) > 0 {
-        params = string[]{cap: len(chain.eqns)}
-        tags = string[]{cap: len(chain.eqns)}
+        params = make([]string, len(chain.eqns))
+        tags = make([]string, len(chain.eqns))
         int i = 0
         for i < len(chain.eqns) {
             tags[i] = chain.eqns[i].primitive

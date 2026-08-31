@@ -63,7 +63,7 @@ func (function_registry* registry) RegisterFunction(
     registry.functions[fn.function_name] = fn
 }
 
-func (function_registry* registry) ListFunctions() string[] {
+func (function_registry* registry) ListFunctions() []string {
     functions := make(string[], 0)
     for name := range registry.functions {
         functions = append(functions, name)

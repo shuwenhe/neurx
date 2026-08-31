@@ -74,11 +74,11 @@ func inv_sqrt(float x) float {
     y
 }
 
-func ensure_size(float[] values, int n) float[] {
+func ensure_size(float[] values, int n) []float {
     if len(values) == n {
         return values
     }
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         out = append(out, 0.0)
     }
@@ -87,7 +87,7 @@ func ensure_size(float[] values, int n) float[] {
 
 func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         out = append(out, params.data[i] - optimizer.lr * grads.data[i])
     }
@@ -98,7 +98,7 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_
     int n = len(params.data)
     float[] m = ensure_size(optimizer.m, n)
     float[] v = ensure_size(optimizer.v, n)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int step = optimizer.step + 1
     float beta1_pow = optimizer.beta1_pow * optimizer.beta1
     float beta2_pow = optimizer.beta2_pow * optimizer.beta2
@@ -135,7 +135,7 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_
 func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) rmsprop_step_output {
     int n = len(params.data)
     float[] avg = ensure_size(optimizer.avg, n)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         float g = grads.data[i]
         avg[i] = optimizer.alpha * avg[i] + (1.0 - optimizer.alpha) * g * g

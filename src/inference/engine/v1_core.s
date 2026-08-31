@@ -77,7 +77,7 @@ func (v1_core* core) batch_prefill(int32[][]] batch_input_ids, float32[][]] batc
     return true
 }
 
-func (v1_core* core) batch_decode(float32[][]] batch_logits, sampling_params* params) int32[] {
+func (v1_core* core) batch_decode(float32[][]] batch_logits, sampling_params* params) []int32 {
     results := make(int32[])
     for i := 0; i < len(batch_logits); i = i + 1 {
         token := core.decode(batch_logits[i], params)
@@ -86,7 +86,7 @@ func (v1_core* core) batch_decode(float32[][]] batch_logits, sampling_params* pa
     return results
 }
 
-func (v1_core* core) get_generated_tokens() int32[] {
+func (v1_core* core) get_generated_tokens() []int32 {
     return core.token_buffer
 }
 

@@ -48,8 +48,8 @@ struct session_update_result {
     bool released_kv
 }
 
-func session_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func session_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

@@ -89,7 +89,7 @@ func compile_component(string s_file, string bin_dir, string log_dir) compilatio
     return result
 }
 
-func compile_all_components(string bin_dir, string log_dir) compilation_result[] {
+func compile_all_components(string bin_dir, string log_dir) []compilation_result {
     print_section("PHASE 1: COMPILATION")
     components := [
         "src/training/orchestration/scaled_training_system.s",
@@ -97,7 +97,7 @@ func compile_all_components(string bin_dir, string log_dir) compilation_result[]
         "backend/cuda/cuda_accelerated_training.s",
         "src/runtime/distributed/ddp_distributed_training.s"
     ]
-    results := compilation_result[]{}
+    results := []compilation_result{}
     for component in components {
         result := compile_component(component, bin_dir, log_dir)
         results = append(results, result)
@@ -123,7 +123,7 @@ func run_unit_test(string name, string binary_path, string args, i32 timeout) te
     return result
 }
 
-func run_unit_tests(string bin_dir, string test_dir) test_result[] {
+func run_unit_tests(string bin_dir, string test_dir) []test_result {
     print_section("PHASE 2: UNIT TESTS")
     tests := []struct{name: string, binary: string, args: string, timeout: i32}{
         {name: "Scaled Training System", binary: "scaled_training_system", args: "--epochs=1 --steps=5 --batch_size=16", timeout: 10},
@@ -131,7 +131,7 @@ func run_unit_tests(string bin_dir, string test_dir) test_result[] {
         {name: "CUDA Backend", binary: "cuda_accelerated_training", args: "--device_count=1 --memory_test=true", timeout: 10},
         {name: "DDP Training (Single Process)", binary: "ddp_distributed_training", args: "--rank=0 --world_size=1 --num_steps=5", timeout: 10},
     }
-    results := test_result[]{}
+    results := []test_result{}
     for test in tests {
         binary_path := bin_dir + "/" + test.binary
         result := run_unit_test(test.name, binary_path, test.args, test.timeout)

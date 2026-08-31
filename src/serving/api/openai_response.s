@@ -149,7 +149,7 @@ func create_embedding_response(
 	}
 }
 
-func create_model_list_response(models string[]) model_list_response {
+func create_model_list_response(models []string) model_list_response {
 	data := make(model_info[], 0, len(models))
 	for model := range models {
 		data = append(data, model_info{

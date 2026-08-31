@@ -65,7 +65,7 @@ func new_prefill_decode_scheduler(
         scheduler_id: scheduler_id,
         current_prefill_batch: prefill_batch {
             batch_id: 0,
-            requests: prefill_request[]{cap: max_prefill_batch_size},
+            requests: make([]prefill_request, max_prefill_batch_size),
             total_prompt_tokens: 0,
             max_prompt_length: 0,
             batched_input_ids: make(float[], max_prefill_batch_size * 4096),
@@ -74,13 +74,13 @@ func new_prefill_decode_scheduler(
         },
         current_decode_batch: decode_batch {
             batch_id: 0,
-            requests: decode_state[]{cap: max_decode_batch_size},
+            requests: make([]decode_state, max_decode_batch_size),
             batch_size: 0,
             current_step: 0,
             has_active_requests: false,
         },
-        prefill_queue: prefill_request[]{cap: 1000},
-        decode_queue: decode_state[]{cap: 10000},
+        prefill_queue: make([]prefill_request, 1000),
+        decode_queue: make([]decode_state, 10000),
         max_prefill_batch_size: max_prefill_batch_size,
         max_decode_batch_size: max_decode_batch_size,
         prefill_decode_split_point: max_prefill_batch_size / 4,
@@ -109,7 +109,7 @@ func (prefill_decode_scheduler* sched) build_prefill_batch() (prefill_batch, boo
     }
     new_batch := prefill_batch {
         batch_id: sched.total_prefill_batches,
-        requests: prefill_request[]{cap: sched.max_prefill_batch_size},
+        requests: make([]prefill_request, sched.max_prefill_batch_size),
         total_prompt_tokens: 0,
         max_prompt_length: 0,
         batched_input_ids: make(float[], sched.max_prefill_batch_size * 4096),
@@ -140,7 +140,7 @@ func (prefill_decode_scheduler* sched) build_prefill_batch() (prefill_batch, boo
 func (prefill_decode_scheduler* sched) execute_prefill_batch(
     prefill_batch* batch
 ) (decode_state[], bool) {
-    decode_states := decode_state[]{cap: len(batch.requests)}
+    decode_states := make([]decode_state, len(batch.requests))
     int req_idx = 0
     for req_idx < len(batch.requests) {
         prefill_request* req = &batch.requests[req_idx]
@@ -149,7 +149,7 @@ func (prefill_decode_scheduler* sched) execute_prefill_batch(
             current_seq_length: req.prompt_tokens,
             output_tokens_generated: 0,
             max_output_tokens: req.max_output_tokens,
-            kv_block_ids: int[]{cap: (req.prompt_tokens + req.max_output_tokens + 15) / 16},
+            kv_block_ids: make([]int, (req.prompt_tokens + req.max_output_tokens + 15) / 16),
             logits_buffer: make(float[], 32000),
             top_k: 50,
             top_p: 0.9,
@@ -172,7 +172,7 @@ func (prefill_decode_scheduler* sched) build_decode_batch(
 ) (decode_batch, bool) {
     new_batch := decode_batch {
         batch_id: sched.total_decode_batches,
-        requests: decode_state[]{cap: sched.max_decode_batch_size},
+        requests: make([]decode_state, sched.max_decode_batch_size),
         batch_size: 0,
         current_step: 0,
         has_active_requests: true,
@@ -277,7 +277,7 @@ func (prefill_decode_scheduler* sched) move_finished_to_completion(
 ) int {
     completed_count := 0
     int req_idx = 0
-    remaining := decode_state[]{cap: len(batch.requests)}
+    remaining := make([]decode_state, len(batch.requests))
     for req_idx < len(batch.requests) {
         decode_state* state = &batch.requests[req_idx]
         if state.is_finished {

@@ -26,7 +26,7 @@ func (active_request* req) transition_state(request_state new_state) bool {
     return false
 }
 
-func get_valid_transitions(request_state from_state) request_state[] {
+func get_valid_transitions(request_state from_state) []request_state {
     transitions := make(request_state[])
     if from_state == req_state_submitted {
         transitions = append(transitions, req_state_waiting)

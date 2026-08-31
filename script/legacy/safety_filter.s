@@ -44,8 +44,8 @@ struct safety_stats {
     blocked_generation      int64
 }
 
-func (safety_filter* filter) detect_harmful_keywords(text string) string[] {
-    harmful := string[]{}
+func (safety_filter* filter) detect_harmful_keywords(text string) []string {
+    harmful := []string{}
     text_lower := strings.ToLower(text)
     for _, keyword := range filter.config.harmful_keywords {
         if strings.Contains(text_lower, strings.ToLower(keyword)) {
@@ -116,7 +116,7 @@ func (safety_filter* filter) model_based_safety_check(text string) (float64, str
         probs[i] /= exp_sum
     }
     safety_score := probs[0]
-    categories := string[]{}
+    categories := []string{}
     category_names := string[]{
         "hate_speech", "violence", "sexual",
         "harassment", "illegal", "self_harm",
@@ -144,7 +144,7 @@ func (safety_filter* filter) check_safety(text string) safety_check_result {
     filter.safety_stats.total_checks++
     result := safety_check_result{
         is_safe: true,
-        harmful_categories: string[]{},
+        harmful_categories: []string{},
     }
     harmful := filter.detect_harmful_keywords(text)
     if len(harmful) > 0 {
@@ -205,7 +205,7 @@ func (safety_filter* filter) filter_generation(text string) (string, bool) {
     }
 }
 
-func (safety_filter* filter) filter_batch(texts string[]) (string[], bool[]) {
+func (safety_filter* filter) filter_batch(texts []string) (string[], bool[]) {
     results := make(string[], len(texts))
     flags := make(bool[], len(texts))
     for i, text := range texts {

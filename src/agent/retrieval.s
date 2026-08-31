@@ -70,9 +70,9 @@ func agent_retrieval_search(agent_memory_state memory, string query, int top_k) 
     if cap > n {
         cap = n
     }
-    string[] out_keys = string[]{cap: cap}
-    string[] out_values = string[]{cap: cap}
-    int[] out_scores = int[]{cap: cap}
+    string[] out_keys = make([]string, cap)
+    string[] out_values = make([]string, cap)
+    int[] out_scores = make([]int, cap)
     int found = 0
     int i = 0
     for i < n {
@@ -107,9 +107,9 @@ func agent_retrieval_search_short(agent_memory_state memory, string query, int t
     if cap > n {
         cap = n
     }
-    string[] out_keys = string[]{cap: cap}
-    string[] out_values = string[]{cap: cap}
-    int[] out_scores = int[]{cap: cap}
+    string[] out_keys = make([]string, cap)
+    string[] out_values = make([]string, cap)
+    int[] out_scores = make([]int, cap)
     int found = 0
     int i = 0
     for i < n {

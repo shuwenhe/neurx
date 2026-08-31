@@ -81,8 +81,8 @@ func pretrain_checkpoint_chr(int c) string {
     string(c)
 }
 
-func pretrain_checkpoint_split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func pretrain_checkpoint_split_lines(string text) []string {
+    string[] lines = []string{}
     string current = ""
     bool ends_with_newline = false
     int i = 0

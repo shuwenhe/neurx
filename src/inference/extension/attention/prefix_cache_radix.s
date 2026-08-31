@@ -88,7 +88,7 @@ func lookup_prefix(
         return prefix_lookup_result{
             found: false,
             node_id: -1,
-            kv_data: float[]{},
+            kv_data: []float{},
             matched_tokens: 0,
             memory_saved_mb: 0.0,
         }
@@ -115,7 +115,7 @@ func lookup_prefix(
     return prefix_lookup_result{
         found: false,
         node_id: -1,
-        kv_data: float[]{},
+        kv_data: []float{},
         matched_tokens: 0,
         memory_saved_mb: 0.0,
     }
@@ -146,7 +146,7 @@ func find_longest_prefix(
         return prefix_lookup_result{
             found: false,
             node_id: -1,
-            kv_data: float[]{},
+            kv_data: []float{},
             matched_tokens: 0,
             memory_saved_mb: 0.0,
         }
@@ -164,7 +164,7 @@ func find_longest_prefix(
     return prefix_lookup_result{
         found: false,
         node_id: -1,
-        kv_data: float[]{},
+        kv_data: []float{},
         matched_tokens: 0,
         memory_saved_mb: 0.0,
     }

@@ -149,7 +149,7 @@ func (s stream_state*) add_token(token_id int32, token_text string) bool {
 	return true
 }
 
-func (s stream_state*) add_tokens_batch(token_ids int32[], token_texts string[]) bool {
+func (s stream_state*) add_tokens_batch(token_ids []int32, token_texts string[]) bool {
 	for i := int32(0); i < int32(len(token_ids)); i++ {
 		s.add_token(token_ids[i], token_texts[i])
 	}
@@ -234,7 +234,7 @@ func (s stream_state*) create_heartbeat_event() stream_event {
 	}
 }
 
-func (s stream_state*) get_pending_events() stream_event[] {
+func (s stream_state*) get_pending_events() []stream_event {
 	s.buffer.mu.Lock()
 	defer s.buffer.mu.Unlock()
 	events := make(stream_event[], 0, len(s.buffer.events))

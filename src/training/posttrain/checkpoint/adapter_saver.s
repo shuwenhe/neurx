@@ -24,7 +24,7 @@ func create_safetensors_header() safetensors_header {
 }
 
 func float_to_bytes_le(float f) []byte {
-    []byte bytes = []byte{cap: 4}
+    []byte bytes = make([]byte, 4)
     int i = 0
     for i < 4 {
         bytes = append(bytes, 0)
@@ -155,7 +155,7 @@ func load_adapter_config_json(string config_file) string {
 }
 
 func load_adapter_model(string adapter_path, int expected_rank, int hidden_size) float[][] {
-    float[][] loaded_adapters = float[][]{cap: 7}
+    float[][] loaded_adapters = floatmake([][], 7)
     if !runtime_file_exists(adapter_path) {
         println("Error: adapter model file not found: " + adapter_path)
         return loaded_adapters
@@ -164,7 +164,7 @@ func load_adapter_model(string adapter_path, int expected_rank, int hidden_size)
     int expected_size = hidden_size * expected_rank
     int i = 0
     for i < 7 {
-        float[] adapter_lora = float[]{cap: expected_size}
+        float[] adapter_lora = make([]float, expected_size)
         int j = 0
         for j < expected_size {
             adapter_lora[j] = 0.01

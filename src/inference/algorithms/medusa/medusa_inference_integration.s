@@ -105,7 +105,7 @@ func decode_step_with_medusa(
     i := 0
     for i < draft_sequences.len {
         draft_seq := draft_sequences[i]
-        candidates := int[]{}
+        candidates := []int{}
         j := 0
         for j < draft_seq.len {
             candidates = append(candidates, draft_seq[j])
@@ -127,7 +127,7 @@ func decode_step_with_medusa(
         verifier_logits,
         engine.medusa_threshold
     )
-    output_tokens := int[]{}
+    output_tokens := []int{}
     num_accepted := 0
     num_total := 0
     i = 0
@@ -164,7 +164,7 @@ func standard_decode_step(
     inference_engine_with_medusa engine,
     float[] current_hidden
 ) (inference_engine_with_medusa, int[]) {
-    token := int[]{}
+    token := []int{}
     token = append(token, sample_from_distribution(current_hidden, engine.sampling_config))
     (engine, token)
 }
@@ -178,11 +178,11 @@ func generate_with_medusa(
     (updated_engine, prefill_hidden, kv_cache) := prefill_with_medusa(updated_engine, batch)
     output := inference_output_with_medusa{
         sequence_ids: int[][]{},
-        sequence_scores: float[]{},
-        num_tokens_generated: int[]{},
-        medusa_tokens_generated: int[]{},
-        acceptance_rates: float[]{},
-        latencies_ms: float[]{},
+        sequence_scores: []float{},
+        num_tokens_generated: []int{},
+        medusa_tokens_generated: []int{},
+        acceptance_rates: []float{},
+        latencies_ms: []float{},
     }
     current_position := batch.input_ids[0].len
     current_hidden := prefill_hidden[0]
@@ -270,8 +270,8 @@ func disable_medusa_and_retry(
     generate_with_medusa(updated_engine, updated_batch, max_new_tokens)
 }
 
-func forward_model(inference_model_handle model, int[] input_ids) float[] {
-    output := float[]{}
+func forward_model(inference_model_handle model, int[] input_ids) []float {
+    output := []float{}
     i := 0
     for i < 4096 {
         output = append(output, 0.0)
@@ -280,8 +280,8 @@ func forward_model(inference_model_handle model, int[] input_ids) float[] {
     output
 }
 
-func create_kv_cache_entry(float[] hidden, int seq_len) float[] {
-    cache := float[]{}
+func create_kv_cache_entry(float[] hidden, int seq_len) []float {
+    cache := []float{}
     i := 0
     for i < hidden.len * 2 {
         cache = append(cache, 0.0)
@@ -294,8 +294,8 @@ func compute_verifier_logits(
     inference_model_handle model,
     int[] tokens,
     float[][] kv_cache
-) float[] {
-    logits := float[]{}
+) []float {
+    logits := []float{}
     i := 0
     for i < 32000 {
         logits = append(logits, 0.0)

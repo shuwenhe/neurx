@@ -3,9 +3,9 @@ use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
 
-func copy_float(float[] data) float[] {
+func copy_float(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -14,9 +14,9 @@ func copy_float(float[] data) float[] {
     out
 }
 
-func copy_int(int[] data) int[] {
+func copy_int(int[] data) []int {
     int n = len(data)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -180,9 +180,9 @@ func resolve_checkpoint_path(string path) string {
     target
 }
 
-func split_lines(string text) string[] {
+func split_lines(string text) []string {
     int n = len(text)
-    string[] lines = string[]{cap: 0}
+    string[] lines = []string{}
     string current = ""
     int i = 0
     for i < n {
@@ -206,9 +206,9 @@ func split_lines(string text) string[] {
     lines
 }
 
-func csv_tokens(string text) string[] {
+func csv_tokens(string text) []string {
     int n = len(text)
-    string[] tokens = string[]{cap: 0}
+    string[] tokens = []string{}
     string current = ""
     int i = 0
     for i < n {
@@ -254,9 +254,9 @@ func join_floats(float[] values) string {
     out
 }
 
-func parse_int_list(string value) int[] {
+func parse_int_list(string value) []int {
     string[] parts = csv_tokens(value)
-    int[] out = int[]{cap: 0}
+    int[] out = []int{}
     int i = 0
     for i < len(parts) {
         string token = trim(parts[i])
@@ -268,9 +268,9 @@ func parse_int_list(string value) int[] {
     out
 }
 
-func parse_float_list(string value) float[] {
+func parse_float_list(string value) []float {
     string[] parts = csv_tokens(value)
-    float[] out = float[]{cap: 0}
+    float[] out = []float{}
     int i = 0
     for i < len(parts) {
         string token = trim(parts[i])
@@ -291,8 +291,8 @@ func parse_bool_flag(string value) bool {
     r1 || r2 || r3 || r4
 }
 
-func tensor_to_checkpoint_lines(int index, tensor value) string[] {
-    string[] lines = string[]{cap: 0}
+func tensor_to_checkpoint_lines(int index, tensor value) []string {
+    string[] lines = []string{}
     string idx_str = string(index)
     string line1 = neurx.strings.concat5("param", idx_str, ".requires_grad=", string(value.requires_grad), "")
     string line2 = neurx.strings.concat5("param", idx_str, ".shape=", join_ints(value.shape), "")
@@ -303,9 +303,9 @@ func tensor_to_checkpoint_lines(int index, tensor value) string[] {
     lines
 }
 
-func tensor_to_checkpoint_lines_from_params([]tensor params, int index) string[] {
-    float[] empty_data = float[]{cap: 0}
-    int[] empty_shape = int[]{cap: 0}
+func tensor_to_checkpoint_lines_from_params([]tensor params, int index) []string {
+    float[] empty_data = []float{}
+    int[] empty_shape = []int{}
     tensor t = new(empty_data, empty_shape, false)
     if index < len(params) {
         int k = 0
@@ -364,7 +364,7 @@ func parse_checkpoint_lines(string[] lines) checkpoint {
         }
         i = i + 1
     }
-    []tensor params = []tensor{cap: 0}
+    []tensor params = make([]tensor, 0)
     i = 1
     for i < len(lines) {
         string line = lines[i]
@@ -396,8 +396,8 @@ func parse_checkpoint_lines(string[] lines) checkpoint {
                     string shape_key = neurx.strings.concat4("param", string(idx), ".shape=", "")
                     string data_key = neurx.strings.concat4("param", string(idx), ".data=", "")
                     bool requires_grad = parse_bool_flag(flag)
-                    int[] shape = int[]{cap: 0}
-                    float[] data = float[]{cap: 0}
+                    int[] shape = []int{}
+                    float[] data = []float{}
                     int k = 0
                     for k < len(lines) {
                         string candidate = lines[k]
@@ -420,7 +420,7 @@ func parse_checkpoint_lines(string[] lines) checkpoint {
 
 func copy_params([]tensor params) []tensor {
     int n = len(params)
-    []tensor out = []tensor{cap: n}
+    []tensor out = make([]tensor, n)
     int i = 0
     for i < n {
         out[i] = copy_tensor(params[i])

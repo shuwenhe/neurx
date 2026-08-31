@@ -25,7 +25,7 @@ struct adamw_optimizer {
 func new_adamw(adamw_config cfg) adamw_optimizer {
     adamw_optimizer {
         config: cfg,
-        param_states: []adamw_param_state{cap: 0},
+        param_states: make([]adamw_param_state, 0),
         global_step: 0,
         current_lr: cfg.learning_rate,
     }
@@ -155,8 +155,8 @@ func adamw_load_state_dict(
     return opt
 }
 
-func allocate_float_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_float_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     i := 0
     for i < size {
         v = append(v, init_val)

@@ -47,10 +47,10 @@ func create_training_batch(
 ) training_batch {
     int num_sequences = len(texts)
     training_batch {
-        token_ids: int[][]{cap: batch_size},
-        input_ids: int[][]{cap: batch_size},
-        labels: int[][]{cap: batch_size},
-        attention_mask: int[][]{cap: batch_size},
+        token_ids: intmake([][], batch_size),
+        input_ids: intmake([][], batch_size),
+        labels: intmake([][], batch_size),
+        attention_mask: intmake([][], batch_size),
         batch_size: num_sequences,
         seq_len: max_seq_len,
         num_tokens: long(num_sequences * max_seq_len),
@@ -72,8 +72,8 @@ func new_model_trainer(
             best_eval_loss: 999999.0,
             total_tokens_seen: 0,
         },
-        loss_history: [string:double{cap: 10000},
-        eval_metrics: [string:double{cap: 100},
+        loss_history: [string:double{},
+        eval_metrics: [string:double{},
     }
 }
 
@@ -143,7 +143,7 @@ func get_learning_rate(
 }
 
 func get_training_stats(model_trainer trainer) [string string {
-    [string:string{cap: 20}
+    [string:string{}
 }
 
 func get_average_loss(model_trainer trainer) double {
@@ -171,7 +171,7 @@ func load_checkpoint(
 func compute_training_metrics(
     model_trainer trainer
 ) [string:double {
-    [string:double{cap: 10}
+    [string:double{}
 }
 
 func estimate_training_time(

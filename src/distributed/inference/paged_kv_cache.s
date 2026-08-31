@@ -57,8 +57,8 @@ func new_block_manager(
         num_blocks: num_blocks,
         block_size_tokens: block_size_tokens,
         total_memory_mb: total_memory_mb,
-        blocks: kv_block[]{cap: num_blocks},
-        free_block_list: int[]{cap: num_blocks},
+        blocks: make([]kv_block, num_blocks),
+        free_block_list: make([]int, num_blocks),
         current_time_ns: 0,
     }
     int i = 0
@@ -154,13 +154,13 @@ func new_paged_kv_cache(
         max_seq_length: max_seq_length,
         num_gpus: num_gpus,
         device_mem_per_gpu_mb: device_mem_per_gpu_mb,
-        block_tables: int[][]{cap: 10000},
+        block_tables: intmake([][], 10000),
         total_hits: 0,
         total_misses: 0,
     }
     int i = 0
     for i < 10000 {
-        cache.block_tables = append(cache.block_tables, int[]{cap: (max_seq_length + block_size - 1) / block_size})
+        cache.block_tables = append(cache.block_tables, make([]int, (max_seq_length + block_size - 1) / block_size))
         i = i + 1
     }
     return cache
@@ -171,7 +171,7 @@ func (paged_kv_cache* cache) allocate_kv_cache(
     int seq_length
 ) (int[], bool) {
     int num_blocks_needed = (seq_length + cache.block_mgr.block_size_tokens - 1) / cache.block_mgr.block_size_tokens
-    int[] blocks = int[]{cap: num_blocks_needed}
+    int[] blocks = make([]int, num_blocks_needed)
     int block_idx = 0
     for block_idx < num_blocks_needed {
         block_id, success := cache.block_mgr.allocate_block(block_idx * cache.block_mgr.block_size_tokens)
@@ -182,7 +182,7 @@ func (paged_kv_cache* cache) allocate_kv_cache(
                 cache.block_mgr.free_block(blocks[i])
                 i = i + 1
             }
-            return int[]{}, false
+            return []int{}, false
         }
         blocks = append(blocks, block_id)
         block_idx = block_idx + 1
@@ -204,7 +204,7 @@ func (paged_kv_cache* cache) free_kv_cache(int request_id) {
         cache.block_mgr.free_block(blocks[i])
         i = i + 1
     }
-    cache.block_tables[request_id] = int[]{cap: cache.max_seq_length}
+    cache.block_tables[request_id] = make([]int, cache.max_seq_length)
 }
 
 func (paged_kv_cache* cache) get_hit_rate() float {
@@ -226,8 +226,8 @@ func (paged_kv_cache* cache) get_available_blocks() int {
 func new_prefix_cache_manager(int cache_capacity) prefix_cache_manager {
     mgr := prefix_cache_manager {
         cache_capacity: cache_capacity,
-        entries: prefix_cache_entry[]{cap: cache_capacity},
-        prefix_hashes: string[]{cap: cache_capacity},
+        entries: make([]prefix_cache_entry, cache_capacity),
+        prefix_hashes: make([]string, cache_capacity),
         total_prefixes_cached: 0,
     }
     return mgr

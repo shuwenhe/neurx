@@ -49,7 +49,7 @@ func copy_stage(pipeline_stage stage) pipeline_stage {
 }
 
 func copy_stages([]pipeline_stage values) []pipeline_stage {
-    []pipeline_stage out = []pipeline_stage{cap: len(values)}
+    []pipeline_stage out = make([]pipeline_stage, len(values))
     int i = 0
     for i < len(values) {
         out[i] = copy_stage(values[i])
@@ -409,7 +409,7 @@ func schedule_current_op(pipeline_schedule_state state) string {
 
 func new_schedule_gpipe(pipeline_plan plan) pipeline_schedule_state {
     int n = plan.chunks
-    string[] ops = string[]{cap: 2 * n}
+    string[] ops = make([]string, 2 * n)
     int i = 0
     for i < n {
         ops[i] = "forward"
@@ -425,7 +425,7 @@ func new_schedule_gpipe(pipeline_plan plan) pipeline_schedule_state {
 
 func new_schedule_gpipe_for_stage(pipeline_plan plan, int stage_index) pipeline_schedule_state {
     int n = plan.chunks
-    string[] ops = string[]{cap: 2 * n}
+    string[] ops = make([]string, 2 * n)
     int i = 0
     for i < n {
         ops[i] = "forward"
@@ -448,7 +448,7 @@ func new_schedule_1f1b_for_stage(pipeline_plan plan, int stage_index) pipeline_s
     int warmup = schedule_warmup_steps(plan, stage_index)
     int steady = schedule_steady_steps(plan, stage_index)
     int flush = schedule_flush_steps(plan, stage_index)
-    string[] ops = string[]{cap: warmup + steady + flush}
+    string[] ops = make([]string, warmup + steady + flush)
     int i = 0
     for i < warmup {
         ops[i] = "forward"

@@ -137,7 +137,7 @@ func simple_forward(simple_model model, int[] input_ids, simple_config cfg) floa
     return total_loss / float(num_tokens)
 }
 
-func simple_backward(simple_model model, float loss) float[] {
+func simple_backward(simple_model model, float loss) []float {
     int total_params = len(model.embeddings) + len(model.output_weights)
     float[] gradients = []
     int i = 0

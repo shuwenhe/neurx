@@ -35,7 +35,7 @@ func new_tokenizer(string vocab_file) native_tokenizer_handle {
     }
 }
 
-func (native_tokenizer_handle* t) encode(string text) int[] {
+func (native_tokenizer_handle* t) encode(string text) []int {
     if !t.initialized {
         return int[]()
     }

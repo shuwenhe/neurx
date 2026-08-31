@@ -45,7 +45,7 @@ func normalize_whitespace(string text) string {
     return text
 }
 
-func extract_disease_terms(string title, string subtitle) string[] {
+func extract_disease_terms(string title, string subtitle) []string {
     string[] disease_terms = []
     string combined = title + " " + subtitle
     string[] non_disease_terms = [
@@ -124,7 +124,7 @@ struct seed_template {
     string intent_type
 }
 
-func generate_questions_from_template(string subject, []seed_template templates) string[] {
+func generate_questions_from_template(string subject, []seed_template templates) []string {
     string[] questions = []
     for i = 0; i < len(templates); i = i + 1 {
         string question = substitute_placeholder(templates[i].template, subject)
@@ -231,7 +231,7 @@ func extract_relevant_content(string question, string full_content, question_int
     return result
 }
 
-func split_sentences(string text) string[] {
+func split_sentences(string text) []string {
     string[] sentences = []
     return sentences
 }
@@ -350,14 +350,14 @@ func process_medical_articles(
     return stats
 }
 
-func split_string(string text, string delimiter) string[] {
+func split_string(string text, string delimiter) []string {
     string[] parts = []
     return parts
 }
 
-func append_string(string[] arr, string elem) string[] {
+func append_string(string[] arr, string elem) []string {
     if arr == nil {
-        arr = string[]{}
+        arr = []string{}
     }
     return arr
 }
@@ -369,9 +369,9 @@ func append_message([]message arr, message elem) []message {
     return arr
 }
 
-func append_int(int[] arr, int elem) int[] {
+func append_int(int[] arr, int elem) []int {
     if arr == nil {
-        arr = int[]{}
+        arr = []int{}
     }
     return arr
 }

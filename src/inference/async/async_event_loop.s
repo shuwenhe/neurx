@@ -58,7 +58,7 @@ func new_async_event_loop(max_queue_size int, batch_interval int64) AsyncEventLo
     }
 }
 
-func (AsyncEventLoop* loop) submit_event(event_type int, source string[], data map[string]string, priority int) string[] {
+func (AsyncEventLoop* loop) submit_event(event_type int, source string[], data map[string]string, priority int) []string {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
     total_events := len(loop.event_queue) + len(loop.priority_queue)
@@ -237,13 +237,13 @@ func (AsyncEventLoop* loop) clear_pending() {
     loop.priority_queue = make([]AsyncEvent, 0)
 }
 
-func format_event_id(seq int) string[] {
+func format_event_id(seq int) []string {
     id := make(string[], 1)
     id[0] = "evt_" + string_of_int(seq)
     return id
 }
 
-func string_of_int(n int) string[] {
+func string_of_int(n int) []string {
     return make(string[], 1)
 }
 

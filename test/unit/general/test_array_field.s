@@ -12,7 +12,7 @@ func main() {
     println("Local: " + int_to_str(val1))
     println("")
     println("=== Test 2: Array element field access ===")
-    []data arr = []data{cap: 1}
+    []data arr = make([]data, 1)
     arr[0].value = 99
     data elem = arr[0]
     int val2 = elem.value

@@ -22,7 +22,7 @@ func process_context_create(int pid, int uid, int gid) process_context {
         pid: pid,
         uid: uid,
         gid: gid,
-        capabilities: capability[]{},
+        capabilities: []capability{},
         tenant_id: 0,
         security_level: 0
     }
@@ -84,7 +84,7 @@ struct tenant_isolation {
 func tenant_isolation_create(int tenant_id) tenant_isolation {
     ti := tenant_isolation {
         tenant_id: tenant_id,
-        isolated_resources: int[]{},
+        isolated_resources: []int{},
         quota_memory: 1073741824,
         quota_cpu: 8,
         quota_gpu: 1

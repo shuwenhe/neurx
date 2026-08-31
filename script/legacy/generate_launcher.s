@@ -99,8 +99,8 @@ func parse_env_float(string key, float default_val) float {
     return strings_parse_float(val)
 }
 
-func parse_hostfile(string hostfile_path) string[] {
-    string[] hosts = string[]{}
+func parse_hostfile(string hostfile_path) []string {
+    string[] hosts = []string{}
     if !fs_exists(hostfile_path) {
         io_eprintln("hostfile not found: " + hostfile_path)
         return hosts

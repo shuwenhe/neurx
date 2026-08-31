@@ -296,7 +296,7 @@ func (model_cache* cache) cleanup_expired_entries() int32 {
 	defer cache.mu.Unlock()
 	removed := int32(0)
 	now := time.Now()
-	keys_to_delete := string[]{}
+	keys_to_delete := []string{}
 	for key, entry := range cache.entries {
 		if entry.ttl_seconds > 0 {
 			elapsed := now.Sub(entry.created_at).Seconds()

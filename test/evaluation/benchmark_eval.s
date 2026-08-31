@@ -128,9 +128,9 @@ func mc_predict(language_model model, mc_question q) int {
     best_idx
 }
 
-func mc_concat(int[] a, int[] b) int[] {
+func mc_concat(int[] a, int[] b) []int {
     int n = len(a) + len(b)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < len(a) { out[i] = a[i]; i = i + 1 }
     int j = 0

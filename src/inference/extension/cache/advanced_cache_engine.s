@@ -30,7 +30,7 @@ func create_advanced_kv_cache_engine(string node_id) advanced_kv_cache_engine {
     return engine
 }
 
-func advanced_cache_query(advanced_kv_cache_engine engine, string prefix_hash) int[] {
+func advanced_cache_query(advanced_kv_cache_engine engine, string prefix_hash) []int {
     engine.total_reads = engine.total_reads + 1
     int[] cached_blocks = hash_table_lookup(engine.index, prefix_hash)
     if len(cached_blocks) > 0 {
@@ -55,7 +55,7 @@ func advanced_cache_query(advanced_kv_cache_engine engine, string prefix_hash) i
         print("[AdvancedCache] MISS locally, querying replicas: " + best_node + "\n")
     }
     print("[AdvancedCache] MISS: " + prefix_hash + "\n")
-    return int[]{cap: 0}
+    return []int{}
 }
 
 func advanced_cache_store(advanced_kv_cache_engine engine, string prefix_hash, int[] block_ids) int {

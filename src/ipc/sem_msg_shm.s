@@ -14,7 +14,7 @@ struct semaphore_set {
 }
 
 func (semaphore_set* ss) init(int max_sems) (int, string) {
-    ss.semaphores = semaphore[]{}
+    ss.semaphores = []semaphore{}
     ss.total_sems = max_sems
     return 0, ""
 }
@@ -28,7 +28,7 @@ func (semaphore_set* ss) create_semaphore(int initial_value) (semaphore, string)
         value: initial_value,
         owner_pid: 0,
         wait_count: 0,
-        waiters: int[]{}
+        waiters: []int{}
     }
     ss.semaphores = append(ss.semaphores, sem)
     return sem, ""
@@ -99,7 +99,7 @@ struct message_queue_manager {
 }
 
 func (message_queue_manager* mqm) init() (int, string) {
-    mqm.queues = message_queue[]{}
+    mqm.queues = []message_queue{}
     mqm.next_queue_id = 0
     return 0, ""
 }
@@ -107,7 +107,7 @@ func (message_queue_manager* mqm) init() (int, string) {
 func (message_queue_manager* mqm) create_queue(int max_msgs) (message_queue, string) {
     mq := message_queue{
         queue_id: mqm.next_queue_id,
-        messages: message[]{},
+        messages: []message{},
         max_messages: max_msgs,
         receiver_pid: 0,
         sender_pid: 0
@@ -170,7 +170,7 @@ struct shared_memory_manager {
 }
 
 func (shared_memory_manager* smm) init() (int, string) {
-    smm.segments = shared_memory_segment[]{}"
+    smm.segments = []shared_memory_segment{}"
     smm.next_shmid = 0
     return 0, ""
 }

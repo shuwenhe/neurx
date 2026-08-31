@@ -252,7 +252,7 @@ func gpt_large_pretrain_mix_seed(int seed, int epoch, int total) int {
     mixed
 }
 
-func gpt_large_pretrain_shuffle_ints(int[] values, int seed) int[] {
+func gpt_large_pretrain_shuffle_ints(int[] values, int seed) []int {
     int[] out = copy_int(values)
     int i = len(out) - 1
     int state = seed
@@ -267,11 +267,11 @@ func gpt_large_pretrain_shuffle_ints(int[] values, int seed) int[] {
     out
 }
 
-func gpt_large_pretrain_build_shard_order(int shard_count, int shard_seed, int shard_epoch) int[] {
+func gpt_large_pretrain_build_shard_order(int shard_count, int shard_seed, int shard_epoch) []int {
     if shard_count <= 0 {
-        return int[]{cap: 0}
+        return []int{}
     }
-    int[] order = int[]{cap: shard_count}
+    int[] order = make([]int, shard_count)
     int i = 0
     for i < shard_count {
         order[i] = i
@@ -280,8 +280,8 @@ func gpt_large_pretrain_build_shard_order(int shard_count, int shard_seed, int s
     return gpt_large_pretrain_shuffle_ints(order, gpt_large_pretrain_mix_seed(shard_seed, shard_epoch, shard_count))
 }
 
-func gpt_large_pretrain_shuffle_strings(string[] values, int seed) string[] {
-    string[] out = string[]{cap: len(values)}
+func gpt_large_pretrain_shuffle_strings(string[] values, int seed) []string {
+    string[] out = make([]string, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -300,7 +300,7 @@ func gpt_large_pretrain_shuffle_strings(string[] values, int seed) string[] {
     out
 }
 
-func gpt_large_pretrain_slice_strings(string[] values, int start, int end) string[] {
+func gpt_large_pretrain_slice_strings(string[] values, int start, int end) []string {
     int lo = start
     int hi = end
     if lo < 0 {
@@ -315,7 +315,7 @@ func gpt_large_pretrain_slice_strings(string[] values, int start, int end) strin
     if lo > len(values) {
         lo = len(values)
     }
-    string[] out = string[]{cap: hi - lo}
+    string[] out = make([]string, hi - lo)
     int i = lo
     int j = 0
     for i < hi {
@@ -330,9 +330,9 @@ func gpt_large_pretrain_split_shard_refs(string[] refs, int seed) gpt_large_pret
     string[] ordered = gpt_large_pretrain_shuffle_strings(refs, seed)
     int total = len(ordered)
     gpt_large_pretrain_shard_splits splits = gpt_large_pretrain_shard_splits {
-        train_refs: string[]{cap: 0},
-        valid_refs: string[]{cap: 0},
-        test_refs: string[]{cap: 0},
+        train_refs: []string{},
+        valid_refs: []string{},
+        test_refs: []string{},
     }
     if total > 0 {
         int train_count = (total * 80) / 100
@@ -403,12 +403,12 @@ func gpt_large_pretrain_basename(string path) string {
     path
 }
 
-func gpt_large_pretrain_split_csv(string value) string[] {
+func gpt_large_pretrain_split_csv(string value) []string {
     string text = trim(value)
     if text == "" {
-        return string[]{cap: 0}
+        return []string{}
     }
-    string[] parts = string[]{cap: len(text)}
+    string[] parts = make([]string, len(text))
     int count = 0
     int start = 0
     int i = 0
@@ -425,9 +425,9 @@ func gpt_large_pretrain_split_csv(string value) string[] {
         i = i + 1
     }
     if count == 0 {
-        return string[]{cap: 0}
+        return []string{}
     }
-    string[] out = string[]{cap: count}
+    string[] out = make([]string, count)
     int j = 0
     for j < count {
         out[j] = parts[j]
@@ -457,12 +457,12 @@ func gpt_large_pretrain_string_matches_shard(string value, string shard_path) bo
     false
 }
 
-func gpt_large_pretrain_filter_shard_refs(string[] refs, string selection_csv) string[] {
+func gpt_large_pretrain_filter_shard_refs(string[] refs, string selection_csv) []string {
     string[] selection = gpt_large_pretrain_split_csv(selection_csv)
     if len(selection) == 0 {
         return refs
     }
-    string[] out = string[]{cap: len(refs)}
+    string[] out = make([]string, len(refs))
     int out_len = 0
     int i = 0
     for i < len(refs) {
@@ -485,7 +485,7 @@ func gpt_large_pretrain_filter_shard_refs(string[] refs, string selection_csv) s
     if out_len == len(refs) {
         return refs
     }
-    string[] filtered = string[]{cap: out_len}
+    string[] filtered = make([]string, out_len)
     int k = 0
     for k < out_len {
         filtered[k] = out[k]
@@ -585,11 +585,11 @@ func str_to_float(string s) float {
     value
 }
 
-func copy_float(float[] values) float[] {
+func copy_float(float[] values) []float {
     values
 }
 
-func copy_int(int[] values) int[] {
+func copy_int(int[] values) []int {
     values
 }
 
@@ -609,7 +609,7 @@ func tensor_numel(int[] shape) int {
 
 func tensor_from_ints(int[] values, int[] shape) tensor {
     int n = len(values)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = values[i]
@@ -618,15 +618,15 @@ func tensor_from_ints(int[] values, int[] shape) tensor {
     new(data, copy_int(shape), false)
 }
 
-func shape1(int size) int[] {
-    int[] out = int[]{cap: 1}
+func shape1(int size) []int {
+    int[] out = make([]int, 1)
     out[0] = size
     out
 }
 
 func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = value.data[i] * scale
@@ -650,7 +650,7 @@ func zero_pad_int(int value, int width) string {
     prefix + digits
 }
 
-func split_lines(string text) string[] {
+func split_lines(string text) []string {
     int count = 0
     bool in_line = false
     int i = 0
@@ -678,9 +678,9 @@ func split_lines(string text) string[] {
     }
     println("[split] ✓ found " + int_to_str(count, 0) + " lines, extracting...")
     if count <= 0 {
-        return string[]{cap: 0}
+        return []string{}
     }
-    string[] lines = string[]{cap: count}
+    string[] lines = make([]string, count)
     int line_start = 0
     int out_idx = 0
     i = 0
@@ -797,15 +797,15 @@ func gpt_large_pretrain_find_substring(string text, string pattern) int {
     -1
 }
 
-func gpt_large_pretrain_manifest_refs(string manifest_path) string[] {
+func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     if trim(manifest_path) == "" {
-        return string[]{cap: 0}
+        return []string{}
     }
     if !runtime_file_exists(manifest_path) {
-        return string[]{cap: 0}
+        return []string{}
     }
     if gpt_large_pretrain_find_substring(manifest_path, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(manifest_path, ".gz") < 0 {
-        string[] refs = string[]{cap: 1}
+        string[] refs = make([]string, 1)
         refs[0] = manifest_path
         return refs
     }
@@ -854,9 +854,9 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) string[] {
         }
     }
     if ref_count <= 0 {
-        return string[]{cap: 0}
+        return []string{}
     }
-    string[] refs = string[]{cap: ref_count}
+    string[] refs = make([]string, ref_count)
     int ref_idx = 0
     if trim(train_ref) != "" && trim(train_ref) != "null" {
         if runtime_file_exists(train_ref) {
@@ -907,30 +907,30 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) string[] {
     refs
 }
 
-func gpt_large_pretrain_documents_for_ref(string shard_ref) string[] {
+func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
     if trim(shard_ref) == "" {
         println("[init] ERROR: empty shard reference")
-        return string[]{cap: 0}
+        return []string{}
     }
     if !runtime_file_exists(shard_ref) {
         println("[init] ERROR: shard file not found: " + shard_ref)
-        return string[]{cap: 0}
+        return []string{}
     }
     println("[init] reading shard text: " + shard_ref)
     string text = read_text_file_with_estimated_progress(shard_ref, 1000)
     if len(text) == 0 {
         println("[init] ERROR: failed to read shard file")
-        return string[]{cap: 0}
+        return []string{}
     }
     if trim(text) == "" {
         println("[init] WARNING: shard file is empty")
-        return string[]{cap: 0}
+        return []string{}
     }
     println("[init] ✓ file loaded successfully, text length: " + int_to_str(len(text), 0) + " bytes")
     println("[init] splitting lines...")
     string[] lines = split_lines(text)
     println("[init] ✓ split complete: " + int_to_str(len(lines), 0) + " lines found, parsing documents...")
-    string[] docs = string[]{cap: 0}
+    string[] docs = []string{}
     int line_count = 0
     int doc_count = 0
     bool is_jsonl = gpt_large_pretrain_find_substring(shard_ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(shard_ref, ".gz") < 0
@@ -949,7 +949,7 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) string[] {
                 }
             } else {
                 int docs_push_len = len(docs)
-                string[] docs_push_tmp = string[]{cap: docs_push_len + 1}
+                string[] docs_push_tmp = make([]string, docs_push_len + 1)
                 int docs_push_i = 0
                 for docs_push_i < docs_push_len {
                     docs_push_tmp[docs_push_i] = docs[docs_push_i]
@@ -971,9 +971,9 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) string[] {
     return docs
 }
 
-func gpt_large_pretrain_documents_for_refs(string[] shard_refs) string[] {
+func gpt_large_pretrain_documents_for_refs(string[] shard_refs) []string {
     println("[init] collecting documents from shard set: " + int_to_str(len(shard_refs), 0))
-    string[] documents = string[]{cap: 0}
+    string[] documents = []string{}
     int i = 0
     for i < len(shard_refs) {
         string shard_ref = gpt_large_pretrain_string_at(shard_refs, i)
@@ -982,7 +982,7 @@ func gpt_large_pretrain_documents_for_refs(string[] shard_refs) string[] {
         int j = 0
             for j < len(shard_documents) {
             int documents_push_len = len(documents)
-            string[] documents_push_tmp = string[]{cap: documents_push_len + 1}
+            string[] documents_push_tmp = make([]string, documents_push_len + 1)
             int documents_push_i = 0
             for documents_push_i < documents_push_len {
                 documents_push_tmp[documents_push_i] = documents[documents_push_i]
@@ -1183,7 +1183,7 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
         train_shard_refs: shard_refs,
         valid_shard_refs: shard_refs,
         test_shard_refs: shard_refs,
-        shard_order: int[]{cap: 0},
+        shard_order: []int{},
         shard_order_index: shard_order_index,
         shard_epoch: 0,
         shard_shuffle_seed: shard_shuffle_seed,
@@ -1228,7 +1228,7 @@ func gpt_large_pretrain_checkpoint_dir(gpt_large_pretrain_state state) string {
 func gpt_large_pretrain_checkpoint_params(gpt_large_pretrain_state state) []tensor {
     int layer_count = len(state.training.backbone.layers)
     int param_count = 3 + layer_count * 10
-    []tensor params = []tensor{cap: param_count}
+    []tensor params = make([]tensor, param_count)
     int idx = 0
     params[idx] = state.training.token_embedding
     idx = idx + 1
@@ -1634,7 +1634,7 @@ func gpt_large_pretrain_metadata_float(string text, string key, float fallback) 
     str_to_float(gpt_large_pretrain_metadata_value(text, key, fmt_float(fallback, 6)))
 }
 
-func gpt_large_pretrain_metadata_float_list(string text, string key, float[] fallback) float[] {
+func gpt_large_pretrain_metadata_float_list(string text, string key, float[] fallback) []float {
     parse_float_list(gpt_large_pretrain_metadata_value(text, key, join_floats(fallback)))
 }
 
@@ -2194,7 +2194,7 @@ func gpt_large_pretrain_test_metrics(gpt_large_pretrain_state state) gpt_large_p
 }
 
 func embedding_grad_tensor(tensor token_ids, tensor grad_hidden, int vocab_size, int hidden_size) tensor {
-    float[] data = float[]{cap: vocab_size * hidden_size}
+    float[] data = make([]float, vocab_size * hidden_size)
     int token_count = len(token_ids.data)
     int i = 0
     for i < token_count {

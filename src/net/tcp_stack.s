@@ -133,20 +133,20 @@ func (mgr* tcp_manager) send_data(conn_id int, data byte[], len int) (int, strin
 
 func (mgr* tcp_manager) recv_data(conn_id int) (byte[], string) {
     if conn_id >= len(mgr.connections) {
-        return byte[]{}, "connection not found"
+        return []byte{}, "connection not found"
     }
     conn := mgr.connections[conn_id]
     if conn.state != TCP_STATE_ESTABLISHED {
-        return byte[]{}, "connection not established"
+        return []byte{}, "connection not established"
     }
-    data := byte[]{}
+    data := []byte{}
     mgr.total_bytes_recv = mgr.total_bytes_recv + len(data)
     return data, ""
 }
 
 func create_tcp_manager() (tcp_manager, string) {
     mgr := tcp_manager{
-        connections: tcp_connection[]{},
+        connections: []tcp_connection{},
         conn_counter: 0,
         total_connections: 0,
         active_connections: 0,
@@ -185,19 +185,19 @@ func (mgr* udp_manager) send_datagram(endpoint_id int, data byte[], len int) (in
 
 func (mgr* udp_manager) recv_datagram(endpoint_id int) (byte[], string) {
     if endpoint_id >= len(mgr.endpoints) {
-        return byte[]{}, "endpoint not found"
+        return []byte{}, "endpoint not found"
     }
     endpoint := mgr.endpoints[endpoint_id]
     endpoint.packets_recv = endpoint.packets_recv + 1
     mgr.total_packets_recv = mgr.total_packets_recv + 1
     mgr.endpoints[endpoint_id] = endpoint
-    data := byte[]{}
+    data := []byte{}
     return data, ""
 }
 
 func create_udp_manager() (udp_manager, string) {
     mgr := udp_manager{
-        endpoints: udp_endpoint[]{},
+        endpoints: []udp_endpoint{},
         endpoint_counter: 0,
         total_packets_sent: 0,
         total_packets_recv: 0,
@@ -238,7 +238,7 @@ func (mgr* route_manager) lookup_route(dest_ip int) (route_entry, string) {
 
 func create_route_manager() (route_manager, string) {
     mgr := route_manager{
-        routes: route_entry[]{},
+        routes: []route_entry{},
         route_counter: 0,
         total_lookups: 0,
         cache_hits: 0,

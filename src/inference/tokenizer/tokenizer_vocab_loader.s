@@ -46,7 +46,7 @@ func load_vocab_from_file(string vocab_file_path) bool {
     if len(content) == 0 {
         return false
     }
-    []vocab_entry entries = []vocab_entry{cap: 160000}
+    []vocab_entry entries = make([]vocab_entry, 160000)
     int entry_count = 0
     int line_start = 0
     int i = 0

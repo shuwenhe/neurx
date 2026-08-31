@@ -3,7 +3,7 @@ use neurx.backends.cpu.transformer_decode.{cpu_transformer_result, cpu_abs, cpu_
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding}
 
 func main() {
-    float[] input = float[]{cap: 2}
+    float[] input = make([]float, 2)
     input[0] = 3.0
     input[1] = 4.0
     float[] normalized = cpu_rms_norm(input)
@@ -12,7 +12,7 @@ func main() {
     if cpu_abs(normalized[1] - 1.131371) > 0.001 { return 1 }
 
     safetensors_embedding embedding = load_f32_embedding("artifact/build/commands/native-test/embedding.safetensors", "embedding.weight")
-    int[] tokens = int[]{cap: 2}
+    int[] tokens = make([]int, 2)
     tokens[0] = 1
     tokens[1] = 0
     cpu_transformer_result result = cpu_transformer_prefill_decode(embedding, tokens, 2)

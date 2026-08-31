@@ -55,7 +55,7 @@ func compute_remote_rewards(
     remote_reward_state state,
     string[] prompts,
     string[] responses
-) float[] {
+) []float {
     int[] request_ids = make(int[], len(prompts))
     for int i = 0; i < len(prompts); i = i + 1 {
         request_ids[i] = state.num_requests + i
@@ -119,7 +119,7 @@ func batch_compute_remote_rewards(
     remote_reward_state state,
     string[] prompts,
     string[] responses
-) float[] {
+) []float {
     int total = len(prompts)
     int batch_size = state.config.batch_size
     float[] all_rewards = make(float[], total)
@@ -162,7 +162,7 @@ func min_int(int a, int b) int {
     return b
 }
 
-func slice_strings(string[] arr, int start, int end) string[] {
+func slice_strings(string[] arr, int start, int end) []string {
     string[] result = make(string[], end - start)
     for int i = start; i < end; i = i + 1 {
         result[i - start] = arr[i]

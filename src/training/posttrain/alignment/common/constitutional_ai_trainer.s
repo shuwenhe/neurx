@@ -395,13 +395,13 @@ func make_principle_array(int size) []constitutional_principle {
     arr
 }
 
-func make_int_array(int size, int init_value) int[] {
-    int[] arr = int[]{}
+func make_int_array(int size, int init_value) []int {
+    int[] arr = []int{}
     arr
 }
 
-func make_float_array(int size, float init_value) float[] {
-    float[] arr = float[]{}
+func make_float_array(int size, float init_value) []float {
+    float[] arr = []float{}
     arr
 }
 

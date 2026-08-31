@@ -28,7 +28,7 @@ func (rule_reward_manager* rm) compute_rewards(
     string[] responses
 ) reward_result {
     int batch_size = len(responses)
-    float[] rewards = float[]{}
+    float[] rewards = []float{}
     int i = 0
     for i < batch_size {
         string response = responses[i]
@@ -100,7 +100,7 @@ func (batch_reward_manager* brm) compute_rewards_batched(
     string[] responses
 ) reward_result {
     int total_samples = len(responses)
-    float[] all_rewards = float[]{}
+    float[] all_rewards = []float{}
     int start = 0
     for start < total_samples {
         int end = start + brm.batch_size
@@ -146,7 +146,7 @@ func (mixed_reward_manager* mrm) compute_rewards(
     rule_reward_manager rm = new_rule_reward_manager(mrm.config)
     reward_result rule_result = rm.compute_rewards(prompts, responses)
     float[] model_rewards = simulate_model_rewards(responses)
-    float[] mixed_rewards = float[]{}
+    float[] mixed_rewards = []float{}
     int i = 0
     for i < len(rule_result.rewards) {
         float mixed = mrm.rule_weight * rule_result.rewards[i] +
@@ -157,8 +157,8 @@ func (mixed_reward_manager* mrm) compute_rewards(
     return compute_reward_statistics(mixed_rewards)
 }
 
-func simulate_model_rewards(string[] responses) float[] {
-    float[] rewards = float[]{}
+func simulate_model_rewards(string[] responses) []float {
+    float[] rewards = []float{}
     int i = 0
     for i < len(responses) {
         int len = string_length(responses[i])
@@ -209,7 +209,7 @@ func compute_reward_statistics(float[] rewards) reward_result {
     return result
 }
 
-func normalize_rewards(float[] rewards) float[] {
+func normalize_rewards(float[] rewards) []float {
     int n = len(rewards)
     if n == 0 { return rewards }
     float sum = 0.0
@@ -227,7 +227,7 @@ func normalize_rewards(float[] rewards) float[] {
         i = i + 1
     }
     float std = sqrt(var_sum / ((n as float)))
-    float[] normalized = float[]{}
+    float[] normalized = []float{}
     i = 0
     for i < n {
         float norm_val = (rewards[i] - mean) / (std + 1e-8)
@@ -261,8 +261,8 @@ func string_contains(string haystack, string needle) bool {
     return false
 }
 
-func slice_strings(string[] arr, int start, int end) string[] {
-    string[] result = string[]{}
+func slice_strings(string[] arr, int start, int end) []string {
+    string[] result = []string{}
     int i = start
     for i < end && i < len(arr) {
         result = append(result, arr[i])

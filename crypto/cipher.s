@@ -141,10 +141,10 @@ struct crypto_subsystem {
 
 func crypto_subsystem_init() crypto_subsystem {
     crypto := crypto_subsystem {
-        sha256_contexts: sha256_context[]{},
-        aes_keys: aes_key[]{},
-        rsa_keys: rsa_key[]{},
-        certificates: certificate[]{}
+        sha256_contexts: []sha256_context{},
+        aes_keys: []aes_key{},
+        rsa_keys: []rsa_key{},
+        certificates: []certificate{}
     }
     crypto
 }

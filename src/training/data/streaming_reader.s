@@ -127,7 +127,7 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
     if num_chunks == 0:
         num_chunks = 1
     reader.num_chunks = num_chunks
-    reader.chunks = []data_chunk{cap: num_chunks}
+    reader.chunks = make([]data_chunk, num_chunks)
     int64 current_offset = 0
     int c = 0
     for c < num_chunks {
@@ -149,7 +149,7 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
         reader.chunks[c] = chunk
         current_offset = end_offset
         c = c + 1
-    reader.loaded_chunk_indices = int[]{cap: reader.max_loaded_chunks}
+    reader.loaded_chunk_indices = make([]int, reader.max_loaded_chunks)
     return reader
 struct line_read_result {
     string line_content
@@ -247,7 +247,7 @@ func unload_chunk(streaming_reader_state reader, int chunk_idx) streaming_reader
     if chunk.is_mmap_mapped:
         unmap_region(chunk.raw_data)
     else:
-        chunk.raw_data = []byte{cap: 0}
+        chunk.raw_data = make([]byte, 0)
     chunk.is_loaded = false
     reader.chunks[chunk_idx] = chunk
     remove_from_lru(reader.loaded_chunk_indices, chunk_idx)
@@ -263,7 +263,7 @@ func read_batch_of_lines(
     streaming_reader_state reader,
     int batch_size
 ) batch_read_result {
-    string[] batch_lines = string[]{cap: batch_size}
+    string[] batch_lines = make([]string, batch_size)
     int count = 0
     bool eof = false
     for count < batch_size and !eof {
@@ -335,7 +335,7 @@ func get_progress(streaming_reader_state reader) reader_progress {
 func get_file_size(string path) int64:
     return 0
 func read_file_header(string path, int num_bytes) []byte:
-    return []byte{cap: 0}
+    return make([]byte, 0)
 
 func detect_encoding([]byte header, string default_enc) (string, bool):
     return default_enc, false
@@ -352,12 +352,12 @@ func extract_line_from_chunk(data_chunk chunk, int line_index) (string, bool, bo
 func get_line_byte_offset(data_chunk chunk, int line_index) int64:
     return 0
 func mmap_region(string path, int64 offset, int64 size) []byte:
-    return []byte{cap: 0}
+    return make([]byte, 0)
 
 func unmap_region([]byte mapped_data) void:
     return
 func read_file_range(string path, int64 offset, int64 size) []byte:
-    return []byte{cap: 0}
+    return make([]byte, 0)
 
 func move_to_front_of_lru(int[] lru_list, int item) void:
     return

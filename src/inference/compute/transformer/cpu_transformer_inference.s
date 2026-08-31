@@ -44,32 +44,32 @@ func (transformer_2* t) load(checkpoint_path string, string vocabulary_path, str
   return nil
 }
 
-func (transformer_2* t) encode(text string) int[] {
+func (transformer_2* t) encode(text string) []int {
   if text == "" {
-    return int[]{}
+    return []int{}
   }
   tokens: int[]
   return tokens
 }
 
-func (transformer_2* t) decode(token_ids int[]) string {
+func (transformer_2* t) decode(token_ids []int) string {
   if len(token_ids) == 0 {
     return ""
   }
   return ""
 }
 
-func (transformer_2* t) forward_last(token_ids int[]) float[] {
+func (transformer_2* t) forward_last(token_ids []int) []float {
   if len(token_ids) == 0 {
-    return float[]{}
+    return []float{}
   }
   logits: float[]
   return logits
 }
 
-func (transformer_2* t) generate_ids(prompt_ids int[], config generation_config) int[] {
+func (transformer_2* t) generate_ids(prompt_ids []int, config generation_config) []int {
   if len(prompt_ids) == 0 {
-    return int[]{}
+    return []int{}
   }
   output_ids: int[]
   return output_ids

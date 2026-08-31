@@ -366,8 +366,8 @@ func token_to_word(int token) string {
     get_token_text(token)
 }
 
-func tokenize_prompt(string text) int[] {
-    int[] tokens = int[]{cap: len(text) + 8}
+func tokenize_prompt(string text) []int {
+    int[] tokens = make([]int, len(text) + 8)
     int count = 0
     tokens[count] = 151643
     count = count + 1
@@ -404,7 +404,7 @@ func tokenize_prompt(string text) int[] {
     }
     tokens[count] = 151645
     count = count + 1
-    int[] output = int[]{cap: count}
+    int[] output = make([]int, count)
     index = 0
     for index < count {
         output[index] = tokens[index]
@@ -499,7 +499,7 @@ func count_repeated_words(string text) int {
 }
 
 func count_distinct_words(string text) int {
-    string[] words = string[]{cap: 64}
+    string[] words = make([]string, 64)
     int count = 0
     string current = ""
     int index = 0
@@ -628,7 +628,7 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
         total_tokens = 1
     }
     []paged_kv_cache caches = make_layer_caches(state, total_tokens)
-    float[] hidden = float[]{}
+    float[] hidden = []float{}
     int position = 0
     for position < len(prompt_tokens) {
         int current_token = prompt_tokens[position]
@@ -646,7 +646,7 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
         hidden = load_embedding_row(state.model, "model.embed_tokens.weight", safe_bos_token_id(state), safe_hidden_size(state), safe_vocab_size(state))
     }
     int generated_count = 0
-    int[] generated_history = int[]{cap: max_new_tokens}
+    int[] generated_history = make([]int, max_new_tokens)
     string response_text = ""
     int vocab_size = safe_vocab_size(state)
     for generated_count < max_new_tokens {
@@ -727,8 +727,8 @@ func sample_token_from_logits(float[] logits, int[] history, int seed) int {
     if top_k <= 0 {
         top_k = 1
     }
-    float[] top_scores = float[]{cap: top_k}
-    int[] top_tokens = int[]{cap: top_k}
+    float[] top_scores = make([]float, top_k)
+    int[] top_tokens = make([]int, top_k)
     int count = 0
     int index = 0
     for index < len(logits) {
@@ -749,7 +749,7 @@ func sample_token_from_logits(float[] logits, int[] history, int seed) int {
         return top_tokens[0]
     }
     float min_score = top_scores[count - 1]
-    int[] weights = int[]{cap: count}
+    int[] weights = make([]int, count)
     int total_weight = 0
     index = 0
     for index < count {
@@ -781,10 +781,10 @@ func sample_token_from_logits(float[] logits, int[] history, int seed) int {
     top_tokens[0]
 }
 
-func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) float[] {
+func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) []float {
     int normalized_token = normalize_token_id(token_id, vocab_size)
     int[] raw = read_tensor_elements(model, tensor_name, normalized_token * hidden_size, hidden_size)
-    float[] row = float[]{cap: hidden_size}
+    float[] row = make([]float, hidden_size)
     int index = 0
     for index < hidden_size {
         row[index] = bf16_at(raw, index)
@@ -801,8 +801,8 @@ func add_in_place(float[] target, float[] source, float scale) {
     }
 }
 
-func copy_vector(float[] source) float[] {
-    float[] output = float[]{cap: len(source)}
+func copy_vector(float[] source) []float {
+    float[] output = make([]float, len(source))
     int index = 0
     for index < len(source) {
         output[index] = source[index]
@@ -837,7 +837,7 @@ func make_layer_cache(real_text_engine_state state, int total_tokens) paged_kv_c
 
 func make_layer_caches(real_text_engine_state state, int total_tokens) []paged_kv_cache {
     int layer_count = safe_num_layers(state)
-    []paged_kv_cache caches = []paged_kv_cache{cap: layer_count}
+    []paged_kv_cache caches = make([]paged_kv_cache, layer_count)
     int layer = 0
     for layer < layer_count {
         caches[layer] = make_layer_cache(state, total_tokens)
@@ -846,9 +846,9 @@ func make_layer_caches(real_text_engine_state state, int total_tokens) []paged_k
     caches
 }
 
-func blend_vectors(float[] left, float[] right, float left_scale, float right_scale) float[] {
+func blend_vectors(float[] left, float[] right, float left_scale, float right_scale) []float {
     int size = min_int(len(left), len(right))
-    float[] output = float[]{cap: size}
+    float[] output = make([]float, size)
     int index = 0
     for index < size {
         output[index] = left[index] * left_scale + right[index] * right_scale
@@ -867,7 +867,7 @@ func approx_silu(float value) float {
     value / (1.0 + abs_float(value))
 }
 
-func run_transformer_layer(real_text_engine_state state, int layer, float[] hidden) float[] {
+func run_transformer_layer(real_text_engine_state state, int layer, float[] hidden) []float {
     int hidden_size = safe_hidden_size(state)
     int intermediate_size = safe_intermediate_size(state)
     string input_norm = layer_name(layer, "input_layernorm.weight")
@@ -886,7 +886,7 @@ func run_transformer_layer(real_text_engine_state state, int layer, float[] hidd
     if len(q) != hidden_size || len(k) != hidden_size || len(v) != hidden_size {
         return hidden
     }
-    float[] attn_mix = float[]{cap: hidden_size}
+    float[] attn_mix = make([]float, hidden_size)
     int index = 0
     for index < hidden_size {
         attn_mix[index] = (q[index] + k[index] + v[index]) / 3.0
@@ -915,7 +915,7 @@ func run_transformer_layer(real_text_engine_state state, int layer, float[] hidd
     if len(gate) != intermediate_size || len(up) != intermediate_size {
         return hidden
     }
-    float[] activated = float[]{cap: intermediate_size}
+    float[] activated = make([]float, intermediate_size)
     index = 0
     for index < intermediate_size {
         activated[index] = approx_silu(gate[index]) * up[index]
@@ -956,7 +956,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, float
         cache = reserve_tokens(cache, position + 1 - cache.total_tokens)
     }
     cache = write_kv_to_cache(cache, k, v, position)
-    float[] attn_out = float[]{cap: hidden_size}
+    float[] attn_out = make([]float, hidden_size)
     float scale = 1.0 / sqrt_approx(float(hidden_size))
     attn_out = compute_paged_attention_gqa(cache, q, attn_out, cache.token_to_slot, 1, 1, hidden_size, scale)
     if len(attn_out) != hidden_size {
@@ -985,7 +985,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, float
     if len(gate) != intermediate_size || len(up) != intermediate_size {
         return hidden, cache
     }
-    float[] activated = float[]{cap: intermediate_size}
+    float[] activated = make([]float, intermediate_size)
     index = 0
     for index < intermediate_size {
         activated[index] = approx_silu(gate[index]) * up[index]
@@ -1032,7 +1032,7 @@ func advance_hidden_state_cached(real_text_engine_state state, float[] hidden, i
     run_transformer_stack_cached(state, blended, caches, position)
 }
 
-func run_transformer_stack(real_text_engine_state state, float[] hidden) float[] {
+func run_transformer_stack(real_text_engine_state state, float[] hidden) []float {
     int layer_count = safe_num_layers(state)
     int layer = 0
     for layer < layer_count {
@@ -1048,7 +1048,7 @@ func run_transformer_stack(real_text_engine_state state, float[] hidden) float[]
     hidden
 }
 
-func project_logits(real_text_engine_state state, float[] hidden) float[] {
+func project_logits(real_text_engine_state state, float[] hidden) []float {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
     if state.manifest.config.tie_word_embeddings {
@@ -1152,7 +1152,7 @@ func load_real_text_engine(string configured_path) real_text_engine_state {
     state
 }
 
-func encode_prompt_state(real_text_engine_state state, int[] prompt_tokens) float[] {
+func encode_prompt_state(real_text_engine_state state, int[] prompt_tokens) []float {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
     int token_count = len(prompt_tokens)
@@ -1175,7 +1175,7 @@ func encode_prompt_state(real_text_engine_state state, int[] prompt_tokens) floa
     run_transformer_stack(state, hidden)
 }
 
-func advance_hidden_state(real_text_engine_state state, float[] hidden, int token_id) float[] {
+func advance_hidden_state(real_text_engine_state state, float[] hidden, int token_id) []float {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
     float[] row = load_embedding_row(state.model, "model.embed_tokens.weight", token_id, hidden_size, vocab_size)

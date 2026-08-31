@@ -43,7 +43,7 @@ struct training_performance_state {
 
 func new_performance_monitor() training_performance_state {
     training_performance_state {
-        metrics: []performance_metric{cap: 10000},
+        metrics: make([]performance_metric, 10000),
         gpu_memory: gpu_memory_stats{
             allocated_gb: 0.0,
             reserved_gb: 0.0,
@@ -159,8 +159,8 @@ func perf_generate_report(training_performance_state state) string {
     report
 }
 
-func perf_get_metric_history(training_performance_state state, string metric_name) float[] {
-    float[] history = float[]{cap: len(state.metrics)}
+func perf_get_metric_history(training_performance_state state, string metric_name) []float {
+    float[] history = make([]float, len(state.metrics))
     for i in range(len(state.metrics)) {
         performance_metric m = state.metrics[i]
         if m.metric_name == metric_name {

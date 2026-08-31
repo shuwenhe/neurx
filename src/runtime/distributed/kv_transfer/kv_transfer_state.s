@@ -41,8 +41,8 @@ struct kv_transfer_begin_result {
     string error_message
 }
 
-func copy_kv_block_ids(int[] block_ids) int[] {
-    int[] copied = int[]{cap: len(block_ids)}
+func copy_kv_block_ids(int[] block_ids) []int {
+    int[] copied = make([]int, len(block_ids))
     int i = 0
     for i < len(block_ids) {
         copied[i] = block_ids[i]

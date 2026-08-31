@@ -22,8 +22,8 @@ func get_cache_utilization(int allocated, int total) float {
     return float(allocated) / float(total)
 }
 
-func allocate_block_ids(int num_blocks) int[] {
-    int[] ids = int[]{}
+func allocate_block_ids(int num_blocks) []int {
+    int[] ids = []int{}
     int i = 0
     for i < num_blocks {
         ids = append(ids, i)
@@ -40,32 +40,32 @@ func copy_block_ids(int[] src_blocks, int[] dst_blocks) int {
     return min_len
 }
 
-func new_stats(int total_blocks) int[] {
+func new_stats(int total_blocks) []int {
     int[] stats = int[]{total_blocks, 0, 0, 0, 0, 0}
     return stats
 }
 
-func update_allocated(int[] stats, int blocks) int[] {
+func update_allocated(int[] stats, int blocks) []int {
     stats[1] = stats[1] + blocks
     return stats
 }
 
-func update_freed(int[] stats, int blocks) int[] {
+func update_freed(int[] stats, int blocks) []int {
     stats[2] = stats[2] + blocks
     return stats
 }
 
-func record_eviction(int[] stats, int count) int[] {
+func record_eviction(int[] stats, int count) []int {
     stats[3] = stats[3] + count
     return stats
 }
 
-func record_hit(int[] stats) int[] {
+func record_hit(int[] stats) []int {
     stats[4] = stats[4] + 1
     return stats
 }
 
-func record_miss(int[] stats) int[] {
+func record_miss(int[] stats) []int {
     stats[5] = stats[5] + 1
     return stats
 }
@@ -100,7 +100,7 @@ func format_stats(int[] stats) string {
     return result
 }
 
-func reset_counters(int[] stats) int[] {
+func reset_counters(int[] stats) []int {
     stats[3] = 0
     stats[4] = 0
     stats[5] = 0

@@ -234,7 +234,7 @@ func compute_multi_head_attention_optimized(
     float[] queries,
     paged_kv_cache kv_cache,
     attention_config config
-) float[] {
+) []float {
     int chunk_size = 4
     float[] output = make(float[], len(queries))
     int chunk_start = 0

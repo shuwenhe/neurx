@@ -46,7 +46,7 @@ func (w v1_async_engine_wrapper*) get_async_result(request_id string) (stream_ou
 	return w.async_engine.get_generation_output(request_id)
 }
 
-func (w v1_async_engine_wrapper*) stream_async_output(request_id string) stream_event[] {
+func (w v1_async_engine_wrapper*) stream_async_output(request_id string) []stream_event {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.async_engine.get_stream_events(request_id)
@@ -174,7 +174,7 @@ func create_stream_handler(
 	}
 }
 
-func (h async_stream_handler*) poll_events() stream_event[] {
+func (h async_stream_handler*) poll_events() []stream_event {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	events := h.engine.stream_async_output(h.request_id)
@@ -182,7 +182,7 @@ func (h async_stream_handler*) poll_events() stream_event[] {
 	return events
 }
 
-func (h async_stream_handler*) drain_events() stream_event[] {
+func (h async_stream_handler*) drain_events() []stream_event {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	events := make(stream_event[], 0, len(h.event_buffer))
@@ -230,7 +230,7 @@ func create_batch_processor(engine v1_async_engine_wrapper*) async_batch_process
 	}
 }
 
-func (bp async_batch_processor*) submit_batch(request_ids string[], params interface{}, priority int32) (int32, error) {
+func (bp async_batch_processor*) submit_batch(request_ids []string, params interface{}, priority int32) (int32, error) {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 	submitted := int32(0)
@@ -244,7 +244,7 @@ func (bp async_batch_processor*) submit_batch(request_ids string[], params inter
 	return submitted, nil
 }
 
-func (bp async_batch_processor*) get_batch_results() stream_output[] {
+func (bp async_batch_processor*) get_batch_results() []stream_output {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 	results := make(stream_output[], 0, len(bp.request_ids))

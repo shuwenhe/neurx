@@ -29,16 +29,16 @@ struct layer_weights {
     int intermediate_size
 }
 
-func load_safetensors_metadata(string path) string[] {
+func load_safetensors_metadata(string path) []string {
     if !runtime_file_exists(path) {
         println("Error: safetensors file not found: " + path)
-        return string[]{}
+        return []string{}
     }
-    string[] metadata = string[]{}
+    string[] metadata = []string{}
     return metadata
 }
 
-func load_embedding_from_safetensors(string model_path, int vocab_size, int hidden_size) float[] {
+func load_embedding_from_safetensors(string model_path, int vocab_size, int hidden_size) []float {
     float[] embedding = fill_model_tensor(vocab_size * hidden_size, 0.0)
     string embedding_file = model_path + "/embedding.safetensors"
     if runtime_file_exists(embedding_file) {
@@ -94,8 +94,8 @@ func load_model_from_safetensors(string model_path, int num_layers, int hidden_s
     return weights
 }
 
-func fill_model_tensor(int size, float init_val) float[] {
-    float[] tensor = float[]{cap: size}
+func fill_model_tensor(int size, float init_val) []float {
+    float[] tensor = make([]float, size)
     int i = 0
     for i < size {
         tensor = append(tensor, init_val)
@@ -112,8 +112,8 @@ func bytes_to_f32([]byte data, int offset) float {
     return result
 }
 
-func serialize_layer_weights(layer_weights w) float[] {
-    float[] serialized = float[]{}
+func serialize_layer_weights(layer_weights w) []float {
+    float[] serialized = []float{}
     int i = 0
     for i < len(w.q_weight) {
         serialized = append(serialized, w.q_weight[i])

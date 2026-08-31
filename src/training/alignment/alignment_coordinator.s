@@ -48,7 +48,7 @@ func new_alignment_config(string base_model_path) alignment_config {
 }
 
 func new_alignment_trainer(alignment_config cfg) alignment_trainer {
-    []alignment_stage stages = []alignment_stage{cap: 3}
+    []alignment_stage stages = make([]alignment_stage, 3)
     stages[0] = alignment_stage {
         stage_name: "sft",
         steps_total: 0,
@@ -64,9 +64,9 @@ func new_alignment_trainer(alignment_config cfg) alignment_trainer {
     alignment_trainer {
         config: cfg,
         stages: stages,
-        checkpoints: []alignment_checkpoint{cap: 100},
+        checkpoints: make([]alignment_checkpoint, 100),
         current_stage_index: 0,
-        cumulative_metrics: [string:float{cap: 10},
+        cumulative_metrics: [string:float{},
     }
 }
 
@@ -89,7 +89,7 @@ func run_rlhf_stage(alignment_trainer trainer, string[] preference_data) alignme
 }
 
 func evaluate_alignment(string model_path, string[] test_prompts) [float string {
-    [string:float metrics = [string:float{cap: 10}
+    [string:float metrics = [string:float{}
     metrics["instruction_following"] = 0.0
     metrics["coherence"] = 0.0
     metrics["accuracy"] = 0.0
@@ -99,7 +99,7 @@ func evaluate_alignment(string model_path, string[] test_prompts) [float string 
 }
 
 func run_safety_evaluation(string model_path) [bool string {
-    [string:bool results = [string:bool{cap: 10}
+    [string:bool results = [string:bool{}
     results["jailbreak_resistant"] = true
     results["no_harmful_outputs"] = true
     results["low_bias"] = true
@@ -127,10 +127,10 @@ func save_alignment_checkpoint(alignment_trainer trainer, string checkpoint_dir)
 func resume_from_checkpoint(string checkpoint_path) alignment_trainer {
     alignment_trainer {
         config: new_alignment_config(""),
-        stages: []alignment_stage{cap: 3},
-        checkpoints: []alignment_checkpoint{cap: 100},
+        stages: make([]alignment_stage, 3),
+        checkpoints: make([]alignment_checkpoint, 100),
         current_stage_index: 0,
-        cumulative_metrics: [string:float{cap: 10},
+        cumulative_metrics: [string:float{},
     }
 }
 
@@ -139,7 +139,7 @@ func create_model_version(alignment_trainer trainer, string version_tag) string 
 }
 
 func compare_model_versions(string[] version_ids) [float string {
-    [string:float comparison = [string:float{cap: 10}
+    [string:float comparison = [string:float{}
     comparison
 }
 

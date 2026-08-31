@@ -198,7 +198,7 @@ func (reasoning_state_manager* m) add_error(error_msg string) {
 	}
 }
 
-func (reasoning_state_manager* m) get_errors() string[] {
+func (reasoning_state_manager* m) get_errors() []string {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	errors := make(string[], 0, len(m.error_messages))
@@ -214,7 +214,7 @@ func (reasoning_state_manager* m) clear_errors() {
 	m.error_messages = make(string[], 0, 50)
 }
 
-func (reasoning_state_manager* m) get_history() reasoning_history_entry[] {
+func (reasoning_state_manager* m) get_history() []reasoning_history_entry {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	history := make(reasoning_history_entry[], 0, len(m.history))
@@ -224,7 +224,7 @@ func (reasoning_state_manager* m) get_history() reasoning_history_entry[] {
 	return history
 }
 
-func (reasoning_state_manager* m) get_history_by_type(action_type string) reasoning_history_entry[] {
+func (reasoning_state_manager* m) get_history_by_type(action_type string) []reasoning_history_entry {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	filtered := make(reasoning_history_entry[], 0, len(m.history)/5)
@@ -253,7 +253,7 @@ func (reasoning_state_manager* m) get_state_summary() map[string]interface{} {
 	return summary
 }
 
-func (reasoning_state_manager* m) get_transition_history() state_transition[] {
+func (reasoning_state_manager* m) get_transition_history() []state_transition {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	transitions := make(state_transition[], 0, len(m.transitions))

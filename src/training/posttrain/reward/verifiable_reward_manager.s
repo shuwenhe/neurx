@@ -44,12 +44,12 @@ struct verifiable_reward_manager_state {
 
 func new_verifiable_reward_manager() verifiable_reward_manager_state {
     verifiable_reward_manager_state {
-        reward_functions: []reward_function_config{cap: 50},
-        history: []reward_sample{cap: 100000},
+        reward_functions: make([]reward_function_config, 50),
+        history: make([]reward_sample, 100000),
         sample_count: 0,
         avg_reward: 0.0,
         reward_variance: 0.0,
-        map function_call_count string = int{cap: 50},
+        map function_call_count string = int{},
         enable_verification: true,
     }
 }
@@ -274,7 +274,7 @@ func float_to_str_func(float f) string {
     ""
 }
 
-func map_keys_func(map string = int m) string[] {
-    string[] keys = string[]{cap: 100}
+func map_keys_func(map string = int m) []string {
+    string[] keys = make([]string, 100)
     keys
 }

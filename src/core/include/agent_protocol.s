@@ -136,7 +136,7 @@ func new_agent_protocol_message(agent_message_header header, string role) agent_
     agent_protocol_message {
         header:        header,
         role:          role,
-        content:       []agent_content_block{cap: 8},
+        content:       make([]agent_content_block, 8),
         content_count: 0,
         stop_reason:   "",
         model:         "",
@@ -147,7 +147,7 @@ func new_agent_protocol_message(agent_message_header header, string role) agent_
 
 func agent_protocol_message_add_block(agent_protocol_message msg, agent_content_block block) agent_protocol_message {
     int n = msg.content_count
-    []agent_content_block next = []agent_content_block{cap: n + 1}
+    []agent_content_block next = make([]agent_content_block, n + 1)
     int i = 0
     for i < n {
         next[i] = msg.content[i]

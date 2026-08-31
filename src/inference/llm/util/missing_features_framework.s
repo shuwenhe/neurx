@@ -25,8 +25,8 @@ func allocate_gpu_memory(int gpu_id, int size_mb) gpu_tensor {
 func free_gpu_memory(gpu_tensor tensor) {
 }
 
-func gpu_to_host(gpu_tensor tensor) float[] {
-    return float[]{}
+func gpu_to_host(gpu_tensor tensor) []float {
+    return []float{}
 }
 
 func host_to_gpu(gpu_tensor tensor, float[] host_data) gpu_tensor {
@@ -166,7 +166,7 @@ func allgather_output(
     float[] local_output,
     int rank,
     int world_size
-) float[] {
+) []float {
     global_output = make(float[], len(local_output) * world_size)
     return global_output
 }
@@ -175,7 +175,7 @@ func reduce_scatter(
     float[] global_gradient,
     int rank,
     int world_size
-) float[] {
+) []float {
     local_gradient = make(float[], len(global_gradient) / world_size)
     return local_gradient
 }
@@ -214,7 +214,7 @@ func quantize_kv_cache(
 
 func dequantize_for_attention(
     quantized_tensor q_tensor
-) float[] {
+) []float {
     scale = q_tensor.scales[0]
     min_val = q_tensor.scales[1]
     output = make(float[], len(q_tensor.data))
@@ -256,8 +256,8 @@ func vision_transformer_encode(
 func fuse_text_and_vision(
     float[] text_embedding,
     vision_features vis_feat
-) float[] {
-    fused = float[]{}
+) []float {
+    fused = []float{}
     fused = append(fused, text_embedding[0:])
     fused = append(fused, vis_feat.embedding)
     return fused
@@ -272,7 +272,7 @@ struct constrained_generation_state {
     bool is_complete
 }
 
-func build_json_vocabulary(json_schema schema) string[] {
+func build_json_vocabulary(json_schema schema) []string {
     vocab = string[]{
         "{", "}",
         "[", "]",
@@ -364,7 +364,7 @@ func apply_lora_to_linear(
     float[] weight,
     lora_adapter adapter,
     float[] input
-) float[] {
+) []float {
     standard_output = matmul(input, transpose(weight))
     lora_input = matmul(input, transpose(adapter.lora_a))
     lora_output = matmul(lora_input, transpose(adapter.lora_b))

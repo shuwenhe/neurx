@@ -76,7 +76,7 @@ struct nucleus_processor {
     float top_p
 }
 
-func softmax(*float[] logits) float[] {
+func softmax(*float[] logits) []float {
     max_logit := logits[0]
     i := 1
     for i < len(logits) {

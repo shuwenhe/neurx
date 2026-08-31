@@ -47,7 +47,7 @@ func new_inference_observability() inference_observability_state {
     state.latency_le_500_ms = 0
     state.latency_over_500_ms = 0
     state.latency_sum_ms = 0
-    state.spans = []inference_trace_span{cap: 4096}
+    state.spans = make([]inference_trace_span, 4096)
     state
 }
 

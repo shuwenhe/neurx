@@ -156,7 +156,7 @@ func compute_topological_order(computation_graph g) computation_graph {
     if n == 0 {
         return g
     }
-    int[] in_degree = int[]{cap: n}
+    int[] in_degree = make([]int, n)
     for i in 0..n {
         in_degree[i] = len(g.nodes[i].parent_ids)
     }
@@ -257,8 +257,8 @@ func accumulate_to_node_output(node *n, tensor grad) {
     }
 }
 
-func copy_tensor(float[] data) float[] {
-    float[] out = float[]{cap: len(data)}
+func copy_tensor(float[] data) []float {
+    float[] out = make([]float, len(data))
     for i in 0..len(data) {
         out[i] = data[i]
     }

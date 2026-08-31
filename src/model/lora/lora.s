@@ -36,8 +36,8 @@ func qlora_config_7b() lora_config {
     }
 }
 
-func nf4_codebook() float[] {
-    float[] nf4_values = float[]{cap: 16}
+func nf4_codebook() []float {
+    float[] nf4_values = make([]float, 16)
     nf4_values[0] = -1.0
     nf4_values[1] = -0.6961928009986877
     nf4_values[2] = -0.5250730514526367
@@ -75,7 +75,7 @@ func quantize_nf4(float[] w, int n) nf4_tensor {
         i = i + 1
     }
     if amax < 1e-10 { amax = 1.0 }
-    int[] codes = int[]{}
+    int[] codes = []int{}
     int j = 0
     for j < n {
         float wn = w[j] / amax
@@ -102,8 +102,8 @@ func quantize_nf4(float[] w, int n) nf4_tensor {
     }
 }
 
-func dequantize_nf4(nf4_tensor t) float[] {
-    float[] out = float[]{}
+func dequantize_nf4(nf4_tensor t) []float {
+    float[] out = []float{}
     int i = 0
     for i < t.num_elem {
         float val = t.codebook[t.codes[i]] * t.absmax
@@ -113,8 +113,8 @@ func dequantize_nf4(nf4_tensor t) float[] {
     out
 }
 
-func matmul_lora(float[] a, float[] b, int M, int K, int N, bool transpose_b) float[] {
-    float[] c = float[]{cap: M * N}
+func matmul_lora(float[] a, float[] b, int M, int K, int N, bool transpose_b) []float {
+    float[] c = make([]float, M * N)
     int i = 0
     for i < M {
         int j = 0
@@ -180,44 +180,44 @@ func new_lora_linear(int in_dim, int out_dim, float[] base_weight, lora_config c
     if cfg.use_qlora {
         nf4_tensor q = quantize_nf4(base_weight, in_dim * out_dim)
         lora_linear {
-            base_weight: float[]{},
+            base_weight: []float{},
             base_nf4: q,
             quantized: true,
-            lora_a: float[]{cap: cfg.rank * in_dim},
-            lora_b: float[]{cap: out_dim * cfg.rank},
-            lora_a_grad: float[]{cap: cfg.rank * in_dim},
-            lora_b_grad: float[]{cap: out_dim * cfg.rank},
+            lora_a: make([]float, cfg.rank * in_dim),
+            lora_b: make([]float, out_dim * cfg.rank),
+            lora_a_grad: make([]float, cfg.rank * in_dim),
+            lora_b_grad: make([]float, out_dim * cfg.rank),
             in_dim: in_dim,
             out_dim: out_dim,
             rank: cfg.rank,
             scaling: cfg.alpha,
             dropout_rate: cfg.dropout,
-            last_input: float[]{},
-            last_ax: float[]{},
+            last_input: []float{},
+            last_ax: []float{},
         }
     } else {
         lora_linear {
             base_weight: base_weight,
-            base_nf4: nf4_tensor{ codes: int[]{}, absmax: 0.0, num_elem: 0, codebook: float[]{} },
+            base_nf4: nf4_tensor{ codes: []int{}, absmax: 0.0, num_elem: 0, codebook: []float{} },
             quantized: false,
-            lora_a: float[]{cap: cfg.rank * in_dim},
-            lora_b: float[]{cap: out_dim * cfg.rank},
-            lora_a_grad: float[]{cap: cfg.rank * in_dim},
-            lora_b_grad: float[]{cap: out_dim * cfg.rank},
+            lora_a: make([]float, cfg.rank * in_dim),
+            lora_b: make([]float, out_dim * cfg.rank),
+            lora_a_grad: make([]float, cfg.rank * in_dim),
+            lora_b_grad: make([]float, out_dim * cfg.rank),
             in_dim: in_dim,
             out_dim: out_dim,
             rank: cfg.rank,
             scaling: cfg.alpha,
             dropout_rate: cfg.dropout,
-            last_input: float[]{},
-            last_ax: float[]{},
+            last_input: []float{},
+            last_ax: []float{},
         }
     }
 }
 
 func lora_forward(lora_linear layer, float[] x, int batch) lora_linear {
-    float[] y = float[]{}
-    float[] ax = float[]{}
+    float[] y = []float{}
+    float[] ax = []float{}
     int in_dim = layer.in_dim
     int b = 0
     for b < batch {
@@ -264,8 +264,8 @@ struct lora_forward_result {
 }
 
 func lora_forward_with_output(lora_linear layer, float[] x, int batch) lora_forward_result {
-    float[] y = float[]{}
-    float[] ax = float[]{}
+    float[] y = []float{}
+    float[] ax = []float{}
     int in_dim = layer.in_dim
     int b = 0
     for b < batch {
@@ -312,11 +312,11 @@ struct lora_backward_result {
 }
 
 func lora_backward(lora_linear layer, float[] dy, int batch) lora_backward_result {
-    float[] x  = float[]{}
-    float[] ax = float[]{}
-    float[] d_b = float[]{}
-    float[] d_a = float[]{}
-    float[] dx = float[]{}
+    float[] x  = []float{}
+    float[] ax = []float{}
+    float[] d_b = []float{}
+    float[] d_a = []float{}
+    float[] dx = []float{}
     int in_dim = layer.in_dim
     x = layer.last_input
     ax = layer.last_Ax
@@ -399,10 +399,10 @@ struct lora_adamw_state {
 
 func new_lora_adamw(int rank, int in_dim, int out_dim, float lr) lora_adamw_state {
     lora_adamw_state {
-        m_a: float[]{cap: rank * in_dim},
-        v_a: float[]{cap: rank * in_dim},
-        m_b: float[]{cap: out_dim * rank},
-        v_b: float[]{cap: out_dim * rank},
+        m_a: make([]float, rank * in_dim),
+        v_a: make([]float, rank * in_dim),
+        m_b: make([]float, out_dim * rank),
+        v_b: make([]float, out_dim * rank),
         lr: lr,
         beta1: 0.9,
         beta2: 0.999,
@@ -445,7 +445,7 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result 
 }
 
 func lora_merge_weights(lora_linear layer) lora_linear {
-    float[] merged = float[]{}
+    float[] merged = []float{}
     int in_dim = layer.in_dim
     int fill_m = 0
     for fill_m < layer.out_dim * in_dim {
@@ -470,8 +470,8 @@ func lora_merge_weights(lora_linear layer) lora_linear {
     lora_linear result = layer
     result.base_weight = merged
     result.quantized = false
-    result.lora_A = float[]{}
-    result.lora_B = float[]{}
+    result.lora_A = []float{}
+    result.lora_B = []float{}
     result
 }
 

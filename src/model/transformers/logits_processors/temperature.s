@@ -22,7 +22,7 @@ func create_temperature_processor(float temperature) temperature_processor {
 func apply_temperature(
     logits: float[],
     temperature_processor processor
-) float[] {
+) []float {
     float[] scaled_logits
     for logit in logits {
         scaled := logit / processor.temperature
@@ -34,7 +34,7 @@ func apply_temperature(
 func apply_temperature_minmax(
     logits: float[],
     float temperature
-) float[] {
+) []float {
     float min_logit = logits[0]
     float max_logit = logits[0]
     for i = 1; i < len(logits); i = i + 1 {
@@ -145,7 +145,7 @@ func apply_temperature_top_k(
     logits: float[],
     temperature: float,
     int k
-) float[] {
+) []float {
     int vocab_size = len(logits)
     float[] scaled_logits
     for logit in logits {

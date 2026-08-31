@@ -88,8 +88,8 @@ func moe_1t_trim(string s) string {
     out
 }
 
-func moe_1t_split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func moe_1t_split_lines(string text) []string {
+    string[] lines = []string{}
     string current = ""
     bool ends_with_newline = false
     int i = 0
@@ -123,31 +123,31 @@ func moe_1t_positive_mod(int value, int modulus) int {
     result
 }
 
-func moe_1t_manifest_refs(string manifest_path) string[] {
+func moe_1t_manifest_refs(string manifest_path) []string {
     if moe_1t_trim(manifest_path) == "" {
-        string[] refs = string[]{cap: 1}
+        string[] refs = make([]string, 1)
         refs[0] = "dataset/pretrain/manifest.json"
         return refs
     }
     if !runtime_file_exists(manifest_path) {
-        string[] refs = string[]{cap: 1}
+        string[] refs = make([]string, 1)
         refs[0] = manifest_path
         return refs
     }
     string[] refs = gpt_large_pretrain_manifest_refs(manifest_path)
     if len(refs) == 0 {
-        string[] fallback = string[]{cap: 1}
+        string[] fallback = make([]string, 1)
         fallback[0] = manifest_path
         return fallback
     }
     refs
 }
 
-func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) int[] {
+func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) []int {
     if batch_size_tokens <= 0 {
-        return int[]{cap: 0}
+        return []int{}
     }
-    int[] tokens = int[]{cap: batch_size_tokens}
+    int[] tokens = make([]int, batch_size_tokens)
     int token_count = 0
     int rolling = seed + 17
     int i = 0
@@ -178,9 +178,9 @@ func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) int[] {
     tokens
 }
 
-func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) int[] {
+func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []int {
     if batch_size_tokens <= 0 {
-        return int[]{cap: 0}
+        return []int{}
     }
     string shard_text = ""
     if runtime_file_exists(shard_path) {
@@ -204,9 +204,9 @@ func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) int
     moe_1t_text_to_tokens(shard_text, batch_size_tokens, seed)
 }
 
-func moe_1t_build_labels(int[] batch_tokens, int vocab_size) int[] {
+func moe_1t_build_labels(int[] batch_tokens, int vocab_size) []int {
     int count = len(batch_tokens)
-    int[] labels = int[]{cap: count}
+    int[] labels = make([]int, count)
     if count == 0 {
         return labels
     }
@@ -231,8 +231,8 @@ func moe_1t_build_top1_routing(
     if num_experts <= 0 {
         num_experts = 1
     }
-    int[] expert_indices = int[]{cap: count}
-    float[] expert_weights = float[]{cap: count}
+    int[] expert_indices = make([]int, count)
+    float[] expert_weights = make([]float, count)
     int i = 0
     for i < count {
         expert_indices[i] = moe_1t_positive_mod(batch_tokens[i] + orch.world_rank + i, num_experts)
@@ -689,7 +689,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         int current_step = state.training_step
         int batch_tokens_per_gpu = 512
         int seq_len = 4096
-        int[] batch = int[]{cap: 0}
+        int[] batch = []int{}
         (state, batch) = moe_1t_get_next_batch(state, batch_tokens_per_gpu, seq_len)
         if len(batch) == 0 {
             if state.world_rank == 0 {

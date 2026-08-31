@@ -272,23 +272,23 @@ func cuda_allreduce_f32(
     return false, "cuda backend not available"
 }
 
-func create_alloc_kernel_ptx() int8[] {
+func create_alloc_kernel_ptx() []int8 {
     return make(int8[], 0)
 }
 
-func create_vector_add_kernel_ptx() int8[] {
+func create_vector_add_kernel_ptx() []int8 {
     return make(int8[], 0)
 }
 
-func create_rms_norm_kernel_ptx() int8[] {
+func create_rms_norm_kernel_ptx() []int8 {
     return make(int8[], 0)
 }
 
-func create_rope_kernel_ptx() int8[] {
+func create_rope_kernel_ptx() []int8 {
     return make(int8[], 0)
 }
 
-func create_attention_kernel_ptx() int8[] {
+func create_attention_kernel_ptx() []int8 {
     return make(int8[], 0)
 }
 

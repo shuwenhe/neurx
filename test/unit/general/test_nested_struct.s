@@ -16,7 +16,7 @@ func test_direct_access() {
     obj.name = "test"
     obj.data.value = 42
     obj.data.score = 3.14
-    obj.data.weights = float[]{cap: 3}
+    obj.data.weights = make([]float, 3)
     obj.data.weights[0] = 1.0
     obj.data.weights[1] = 2.0
     obj.data.weights[2] = 3.0
@@ -27,11 +27,11 @@ func test_direct_access() {
 }
 
 func test_array_element_access() {
-    []outer_data arr = []outer_data{cap: 2}
+    []outer_data arr = make([]outer_data, 2)
     arr[0].name = "first"
     arr[0].data.value = 10
     arr[0].data.score = 1.5
-    arr[0].data.weights = float[]{cap: 2}
+    arr[0].data.weights = make([]float, 2)
     arr[0].data.weights[0] = 0.5
     arr[1].name = "second"
     arr[1].data.value = 20
@@ -43,7 +43,7 @@ func test_array_element_access() {
 }
 
 func test_local_extraction() {
-    []outer_data arr = []outer_data{cap: 1}
+    []outer_data arr = make([]outer_data, 1)
     arr[0].name = "extract"
     arr[0].data.value = 99
     arr[0].data.score = 9.9
@@ -65,7 +65,7 @@ func test_function_param(outer_data param) {
 }
 
 func test_loop_iteration() {
-    []outer_data arr = []outer_data{cap: 3}
+    []outer_data arr = make([]outer_data, 3)
     int i = 0
     for i < 3 {
         arr[i].name = "item" + int_to_str(i)

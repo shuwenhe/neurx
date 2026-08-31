@@ -21,9 +21,9 @@ func shape_numel(int[] shape) int {
     return n
 }
 
-func contiguous_strides(int[] shape) int[] {
+func contiguous_strides(int[] shape) []int {
     int ndim = len(shape)
-    int[] strides = int[]{cap: ndim}
+    int[] strides = make([]int, ndim)
     int stride = 1
     int i = ndim - 1
     for i >= 0 {
@@ -34,8 +34,8 @@ func contiguous_strides(int[] shape) int[] {
     return strides
 }
 
-func zeros_float(int n) float[] {
-    float[] out = float[]{cap: n}
+func zeros_float(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -88,7 +88,7 @@ func matmul2d(tensor a, tensor b) tensor {
     int m = ashape[0]
     int k = ashape[1]
     int n = bshape[1]
-    int[] shape = int[]{cap: 2}
+    int[] shape = make([]int, 2)
     shape[0] = m
     shape[1] = n
     float[] storage = zeros_float(m * n)
@@ -131,17 +131,17 @@ func assert_close(float actual, float expected, string name) {
 
 func main() {
     println("NeurX tensor core runtime smoke")
-    float[] adata = float[]{cap: 4}
+    float[] adata = make([]float, 4)
     adata[0] = 1.0
     adata[1] = 2.0
     adata[2] = 3.0
     adata[3] = 4.0
-    float[] bdata = float[]{cap: 4}
+    float[] bdata = make([]float, 4)
     bdata[0] = 5.0
     bdata[1] = 6.0
     bdata[2] = 7.0
     bdata[3] = 8.0
-    int[] shape = int[]{cap: 2}
+    int[] shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 2
     tensor a = from_data(adata, shape)

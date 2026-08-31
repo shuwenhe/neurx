@@ -129,7 +129,7 @@ func (HFTokenizer* h) Decode(i32[] token_ids) string {
     return result.text
 }
 
-func (HFTokenizer* h) basic_tokenize(string text) string[] {
+func (HFTokenizer* h) basic_tokenize(string text) []string {
     tokens := make(string[], 0)
     current := ""
     for i := 0; i < len(text); i += 1 {
@@ -155,7 +155,7 @@ func (HFTokenizer* h) basic_tokenize(string text) string[] {
     return tokens
 }
 
-func (HFTokenizer* h) wordpiece_tokenize(string[] tokens) string[] {
+func (HFTokenizer* h) wordpiece_tokenize(string[] tokens) []string {
     output := make(string[], 0)
     for i := 0; i < len(tokens); i += 1 {
         token := tokens[i]
@@ -171,7 +171,7 @@ func (HFTokenizer* h) wordpiece_tokenize(string[] tokens) string[] {
     return output
 }
 
-func (HFTokenizer* h) split_subwords(string word) string[] {
+func (HFTokenizer* h) split_subwords(string word) []string {
     subwords := make(string[], 0)
     start := 0
     for start < len(word) {
@@ -199,7 +199,7 @@ func (HFTokenizer* h) split_subwords(string word) string[] {
     return subwords
 }
 
-func (HFTokenizer* h) add_special_tokens_hf(i32[] tokens) i32[] {
+func (HFTokenizer* h) add_special_tokens_hf(i32[] tokens) []i32 {
     result := make(i32[], 0)
     result = append(result, h.base.GetSpecialToken("cls"))
     result = append_slice_i32(result, tokens)
@@ -207,7 +207,7 @@ func (HFTokenizer* h) add_special_tokens_hf(i32[] tokens) i32[] {
     return result
 }
 
-func (HFTokenizer* h) truncate_tokens(i32[] tokens, i32 max_length, string side) i32[] {
+func (HFTokenizer* h) truncate_tokens(i32[] tokens, i32 max_length, string side) []i32 {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
@@ -231,7 +231,7 @@ func (HFTokenizer* h) remove_accents(string text) string {
     return text
 }
 
-func (HFTokenizer* h) tokenize_internal(string text) i32[] {
+func (HFTokenizer* h) tokenize_internal(string text) []i32 {
     basic_tokens := h.basic_tokenize(text)
     wordpiece_tokens := h.wordpiece_tokenize(basic_tokens)
     result := make(i32[], len(wordpiece_tokens))
@@ -303,7 +303,7 @@ func contains_string(string s, string substring) bool {
     return false
 }
 
-func append_slice_i32(i32[] a, i32[] b) i32[] {
+func append_slice_i32(i32[] a, i32[] b) []i32 {
     for i := 0; i < len(b); i += 1 {
         a = append(a, b[i])
     }

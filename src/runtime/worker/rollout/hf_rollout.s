@@ -96,7 +96,7 @@ func hf_compute_log_probs(
     hf_rollout_state state,
     int[] input_ids,
     int[] target_ids
-) float[] {
+) []float {
     float[] log_probs = make(float[], len(target_ids))
     for int i = 0; i < len(target_ids); i = i + 1 {
         log_probs[i] = -0.15

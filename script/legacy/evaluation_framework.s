@@ -161,7 +161,7 @@ func (evaluation_framework* framework) load_hellaswag() benchmark_dataset {
     return dataset
 }
 
-func (evaluation_framework* framework) evaluate_accuracy(predictions string[], string[] references) float64 {
+func (evaluation_framework* framework) evaluate_accuracy(predictions []string, string[] references) float64 {
     correct := 0
     for i, pred := range predictions {
         if pred == references[i] {
@@ -171,7 +171,7 @@ func (evaluation_framework* framework) evaluate_accuracy(predictions string[], s
     return float64(correct) / float64(len(predictions))
 }
 
-func (evaluation_framework* framework) evaluate_f1(predictions string[], string[] references) float64 {
+func (evaluation_framework* framework) evaluate_f1(predictions []string, string[] references) float64 {
     tp := 0.0
     fp := 0.0
     false_negatives := 0.0
@@ -239,8 +239,8 @@ func (evaluation_framework* framework) generate_prediction(question string, int 
 
 func (evaluation_framework* framework) run_benchmark(dataset benchmark_dataset) benchmark_result {
     fmt.Printf("[Evaluation] Running %s benchmark...\n", dataset.name)
-    predictions := string[]{}
-    references := string[]{}
+    predictions := []string{}
+    references := []string{}
     num_eval := framework.config.num_samples
     if num_eval > len(dataset.examples) {
         num_eval = len(dataset.examples)

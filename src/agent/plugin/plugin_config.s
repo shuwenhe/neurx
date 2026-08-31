@@ -271,7 +271,7 @@ func (config_schema* s) add_rule(rule config_validation_rule) {
 	s.rule_count++
 }
 
-func (config_schema* s) get_rules() config_validation_rule[] {
+func (config_schema* s) get_rules() []config_validation_rule {
 	return s.rules
 }
 

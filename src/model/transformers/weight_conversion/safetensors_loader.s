@@ -71,7 +71,7 @@ func map_layer_name_to_neurx(string hf_name) string {
 
 func convert_weight_names_huggingface_to_neurx(
     hf_names: string[]
-) string[] {
+) []string {
     string[] neurx_names
     for hf_name in hf_names {
         neurx_name := map_layer_name_to_neurx(hf_name)

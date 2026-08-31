@@ -30,8 +30,8 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
     if config.layers <= 0 || config.hidden <= 0 || config.intermediate <= 0 || config.query_heads <= 0 || config.kv_heads <= 0 || config.head_dim <= 0 {
         return transformer_schedule {backend: backend, operations: [], vendor_operations: [], layer_operations: 0, valid: false, error_message: "invalid_transformer_config"}
     }
-    []lowered_op operations = []lowered_op{cap: config.layers * 14 + 3}
-    string[] vendor_operations = string[]{cap: config.layers * 14 + 3}
+    []lowered_op operations = make([]lowered_op, config.layers * 14 + 3)
+    string[] vendor_operations = make([]string, config.layers * 14 + 3)
     int operation_index = 0
     operations[operation_index] = lower_device_op(backend, available, op_embedding(config.dtype, config.hidden)); operation_index = operation_index + 1
     int layer = 0

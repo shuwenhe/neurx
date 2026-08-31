@@ -206,7 +206,7 @@ func create_distributed_sampler(int dataset_size, int batch_size, int rank, int 
     }
 }
 
-func next_batch_indices(distributed_batch_sampler* sampler) int[] {
+func next_batch_indices(distributed_batch_sampler* sampler) []int {
     start_idx := (sampler.rank * sampler.dataset_size / sampler.world_size) +
                  (sampler.current_batch * sampler.batch_size)
     indices := make(int[], sampler.batch_size)

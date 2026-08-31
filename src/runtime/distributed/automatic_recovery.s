@@ -42,7 +42,7 @@ func new_automatic_recovery_manager(
     manager := automatic_recovery_manager {
         my_rank: my_rank,
         world_size: world_size,
-        checkpoints: recovery_checkpoint[]{cap: max_checkpoints},
+        checkpoints: make([]recovery_checkpoint, max_checkpoints),
         max_checkpoints_to_keep: max_checkpoints,
         checkpoint_save_interval: save_interval,
         enable_incremental_checkpoint: true,
@@ -52,7 +52,7 @@ func new_automatic_recovery_manager(
             failed_rank: -1,
             recovery_step: 0,
             last_checkpoint_id: -1,
-            ranks_to_recover: int[]{cap: world_size},
+            ranks_to_recover: make([]int, world_size),
             recovery_start_time_ms: 0.0,
             recovery_end_time_ms: 0.0,
         },
@@ -122,9 +122,9 @@ func (automatic_recovery_manager* manager) get_latest_checkpoint() recovery_chec
         return recovery_checkpoint {
             checkpoint_id: -1,
             global_step: 0,
-            model_params: float[]{},
-            optimizer_state: float[]{},
-            grad_accumulation: int[]{},
+            model_params: []float{},
+            optimizer_state: []float{},
+            grad_accumulation: []int{},
             num_ranks: 0,
             tp_size: 0,
             pp_size: 0,
@@ -154,7 +154,7 @@ func (automatic_recovery_manager* manager) initiate_recovery(
     manager.current_recovery.recovery_step = 0
     manager.current_recovery.last_checkpoint_id = latest.checkpoint_id
     manager.current_recovery.recovery_start_time_ms = 0.0
-    int[] ranks_to_keep = int[]{cap: manager.world_size}
+    int[] ranks_to_keep = make([]int, manager.world_size)
     int i = 0
     for i < manager.world_size {
         if i != failed_rank {

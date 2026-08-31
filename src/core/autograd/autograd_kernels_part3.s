@@ -12,7 +12,7 @@ func backward_layer_norm(node n, tensor grad_output) backward_result {
     float eps = get_context_safe_float(n, "eps", 1e-5)
     int normalized_shape_size = get_context_safe_int(n, "normalized_size", len(input.data))
     int[] shape = input.shape
-    float[] grad_input_data = float[]{cap: len(input.data)}
+    float[] grad_input_data = make([]float, len(input.data))
     float[] grad_gamma_data = zeros_like_array(len(gamma.data))
     float[] grad_beta_data = zeros_like_array(len(beta_param.data))
     int batch_size = 1
@@ -70,7 +70,7 @@ func backward_rms_norm(node n, tensor grad_output) backward_result {
     int[] shape = input.shape
     int feature_size = shape[len(shape)-1] if len(shape) >= 1 else norm_size
     int batch_size = len(input.data) / feature_size
-    float[] grad_input_data = float[]{cap: len(input.data)}
+    float[] grad_input_data = make([]float, len(input.data))
     float[] grad_gamma_data = zeros_like_array(len(gamma.data))
     for b in 0..batch_size {
         int offset = b * feature_size

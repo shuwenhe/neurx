@@ -582,8 +582,8 @@ func float_text(float value) string {
     neurx.strings.format("%.6f", value)
 }
 
-func split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func split_lines(string text) []string {
+    string[] lines = []string{}
     string current = ""
     int i = 0
     for i < length(text) {

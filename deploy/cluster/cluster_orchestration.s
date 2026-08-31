@@ -89,7 +89,7 @@ func new_cluster_orchestration_state(string cluster_name, string deployment_dir,
         deployment_dir: deployment_dir,
         backend: backend,
         discovery_source: "",
-        nodes: []cluster_node_spec{cap: 0},
+        nodes: make([]cluster_node_spec, 0),
         healthy_nodes: 0,
         total_gpus: 0,
         ready: false,
@@ -129,8 +129,8 @@ func cluster_trim(string s) string {
     out
 }
 
-func cluster_split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func cluster_split_lines(string text) []string {
+    string[] lines = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -225,7 +225,7 @@ func cluster_parse_float(string text, float fallback) float {
 }
 
 func cluster_parse_node_record(string line) cluster_node_spec {
-    string[] parts = string[]{cap: 8}
+    string[] parts = make([]string, 8)
     string current = ""
     int i = 0
     for i < len(line) {
@@ -273,8 +273,8 @@ func cluster_parse_node_record(string line) cluster_node_spec {
     new_cluster_node_spec(0, node_name, ip_address, gpu_count, gpu_type, cpu_cores, memory_gb, status, utilization)
 }
 
-func cluster_split_csv(string text) string[] {
-    string[] items = string[]{cap: 0}
+func cluster_split_csv(string text) []string {
+    string[] items = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -456,7 +456,7 @@ func cluster_discover_nodes_from_network() []cluster_node_spec {
     string host_list = runtime_env_get("NEURX_DISCOVERY_HOSTS", "")
     string prefix_list = runtime_env_get("NEURX_DISCOVERY_PREFIXES", runtime_env_get("NEURX_DISCOVERY_PREFIX", ""))
     int port = cluster_parse_int(runtime_env_get("NEURX_DISCOVERY_PORT", runtime_env_get("NEURX_NODE_PORT", "8888")), 8888)
-    []cluster_node_spec nodes = []cluster_node_spec{cap: 0}
+    []cluster_node_spec nodes = make([]cluster_node_spec, 0)
     if host_list != "" {
         string[] hosts = cluster_split_csv(host_list)
         int i = 0
@@ -504,11 +504,11 @@ func cluster_node_manifest_path() string {
 func cluster_discover_nodes_from_manifest() []cluster_node_spec {
     string manifest_path = cluster_node_manifest_path()
     if !runtime_file_exists(manifest_path) {
-        return []cluster_node_spec{cap: 0}
+        return make([]cluster_node_spec, 0)
     }
     string text = runtime_read_text_file(manifest_path)
     string[] lines = cluster_split_lines(text)
-    []cluster_node_spec nodes = []cluster_node_spec{cap: len(lines)}
+    []cluster_node_spec nodes = make([]cluster_node_spec, len(lines))
     int i = 0
     for i < len(lines) {
         string line = cluster_trim(lines[i])
@@ -523,7 +523,7 @@ func cluster_discover_nodes_from_manifest() []cluster_node_spec {
 }
 
 func cluster_discover_local_fallback() []cluster_node_spec {
-    []cluster_node_spec nodes = []cluster_node_spec{cap: 1}
+    []cluster_node_spec nodes = make([]cluster_node_spec, 1)
     nodes = append(nodes, new_cluster_node_spec(0, "localhost", "127.0.0.1", 1, "local", 8, 16, "healthy", 0.0))
     nodes
 }
@@ -666,8 +666,8 @@ func cluster_int_to_string(int value) string {
     out
 }
 
-func cluster_generate_env_lines(cluster_deployment_spec spec) string[] {
-    string[] lines = string[]{cap: 12}
+func cluster_generate_env_lines(cluster_deployment_spec spec) []string {
+    string[] lines = make([]string, 12)
     lines = append(lines, "export CLUSTER_NAME=" + spec.cluster_name)
     lines = append(lines, "export MASTER_ADDR=" + spec.master_addr)
     lines = append(lines, "export MASTER_PORT=" + cluster_int_to_string(spec.master_port))
@@ -695,8 +695,8 @@ func cluster_default_pretrain_tokenizer_manifest_path(cluster_deployment_spec sp
     "./data/tokenizer.manifest"
 }
 
-func cluster_generate_training_startup_lines(cluster_orchestration_state state, cluster_deployment_spec spec) string[] {
-    string[] lines = string[]{cap: 32}
+func cluster_generate_training_startup_lines(cluster_orchestration_state state, cluster_deployment_spec spec) []string {
+    string[] lines = make([]string, 32)
     string pretrain_output_dir = cluster_default_pretrain_output_dir(spec)
     string pretrain_manifest = cluster_default_pretrain_manifest_path(spec)
     string tokenizer_manifest = cluster_default_pretrain_tokenizer_manifest_path(spec)
@@ -753,7 +753,7 @@ func cluster_generate_training_startup_env(cluster_orchestration_state state, cl
 }
 
 func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
-    string[] lines = string[]{cap: 32}
+    string[] lines = make([]string, 32)
     lines = append(lines, "#!/bin/bash")
     lines = append(lines, "")
     lines = append(lines, "# NeurX cluster deployment script")
@@ -789,7 +789,7 @@ func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
 }
 
 func cluster_generate_kubernetes_yaml(cluster_deployment_spec spec) string {
-    string[] lines = string[]{cap: 40}
+    string[] lines = make([]string, 40)
     lines = append(lines, "apiVersion: app/v1")
     lines = append(lines, "kind: StatefulSet")
     lines = append(lines, "metadata:")

@@ -182,13 +182,13 @@ func init_orchestrator(
     int pp = model_cfg.dims.pp_degree
     int layers_per_stage = model_cfg.num_layers / pp
     int remaining_layers = model_cfg.num_layers % pp
-    []pipeline_stage_state stages = []pipeline_stage_state{cap: pp}
+    []pipeline_stage_state stages = make([]pipeline_stage_state, pp)
     int s = 0
     for s < pp {
         int start_layer = s * layers_per_stage + min_int(s, remaining_layers)
         int end_layer = start_layer + layers_per_stage - 1
         if s < remaining_layers { end_layer = end_layer + 1 }
-        int[] layer_ids = int[]{cap: end_layer - start_layer + 1}
+        int[] layer_ids = make([]int, end_layer - start_layer + 1)
         int l = start_layer
         for l <= end_layer {
             layer_ids = append(layer_ids, l)
@@ -231,9 +231,9 @@ func init_orchestrator(
     }
 }
 
-func append(int[] arr, int val) int[] {
+func append(int[] arr, int val) []int {
     int n = len(arr)
-    float[] new_arr = int[]{cap: n + 1}
+    float[] new_arr = make([]int, n + 1)
     int i = 0
     for i < n { new_arr[i] = arr[i]; i = i + 1 }
     new_arr[n] = val
@@ -648,32 +648,32 @@ func recv_activation_from_previous_stage(int from_stage, int mb_id) float[][] { 
 
 func send_activation_to_next_stage(int to_stage, float[][] act, int mb_id) {}
 
-func reduce_scatter_across_dp(float[] g, int group, int degree) float[] { return g }
+func reduce_scatter_across_dp(float[] g, int group, int degree) []float { return g }
 
-func all_reduce_sum_across_dp(float[] g, int group, int degree) float[] { return g }
+func all_reduce_sum_across_dp(float[] g, int group, int degree) []float { return g }
 
 func allocate_2d(int r, int c) float[][] {
-    float[][] t = float[][]{cap: r}
+    float[][] t = floatmake([][], r)
     int i = 0
-    for i < r { t[i] = float[]{cap: c}; i = i + 1 }
+    for i < r { t[i] = make([]float, c); i = i + 1 }
     return t
 }
 
 func get_num_parameters(orchestrator_state o) int { return 1000 }
 
-func get_parameter(orchestrator o, int idx) float[] { return float[]{} }
+func get_parameter(orchestrator o, int idx) []float { return []float{} }
 
-func get_parameter_grad(orchestrator o, int idx) float[] { return float[]{} }
+func get_parameter_grad(orchestrator o, int idx) []float { return []float{} }
 
-func get_parameter_grad_ref(ref orchestrator o, int idx) float[] { return float[]{} }
+func get_parameter_grad_ref(ref orchestrator o, int idx) []float { return []float{} }
 
 func set_parameter(ref orchestrator o, int idx, float[] v) {}
 
 func set_parameter_grad(ref orchestrator o, int idx, float[] v) {}
 
-func get_exp_avg(orchestrator o, int idx) float[] { return float[]{} }
+func get_exp_avg(orchestrator o, int idx) []float { return []float{} }
 
-func get_exp_avg_sq(orchestrator o, int idx) float[] { return float[]{} }
+func get_exp_avg_sq(orchestrator o, int idx) []float { return []float{} }
 
 func set_exp_avg(ref orchestrator o, int idx, float[] v) {}
 

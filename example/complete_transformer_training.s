@@ -26,8 +26,8 @@ use neurx.model.transformer.transformer_backward.{
     backward_pass_output
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -36,7 +36,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -104,7 +104,7 @@ func initialize_transformer_layer(int hidden_dim, int intermediate_dim) transfor
 
 func initialize_transformer_state(transformer_forward_config cfg) transformer_forward_state {
     int head_dim = cfg.hidden_dim / cfg.num_heads
-    []transformer_layer_state layers = []transformer_layer_state{cap: cfg.num_layers}
+    []transformer_layer_state layers = make([]transformer_layer_state, cfg.num_layers)
     int layer_idx = 0
     for layer_idx < cfg.num_layers {
         layers[layer_idx] = initialize_transformer_layer(cfg.hidden_dim, cfg.intermediate_dim)
@@ -175,7 +175,7 @@ func training_step(
     transformer_forward_state transformer,
     training_batch batch,
     float learning_rate
-) float[] {
+) []float {
     int batch_size = batch.batch_size
     int seq_len = batch.seq_len
     forward_output := transformer_forward_pass(

@@ -116,7 +116,7 @@ func new_veomni_state(veomni_config config) veomni_state {
         dp_group: new_parallel_group(0, math.allocate_int(config.data_parallel_size, 0), 0),
         mp_group: new_parallel_group(1, math.allocate_int(config.model_parallel_size, 0), 0),
         ep_group: new_parallel_group(2, math.allocate_int(config.expert_parallel_size, 0), 0),
-        stages: []pipeline_stage{cap: config.num_pipeline_stages},
+        stages: make([]pipeline_stage, config.num_pipeline_stages),
         current_stage: 0,
         current_micro_batch: 0,
         gradients: math.allocate_float(0, 0.0),
@@ -180,7 +180,7 @@ func configure_hybrid_parallelism(veomni_state state, int rank) veomni_state {
     state
 }
 
-func allreduce(parallel_group group, float[] data) float[] {
+func allreduce(parallel_group group, float[] data) []float {
     int size = len(data)
     int group_size = group.size
     float[] result = math.copy_float(data)
@@ -212,7 +212,7 @@ func allreduce(parallel_group group, float[] data) float[] {
     result
 }
 
-func allgather(parallel_group group, float[] local_data, int local_size) float[] {
+func allgather(parallel_group group, float[] local_data, int local_size) []float {
     int group_size = group.size
     int global_size = local_size * group_size
     float[] result = math.allocate_float(global_size, 0.0)
@@ -245,7 +245,7 @@ func allgather(parallel_group group, float[] local_data, int local_size) float[]
     result
 }
 
-func broadcast(parallel_group group, float[] data, int root_rank) float[] {
+func broadcast(parallel_group group, float[] data, int root_rank) []float {
     int size = len(data)
     int group_size = group.size
     float[] result = math.allocate_float(size, 0.0)
@@ -280,7 +280,7 @@ func broadcast(parallel_group group, float[] data, int root_rank) float[] {
     result
 }
 
-func reduce_scatter(parallel_group group, float[] global_data, int local_size) float[] {
+func reduce_scatter(parallel_group group, float[] global_data, int local_size) []float {
     int group_size = group.size
     int global_size = local_size * group_size
     float[] result = math.allocate_float(local_size, 0.0)
@@ -318,7 +318,7 @@ func reduce_scatter(parallel_group group, float[] global_data, int local_size) f
     result
 }
 
-func pipeline_forward(pipeline_stage stage, float[] input, int batch_size, int seq_len) float[] {
+func pipeline_forward(pipeline_stage stage, float[] input, int batch_size, int seq_len) []float {
     int hidden_dim = 8192
     int total_tokens = batch_size * seq_len
     float[] output = math.copy_float(input)
@@ -331,7 +331,7 @@ func pipeline_forward(pipeline_stage stage, float[] input, int batch_size, int s
     output
 }
 
-func pipeline_backward(pipeline_stage stage, float[] grad_output, int batch_size, int seq_len) float[] {
+func pipeline_backward(pipeline_stage stage, float[] grad_output, int batch_size, int seq_len) []float {
     int hidden_dim = 8192
     int total_tokens = batch_size * seq_len
     float[] grad_input = math.copy_float(grad_output)
@@ -343,7 +343,7 @@ func pipeline_backward(pipeline_stage stage, float[] grad_output, int batch_size
     grad_input
 }
 
-func apply_transformer_layer(float[] input, int total_tokens, int hidden_dim) float[] {
+func apply_transformer_layer(float[] input, int total_tokens, int hidden_dim) []float {
     float[] output = math.allocate_float(total_tokens * hidden_dim, 0.0)
     int i = 0
     for i < total_tokens * hidden_dim {
@@ -353,7 +353,7 @@ func apply_transformer_layer(float[] input, int total_tokens, int hidden_dim) fl
     output
 }
 
-func apply_transformer_layer_backward(float[] grad_output, int total_tokens, int hidden_dim) float[] {
+func apply_transformer_layer_backward(float[] grad_output, int total_tokens, int hidden_dim) []float {
     float[] grad_input = math.allocate_float(total_tokens * hidden_dim, 0.0)
     int i = 0
     for i < total_tokens * hidden_dim {
@@ -363,7 +363,7 @@ func apply_transformer_layer_backward(float[] grad_output, int total_tokens, int
     grad_input
 }
 
-func pipeline_send_recv(veomni_state state, float[] data, bool is_forward) float[] {
+func pipeline_send_recv(veomni_state state, float[] data, bool is_forward) []float {
     pipeline_stage current_stage = state.stages[state.current_stage]
     if is_forward {
         if !current_stage.is_last_stage {
@@ -384,11 +384,11 @@ func data_parallel_gradient_sync(veomni_state state) veomni_state {
     state
 }
 
-func model_parallel_allgather(veomni_state state, float[] local_data, int local_size) float[] {
+func model_parallel_allgather(veomni_state state, float[] local_data, int local_size) []float {
     allgather(state.mp_group, local_data, local_size)
 }
 
-func expert_parallel_reduce_scatter(veomni_state state, float[] global_data, int local_size) float[] {
+func expert_parallel_reduce_scatter(veomni_state state, float[] global_data, int local_size) []float {
     reduce_scatter(state.ep_group, global_data, local_size)
 }
 
@@ -416,7 +416,7 @@ func veomni_train_step(veomni_state state, float[] input, int batch_size, int se
     state
 }
 
-func extract_micro_batch(float[] input, int micro_batch_idx, int micro_batch_size, int seq_len) float[] {
+func extract_micro_batch(float[] input, int micro_batch_idx, int micro_batch_size, int seq_len) []float {
     int hidden_dim = 8192
     int micro_batch_tokens = micro_batch_size * seq_len
     float[] micro_batch = math.allocate_float(micro_batch_tokens * hidden_dim, 0.0)
@@ -431,7 +431,7 @@ func extract_micro_batch(float[] input, int micro_batch_idx, int micro_batch_siz
     micro_batch
 }
 
-func compute_loss(float[] output, int batch_size, int seq_len) float[] {
+func compute_loss(float[] output, int batch_size, int seq_len) []float {
     int total_tokens = batch_size * seq_len
     float[] loss = math.allocate_float(total_tokens, 0.0)
     int i = 0
@@ -442,7 +442,7 @@ func compute_loss(float[] output, int batch_size, int seq_len) float[] {
     loss
 }
 
-func compute_gradient(float[] loss, float[] output, int batch_size, int seq_len) float[] {
+func compute_gradient(float[] loss, float[] output, int batch_size, int seq_len) []float {
     int hidden_dim = 8192
     int total_tokens = batch_size * seq_len
     float[] grad = math.allocate_float(total_tokens * hidden_dim, 0.0)
@@ -454,7 +454,7 @@ func compute_gradient(float[] loss, float[] output, int batch_size, int seq_len)
     grad
 }
 
-func accumulate_gradients(float[] gradients, float[] new_gradients) float[] {
+func accumulate_gradients(float[] gradients, float[] new_gradients) []float {
     if len(gradients) == 0 {
         return math.copy_float(new_gradients)
     }
@@ -466,7 +466,7 @@ func accumulate_gradients(float[] gradients, float[] new_gradients) float[] {
     gradients
 }
 
-func apply_optimizer(float[] parameters, float[] gradients, float[] optimizer_state) float[] {
+func apply_optimizer(float[] parameters, float[] gradients, float[] optimizer_state) []float {
     float lr = 3e-5
     int i = 0
     for i < len(parameters) && i < len(gradients) {

@@ -54,9 +54,9 @@ func allreduce_inference(
     int rank,
     int world_size,
     string backend
-) float[] {
+) []float {
     printf("[AllReduce] Rank %d reducing across %d ranks\n", rank, world_size)
-    float[] result = float[]{}
+    float[] result = []float{}
     for i = 0; i < len(local_data); i = i + 1 {
         float sum = local_data[i]
         for r = 0; r < world_size; r = r + 1 {
@@ -78,7 +78,7 @@ func allgather_attention_heads(
     float[][] gathered = float[][]{}
     gathered = append(gathered, local_heads)
     for r = 1; r < world_size; r = r + 1 {
-        float[] remote_heads = float[]{}
+        float[] remote_heads = []float{}
         for i = 0; i < len(local_heads); i = i + 1 {
             remote_heads = append(remote_heads, 0.5)
         }
@@ -92,10 +92,10 @@ func reduce_scatter_logits(
     int rank,
     int world_size,
     string reduce_op
-) float[] {
+) []float {
     printf("[ReduceScatter] Rank %d: reduce_op=%s\n", rank, reduce_op)
     int local_size = len(local_logits) / world_size
-    float[] result = float[]{}
+    float[] result = []float{}
     for i = 0; i < local_size; i = i + 1 {
         float val = 0.0
         for r = 0; r < world_size; r = r + 1 {
@@ -114,12 +114,12 @@ func broadcast_from_rank(
     int source_rank,
     int rank,
     int world_size
-) float[] {
+) []float {
     printf("[Broadcast] Rank %d receiving from rank %d\n", rank, source_rank)
     if rank == source_rank {
         return data
     }
-    float[] received = float[]{}
+    float[] received = []float{}
     for i = 0; i < len(data); i = i + 1 {
         received = append(received, 0.5)
     }
@@ -145,10 +145,10 @@ func pipeline_allreduce(
     int rank,
     int world_size,
     int num_chunks
-) float[] {
+) []float {
     printf("[PipelineAllReduce] Rank %d: %d chunks\n", rank, num_chunks)
     int chunk_size = len(data) / num_chunks
-    float[] result = float[]{}
+    float[] result = []float{}
     for chunk = 0; chunk < num_chunks; chunk = chunk + 1 {
         for i = 0; i < chunk_size; i = i + 1 {
             int idx = chunk * chunk_size + i
@@ -164,12 +164,12 @@ func ring_allreduce(
     float[] data,
     int rank,
     int world_size
-) float[] {
+) []float {
     printf("[RingAllReduce] Rank %d in ring of size %d\n", rank, world_size)
     int prev_rank = (rank - 1 + world_size) % world_size
     int next_rank = (rank + 1) % world_size
     printf("  Prev: %d, Next: %d\n", prev_rank, next_rank)
-    float[] result = float[]{}
+    float[] result = []float{}
     for i = 0; i < len(data); i = i + 1 {
         result = append(result, data[i])
     }
@@ -180,9 +180,9 @@ func tree_allreduce(
     float[] data,
     int rank,
     int world_size
-) float[] {
+) []float {
     printf("[TreeAllReduce] Rank %d in tree of size %d\n", rank, world_size)
-    float[] result = float[]{}
+    float[] result = []float{}
     for i = 0; i < len(data); i = i + 1 {
         result = append(result, data[i])
     }

@@ -217,8 +217,8 @@ func tensor_numel(int[] shape) int {
     elements
 }
 
-func tensor_contiguous_strides(int[] shape) int[] {
-    int[] strides = int[]{cap: len(shape)}
+func tensor_contiguous_strides(int[] shape) []int {
+    int[] strides = make([]int, len(shape))
     int stride = 1
     int i = len(shape) - 1
     for i >= 0 {
@@ -289,7 +289,7 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int stream_handle = device_stream_open_handle(context.handle, stream_priority)
     if stream_handle <= 0 { return transformer_plan_invalid(backend, "stream_create_failed") }
     int count = len(descriptor)
-    int[] compiled = int[]{cap: count}
+    int[] compiled = make([]int, count)
     int index = 0
     for index < count {
         if len(descriptor[index]) == 0 {
@@ -415,8 +415,8 @@ struct production_admission_result {
     string error_message
 }
 
-func production_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func production_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int index = 0
     for index < capacity { values[index] = 0; index = index + 1 }
     values
@@ -639,7 +639,7 @@ func batch_upload_i32(device_context context, int[] values) device_tensor {
     int bytes = len(values) * 4
     int host = device_buffer_alloc(context.handle, bytes, "host")
     if host <= 0 { return tensor_invalid(context.backend, "int32", "host_allocation_failed") }
-    int[] upload_shape = int[]{cap: 1}
+    int[] upload_shape = make([]int, 1)
     upload_shape[0] = len(values)
     device_tensor output = tensor_empty(context, upload_shape, "int32")
     if !output.valid || batch_write_i32(context.handle, host, values) != 0 || neurx_device_copy(context.handle, output.buffer, host, bytes, device_copy_host_to_device()) != 0 {
@@ -658,10 +658,10 @@ func pack_batch_tensor(device_context context, production_batch_runtime runtime,
     int total = 0
     int sequence = 0
     for sequence < selected_count { total = total + token_count[sequence]; sequence = sequence + 1 }
-    int[] tokens = int[]{cap: total}
-    int[] positions = int[]{cap: total}
-    int[] slots = int[]{cap: total}
-    int[] table = int[]{cap: selected_count * runtime.config.maximum_pages_per_request}
+    int[] tokens = make([]int, total)
+    int[] positions = make([]int, total)
+    int[] slots = make([]int, total)
+    int[] table = make([]int, selected_count * runtime.config.maximum_pages_per_request)
     int packed = 0
     sequence = 0
     for sequence < selected_count {
@@ -711,7 +711,7 @@ func main() {
     runtime = first.runtime
     production_admission_result second = production_admit(runtime, 2, 2, 2, 2)
     runtime = second.runtime
-    int[] selected = int[]{cap: 2}
+    int[] selected = make([]int, 2)
     selected[0] = first.slot
     selected[1] = second.slot
     int[] token = [11, 12, 13, 21, 22]

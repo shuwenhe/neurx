@@ -23,8 +23,8 @@ struct gradient_accumulator {
     float[] grad_bias_terms
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -33,7 +33,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -43,7 +43,7 @@ func copy_vector(float[] src) float[] {
     out
 }
 
-func add_vectors(float[] a, float[] b) float[] {
+func add_vectors(float[] a, float[] b) []float {
     float[] out = copy_vector(a)
     int i = 0
     for i < len(out) {
@@ -53,7 +53,7 @@ func add_vectors(float[] a, float[] b) float[] {
     out
 }
 
-func scale_vector(float[] v, float scale) float[] {
+func scale_vector(float[] v, float scale) []float {
     float[] out = copy_vector(v)
     int i = 0
     for i < len(out) {
@@ -126,7 +126,7 @@ func compute_cross_entropy_loss_with_gradient(
         }
         b = b + 1
     }
-    float[][] result = float[][]{cap: 2}
+    float[][] result = floatmake([][], 2)
     result[0] = loss_vec
     result[1] = grad_logits
     result
@@ -173,7 +173,7 @@ func lm_head_backward(
         }
         b = b + 1
     }
-    float[][] result = float[][]{cap: 2}
+    float[][] result = floatmake([][], 2)
     result[0] = grad_hidden
     result[1] = grad_weight
     result
@@ -237,7 +237,7 @@ func feed_forward_backward(
         }
         b = b + 1
     }
-    float[][] result = float[][]{cap: 3}
+    float[][] result = floatmake([][], 3)
     result[0] = grad_hidden
     result[1] = grad_w_up
     result[2] = grad_w_down
@@ -296,7 +296,7 @@ func attention_backward(
         }
         b = b + 1
     }
-    float[][] result = float[][]{cap: 5}
+    float[][] result = floatmake([][], 5)
     result[0] = grad_hidden
     result[1] = grad_wq
     result[2] = grad_wk
@@ -354,7 +354,7 @@ func transformer_layer_backward(
         false
     )
     grad_input = attn_grads[0]
-    float[][] result = float[][]{cap: 10}
+    float[][] result = floatmake([][], 10)
     result[0] = grad_input
     result[1] = attn_grads[1]
     result[2] = attn_grads[2]
@@ -381,7 +381,7 @@ func transformer_backward_pass(
     int vocab_size
 ) backward_pass_output {
     float[] grad_hidden = copy_vector(loss_gradient)
-    float[][] grad_layer_weights = float[][]{cap: num_layers}
+    float[][] grad_layer_weights = floatmake([][], num_layers)
     lm_grads := lm_head_backward(
         grad_hidden,
         layer_outputs[num_layers - 1],

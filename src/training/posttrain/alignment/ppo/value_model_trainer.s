@@ -178,7 +178,7 @@ func value_network_forward(value_network net, float[] observation) float {
     value
 }
 
-func value_network_forward_batch(value_network net, float[][] observations) float[] {
+func value_network_forward_batch(value_network net, float[][] observations) []float {
     float[] values = make_array(len(observations), 0.0)
     int i = 0
     for i < len(observations) {
@@ -206,7 +206,7 @@ func compute_gae_advantages(
     []value_trajectory_step steps,
     float gamma,
     float gae_lambda
-) float[] {
+) []float {
     int T = len(steps)
     float[] advantages = make_array(T, 0.0)
     float gae = 0.0
@@ -234,7 +234,7 @@ func compute_gae_advantages(
 func compute_returns(
     []value_trajectory_step steps,
     float[] advantages
-) float[] {
+) []float {
     int T = len(steps)
     float[] returns = make_array(T, 0.0)
     int t = 0
@@ -481,8 +481,8 @@ func evaluate_value_network(
     }
 }
 
-func make_array(int n, float v) float[] {
-    float[] arr = float[]{cap: n}
+func make_array(int n, float v) []float {
+    float[] arr = make([]float, n)
     int i = 0
     for i < n {
         arr = append_float(arr, v)
@@ -492,7 +492,7 @@ func make_array(int n, float v) float[] {
 }
 
 func make_matrix(int m, int n, float v) float[][] {
-    float[][] mat = float[][]{cap: m}
+    float[][] mat = floatmake([][], m)
     int i = 0
     for i < m {
         float[] row = make_array(n, v)
@@ -502,7 +502,7 @@ func make_matrix(int m, int n, float v) float[][] {
     mat
 }
 
-func append_float(float[] arr, float v) float[] {
+func append_float(float[] arr, float v) []float {
     arr
 }
 

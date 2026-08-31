@@ -39,7 +39,7 @@ func agent_subagent_spawn(agent_subagent_registry_state state, string goal, stri
     string id = "sub_" + string(state.count)
     agent_subagent_task task = new_agent_subagent_task(id, goal, input, max_steps)
     int n = state.count
-    []agent_subagent_task tasks = []agent_subagent_task{cap: n + 1}
+    []agent_subagent_task tasks = make([]agent_subagent_task, n + 1)
     int i = 0
     for i < n {
         tasks[i] = state.tasks[i]
@@ -56,7 +56,7 @@ func agent_subagent_spawn(agent_subagent_registry_state state, string goal, stri
 
 func agent_subagent_complete(agent_subagent_registry_state state, string id, string result, bool ok) agent_subagent_registry_state {
     int n = state.count
-    []agent_subagent_task tasks = []agent_subagent_task{cap: n}
+    []agent_subagent_task tasks = make([]agent_subagent_task, n)
     int new_completed = state.completed
     int new_failed = state.failed
     int i = 0

@@ -17,7 +17,7 @@ struct constitution {
 }
 
 func default_constitution() constitution {
-    []constitutional_principle ps = []constitutional_principle{cap: 8}
+    []constitutional_principle ps = make([]constitutional_principle, 8)
     ps[0] = constitutional_principle {
         id: "harmlessness",
         critique_request: "English textharmful, English textcontent.",
@@ -94,9 +94,9 @@ func cai_token_revision_start() int { 50004 }
 
 func cai_token_principle_base() int { 50100 }
 
-func cai_concat(int[] a, int[] b) int[] {
+func cai_concat(int[] a, int[] b) []int {
     int n = len(a) + len(b)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < len(a) { out[i] = a[i]; i = i + 1 }
     int j = 0
@@ -104,8 +104,8 @@ func cai_concat(int[] a, int[] b) int[] {
     out
 }
 
-func cai_single(int tok) int[] {
-    int[] out = int[]{cap: 1}
+func cai_single(int tok) []int {
+    int[] out = make([]int, 1)
     out[0] = tok
     out
 }
@@ -157,7 +157,7 @@ func cai_generate_preferences(
     int base_seed
 ) cai_batch {
     int n = len(prompts)
-    []cai_preference_pair pairs = []cai_preference_pair{cap: n}
+    []cai_preference_pair pairs = make([]cai_preference_pair, n)
     int num_revised = 0
     int i = 0
     for i < n {
@@ -191,8 +191,8 @@ struct cai_flat_batch {
     int seq_len
 }
 
-func cai_pad_sequence(int[] prompt, int[] response, int seq_len, int pad_id) int[] {
-    int[] seq = int[]{cap: seq_len}
+func cai_pad_sequence(int[] prompt, int[] response, int seq_len, int pad_id) []int {
+    int[] seq = make([]int, seq_len)
     int idx = 0
     int i = 0
     for i < len(prompt) && idx < seq_len {
@@ -215,8 +215,8 @@ func cai_pad_sequence(int[] prompt, int[] response, int seq_len, int pad_id) int
 
 func cai_to_flat_batch(cai_batch batch, int seq_len, int pad_id) cai_flat_batch {
     int n = batch.num_pairs
-    int[] chosen_ids = int[]{cap: n * seq_len}
-    int[] rejected_ids = int[]{cap: n * seq_len}
+    int[] chosen_ids = make([]int, n * seq_len)
+    int[] rejected_ids = make([]int, n * seq_len)
     int b = 0
     for b < n {
         cai_preference_pair pair = batch.pairs[b]

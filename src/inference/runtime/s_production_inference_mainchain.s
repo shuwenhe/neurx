@@ -32,7 +32,7 @@ func create_validator() s_mainchain_validator {
     }
 }
 
-func tokenize_input(prompt string) int[] {
+func tokenize_input(prompt string) []int {
     int i = 0
     int[] token_ids = []
     for i < len(prompt) {

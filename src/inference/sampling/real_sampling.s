@@ -88,7 +88,7 @@ func math_exp(float x) float {
     result
 }
 
-func apply_temperature(float[] logits, float temp, int vocab_size) float[] {
+func apply_temperature(float[] logits, float temp, int vocab_size) []float {
     float[] out = make(float[], vocab_size)
     float inv = 1.0 / temp
     int i = 0
@@ -99,7 +99,7 @@ func apply_temperature(float[] logits, float temp, int vocab_size) float[] {
     out
 }
 
-func softmax(float[] logits, int size) float[] {
+func softmax(float[] logits, int size) []float {
     float[] probs = make(float[], size)
     if size == 0 {
         return probs
@@ -176,7 +176,7 @@ func argsort_desc(float[] arr, int size) []index_score {
     items
 }
 
-func top_k_filter(float[] logits, int vocab_size, int k) float[] {
+func top_k_filter(float[] logits, int vocab_size, int k) []float {
     if k <= 0 || k >= vocab_size {
         return logits
     }
@@ -195,7 +195,7 @@ func top_k_filter(float[] logits, int vocab_size, int k) float[] {
     filtered
 }
 
-func top_p_filter(float[] logits, int vocab_size, float p) float[] {
+func top_p_filter(float[] logits, int vocab_size, float p) []float {
     if p >= 1.0 {
         return logits
     }

@@ -10,7 +10,7 @@ func blas_sgemm(
     float[] C, int M2, int N2,
     float alpha,
     float beta
-) float[] {
+) []float {
     return blas_sgemm_native_s(A, M, K, B, K2, N, C, M2, N2, alpha, beta)
 }
 
@@ -19,9 +19,9 @@ func blas_sgemm_native_s(
     float[] B, int K2, int N,
     float[] C, int M2, int N2,
     float alpha, float beta
-) float[] {
+) []float {
     if K != K2 || M != M2 || N != N2 { return C }
-    float[] out = float[]{cap: M * N}
+    float[] out = make([]float, M * N)
     int i = 0
     for i < M * N {
         out[i] = C[i] * beta
@@ -47,8 +47,8 @@ func blas_sgemm_native_s(
     out
 }
 
-func blas_sgemv(float[] A, int M, int N, float[] x, float alpha, float beta) float[] {
-    float[] y = float[]{cap: M}
+func blas_sgemv(float[] A, int M, int N, float[] x, float alpha, float beta) []float {
+    float[] y = make([]float, M)
     int i = 0
     for i < M {
         float sum = 0.0
@@ -73,8 +73,8 @@ func blas_sdot(float[] x, float[] y) float {
     result
 }
 
-func blas_saxpy(float[] x, float[] y, float alpha) float[] {
-    float[] out = float[]{cap: len(y)}
+func blas_saxpy(float[] x, float[] y, float alpha) []float {
+    float[] out = make([]float, len(y))
     int i = 0
     for i < len(y) {
         out[i] = alpha * x[i] + y[i]

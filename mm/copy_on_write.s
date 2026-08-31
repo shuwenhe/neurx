@@ -23,7 +23,7 @@ const cow_max_references = 1000
 
 func new_cow_manager() (*cow_manager, string) {
     mgr := *cow_manager{
-        pages: cow_page[]{},
+        pages: []cow_page{},
         lock: mutex_new(),
     } as *cow_manager
 

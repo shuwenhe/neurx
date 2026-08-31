@@ -133,7 +133,7 @@ func (ppotrainer* trainer) generate_trajectory() trajectory {
         timestamp: time.Now().Unix(),
     }
     max_length := 512
-    current_tokens := int[]{}
+    current_tokens := []int{}
     for len(current_tokens) < max_length {
         log_probs := trainer.policy_model.forward(current_tokens)
         next_token := trainer.sample_from_logits(log_probs)
@@ -329,7 +329,7 @@ func (ppotrainer* trainer) sample_from_logits(logits float[]64) int {
     return len(probs) - 1
 }
 
-func (policy_model* model) forward(tokens int[]) float[]64 {
+func (policy_model* model) forward(tokens []int) float[]64 {
     logits := make(float[]64, model.vocab_size)
     for i := range logits {
         logits[i] = math.Sin(float64(i) / float64(model.vocab_size))
@@ -337,7 +337,7 @@ func (policy_model* model) forward(tokens int[]) float[]64 {
     return logits
 }
 
-func (value_model* model) predict_value(tokens int[]) float64 {
+func (value_model* model) predict_value(tokens []int) float64 {
     sum := 0.0
     for i, t := range tokens {
         sum += float64((t + i) % 100) / 100.0
@@ -345,7 +345,7 @@ func (value_model* model) predict_value(tokens int[]) float64 {
     return sum / float64(len(tokens))
 }
 
-func (reward_model* model) predict_reward(tokens int[]) float64 {
+func (reward_model* model) predict_reward(tokens []int) float64 {
     if len(tokens) == 0 {
         return 0.0
     }

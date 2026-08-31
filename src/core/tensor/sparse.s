@@ -19,9 +19,9 @@ struct sparse_tensor_csr {
 
 func new_sparse_coo(int num_rows, int num_cols) sparse_tensor_coo {
     sparse_tensor_coo {
-        indices_i: int[]{cap: 0},
-        indices_j: int[]{cap: 0},
-        values: float[]{cap: 0},
+        indices_i: []int{},
+        indices_j: []int{},
+        values: []float{},
         num_rows: num_rows,
         num_cols: num_cols,
         nnz: 0,
@@ -61,9 +61,9 @@ func sparse_coo_to_dense(sparse_tensor_coo tensor) float[][] {
 }
 
 func sparse_coo_to_csr(sparse_tensor_coo coo) sparse_tensor_csr {
-    int[] row_ptr = int[]{cap: coo.num_rows + 1}
-    int[] col_indices = int[]{cap: coo.nnz}
-    float[] values = float[]{cap: coo.nnz}
+    int[] row_ptr = make([]int, coo.num_rows + 1)
+    int[] col_indices = make([]int, coo.nnz)
+    float[] values = make([]float, coo.nnz)
     int[] row_counts = allocate_int_array(coo.num_rows)
     int k = 0
     for k < coo.nnz {
@@ -102,7 +102,7 @@ func sparse_coo_to_csr(sparse_tensor_coo coo) sparse_tensor_csr {
     }
 }
 
-func sparse_csr_matrix_vector_mul(sparse_tensor_csr csr, float[] vec) float[] {
+func sparse_csr_matrix_vector_mul(sparse_tensor_csr csr, float[] vec) []float {
     float[] result = allocate_float_array(csr.num_rows)
     int i = 0
     for i < csr.num_rows {
@@ -122,7 +122,7 @@ func sparse_csr_matrix_vector_mul(sparse_tensor_csr csr, float[] vec) float[] {
     return result
 }
 
-func sparse_csr_get_row(sparse_tensor_csr csr, int row_idx) float[] {
+func sparse_csr_get_row(sparse_tensor_csr csr, int row_idx) []float {
     float[] row_values = allocate_float_array(csr.num_cols)
     int ptr_start = csr.row_ptr[row_idx]
     int ptr_end = csr.row_ptr[row_idx + 1]
@@ -155,8 +155,8 @@ func allocate_dense_matrix(int num_rows, int num_cols) float[][] {
     return matrix
 }
 
-func allocate_float_array(int n) float[] {
-    float[] arr = float[]{cap: n}
+func allocate_float_array(int n) []float {
+    float[] arr = make([]float, n)
     int i = 0
     for i < n {
         arr[i] = 0.0
@@ -165,8 +165,8 @@ func allocate_float_array(int n) float[] {
     return arr
 }
 
-func allocate_int_array(int n) int[] {
-    int[] arr = int[]{cap: n}
+func allocate_int_array(int n) []int {
+    int[] arr = make([]int, n)
     int i = 0
     for i < n {
         arr[i] = 0

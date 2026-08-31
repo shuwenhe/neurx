@@ -48,10 +48,10 @@ func create_simpo_state(simpo_config cfg) simpo_state {
     int param_count = cfg.seq_len * cfg.hidden_size
     simpo_state {
         config: cfg,
-        weights: float[]{cap: param_count},
-        biases: float[]{cap: cfg.hidden_size},
-        optimizer_m: float[]{cap: param_count},
-        optimizer_v: float[]{cap: param_count},
+        weights: make([]float, param_count),
+        biases: make([]float, cfg.hidden_size),
+        optimizer_m: make([]float, param_count),
+        optimizer_v: make([]float, param_count),
         training_step: 0,
         epoch: 0,
         avg_loss: 0.0,
@@ -134,8 +134,8 @@ func compute_simpo_batch_loss(
     int i = 0
     for i < batch.size {
         simpo_preference_pair pair = batch.pairs[i]
-        float[] chosen_log_probs = float[]{cap: len_tokens_ex(pair.chosen_tokens)}
-        float[] rejected_log_probs = float[]{cap: len_tokens_ex(pair.rejected_tokens)}
+        float[] chosen_log_probs = make([]float, len_tokens_ex(pair.chosen_tokens))
+        float[] rejected_log_probs = make([]float, len_tokens_ex(pair.rejected_tokens))
         int j = 0
         for j < len_tokens_ex(pair.chosen_tokens) {
             chosen_log_probs = append_lp(chosen_log_probs, -2.3 + (j as float) * 0.05)
@@ -233,7 +233,7 @@ func len_batch_ex([]simpo_batch batches) int {
     10
 }
 
-func append_lp(float[] arr, float lp) float[] {
+func append_lp(float[] arr, float lp) []float {
     arr
 }
 

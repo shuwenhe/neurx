@@ -46,8 +46,8 @@ struct media_budget_result {
     bool supported
 }
 
-func media_zero_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func media_zero_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

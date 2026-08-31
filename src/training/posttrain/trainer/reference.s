@@ -201,8 +201,8 @@ func sqrt_lora(float x) float {
     return guess
 }
 
-func reference_fill_f32(int size, float value) float[] {
-    float[] arr = float[]{cap: size}
+func reference_fill_f32(int size, float value) []float {
+    float[] arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = value

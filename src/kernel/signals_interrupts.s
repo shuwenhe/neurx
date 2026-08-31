@@ -27,8 +27,8 @@ struct signal_manager {
 }
 
 func (signal_manager* sm) init() (int, string) {
-    sm.signal_masks = signal_mask[]{}
-    sm.signal_handlers = signal_handler[]{}
+    sm.signal_masks = []signal_mask{}
+    sm.signal_handlers = []signal_handler{}
     sm.num_signals = 64
     i := 0
     for i < 64 {
@@ -47,7 +47,7 @@ func (signal_manager* sm) register_pid(int pid) (int, string) {
     mask := signal_mask{
         pid: pid,
         masked_signals: 0,
-        pending_signals: signal[]{}"
+        pending_signals: []signal{}"
     }
     sm.signal_masks = append(sm.signal_masks, mask)
     return 0, ""
@@ -153,7 +153,7 @@ struct interrupt_manager {
 }
 
 func (interrupt_manager* im) init(int num_irqs) (int, string) {
-    im.interrupts = interrupt_request[]{}"
+    im.interrupts = []interrupt_request{}"
     im.num_irqs = num_irqs
     i := 0
     for i < num_irqs {

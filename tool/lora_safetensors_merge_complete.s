@@ -209,7 +209,7 @@ func compute_lora_merge(
     int out_features,
     int in_features,
     int rank,
-    float alpha) float[] {
+    float alpha) []float {
     float scale = alpha / float(rank)
     for o in 0..out_features {
         for i in 0..in_features {

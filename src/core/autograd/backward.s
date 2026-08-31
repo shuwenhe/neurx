@@ -21,8 +21,8 @@ struct backward_state {
     float[] upstream
 }
 
-func copy_float(float[] values) float[] {
-    float[] out = float[]{cap: len(values)}
+func copy_float(float[] values) []float {
+    float[] out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]

@@ -36,7 +36,7 @@ func rprop_step(rprop_optimizer optimizer, tensor params, tensor grads) rprop_op
     optimizer.step = optimizer.step + 1
     optimizer.prev_grad = ensure_rprop_state(optimizer.prev_grad, n, 0.0)
     optimizer.step_size = ensure_rprop_state(optimizer.step_size, n, optimizer.lr)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         float grad = grads.data[i]
@@ -65,8 +65,8 @@ struct rprop_optimizer_step_output {
     tensor params
 }
 
-func ensure_rprop_state(float[] values, int n, float default_value) float[] {
-    float[] out = float[]{cap: n}
+func ensure_rprop_state(float[] values, int n, float default_value) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         if i < len(values) {

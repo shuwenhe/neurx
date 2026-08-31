@@ -80,7 +80,7 @@ func (v1_spec_decode* spec) verify_speculated_tokens(int32[] predicted_tokens, i
     return int32(accepted)
 }
 
-func (v1_spec_decode* spec) batch_speculate(float32[][]] batch_logits) speculative_tokens[] {
+func (v1_spec_decode* spec) batch_speculate(float32[][]] batch_logits) []speculative_tokens {
     results := make(speculative_tokens[])
     for i := 0; i < len(batch_logits); i = i + 1 {
         spec_result := spec.speculate(batch_logits[i])

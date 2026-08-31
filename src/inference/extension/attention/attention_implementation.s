@@ -70,7 +70,7 @@ func reshape_for_attention(
     int seq_len,
     int num_heads,
     int head_dim
-) float[] {
+) []float {
     int total_size = seq_len * num_heads * head_dim
     float[] reshaped = allocate_vector(total_size, 0.0)
     int idx = 0
@@ -91,7 +91,7 @@ func scaled_dot_product_attention(
     int num_heads,
     int head_dim,
     bool use_causal_mask
-) float[] {
+) []float {
     int size_per_head = seq_len * head_dim
     int total_size = seq_len * num_heads * head_dim
     float[] output = allocate_vector(total_size, 0.0)
@@ -146,7 +146,7 @@ func forward_attention(
     multi_head_attention_module attn,
     float[] hidden_states,
     int seq_len
-) float[] {
+) []float {
     int hidden_dim = attn.config.hidden_dim
     int num_heads = attn.config.num_attention_heads
     int head_dim = attn.head_dim
@@ -171,7 +171,7 @@ func forward_attention(
     return output
 }
 
-func softmax_stable(float[] scores, int size) float[] {
+func softmax_stable(float[] scores, int size) []float {
     float[] probs = allocate_vector(size, 0.0)
     float max_score = scores[0]
     int i = 1
@@ -197,7 +197,7 @@ func softmax_stable(float[] scores, int size) float[] {
     return probs
 }
 
-func matrix_multiply(float[] a, float[] b, int m, int k, int n) float[] {
+func matrix_multiply(float[] a, float[] b, int m, int k, int n) []float {
     float[] result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
@@ -220,7 +220,7 @@ func matrix_multiply(float[] a, float[] b, int m, int k, int n) float[] {
     return result
 }
 
-func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) float[] {
+func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) []float {
     int hidden_dim = num_heads * head_dim
     float[] reshaped = allocate_vector(seq_len * hidden_dim, 0.0)
     int i = 0
@@ -231,7 +231,7 @@ func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) flo
     return reshaped
 }
 
-func allocate_weights(int rows, int cols) float[] {
+func allocate_weights(int rows, int cols) []float {
     int size = rows * cols
     float[] w = allocate_vector(size, 0.0)
     float limit = sqrt_float(6.0 / (rows + cols * 1.0))
@@ -243,8 +243,8 @@ func allocate_weights(int rows, int cols) float[] {
     return w
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v = append(v, init_val)

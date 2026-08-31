@@ -45,7 +45,7 @@ struct multiturn_manager_state {
 
 func new_multiturn_manager(int max_turns) multiturn_manager_state {
     multiturn_manager_state {
-        conversations: []multiturn_conversation{cap: 1000},
+        conversations: make([]multiturn_conversation, 1000),
         conversation_count: 0,
         total_turns: 0,
         avg_reward_per_conversation: 0.0,
@@ -63,7 +63,7 @@ func multiturn_enable_tool_calling(multiturn_manager_state state, bool enable) m
 func multiturn_start_conversation(multiturn_manager_state state, string task_type, int step) (multiturn_manager_state, int) {
     multiturn_conversation conv = multiturn_conversation {
         conversation_id: state.conversation_count,
-        turns: []conversation_turn{cap: state.max_turns_per_conversation},
+        turns: make([]conversation_turn, state.max_turns_per_conversation),
         total_turns: 0,
         cumulative_reward: 0.0,
         task_type: task_type,
@@ -110,7 +110,7 @@ func multiturn_start_turn(multiturn_manager_state state, int conv_id, string que
     }
     conversation_turn turn = conversation_turn {
         turn_id: conv.total_turns,
-        messages: []message{cap: 10},
+        messages: make([]message, 10),
         query: query,
         response: "",
         reward: 0.0,

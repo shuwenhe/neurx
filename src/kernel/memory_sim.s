@@ -1,7 +1,7 @@
 package kernel.mem
 int[] phys_mem
 func init_phys_mem() int {
-    phys_mem = int[]{}
+    phys_mem = []int{}
     i := 0
     size := 16 * 1024 * 1024
     for i < size {
@@ -11,8 +11,8 @@ func init_phys_mem() int {
     0
 }
 
-func mem_get(int addr, int count) int[] {
-    res := int[]{}
+func mem_get(int addr, int count) []int {
+    res := []int{}
     i := 0
     for i < count {
         if addr + i >= 0 && addr + i < len(phys_mem) {

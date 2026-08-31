@@ -145,7 +145,7 @@ func create_parse_result() ParseResult {
         recovery_method: "",
         parse_time_ms: 0,
         confidence: 0.0,
-        warnings: string[]{},
+        warnings: []string{},
         metadata: map[string]string{},
     }
 }
@@ -157,7 +157,7 @@ func create_null_value() ParsedValue {
         number_value: 0.0,
         bool_value: false,
         array_values: []ParsedValue{},
-        object_keys: string[]{},
+        object_keys: []string{},
         object_values: []ParsedValue{},
         raw_text: "null",
     }
@@ -170,7 +170,7 @@ func create_string_value(string s) ParsedValue {
         number_value: 0.0,
         bool_value: false,
         array_values: []ParsedValue{},
-        object_keys: string[]{},
+        object_keys: []string{},
         object_values: []ParsedValue{},
         raw_text: "\"" + s + "\"",
     }
@@ -190,7 +190,7 @@ func create_number_value(float n) ParsedValue {
         number_value: n,
         bool_value: false,
         array_values: []ParsedValue{},
-        object_keys: string[]{},
+        object_keys: []string{},
         object_values: []ParsedValue{},
         raw_text: str_val,
     }
@@ -204,7 +204,7 @@ func create_bool_value(bool b) ParsedValue {
         number_value: 0.0,
         bool_value: b,
         array_values: []ParsedValue{},
-        object_keys: string[]{},
+        object_keys: []string{},
         object_values: []ParsedValue{},
         raw_text: str_val,
     }
@@ -217,7 +217,7 @@ func create_array_value([]ParsedValue items) ParsedValue {
         number_value: 0.0,
         bool_value: false,
         array_values: items,
-        object_keys: string[]{},
+        object_keys: []string{},
         object_values: []ParsedValue{},
         raw_text: "[...]",
     }
@@ -274,16 +274,16 @@ func create_parser_context(string input, ParseConfig config) ParseContext {
             last_token: "",
         },
         token_buffer: TokenBuffer{
-            tokens: string[]{},
-            positions: int[]{},
-            types: int[]{},
-            confidence: float[]{},
+            tokens: []string{},
+            positions: []int{},
+            types: []int{},
+            confidence: []float{},
             buffer_size: 0,
         },
-        scope_stack: string[]{},
-        format_hints: string[]{},
-        errors: string[]{},
-        warnings: string[]{},
+        scope_stack: []string{},
+        format_hints: []string{},
+        errors: []string{},
+        warnings: []string{},
     }
 }
 

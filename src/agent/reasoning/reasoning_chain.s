@@ -42,7 +42,7 @@ func (reasoning_chain* chain) add_step(reasoning_step step) reasoning_chain {
     if chain.state != chain_state.running && chain.state != chain_state.initialized {
         return chain
     }
-    steps := []reasoning_step{cap: len(chain.steps) + 1}
+    steps := make([]reasoning_step, len(chain.steps) + 1)
     i := 0
     for i < len(chain.steps) {
         steps[i] = chain.steps[i]
@@ -204,7 +204,7 @@ func (reasoning_chain* chain) get_reasoning_text() string {
 }
 
 func (reasoning_chain* chain) clone() reasoning_chain {
-    steps := []reasoning_step{cap: len(chain.steps)}
+    steps := make([]reasoning_step, len(chain.steps))
     i := 0
     for i < len(chain.steps) {
         steps[i] = chain.steps[i].clone()

@@ -58,8 +58,8 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     state.w_gate_local = alloc_matrix(lffn, h)
     state.w_up_local = alloc_matrix(lffn, h)
     state.w_down_local = alloc_matrix(h, lffn)
-    state.norm1_gamma = []double{cap: h}
-    state.norm2_gamma = []double{cap: h}
+    state.norm1_gamma = make([]double, h)
+    state.norm2_gamma = make([]double, h)
     int i = 0
     for i < h {
         state.norm1_gamma[i] = 1.0
@@ -73,10 +73,10 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
 }
 
 func alloc_matrix(int rows, int cols) [][]double {
-    [][]double m = [][][]double{cap: rows}
+    [][]double m = [][]make([]double, rows)
     int i = 0
     for i < rows {
-        m[i] = []double{cap: cols}
+        m[i] = make([]double, cols)
         i = i + 1
     }
     return m
@@ -104,10 +104,10 @@ func tp_attention_forward(
     q_heads = apply_rope(q_heads, batch_size, seq_len, nh, d, state.config)
     k_heads = apply_rope(k_heads, batch_size, seq_len, nkh, d, state.config)
     int n_kv_groups = nh / nkh
-    [][]double attn_out = [][][]double{cap: batch_size}
+    [][]double attn_out = [][]make([]double, batch_size)
     int b = 0
     for b < batch_size {
-        attn_out[b] = [][][]double{cap: nh}
+        attn_out[b] = [][]make([]double, nh)
         int h_idx = 0
         for h_idx < nh {
             int kv_h_idx = h_idx / n_kv_groups
@@ -350,16 +350,16 @@ func softmax_2d([][]double logits, int axis) [][]double {
 }
 
 func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
-    [][][]double result = [][][]double{cap: B}
+    [][][]double result = [][]make([]double, B)
     int b = 0
     for b < B {
-        result[b] = [][][]double{cap: nh}
+        result[b] = [][]make([]double, nh)
         int h = 0
         for h < nh {
-            result[b][h] = [][]double{cap: S}
+            result[b][h] = []make([]double, S)
             int s = 0
             for s < S {
-                result[b][h][s] = []double{cap: d}
+                result[b][h][s] = make([]double, d)
                 int dd = 0
                 for dd < d {
                     int src_idx = s * (nh * d) + h * d + dd

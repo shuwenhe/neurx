@@ -49,16 +49,16 @@ func load_text_dataset(dataset ds) (dataset, error) {
     (ds, nil)
 }
 
-func tokenize_text(string text) int[] {
-    int[] tokens = int[]{cap: len(text)}
+func tokenize_text(string text) []int {
+    int[] tokens = make([]int, len(text))
     for i in 0..len(text) {
         tokens[i] = int(text[i])
     }
     tokens
 }
 
-func truncate(int[] tokens, int max_len) int[] {
-    int[] result = int[]{cap: max_len}
+func truncate(int[] tokens, int max_len) []int {
+    int[] result = make([]int, max_len)
     for i in 0..min(max_len, len(tokens)) {
         result[i] = tokens[i]
     }
@@ -78,7 +78,7 @@ func is_space(byte c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
 
-func read_lines(string path) string[] {
+func read_lines(string path) []string {
     string[]{
         "Hello world",
         "This is a sample sentence",

@@ -39,8 +39,8 @@ func new_overlap_schedule(int num_layers, int pipeline_depth) overlap_schedule {
     schedule := overlap_schedule {
         num_layers: num_layers,
         pipeline_depth: pipeline_depth,
-        compute_order: int[]{cap: num_layers},
-        allreduce_order: int[]{cap: num_layers},
+        compute_order: make([]int, num_layers),
+        allreduce_order: make([]int, num_layers),
         initialized: true,
     }
     int i = 0
@@ -72,7 +72,7 @@ func new_overlapped_training_loop(
         world_size: world_size,
         config: config,
         schedule: new_overlap_schedule(num_layers, 4),
-        buffers: gradient_buffer[]{cap: num_layers},
+        buffers: make([]gradient_buffer, num_layers),
         current_layer: 0,
         total_tokens_processed: 0,
         training_active: true,
@@ -96,9 +96,9 @@ func (overlapped_training_loop* loop) forward_pass(
     float[] input,
     float[][] layer_weights,
     int num_tokens
-) float[] {
+) []float {
     if !loop.training_active {
-        return float[]{cap: num_tokens * loop.config.hidden_dim}
+        return make([]float, num_tokens * loop.config.hidden_dim)
     }
     float[] output = input
     int layer = 0
@@ -120,7 +120,7 @@ func (overlapped_training_loop* loop) backward_pass_with_overlap(
     int num_tokens
 ) (float[], float[][]) {
     if !loop.training_active {
-        return float[]{}, float[][]{cap: loop.config.num_layers}
+        return []float{}, floatmake([][], loop.config.num_layers)
     }
     float[][] weight_gradients = make(float[][], loop.config.num_layers)
     float[] activation_grad = output_grad
@@ -180,9 +180,9 @@ func (overlapped_training_loop* loop) compute_layer_forward(
     float[] input,
     float[] weights,
     int num_tokens
-) float[] {
+) []float {
     if len(input) == 0 {
-        return float[]{cap: len(input)}
+        return make([]float, len(input))
     }
     float[] output = make(float[], len(input))
     int i = 0
@@ -197,9 +197,9 @@ func (overlapped_training_loop* loop) compute_layer_backward(
     float[] output_grad,
     float[] weights,
     int num_tokens
-) float[] {
+) []float {
     if len(output_grad) == 0 {
-        return float[]{cap: len(output_grad)}
+        return make([]float, len(output_grad))
     }
     float[] input_grad = make(float[], len(output_grad))
     int i = 0
@@ -210,9 +210,9 @@ func (overlapped_training_loop* loop) compute_layer_backward(
     return input_grad
 }
 
-func (overlapped_training_loop* loop) perform_allreduce(float[] gradients) float[] {
+func (overlapped_training_loop* loop) perform_allreduce(float[] gradients) []float {
     if len(gradients) == 0 {
-        return float[]{cap: len(gradients)}
+        return make([]float, len(gradients))
     }
     float[] reduced = make(float[], len(gradients))
     int i = 0
@@ -260,9 +260,9 @@ func (overlapped_training_loop* loop) compute_loss(float[] logits, float[] targe
     return loss / float(len(logits))
 }
 
-func (overlapped_training_loop* loop) compute_loss_gradient(float[] logits, float[] targets) float[] {
+func (overlapped_training_loop* loop) compute_loss_gradient(float[] logits, float[] targets) []float {
     if len(logits) == 0 || len(targets) == 0 {
-        return float[]{cap: len(logits)}
+        return make([]float, len(logits))
     }
     float[] grad = make(float[], len(logits))
     int i = 0

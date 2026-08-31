@@ -82,8 +82,8 @@ func clone_from_file(string root, string list_file, bool force) int {
     0
 }
 
-func split_commas(string text) string[] {
-    string[] out = string[]{cap: 0}
+func split_commas(string text) []string {
+    string[] out = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -173,8 +173,8 @@ func basename(string path) string {
     out
 }
 
-func split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func split_lines(string text) []string {
+    string[] lines = []string{}
     string current = ""
     int i = 0
     for i < len(text) {

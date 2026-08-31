@@ -41,8 +41,8 @@ struct cache_route_result {
     bool routed
 }
 
-func cache_router_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func cache_router_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

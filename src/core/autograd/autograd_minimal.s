@@ -15,8 +15,8 @@ struct grad_graph {
     []grad_node nodes
 }
 
-func copy_float(float[] data) float[] {
-    float[] out = float[]{cap: len(data)}
+func copy_float(float[] data) []float {
+    float[] out = make([]float, len(data))
     int i = 0
     for i < len(data) {
         out = append(out, data[i])
@@ -25,8 +25,8 @@ func copy_float(float[] data) float[] {
     out
 }
 
-func copy_int(int[] data) int[] {
-    int[] out = int[]{cap: len(data)}
+func copy_int(int[] data) []int {
+    int[] out = make([]int, len(data))
     int i = 0
     for i < len(data) {
         out = append(out, data[i])
@@ -50,7 +50,7 @@ func copy_node(grad_node node) grad_node {
 }
 
 func copy_nodes([]grad_node nodes) []grad_node {
-    []grad_node out = []grad_node{cap: len(nodes)}
+    []grad_node out = make([]grad_node, len(nodes))
     int i = 0
     for i < len(nodes) {
         out = append(out, copy_node(nodes[i]))
@@ -59,8 +59,8 @@ func copy_nodes([]grad_node nodes) []grad_node {
     out
 }
 
-func zeros(int n) float[] {
-    float[] out = float[]{cap: n}
+func zeros(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out = append(out, 0.0)
@@ -69,8 +69,8 @@ func zeros(int n) float[] {
     out
 }
 
-func ones(int n) float[] {
-    float[] out = float[]{cap: n}
+func ones(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out = append(out, 1.0)
@@ -93,8 +93,8 @@ func same_shape(int[] a, int[] b) bool {
     true
 }
 
-func add_values(float[] a, float[] b) float[] {
-    float[] out = float[]{cap: len(a)}
+func add_values(float[] a, float[] b) []float {
+    float[] out = make([]float, len(a))
     int i = 0
     for i < len(a) {
         out = append(out, a[i] + b[i])
@@ -103,8 +103,8 @@ func add_values(float[] a, float[] b) float[] {
     out
 }
 
-func sub_values(float[] a, float[] b) float[] {
-    float[] out = float[]{cap: len(a)}
+func sub_values(float[] a, float[] b) []float {
+    float[] out = make([]float, len(a))
     int i = 0
     for i < len(a) {
         out = append(out, a[i] - b[i])
@@ -113,8 +113,8 @@ func sub_values(float[] a, float[] b) float[] {
     out
 }
 
-func mul_values(float[] a, float[] b) float[] {
-    float[] out = float[]{cap: len(a)}
+func mul_values(float[] a, float[] b) []float {
+    float[] out = make([]float, len(a))
     int i = 0
     for i < len(a) {
         out = append(out, a[i] * b[i])
@@ -123,8 +123,8 @@ func mul_values(float[] a, float[] b) float[] {
     out
 }
 
-func div_values(float[] a, float[] b) float[] {
-    float[] out = float[]{cap: len(a)}
+func div_values(float[] a, float[] b) []float {
+    float[] out = make([]float, len(a))
     int i = 0
     for i < len(a) {
         out = append(out, a[i] / b[i])
@@ -133,8 +133,8 @@ func div_values(float[] a, float[] b) float[] {
     out
 }
 
-func fill(int n, float value) float[] {
-    float[] out = float[]{cap: n}
+func fill(int n, float value) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out = append(out, value)
@@ -143,8 +143,8 @@ func fill(int n, float value) float[] {
     out
 }
 
-func scale_values(float[] values, float scale) float[] {
-    float[] out = float[]{cap: len(values)}
+func scale_values(float[] values, float scale) []float {
+    float[] out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out = append(out, values[i] * scale)
@@ -187,11 +187,11 @@ func add_leaf(grad_graph graph, float[] data, int[] shape, bool requires_grad) g
     }
 }
 
-func node_data(grad_graph graph, int id) float[] {
+func node_data(grad_graph graph, int id) []float {
     copy_float(graph.nodes[id].data)
 }
 
-func node_grad(grad_graph graph, int id) float[] {
+func node_grad(grad_graph graph, int id) []float {
     copy_float(graph.nodes[id].grad)
 }
 
@@ -400,8 +400,8 @@ func backward(grad_graph graph, int output_id) grad_graph {
                 nodes = accumulate_grad(nodes, node.left, input_grad)
             }
             if node.op == "matmul" {
-                float[] left_grad = float[]{cap: len(nodes[node.left].data)}
-                float[] right_grad = float[]{cap: len(nodes[node.right].data)}
+                float[] left_grad = make([]float, len(nodes[node.left].data))
+                float[] right_grad = make([]float, len(nodes[node.right].data))
                 nodes = accumulate_grad(nodes, node.left, left_grad)
                 nodes = accumulate_grad(nodes, node.right, right_grad)
             }
@@ -427,7 +427,7 @@ func matmul_node(grad_graph graph, int left, int right) grad_graph {
     grad_node lhs = graph.nodes[left]
     grad_node rhs = graph.nodes[right]
     []grad_node nodes = copy_nodes(graph.nodes)
-    float[] result = float[]{cap: len(lhs.data)}
+    float[] result = make([]float, len(lhs.data))
     int shape_0 = lhs.shape[0]
     int shape_1 = rhs.shape[1]
     nodes.push(
@@ -450,7 +450,7 @@ func matmul_node(grad_graph graph, int left, int right) grad_graph {
 
 func create_dynamic_graph() grad_graph {
     grad_graph {
-        nodes: []grad_node{cap: 0},
+        nodes: make([]grad_node, 0),
     }
 }
 
@@ -463,10 +463,10 @@ func add_node_dynamic(grad_graph graph, grad_node node) grad_graph {
     }
 }
 
-func execute_dynamic_graph(grad_graph graph, int output_id) float[] {
-    float[] out = float[]{cap: 0}
+func execute_dynamic_graph(grad_graph graph, int output_id) []float {
+    float[] out = []float{}
     if output_id < 0 || output_id >= len(graph.nodes) {
-        out = float[]{cap: 0}
+        out = []float{}
     } else {
         grad_node output_node = graph.nodes[output_id]
         out = copy_float(output_node.data)

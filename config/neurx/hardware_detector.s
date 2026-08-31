@@ -114,8 +114,8 @@ func (hardware_detector_impl* d) detect() (detection_result*) {
     result := *detection_result{
         success: false,
         hw_info: nil,
-        warnings: string[]{},
-        errors: string[]{},
+        warnings: []string{},
+        errors: []string{},
         detection_time_ms: 0,
     }
 
@@ -138,7 +138,7 @@ func (hardware_detector_impl* d) detect() (detection_result*) {
         cpu_props: nil,
         mem_info: memory_info{},
         num_devices: 0,
-        visible_device_ids: int32[]{},
+        visible_device_ids: []int32{},
         pytorch_version: "2.0+",
         cuda_available: device == device_type.cuda,
         rocm_available: device == device_type.rocm,

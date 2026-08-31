@@ -6,8 +6,8 @@ struct device_array {
     bool on_device
 }
 
-func copy_float_values(float[] values) float[] {
-    float[] out = float[]{cap: len(values)}
+func copy_float_values(float[] values) []float {
+    float[] out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -24,7 +24,7 @@ func to_device(float[] host) device_array {
     }
 }
 
-func to_host(device_array arr) float[] {
+func to_host(device_array arr) []float {
     copy_float_values(arr.data)
 }
 
@@ -33,7 +33,7 @@ func add_device(device_array left, device_array right) device_array {
     if right.size < n {
         n = right.size
     }
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = left.data[i] + right.data[i]
@@ -51,7 +51,7 @@ func mul_device(device_array left, device_array right) device_array {
     if right.size < n {
         n = right.size
     }
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = left.data[i] * right.data[i]
@@ -69,7 +69,7 @@ func add_bias_device(device_array values, device_array bias, int rows, int cols)
     if values.size < n {
         n = values.size
     }
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         int c = i % cols

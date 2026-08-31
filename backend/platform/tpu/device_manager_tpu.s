@@ -88,6 +88,6 @@ func tpu_get_memory_info(tpu_device device) [int, int] {
     [free_bytes, total_bytes]
 }
 
-func tpu_supported_dtypes() string[] {
+func tpu_supported_dtypes() []string {
     ["bfloat16", "float32", "int8", "int32"]
 }

@@ -123,7 +123,7 @@ func (e* enhanced_sampler) sample(float32[] logits) int32 {
 	}
 }
 
-func (e* enhanced_sampler) batch_sample(float32[][]] batch_logits) int32[] {
+func (e* enhanced_sampler) batch_sample(float32[][]] batch_logits) []int32 {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
 		token := e.sample(batch_logits[i])

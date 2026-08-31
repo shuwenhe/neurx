@@ -54,8 +54,8 @@ struct hicache_prefix_result {
     int usable_pages
 }
 
-func hicache_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func hicache_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

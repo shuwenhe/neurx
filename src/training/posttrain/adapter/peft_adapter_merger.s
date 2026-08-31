@@ -59,7 +59,7 @@ func apply_lora_to_weight(
     int in_dim,
     int rank,
     float alpha
-) float[] {
+) []float {
     float[] ba = matmul_lora(lora_b, lora_a, out_dim, rank, in_dim)
     float scaling = alpha / (rank as float)
     int i = 0
@@ -67,7 +67,7 @@ func apply_lora_to_weight(
         ba[i] = ba[i] * scaling
         i = i + 1
     }
-    float[] result = float[]{}
+    float[] result = []float{}
     int j = 0
     for j < len(base_weight) {
         result = append(result, base_weight[j] + ba[j])
@@ -76,8 +76,8 @@ func apply_lora_to_weight(
     result
 }
 
-func matmul_lora(float[] a, float[] b, int m, int r, int n) float[] {
-    float[] c = float[]{cap: m * n}
+func matmul_lora(float[] a, float[] b, int m, int r, int n) []float {
+    float[] c = make([]float, m * n)
     int i = 0
     for i < m {
         int j = 0
@@ -161,7 +161,7 @@ func create_merged_model(
         layer = layer + 1
     }
     merged_model_state {
-        merged_weights: map[string]float[]{ "placeholder": float[]{} },
+        merged_weights: map[string]float[]{ "placeholder": []float{} },
         hidden_dim: hidden_dim,
         num_layers: num_layers,
         vocab_size: 151936,

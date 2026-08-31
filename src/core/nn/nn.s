@@ -14,9 +14,9 @@ struct linear {
     bool training
 }
 
-func copy_float(float[] data) float[] {
+func copy_float(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -25,9 +25,9 @@ func copy_float(float[] data) float[] {
     return out
 }
 
-func copy_int(int[] data) int[] {
+func copy_int(int[] data) []int {
     int n = len(data)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -36,21 +36,21 @@ func copy_int(int[] data) int[] {
     return out
 }
 
-func shape1(int n) int[] {
-    int[] shape = int[]{cap: 1}
+func shape1(int n) []int {
+    int[] shape = make([]int, 1)
     shape[0] = n
     return shape
 }
 
-func shape2(int m, int n) int[] {
-    int[] shape = int[]{cap: 2}
+func shape2(int m, int n) []int {
+    int[] shape = make([]int, 2)
     shape[0] = m
     shape[1] = n
     return shape
 }
 
-func shape3(int a, int b, int c) int[] {
-    int[] shape = int[]{cap: 3}
+func shape3(int a, int b, int c) []int {
+    int[] shape = make([]int, 3)
     shape[0] = a
     shape[1] = b
     shape[2] = c
@@ -100,7 +100,7 @@ func matmul2d(tensor a, tensor b) tensor {
     int rows = a.shape[0]
     int inner = a.shape[1]
     int cols = b.shape[1]
-    float[] out = float[]{cap: rows * cols}
+    float[] out = make([]float, rows * cols)
     int r = 0
     for r < rows {
         int c = 0
@@ -119,9 +119,9 @@ func matmul2d(tensor a, tensor b) tensor {
     neurx.tensor.new(out, shape2(rows, cols), a.requires_grad || b.requires_grad)
 }
 
-func softmax_1d(float[] values) float[] {
+func softmax_1d(float[] values) []float {
     int n = len(values)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     float max_v = values[0]
     int i = 1
     for i < n {
@@ -175,7 +175,7 @@ func layer_norm_impl(tensor input, tensor weight, tensor bias, int normalized_di
         inner = inner * input.shape[i]
         i = i + 1
     }
-    float[] out = float[]{cap: len(input.data)}
+    float[] out = make([]float, len(input.data))
     int o = 0
     for o < outer {
         int base = o * inner
@@ -222,7 +222,7 @@ func rms_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims
         inner = inner * input.shape[i]
         i = i + 1
     }
-    float[] out = float[]{cap: len(input.data)}
+    float[] out = make([]float, len(input.data))
     int o = 0
     for o < outer {
         int base = o * inner
@@ -250,7 +250,7 @@ func mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2
     int batch = input.shape[0]
     int in_features = input.shape[1]
     int hidden_features = fc1_bias.shape[0]
-    float[] hidden = float[]{cap: batch * hidden_features}
+    float[] hidden = make([]float, batch * hidden_features)
     int b = 0
     for b < batch {
         int j = 0
@@ -268,7 +268,7 @@ func mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2
         b = b + 1
     }
     int out_features = fc2_bias.shape[0]
-    float[] out = float[]{cap: batch * out_features}
+    float[] out = make([]float, batch * out_features)
     b = 0
     for b < batch {
         int j = 0
@@ -293,7 +293,7 @@ func qkv_projection_impl(tensor input, tensor weight, tensor bias, int n_heads) 
     int channels = input.shape[2]
     int head_dim = channels / n_heads
     int proj_channels = channels * 3
-    float[] out = float[]{cap: batch * seq_len * proj_channels}
+    float[] out = make([]float, batch * seq_len * proj_channels)
     int b = 0
     for b < batch {
         int s = 0
@@ -318,7 +318,7 @@ func qkv_projection_impl(tensor input, tensor weight, tensor bias, int n_heads) 
 
 func rope_apply_impl(tensor input, tensor cos, tensor sin) tensor {
     int n = len(input.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         if i + 1 < n {
@@ -336,7 +336,7 @@ func embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) ten
     int vocab = weight.shape[0]
     int dim = weight.shape[1]
     int n = len(input_ids.data)
-    float[] out = float[]{cap: n * dim}
+    float[] out = make([]float, n * dim)
     int i = 0
     for i < n {
         int idx = input_ids.data[i]
@@ -361,8 +361,8 @@ func embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) ten
 
 func new_linear(int in_features, int out_features) linear {
     int weight_size = in_features * out_features
-    float[] weight = float[]{cap: weight_size}
-    float[] bias = float[]{cap: out_features}
+    float[] weight = make([]float, weight_size)
+    float[] bias = make([]float, out_features)
     int i = 0
     for i < weight_size {
         weight[i] = 0.0
@@ -428,7 +428,7 @@ func linear_load_state_dict(linear layer, linear other) linear {
 }
 
 func linear_parameters(linear layer) []tensor {
-    []tensor params = []tensor{cap: 2}
+    []tensor params = make([]tensor, 2)
     params[0] = neurx.tensor.new(copy_float(layer.weight), shape2(layer.in_features, layer.out_features), true)
     params[1] = neurx.tensor.new(copy_float(layer.bias), shape1(layer.out_features), true)
     return params
@@ -518,10 +518,10 @@ func embedding_bag(tensor weight, tensor input_ids, tensor offsets, int padding_
     tensor embedded = embedding_lookup_impl(weight, input_ids, padding_idx)
     int bag_count = len(offsets.data)
     if bag_count <= 0 {
-        return neurx.tensor.new(float[]{cap: 0}, shape2(0, weight.shape[1]), embedded.requires_grad)
+        return neurx.tensor.new([]float{}, shape2(0, weight.shape[1]), embedded.requires_grad)
     }
     int dim = weight.shape[1]
-    float[] out = float[]{cap: bag_count * dim}
+    float[] out = make([]float, bag_count * dim)
     int b = 0
     for b < bag_count {
         int start = offsets.data[b]
@@ -636,7 +636,7 @@ func dropout(tensor input, float p, bool training) tensor {
     }
     float keep_scale = 1.0 / (1.0 - p)
     int n = len(input.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         int bucket = i - (i / 10) * 10
@@ -672,7 +672,7 @@ func alpha_dropout(tensor input, float p, bool training) tensor {
     float alpha_prime = -1.7580993408
     float keep_scale = 1.0507009873
     int n = len(input.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         int bucket = i - (i / 10) * 10
@@ -692,7 +692,7 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
         return neurx.tensor.clone(input)
     }
     int channels = input.shape[1]
-    float[] out = float[]{cap: len(input.data)}
+    float[] out = make([]float, len(input.data))
     int c = 0
     for c < channels {
         float mean = 0.0
@@ -893,7 +893,7 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
         spatial = spatial * input.shape[i]
         i = i + 1
     }
-    float[] out = float[]{cap: len(input.data)}
+    float[] out = make([]float, len(input.data))
     int b = 0
     for b < batch {
         int g = 0
@@ -1082,7 +1082,7 @@ func new_rnn_cell(int input_size, int hidden_size) rnn_cell_state {
     return neurx.nn.rnn.new_rnn_cell(input_size, hidden_size)
 }
 
-func rnn_cell_forward(rnn_cell_state cell, float[] x, float[] h_prev) float[] {
+func rnn_cell_forward(rnn_cell_state cell, float[] x, float[] h_prev) []float {
     return neurx.nn.rnn.rnn_cell_forward(cell, x, h_prev)
 }
 
@@ -1106,7 +1106,7 @@ func new_gru_cell(int input_size, int hidden_size) gru_cell_state {
     return neurx.nn.rnn.new_gru_cell(input_size, hidden_size)
 }
 
-func gru_cell_forward(gru_cell_state cell, float[] x, float[] h_prev) float[] {
+func gru_cell_forward(gru_cell_state cell, float[] x, float[] h_prev) []float {
     return neurx.nn.rnn.gru_cell_forward(cell, x, h_prev)
 }
 

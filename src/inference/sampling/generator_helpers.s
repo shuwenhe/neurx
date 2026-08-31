@@ -14,10 +14,10 @@ func greedy_step(
     (argmax(logits), rng_state)
 }
 
-func extract_generated_part(int[] full_ids, int prompt_length) int[] {
+func extract_generated_part(int[] full_ids, int prompt_length) []int {
     int gen_len = len(full_ids) - prompt_length
     if gen_len <= 0 { return [] }
-    int[] generated = int[]{cap: gen_len}
+    int[] generated = make([]int, gen_len)
     for i in 0..gen_len {
         generated[i] = full_ids[prompt_length + i]
     }

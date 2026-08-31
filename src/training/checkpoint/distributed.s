@@ -180,7 +180,7 @@ func init_checkpoint_manager(checkpoint_config cfg) checkpoint_manager {
         front_buffer: empty_buf,
         back_buffer: empty_buf,
         buffer_locked: false,
-        task_queue: []checkpoint_task{cap: cfg.async_queue_depth},
+        task_queue: make([]checkpoint_task, cfg.async_queue_depth),
         queue_front: 0,
         queue_rear: 0,
         stats: init_stats,
@@ -561,7 +561,7 @@ func restore_data_iterator(data_iterator_state iter) {}
 
 func find_best_checkpoint(string base_dir) string { return "" }
 
-func list_all_checkpoints(string base_dir) string[] { return string[]{} }
+func list_all_checkpoints(string base_dir) []string { return []string{} }
 
 func sort_checkpoints_by_step_desc(ref string[] paths) {}
 

@@ -48,7 +48,7 @@ func largest_differencing_method(
     }
 }
 
-func argsort_descending(int[] values) int[] {
+func argsort_descending(int[] values) []int {
     int[] indices = make(int[], len(values))
     for int i = 0; i < len(values); i = i + 1 {
         indices[i] = i

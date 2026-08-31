@@ -71,7 +71,7 @@ func test_route_chat_non_stream() int {
     http_request req = http_request{
         method: "POST",
         path: "/v1/chat/completions",
-        headers: string[]{},
+        headers: []string{},
         body: "{\"model\":\"neurx-glm\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}],\"max_tokens\":4,\"stream\":false}",
     }
     http_response resp = route_request(req, cfg)
@@ -86,7 +86,7 @@ func test_route_chat_stream() int {
     http_request req = http_request{
         method: "POST",
         path: "/v1/chat/completions",
-        headers: string[]{},
+        headers: []string{},
         body: "{\"model\":\"neurx-glm\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}],\"stream\":true}",
     }
     http_response resp = route_request(req, cfg)
@@ -101,7 +101,7 @@ func test_route_invalid_model() int {
     http_request req = http_request{
         method: "POST",
         path: "/v1/chat/completions",
-        headers: string[]{},
+        headers: []string{},
         body: "{\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}",
     }
     http_response resp = route_request(req, cfg)
@@ -113,12 +113,12 @@ func test_route_invalid_model() int {
 
 func test_route_health_and_models() int {
     sse_server_config cfg = new_sse_server_config("0.0.0.0", 8080, "neurx-glm")
-    http_request health_req = http_request{method: "GET", path: "/health", headers: string[]{}, body: ""}
+    http_request health_req = http_request{method: "GET", path: "/health", headers: []string{}, body: ""}
     http_response health_resp = route_request(health_req, cfg)
     int fail = 0
     fail = fail + expect(health_resp.status_code == 200, "health returns 200")
     fail = fail + expect(string_contains(health_resp.body, "ok"), "health body says ok")
-    http_request models_req = http_request{method: "GET", path: "/v1/models", headers: string[]{}, body: ""}
+    http_request models_req = http_request{method: "GET", path: "/v1/models", headers: []string{}, body: ""}
     http_response models_resp = route_request(models_req, cfg)
     fail = fail + expect(models_resp.status_code == 200, "models returns 200")
     fail = fail + expect(string_contains(models_resp.body, "neurx-glm"), "models body lists neurx-glm")

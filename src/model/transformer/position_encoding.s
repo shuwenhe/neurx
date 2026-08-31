@@ -25,8 +25,8 @@ struct rope_position_encoding {
     float[] frequencies
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -35,7 +35,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -177,7 +177,7 @@ func get_position_encoding(
     absolute_position_encoding enc,
     int position,
     int seq_len
-) float[] {
+) []float {
     int hidden_dim = enc.hidden_dim
     float[] output = allocate_vector(seq_len * hidden_dim, 0.0)
     int pos = 0
@@ -217,7 +217,7 @@ func get_learned_position_encoding(
     learned_position_encoding enc,
     int position,
     int seq_len
-) float[] {
+) []float {
     int hidden_dim = enc.hidden_dim
     float[] output = allocate_vector(seq_len * hidden_dim, 0.0)
     int pos = 0
@@ -290,7 +290,7 @@ func apply_rope_position(
         }
         pos = pos + 1
     }
-    float[][] result = float[][]{cap: 2}
+    float[][] result = floatmake([][], 2)
     result[0] = q_out
     result[1] = k_out
     result
@@ -302,7 +302,7 @@ func add_position_encoding_to_hidden(
     int batch_size,
     int seq_len,
     int hidden_dim
-) float[] {
+) []float {
     float[] output = copy_vector(hidden_states)
     int b = 0
     for b < batch_size {

@@ -102,7 +102,7 @@ func math_cos(float x) float {
     result
 }
 
-func rms_norm(float[] hidden, float[] weight, int hidden_size, float eps) float[] {
+func rms_norm(float[] hidden, float[] weight, int hidden_size, float eps) []float {
     float[] output = make(float[], hidden_size)
     float sum_sq = 0.0
     int i = 0
@@ -124,7 +124,7 @@ func rms_norm(float[] hidden, float[] weight, int hidden_size, float eps) float[
     output
 }
 
-func matmul_vec(float[] x, float[] w, int in_dim, int out_dim) float[] {
+func matmul_vec(float[] x, float[] w, int in_dim, int out_dim) []float {
     float[] output = make(float[], out_dim)
     int o = 0
     for o < out_dim {
@@ -140,7 +140,7 @@ func matmul_vec(float[] x, float[] w, int in_dim, int out_dim) float[] {
     output
 }
 
-func apply_rope(float[] qk, int num_heads, int head_size, int position, float theta) float[] {
+func apply_rope(float[] qk, int num_heads, int head_size, int position, float theta) []float {
     float[] output = make(float[], len(qk))
     int h = 0
     for h < num_heads {
@@ -197,7 +197,7 @@ func math_exp_neg(float x) float {
     result
 }
 
-func swiglu_ffn(float[] hidden, float[] gate_w, float[] up_w, float[] down_w, int hidden_size, int inter_dim) float[] {
+func swiglu_ffn(float[] hidden, float[] gate_w, float[] up_w, float[] down_w, int hidden_size, int inter_dim) []float {
     float[] gate = matmul_vec(hidden, gate_w, hidden_size, inter_dim)
     float[] up = matmul_vec(hidden, up_w, hidden_size, inter_dim)
     float[] act = make(float[], inter_dim)
@@ -257,7 +257,7 @@ func moe_route(float[] hidden, float[] gate_weight, int hidden_size, int num_exp
     moe_routing_result{selected_experts: selected, weights: weights, num_selected: top_k}
 }
 
-func moe_ffn(float[] hidden, transformer_layer_weights weights, transformer_layer_config config, moe_routing_result route) float[] {
+func moe_ffn(float[] hidden, transformer_layer_weights weights, transformer_layer_config config, moe_routing_result route) []float {
     int inter = config.intermediate_size
     float[] output = make(float[], config.hidden_size)
     int k = 0
@@ -410,7 +410,7 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
     }
 }
 
-func identity_matrix(int in_dim, int out_dim) float[] {
+func identity_matrix(int in_dim, int out_dim) []float {
     float[] w = make(float[], out_dim * in_dim)
     int i = 0
     for i < out_dim && i < in_dim {

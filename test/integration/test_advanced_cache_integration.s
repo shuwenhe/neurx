@@ -9,7 +9,7 @@ func test_advanced_cache_basic() {
     print("[✓] Advanced cache initialized\n")
     
     print("\n[TEST] Creating test token sequences...\n")
-    int[] tokens_1 = int[]{cap: 10}
+    int[] tokens_1 = make([]int, 10)
     tokens_1[0] = 101
     tokens_1[1] = 102
     tokens_1[2] = 103
@@ -26,7 +26,7 @@ func test_advanced_cache_basic() {
     }
     
     print("\n[TEST] Storing KV data in tiered storage...\n")
-    float[] kv_data = float[]{cap: 100}
+    float[] kv_data = make([]float, 100)
     int idx = 0
     for idx < 100 {
         kv_data[idx] = 0.5

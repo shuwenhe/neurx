@@ -75,17 +75,17 @@ func new_fsdp_state(int rank, int world_size, nccl_backend.nccl_comm comm) fsdp_
         world_size: world_size,
         local_rank: rank % 8,
         num_shards: world_size,
-        param_shards: int[]{},
-        grad_shards: int[]{},
-        optimizer_shards: int[]{},
+        param_shards: []int{},
+        grad_shards: []int{},
+        optimizer_shards: []int{},
         is_root: rank == 0,
         comm: comm,
         config: new_fsdp_config(),
     }
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -106,7 +106,7 @@ func fsdp_init(pointer model, fsdp_state state) fsdp_module {
     int global_offset = shard_size * state.rank + min(state.rank, remainder)
     fsdp_module module {
         state: state,
-        params: []fsdp_param{cap: 100},
+        params: make([]fsdp_param, 100),
         flattened_params: allocate_vector(local_size, 0.0),
         flattened_grads: allocate_vector(local_size, 0.0),
         total_params: total_params,
@@ -337,11 +337,11 @@ func fsdp_compute_memory_savings(fsdp_module module) float {
     (1.0 - local_memory / total_memory) * 100.0
 }
 
-func fsdp_module_parameters(fsdp_module module) float[] {
+func fsdp_module_parameters(fsdp_module module) []float {
     module.flattened_params
 }
 
-func fsdp_module_gradients(fsdp_module module) float[] {
+func fsdp_module_gradients(fsdp_module module) []float {
     module.flattened_grads
 }
 
@@ -381,13 +381,13 @@ func fsdp_set_gradients(fsdp_module module, float[] grads) fsdp_module {
     module
 }
 
-func fsdp_get_gradients(fsdp_module module) float[] {
+func fsdp_get_gradients(fsdp_module module) []float {
     copy_vector(module.flattened_grads)
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     int n = len(src)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i := 0; i < n; i += 1 {
         out[i] = src[i]
     }

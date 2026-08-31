@@ -20,7 +20,7 @@ func test_sampling_complete() bool {
         return false
     }
     float[] config = new_sampling_config(0.7, 50, 0.95)
-    float[] final_logits = apply_all_sampling(logits, config, prev_tokens, int[]{})
+    float[] final_logits = apply_all_sampling(logits, config, prev_tokens, []int{})
     if len(final_logits) == 0 {
         return false
     }
@@ -141,7 +141,7 @@ func test_integrated_pipeline() bool {
     float[] logits_pipeline = float[]{2.5, 1.8, 1.2, 0.5, 0.1}
     float[] sampling_config = new_sampling_config(0.8, 40, 0.92)
     sampling_config = set_repetition_penalty(sampling_config, 1.1)
-    float[] processed = apply_all_sampling(logits_pipeline, sampling_config, int[]{}, int[]{})
+    float[] processed = apply_all_sampling(logits_pipeline, sampling_config, []int{}, []int{})
     if len(processed) == 0 {
         return false
     }

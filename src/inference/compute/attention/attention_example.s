@@ -186,7 +186,7 @@ func example_diagnostics() {
     println("Optimal: ~4-8 (mix of focused and broad)\n")
 }
 
-func make_dummy_embeddings(int size) float[] {
+func make_dummy_embeddings(int size) []float {
     emb = make(float[], size)
     i = 0
     for i < size {
@@ -196,7 +196,7 @@ func make_dummy_embeddings(int size) float[] {
     return emb
 }
 
-func make_dummy_tokens(int count) int[] {
+func make_dummy_tokens(int count) []int {
     tokens = make(int[], count)
     i = 0
     for i < count {

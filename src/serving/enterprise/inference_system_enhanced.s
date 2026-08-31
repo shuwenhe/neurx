@@ -94,7 +94,7 @@ func inference_enhanced_batch(
     int max_new_tokens,
 ) (inference_system_enhanced, string[]) {
     updated_sys := sys
-    outputs := string[]{}
+    outputs := []string{}
     if updated_sys.config.enable_speculative_decode {
         batch_input_ids := int[][]{}
         i := 0
@@ -184,8 +184,8 @@ func disable_speculative_mode(inference_system_enhanced sys) inference_system_en
     updated_sys
 }
 
-func tokenize_prompt(string prompt) int[] {
-    tokens := int[]{}
+func tokenize_prompt(string prompt) []int {
+    tokens := []int{}
     i := 0
     for i < prompt.len {
         tokens = append(tokens, i)

@@ -57,8 +57,8 @@ func new_async_task_manager(max_concurrent int) AsyncTaskManager {
     }
 }
 
-func (AsyncTaskManager* manager) submit_task(input_ids int[], max_tokens int,
-        temperature float64, top_k int, top_p float64) string[] {
+func (AsyncTaskManager* manager) submit_task(input_ids []int, max_tokens int,
+        temperature float64, top_k int, top_p float64) []string {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     manager.task_counter = manager.task_counter + 1
@@ -81,8 +81,8 @@ func (AsyncTaskManager* manager) submit_task(input_ids int[], max_tokens int,
     return task_id
 }
 
-func (AsyncTaskManager* manager) submit_task_streaming(input_ids int[], max_tokens int,
-        temperature float64, top_k int, top_p float64, callback string) string[] {
+func (AsyncTaskManager* manager) submit_task_streaming(input_ids []int, max_tokens int,
+        temperature float64, top_k int, top_p float64, callback string) []string {
     task_id := manager.submit_task(input_ids, max_tokens, temperature, top_k, top_p)
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -96,7 +96,7 @@ func (AsyncTaskManager* manager) submit_task_streaming(input_ids int[], max_toke
     return task_id
 }
 
-func (AsyncTaskManager* manager) get_task_status(task_id string[]) int {
+func (AsyncTaskManager* manager) get_task_status(task_id []string) int {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -106,7 +106,7 @@ func (AsyncTaskManager* manager) get_task_status(task_id string[]) int {
     return task.status
 }
 
-func (AsyncTaskManager* manager) get_task_result(task_id string[]) AsyncTask {
+func (AsyncTaskManager* manager) get_task_result(task_id []string) AsyncTask {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -115,7 +115,7 @@ func (AsyncTaskManager* manager) get_task_result(task_id string[]) AsyncTask {
     return manager.tasks[task_id[0]]
 }
 
-func (AsyncTaskManager* manager) update_task_status(task_id string[], status int) {
+func (AsyncTaskManager* manager) update_task_status(task_id []string, status int) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -139,7 +139,7 @@ func (AsyncTaskManager* manager) update_task_status(task_id string[], status int
     manager.tasks[task_id[0]] = task
 }
 
-func (AsyncTaskManager* manager) set_task_output(task_id string[], output_ids int[], output_text string[]) {
+func (AsyncTaskManager* manager) set_task_output(task_id []string, output_ids int[], output_text string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -151,7 +151,7 @@ func (AsyncTaskManager* manager) set_task_output(task_id string[], output_ids in
     manager.tasks[task_id[0]] = task
 }
 
-func (AsyncTaskManager* manager) set_task_error(task_id string[], error_msg string[]) {
+func (AsyncTaskManager* manager) set_task_error(task_id []string, error_msg string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -163,7 +163,7 @@ func (AsyncTaskManager* manager) set_task_error(task_id string[], error_msg stri
     manager.tasks[task_id[0]] = task
 }
 
-func (AsyncTaskManager* manager) get_next_task() string[] {
+func (AsyncTaskManager* manager) get_next_task() []string {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if manager.current_running >= manager.max_concurrent {
@@ -212,7 +212,7 @@ func (AsyncTaskManager* manager) get_statistics() map[string]int {
     return stats
 }
 
-func (AsyncTaskManager* manager) cancel_task(task_id string[]) bool {
+func (AsyncTaskManager* manager) cancel_task(task_id []string) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -243,7 +243,7 @@ func time_ms() int64 {
     return 0
 }
 
-func format_string(format string[], args... interface{}) string[] {
+func format_string(format []string, args... interface{}) []string {
     return make(string[], 1)
 }
 

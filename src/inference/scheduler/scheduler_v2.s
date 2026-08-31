@@ -74,7 +74,7 @@ func new_batch_request(string request_id, int32[] input_tokens, int32 max_tokens
     batch_request {
         request_id: request_id,
         input_tokens: input_tokens,
-        generated_tokens: int32[]{},
+        generated_tokens: []int32{},
         max_tokens: max_tokens,
         state: request_state_submitted,
         priority: priority,
@@ -151,7 +151,7 @@ func (batch_request* req) get_priority_score() float {
 func new_batch_context(int64 batch_id) batch_context {
     batch_context {
         batch_id: batch_id,
-        slots: batch_slot[]{},
+        slots: []batch_slot{},
         total_prefill_tokens: 0,
         total_decode_tokens: 0,
         max_seq_length: 0,
@@ -243,8 +243,8 @@ func (batch_context* batch) remove_slot(int32 slot_index) bool {
     }
 }
 
-func batch_slot_vec_remove_at(batch_slot[] v, int32 idx) batch_slot[] {
-    result := batch_slot[]{}
+func batch_slot_vec_remove_at(batch_slot[] v, int32 idx) []batch_slot {
+    result := []batch_slot{}
     for i in len(0..v) {
         if i != idx {
             result = append(result, v[i])

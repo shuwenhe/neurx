@@ -171,9 +171,9 @@ func to_fp8_e4m3(float value) float {
     quantize_mantissa(value, 3)
 }
 
-func array_to_bf16(float[] arr) float[] {
+func array_to_bf16(float[] arr) []float {
     int n = len(arr)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = to_bf16(arr[i])
@@ -182,9 +182,9 @@ func array_to_bf16(float[] arr) float[] {
     out
 }
 
-func array_to_fp16(float[] arr) float[] {
+func array_to_fp16(float[] arr) []float {
     int n = len(arr)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = to_fp16(arr[i])
@@ -197,10 +197,10 @@ func backend_matmul(
     compute_context ctx,
     float[] a, float[] b,
     int m, int k, int n
-) float[] {
+) []float {
     if ctx.gpu_available {
         if ctx.device.backend == "cann" {
-            float[] out = float[]{cap: m * n}
+            float[] out = make([]float, m * n)
             int idx = 0
             for idx < m * n { out[idx] = 0.0; idx = idx + 1 }
             __neurx_cann_matmul(a, b, out, m, k, n)
@@ -212,8 +212,8 @@ func backend_matmul(
 }
 extern "intrinsic" func __neurx_cann_matmul(float[] a, float[] b, float[] out, int m, int k, int n) ()
 
-func cpu_matmul(float[] a, float[] b, int m, int k, int n) float[] {
-    float[] result = float[]{cap: m * n}
+func cpu_matmul(float[] a, float[] b, int m, int k, int n) []float {
+    float[] result = make([]float, m * n)
     int idx = 0
     for idx < m * n { result[idx] = 0.0; idx = idx + 1 }
     int i = 0
@@ -238,7 +238,7 @@ func backend_matmul_bf16(
     compute_context ctx,
     float[] a, float[] b,
     int m, int k, int n
-) float[] {
+) []float {
     float[] a_bf = array_to_bf16(a)
     float[] b_bf = array_to_bf16(b)
     return backend_matmul(ctx, a_bf, b_bf, m, k, n)
@@ -248,7 +248,7 @@ func backend_matmul_dispatch(
     compute_context ctx,
     float[] a, float[] b,
     int m, int k, int n
-) float[] {
+) []float {
     if ctx.active_dtype == "bf16" {
         return backend_matmul_bf16(ctx, a, b, m, k, n)
     }
@@ -279,16 +279,16 @@ func new_comm_context(int world_size, int rank) comm_context {
 func backend_all_reduce(
     comm_context comm,
     float[] buffer
-) float[] {
+) []float {
     if comm.backend == "nccl" && comm.world_size > 1 {
         return buffer
     }
     buffer
 }
 
-func backend_all_reduce_pair(float[] a, float[] b) float[] {
+func backend_all_reduce_pair(float[] a, float[] b) []float {
     int n = len(a)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         float bv = 0.0
@@ -299,7 +299,7 @@ func backend_all_reduce_pair(float[] a, float[] b) float[] {
     out
 }
 
-func backend_broadcast(comm_context comm, float[] buffer, int root) float[] {
+func backend_broadcast(comm_context comm, float[] buffer, int root) []float {
     if comm.backend == "nccl" && comm.world_size > 1 {
         return buffer
     }
@@ -336,10 +336,10 @@ func amp_scale_loss(amp_state amp, float loss) float {
     loss * amp.loss_scale
 }
 
-func amp_unscale_grad(amp_state amp, float[] grad) float[] {
+func amp_unscale_grad(amp_state amp, float[] grad) []float {
     float inv = 1.0 / amp.loss_scale
     int n = len(grad)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = grad[i] * inv

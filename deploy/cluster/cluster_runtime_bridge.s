@@ -94,9 +94,9 @@ func bridge_probe_runtime(cluster_orchestration_state state) cluster_runtime_bri
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    int[] node_ids = int[]{cap: len(state.nodes)}
-    string[] node_names = string[]{cap: len(state.nodes)}
-    string[] node_hosts = string[]{cap: len(state.nodes)}
+    int[] node_ids = make([]int, len(state.nodes))
+    string[] node_names = make([]string, len(state.nodes))
+    string[] node_hosts = make([]string, len(state.nodes))
     int j = 0
     for j < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[j].node_id)
@@ -194,9 +194,9 @@ func bridge_launch_plan(cluster_orchestration_state state) string {
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    int[] node_ids = int[]{}
-    string[] node_names = string[]{}
-    string[] node_hosts = string[]{}
+    int[] node_ids = []int{}
+    string[] node_names = []string{}
+    string[] node_hosts = []string{}
     int i = 0
     for i < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[i].node_id)
@@ -240,9 +240,9 @@ func bridge_execute_launch_plan(cluster_orchestration_state state) string {
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    int[] node_ids = int[]{}
-    string[] node_names = string[]{}
-    string[] node_hosts = string[]{}
+    int[] node_ids = []int{}
+    string[] node_names = []string{}
+    string[] node_hosts = []string{}
     int i = 0
     for i < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[i].node_id)
@@ -288,9 +288,9 @@ func bridge_remote_execution_commands(cluster_orchestration_state state, bool us
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    int[] node_ids = int[]{}
-    string[] node_names = string[]{}
-    string[] node_hosts = string[]{}
+    int[] node_ids = []int{}
+    string[] node_names = []string{}
+    string[] node_hosts = []string{}
     int i = 0
     for i < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[i].node_id)
@@ -343,9 +343,9 @@ func bridge_recover_failed_nodes(cluster_orchestration_state state) string {
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    int[] node_ids = int[]{}
-    string[] node_names = string[]{}
-    string[] node_hosts = string[]{}
+    int[] node_ids = []int{}
+    string[] node_names = []string{}
+    string[] node_hosts = []string{}
     int j = 0
     for j < len(state.nodes) {
         if state.nodes[j].healthy {
@@ -396,9 +396,9 @@ func bridge_fault_injection_recovery(cluster_orchestration_state state) cluster_
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    int[] node_ids = int[]{}
-    string[] node_names = string[]{}
-    string[] node_hosts = string[]{}
+    int[] node_ids = []int{}
+    string[] node_names = []string{}
+    string[] node_hosts = []string{}
     int j = 0
     for j < len(state.nodes) {
         if state.nodes[j].healthy {

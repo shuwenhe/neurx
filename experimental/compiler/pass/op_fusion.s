@@ -45,7 +45,7 @@ func get_fusion_pattern(op_type first_op, op_type second_op) option[fusion_patte
     }
 }
 
-func find_fusion_candidates(*computation_graph g) fusion_candidate[] {
+func find_fusion_candidates(*computation_graph g) []fusion_candidate {
     candidates = fusion_candidate[]()
 
     for i in range(len(g.operations) - 1) {

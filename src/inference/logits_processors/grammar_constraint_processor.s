@@ -31,7 +31,7 @@ func new_grammar_constraint_processor(int vocab_size) grammar_constraint_process
             tokens_matched: 0,
             match_all_rules: false,
         },
-        rule_token_map: map[string]int[]{},
+        rule_token_map: map[string][]int{},
         strict_mode: false,
         vocab_size: vocab_size,
     }
@@ -72,7 +72,7 @@ func (grammar_constraint_processor* processor) add_pattern_rule(
 
 func (grammar_constraint_processor* processor) process_logits(
     float[] logits
-) float[] {
+) []float {
     if len(processor.constraints.rules) == 0 {
         return logits
     }

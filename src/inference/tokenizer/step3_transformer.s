@@ -59,7 +59,7 @@ func create_transformer_config() transformer_config {
     }
 }
 
-func apply_rope(float[] x, int position, float theta) float[] {
+func apply_rope(float[] x, int position, float theta) []float {
     return x
 }
 
@@ -93,8 +93,8 @@ func exp_approx(float x) float {
     result
 }
 
-func softmax_row(float[] scores, int length) float[] {
-    float[] out = float[]{cap: length}
+func softmax_row(float[] scores, int length) []float {
+    float[] out = make([]float, length)
     if length == 0 { return out }
     float maxv = scores[0]
     int i = 1
@@ -153,13 +153,13 @@ func compute_matrix_stats(float[][] mat) matrix_stats {
     return matrix_stats{mean: mean, sample: sample}
 }
 
-func flatten_mat(float[][] mat) float[] {
-    if len(mat) == 0 { return float[]{} }
+func flatten_mat(float[][] mat) []float {
+    if len(mat) == 0 { return []float{} }
     int R = len(mat)
     int C = 0
     if R > 0 { C = len(mat[0]) }
-    if C == 0 { return float[]{} }
-    float[] out = float[]{cap: R * C}
+    if C == 0 { return []float{} }
+    float[] out = make([]float, R * C)
     int r = 0
     for r < R {
         int c = 0
@@ -177,7 +177,7 @@ func transformer_forward(float[][] embeddings) float[][] {
     if seq_len == 0 { return embeddings }
     int hidden = len(embeddings[0])
     string model_file = "/home/shuwen/shuwen/posttrain/model.safetensors"
-    float[] A = float[]{cap: seq_len * hidden}
+    float[] A = make([]float, seq_len * hidden)
     int i = 0
     for i < seq_len {
         int j = 0
@@ -237,14 +237,14 @@ func transformer_forward(float[][] embeddings) float[][] {
         K = rope_res[1]
         int num_heads = 14
         int head_dim = hidden / num_heads
-        float[] Out = float[]{cap: seq_len * hidden}
+        float[] Out = make([]float, seq_len * hidden)
         int qi = 0
         float scale = 1.0 / pow_f(float(head_dim), 0.5)
         for qi < seq_len {
             int h = 0
             for h < num_heads {
                 int q_off = qi * hidden + h * head_dim
-                float[] scores = float[]{cap: seq_len}
+                float[] scores = make([]float, seq_len)
                 int kj = 0
                 for kj < seq_len {
                     int k_off = kj * hidden + h * head_dim
@@ -259,7 +259,7 @@ func transformer_forward(float[][] embeddings) float[][] {
                     scores[kj] = s
                     kj = kj + 1
                 }
-                float[] probs = float[]{cap: seq_len}
+                float[] probs = make([]float, seq_len)
                 fast_softmax(scores, probs, seq_len)
                 int d2 = 0
                 for d2 < head_dim {
@@ -285,7 +285,7 @@ func transformer_forward(float[][] embeddings) float[][] {
         }
         float[] Gate = fast_matmul_flat_opt(A, fgate, seq_len, hidden, 4864)
         float[] Up = fast_matmul_flat_opt(A, fup, seq_len, hidden, 4864)
-        float[] Gated = float[]{cap: seq_len * 4864}
+        float[] Gated = make([]float, seq_len * 4864)
         int ii = 0
         for ii < seq_len {
             int jj = 0
@@ -308,10 +308,10 @@ func transformer_forward(float[][] embeddings) float[][] {
         layer = layer + 1
     }
     print("[TRANSFORMER INFERENCE END] total_ops=" + int_to_string(total_ops / 1000000000) + "B\n\n")
-    float[][] result = float[][]{cap: seq_len}
+    float[][] result = floatmake([][], seq_len)
     int r = 0
     for r < seq_len {
-        float[] row = float[]{cap: hidden}
+        float[] row = make([]float, hidden)
         int c = 0
         for c < hidden {
             row = append(row, A[r * hidden + c])

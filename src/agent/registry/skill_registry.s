@@ -26,7 +26,7 @@ func agent_skill_registry_count(agent_skill_registry_state state) int {
 }
 
 func agent_skill_registry_copy_records([]agent_skill_record records) []agent_skill_record {
-    []agent_skill_record out = []agent_skill_record{cap: len(records)}
+    []agent_skill_record out = make([]agent_skill_record, len(records))
     int i = 0
     for i < len(records) {
         out[i] = agent_skill_record_state_dict(records[i])
@@ -37,7 +37,7 @@ func agent_skill_registry_copy_records([]agent_skill_record records) []agent_ski
 
 func agent_skill_registry_add(agent_skill_registry_state state, agent_skill_record record) agent_skill_registry_state {
     int size = len(state.records)
-    []agent_skill_record records = []agent_skill_record{cap: size + 1}
+    []agent_skill_record records = make([]agent_skill_record, size + 1)
     int i = 0
     for i < size {
         records[i] = state.records[i]
@@ -314,8 +314,8 @@ func agent_skill_registry_load_state_dict(agent_skill_registry_state state, agen
     }
 }
 
-func agent_skill_registry_names(agent_skill_registry_state state) string[] {
-    string[] names = string[]{cap: len(state.records)}
+func agent_skill_registry_names(agent_skill_registry_state state) []string {
+    string[] names = make([]string, len(state.records))
     int i = 0
     for i < len(state.records) {
         names[i] = state.records[i].spec.name
@@ -337,7 +337,7 @@ func agent_skill_registry_success_rate(agent_skill_registry_state state, string 
     float(rec.success_count) / float(total)
 }
 
-func agent_skill_registry_promoted_names(agent_skill_registry_state state) string[] {
+func agent_skill_registry_promoted_names(agent_skill_registry_state state) []string {
     int count = 0
     int i = 0
     for i < len(state.records) {
@@ -346,7 +346,7 @@ func agent_skill_registry_promoted_names(agent_skill_registry_state state) strin
         }
         i = i + 1
     }
-    string[] names = string[]{cap: count}
+    string[] names = make([]string, count)
     i = 0
     int out_i = 0
     for i < len(state.records) {
@@ -368,7 +368,7 @@ func agent_skill_registry_prune(agent_skill_registry_state state) agent_skill_re
         }
         i = i + 1
     }
-    []agent_skill_record records = []agent_skill_record{cap: keep}
+    []agent_skill_record records = make([]agent_skill_record, keep)
     i = 0
     int out_i = 0
     int active_index = -1

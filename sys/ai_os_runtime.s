@@ -27,7 +27,7 @@ struct ai_os_runtime {
 
 func create_ai_os_runtime(int cpu, int memory, int disk) ai_os_runtime {
     runtime := ai_os_runtime {
-        workloads: workload_context[]{},
+        workloads: []workload_context{},
         workload_count: 0,
         total_cpu: cpu,
         total_memory: memory,

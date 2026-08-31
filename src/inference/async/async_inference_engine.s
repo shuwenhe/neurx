@@ -85,8 +85,8 @@ func (AsyncInferenceEngine* engine) setup_event_handlers() {
     engine.event_loop.register_handler(EVENT_BATCH_EXECUTED, batch_handler)
 }
 
-func (AsyncInferenceEngine* engine) submit_request(input_ids int[], max_tokens int,
-        temperature float64, top_k int, top_p float64) string[] {
+func (AsyncInferenceEngine* engine) submit_request(input_ids []int, max_tokens int,
+        temperature float64, top_k int, top_p float64) []string {
     engine.mutex.Lock()
     if !engine.running {
         engine.mutex.Unlock()
@@ -109,8 +109,8 @@ func (AsyncInferenceEngine* engine) submit_request(input_ids int[], max_tokens i
     return req_id
 }
 
-func (AsyncInferenceEngine* engine) submit_request_streaming(input_ids int[], max_tokens int,
-        temperature float64, top_k int, top_p float64) string[] {
+func (AsyncInferenceEngine* engine) submit_request_streaming(input_ids []int, max_tokens int,
+        temperature float64, top_k int, top_p float64) []string {
     engine.mutex.Lock()
     if !engine.running || !engine.config.enable_streaming {
         engine.mutex.Unlock()
@@ -259,7 +259,7 @@ func (AsyncInferenceEngine* engine) wait_completion(timeout_ms int64) bool {
     }
 }
 
-func string_of_int64(n int64) string[] {
+func string_of_int64(n int64) []string {
     s := make(string[], 1)
     s[0] = "value"
     return s

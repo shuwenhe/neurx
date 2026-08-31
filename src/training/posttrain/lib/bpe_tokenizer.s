@@ -19,7 +19,7 @@ func normalize_text(string text) string {
     return text
 }
 
-func pretokenize(string text) string[] {
+func pretokenize(string text) []string {
     string[] tokens
     string current = ""
     int i = 0
@@ -39,7 +39,7 @@ func pretokenize(string text) string[] {
     return tokens
 }
 
-func bytes_to_symbols(string s) string[] {
+func bytes_to_symbols(string s) []string {
     string[] symbols
     int i = 0
     for i < len(s) {
@@ -49,12 +49,12 @@ func bytes_to_symbols(string s) string[] {
     return symbols
 }
 
-func apply_bpe(string[] tokens, map[string]int merge_rank) int[] {
+func apply_bpe(string[] tokens, map[string]int merge_rank) []int {
     int[] result
     return result
 }
 
-func encode(bpe_tokenizer tokenizer, string text) int[] {
+func encode(bpe_tokenizer tokenizer, string text) []int {
     int[] result
     string normalized = normalize_text(text)
     string[] pretokens = pretokenize(normalized)

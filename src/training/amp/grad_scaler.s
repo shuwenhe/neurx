@@ -17,8 +17,8 @@ func new_grad_scaler(float init_scale, float growth_factor, float backoff_factor
     }
 }
 
-func grad_scaler_scale(grad_scaler_state scaler, float[] grads) float[] {
-    float[] scaled = float[]{cap: len(grads)}
+func grad_scaler_scale(grad_scaler_state scaler, float[] grads) []float {
+    float[] scaled = make([]float, len(grads))
     int i = 0
     for i < len(grads) {
         scaled[i] = grads[i] * scaler.scale
@@ -27,8 +27,8 @@ func grad_scaler_scale(grad_scaler_state scaler, float[] grads) float[] {
     return scaled
 }
 
-func grad_scaler_unscale(grad_scaler_state scaler, float[] grads) float[] {
-    float[] unscaled = float[]{cap: len(grads)}
+func grad_scaler_unscale(grad_scaler_state scaler, float[] grads) []float {
+    float[] unscaled = make([]float, len(grads))
     int i = 0
     for i < len(grads) {
         unscaled[i] = grads[i] / (scaler.scale + 1e-10)

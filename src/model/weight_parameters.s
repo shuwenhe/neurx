@@ -227,7 +227,7 @@ func (layer_weights* layer) get_weight(string weight_id) weight_parameter {
     if weight_id in layer.weights {
         layer.weights[weight_id]
     }
-    metadata := new_parameter_metadata("", int64[]{}, parameter_dtype_float32)
+    metadata := new_parameter_metadata("", []int64{}, parameter_dtype_float32)
     weight := new_model_weight("", metadata)
     weight_parameter {
         weight: weight,

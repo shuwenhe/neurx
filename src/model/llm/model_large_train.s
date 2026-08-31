@@ -64,11 +64,11 @@ struct transformer_layer_optimizer_state {
     adamw_optimizer b_up
 }
 
-func copy_float(float[] values) float[] {
+func copy_float(float[] values) []float {
     values
 }
 
-func copy_int(int[] values) int[] {
+func copy_int(int[] values) []int {
     values
 }
 
@@ -123,7 +123,7 @@ func new_layer_optimizer_state(transformer_layer layer, float lr, float beta1, f
 
 func new_backbone_optimizer_states(transformer backbone, float lr, float beta1, float beta2, float eps, float weight_decay) []transformer_layer_optimizer_state {
     int n = len(backbone.layers)
-    []transformer_layer_optimizer_state out = []transformer_layer_optimizer_state{cap: n}
+    []transformer_layer_optimizer_state out = make([]transformer_layer_optimizer_state, n)
     int i = 0
     for i < n {
         out[i] = new_layer_optimizer_state(transformer_layer_at(backbone.layers, i), lr, beta1, beta2, eps, weight_decay)
@@ -158,7 +158,7 @@ func layer_optimizer_state_set([]transformer_layer_optimizer_state states, int i
 }
 
 func copy_backbone_optimizer_states([]transformer_layer_optimizer_state states) []transformer_layer_optimizer_state {
-    []transformer_layer_optimizer_state out = []transformer_layer_optimizer_state{cap: len(states)}
+    []transformer_layer_optimizer_state out = make([]transformer_layer_optimizer_state, len(states))
     int i = 0
     for i < len(states) {
         out = layer_optimizer_state_set(out, i, copy_layer_optimizer_state(layer_optimizer_state_at(states, i)))
@@ -204,7 +204,7 @@ func tensor_numel(int[] shape) int {
 
 func tensor_from_ints(int[] values, int[] shape) tensor {
     int n = len(values)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = values[i]
@@ -219,7 +219,7 @@ func tensor_from_float_value(float value) tensor {
 
 func zero_tensor(int[] shape) tensor {
     int n = tensor_numel(shape)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = 0.0
@@ -230,7 +230,7 @@ func zero_tensor(int[] shape) tensor {
 
 func ramp_tensor(int[] shape, float scale) tensor {
     int n = tensor_numel(shape)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     if n <= 0 {
         return new(data, copy_int(shape), true)
     }
@@ -292,7 +292,7 @@ func normalize_token_id(int token_id, int vocab_size) int {
 
 func one_hot_tensor(tensor ids, int vocab_size) tensor {
     int n = len(ids.data)
-    float[] data = float[]{cap: n * vocab_size}
+    float[] data = make([]float, n * vocab_size)
     int i = 0
     for i < n {
         int token_id = normalize_token_id(ids.data[i] as int, vocab_size)
@@ -307,7 +307,7 @@ func one_hot_tensor(tensor ids, int vocab_size) tensor {
 
 func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = value.data[i] * scale
@@ -329,8 +329,8 @@ func transformer_backward(
     []transformer_layer_optimizer_state layer_optimizers
 ) gpt_large_backward_result {
     int num_layers = len(backbone.layers)
-    []tensor layer_inputs = []tensor{cap: num_layers + 1}
-    []tensor layer_outputs = []tensor{cap: num_layers}
+    []tensor layer_inputs = make([]tensor, num_layers + 1)
+    []tensor layer_outputs = make([]tensor, num_layers)
     layer_inputs[0] = input_hidden
     tensor current = input_hidden
     int li = 0
@@ -510,7 +510,7 @@ func backward_swiglu_ffn(
 
 func relu_backward_mask(tensor input) tensor {
     int n = len(input.data)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     int i = 0
     for i < n {
         if input.data[i] > 0.0 {
@@ -525,7 +525,7 @@ func relu_backward_mask(tensor input) tensor {
 
 func tensor_ones_like(tensor input) tensor {
     int n = len(input.data)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = 1.0
@@ -619,7 +619,7 @@ func gpt_large_training_corpus(string[] documents) string {
     "neurx trains a decoder only transformer for language modeling.\nneurx uses s to build the full training pipeline.\n"
 }
 
-func gpt_large_training_tokens_from_text(string text) int[] {
+func gpt_large_training_tokens_from_text(string text) []int {
     string[] vocab = build_vocab(text)
     encode_text(text, vocab)
 }

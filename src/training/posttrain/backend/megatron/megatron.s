@@ -168,13 +168,13 @@ func new_megatron_module(
     tensor_parallel_state tp_state = tensor_parallel_state {
         tp_rank: global_ctx.rank % config.tensor_parallel_size,
         tp_world_size: config.tensor_parallel_size,
-        tp_group_ranks: int[]{},
+        tp_group_ranks: []int{},
         tp_ctx: global_ctx,
     }
     pipeline_parallel_state pp_state = pipeline_parallel_state {
         pp_rank: global_ctx.rank / config.tensor_parallel_size,
         pp_world_size: config.pipeline_parallel_size,
-        pp_group_ranks: int[]{},
+        pp_group_ranks: []int{},
         pp_ctx: global_ctx,
         num_microbatches: config.global_batch_size / config.micro_batch_size,
     }

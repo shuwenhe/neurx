@@ -16,7 +16,7 @@ func backward_log(node n, tensor grad_output) backward_result {
         return backward_result { input_grads: [], success: false }
     }
     tensor input = n.inputs[0]
-    float[] grad_data = float[]{cap: len(input.data)}
+    float[] grad_data = make([]float, len(input.data))
     for i in 0..len(input.data) {
         if abs_float(input.data[i]) > 1e-8 {
             grad_data[i] = grad_output.data[i] / input.data[i]
@@ -51,8 +51,8 @@ func backward_concat(node n, tensor grad_output) backward_result {
     backward_result { input_grads: grads, success: true }
 }
 
-func extract_slice(float[] data, int start, int size, int dim, int[] target_shape) float[] {
-    float[] result = float[]{cap: size}
+func extract_slice(float[] data, int start, int size, int dim, int[] target_shape) []float {
+    float[] result = make([]float, size)
     if dim == 0 || len(target_shape) <= 1 {
         for i in 0..size {
             if start + i < len(data) {
@@ -91,7 +91,7 @@ func backward_cross_entropy_loss(node n, tensor grad_output) backward_result {
     int[] shape = logits.shape
     int batch_size = shape[0] if len(shape) > 0 else 1
     int num_classes = shape[1] if len(shape) > 1 else len(logits.data) / batch_size
-    float[] grad_logits = float[]{cap: len(logits.data)}
+    float[] grad_logits = make([]float, len(logits.data))
     for b in 0..batch_size {
         int target_idx = int(targets.data[b]) if b < len(targets.data) else 0
         for c in 0..num_classes {

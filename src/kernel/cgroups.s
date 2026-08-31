@@ -56,8 +56,8 @@ struct cgroup_manager {
 }
 
 func (cgroup_manager* cm) init() (int, string) {
-    cm.cgroup_groups = cgroup_group[]{}
-    cm.subsystems = cgroup_subsystem[]{}
+    cm.cgroup_groups = []cgroup_group{}
+    cm.subsystems = []cgroup_subsystem{}
     cm.next_group_id = 0
     cpu_sys := cgroup_subsystem{
         subsys_id: 0,
@@ -106,7 +106,7 @@ func (cgroup_manager* cm) create_cgroup(string group_name) (cgroup_group, string
             read_iops_limit: 10000,
             write_iops_limit: 10000
         },
-        processes: int[]{}"
+        processes: []int{}"
     }
     cm.cgroup_groups = append(cm.cgroup_groups, group)
     cm.next_group_id = cm.next_group_id + 1

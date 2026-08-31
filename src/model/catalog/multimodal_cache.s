@@ -266,7 +266,7 @@ func (multimodal_cache* mc) cleanup_expired_entries() int32 {
 	return removed_count
 }
 
-func (multimodal_cache* mc) get_entries_by_modality(modality modality_type) string[] {
+func (multimodal_cache* mc) get_entries_by_modality(modality modality_type) []string {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
 	modality_name := "unknown"

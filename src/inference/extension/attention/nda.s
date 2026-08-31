@@ -38,8 +38,8 @@ func new_nda_config(int hidden, int state, int latent, int kernel) nda_config {
     }
 }
 
-func nda_zeros(int n) float[] {
-    float[] out = float[]{cap: n}
+func nda_zeros(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -48,7 +48,7 @@ func nda_zeros(int n) float[] {
     out
 }
 
-func nda_deterministic_weights(int n, int salt, float scale) float[] {
+func nda_deterministic_weights(int n, int salt, float scale) []float {
     float[] out = nda_zeros(n)
     int i = 0
     for i < n {
@@ -60,7 +60,7 @@ func nda_deterministic_weights(int n, int salt, float scale) float[] {
     out
 }
 
-func nda_copy_floats(float[] values) float[] {
+func nda_copy_floats(float[] values) []float {
     float[] out = nda_zeros(len(values))
     int i = 0
     for i < len(values) {
@@ -116,7 +116,7 @@ func nda_swish(float x) float {
     x * nda_sigmoid(x)
 }
 
-func nda_rms_norm_tokens(float[] input, int tokens, int hidden) float[] {
+func nda_rms_norm_tokens(float[] input, int tokens, int hidden) []float {
     float[] out = nda_zeros(tokens * hidden)
     int t = 0
     for t < tokens {
@@ -138,7 +138,7 @@ func nda_rms_norm_tokens(float[] input, int tokens, int hidden) float[] {
     out
 }
 
-func nda_l2_normalize_channels(float[] input, int tokens, int width) float[] {
+func nda_l2_normalize_channels(float[] input, int tokens, int width) []float {
     float[] out = nda_zeros(tokens * width)
     int t = 0
     for t < tokens {
@@ -160,7 +160,7 @@ func nda_l2_normalize_channels(float[] input, int tokens, int width) float[] {
     out
 }
 
-func nda_linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) float[] {
+func nda_linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) []float {
     float[] out = nda_zeros(rows * out_dim)
     int r = 0
     for r < rows {
@@ -180,7 +180,7 @@ func nda_linear(float[] input, float[] weight, int rows, int in_dim, int out_dim
     out
 }
 
-func nda_short_conv(float[] input, float[] kernel, int tokens, int channels, int kernel_size) float[] {
+func nda_short_conv(float[] input, float[] kernel, int tokens, int channels, int kernel_size) []float {
     float[] out = nda_zeros(tokens * channels)
     int t = 0
     for t < tokens {
@@ -203,7 +203,7 @@ func nda_short_conv(float[] input, float[] kernel, int tokens, int channels, int
     out
 }
 
-func nda_activate_swish(float[] input) float[] {
+func nda_activate_swish(float[] input) []float {
     float[] out = nda_zeros(len(input))
     int i = 0
     for i < len(input) {

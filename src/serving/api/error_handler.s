@@ -275,7 +275,7 @@ func (l error_logging*) log_error(error_msg string) {
 	l.error_logs = append(l.error_logs, error_msg)
 }
 
-func (l error_logging*) get_error_logs() string[] {
+func (l error_logging*) get_error_logs() []string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	logs := make(string[], 0, len(l.error_logs))

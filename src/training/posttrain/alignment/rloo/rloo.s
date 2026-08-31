@@ -47,7 +47,7 @@ func rloo_compute_loo_baselines(
     int num_samples
 ) []tensor {
     int n = rewards.len
-    []tensor baselines = []tensor{cap: n}
+    []tensor baselines = make([]tensor, n)
     int i = 0
     for i < n {
         int group_idx = i / num_samples
@@ -120,7 +120,7 @@ func rloo_step(
         rewards,
         cfg.num_samples
     )
-    []tensor advantages = []tensor{cap: rewards.len}
+    []tensor advantages = make([]tensor, rewards.len)
     i = 0
     for i < rewards.len {
         advantages[i] = tensor_ops.sub(rewards[i], baselines[i])

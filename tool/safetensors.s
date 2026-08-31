@@ -86,8 +86,8 @@ func read_tensor(safetensors_archive archive, string tensor_name) tensor_data {
     tensor_data {
         name: tensor_name,
         dtype: "",
-        shape: int[]{},
-        as_f32: float[]{},
+        shape: []int{},
+        as_f32: []float{},
     }
 }
 

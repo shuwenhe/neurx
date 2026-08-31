@@ -360,7 +360,7 @@ func bind_backend_socket(int listener_fd, string host, int port) int {
 }
 
 func tokenize_text(string text) []int {
-    []int tokens = []int{cap: 256}
+    []int tokens = make([]int, 256)
     int i = 0
     int token_count = 0
     int word_start = 0
@@ -402,7 +402,7 @@ func safe_allocate_float_array(int requested_size) int {
 func streaming_matmul_bf16(string model_path, []int metadata_bytes, string tensor_name, []float input, int out_dim, int in_dim) []float {
     print("[MatMul] Streaming matmul for " + tensor_name + " (out=" + int_to_string(out_dim) + ", in=" + int_to_string(in_dim) + ")\n")
     int actual_out = safe_allocate_float_array(out_dim)
-    []float output = []float{cap: actual_out}
+    []float output = make([]float, actual_out)
     if actual_out == 0 {
         print("[MatMul] Allocation failed\n")
         return output
@@ -446,7 +446,7 @@ func streaming_matmul_bf16(string model_path, []int metadata_bytes, string tenso
 
 func simple_transformer_layer([]float input, int hidden_dim, int layer_idx) []float {
     print("[Layer " + int_to_string(layer_idx) + "] Processing input of size " + int_to_string(len(input)) + "\n")
-    []float output = []float{cap: safe_allocate_float_array(hidden_dim)}
+    []float output = make([]float, safe_allocate_float_array(hidden_dim))
     int i = 0
     for i < len(output) && i < len(input) {
         output[i] = input[i] * 0.99 + 0.01
@@ -484,7 +484,7 @@ func exp_approx(float x) float {
 
 func softmax([]float logits) []float {
     int n = len(logits)
-    []float probs = []float{cap: safe_allocate_float_array(n)}
+    []float probs = make([]float, safe_allocate_float_array(n))
     if n == 0 {
         return probs
     }
@@ -577,13 +577,13 @@ func token_id_to_string(int id) string {
 func top_k_indices([]float logits, int k) []int {
     int n = len(logits)
     if k <= 0 || n == 0 {
-        return []int{cap: 0}
+        return make([]int, 0)
     }
     int kk = k
     if kk > n {
         kk = n
     }
-    []int idx = []int{cap: n}
+    []int idx = make([]int, n)
     int i = 0
     for i < n {
         idx[i] = i
@@ -606,7 +606,7 @@ func top_k_indices([]float logits, int k) []int {
         idx[best] = tmp
         out = out + 1
     }
-    []int topk = []int{cap: kk}
+    []int topk = make([]int, kk)
     i = 0
     for i < kk {
         topk[i] = idx[i]
@@ -747,7 +747,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
 
     []int input_tokens = tokenize_text(prompt)
     if len(input_tokens) == 0 {
-        input_tokens = []int{cap: 1}
+        input_tokens = make([]int, 1)
         input_tokens[0] = 50256
     }
     print("[RealInference] Input tokenized: " + int_to_string(len(input_tokens)) + " tokens\n")
@@ -755,7 +755,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     int seq_len = len(input_tokens)
     if seq_len > 32 { seq_len = 32 }
 
-    []float input_hidden = []float{cap: seq_len * hidden_dim}
+    []float input_hidden = make([]float, seq_len * hidden_dim)
     int tok_idx = 0
     for tok_idx < seq_len {
         int token_id = input_tokens[tok_idx]
@@ -780,12 +780,12 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
 
     for layer_idx < active_layers {
 
-        []float attn_hidden = []float{cap: len(current_hidden)}
+        []float attn_hidden = make([]float, len(current_hidden))
         tok_idx = 0
         for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
 
-            []float attn_scores = []float{cap: seq_len}
+            []float attn_scores = make([]float, seq_len)
             int pos = 0
             for pos < seq_len {
                 float dot_product = 0.0
@@ -822,7 +822,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
             tok_idx = tok_idx + 1
         }
 
-        []float ffn_hidden = []float{cap: len(current_hidden)}
+        []float ffn_hidden = make([]float, len(current_hidden))
         tok_idx = 0
         for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
@@ -1149,7 +1149,7 @@ func main() {
 }
 
 func load_embedding_weights(string model_path, int vocab_size, int hidden_size) []float {
-    []float embeddings = []float{cap: vocab_size}
+    []float embeddings = make([]float, vocab_size)
     print("[Weights] Loading embeddings: " + int_to_string(vocab_size) + " × " + int_to_string(hidden_size) + "\n")
 
     []int header_bytes = __host_read_binary_file_range(model_path, 0, 16)
@@ -1177,7 +1177,7 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size) int {
 }
 
 func tokenize_with_vocab(string text) []int {
-    []int tokens = []int{cap: 512}
+    []int tokens = make([]int, 512)
     int token_count = 0
 
     int i = 0
@@ -1234,7 +1234,7 @@ func nucleus_sample([]float logits, float p, int seed) int {
         p_val = 1.0
     }
 
-    []int sorted_indices = []int{cap: n}
+    []int sorted_indices = make([]int, n)
     int i = 0
     for i < n {
         sorted_indices[i] = i
@@ -1287,7 +1287,7 @@ func nucleus_sample([]float logits, float p, int seed) int {
 }
 
 func temperature_scale([]float logits, float temperature) []float {
-    []float scaled = []float{cap: len(logits)}
+    []float scaled = make([]float, len(logits))
 
     float temp_val = temperature
     if temp_val <= 0.0 {
@@ -1305,7 +1305,7 @@ func temperature_scale([]float logits, float temperature) []float {
 
 func init_kv_cache(int num_layers, int max_seq_len, int hidden_size) kv_cache {
     int cache_size = num_layers * max_seq_len * hidden_size
-    []float cache_data = []float{cap: cache_size}
+    []float cache_data = make([]float, cache_size)
 
     print("[Cache] Initializing KV cache: " + int_to_string(num_layers) + " layers, seq_len=" + int_to_string(max_seq_len) + "\n")
 

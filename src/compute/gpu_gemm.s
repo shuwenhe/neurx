@@ -106,17 +106,17 @@ func gpu_gemm(
 }
 
 func cuda_kernel_gemm(
-    a_data: int64,
-    b_data: int64,
-    c_data: int64,
-    m: int,
-    n: int,
-    k: int,
-    alpha: float,
-    beta: float,
-    lda: int,
-    ldb: int,
-    ldc: int
+    int64 a_data,
+    int64 b_data,
+    int64 c_data,
+    int m,
+    int n,
+    int k,
+    float alpha,
+    float beta,
+    int lda,
+    int ldb,
+    int ldc
 ) (bool, string) {
     if m <= 0 || n <= 0 || k <= 0 {
         return false, "Invalid GEMM dimensions"
@@ -130,15 +130,15 @@ func cuda_kernel_gemm(
 }
 
 func cuda_kernel_gemm_batch(
-    a_data: int64,
-    b_data: int64,
-    c_data: int64,
-    m: int,
-    n: int,
-    k: int,
-    batch_size: int,
-    alpha: float,
-    beta: float
+    int64 a_data,
+    int64 b_data,
+    int64 c_data,
+    int m,
+    int n,
+    int k,
+    int batch_size,
+    float alpha,
+    float beta
 ) (bool, string) {
     if m <= 0 || n <= 0 || k <= 0 || batch_size <= 0 {
         return false, "Invalid batch GEMM dimensions"

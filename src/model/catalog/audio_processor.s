@@ -381,7 +381,7 @@ func (audio_processor* ap) get_audio(audio_id string) (*audio_data, error) {
 	return audio, nil
 }
 
-func (audio_processor* ap) list_loaded_audios() string[] {
+func (audio_processor* ap) list_loaded_audios() []string {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 	ids := make(string[], 0, len(ap.loaded_audios))

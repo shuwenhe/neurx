@@ -32,8 +32,8 @@ struct dllm_step_result {
     bool complete
 }
 
-func dllm_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func dllm_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

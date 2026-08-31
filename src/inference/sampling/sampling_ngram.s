@@ -3,7 +3,7 @@ func get_blocked_tokens(
     int[] generated_ids,
     int no_repeat_ngram_size,
     int vocab_size
-) int[] {
+) []int {
     if no_repeat_ngram_size <= 0 || len(generated_ids) < no_repeat_ngram_size - 1 {
         return []
     }
@@ -40,7 +40,7 @@ func apply_ngram_blocking(
     float[] logits,
     int[] generated_ids,
     int ngram_size
-) float[] {
+) []float {
     int[] blocked = get_blocked_tokens(generated_ids, ngram_size, len(logits))
     if len(blocked) == 0 {
         return logits

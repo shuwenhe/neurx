@@ -65,7 +65,7 @@ func neuray_infer(infer_request req) infer_response {
     
     return infer_response {
         request_id: req.request_id,
-        output_data: []byte{cap: 0},
+        output_data: make([]byte, 0),
         output_size_bytes: 0,
         actual_tokens: 0,
         finish_reason: "error",
@@ -85,7 +85,7 @@ func neuray_infer_result_get(string request_id) infer_response {
     // Poll result queue for this request_id
     return infer_response {
         request_id: request_id,
-        output_data: []byte{cap: 0},
+        output_data: make([]byte, 0),
         output_size_bytes: 0,
         finish_reason: "pending",
         latency_ms: 0,
@@ -327,11 +327,11 @@ struct recorded_metrics {
 func neuray_metrics_get(string device_id) recorded_metrics {
     return recorded_metrics {
         sample_count: 0,
-        timestamps: int[]{cap: 0},
-        utilization: int[]{cap: 0},
-        power_watts: int[]{cap: 0},
-        temperature_c: int[]{cap: 0},
-        bandwidth_gbps: int[]{cap: 0},
+        timestamps: []int{},
+        utilization: []int{},
+        power_watts: []int{},
+        temperature_c: []int{},
+        bandwidth_gbps: []int{},
     }
 }
 

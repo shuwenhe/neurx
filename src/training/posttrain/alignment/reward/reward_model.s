@@ -32,14 +32,14 @@ struct reward_batch_scores {
     float[] rewards
 }
 
-func rm_alloc(int n, float v) float[] {
-    float[] arr = float[]{cap: n}
+func rm_alloc(int n, float v) []float {
+    float[] arr = make([]float, n)
     int i = 0
     for i < n { arr[i] = v; i = i + 1 }
     arr
 }
 
-func rm_init_head(int n_embd) float[] {
+func rm_init_head(int n_embd) []float {
     float[] head = rm_alloc(n_embd, 0.0)
     int i = 0
     for i < n_embd {
@@ -143,7 +143,7 @@ func rm_pow(float base, int exp) float {
     r
 }
 
-func rm_pool_last_hidden(float[] last_hidden, int batch_size, int seq_len, int n_embd) float[] {
+func rm_pool_last_hidden(float[] last_hidden, int batch_size, int seq_len, int n_embd) []float {
     float[] pooled = rm_alloc(batch_size * n_embd, 0.0)
     int b = 0
     for b < batch_size {

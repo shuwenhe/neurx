@@ -146,11 +146,11 @@ func (model_warmup_engine* mwe) estimate_throughput(int32 batch_size) float32 {
     return 0.0
 }
 
-func (model_warmup_engine* mwe) identify_bottlenecks() string[] {
+func (model_warmup_engine* mwe) identify_bottlenecks() []string {
     return make(string[], 0)
 }
 
-func (model_warmup_engine* mwe) recommend_optimizations() string[] {
+func (model_warmup_engine* mwe) recommend_optimizations() []string {
     return make(string[], 0)
 }
 

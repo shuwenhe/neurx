@@ -153,12 +153,12 @@ func file_count_lines(string path) (i64, bool) {
     (i64(len(lines)), true)
 }
 
-func dir_list_files(string path, string[] suffixes) string[] {
+func dir_list_files(string path, string[] suffixes) []string {
     if !path_is_dir(path) {
-        return string[]{}
+        return []string{}
     }
     files := runtime_list_dir(path)
-    result := string[]{}
+    result := []string{}
     for _, file in files {
         fname := path_basename(file)
         for _, suffix in suffixes {

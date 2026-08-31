@@ -52,10 +52,10 @@ func flash_attention_forward(
     float[] keys,
     float[] values,
     flash_attention_config config
-) float[] {
+) []float {
     int seq_len = len(queries) / (config.num_heads * config.head_dim)
     if seq_len <= 0 {
-        return float[]{}
+        return []float{}
     }
     float[] output = make(float[], len(queries))
     int h = 0
@@ -263,10 +263,10 @@ func mla_forward(
     float[] hidden,
     mla_weights weights,
     mla_cache cache
-) float[] {
+) []float {
     int seq_len = len(hidden) / weights.config.hidden_dim
     if seq_len <= 0 {
-        return float[]{}
+        return []float{}
     }
     int q_down_dim = weights.config.q_lora_rank
     float[] q_down_proj = matrix_mult(
@@ -345,7 +345,7 @@ func standard_attention(
     bool causal,
     int seq_len,
     int head_dim
-) float[] {
+) []float {
     float[] output = make(float[], len(queries))
     int i = 0
     for i < seq_len {
@@ -381,7 +381,7 @@ func apply_rope(
     float[] freqs,
     int seq_len,
     int head_dim
-) float[] {
+) []float {
     float[] output = make(float[], len(x))
     int i = 0
     for i < seq_len {
@@ -436,7 +436,7 @@ func layer_norm(
     float[] gamma,
     int seq_len,
     int hidden_dim
-) float[] {
+) []float {
     float[] output = make(float[], len(x))
     float eps = 1e-5
     int i = 0
@@ -473,7 +473,7 @@ func matrix_mult(
     int m,
     int k,
     int n
-) float[] {
+) []float {
     float[] result = make(float[], m * n)
     int i = 0
     for i < m {
@@ -513,10 +513,10 @@ func lightning_attention_forward(
     float[] keys,
     float[] values,
     lightning_attention_config config
-) float[] {
+) []float {
     int seq_len = len(queries) / (config.num_heads * config.head_dim)
     if seq_len <= 0 {
-        return float[]{}
+        return []float{}
     }
     int num_blocks = (seq_len + config.block_size - 1) / config.block_size
     float[] output = make(float[], len(queries))
@@ -585,7 +585,7 @@ func compute_local_attention(
     int head_dim,
     int num_heads,
     int head_idx
-) float[] {
+) []float {
     int q_len = len(queries) / head_dim
     int k_len = key_end - key_start
     float[] output = make(float[], len(queries))
@@ -643,7 +643,7 @@ func create_sparse_pattern(
     sparse_attention_config config
 ) sparse_attention_mask {
     bool[] mask = make(bool[], seq_len * seq_len)
-    int[] block_indices = int[]{}
+    int[] block_indices = []int{}
     if config.pattern == "local" {
         int i = 0
         for i < seq_len {
@@ -718,10 +718,10 @@ func sparse_attention_forward(
     float[] keys,
     float[] values,
     sparse_attention_config config
-) float[] {
+) []float {
     int seq_len = len(queries) / (config.num_heads * config.head_dim)
     if seq_len <= 0 {
-        return float[]{}
+        return []float{}
     }
     sparse_attention_mask pattern = create_sparse_pattern(seq_len, config)
     float[] output = make(float[], len(queries))
@@ -769,7 +769,7 @@ func sparse_attention_forward(
     return output
 }
 
-func append_int(int[] arr, int val) int[] {
+func append_int(int[] arr, int val) []int {
     int[] new_arr = make(int[], len(arr) + 1)
     int i = 0
     for i < len(arr) {

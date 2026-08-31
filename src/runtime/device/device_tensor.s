@@ -35,8 +35,8 @@ func tensor_numel(int[] shape) int {
     elements
 }
 
-func tensor_contiguous_strides(int[] shape) int[] {
-    int[] strides = int[]{cap: len(shape)}
+func tensor_contiguous_strides(int[] shape) []int {
+    int[] strides = make([]int, len(shape))
     int stride = 1
     int i = len(shape) - 1
     for i >= 0 {

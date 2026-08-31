@@ -59,7 +59,7 @@ func group_by_prefix(
     return groups
 }
 
-func extract_prefix(int[] tokens, prefix_grouping_config config) int[] {
+func extract_prefix(int[] tokens, prefix_grouping_config config) []int {
     int prefix_len = min_int(len(tokens), config.max_prefix_len)
     prefix_len = max_int(prefix_len, config.min_prefix_len)
     int[] prefix = make(int[], prefix_len)

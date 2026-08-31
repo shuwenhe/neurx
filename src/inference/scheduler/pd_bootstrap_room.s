@@ -40,8 +40,8 @@ struct pd_room_result {
     bool accepted
 }
 
-func pd_room_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func pd_room_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

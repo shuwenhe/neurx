@@ -19,7 +19,7 @@ struct model_delta {
 func new_merge_config() merge_config {
     merge_config {
         merge_method: "average",
-        weights: float[]{},
+        weights: []float{},
         lambda: 1.0,
         top_k_percent: 20,
         drop_rate: 0.5,
@@ -33,8 +33,8 @@ func compute_model_delta(
 ) model_delta {
     []tensor ft_params = finetuned.parameters()
     []tensor base_params = base.parameters()
-    []tensor deltas = []tensor{cap: ft_params.len}
-    string[] names = string[]{cap: ft_params.len}
+    []tensor deltas = make([]tensor, ft_params.len)
+    string[] names = make([]string, ft_params.len)
     int i = 0
     for i < ft_params.len {
         tensor delta = tensor_ops.sub(ft_params[i], base_params[i])
@@ -61,7 +61,7 @@ func merge_models_average(
         weight_sum = weight_sum + weights[i]
         i = i + 1
     }
-    float[] norm_weights = float[]{cap: weights.len}
+    float[] norm_weights = make([]float, weights.len)
     i = 0
     for i < weights.len {
         norm_weights[i] = weights[i] / weight_sum
@@ -130,7 +130,7 @@ func merge_ties(
     []tensor result_params = result.parameters()
     int p = 0
     for p < result_params.len {
-        []tensor param_deltas = []tensor{cap: deltas.len}
+        []tensor param_deltas = make([]tensor, deltas.len)
         int d = 0
         for d < deltas.len {
             param_deltas[d] = deltas[d].param_deltas[p]

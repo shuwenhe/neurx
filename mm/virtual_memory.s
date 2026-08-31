@@ -308,7 +308,7 @@ func (virtual_address_space* vas) reclaim_pages(target_pages: u64) (page_reclaim
 return     (stats, "")
 }
 
-func range(start: u32, end: u32) u32[] {
+func range(start: u32, end: u32) []u32 {
     result := u32[]()
     i := start
     while i < end {

@@ -17,7 +17,7 @@ func create_nucleus_processor(float p) nucleus_processor {
 func apply_nucleus(
     logits: float[],
     nucleus_processor processor
-) float[] {
+) []float {
     int vocab_size = len(logits)
     float[] probs = processor_utils.softmax(logits)
     int[] sorted_indices
@@ -62,7 +62,7 @@ func apply_adaptive_nucleus(
     logits: float[],
     base_p: float,
     float temperature
-) float[] {
+) []float {
     float adaptive_p = base_p
     if temperature < 0.5 {
         adaptive_p = base_p * 0.7
@@ -117,7 +117,7 @@ func apply_top_k_nucleus(
     logits: float[],
     k: int,
     float p
-) float[] {
+) []float {
     int vocab_size = len(logits)
     float[] probs = processor_utils.softmax(logits)
     int[] sorted_indices

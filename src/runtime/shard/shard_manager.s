@@ -73,7 +73,7 @@ func build_training_dataset_manifest(string dataset_path) dataset_manifest:
     manifest.total_shard_count = 1
     manifest.total_document_count = layout.total_documents
     manifest.total_token_count = layout.estimated_tokens
-    manifest.shards = []shard_info{cap: 1}
+    manifest.shards = make([]shard_info, 1)
     manifest.config_used = default_tb_shard_config()
     manifest.creation_timestamp = get_current_time_ms()
     manifest.created_by = "neurx_single_file_manifest"
@@ -88,7 +88,7 @@ func build_training_dataset_manifest(string dataset_path) dataset_manifest:
     shard.quality_score = 1.0
     shard.start_offset_in_dataset = 0
     shard.end_offset_in_dataset = layout.total_size_bytes
-    shard.assigned_ranks = int[]{cap: 1}
+    shard.assigned_ranks = make([]int, 1)
     shard.assigned_ranks[0] = 0
     shard.primary_rank = 0
     shard.is_fully_written = true
@@ -153,9 +153,9 @@ func new_shard_manager(shard_manager_config config) shard_manager_state:
     mgr.current_operation = "idle"
     mgr.operation_progress = 0.0
     mgr.current_shard_being_processed = -1
-    mgr.recently_accessed = []shard_info{cap: 100}
+    mgr.recently_accessed = make([]shard_info, 100)
     mgr.max_cache_size = 100
-    mgr.error_log = string[]{cap: 100}
+    mgr.error_log = make([]string, 100)
     mgr.error_count = 0
     return mgr
 struct partition_result:
@@ -197,7 +197,7 @@ func partition_dataset(
     string shard_base_path = output_dir + "/" + dataset_name
     mgr.config.shard_dir = shard_base_path
     print("Writing shards...")
-    []shard_info all_shards = []shard_info{cap: len(boundaries)}
+    []shard_info all_shards = make([]shard_info, len(boundaries))
     int s = 0
     for s < len(boundaries) {
         shard_boundary bnd = boundaries[s]
@@ -313,7 +313,7 @@ func calculate_shard_boundaries(
     int64 target_size = cfg.target_shard_size_mb * 1024 * 1024
     int64 min_size = cfg.min_shard_size_mb * 1024 * 1024
     int64 max_size = cfg.max_shard_size_mb * 1024 * 1024
-    []shard_boundary boundaries = []shard_boundary{cap: 100}
+    []shard_boundary boundaries = make([]shard_boundary, 100)
     if analysis.is_single_file:
         boundaries = find_split_points_single_file(
             analysis.source_files[0],
@@ -339,7 +339,7 @@ func find_split_points_single_file(
     int64 max_size,
     string alignment
 ) []shard_boundary:
-    []shard_boundary boundaries = []shard_boundary{cap: 100}
+    []shard_boundary boundaries = make([]shard_boundary, 100)
     int64 current_start = 0
     int shard_id = 0
     for current_start < total_size {
@@ -428,12 +428,12 @@ func write_single_shard(
     result.success = true
     return result
 func assign_shard_to_ranks(int shard_id, int num_ranks) int[]:
-    int[] ranks = int[]{cap: 2}
+    int[] ranks = make([]int, 2)
     int primary_rank = s(shard_id - (shard_id / num_ranks) * num_ranks)
     ranks = append(ranks, primary_rank)
     return ranks
 func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
-    []shard_info my_shards = []shard_info{cap: 100}
+    []shard_info my_shards = make([]shard_info, 100)
     int s = 0
     for s < len(manifest.shards) {
         shard_info shard = manifest.shards[s]
@@ -551,7 +551,7 @@ func read_file_range(string path, int64 offset, int64 length) []byte {
     }
     int available = len(content)
     if start >= available {
-        return []byte{cap: 0}
+        return make([]byte, 0)
     }
     int count = int(length)
     if count < 0 {
@@ -561,7 +561,7 @@ func read_file_range(string path, int64 offset, int64 length) []byte {
     if end > available {
         end = available
     }
-    []byte out = []byte{cap: end - start}
+    []byte out = make([]byte, end - start)
     int i = 0
     int pos = start
     for pos < end {

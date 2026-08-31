@@ -70,9 +70,9 @@ func tensor_summary(tensor t) string {
     return summary
 }
 
-func copy_int(int[] values) int[] {
+func copy_int(int[] values) []int {
     int n = len(values)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -81,9 +81,9 @@ func copy_int(int[] values) int[] {
     return out
 }
 
-func copy_float(float[] values) float[] {
+func copy_float(float[] values) []float {
     int n = len(values)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -92,8 +92,8 @@ func copy_float(float[] values) float[] {
     return out
 }
 
-func zeros_float(int n) float[] {
-    float[] out = float[]{cap: n}
+func zeros_float(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -112,9 +112,9 @@ func shape_numel(int[] shape) int {
     return n
 }
 
-func contiguous_strides(int[] shape) int[] {
+func contiguous_strides(int[] shape) []int {
     int ndim = len(shape)
-    int[] strides = int[]{cap: ndim}
+    int[] strides = make([]int, ndim)
     int stride = 1
     int i = ndim - 1
     for i >= 0 {
@@ -143,9 +143,9 @@ func int_to_float(int n) float {
     return 0.0 + n
 }
 
-func broadcast_shape(int[] a, int[] b) int[] {
+func broadcast_shape(int[] a, int[] b) []int {
     if !broadcastable_shape(a, b) {
-        int[] empty_shape = int[]{cap: 1}
+        int[] empty_shape = make([]int, 1)
         empty_shape[0] = 0
         return empty_shape
     }
@@ -155,7 +155,7 @@ func broadcast_shape(int[] a, int[] b) int[] {
     if ndim_b > ndim {
         ndim = ndim_b
     }
-    int[] out = int[]{cap: ndim}
+    int[] out = make([]int, ndim)
     int i = 0
     for i < ndim {
         out[i] = 1
@@ -221,7 +221,7 @@ func broadcastable_shape(int[] a, int[] b) bool {
 func sum_to_shape(tensor src, int[] target_shape) tensor {
     tensor input = contiguous(src)
     if !broadcastable_shape(target_shape, input.desc.shape) {
-        int[] empty_shape = int[]{cap: 1}
+        int[] empty_shape = make([]int, 1)
         empty_shape[0] = 0
         return empty(empty_shape, input.desc.dtype, input.desc.device, input.desc.requires_grad)
     }
@@ -233,7 +233,7 @@ func sum_to_shape(tensor src, int[] target_shape) tensor {
     int flat = 0
     for flat < total {
         int[] src_coords = unravel_index(flat, input.desc.shape)
-        int[] dst_coords = int[]{cap: target_rank}
+        int[] dst_coords = make([]int, target_rank)
         int i = 0
         for i < target_rank {
             dst_coords[i] = 0
@@ -268,9 +268,9 @@ func sum_to_shape(tensor src, int[] target_shape) tensor {
     return out
 }
 
-func unravel_index(int flat_index, int[] shape) int[] {
+func unravel_index(int flat_index, int[] shape) []int {
     int ndim = len(shape)
-    int[] coords = int[]{cap: ndim}
+    int[] coords = make([]int, ndim)
     int i = 0
     for i < ndim {
         coords[i] = 0
@@ -451,10 +451,10 @@ func transpose2d(tensor base) tensor {
     if len(base.desc.shape) != 2 {
         return clone(base)
     }
-    int[] shape = int[]{cap: 2}
+    int[] shape = make([]int, 2)
     shape[0] = base.desc.shape[1]
     shape[1] = base.desc.shape[0]
-    int[] strides = int[]{cap: 2}
+    int[] strides = make([]int, 2)
     strides[0] = base.desc.strides[1]
     strides[1] = base.desc.strides[0]
     return as_strided(base, shape, strides, base.desc.storage_offset)
@@ -485,7 +485,7 @@ func elementwise_binary(tensor a, tensor b, string op) tensor {
     tensor left = contiguous(a)
     tensor right = contiguous(b)
     if !broadcastable_shape(left.desc.shape, right.desc.shape) {
-        int[] empty_shape = int[]{cap: 1}
+        int[] empty_shape = make([]int, 1)
         empty_shape[0] = 0
         return empty(empty_shape, left.desc.dtype, left.desc.device, left.desc.requires_grad || right.desc.requires_grad)
     }
@@ -518,7 +518,7 @@ func elementwise_binary(tensor a, tensor b, string op) tensor {
 func broadcast_to(tensor a, int[] target_shape) tensor {
     tensor src = contiguous(a)
     if !broadcastable_shape(src.desc.shape, target_shape) {
-        int[] empty_shape = int[]{cap: 1}
+        int[] empty_shape = make([]int, 1)
         empty_shape[0] = 0
         return empty(empty_shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
     }
@@ -700,7 +700,7 @@ func softmax(tensor a, int dim) tensor {
     int outer_index = 0
     for outer_index < outer {
         int[] base = unravel_index(outer_index, out_shape)
-        int[] coords = int[]{cap: ndim}
+        int[] coords = make([]int, ndim)
         int j = 0
         int k = 0
         for j < ndim {
@@ -749,7 +749,7 @@ func softmax(tensor a, int dim) tensor {
 }
 
 func core_backend_smoke() bool {
-    int[] shape2 = int[]{cap: 2}
+    int[] shape2 = make([]int, 2)
     shape2[0] = 2
     shape2[1] = 2
     tensor a = ones(shape2, "fp32", "cpu", false)
@@ -783,7 +783,7 @@ func div(tensor a, tensor b) tensor {
 
 func sum_all(tensor a) tensor {
     tensor src = contiguous(a)
-    int[] scalar_shape = int[]{cap: 1}
+    int[] scalar_shape = make([]int, 1)
     scalar_shape[0] = 1
     tensor out = zeros(scalar_shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
     int i = 0
@@ -810,10 +810,10 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
         out_shape[axis] = 1
     } else {
         if ndim <= 1 {
-            out_shape = int[]{cap: 1}
+            out_shape = make([]int, 1)
             out_shape[0] = 1
         } else {
-            out_shape = int[]{cap: ndim - 1}
+            out_shape = make([]int, ndim - 1)
             int i = 0
             int j = 0
             for i < ndim {
@@ -839,7 +839,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                 base_coords[axis] = 0
                 first_off = broadcast_offset(src, base_coords)
             } else {
-                int[] base_coords2 = int[]{cap: ndim}
+                int[] base_coords2 = make([]int, ndim)
                 int i2 = 0
                 int j2 = 0
                 for i2 < ndim {
@@ -861,7 +861,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                     base_coords3[axis] = red
                     src_off = broadcast_offset(src, base_coords3)
                 } else {
-                    int[] base_coords4 = int[]{cap: ndim}
+                    int[] base_coords4 = make([]int, ndim)
                     int i3 = 0
                     int j3 = 0
                     for i3 < ndim {
@@ -896,7 +896,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                     base_coords5[axis] = red2
                     src_off2 = broadcast_offset(src, base_coords5)
                 } else {
-                    int[] base_coords6 = int[]{cap: ndim}
+                    int[] base_coords6 = make([]int, ndim)
                     int i4 = 0
                     int j4 = 0
                     for i4 < ndim {
@@ -922,7 +922,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                     base_coords7[axis] = red3
                     src_off3 = broadcast_offset(src, base_coords7)
                 } else {
-                    int[] base_coords8 = int[]{cap: ndim}
+                    int[] base_coords8 = make([]int, ndim)
                     int i5 = 0
                     int j5 = 0
                     for i5 < ndim {
@@ -992,7 +992,7 @@ func matmul2d(tensor a, tensor b) tensor {
     if k != k2 {
         return empty([0], left.desc.dtype, left.desc.device, left.desc.requires_grad || right.desc.requires_grad)
     }
-    int[] shape = int[]{cap: 2}
+    int[] shape = make([]int, 2)
     shape[0] = m
     shape[1] = n
     tensor out = zeros(shape, left.desc.dtype, left.desc.device, left.desc.requires_grad || right.desc.requires_grad)

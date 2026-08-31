@@ -67,8 +67,8 @@ func run_real_training() int {
     eprintln("[Step 1/6] ✓ Real model weights loaded successfully")
     eprintln("")
     eprintln("[Step 2/6] Creating LoRA adapters")
-    float[][] lora_a_matrices = float[][]{cap: 7}
-    float[][] lora_b_matrices = float[][]{cap: 7}
+    float[][] lora_a_matrices = floatmake([][], 7)
+    float[][] lora_b_matrices = floatmake([][], 7)
     int adapter_i = 0
     for adapter_i < 7 {
         lora_a_matrices[adapter_i] = init_gaussian(config.hidden_size * config.lora_rank, 0.02)
@@ -84,8 +84,8 @@ func run_real_training() int {
     int[] labels = create_labels(input_ids, config.seq_len)
     eprintln("[Step 3/6] ✓ Tokenizer ready (vocab_size=" + int_to_str(tokenizer.vocab_size) + ")")
     eprintln("")
-    float[] loss_history = float[]{cap: config.num_epochs * config.steps_per_epoch}
-    float[] eval_loss_history = float[]{cap: config.num_epochs * config.steps_per_epoch}
+    float[] loss_history = make([]float, config.num_epochs * config.steps_per_epoch)
+    float[] eval_loss_history = make([]float, config.num_epochs * config.steps_per_epoch)
     eprintln("[Step 4/6] Starting REAL training loop with LM loss")
     int epoch = 0
     int total_steps = 0
@@ -136,7 +136,7 @@ func run_real_training() int {
     }
     eprintln("")
     eprintln("[Step 5/6] Saving adapter checkpoints")
-    string[] target_modules = string[]{cap: 7}
+    string[] target_modules = make([]string, 7)
     target_modules[0] = "q_proj"
     target_modules[1] = "k_proj"
     target_modules[2] = "v_proj"

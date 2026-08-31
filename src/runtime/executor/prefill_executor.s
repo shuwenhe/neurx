@@ -25,7 +25,7 @@ func (PrefillExecutor* pe) Initialize() ExecutionResult {
     return pe.base.Initialize()
 }
 
-func (PrefillExecutor* pe) ProcessPrefill(sequences string[], prompt_tokens []i32) ExecutionResult {
+func (PrefillExecutor* pe) ProcessPrefill(sequences []string, prompt_tokens []i32) ExecutionResult {
     if pe.base.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
             success: 0,
@@ -100,7 +100,7 @@ func (PrefillExecutor* pe) allocate_kv_cache(sequence_id string, num_tokens i32)
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (PrefillExecutor* pe) compute_attention(sequences string[], token_counts []i32) ExecutionResult {
+func (PrefillExecutor* pe) compute_attention(sequences []string, token_counts []i32) ExecutionResult {
     total_ops := i32(0)
     for i := 0; i < len(token_counts); i++ {
         total_ops += token_counts[i] * token_counts[i]
@@ -111,14 +111,14 @@ func (PrefillExecutor* pe) compute_attention(sequences string[], token_counts []
     }
 }
 
-func (PrefillExecutor* pe) compute_logits(sequences string[]) ExecutionResult {
+func (PrefillExecutor* pe) compute_logits(sequences []string) ExecutionResult {
     return ExecutionResult{
         success: 1,
         error_code: ERROR_SUCCESS,
     }
 }
 
-func (PrefillExecutor* pe) CreateBatch(num_sequences i32) string[] {
+func (PrefillExecutor* pe) CreateBatch(num_sequences i32) []string {
     batch := make(string[], 0)
     for seq_id, _ := range pe.base.sequences {
         if i32(len(batch)) < num_sequences {

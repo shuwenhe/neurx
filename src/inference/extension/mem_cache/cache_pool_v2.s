@@ -36,7 +36,7 @@ struct cache_pool_v2 {
 
 func new_cache_pool_v2(int64 pool_size, int32 initial_blocks, eviction_policy policy) cache_pool_v2 {
     prefix_cache := new_prefix_cache(pool_size, policy)
-    blocks := memory_block[]{}
+    blocks := []memory_block{}
     block_size := pool_size / int64(initial_blocks)
     for i in 0..initial_blocks {
         block := memory_block {
@@ -161,8 +161,8 @@ func delete_block_at(cache_pool_v2* pool, int32 idx) {
     }
 }
 
-func vec_remove_at(memory_block[] v, int32 idx) memory_block[] {
-    result := memory_block[]{}
+func vec_remove_at(memory_block[] v, int32 idx) []memory_block {
+    result := []memory_block{}
     for i in len(0..v) {
         if i != idx {
             result = append(result, v[i])

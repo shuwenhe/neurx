@@ -380,7 +380,7 @@ func (video_processor* vp) get_video(video_id string) (*video_data, error) {
 	return video, nil
 }
 
-func (video_processor* vp) list_loaded_videos() string[] {
+func (video_processor* vp) list_loaded_videos() []string {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 	ids := make(string[], 0, len(vp.loaded_videos))

@@ -181,13 +181,13 @@ func create_master_weights([]double initial_params, int storage_precision) maste
     master_weight_state state
     state.num_elements = len(initial_params)
     state.storage_precision = storage_precision
-    state.fp32_weights = []double{cap: state.num_elements}
+    state.fp32_weights = make([]double, state.num_elements)
     int i = 0
     for i < state.num_elements {
         state.fp32_weights[i] = initial_params[i]
         i = i + 1
     }
-    state.low_precision_params = []double{cap: state.num_elements}
+    state.low_precision_params = make([]double, state.num_elements)
     i = 0
     for i < state.num_elements {
         state.low_precision_params[i] = cast_to_low_precision(initial_params[i], storage_precision)

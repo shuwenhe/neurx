@@ -181,7 +181,7 @@ func reset_cache_stats(paged_kv_cache_manager mgr) paged_kv_cache_manager {
 func get_sequence_blocks(
     paged_kv_cache_manager mgr,
     int seq_id
-) int[] {
+) []int {
     result := make(int[], 0)
     i := 0
     for i < len(mgr.blocks) {

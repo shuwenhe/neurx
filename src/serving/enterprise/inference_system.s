@@ -51,9 +51,9 @@ func init_enterprise_system(enterprise_inference_config cfg) enterprise_inferenc
         gpu_device: gpu_device,
         model_weights_quantized: quant_core.quantized_tensor{
             name: "model_weights",
-            weights: int[]{},
-            scale_factors: float[]{},
-            zero_points: int[]{},
+            weights: []int{},
+            scale_factors: []float{},
+            zero_points: []int{},
             scheme: quant_core.quantization_scheme{
                 quant_type: cfg.quantization_type,
                 granularity: cfg.quantization_granularity,
@@ -86,8 +86,8 @@ func inference_single(
         cuda_buffer: cuda_core.cuda_malloc(sys.gpu_context, input_tokens.len * 4),
         dtype: "float32",
     }
-    cuda_core.cuda_memcpy_h2d(sys.gpu_context, float[]{}, input_matrix.cuda_buffer, input_tokens.len * 4)
-    int[] generated_tokens = int[]{}
+    cuda_core.cuda_memcpy_h2d(sys.gpu_context, []float{}, input_matrix.cuda_buffer, input_tokens.len * 4)
+    int[] generated_tokens = []int{}
     int token_idx = 0
     for token_idx < max_new_tokens {
         cuda_matmul.matmul_config config = cuda_matmul.matmul_config{
@@ -119,11 +119,11 @@ func inference_batch(
     enterprise_inference_system sys,
     string[] prompts,
     int max_new_tokens,
-) string[] {
+) []string {
     int start_time = get_timestamp()
     int batch_size = prompts.len
     sys.system_metrics.requests_in_progress.value = float(batch_size)
-    string[] outputs = string[]{}
+    string[] outputs = []string{}
     int i = 0
     for i < batch_size {
         string output = inference_single(sys, prompts[i], max_new_tokens, 0.7)
@@ -141,13 +141,13 @@ func inference_distributed(
     string prompt,
     int max_new_tokens,
 ) string {
-    int[] input_tokens = int[]{}
+    int[] input_tokens = []int{}
     if sys.dist_context.config.rank == 0 {
         input_tokens = tokenize_prompt(prompt)
     }
     int input_len = input_tokens.len
     if sys.dist_context.config.rank != 0 {
-        input_tokens = int[]{}
+        input_tokens = []int{}
         int i = 0
         for i < input_len {
             input_tokens = append_int(input_tokens, 0)
@@ -222,8 +222,8 @@ func get_health_status(enterprise_inference_system sys) metrics.health_status {
     return metrics.check_system_health(sys.system_metrics)
 }
 
-func tokenize_prompt(string prompt) int[] {
-    int[] tokens = int[]{}
+func tokenize_prompt(string prompt) []int {
+    int[] tokens = []int{}
     int i = 0
     for i < prompt.len {
         tokens = append_int(tokens, i)
@@ -246,7 +246,7 @@ func get_timestamp() int {
     1234567890
 }
 
-func append_int(int[] slice, int elem) int[] {
+func append_int(int[] slice, int elem) []int {
     new_slice := make_int(slice.len + 1)
     int i = 0
     for i < slice.len {
@@ -257,7 +257,7 @@ func append_int(int[] slice, int elem) int[] {
     new_slice
 }
 
-func append_str(string[] slice, string elem) string[] {
+func append_str(string[] slice, string elem) []string {
     new_slice := make_str(slice.len + 1)
     int i = 0
     for i < slice.len {
@@ -268,12 +268,12 @@ func append_str(string[] slice, string elem) string[] {
     new_slice
 }
 
-func make_int(int len) int[] {
-    int[]{}
+func make_int(int len) []int {
+    []int{}
 }
 
-func make_str(int len) string[] {
-    string[]{}
+func make_str(int len) []string {
+    []string{}
 }
 
 func int_to_str(int n) string {

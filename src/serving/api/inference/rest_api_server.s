@@ -63,8 +63,8 @@ func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     int c = s[idx]
     return string(c)
-func split_string(string s, string sep) string[] {
-    string[] result = string[]{}
+func split_string(string s, string sep) []string {
+    string[] result = []string{}
     if len(s) == 0 { return result }
     string current = ""
     int i = 0

@@ -119,7 +119,7 @@ func get_vocab_size(string model_path) int {
     152064
 }
 
-func tokenize_deterministic_mapper(string text, int vocab_size) int[] {
+func tokenize_deterministic_mapper(string text, int vocab_size) []int {
     token_ids := make(int[], 0)
     current_word := ""
     i := 0

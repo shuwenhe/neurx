@@ -91,8 +91,8 @@ func remax_step(
     remax_config cfg
 ) remax_state {
     int T = rewards.len
-    []tensor advantages = []tensor{cap: T}
-    []tensor returns = []tensor{cap: T}
+    []tensor advantages = make([]tensor, T)
+    []tensor returns = make([]tensor, T)
     tensor gae = tensor_ops.zeros_like(old_values[T - 1])
     int t = T - 1
     for t >= 0 {

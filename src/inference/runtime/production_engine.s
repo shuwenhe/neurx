@@ -251,7 +251,7 @@ func engine_execution_at(production_engine_state state, int index) gpu_execution
 }
 
 func engine_remove_execution([]gpu_execution_command commands, int remove_index) []gpu_execution_command {
-    []gpu_execution_command filtered = []gpu_execution_command{cap: len(commands)}
+    []gpu_execution_command filtered = make([]gpu_execution_command, len(commands))
     int i = 0
     for i < len(commands) {
         if i != remove_index { filtered = append(filtered, commands[i]) }
@@ -326,8 +326,8 @@ func engine_select_data_rank(production_engine_state state) int {
     -1
 }
 
-func engine_replica_worker_ids(production_engine_state state, int data_rank) string[] {
-    string[] worker_ids = string[]{cap: state.config.topology.tensor_parallel_size * state.config.topology.pipeline_parallel_size}
+func engine_replica_worker_ids(production_engine_state state, int data_rank) []string {
+    string[] worker_ids = make([]string, state.config.topology.tensor_parallel_size * state.config.topology.pipeline_parallel_size)
     int i = 0
     for i < len(state.cluster.workers) {
         inference_worker worker = state.cluster.workers[i]
@@ -426,7 +426,7 @@ func engine_release_command_workers(production_engine_state state, gpu_execution
 }
 
 func engine_invalidate_request_executions(production_engine_state state, string request_id) production_engine_state {
-    []gpu_execution_command retained = []gpu_execution_command{cap: len(state.inflight)}
+    []gpu_execution_command retained = make([]gpu_execution_command, len(state.inflight))
     int i = 0
     for i < len(state.inflight) {
         gpu_execution_command command = engine_execution_at(state, i)

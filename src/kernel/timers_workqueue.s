@@ -16,7 +16,7 @@ struct timer_manager {
 }
 
 func (timer_manager* tm) init() (int, string) {
-    tm.timers = timer[]{}
+    tm.timers = []timer{}
     tm.current_time = 0
     tm.next_timer_id = 0
     return 0, ""

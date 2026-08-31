@@ -26,8 +26,8 @@ struct thinking_budget_update {
     int forced_token_id
 }
 
-func thinking_zero_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func thinking_zero_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

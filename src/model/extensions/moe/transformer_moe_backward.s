@@ -110,7 +110,7 @@ func moe_expert_backward(
     (d_h, eg)
 }
 
-func moe_softmax_bk(float[] probs, float[] d_logprob, int E) float[] {
+func moe_softmax_bk(float[] probs, float[] d_logprob, int E) []float {
     float dot = 0.0
     int e = 0
     for e < E { dot = dot + d_logprob[e] * probs[e]; e = e + 1 }
@@ -136,7 +136,7 @@ func moe_backward(
     int K = layer.top_k
     float[] d_hidden = moe_alloc(tokens * H, 0.0)
     float[] d_router_weight = moe_alloc(H * E, 0.0)
-    []moe_expert_grads expert_grads = []moe_expert_grads{cap: E}
+    []moe_expert_grads expert_grads = make([]moe_expert_grads, E)
     int e = 0
     for e < E {
         expert_grads[e] = moe_expert_grads {
@@ -147,7 +147,7 @@ func moe_backward(
         e = e + 1
     }
     int capacity = moe_capacity(tokens, E, K, layer.config.capacity_factor)
-    int[] expert_counts = int[]{cap: E}
+    int[] expert_counts = make([]int, E)
     int ec = 0
     for ec < E { expert_counts[ec] = 0; ec = ec + 1 }
     int t = 0
@@ -244,12 +244,12 @@ func new_moe_adamw_state(moe_layer layer) moe_adamw_state {
     int H = layer.hidden_dim
     int D = layer.expert_dim
     int E = layer.num_experts
-    float[][] m_gw = float[][]{cap: E}
-    float[][] v_gw = float[][]{cap: E}
-    float[][] m_vw = float[][]{cap: E}
-    float[][] v_vw = float[][]{cap: E}
-    float[][] m_dw = float[][]{cap: E}
-    float[][] v_dw = float[][]{cap: E}
+    float[][] m_gw = floatmake([][], E)
+    float[][] v_gw = floatmake([][], E)
+    float[][] m_vw = floatmake([][], E)
+    float[][] v_vw = floatmake([][], E)
+    float[][] m_dw = floatmake([][], E)
+    float[][] v_dw = floatmake([][], E)
     int e = 0
     for e < E {
         m_gw[e] = moe_alloc(H * D, 0.0)
@@ -271,7 +271,7 @@ func new_moe_adamw_state(moe_layer layer) moe_adamw_state {
     }
 }
 
-func moe_adamw_vec(float[] p, float[] g, float[] m, float[] v, int step, float lr, float b1, float b2, float eps, float wd) float[] {
+func moe_adamw_vec(float[] p, float[] g, float[] m, float[] v, int step, float lr, float b1, float b2, float eps, float wd) []float {
     float bc1 = 1.0 - moe_pow(b1, step)
     float bc2 = 1.0 - moe_pow(b2, step)
     int n = len(p)
@@ -308,8 +308,8 @@ func moe_adamw_step(moe_layer layer, moe_layer_grads grads, moe_adamw_state opt)
     (layer, opt)
 }
 
-func moe_alloc(int n, float v) float[] {
-    float[] arr = float[]{cap: n}
+func moe_alloc(int n, float v) []float {
+    float[] arr = make([]float, n)
     int i = 0
     for i < n { arr[i] = v; i = i + 1 }
     arr

@@ -17,7 +17,7 @@ struct sampler {
 }
 
 func new_sampler(sampler_config cfg) sampler {
-    int[] indices = int[]{cap: cfg.total_samples}
+    int[] indices = make([]int, cfg.total_samples)
     for i in 0..cfg.total_samples {
         indices[i] = i
     }
@@ -54,8 +54,8 @@ func next_batch_sequential(sampler s) (int[], bool) {
     }
 }
 
-func extract_indices(int[] src, int start, int count) int[] {
-    int[] result = int[]{cap: count}
+func extract_indices(int[] src, int start, int count) []int {
+    int[] result = make([]int, count)
     for i in 0..count {
         if start + i < len(src) {
             result[i] = src[start + i]
@@ -148,8 +148,8 @@ func generate_distributed_indices(
     sampler_config cfg,
     int offset,
     int count
-) int[] {
-    int[] indices = int[]{cap: count}
+) []int {
+    int[] indices = make([]int, count)
     for i in 0..count {
         indices[i] = offset + i
     }
@@ -181,7 +181,7 @@ func create_weighted_sampler(
     sampler_config cfg,
     float[] weights
 ) weighted_sampler {
-    float[] cumsum = float[]{cap: len(weights)}
+    float[] cumsum = make([]float, len(weights))
     float running_sum = 0.0
     for i in 0..len(weights) {
         running_sum = running_sum + weights[i]
@@ -205,7 +205,7 @@ func next_batch_weighted(weighted_sampler ws) (int[], bool) {
     }
     int batch_count = min(ws.base.config.batch_size,
                           ws.num_samples_to_yield - ws.base.current_position)
-    int[] batch = int[]{cap: batch_count}
+    int[] batch = make([]int, batch_count)
     for i in 0..batch_count {
         batch[i] = draw_weighted_sample(ws)
         ws.base.current_position = ws.base.current_position + 1

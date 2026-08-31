@@ -190,7 +190,7 @@ func (cp connection_pool*) get_active_connections_count() int32 {
 	return cp.metrics.active_connections
 }
 
-func (cp connection_pool*) get_idle_connections() connection_info[] {
+func (cp connection_pool*) get_idle_connections() []connection_info {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
 	idle_conns := make(connection_info[], 0, len(cp.idle_connections))

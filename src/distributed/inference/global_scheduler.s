@@ -73,11 +73,11 @@ func new_global_inference_scheduler(
         scheduler_id: scheduler_id,
         world_size: world_size,
         config: config,
-        pending_requests: request_metadata[]{cap: 1000},
+        pending_requests: make([]request_metadata, 1000),
         current_batch: continuous_batch {
             batch_id: 0,
             creation_time_ns: 0,
-            slots: batch_slot[]{cap: config.max_batch_size},
+            slots: make([]batch_slot, config.max_batch_size),
             num_prefill_slots: 0,
             num_decode_slots: 0,
             total_prefill_tokens: 0,
@@ -86,7 +86,7 @@ func new_global_inference_scheduler(
             kv_cache_read_indices: make(float[], config.max_decode_batch_size),
             is_full: false,
         },
-        active_batches: continuous_batch[]{cap: 100},
+        active_batches: make([]continuous_batch, 100),
         total_requests_processed: 0,
         total_tokens_generated: 0,
         start_time_ns: 0,
@@ -121,7 +121,7 @@ func (global_inference_scheduler* scheduler) continuous_batch_iteration() (conti
     new_batch := continuous_batch {
         batch_id: len(scheduler.active_batches),
         creation_time_ns: 0,
-        slots: batch_slot[]{cap: scheduler.config.max_batch_size},
+        slots: make([]batch_slot, scheduler.config.max_batch_size),
         num_prefill_slots: 0,
         num_decode_slots: 0,
         total_prefill_tokens: 0,
@@ -205,13 +205,13 @@ func (global_inference_scheduler* scheduler) decode_one_token_batch(
         i = i + 1
     }
     if active_decode_slots == 0 {
-        return float[]{}, false
+        return []float{}, false
     }
     return logits, true
 }
 
-func (global_inference_scheduler* scheduler) get_completed_batches() continuous_batch[] {
-    completed := continuous_batch[]{cap: len(scheduler.active_batches)}
+func (global_inference_scheduler* scheduler) get_completed_batches() []continuous_batch {
+    completed := make([]continuous_batch, len(scheduler.active_batches))
     int i = 0
     for i < len(scheduler.active_batches) {
         continuous_batch* batch = &scheduler.active_batches[i]

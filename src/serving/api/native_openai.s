@@ -27,7 +27,7 @@ func native_openai_stream(inference_request request, native_execution_result res
     string body = ""
     int i = 0
     for i < len(result.token_ids) {
-        int[] single = int[]{cap: 1}
+        int[] single = make([]int, 1)
         single[0] = result.token_ids[i]
         hf_bpe_decode_result decoded = hf_bpe_decode_generated(tokenizer, single)
         if decoded.ok && decoded.text != "" {

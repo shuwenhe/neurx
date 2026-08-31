@@ -58,7 +58,7 @@ func runtime_read_text_file(string path) string {
     ""
 }
 extern "intrinsic" func __host_read_binary_file(string path) int[]
-func runtime_read_binary_file(string path) int[] {
+func runtime_read_binary_file(string path) []int {
     __host_read_binary_file(path)
 }
 
@@ -137,7 +137,7 @@ func runtime_run_command(string command) runtime_command_result {
             error: "empty_command",
         }
     }
-    string[] argv = string[]{cap: 3}
+    string[] argv = make([]string, 3)
     argv[0] = "sh"
     argv[1] = "-c"
     argv[2] = cmd
@@ -161,7 +161,7 @@ func runtime_run_command_output(string command) string {
     if cmd == "" {
         return ""
     }
-    string[] argv = string[]{cap: 3}
+    string[] argv = make([]string, 3)
     argv[0] = "sh"
     argv[1] = "-c"
     argv[2] = cmd
@@ -203,7 +203,7 @@ struct tensor_buffer {
 
 func tensor_buffer_new(int capacity) tensor_buffer {
     tensor_buffer {
-        buffer: []byte{cap: capacity},
+        buffer: make([]byte, capacity),
         pos: 0,
     }
 }
@@ -221,7 +221,7 @@ func tensor_buffer_write_bytes(tensor_buffer buf, []byte data) () {
 }
 
 func tensor_buffer_write_u64_le(tensor_buffer buf, int value) () {
-    []byte bytes = []byte{cap: 8}
+    []byte bytes = make([]byte, 8)
     int v = value
     int i = 0
     for i < 8 {
@@ -241,7 +241,7 @@ func tensor_buffer_write_f32_le(tensor_buffer buf, float value) () {
     } else {
         bits = float_to_bits_internal(value)
     }
-    []byte bytes = []byte{cap: 4}
+    []byte bytes = make([]byte, 4)
     int v = bits
     bytes[0] = byte(v - (v / 256) * 256)
     v = v / 256
@@ -270,7 +270,7 @@ func tensor_buffer_len(tensor_buffer buf) int {
 }
 
 func tensor_buffer_slice(tensor_buffer buf) []byte {
-    []byte result = []byte{cap: buf.pos}
+    []byte result = make([]byte, buf.pos)
     int i = 0
     for i < buf.pos {
         result[i] = buf.buffer[i]
@@ -318,7 +318,7 @@ struct safetensors_writer {
 func safetensors_writer_new(string filepath) safetensors_writer {
     safetensors_writer {
         filepath: filepath,
-        tensors: []tensor{cap: 100},
+        tensors: make([]tensor, 100),
         tensor_count: 0,
         total_data_size: 0,
     }

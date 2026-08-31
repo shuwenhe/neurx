@@ -20,18 +20,18 @@ func new_state() autograd_state {
     }
 }
 
-func zeros_like(float[] data) float[] {
+func zeros_like(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         out[i] = 0.0
     }
     out
 }
 
-func ones_like(float[] data) float[] {
+func ones_like(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         out[i] = 1.0
     }
@@ -84,7 +84,7 @@ func accumulate_grad(autograd_state state, int id, float[] grad) autograd_state 
     }
 }
 
-func grad_of(autograd_state state, int id) float[] {
+func grad_of(autograd_state state, int id) []float {
     int n = len(state.records)
     for i in 0..n {
         if state.records[i].id == id {

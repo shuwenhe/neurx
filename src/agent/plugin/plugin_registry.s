@@ -168,7 +168,7 @@ func (plugin_registry* r) query_plugins(query plugin_query) plugin_query_result 
 	return result
 }
 
-func (plugin_registry* r) get_all_plugins() plugin_interface[] {
+func (plugin_registry* r) get_all_plugins() []plugin_interface {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	result := make(plugin_interface[], 0)
@@ -178,7 +178,7 @@ func (plugin_registry* r) get_all_plugins() plugin_interface[] {
 	return result
 }
 
-func (plugin_registry* r) get_active_plugins() string[] {
+func (plugin_registry* r) get_active_plugins() []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	result := make(string[], 0)
@@ -196,7 +196,7 @@ func (plugin_registry* r) get_plugin_count() int32 {
 	return r.plugin_count
 }
 
-func (plugin_registry* r) get_plugin_by_type(ptype plugin_type) string[] {
+func (plugin_registry* r) get_plugin_by_type(ptype plugin_type) []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	result := make(string[], 0)
@@ -208,7 +208,7 @@ func (plugin_registry* r) get_plugin_by_type(ptype plugin_type) string[] {
 	return result
 }
 
-func (plugin_registry* r) sort_by_priority() string[] {
+func (plugin_registry* r) sort_by_priority() []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	sorted := make(string[], 0)
@@ -239,7 +239,7 @@ func (plugin_registry* r) has_plugin(plugin_id string) bool {
 	return exists
 }
 
-func (plugin_registry* r) get_plugin_dependencies(plugin_id string) string[] {
+func (plugin_registry* r) get_plugin_dependencies(plugin_id string) []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	plugin, exists := r.registered_plugins[plugin_id]

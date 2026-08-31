@@ -245,7 +245,7 @@ func compute_group_advantages([]generation_output outputs, int G) (float[], floa
         i = i + 1
     }
     float std_r = sqrt_approx(sum_sq / G as float)
-    float[] advantages = float[]{cap: G}
+    float[] advantages = make([]float, G)
     if std_r > 1e-8 {
         i = 0
         for i < G {
@@ -311,9 +311,9 @@ func grpo_training_step(
     grpo_config cfg = state.config
     int G = cfg.group_size
     (float[] advantages, float mean_r, float std_r) = compute_group_advantages(group.outputs, G)
-    float[] new_log_probs = float[]{cap: G}
-    float[] old_log_probs = float[]{cap: G}
-    float[] ref_log_probs = float[]{cap: G}
+    float[] new_log_probs = make([]float, G)
+    float[] old_log_probs = make([]float, G)
+    float[] ref_log_probs = make([]float, G)
     int i = 0
     for i < G {
         new_log_probs[i] = sum_float(group.outputs[i].log_probs)
@@ -377,12 +377,12 @@ func grpo_training_init(grpo_config cfg) grpo_training_state {
         total_prompts_processed: 0,
         running_mean_reward: 0.0,
         running_std_reward: 1.0,
-        policy_loss_history: float[]{cap: 0},
-        kl_divergence_history: float[]{cap: 0},
-        total_loss_history: float[]{cap: 0},
-        reward_history: float[]{cap: 0},
-        format_reward_history: float[]{cap: 0},
-        accuracy_reward_history: float[]{cap: 0},
+        policy_loss_history: []float{},
+        kl_divergence_history: []float{},
+        total_loss_history: []float{},
+        reward_history: []float{},
+        format_reward_history: []float{},
+        accuracy_reward_history: []float{},
     }
 }
 

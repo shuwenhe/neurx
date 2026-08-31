@@ -96,7 +96,7 @@ func new_generation_engine(int num_layers) generation_engine {
     }
 }
 
-func embed_token(generation_engine engine, int token_id) float[] {
+func embed_token(generation_engine engine, int token_id) []float {
     float[] hidden = make(float[], engine.hidden_size)
     if token_id < 0 || token_id >= engine.tokenizer.vocab_size {
         return hidden
@@ -129,7 +129,7 @@ func argmax_logits(float[] logits, int vocab_size) int {
     best_idx
 }
 
-func compute_logits(float[] hidden, float[] lm_head, int hidden_size, int vocab_size) float[] {
+func compute_logits(float[] hidden, float[] lm_head, int hidden_size, int vocab_size) []float {
     float[] logits = make(float[], vocab_size)
     int v = 0
     for v < vocab_size {
@@ -178,8 +178,8 @@ func generate(generation_engine engine, string prompt, int max_new_tokens) gener
         hidden = run_layer_stack(engine, hidden, position)
         position = position + 1
     }
-    int[] generated = int[]{}
-    string[] token_strings = string[]{}
+    int[] generated = []int{}
+    string[] token_strings = []string{}
     rng_state rng = engine.rng
     int step = 0
     for step < max_new_tokens {

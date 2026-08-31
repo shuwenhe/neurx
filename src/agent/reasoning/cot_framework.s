@@ -121,7 +121,7 @@ func (cot_framework* f) add_thought_dependency(
 	return false
 }
 
-func (cot_framework* f) get_reasoning_chain() string[] {
+func (cot_framework* f) get_reasoning_chain() []string {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	chain := make(string[], 0, len(f.steps))
@@ -173,7 +173,7 @@ func (cot_framework* f) update_step_result(
 	return found
 }
 
-func (cot_framework* f) get_step_dependencies(thought_id string) string[] {
+func (cot_framework* f) get_step_dependencies(thought_id string) []string {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	for thought := range f.thoughts {
@@ -190,7 +190,7 @@ func (cot_framework* f) get_step_dependencies(thought_id string) string[] {
 
 func (cot_framework* f) get_thoughts_by_type(
 	thought_type thought_type,
-) thought[] {
+) []thought {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	filtered := make(thought[], 0, len(f.thoughts)/5)

@@ -57,8 +57,8 @@ struct alibi_apply_result {
     float[] scores
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -67,7 +67,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -175,7 +175,7 @@ func layer_normalize(
     float[] input,
     int batch_size,
     int seq_len
-) float[] {
+) []float {
     int hidden_dim = ln.hidden_dim
     float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
@@ -221,7 +221,7 @@ func rms_normalize(
     float[] input,
     int batch_size,
     int seq_len
-) float[] {
+) []float {
     int hidden_dim = rn.hidden_dim
     float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
@@ -250,7 +250,7 @@ func rms_normalize(
     output
 }
 
-func new_absolute_position_embedding(position_embedding_config cfg) float[] {
+func new_absolute_position_embedding(position_embedding_config cfg) []float {
     int total = cfg.max_seq_len * cfg.hidden_dim
     float[] embedding = allocate_vector(total, 0.0)
     int pos = 0
@@ -297,7 +297,7 @@ func get_position_embedding(
     float[] embedding,
     int hidden_dim,
     int seq_len
-) float[] {
+) []float {
     int total = seq_len * hidden_dim
     float[] out = allocate_vector(total, 0.0)
     int i = 0
@@ -311,7 +311,7 @@ func get_position_embedding(
 func get_learned_position_embedding(
     learned_position_embedding embedding,
     int seq_len
-) float[] {
+) []float {
     int total = seq_len * embedding.hidden_dim
     float[] out = allocate_vector(total, 0.0)
     int i = 0

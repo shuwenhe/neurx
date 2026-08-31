@@ -460,12 +460,12 @@ func agent_workspace_replace_exact(string text, string old_text, string new_text
     }
 }
 
-func agent_workspace_split_lines(string text) string[] {
+func agent_workspace_split_lines(string text) []string {
     int count = agent_workspace_count_lines(text)
     if count < 1 {
         count = 1
     }
-    string[] result = string[]{cap: count + 1}
+    string[] result = make([]string, count + 1)
     string line = ""
     int i = 0
     for i < len(text) {
@@ -505,7 +505,7 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
     if no == 0 {
         return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "no_progress", "reason=empty_old_text"), "")
     }
-    string[] norm_ol = string[]{cap: no + 1}
+    string[] norm_ol = make([]string, no + 1)
     int oi = 0
     for oi < no {
         norm_ol = append(norm_ol, agent_workspace_normalize_line(ol[oi]))

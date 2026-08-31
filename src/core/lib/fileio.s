@@ -47,7 +47,7 @@ func write_line(file_handle handle, string line) int {
     write_string(handle, line + "\n")
 }
 
-func read_file_lines(string filepath) string[] {
+func read_file_lines(string filepath) []string {
     string[] lines
     lines
 }
@@ -56,7 +56,7 @@ func read_line(string filepath, int line_num) string {
     ""
 }
 
-func split_string(string text, string delim) string[] {
+func split_string(string text, string delim) []string {
     string[] parts
     int count = 0
     string current = ""

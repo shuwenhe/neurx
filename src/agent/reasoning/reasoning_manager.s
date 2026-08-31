@@ -148,7 +148,7 @@ func (reasoning_manager* mgr) get_reasoning_summary(string chain_id) string {
 }
 
 func (reasoning_manager* mgr) cleanup_completed_chains() int {
-    to_delete := string[]{}
+    to_delete := []string{}
     for chain_id, chain := range mgr.chains {
         if chain.state == chain_state.completed || chain.state == chain_state.failed {
             to_delete = append(to_delete, chain_id)

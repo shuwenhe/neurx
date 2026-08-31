@@ -129,7 +129,7 @@ func (sse_buffer* b) peek_event() (sse_event, bool) {
 	return event, true
 }
 
-func (sse_buffer* b) get_pending_events() sse_event[] {
+func (sse_buffer* b) get_pending_events() []sse_event {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	result := make(sse_event[], 0)
@@ -223,7 +223,7 @@ func (sse_queue* q) dequeue_event() (sse_event, bool) {
 	return sse_event{}, false
 }
 
-func (sse_queue* q) get_pending_events() sse_event[] {
+func (sse_queue* q) get_pending_events() []sse_event {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	result := make(sse_event[], 0)

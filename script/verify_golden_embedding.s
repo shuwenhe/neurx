@@ -153,7 +153,7 @@ func main() {
     }
     println("Test Case Discovery:")
     println("  Searching in: " + golden_dir)
-    string[] test_cases = string[]{}
+    string[] test_cases = []string{}
     test_cases = append(test_cases, "single_token")
     test_cases = append(test_cases, "short_sequence")
     test_cases = append(test_cases, "batch_sequences")

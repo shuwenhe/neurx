@@ -51,8 +51,8 @@ func main() {
     training_loop_with_stability()
 }
 
-func make_float_array(int size) float[] {
-    float[] arr = float[]{}
+func make_float_array(int size) []float {
+    float[] arr = []float{}
     int i = 0
     for i < size {
         arr = append(arr, 0.0)
@@ -65,7 +65,7 @@ func make_2d_array(int size) float[][] {
     float[][] arr = float[][]{}
     int i = 0
     for i < size {
-        arr = append(arr, float[]{})
+        arr = append(arr, []float{})
         i = i + 1
     }
     return arr

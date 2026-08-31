@@ -193,7 +193,7 @@ func (tensor_parallel_inference* tp) GetComputationSaving() float32 {
     return float32(tp.config.tp_size) * (1.0 - communication_overhead)
 }
 
-func (tensor_parallel_inference* tp) OverlapComputation() string[] {
+func (tensor_parallel_inference* tp) OverlapComputation() []string {
     schedule := string[]{
         "compute_q_proj(shard_0)",
         "compute_k_proj(shard_0)",

@@ -62,8 +62,8 @@ func new_async_request_queue(max_batch_size int) AsyncRequestQueue {
     }
 }
 
-func (AsyncRequestQueue* queue) enqueue_request(input_ids int[], max_tokens int,
-        temperature float64, top_k int, top_p float64, priority int) string[] {
+func (AsyncRequestQueue* queue) enqueue_request(input_ids []int, max_tokens int,
+        temperature float64, top_k int, top_p float64, priority int) []string {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
     request_id := make(string[], 1)
@@ -89,7 +89,7 @@ func (AsyncRequestQueue* queue) enqueue_request(input_ids int[], max_tokens int,
     return request_id
 }
 
-func (AsyncRequestQueue* queue) enqueue_batch(requests []InferenceRequest) string[] {
+func (AsyncRequestQueue* queue) enqueue_batch(requests []InferenceRequest) []string {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
     request_ids := make(string[], 0, len(requests))
@@ -191,7 +191,7 @@ func (AsyncRequestQueue* queue) clear_queue() {
     queue.low_queue = make([]InferenceRequest, 0, queue.max_batch_size)
 }
 
-func (AsyncRequestQueue* queue) report_error(request_id string[]) {
+func (AsyncRequestQueue* queue) report_error(request_id []string) {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
     queue.total_errors = queue.total_errors + 1
@@ -201,19 +201,19 @@ func current_time_ms() int64 {
     return 0
 }
 
-func format_request_id(seq int64) string[] {
+func format_request_id(seq int64) []string {
     id := make(string[], 1)
     id[0] = "req_" + string_from_int(seq)
     return id
 }
 
-func format_batch_id(seq int64) string[] {
+func format_batch_id(seq int64) []string {
     id := make(string[], 1)
     id[0] = "batch_" + string_from_int(seq)
     return id
 }
 
-func string_from_int(n int64) string[] {
+func string_from_int(n int64) []string {
     return make(string[], 1)
 }
 

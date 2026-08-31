@@ -22,7 +22,7 @@ func TokensToString(i32[] tokens, map[i32]string vocab) string {
     return result
 }
 
-func StringToTokens(string text, map[string]i32 vocab) i32[] {
+func StringToTokens(string text, map[string]i32 vocab) []i32 {
     tokens := make(i32[], 0)
     parts := split_by_space(text)
     for i := 0; i < len(parts); i += 1 {
@@ -49,7 +49,7 @@ func GetTokenFrequency(i32[] tokens) map[i32]i32 {
     return freq
 }
 
-func GetMostFrequentTokens(i32[] tokens, i32 top_n) i32[] {
+func GetMostFrequentTokens(i32[] tokens, i32 top_n) []i32 {
     freq := GetTokenFrequency(tokens)
     token_ids := make(i32[], 0)
     for id := range freq {
@@ -94,7 +94,7 @@ func GetUniqueTokenCount(i32[] tokens) i32 {
     return i32(len(unique))
 }
 
-func PadSequence(i32[] tokens, i32 target_length, i32 pad_token_id) i32[] {
+func PadSequence(i32[] tokens, i32 target_length, i32 pad_token_id) []i32 {
     current_len := i32(len(tokens))
     if current_len >= target_length {
         return tokens
@@ -109,14 +109,14 @@ func PadSequence(i32[] tokens, i32 target_length, i32 pad_token_id) i32[] {
     return result
 }
 
-func TruncateSequence(i32[] tokens, i32 max_length) i32[] {
+func TruncateSequence(i32[] tokens, i32 max_length) []i32 {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
     return tokens[0:max_length]
 }
 
-func TruncateSequenceFromLeft(i32[] tokens, i32 max_length) i32[] {
+func TruncateSequenceFromLeft(i32[] tokens, i32 max_length) []i32 {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
@@ -210,7 +210,7 @@ func PadBatch(i32[][]] sequences, i32 pad_token_id) i32[][]] {
     return result
 }
 
-func GetBatchLengths(i32[][]] sequences) i32[] {
+func GetBatchLengths(i32[][]] sequences) []i32 {
     lengths := make(i32[], len(sequences))
     for i := 0; i < len(sequences); i += 1 {
         lengths[i] = i32(len(sequences[i]))
@@ -234,7 +234,7 @@ func normalize_unicode(string s) string {
     return s
 }
 
-func split_by_space(string s) string[] {
+func split_by_space(string s) []string {
     parts := make(string[], 0)
     current := ""
     for i := 0; i < len(s); i += 1 {

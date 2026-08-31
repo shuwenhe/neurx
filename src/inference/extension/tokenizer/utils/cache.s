@@ -235,7 +235,7 @@ func (TokenCache* c) PrintStatistics() {
     println("  Bytes Evicted:", c.stats.bytes_evicted)
 }
 
-func (TokenCache* c) GetLargestEntries(i32 count) CacheEntry[] {
+func (TokenCache* c) GetLargestEntries(i32 count) []CacheEntry {
     entries := make(CacheEntry[], 0)
     for _, entry := range c.entries {
         entries = append(entries, entry)
@@ -255,7 +255,7 @@ func (TokenCache* c) GetLargestEntries(i32 count) CacheEntry[] {
     return entries
 }
 
-func (TokenCache* c) GetHotEntries(i32 count) CacheEntry[] {
+func (TokenCache* c) GetHotEntries(i32 count) []CacheEntry {
     entries := make(CacheEntry[], 0)
     for _, entry := range c.entries {
         entries = append(entries, entry)

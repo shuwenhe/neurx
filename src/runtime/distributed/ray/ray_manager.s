@@ -175,7 +175,7 @@ func (manager ray_manager*) get_component_state(name string) ray_component_state
     return state
 }
 
-func (manager ray_manager*) list_components() string[] {
+func (manager ray_manager*) list_components() []string {
     names := make(string[], 0)
     for name := range manager.components {
         names = append(names, name)
@@ -187,7 +187,7 @@ func (manager ray_manager*) get_actor(actor_name string) interface{} {
     return manager.env.get_actor(actor_name)
 }
 
-func (manager ray_manager*) list_actors() string[] {
+func (manager ray_manager*) list_actors() []string {
     return manager.dispatcher.list_actors()
 }
 
@@ -248,7 +248,7 @@ func (manager ray_manager*) validate_all_dependencies() bool {
     return manager.loader.validate_dependencies()
 }
 
-func (manager ray_manager*) preload_modules(module_names string[]) uint32 {
+func (manager ray_manager*) preload_modules(module_names []string) uint32 {
     if !manager.is_running {
         return 0
     }
@@ -293,7 +293,7 @@ func (manager ray_manager*) get_placement_group(name string) placement_group* {
     return manager.env.get_placement_group(name)
 }
 
-func (manager ray_manager*) list_placement_groups() string[] {
+func (manager ray_manager*) list_placement_groups() []string {
     return manager.env.list_placement_groups()
 }
 

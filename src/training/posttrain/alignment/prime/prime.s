@@ -56,7 +56,7 @@ func prime_compute_process_rewards(
     []tensor states,
     []tensor actions
 ) []tensor {
-    []tensor step_rewards = []tensor{cap: states.len}
+    []tensor step_rewards = make([]tensor, states.len)
     int i = 0
     for i < states.len {
         int step_idx = i % rm.num_steps
@@ -74,7 +74,7 @@ func prime_compute_cumulative_rewards(
     float intermediate_weight
 ) []tensor {
     int n = step_rewards.len
-    []tensor cumulative = []tensor{cap: n}
+    []tensor cumulative = make([]tensor, n)
     tensor running_reward = tensor_ops.zeros_like(step_rewards[n - 1])
     int i = n - 1
     for i >= 0 {
@@ -118,8 +118,8 @@ func prime_step(
         cfg.gamma,
         cfg.intermediate_reward_weight
     )
-    []tensor advantages = []tensor{cap: states.len}
-    []tensor returns = []tensor{cap: states.len}
+    []tensor advantages = make([]tensor, states.len)
+    []tensor returns = make([]tensor, states.len)
     tensor gae = tensor_ops.zeros_like(old_values[states.len - 1])
     int t = states.len - 1
     for t >= 0 {

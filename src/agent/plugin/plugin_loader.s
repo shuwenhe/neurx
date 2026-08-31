@@ -175,7 +175,7 @@ func (plugin_loader* l) validate_plugin_package(pkg plugin_package) load_validat
 	return result
 }
 
-func (plugin_loader* l) get_loaded_plugins() string[] {
+func (plugin_loader* l) get_loaded_plugins() []string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	result := make(string[], 0)
@@ -274,10 +274,10 @@ func (plugin_descriptor* d) add_exported_function(function_name string) {
 	d.exported_functions = append(d.exported_functions, function_name)
 }
 
-func (plugin_descriptor* d) get_required_modules() string[] {
+func (plugin_descriptor* d) get_required_modules() []string {
 	return d.required_modules
 }
 
-func (plugin_descriptor* d) get_exported_functions() string[] {
+func (plugin_descriptor* d) get_exported_functions() []string {
 	return d.exported_functions
 }

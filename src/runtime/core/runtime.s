@@ -35,7 +35,7 @@ func runtime_artifact_root(runtime_state state) string {
     state.artifact_root
 }
 
-func runtime_ir_files(runtime_state state) string[] {
+func runtime_ir_files(runtime_state state) []string {
     state.ir_files
 }
 
@@ -51,7 +51,7 @@ func runtime_is_ready(runtime_state state) bool {
     state.available && len(state.ir_files) > 0
 }
 
-func runtime_ir_paths(runtime_state state) string[] {
+func runtime_ir_paths(runtime_state state) []string {
     state.ir_files
 }
 

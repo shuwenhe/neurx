@@ -87,7 +87,7 @@ func copy_eqn(ir_eqn eqn) ir_eqn {
 }
 
 func copy_eqns([]ir_eqn values) []ir_eqn {
-    []ir_eqn out = []ir_eqn{cap: len(values)}
+    []ir_eqn out = make([]ir_eqn, len(values))
     int i = 0
     for i < len(values) {
         out[i] = copy_eqn(values[i])
@@ -307,18 +307,18 @@ func ir_to_transform_chain(ir_graph graph) transform_chain {
 func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
     []ir_eqn eqns = copy_eqns(chain.eqns)
     if len(eqns) == 0 {
-        eqns = []ir_eqn{cap: len(chain.steps)}
+        eqns = make([]ir_eqn, len(chain.steps))
         int i = 0
         for i < len(chain.steps) {
             string step = get_chain_step(chain, i)
             eqns[i] = ir_eqn {
                 primitive: step,
-                params: string[]{cap: 0},
+                params: []string{},
                 inputs: [],
                 outputs: [],
             }
             if i < len(chain.params) && get_chain_param(chain, i) != "" {
-                string[] params = string[]{cap: 1}
+                string[] params = make([]string, 1)
                 params[0] = get_chain_param(chain, i)
                 eqns[i].params = params
             }
@@ -362,9 +362,9 @@ func simple_fuse_add(ir_graph graph) ir_graph {
     for i < len(graph.eqns) {
         ir_eqn eqn = get_eqn(graph, i)
         if eqn.primitive == "add" && len(eqn.inputs) > 1 && get_eqn_input(eqn, 0) == get_eqn_input(eqn, 1) {
-            string[] params = string[]{cap: 1}
+            string[] params = make([]string, 1)
             params[0] = "2.0"
-            string[] inputs = string[]{cap: 1}
+            string[] inputs = make([]string, 1)
             inputs[0] = get_eqn_input(eqn, 0)
             optimized_eqns.push(ir_eqn {
                 primitive: "mul",

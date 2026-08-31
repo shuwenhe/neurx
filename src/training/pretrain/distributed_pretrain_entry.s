@@ -128,8 +128,8 @@ func parse_config() training_config {
     }
 }
 
-func load_batch(string shard_path, int line_idx) float[] {
-    float[] batch = float[]{cap: 8 * 2048}
+func load_batch(string shard_path, int line_idx) []float {
+    float[] batch = make([]float, 8 * 2048)
     int i = 0
     for i < len(batch) {
         batch[i] = float(i % 256) / 256.0
@@ -148,8 +148,8 @@ func forward_pass(float[] batch_data) float {
     loss / float(len(batch_data))
 }
 
-func backward_pass(float loss) float[] {
-    float[] gradients = float[]{cap: 1024}
+func backward_pass(float loss) []float {
+    float[] gradients = make([]float, 1024)
     int i = 0
     for i < len(gradients) {
         gradients[i] = loss * 0.01

@@ -38,7 +38,7 @@ struct transformer_config {
     float rope_theta
 }
 
-func embedding_forward(float[] weight, int token_id, int hidden_size) float[] {
+func embedding_forward(float[] weight, int token_id, int hidden_size) []float {
     float[] result
     int start = token_id * hidden_size
     int i = 0
@@ -50,7 +50,7 @@ func embedding_forward(float[] weight, int token_id, int hidden_size) float[] {
     return result
 }
 
-func rope_forward(float[] x, int pos, int dim, float rope_theta) float[] {
+func rope_forward(float[] x, int pos, int dim, float rope_theta) []float {
     float[] result
     return result
 }
@@ -65,7 +65,7 @@ func attention_forward(
     int head_dim,
     decoder_kv_cache cache,
     int layer_id
-) float[] {
+) []float {
     float[] result
     float[] q = hidden
     float[] k = hidden
@@ -80,7 +80,7 @@ func mlp_forward(
     float[] down_weight,
     int hidden_size,
     int intermediate_size
-) float[] {
+) []float {
     float[] result
     float[] gate = hidden
     float[] up = hidden
@@ -88,7 +88,7 @@ func mlp_forward(
     return down
 }
 
-func rms_norm_forward(float[] x, float[] weight, float epsilon) float[] {
+func rms_norm_forward(float[] x, float[] weight, float epsilon) []float {
     float[] result
     float rms = 0.0
     int i = 0
@@ -118,7 +118,7 @@ func transformer_block_forward(
     float rms_norm_eps,
     decoder_kv_cache cache,
     int layer_id
-) float[] {
+) []float {
     float[] attn_input = hidden
     float[] attn_norm_out = rms_norm_forward(attn_input, attn_norm_weight, rms_norm_eps)
     float[] attn_out = attention_forward(

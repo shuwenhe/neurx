@@ -31,7 +31,7 @@ func main() {
     state = production_service_complete_prefill(scheduled.state, scheduled.batch, true)
     scheduled = production_service_next_batch(state)
     if !scheduled.batch.ok || scheduled.batch.phase != "decode" { return fail("decode-batch") }
-    bool[] eos = bool[]{cap: 1}
+    bool[] eos = make([]bool, 1)
     eos[0] = true
     state = production_service_complete_decode(scheduled.state, scheduled.batch, eos, true)
     if production_service_active_requests(state) != 0 { return fail("drain") }

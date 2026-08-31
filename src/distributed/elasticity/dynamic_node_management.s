@@ -31,9 +31,9 @@ struct elastic_scaling_manager {
 func new_elastic_scaling_manager(int initial_world_size) elastic_scaling_manager {
     manager := elastic_scaling_manager {
         current_world_size: initial_world_size,
-        active_ranks: int[]{cap: initial_world_size},
+        active_ranks: make([]int, initial_world_size),
         rank_to_node: map[int]int{},
-        pending_remappings: rank_mapping[]{cap: 100},
+        pending_remappings: make([]rank_mapping, 100),
         rebalancing: false,
         rebalance_time_ms: 0.0,
         total_nodes: 0,
@@ -69,7 +69,7 @@ func (elastic_scaling_manager* manager) handle_node_removal(removed_rank int) (b
     }
     manager.rebalancing = true
     int new_idx = 0
-    int[] new_active_ranks = int[]{cap: len(manager.active_ranks)}
+    int[] new_active_ranks = make([]int, len(manager.active_ranks))
     int i = 0
     for i < len(manager.active_ranks) {
         if manager.active_ranks[i] != removed_rank {
@@ -137,8 +137,8 @@ func (elastic_scaling_manager* manager) generate_parameter_remapping(
     int old_tp int, old_pp int, old_dp int,
     int new_tp int, new_pp int, new_dp int,
     int total_params int
-) rank_mapping[] {
-    remappings := rank_mapping[]{cap: 1024}
+) []rank_mapping {
+    remappings := make([]rank_mapping, 1024)
     int rank = 0
     for rank < old_tp * old_pp * old_dp {
         old_tp_rank := rank % old_tp
@@ -171,7 +171,7 @@ func (elastic_scaling_manager* manager) generate_parameter_remapping(
 func (elastic_scaling_manager* manager) apply_parameter_remapping(
     float[] model_params,
     rank_mapping[] remappings
-) float[] {
+) []float {
     int param_size = len(model_params)
     float[] remapped_params = make(float[], param_size)
     int i = 0
@@ -224,7 +224,7 @@ func (elastic_scaling_manager* manager) get_current_world_size() int {
     return manager.current_world_size
 }
 
-func (elastic_scaling_manager* manager) get_active_ranks() int[] {
+func (elastic_scaling_manager* manager) get_active_ranks() []int {
     return manager.active_ranks
 }
 

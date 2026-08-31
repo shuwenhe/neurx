@@ -94,7 +94,7 @@ func (multimodal_hasher* hasher) add_content(string content_id, uint8[] data, mo
     return hash_value
 }
 
-func (multimodal_hasher* hasher) find_duplicates(string content_id) string[] {
+func (multimodal_hasher* hasher) find_duplicates(string content_id) []string {
     duplicates := make(string[])
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
         for other_id, other_hash := range hasher.matcher.hash_cache {
@@ -126,7 +126,7 @@ func (multimodal_hasher* hasher) compute_similarity(string hash1, string hash2) 
     return float32(common_chars) / float32(max_len)
 }
 
-func (multimodal_hasher* hasher) find_similar(string content_id) string[] {
+func (multimodal_hasher* hasher) find_similar(string content_id) []string {
     similar := make(string[])
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
         for other_id, other_hash := range hasher.matcher.hash_cache {

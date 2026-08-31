@@ -104,8 +104,8 @@ func new_block_manager(int total_blocks, int block_size, int watermark_blocks) b
     state.block_size = normalized_size
     state.total_blocks = normalized_total
     state.watermark_blocks = normalized_watermark
-    state.blocks = []kv_cache_block{cap: normalized_total}
-    state.free_block_ids = int[]{cap: normalized_total}
+    state.blocks = make([]kv_cache_block, normalized_total)
+    state.free_block_ids = make([]int, normalized_total)
     state.deferred_free_ids = []
     state.tables = []
     state.tick = 0
@@ -181,8 +181,8 @@ func block_manager_upsert_table(block_manager_state state, request_block_table t
     state
 }
 
-func block_manager_remove_int(int[] values, int expected) int[] {
-    int[] result = int[]{cap: len(values)}
+func block_manager_remove_int(int[] values, int expected) []int {
+    int[] result = make([]int, len(values))
     int i = 0
     for i < len(values) {
         if values[i] != expected {
@@ -204,8 +204,8 @@ func block_manager_contains_int(int[] values, int expected) bool {
     false
 }
 
-func block_manager_prepend_int(int[] values, int value) int[] {
-    int[] result = int[]{cap: len(values) + 1}
+func block_manager_prepend_int(int[] values, int value) []int {
+    int[] result = make([]int, len(values) + 1)
     result = append(result, value)
     int i = 0
     for i < len(values) {
@@ -217,7 +217,7 @@ func block_manager_prepend_int(int[] values, int value) int[] {
     result
 }
 
-func block_manager_append_unique(int[] values, int value) int[] {
+func block_manager_append_unique(int[] values, int value) []int {
     if block_manager_contains_int(values, value) {
         return values
     }
@@ -225,7 +225,7 @@ func block_manager_append_unique(int[] values, int value) int[] {
 }
 
 func block_manager_remove_table(block_manager_state state, int remove_index) block_manager_state {
-    []request_block_table tables = []request_block_table{cap: len(state.tables)}
+    []request_block_table tables = make([]request_block_table, len(state.tables))
     int i = 0
     for i < len(state.tables) {
         if i != remove_index {

@@ -30,8 +30,8 @@ struct fused_kernel_config {
     float compute_bound_ratio
 }
 
-func detect_fusion_opportunities(operation_registry reg, string[] operation_sequence) kernel_fusion_opportunity[] {
-    opportunities := kernel_fusion_opportunity[]{}
+func detect_fusion_opportunities(operation_registry reg, string[] operation_sequence) []kernel_fusion_opportunity {
+    opportunities := []kernel_fusion_opportunity{}
     i := 0
     for i < len(operation_sequence) - 1 {
         op_id1 := operation_sequence[i]
@@ -74,10 +74,10 @@ struct operation_scheduler {
 func new_operation_scheduler(operation_registry reg) operation_scheduler {
     operation_scheduler {
         registry: reg,
-        operation_queue: string[]{},
+        operation_queue: []string{},
         fusion_graph: operation_fusion_graph {
-            nodes: string[]{},
-            edges: operation_dependency[]{},
+            nodes: []string{},
+            edges: []operation_dependency{},
             num_nodes: 0,
             num_edges: 0,
         },
@@ -107,11 +107,11 @@ func (operation_scheduler* sched) add_dependency(string producer_op, string cons
     true
 }
 
-func (operation_scheduler* sched) optimize_schedule() string[] {
+func (operation_scheduler* sched) optimize_schedule() []string {
     if !sched.optimization_enabled {
         sched.operation_queue
     }
-    optimized_schedule := string[]{}
+    optimized_schedule := []string{}
     opportunities := detect_fusion_opportunities(sched.registry, sched.operation_queue)
     i := 0
     for i < len(opportunities) {

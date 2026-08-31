@@ -15,7 +15,7 @@ func create_comm_context(int world_size, int rank, string backend) comm_context 
     return ctx
 }
 
-func all_reduce(comm_context ctx, float[] data, string op) float[] {
+func all_reduce(comm_context ctx, float[] data, string op) []float {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
         return data
@@ -30,7 +30,7 @@ func all_reduce(comm_context ctx, float[] data, string op) float[] {
     return data
 }
 
-func all_gather(comm_context ctx, float[] local_data) float[] {
+func all_gather(comm_context ctx, float[] local_data) []float {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
         return local_data
@@ -57,7 +57,7 @@ func all_gather(comm_context ctx, float[] local_data) float[] {
     return gathered_data
 }
 
-func reduce_scatter(comm_context ctx, float[] data) float[] {
+func reduce_scatter(comm_context ctx, float[] data) []float {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
         return data
@@ -80,7 +80,7 @@ func reduce_scatter(comm_context ctx, float[] data) float[] {
     return local_chunk
 }
 
-func broadcast(comm_context ctx, float[] data, int root) float[] {
+func broadcast(comm_context ctx, float[] data, int root) []float {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
         return data

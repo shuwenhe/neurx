@@ -44,15 +44,15 @@ struct mtp_weights {
     []mtp_module_weights modules
 }
 
-func zeros(int n) float[] {
-    float[] out = float[]{cap: n}
+func zeros(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n { out[i] = 0.0; i = i + 1 }
     out
 }
 
-func fill_ramp(int n, float scale) float[] {
-    float[] out = float[]{cap: n}
+func fill_ramp(int n, float scale) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = scale * (i + 1) as float / (n + 1) as float
@@ -92,7 +92,7 @@ func gelu(float x) float {
     0.5 * x * (1.0 + tanh_val)
 }
 
-func matmul_2d(float[] a, float[] b, int m, int k, int n) float[] {
+func matmul_2d(float[] a, float[] b, int m, int k, int n) []float {
     float[] result = zeros(m * n)
     int i = 0
     for i < m {
@@ -112,8 +112,8 @@ func matmul_2d(float[] a, float[] b, int m, int k, int n) float[] {
     result
 }
 
-func rms_norm(float[] x, int n, float[] weight, float eps) float[] {
-    float[] out = float[]{cap: n}
+func rms_norm(float[] x, int n, float[] weight, float eps) []float {
+    float[] out = make([]float, n)
     float sum_sq = 0.0
     int i = 0
     for i < n {
@@ -156,7 +156,7 @@ func new_mtp_weights(mtp_config cfg) mtp_weights {
     int D = cfg.num_mtp_layers
     int d = cfg.hidden_dim
     int v = cfg.vocab_size
-    []mtp_module_weights modules = []mtp_module_weights{cap: D}
+    []mtp_module_weights modules = make([]mtp_module_weights, D)
     int i = 0
     for i < D {
         modules[i] = new_mtp_module_weights(cfg)
@@ -240,7 +240,7 @@ func mtp_module_forward(
 func multi_head_attention(
     float[] q, float[] k, float[] v,
     int seq_len, int n_h, int d_h, bool causal
-) float[] {
+) []float {
     int hd = n_h * d_h
     float scale = 1.0 / sqrt_approx(d_h as float)
     float[] output = zeros(seq_len * hd)
@@ -249,7 +249,7 @@ func multi_head_attention(
         int h_off = h * d_h
         int i = 0
         for i < seq_len {
-            float[] scores = float[]{cap: seq_len}
+            float[] scores = make([]float, seq_len)
             float max_s = -1e9
             int j = 0
             for j < seq_len {
@@ -311,14 +311,14 @@ func mtp_forward(
 ) mtp_forward_output {
     mtp_config cfg = w.config
     int D = cfg.num_mtp_layers
-    float[][] all_logits = float[][]{cap: D}
-    float[][] all_hidden = float[][]{cap: D}
+    float[][] all_logits = floatmake([][], D)
+    float[][] all_hidden = floatmake([][], D)
     float[] per_loss = zeros(D)
     float[] prev_hidden = main_hidden
     int mtp_idx = 0
     for mtp_idx < D {
         mtp_module_weights mw = w.modules[mtp_idx]
-        int[] prev_tokens = int[]{cap: seq_len}
+        int[] prev_tokens = make([]int, seq_len)
         int s = 0
         for s < seq_len {
             prev_tokens[s] = target_tokens[s]
@@ -399,10 +399,10 @@ func mtp_inference(
     mtp_config cfg = w.config
     int D = cfg.num_mtp_layers
     int v = cfg.vocab_size
-    int[][] predicted = int[][]{cap: D}
-    float[][] confidence = float[][]{cap: D}
+    int[][] predicted = intmake([][], D)
+    float[][] confidence = floatmake([][], D)
     float[] prev_hidden = main_hidden
-    int[] prev_tokens = int[]{cap: 1}
+    int[] prev_tokens = make([]int, 1)
     prev_tokens[0] = prev_token
     int mtp_idx = 0
     for mtp_idx < D {
@@ -421,7 +421,7 @@ func mtp_inference(
             }
             i = i + 1
         }
-        int[] pred_row = int[]{cap: 1}
+        int[] pred_row = make([]int, 1)
         pred_row[0] = best_token
         predicted[mtp_idx] = pred_row
         float max_logit = mtp_out.logits[0]
@@ -436,7 +436,7 @@ func mtp_inference(
             sum_exp = sum_exp + exp_approx(mtp_out.logits[i] - max_logit)
             i = i + 1
         }
-        float[] conf_row = float[]{cap: 1}
+        float[] conf_row = make([]float, 1)
         conf_row[0] = exp_approx(best_logit - max_logit) / sum_exp
         confidence[mtp_idx] = conf_row
         prev_tokens = predicted[mtp_idx]

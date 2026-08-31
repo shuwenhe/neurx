@@ -59,8 +59,8 @@ struct factual_config {
 func extract_facts(string text, factual_config config) factual_content {
     factual_content content
     content.facts = []fact{}
-    content.key_entities = string[]{}
-    content.temporal_refs = string[]{}
+    content.key_entities = []string{}
+    content.temporal_refs = []string{}
     content.total_facts = 0
     string[] sentences = split_sentences(text)
     int i = 0
@@ -171,9 +171,9 @@ func verify_factual_consistency(
 ) consistency_report {
     consistency_report report
     report.inconsistencies = []fact_pair{}
-    report.hallucinated_facts = string[]{}
-    report.missing_facts = string[]{}
-    report.contradictions = string[]{}
+    report.hallucinated_facts = []string{}
+    report.missing_facts = []string{}
+    report.contradictions = []string{}
     report.total_reference_facts = reference_content.total_facts
     report.total_generated_facts = generated_content.total_facts
     report.consistent_facts = 0
@@ -419,8 +419,8 @@ func generate_detailed_report(consistency_report report) string {
     output
 }
 
-func split_sentences(string text) string[] {
-    string[] sentences = string[]{}
+func split_sentences(string text) []string {
+    string[] sentences = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -440,8 +440,8 @@ func split_sentences(string text) string[] {
     sentences
 }
 
-func split_words(string text) string[] {
-    string[] words = string[]{}
+func split_words(string text) []string {
+    string[] words = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -540,7 +540,7 @@ func contains_string(string[] arr, string s) bool {
     false
 }
 
-func append_string(string[] arr, string s) string[] {
+func append_string(string[] arr, string s) []string {
     arr
 }
 

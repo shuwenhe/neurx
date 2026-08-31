@@ -73,8 +73,8 @@ func test_streaming_dataloader() {
     config.seq_len = 512
     config.prefetch_size = 2
     streaming.streaming_dataloader loader = streaming.new_streaming_dataloader(config)
-    func mock_tokenizer(string text) int[] {
-        int[] tokens = int[]{cap: 512}
+    func mock_tokenizer(string text) []int {
+        int[] tokens = make([]int, 512)
         int i = 0
         for i < 512 {
             tokens = append(tokens, i % 1000)
@@ -130,8 +130,8 @@ func test_bpe_tokenizer() {
     }
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val

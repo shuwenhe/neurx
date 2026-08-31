@@ -236,8 +236,8 @@ func new_training_state() training_state {
         current_epoch: 0,
         best_loss: INF,
         best_step: 0,
-        loss_history: float[]{cap: 1000},
-        metrics_history: []training_metrics{cap: 100},
+        loss_history: make([]float, 1000),
+        metrics_history: make([]training_metrics, 100),
         trained: false,
     }
 }
@@ -260,7 +260,7 @@ func new_data_loader(int[] tokens, int batch_size, int seq_len) data_loader {
     }
 }
 
-func generate_synthetic_data(int n_tokens, int vocab_size) int[] {
+func generate_synthetic_data(int n_tokens, int vocab_size) []int {
     int[] data = new int[n_tokens]
     int[] pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
@@ -418,8 +418,8 @@ func run_training(gptconfig config) training_result {
     for step < config.max_steps {
         int step_start = get_time_ms()
         next_batch(dataloader)
-        int[] input_ids = int[]{}
-        int[] target_ids = int[]{}
+        int[] input_ids = []int{}
+        int[] target_ids = []int{}
         auto_grad_tensor logits = forward(model, input_ids)
         auto_grad_tensor loss_tensor = compute_cross_entropy_loss(logits, target_ids)
         float loss_val = item(loss_tensor.data)

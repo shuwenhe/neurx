@@ -95,7 +95,7 @@ func run_verl_style_training() int {
 }
 
 func map_create(string k1, float v1, string k2, float v2) map string = float {
-    map string = float m = map string = float{cap: 2}
+    map string = float m = map string = float{}
     m[k1] = v1
     m[k2] = v2
     m
@@ -109,7 +109,7 @@ func float_to_str_uf(float f) string {
     ""
 }
 
-func range_func(int n) int[] {
-    int[] r = int[]{cap: n}
+func range_func(int n) []int {
+    int[] r = make([]int, n)
     r
 }

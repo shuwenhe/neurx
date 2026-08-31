@@ -205,8 +205,8 @@ func (device_class* dev_class) unregister_device(string device_id) (bool, string
 func device_bus_create(string bus_name) device_bus {
     bus := device_bus {
         bus_name: bus_name,
-        devices: device[]{},
-        drivers: device_driver[]{},
+        devices: []device{},
+        drivers: []device_driver{},
         total_devices: 0,
         total_drivers: 0,
         hotplug_enabled: 1
@@ -251,8 +251,8 @@ func (device_bus* bus) match_and_bind() (int, string) {
 
 func device_manager_create() device_manager {
     mgr := device_manager {
-        buses: device_bus[]{},
-        classes: device_class[]{},
+        buses: []device_bus{},
+        classes: []device_class{},
         total_devices: 0,
         total_drivers: 0,
         hotplug_events: 0,

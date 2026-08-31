@@ -132,7 +132,7 @@ func parse_tensor_info(string json, string tensor_name) safe_tensor_info {
     safe_tensor_info info
     info.name = tensor_name
     info.dtype = "F32"
-    info.shape = int[]{}
+    info.shape = []int{}
     info.byte_start = 0
     info.byte_end = 0
     string search = "\"" + tensor_name + "\""
@@ -209,7 +209,7 @@ func open_safetensors(string path) safe_tensor_file {
     return file
 }
 
-func load_tensor_float(safe_tensor_file file, safe_tensor_info info) float[] {
+func load_tensor_float(safe_tensor_file file, safe_tensor_info info) []float {
     float[] result
     string data = string(file.data)
     if len(data) == 0 { return result }

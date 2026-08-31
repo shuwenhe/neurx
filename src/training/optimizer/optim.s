@@ -49,8 +49,8 @@ struct rmsprop_optimizer {
     float[] avg
 }
 
-func ensure_size(float[] values, int n) float[] {
-    float[] out = float[]{cap: n}
+func ensure_size(float[] values, int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         if i < len(values) {
@@ -130,7 +130,7 @@ func new_rmsprop(float lr, float alpha, float eps) rmsprop_optimizer {
 
 func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = params.data[i] - optimizer.lr * grads.data[i]
@@ -143,7 +143,7 @@ func adam_step_state(adam_optimizer optimizer, tensor params, tensor grads) adam
     int n = len(params.data)
     float[] m = ensure_size(optimizer.m, n)
     float[] v = ensure_size(optimizer.v, n)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int step = optimizer.step + 1
     float beta1_pow = optimizer.beta1_pow * optimizer.beta1
     float beta2_pow = optimizer.beta2_pow * optimizer.beta2
@@ -196,7 +196,7 @@ func adamw_step(adamw_optimizer optimizer, tensor params, tensor grads) tensor {
 func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
     float[] avg = ensure_size(optimizer.avg, n)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         float g = grads.data[i]
@@ -224,7 +224,7 @@ func tensor_l2_norm(tensor value) float {
 
 func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = value.data[i] * scale
@@ -249,7 +249,7 @@ func adamw_step_state(adamw_optimizer optimizer, tensor params, tensor grads) ad
     int n = len(params.data)
     float[] m = ensure_size(optimizer.m, n)
     float[] v = ensure_size(optimizer.v, n)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int step = optimizer.step + 1
     float beta1_pow = optimizer.beta1_pow * optimizer.beta1
     float beta2_pow = optimizer.beta2_pow * optimizer.beta2

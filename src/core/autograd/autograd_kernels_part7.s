@@ -6,12 +6,11 @@ func backward_masked_fill(node n, tensor grad_output) backward_result {
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -19,7 +18,7 @@ func backward_masked_fill(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -54,15 +53,15 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
     default_val
 }
 
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
 }
 
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -222,12 +221,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -235,7 +233,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -260,13 +258,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -414,12 +412,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -427,7 +424,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -452,13 +449,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -606,12 +603,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -619,7 +615,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -644,13 +640,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -817,13 +813,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -985,13 +981,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -1148,13 +1144,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -1306,13 +1302,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -1459,13 +1455,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -1612,8 +1608,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -1756,7 +1752,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -2871,12 +2867,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -2884,7 +2879,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -2909,13 +2904,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -3063,12 +3058,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -3076,7 +3070,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -3101,13 +3095,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -3255,12 +3249,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -3268,7 +3261,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -3293,13 +3286,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -3447,12 +3440,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -3460,7 +3452,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -3485,13 +3477,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -3658,13 +3650,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -3826,13 +3818,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -3989,13 +3981,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -4147,13 +4139,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -4300,13 +4292,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -4453,8 +4445,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -4597,7 +4589,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -5731,13 +5723,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -5885,12 +5877,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -5898,7 +5889,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -5923,13 +5914,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -6077,12 +6068,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -6090,7 +6080,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -6115,13 +6105,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -6288,13 +6278,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -6456,13 +6446,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -6619,13 +6609,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -6777,13 +6767,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -6930,13 +6920,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -7083,8 +7073,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -7227,7 +7217,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -8356,13 +8346,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -8510,12 +8500,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -8523,7 +8512,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -8548,13 +8537,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -8702,12 +8691,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -8715,7 +8703,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -8740,13 +8728,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -8913,13 +8901,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -9081,13 +9069,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -9244,13 +9232,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -9402,13 +9390,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -9555,13 +9543,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -9708,8 +9696,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -9852,7 +9840,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -10976,13 +10964,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -11130,12 +11118,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -11143,7 +11130,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -11168,13 +11155,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -11322,12 +11309,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -11335,7 +11321,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -11360,13 +11346,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -11533,13 +11519,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -11701,13 +11687,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -11864,13 +11850,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -12022,13 +12008,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -12175,13 +12161,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -12328,8 +12314,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -12472,7 +12458,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -13591,13 +13577,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -13745,12 +13731,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -13758,7 +13743,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -13783,13 +13768,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -13937,12 +13922,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -13950,7 +13934,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -13975,13 +13959,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -14148,13 +14132,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -14316,13 +14300,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -14479,13 +14463,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -14637,13 +14621,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -14790,13 +14774,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -14943,8 +14927,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -15087,7 +15071,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -16201,13 +16185,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -16355,12 +16339,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -16368,7 +16351,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -16393,13 +16376,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -16547,12 +16530,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -16560,7 +16542,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -16585,13 +16567,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -16758,13 +16740,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -16926,13 +16908,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -17089,13 +17071,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -17247,13 +17229,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -17400,13 +17382,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -17553,8 +17535,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -17697,7 +17679,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -18811,8 +18793,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -18960,12 +18942,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -18973,7 +18954,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -18998,13 +18979,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -19152,12 +19133,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -19165,7 +19145,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -19190,13 +19170,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -19363,13 +19343,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -19531,13 +19511,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -19694,13 +19674,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -19852,13 +19832,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -20005,13 +19985,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -20158,8 +20138,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -20302,7 +20282,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -21412,7 +21392,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -21560,12 +21540,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -21573,7 +21552,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -21598,13 +21577,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -21752,12 +21731,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -21765,7 +21743,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -21790,13 +21768,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -21963,13 +21941,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -22131,13 +22109,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -22294,13 +22272,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -22452,13 +22430,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -22605,13 +22583,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -22758,8 +22736,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -22902,7 +22880,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -24154,12 +24132,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -24167,7 +24144,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -24192,13 +24169,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -24346,12 +24323,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -24359,7 +24335,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -24384,13 +24360,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -24557,13 +24533,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -24725,13 +24701,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -24888,13 +24864,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -25046,13 +25022,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -25199,13 +25175,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -25352,8 +25328,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -25496,7 +25472,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -26736,12 +26712,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -26749,7 +26724,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -26774,13 +26749,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -26928,12 +26903,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -26941,7 +26915,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -26966,13 +26940,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -27139,13 +27113,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -27307,13 +27281,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -27470,13 +27444,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -27628,13 +27602,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -27781,13 +27755,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -27934,8 +27908,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -28078,7 +28052,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -29315,12 +29289,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -29328,7 +29301,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -29353,13 +29326,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -29507,12 +29480,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -29520,7 +29492,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -29545,13 +29517,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -29718,13 +29690,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -29886,13 +29858,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -30049,13 +30021,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -30207,13 +30179,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -30360,13 +30332,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -30513,8 +30485,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -30657,7 +30629,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -31866,12 +31838,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -31879,7 +31850,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -31904,13 +31875,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -32058,12 +32029,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -32071,7 +32041,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -32096,13 +32066,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -32269,13 +32239,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -32437,13 +32407,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -32600,13 +32570,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -32758,13 +32728,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -32911,13 +32881,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -33064,8 +33034,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -33208,7 +33178,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -34409,12 +34379,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -34422,7 +34391,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -34447,13 +34416,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -34601,12 +34570,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -34614,7 +34582,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -34639,13 +34607,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -34812,13 +34780,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -34980,13 +34948,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -35143,13 +35111,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -35301,13 +35269,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -35454,13 +35422,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -35607,8 +35575,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -35751,7 +35719,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -36944,12 +36912,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -36957,7 +36924,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -36982,13 +36949,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -37136,12 +37103,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -37149,7 +37115,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -37174,13 +37140,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -37347,13 +37313,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -37515,13 +37481,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -37678,13 +37644,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -37836,13 +37802,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -37989,13 +37955,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -38142,8 +38108,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -38286,7 +38252,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -39468,12 +39434,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -39481,7 +39446,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -39506,13 +39471,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -39660,12 +39625,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -39673,7 +39637,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -39698,13 +39662,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -39871,13 +39835,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -40039,13 +40003,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -40202,13 +40166,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -40360,13 +40324,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -40513,13 +40477,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -40666,8 +40630,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -40810,7 +40774,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -41984,12 +41948,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -41997,7 +41960,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -42022,13 +41985,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -42176,12 +42139,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -42189,7 +42151,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -42214,13 +42176,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -42387,13 +42349,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -42555,13 +42517,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -42718,13 +42680,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -42876,13 +42838,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -43029,13 +42991,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -43182,8 +43144,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -43326,7 +43288,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -44490,12 +44452,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -44503,7 +44464,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -44528,13 +44489,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -44682,12 +44643,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -44695,7 +44655,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -44720,13 +44680,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -44893,13 +44853,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -45061,13 +45021,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -45224,13 +45184,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -45382,13 +45342,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -45535,13 +45495,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -45688,8 +45648,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -45832,7 +45792,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -46994,12 +46954,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -47007,7 +46966,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -47032,13 +46991,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -47186,12 +47145,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -47199,7 +47157,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -47224,13 +47182,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -47397,13 +47355,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -47565,13 +47523,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -47728,13 +47686,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -47886,13 +47844,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -48039,13 +47997,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -48192,8 +48150,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -48336,7 +48294,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -49496,12 +49454,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -49509,7 +49466,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -49534,13 +49491,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -49688,12 +49645,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -49701,7 +49657,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -49726,13 +49682,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -49899,13 +49855,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -50067,13 +50023,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -50230,13 +50186,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -50388,13 +50344,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -50541,13 +50497,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -50694,8 +50650,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -50838,7 +50794,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -52011,12 +51967,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -52024,7 +51979,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -52049,13 +52004,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -52203,12 +52158,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -52216,7 +52170,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -52241,13 +52195,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -52414,13 +52368,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -52582,13 +52536,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -52745,13 +52699,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -52903,13 +52857,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -53056,13 +53010,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -53209,8 +53163,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -53353,7 +53307,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -54487,13 +54441,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -54641,12 +54595,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -54654,7 +54607,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -54679,13 +54632,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -54852,13 +54805,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -55020,13 +54973,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -55183,13 +55136,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -55341,13 +55294,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -55494,13 +55447,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -55647,8 +55600,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -55791,7 +55744,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -56920,13 +56873,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -57074,12 +57027,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -57087,7 +57039,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -57112,13 +57064,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -57285,13 +57237,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -57453,13 +57405,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -57616,13 +57568,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -57774,13 +57726,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -57927,13 +57879,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -58080,8 +58032,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -58224,7 +58176,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -59348,13 +59300,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -59502,12 +59454,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -59515,7 +59466,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -59540,13 +59491,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -59713,13 +59664,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -59881,13 +59832,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -60044,13 +59995,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -60202,13 +60153,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -60355,13 +60306,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -60508,8 +60459,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -60652,7 +60603,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -61771,13 +61722,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -61925,12 +61876,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -61938,7 +61888,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -61963,13 +61913,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -62136,13 +62086,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -62304,13 +62254,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -62467,13 +62417,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -62625,13 +62575,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -62778,13 +62728,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -62931,8 +62881,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -63075,7 +63025,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -64189,13 +64139,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -64343,12 +64293,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -64356,7 +64305,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -64381,13 +64330,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -64554,13 +64503,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -64722,13 +64671,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -64885,13 +64834,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -65043,13 +64992,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -65196,13 +65145,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -65349,8 +65298,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -65493,7 +65442,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -66607,8 +66556,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -66756,12 +66705,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -66769,7 +66717,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -66794,13 +66742,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -66967,13 +66915,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -67135,13 +67083,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -67298,13 +67246,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -67456,13 +67404,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -67609,13 +67557,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -67762,8 +67710,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -67906,7 +67854,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -69016,7 +68964,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -69164,12 +69112,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -69177,7 +69124,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -69202,13 +69149,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -69375,13 +69322,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -69543,13 +69490,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -69706,13 +69653,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -69864,13 +69811,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -70017,13 +69964,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -70170,8 +70117,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -70314,7 +70261,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -71566,12 +71513,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -71579,7 +71525,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -71604,13 +71550,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -71777,13 +71723,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -71945,13 +71891,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -72108,13 +72054,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -72266,13 +72212,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -72419,13 +72365,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -72572,8 +72518,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -72716,7 +72662,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -73956,12 +73902,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -73969,7 +73914,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -73994,13 +73939,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -74167,13 +74112,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -74335,13 +74280,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -74498,13 +74443,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -74656,13 +74601,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -74809,13 +74754,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -74962,8 +74907,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -75106,7 +75051,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -76343,12 +76288,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -76356,7 +76300,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -76381,13 +76325,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -76554,13 +76498,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -76722,13 +76666,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -76885,13 +76829,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -77043,13 +76987,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -77196,13 +77140,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -77349,8 +77293,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -77493,7 +77437,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -78702,12 +78646,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -78715,7 +78658,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -78740,13 +78683,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -78913,13 +78856,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -79081,13 +79024,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -79244,13 +79187,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -79402,13 +79345,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -79555,13 +79498,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -79708,8 +79651,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -79852,7 +79795,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -81053,12 +80996,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -81066,7 +81008,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -81091,13 +81033,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -81264,13 +81206,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -81432,13 +81374,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -81595,13 +81537,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -81753,13 +81695,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -81906,13 +81848,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -82059,8 +82001,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -82203,7 +82145,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -83396,12 +83338,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -83409,7 +83350,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -83434,13 +83375,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -83607,13 +83548,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -83775,13 +83716,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -83938,13 +83879,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -84096,13 +84037,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -84249,13 +84190,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -84402,8 +84343,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -84546,7 +84487,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -85728,12 +85669,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -85741,7 +85681,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -85766,13 +85706,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -85939,13 +85879,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -86107,13 +86047,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -86270,13 +86210,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -86428,13 +86368,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -86581,13 +86521,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -86734,8 +86674,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -86878,7 +86818,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -88052,12 +87992,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -88065,7 +88004,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -88090,13 +88029,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -88263,13 +88202,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -88431,13 +88370,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -88594,13 +88533,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -88752,13 +88691,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -88905,13 +88844,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -89058,8 +88997,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -89202,7 +89141,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -90366,12 +90305,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -90379,7 +90317,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -90404,13 +90342,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -90577,13 +90515,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -90745,13 +90683,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -90908,13 +90846,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -91066,13 +91004,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -91219,13 +91157,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -91372,8 +91310,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -91516,7 +91454,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -92678,12 +92616,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -92691,7 +92628,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -92716,13 +92653,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -92889,13 +92826,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -93057,13 +92994,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -93220,13 +93157,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -93378,13 +93315,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -93531,13 +93468,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -93684,8 +93621,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -93828,7 +93765,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -94988,12 +94925,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -95001,7 +94937,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -95026,13 +94962,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -95199,13 +95135,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -95367,13 +95303,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -95530,13 +95466,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -95688,13 +95624,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -95841,13 +95777,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -95994,8 +95930,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -96138,7 +96074,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -97311,12 +97247,11 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     tensor input = n.inputs[0]
     tensor mask = get_context_safe_tensor(n, "mask", input)
-    float[] grad_input_data = float[]{cap: len(input.data)]
+    float[] grad_input_data = make([]float, len(input.data)]
     for i in 0..len(input.data) {
         int mask_idx = i(i - (i / len) * len)(mask.data)
         if mask.data[mask_idx] != 0.0 {
-            grad_input_data[i] = 0.0
-        } else {
+            grad_input_data[i] = 0.0) else {
             grad_input_data[i] = grad_output.data[i]
         }
     }
@@ -97324,7 +97259,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     backward_result { input_grads: [result], success: true }
 }
 
-func get_context_safe(node n, string key, int[] default_val) int[] {
+func get_context_safe(node n, string key, int[] default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
@@ -97349,13 +97284,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -97522,13 +97457,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -97690,13 +97625,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -97853,13 +97788,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -98011,13 +97946,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -98164,13 +98099,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -98317,8 +98252,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -98461,7 +98396,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -99595,13 +99530,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -99768,13 +99703,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -99936,13 +99871,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -100099,13 +100034,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -100257,13 +100192,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -100410,13 +100345,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -100563,8 +100498,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -100707,7 +100642,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -101836,13 +101771,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -102009,13 +101944,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -102177,13 +102112,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -102340,13 +102275,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -102498,13 +102433,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -102651,13 +102586,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -102804,8 +102739,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -102948,7 +102883,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -104072,13 +104007,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -104245,13 +104180,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -104413,13 +104348,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -104576,13 +104511,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -104734,13 +104669,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -104887,13 +104822,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -105040,8 +104975,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -105184,7 +105119,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -106303,13 +106238,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -106476,13 +106411,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -106644,13 +106579,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -106807,13 +106742,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -106965,13 +106900,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -107118,13 +107053,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -107271,8 +107206,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -107415,7 +107350,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -108529,13 +108464,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -108702,13 +108637,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -108870,13 +108805,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -109033,13 +108968,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -109191,13 +109126,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -109344,13 +109279,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -109497,8 +109432,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -109641,7 +109576,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -110755,8 +110690,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -110923,13 +110858,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -111091,13 +111026,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -111254,13 +111189,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -111412,13 +111347,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -111565,13 +111500,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -111718,8 +111653,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -111862,7 +111797,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -112972,7 +112907,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -113139,13 +113074,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -113307,13 +113242,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -113470,13 +113405,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -113628,13 +113563,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -113781,13 +113716,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -113934,8 +113869,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -114078,7 +114013,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -115349,13 +115284,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -115517,13 +115452,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -115680,13 +115615,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -115838,13 +115773,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -115991,13 +115926,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -116144,8 +116079,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -116288,7 +116223,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -117547,13 +117482,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -117715,13 +117650,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -117878,13 +117813,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -118036,13 +117971,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -118189,13 +118124,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -118342,8 +118277,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -118486,7 +118421,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -119742,13 +119677,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -119910,13 +119845,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -120073,13 +120008,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -120231,13 +120166,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -120384,13 +120319,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -120537,8 +120472,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -120681,7 +120616,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -121909,13 +121844,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -122077,13 +122012,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -122240,13 +122175,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -122398,13 +122333,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -122551,13 +122486,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -122704,8 +122639,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -122848,7 +122783,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -124068,13 +124003,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -124236,13 +124171,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -124399,13 +124334,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -124557,13 +124492,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -124710,13 +124645,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -124863,8 +124798,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -125007,7 +124942,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -126219,13 +126154,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -126387,13 +126322,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -126550,13 +126485,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -126708,13 +126643,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -126861,13 +126796,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -127014,8 +126949,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -127158,7 +127093,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -128359,13 +128294,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -128527,13 +128462,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -128690,13 +128625,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -128848,13 +128783,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -129001,13 +128936,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -129154,8 +129089,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -129298,7 +129233,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -130491,13 +130426,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -130659,13 +130594,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -130822,13 +130757,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -130980,13 +130915,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -131133,13 +131068,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -131286,8 +131221,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -131430,7 +131365,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -132613,13 +132548,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -132781,13 +132716,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -132944,13 +132879,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -133102,13 +133037,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -133255,13 +133190,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -133408,8 +133343,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -133552,7 +133487,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -134733,13 +134668,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -134901,13 +134836,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -135064,13 +134999,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -135222,13 +135157,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -135375,13 +135310,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -135528,8 +135463,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -135672,7 +135607,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -136851,13 +136786,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -137019,13 +136954,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -137182,13 +137117,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -137340,13 +137275,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -137493,13 +137428,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -137646,8 +137581,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -137790,7 +137725,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -138982,13 +138917,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -139150,13 +139085,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -139313,13 +139248,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -139471,13 +139406,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -139624,13 +139559,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -139777,8 +139712,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -139921,7 +139856,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -141050,13 +140985,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -141218,13 +141153,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -141381,13 +141316,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -141539,13 +141474,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -141692,13 +141627,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -141845,8 +141780,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -141989,7 +141924,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -143113,13 +143048,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -143281,13 +143216,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -143444,13 +143379,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -143602,13 +143537,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -143755,13 +143690,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -143908,8 +143843,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -144052,7 +143987,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -145171,13 +145106,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -145339,13 +145274,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -145502,13 +145437,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -145660,13 +145595,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -145813,13 +145748,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -145966,8 +145901,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -146110,7 +146045,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -147224,13 +147159,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -147392,13 +147327,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -147555,13 +147490,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -147713,13 +147648,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -147866,13 +147801,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -148019,8 +147954,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -148163,7 +148098,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -149277,8 +149212,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -149440,13 +149375,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -149603,13 +149538,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -149761,13 +149696,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -149914,13 +149849,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -150067,8 +150002,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -150211,7 +150146,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -151321,7 +151256,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -151483,13 +151418,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -151646,13 +151581,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -151804,13 +151739,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -151957,13 +151892,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -152110,8 +152045,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -152254,7 +152189,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -153520,13 +153455,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -153683,13 +153618,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -153841,13 +153776,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -153994,13 +153929,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -154147,8 +154082,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -154291,7 +154226,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -155545,13 +155480,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -155708,13 +155643,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -155866,13 +155801,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -156019,13 +155954,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -156172,8 +156107,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -156316,7 +156251,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -157567,13 +157502,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -157730,13 +157665,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -157888,13 +157823,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -158041,13 +157976,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -158194,8 +158129,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -158338,7 +158273,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -159561,13 +159496,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -159724,13 +159659,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -159882,13 +159817,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -160035,13 +159970,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -160188,8 +160123,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -160332,7 +160267,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -161547,13 +161482,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -161710,13 +161645,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -161868,13 +161803,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -162021,13 +161956,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -162174,8 +162109,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -162318,7 +162253,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -163525,13 +163460,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -163688,13 +163623,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -163846,13 +163781,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -163999,13 +163934,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -164152,8 +164087,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -164296,7 +164231,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -165492,13 +165427,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -165655,13 +165590,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -165813,13 +165748,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -165966,13 +165901,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -166119,8 +166054,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -166263,7 +166198,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -167451,13 +167386,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -167614,13 +167549,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -167772,13 +167707,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -167925,13 +167860,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -168078,8 +168013,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -168222,7 +168157,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -169400,13 +169335,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -169563,13 +169498,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -169721,13 +169656,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -169874,13 +169809,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -170027,8 +169962,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -170171,7 +170106,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -171347,13 +171282,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -171510,13 +171445,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -171668,13 +171603,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -171821,13 +171756,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -171974,8 +171909,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -172118,7 +172053,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -173292,13 +173227,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -173455,13 +173390,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -173613,13 +173548,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -173766,13 +173701,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -173919,8 +173854,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -174063,7 +173998,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -175250,13 +175185,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -175413,13 +175348,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -175571,13 +175506,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -175724,13 +175659,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -175877,8 +175812,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -176021,7 +175956,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -177145,13 +177080,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -177308,13 +177243,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -177466,13 +177401,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -177619,13 +177554,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -177772,8 +177707,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -177916,7 +177851,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -179035,13 +178970,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -179198,13 +179133,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -179356,13 +179291,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -179509,13 +179444,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -179662,8 +179597,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -179806,7 +179741,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -180920,13 +180855,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -181083,13 +181018,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -181241,13 +181176,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -181394,13 +181329,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -181547,8 +181482,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -181691,7 +181626,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -182805,8 +182740,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -182963,13 +182898,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -183121,13 +183056,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -183274,13 +183209,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -183427,8 +183362,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -183571,7 +183506,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -184681,7 +184616,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -184838,13 +184773,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -184996,13 +184931,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -185149,13 +185084,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -185302,8 +185237,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -185446,7 +185381,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -186707,13 +186642,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -186865,13 +186800,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -187018,13 +186953,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -187171,8 +187106,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -187315,7 +187250,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -188564,13 +188499,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -188722,13 +188657,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -188875,13 +188810,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -189028,8 +188963,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -189172,7 +189107,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -190418,13 +190353,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -190576,13 +190511,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -190729,13 +190664,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -190882,8 +190817,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -191026,7 +190961,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -192244,13 +192179,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -192402,13 +192337,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -192555,13 +192490,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -192708,8 +192643,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -192852,7 +192787,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -194062,13 +193997,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -194220,13 +194155,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -194373,13 +194308,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -194526,8 +194461,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -194670,7 +194605,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -195872,13 +195807,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -196030,13 +195965,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -196183,13 +196118,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -196336,8 +196271,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -196480,7 +196415,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -197671,13 +197606,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -197829,13 +197764,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -197982,13 +197917,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -198135,8 +198070,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -198279,7 +198214,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -199462,13 +199397,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -199620,13 +199555,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -199773,13 +199708,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -199926,8 +199861,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -200070,7 +200005,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -201243,13 +201178,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -201401,13 +201336,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -201554,13 +201489,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -201707,8 +201642,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -201851,7 +201786,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -203022,13 +202957,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -203180,13 +203115,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -203333,13 +203268,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -203486,8 +203421,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -203630,7 +203565,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -204799,13 +204734,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -204957,13 +204892,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -205110,13 +205045,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -205263,8 +205198,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -205407,7 +205342,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -206589,13 +206524,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -206747,13 +206682,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -206900,13 +206835,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -207053,8 +206988,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -207197,7 +207132,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -208316,13 +208251,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -208474,13 +208409,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -208627,13 +208562,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -208780,8 +208715,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -208924,7 +208859,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -210038,13 +209973,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -210196,13 +210131,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -210349,13 +210284,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -210502,8 +210437,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -210646,7 +210581,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -211760,8 +211695,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -211913,13 +211848,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -212066,13 +212001,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -212219,8 +212154,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -212363,7 +212298,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -213473,7 +213408,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -213625,13 +213560,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -213778,13 +213713,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -213931,8 +213866,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -214075,7 +214010,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -215331,13 +215266,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -215484,13 +215419,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -215637,8 +215572,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -215781,7 +215716,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -217025,13 +216960,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -217178,13 +217113,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -217331,8 +217266,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -217475,7 +217410,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -218716,13 +218651,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -218869,13 +218804,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -219022,8 +218957,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -219166,7 +219101,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -220379,13 +220314,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -220532,13 +220467,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -220685,8 +220620,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -220829,7 +220764,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -222034,13 +221969,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -222187,13 +222122,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -222340,8 +222275,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -222484,7 +222419,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -223681,13 +223616,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -223834,13 +223769,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -223987,8 +223922,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -224131,7 +224066,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -225317,13 +225252,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -225470,13 +225405,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -225623,8 +225558,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -225767,7 +225702,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -226945,13 +226880,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -227098,13 +227033,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -227251,8 +227186,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -227395,7 +227330,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -228563,13 +228498,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -228716,13 +228651,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -228869,8 +228804,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -229013,7 +228948,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -230179,13 +230114,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -230332,13 +230267,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -230485,8 +230420,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -230629,7 +230564,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -231793,13 +231728,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -231946,13 +231881,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -232099,8 +232034,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -232243,7 +232178,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -233420,13 +233355,13 @@ func get_context_safe_bool(node n, string key, bool default_val) bool {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -233573,13 +233508,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -233726,8 +233661,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -233870,7 +233805,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -234984,13 +234919,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -235137,13 +235072,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -235290,8 +235225,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -235434,7 +235369,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -236548,8 +236483,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -236696,13 +236631,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -236849,8 +236784,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -236993,7 +236928,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -238103,7 +238038,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -238250,13 +238185,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -238403,8 +238338,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -238547,7 +238482,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -239798,13 +239733,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -239951,8 +239886,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -240095,7 +240030,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -241334,13 +241269,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -241487,8 +241422,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -241631,7 +241566,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -242867,13 +242802,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -243020,8 +242955,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -243164,7 +243099,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -244372,13 +244307,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -244525,8 +244460,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -244669,7 +244604,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -245869,13 +245804,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -246022,8 +245957,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -246166,7 +246101,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -247358,13 +247293,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -247511,8 +247446,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -247655,7 +247590,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -248836,13 +248771,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -248989,8 +248924,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -249133,7 +249068,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -250306,13 +250241,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -250459,8 +250394,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -250603,7 +250538,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -251766,13 +251701,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -251919,8 +251854,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -252063,7 +251998,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -253224,13 +253159,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -253377,8 +253312,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -253521,7 +253456,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -254680,13 +254615,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -254833,8 +254768,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -254977,7 +254912,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -256149,13 +256084,13 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
-func get_context_safe_shape(node n, string key, int[] default_val) int[] {
+func get_context_safe_shape(node n, string key, int[] default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -256302,8 +256237,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -256446,7 +256381,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -257560,8 +257495,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -257708,8 +257643,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -257852,7 +257787,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -258962,7 +258897,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -259109,8 +259044,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -259253,7 +259188,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -260504,8 +260439,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -260648,7 +260583,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -261887,8 +261822,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -262031,7 +261966,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -263267,8 +263202,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -263411,7 +263346,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -264619,8 +264554,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -264763,7 +264698,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -265963,8 +265898,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -266107,7 +266042,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -267299,8 +267234,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -267443,7 +267378,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -268624,8 +268559,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -268768,7 +268703,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -269941,8 +269876,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -270085,7 +270020,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -271248,8 +271183,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -271392,7 +271327,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -272553,8 +272488,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -272697,7 +272632,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -273856,8 +273791,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -274000,7 +273935,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -275172,8 +275107,8 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
-func parse_shape_array(float[] data) int[] {
-    int[] shapes = int[]{cap: len(data)}
+func parse_shape_array(float[] data) []int {
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -275316,7 +275251,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -276426,7 +276361,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -276569,7 +276504,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -277816,7 +277751,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -279051,7 +278986,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -280283,7 +280218,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -281487,7 +281422,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -282683,7 +282618,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -283871,7 +283806,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -285048,7 +284983,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -286217,7 +286152,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -287376,7 +287311,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -288533,7 +288468,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -289688,7 +289623,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }
@@ -290856,7 +290791,7 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
-    int[] shapes = int[]{cap: len(data)}
+    int[] shapes = make([]int, len(data))
     for i in 0..len(data) {
         shapes[i] = int(data[i])
     }

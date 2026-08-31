@@ -140,7 +140,7 @@ func (sampler* s) top_p_sample(float32[] logits, float32 p_val) int32 {
 	return 0
 }
 
-func (sampler* s) temperature_sample(float32[] logits, float32 temperature) float32[] {
+func (sampler* s) temperature_sample(float32[] logits, float32 temperature) []float32 {
 	if temperature <= 0.0 {
 		return logits
 	}
@@ -182,7 +182,7 @@ func (sampler* s) sample_enhanced(float32[] logits, sampling.sampling_params* pa
 	return s.enhanced_sampler.sample(logits)
 }
 
-func (sampler* s) batch_sample(float32[][]] batch_logits, sampling_params* params) int32[] {
+func (sampler* s) batch_sample(float32[][]] batch_logits, sampling_params* params) []int32 {
 	results := make(int32[])
 	for i := 0; i < len(batch_logits); i = i + 1 {
 		token := s.sample_with_params(batch_logits[i], params)
@@ -191,14 +191,14 @@ func (sampler* s) batch_sample(float32[][]] batch_logits, sampling_params* param
 	return results
 }
 
-func (sampler* s) batch_sample_enhanced(float32[][]] batch_logits) int32[] {
+func (sampler* s) batch_sample_enhanced(float32[][]] batch_logits) []int32 {
 	if s.enhanced_sampler == nil {
 		return s.batch_sample(batch_logits, nil)
 	}
 	return s.enhanced_sampler.batch_sample(batch_logits)
 }
 
-func (sampler* s) apply_frequency_penalty(float32[] logits, int32[] token_ids, float32 penalty) float32[] {
+func (sampler* s) apply_frequency_penalty(float32[] logits, int32[] token_ids, float32 penalty) []float32 {
 	if penalty == 0.0 {
 		return logits
 	}
@@ -215,7 +215,7 @@ func (sampler* s) apply_frequency_penalty(float32[] logits, int32[] token_ids, f
 	return adjusted
 }
 
-func (sampler* s) apply_presence_penalty(float32[] logits, int32[] token_ids, float32 penalty) float32[] {
+func (sampler* s) apply_presence_penalty(float32[] logits, int32[] token_ids, float32 penalty) []float32 {
 	if penalty == 0.0 {
 		return logits
 	}

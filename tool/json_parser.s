@@ -12,7 +12,7 @@ struct json_token {
 }
 
 func parse_tokenizer_json(string json_text) []json_token {
-    []json_token tokens = []json_token{cap: 160000}
+    []json_token tokens = make([]json_token, 160000)
     int token_count = 0
 
     int i = 0
@@ -57,7 +57,7 @@ func parse_tokenizer_json(string json_text) []json_token {
         i = quote_end + 1
     }
 
-    []json_token result = []json_token{cap: token_count}
+    []json_token result = make([]json_token, token_count)
     int j = 0
     for j < token_count {
         result[j] = tokens[j]

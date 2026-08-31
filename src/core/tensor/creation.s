@@ -16,7 +16,7 @@ func numel(int[] shape) int {
 
 func make(int[] shape, float value, bool requires_grad) tensor {
     int n = numel(shape)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     for i in 0..n {
         data[i] = value
     }
@@ -28,9 +28,9 @@ func make(int[] shape, float value, bool requires_grad) tensor {
     }
 }
 
-func copy_int(int[] data) int[] {
+func copy_int(int[] data) []int {
     int n = len(data)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -82,7 +82,7 @@ func full_like(tensor like, float value) tensor {
 }
 
 func eye(int n, int m) tensor {
-    int[] shape = int[]{cap: 2}
+    int[] shape = make([]int, 2)
     shape[0] = n
     shape[1] = m
     tensor out = make(shape, 0.0, false)
@@ -115,7 +115,7 @@ func arange(int start, int end, int step) tensor {
             value = value + step
         }
     }
-    int[] shape = int[]{cap: 1}
+    int[] shape = make([]int, 1)
     shape[0] = count
     tensor out = make(shape, 0.0, false)
     value = start
@@ -137,7 +137,7 @@ func arange(int start, int end, int step) tensor {
 }
 
 func linspace(float start, float end, int steps) tensor {
-    int[] shape = int[]{cap: 1}
+    int[] shape = make([]int, 1)
     shape[0] = steps
     tensor out = make(shape, 0.0, false)
     if steps <= 0 {
@@ -210,7 +210,7 @@ func randint(int low, int high, int[] shape) tensor {
 }
 
 func randperm(int n) tensor {
-    int[] shape = int[]{cap: 1}
+    int[] shape = make([]int, 1)
     shape[0] = n
     tensor out = make(shape, 0.0, false)
     int i = 0

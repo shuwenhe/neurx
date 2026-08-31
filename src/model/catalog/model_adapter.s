@@ -219,7 +219,7 @@ func (model_adapter_registry* registry) get_adapter_metadata(model_type model_ty
 	return registry.adapter_metadata[type_str]
 }
 
-func (model_adapter_registry* registry) list_registered_adapters() string[] {
+func (model_adapter_registry* registry) list_registered_adapters() []string {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	adapters := make(string[], 0, len(registry.adapters))

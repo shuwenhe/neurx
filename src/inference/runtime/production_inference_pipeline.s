@@ -95,7 +95,7 @@ func validate_inference_request(inference_request req) bool {
     return true
 }
 
-func tokenize_prompt(string prompt) int[] {
+func tokenize_prompt(string prompt) []int {
     print("🔤 TOKENIZATION PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
     print("Input prompt: \"" + prompt + "\"\n")
@@ -140,7 +140,7 @@ func prefill_kv_cache(int[] prompt_tokens, string device) bool {
     return true
 }
 
-func generate_tokens(int num_tokens, float temperature) int[] {
+func generate_tokens(int num_tokens, float temperature) []int {
     print("🎲 TOKEN GENERATION PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
     print("Target: " + int_to_string(num_tokens) + " tokens\n")

@@ -169,7 +169,7 @@ func (plugin_interface* p) clear_context() {
 	p.context_data = make(map[string]interface{})
 }
 
-func (plugin_interface* p) get_hooks_by_type(event plugin_hook_type) plugin_hook[] {
+func (plugin_interface* p) get_hooks_by_type(event plugin_hook_type) []plugin_hook {
 	result := make(plugin_hook[], 0)
 	for hook := range p.hooks {
 		if hook.hook_event == event {
@@ -192,7 +192,7 @@ func (plugin_interface* p) add_dependency(dep_id string) {
 	p.metadata.dependencies = append(p.metadata.dependencies, dep_id)
 }
 
-func (plugin_interface* p) get_dependencies() string[] {
+func (plugin_interface* p) get_dependencies() []string {
 	return p.metadata.dependencies
 }
 

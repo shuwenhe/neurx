@@ -97,12 +97,12 @@ func collect_trajectory(
     for t < config.horizon {
         ppo_step step
         step.step_id = t
-        step.tokens = float[]{cap: 4}
+        step.tokens = make([]float, 4)
         step.tokens[0] = float(prompt_len)
         step.tokens[1] = float(t)
         step.tokens[2] = float(config.seq_len)
         step.tokens[3] = float(config.hidden_size)
-        step.logits = float[]{cap: 4}
+        step.logits = make([]float, 4)
         step.logits[0] = 0.10 + float(t) * 0.01
         step.logits[1] = 0.20 + float(prompt_len) * 0.001
         step.logits[2] = 0.30 + float(config.num_layers) * 0.001
@@ -330,10 +330,10 @@ func compute_explained_variance(ppo_trajectory traj) float {
 func init_ppo_state(ppo_config config) ppo_state {
     ppo_state state
     state.config = config
-    state.policy_params = float[]{}
-    state.policy_grads = float[]{}
-    state.value_params = float[]{}
-    state.value_grads = float[]{}
+    state.policy_params = []float{}
+    state.policy_grads = []float{}
+    state.value_params = []float{}
+    state.value_grads = []float{}
     state.current_step = 0
     state.current_epoch = 0
     state.total_steps = 0
@@ -347,7 +347,7 @@ func init_ppo_state(ppo_config config) ppo_state {
     state.clip_fraction = 0.0
     state.global_rank = config.global_rank
     state.world_size = config.world_size
-    state.global_avg_loss = float[]{}
+    state.global_avg_loss = []float{}
     state
 }
 
@@ -420,8 +420,8 @@ func print_ppo_evaluation(ppo_state state, int step) {
     print("Advantage Mag:      " + float_to_string_ppo(state.avg_advantage_magnitude))
 }
 
-func make_float_array(int size, float init_value) float[] {
-    float[] arr = float[]{cap: size}
+func make_float_array(int size, float init_value) []float {
+    float[] arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = init_value
@@ -497,9 +497,9 @@ func abs_float(float x) float {
     x
 }
 
-func softmax_approx(float[] logits) float[] {
+func softmax_approx(float[] logits) []float {
     int n = len(logits)
-    float[] probs = float[]{cap: n}
+    float[] probs = make([]float, n)
     if n == 0 {
         return probs
     }

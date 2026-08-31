@@ -27,7 +27,7 @@ func new_tool_cache(int capacity) tool_cache_state {
     if cap_val < 1 {
         cap_val = 32
     }
-    []tool_cache_entry entries = []tool_cache_entry{cap: cap_val}
+    []tool_cache_entry entries = make([]tool_cache_entry, cap_val)
     int i = 0
     for i < cap_val {
         entries[i] = tool_cache_entry {
@@ -87,7 +87,7 @@ func tool_cache_get(tool_cache_state state, string tool_name, string input) tool
 
 func tool_cache_record_hit(tool_cache_state state, string tool_name, string input) tool_cache_state {
     string key = tool_cache_make_key(tool_name, input)
-    []tool_cache_entry next = []tool_cache_entry{cap: state.capacity}
+    []tool_cache_entry next = make([]tool_cache_entry, state.capacity)
     int i = 0
     for i < state.capacity {
         next[i] = state.entries[i]
@@ -135,7 +135,7 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
         }
         i = i + 1
     }
-    []tool_cache_entry next = []tool_cache_entry{cap: state.capacity}
+    []tool_cache_entry next = make([]tool_cache_entry, state.capacity)
     int j = 0
     for j < state.capacity {
         next[j] = state.entries[j]
@@ -202,7 +202,7 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
 func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_cache_state {
     string prefix = tool_name + "\x00"
     int prefix_len = len(prefix)
-    []tool_cache_entry next = []tool_cache_entry{cap: state.capacity}
+    []tool_cache_entry next = make([]tool_cache_entry, state.capacity)
     int new_size = state.size
     int i = 0
     for i < state.capacity {

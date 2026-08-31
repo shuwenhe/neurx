@@ -49,7 +49,7 @@ func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
     pool := *kv_cache_pool_v2{
         config:              config,
         blocks:              []*kv_block{},
-        free_blocks:         int[]{},
+        free_blocks:         []int{},
         request_allocations: make(map[int64]*kv_allocation),
         request_to_blocks:   make(map[int64]int[]),
         prefix_cache_map:    make(map[string]int[]),
@@ -80,7 +80,7 @@ func (kv_cache_pool_v2* p) Allocate(request_id int64, num_tokens int32) *kv_allo
         return nil
     }
     allocation := *kv_allocation{
-        block_table:   int[]{},
+        block_table:   []int{},
         block_offsets: int[]32{},
         num_tokens:    num_tokens,
         request_id:    request_id,
@@ -113,7 +113,7 @@ func (kv_cache_pool_v2* p) SharePrefix(source_id int64, target_id int64, prefix_
     target_alloc, exists := p.request_allocations[target_id]
     if !exists {
         target_alloc = *kv_allocation{
-            block_table:   int[]{},
+            block_table:   []int{},
             block_offsets: int[]32{},
             num_tokens:    prefix_tokens,
             request_id:    target_id,

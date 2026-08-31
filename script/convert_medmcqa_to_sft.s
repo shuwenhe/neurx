@@ -171,7 +171,7 @@ func main() {
     }
     println("✓ Read " + len(content) + " bytes")
     println("Parsing JSONL...")
-    string[] lines = string[]{}
+    string[] lines = []string{}
     string current = ""
     for i in 0..len(content)-1 {
         if content[i] == 10 {

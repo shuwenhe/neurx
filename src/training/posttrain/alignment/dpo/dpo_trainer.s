@@ -108,7 +108,7 @@ func load_dpo_dataset(
         train_test_split: 0,
         avg_prompt_len: 0.0,
         avg_response_len: 0.0,
-        domain_distribution: float[]{},
+        domain_distribution: []float{},
     }
 }
 
@@ -157,9 +157,9 @@ func create_dpo_trainer(
         running_chosen_reward: 0.0,
         running_rejected_reward: 0.0,
         running_accuracy: 0.0,
-        loss_history: float[]{},
-        margin_history: float[]{},
-        accuracy_history: float[]{},
+        loss_history: []float{},
+        margin_history: []float{},
+        accuracy_history: []float{},
         train_loader: dataloader{},
         eval_loader: dataloader{},
     }

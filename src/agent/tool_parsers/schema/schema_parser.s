@@ -94,7 +94,7 @@ func extract_int_value(string json_str, int pos) int {
     return string_to_int(result)
 }
 
-func extract_string_array(string json_str, int pos) string[] {
+func extract_string_array(string json_str, int pos) []string {
     result := vec_new()
     i := pos
     for i < len(json_str) && json_str[i] != '[' {

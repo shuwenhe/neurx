@@ -18,8 +18,8 @@ struct ddp_state {
     float last_sync_scale
 }
 
-func copy_ints(int[] values) int[] {
-    int[] out = int[]{cap: len(values)}
+func copy_ints(int[] values) []int {
+    int[] out = make([]int, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -282,14 +282,14 @@ func ddp_attach_process_group(ddp_state state, process_group_state pg) ddp_state
     }
 }
 
-func ddp_all_reduce_grad(ddp_state state, process_group_state pg, float[] grads) float[] {
+func ddp_all_reduce_grad(ddp_state state, process_group_state pg, float[] grads) []float {
     if !ddp_is_distributed(ddp_state_dict(state)) {
         return copy_float(grads)
     }
     all_reduce_sum(pg, grads)
 }
 
-func ddp_broadcast_params(ddp_state state, process_group_state pg, float[] params) float[] {
+func ddp_broadcast_params(ddp_state state, process_group_state pg, float[] params) []float {
     if !ddp_is_distributed(ddp_state_dict(state)) {
         return copy_float(params)
     }

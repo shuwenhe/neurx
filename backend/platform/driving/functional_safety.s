@@ -30,8 +30,8 @@ struct functional_safety_monitor {
 func new_functional_safety_monitor(safety_level level) functional_safety_monitor {
     return functional_safety_monitor{
         target_level: level,
-        fault_count: int[]{},
-        fault_history: int[]{},
+        fault_count: []int{},
+        fault_history: []int{},
         fmea_coverage_percent: 95,
         diagnostics_enabled: true,
     }

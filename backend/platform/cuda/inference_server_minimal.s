@@ -35,7 +35,7 @@ func int_to_string(int value) string {
     return result
 }
 
-func tokenize_text(string text) int[] {
+func tokenize_text(string text) []int {
     return __host_read_binary_file_range("", 0, 0)
 }
 

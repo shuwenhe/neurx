@@ -62,8 +62,8 @@ struct dsl_step_result {
     bool needs_external_result
 }
 
-func dsl_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func dsl_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

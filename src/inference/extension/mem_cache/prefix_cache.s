@@ -258,7 +258,7 @@ func (prefix_cache* cache) find_matching_prefix(int32[] query_tokens) cache_entr
         cache.entries[result.cache_key]
     }
     cache_entry {
-        token_sequence: int32[]{},
+        token_sequence: []int32{},
         kv_cache_ptr: 0,
         kv_cache_size: 0,
         access_count: 0,
@@ -268,8 +268,8 @@ func (prefix_cache* cache) find_matching_prefix(int32[] query_tokens) cache_entr
     }
 }
 
-func (prefix_cache* cache) get_high_reuse_prefixes() cache_entry[] {
-    results := cache_entry[]{}
+func (prefix_cache* cache) get_high_reuse_prefixes() []cache_entry {
+    results := []cache_entry{}
     high_reuse_nodes := cache.tree.find_high_reuse_nodes()
     for node in high_reuse_nodes {
         for key in cache.entries.keys() {

@@ -19,7 +19,7 @@ func create_cache_index(int max_entries_count) cache_index {
     idx.max_entries = max_entries_count
     idx.num_entries = 0
     idx.current_time = 0
-    idx.entries = []cache_index_entry{cap: max_entries_count}
+    idx.entries = make([]cache_index_entry, max_entries_count)
     print("[CacheIndex] Created with capacity " + int_to_string(max_entries_count) + "\n")
     return idx
 }
@@ -52,11 +52,11 @@ func cache_index_find_entry(cache_index idx, string prefix_hash) int {
     return -1
 }
 
-func cache_index_get_blocks(cache_index idx, string prefix_hash) int[] {
+func cache_index_get_blocks(cache_index idx, string prefix_hash) []int {
     int entry_idx = cache_index_find_entry(idx, prefix_hash)
     if entry_idx == -1 {
         print("[CacheIndex] Miss for prefix " + prefix_hash + "\n")
-        return int[]{cap: 0}
+        return []int{}
     }
     cache_index_entry entry = idx.entries[entry_idx]
     entry.access_count = entry.access_count + 1

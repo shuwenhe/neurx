@@ -87,7 +87,7 @@ func decode_tokens(int[] token_ids) string {
     return result
 }
 
-func generate(int[] prompt_tokens, int max_new_tokens, sampling_config config) int[] {
+func generate(int[] prompt_tokens, int max_new_tokens, sampling_config config) []int {
     int[] result = make(int[], len(prompt_tokens))
     int i = 0
     for i < len(prompt_tokens) {

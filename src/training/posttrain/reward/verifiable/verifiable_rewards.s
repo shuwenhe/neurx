@@ -60,7 +60,7 @@ func verify_code_solution(
             correct: false,
             reward: 0.0,
             error_message: error,
-            intermediate_steps: string[]{},
+            intermediate_steps: []string{},
         }
     }
     bool correct = output == problem.expected_output
@@ -74,7 +74,7 @@ func verify_code_solution(
         correct: correct,
         reward: reward,
         error_message: "",
-        intermediate_steps: string[]{},
+        intermediate_steps: []string{},
     }
 }
 
@@ -128,8 +128,8 @@ func normalize_math_expression(string expr) string {
     result
 }
 
-func extract_reasoning_steps(string solution) string[] {
-    string[] steps = string[]{}
+func extract_reasoning_steps(string solution) []string {
+    string[] steps = []string{}
     string[] lines = split(solution, "\n")
     int i = 0
     for i < lines.len {
@@ -210,7 +210,7 @@ func to_lower(string s) string { s }
 
 func replace_all(string s, string old, string new) string { s }
 
-func split(string s, string delim) string[] { string[]{} }
+func split(string s, string delim) []string { []string{} }
 
 func len(string s) int { 0 }
 

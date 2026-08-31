@@ -207,8 +207,8 @@ func custom_model_config(int n_embd, int n_layer, int n_head, int block_size, st
     }
 }
 
-func alloc_tensor(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func alloc_tensor(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -217,7 +217,7 @@ func alloc_tensor(int size, float init_val) float[] {
     v
 }
 
-func copy_tensor(float[] src) float[] {
+func copy_tensor(float[] src) []float {
     float[] out = gpt_alloc(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -227,7 +227,7 @@ func copy_tensor(float[] src) float[] {
     out
 }
 
-func add_tensors(float[] a, float[] b) float[] {
+func add_tensors(float[] a, float[] b) []float {
     float[] out = gpt_copy(a)
     int i = 0
     for i < len(out) {
@@ -237,7 +237,7 @@ func add_tensors(float[] a, float[] b) float[] {
     out
 }
 
-func matmul_transposefloat[] a, float[] b, int m, int k, int n) float[] {
+func matmul_transposefloat[] a, float[] b, int m, int k, int n) []float {
     float[] result = gpt_alloc(m * n, 0.0)
     int i = 0
     for i < m {
@@ -257,7 +257,7 @@ func matmul_transposefloat[] a, float[] b, int m, int k, int n) float[] {
     result
 }
 
-func matmulfloat[] a, float[] b, int m, int k, int n) float[] {
+func matmulfloat[] a, float[] b, int m, int k, int n) []float {
     float[] result = gpt_alloc(m * n, 0.0)
     int i = 0
     for i < m {
@@ -393,7 +393,7 @@ func gelu_activationfloat x) float {
     0.5 * x * (1.0 + inner * 0.7978845608)
 }
 
-func softmax_rowfloat[] scores, int size) float[] {
+func softmax_rowfloat[] scores, int size) []float {
     float[] out = gpt_alloc(size, 0.0)
     float max_val = scores[0]
     int i = 1
@@ -421,7 +421,7 @@ func softmax_rowfloat[] scores, int size) float[] {
     out
 }
 
-func matmul_kvfloat[] a, float[] b, int m, int k, int n, int full_n) float[] {
+func matmul_kvfloat[] a, float[] b, int m, int k, int n, int full_n) []float {
     float[] result = gpt_alloc(m * n, 0.0)
     int i = 0
     for i < m {
@@ -441,7 +441,7 @@ func matmul_kvfloat[] a, float[] b, int m, int k, int n, int full_n) float[] {
     result
 }
 
-func init_weightsint size, float scale) float[] {
+func init_weightsint size, float scale) []float {
     float[] w = gpt_alloc(size, 0.0)
     int i = 0
     for i < size {
@@ -491,7 +491,7 @@ func new_language_modelmodel_config cfg) language_model {
     float[] wte = gpt_init_weights(cfg.vocab_size * hidden_dim, wte_scale)
     float wpe_scale = 0.01
     float[] wpe = gpt_init_weights(cfg.block_size * hidden_dim, wpe_scale)
-    []transformer_layer layers = []transformer_layer{cap: cfg.n_layer}
+    []transformer_layer layers = make([]transformer_layer, cfg.n_layer)
     int i = 0
     for i < cfg.n_layer {
         layers[i] = new_transformer_layer(cfg)
@@ -540,7 +540,7 @@ func embed_tokens(
     int batch_size,
     int seq_len,
     int n_embd
-) float[] {
+) []float {
     int total = batch_size * seq_len
     float[] out = gpt_alloc(total * n_embd, 0.0)
     int b = 0
@@ -583,7 +583,7 @@ func causal_sdpa
     int num_heads,
     int num_kv_heads,
     int head_dim
-) float[] {
+) []float {
     int total = seq_len
     int out_size = total * num_heads * head_dim
     float[] output = gpt_alloc(out_size, 0.0)
@@ -653,7 +653,7 @@ func transformer_layer_forward(
     int batch_size,
     int seq_len,
     rope_embedding rope
-) float[] {
+) []float {
     int total_tokens = batch_size * seq_len
     int hidden_dim = layer.hidden_dim
     int n_head = layer.n_head
@@ -858,7 +858,7 @@ func gpt_generate_greedy(
     language_model model,
     int[] prompt,
     int max_new_tokens
-) int[] {
+) []int {
     int prompt_len = len(prompt)
     int max_total = prompt_len + max_new_tokens
     int[] context = gpt_alloc_int(max_total)
@@ -915,7 +915,7 @@ func gpt_generate_topk(
     int top_k,
     float temperature,
     int seed
-) int[] {
+) []int {
     int prompt_len = len(prompt)
     int max_total = prompt_len + max_new_tokens
     int[] context = gpt_alloc_int(max_total)
@@ -1018,7 +1018,7 @@ func gpt_generate_nucleus(
     float top_p,
     float temperature,
     int seed
-) int[] {
+) []int {
     int prompt_len = len(prompt)
     int max_total = prompt_len + max_new_tokens
     int[] context = gpt_alloc_int(max_total)
@@ -1116,8 +1116,8 @@ func gpt_generate_nucleus(
     result
 }
 
-func gpt_alloc_int(int size) int[] {
-    int[] v = int[]{cap: size}
+func gpt_alloc_int(int size) []int {
+    int[] v = make([]int, size)
     int i = 0
     for i < size {
         v[i] = 0

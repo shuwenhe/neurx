@@ -43,7 +43,7 @@ func new_optimized_inference_engine(
 func (optimized_inference_engine* engine) forward_with_attention(
     float[] input_ids,
     float[] embeddings
-) float[] {
+) []float {
     seq_len := len(input_ids)
     if seq_len > 4096 {
         engine.attn_manager.set_method("sparse")
@@ -72,7 +72,7 @@ func (optimized_inference_engine* engine) forward_with_attention(
 func (optimized_inference_engine* engine) prefill(
     int[] input_ids,
     float[] embeddings
-) float[] {
+) []float {
     engine.inference_mode = "prefill"
     engine.current_seq_pos = len(input_ids)
     float[] token_floats = make(float[], len(input_ids))
@@ -87,7 +87,7 @@ func (optimized_inference_engine* engine) prefill(
 func (optimized_inference_engine* engine) decode(
     int next_token_id,
     float[] last_embedding
-) float[] {
+) []float {
     engine.inference_mode = "decode"
     engine.current_seq_pos = engine.current_seq_pos + 1
     float[] token_float = float[]{last_embedding[0]}
@@ -95,7 +95,7 @@ func (optimized_inference_engine* engine) decode(
     return result
 }
 
-func add_residual(float[] x, float[] y) float[] {
+func add_residual(float[] x, float[] y) []float {
     float[] result = make(float[], len(x))
     int i = 0
     for i < len(x) {
@@ -109,7 +109,7 @@ func add_residual(float[] x, float[] y) float[] {
     return result
 }
 
-func apply_feed_forward(float[] x, int hidden_dim) float[] {
+func apply_feed_forward(float[] x, int hidden_dim) []float {
     int ff_dim = hidden_dim * 4
     float[] hidden = make(float[], ff_dim)
     int i = 0

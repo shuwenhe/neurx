@@ -142,7 +142,7 @@ func (sse_encoder* e) escape_data(data string) string {
 	return escaped
 }
 
-func (sse_encoder* e) split_multiline(data string) string[] {
+func (sse_encoder* e) split_multiline(data string) []string {
 	lines := make(string[], 0)
 	current_line := ""
 	for i := int32(0); i < int32(len(data)); i++ {

@@ -94,8 +94,8 @@ func production_hybrid_moe_shape() hybrid_moe_config {
     }
 }
 
-func zeros(int n) float[] {
-    float[] out = float[]{cap: n}
+func zeros(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -104,8 +104,8 @@ func zeros(int n) float[] {
     out
 }
 
-func zeros_int(int n) int[] {
-    int[] out = int[]{cap: n}
+func zeros_int(int n) []int {
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = 0
@@ -114,7 +114,7 @@ func zeros_int(int n) int[] {
     out
 }
 
-func deterministic_weights(int n, int salt, float scale) float[] {
+func deterministic_weights(int n, int salt, float scale) []float {
     float[] out = zeros(n)
     int i = 0
     for i < n {
@@ -126,7 +126,7 @@ func deterministic_weights(int n, int salt, float scale) float[] {
     out
 }
 
-func copy_floats(float[] values) float[] {
+func copy_floats(float[] values) []float {
     float[] out = zeros(len(values))
     int i = 0
     for i < len(values) {
@@ -189,7 +189,7 @@ func situ(float x) float {
     s * t
 }
 
-func rms_norm_tokens(float[] input, int tokens, int hidden) float[] {
+func rms_norm_tokens(float[] input, int tokens, int hidden) []float {
     float[] out = zeros(tokens * hidden)
     int t = 0
     for t < tokens {
@@ -211,7 +211,7 @@ func rms_norm_tokens(float[] input, int tokens, int hidden) float[] {
     out
 }
 
-func linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) float[] {
+func linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) []float {
     float[] out = zeros(rows * out_dim)
     int r = 0
     for r < rows {
@@ -231,7 +231,7 @@ func linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) fl
     out
 }
 
-func add_arrays(float[] a, float[] b) float[] {
+func add_arrays(float[] a, float[] b) []float {
     float[] out = zeros(len(a))
     int i = 0
     for i < len(a) {
@@ -383,7 +383,7 @@ func attention_residual(
     }
 }
 
-func store_history(float[] history, float[] values, int depth, int width) float[] {
+func store_history(float[] history, float[] values, int depth, int width) []float {
     float[] out = copy_floats(history)
     int i = 0
     for i < width {

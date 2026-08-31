@@ -147,9 +147,9 @@ func cluster_parallel_rank_of(cluster_parallel_topology topology, int global_ran
     }
 }
 
-func cluster_parallel_build_stages(cluster_parallel_topology topology, int num_layers) cluster_parallel_stage[] {
+func cluster_parallel_build_stages(cluster_parallel_topology topology, int num_layers) []cluster_parallel_stage {
     if topology.pipeline_parallel_size <= 0 { topology.pipeline_parallel_size = 1 }
-    cluster_parallel_stage[] stages = cluster_parallel_stage[]{cap: topology.pipeline_parallel_size}
+    cluster_parallel_stage[] stages = make([]cluster_parallel_stage, topology.pipeline_parallel_size)
     int per_stage = num_layers / topology.pipeline_parallel_size
     int remainder = num_layers - per_stage * topology.pipeline_parallel_size
     int stage = 0
@@ -172,8 +172,8 @@ func cluster_parallel_build_stages(cluster_parallel_topology topology, int num_l
     stages
 }
 
-func cluster_parallel_build_ranks(cluster_parallel_topology topology) cluster_parallel_rank[] {
-    cluster_parallel_rank[] ranks = cluster_parallel_rank[]{cap: topology.world_size}
+func cluster_parallel_build_ranks(cluster_parallel_topology topology) []cluster_parallel_rank {
+    cluster_parallel_rank[] ranks = make([]cluster_parallel_rank, topology.world_size)
     int global_rank = 0
     for global_rank < topology.world_size {
         ranks = append(ranks, cluster_parallel_rank_of(topology, global_rank))
@@ -232,19 +232,19 @@ func cluster_parallel_plan_ready(cluster_parallel_plan plan) bool {
 func cluster_parallel_assign_to_nodes(cluster_parallel_plan plan, int[] node_ids, string[] node_names, string[] node_hosts) cluster_parallel_assignment_plan {
     cluster_parallel_assignment_plan result
     if !cluster_parallel_plan_ready(plan) {
-        result.assignments = cluster_parallel_node_assignment[]{cap: 0}
+        result.assignments = []cluster_parallel_node_assignment{}
         result.valid = false
         result.reason = "parallel plan not ready"
         return result
     }
     int available_nodes = len(node_ids)
     if available_nodes <= 0 {
-        result.assignments = cluster_parallel_node_assignment[]{cap: 0}
+        result.assignments = []cluster_parallel_node_assignment{}
         result.valid = false
         result.reason = "no nodes available"
         return result
     }
-    cluster_parallel_node_assignment[] assignments = cluster_parallel_node_assignment[]{}
+    cluster_parallel_node_assignment[] assignments = []cluster_parallel_node_assignment{}
     int i = 0
     for i < len(plan.ranks) {
         cluster_parallel_rank rank = plan.ranks[i]
@@ -284,18 +284,18 @@ func cluster_parallel_assignment_summary(cluster_parallel_assignment_plan plan) 
 func cluster_parallel_build_launch_plan(cluster_parallel_assignment_plan assignment, string worker_bin, string master_addr, int master_port, int world_size) cluster_parallel_launch_plan {
     cluster_parallel_launch_plan result
     if !assignment.valid {
-        result.commands = cluster_parallel_launch_command[]{cap: 0}
+        result.commands = []cluster_parallel_launch_command{}
         result.valid = false
         result.reason = assignment.reason
         return result
     }
     if worker_bin == "" || master_addr == "" || master_port <= 0 || world_size <= 0 {
-        result.commands = cluster_parallel_launch_command[]{cap: 0}
+        result.commands = []cluster_parallel_launch_command{}
         result.valid = false
         result.reason = "invalid launch parameters"
         return result
     }
-    cluster_parallel_launch_command[] commands = cluster_parallel_launch_command[]{}
+    cluster_parallel_launch_command[] commands = []cluster_parallel_launch_command{}
     int i = 0
     for i < len(assignment.assignments) {
         cluster_parallel_node_assignment a = assignment.assignments[i]
@@ -337,12 +337,12 @@ func cluster_parallel_launch_summary(cluster_parallel_launch_plan plan) string {
 func cluster_parallel_group_launch_plan(cluster_parallel_launch_plan plan) cluster_parallel_grouped_launch_plan {
     cluster_parallel_grouped_launch_plan result
     if !plan.valid {
-        result.bundles = cluster_parallel_host_bundle[]{cap: 0}
+        result.bundles = []cluster_parallel_host_bundle{}
         result.valid = false
         result.reason = plan.reason
         return result
     }
-    cluster_parallel_host_bundle[] bundles = cluster_parallel_host_bundle[]{}
+    cluster_parallel_host_bundle[] bundles = []cluster_parallel_host_bundle{}
     int i = 0
     for i < len(plan.commands) {
         cluster_parallel_launch_command cmd = plan.commands[i]
@@ -386,12 +386,12 @@ func cluster_parallel_grouped_launch_summary(cluster_parallel_grouped_launch_pla
 func cluster_parallel_execute_launch_plan(cluster_parallel_launch_plan plan) cluster_parallel_execution_batch {
     cluster_parallel_execution_batch result
     if !plan.valid {
-        result.lines = cluster_parallel_execution_line[]{cap: 0}
+        result.lines = []cluster_parallel_execution_line{}
         result.valid = false
         result.reason = plan.reason
         return result
     }
-    cluster_parallel_execution_line[] lines = cluster_parallel_execution_line[]{}
+    cluster_parallel_execution_line[] lines = []cluster_parallel_execution_line{}
     int i = 0
     for i < len(plan.commands) {
         cluster_parallel_launch_command cmd = plan.commands[i]
@@ -448,7 +448,7 @@ func cluster_parallel_build_execution_script(cluster_parallel_execution_batch ba
 func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[] failed_ranks) cluster_parallel_rank_filter_result {
     cluster_parallel_rank_filter_result meta
     if !plan.valid {
-        meta.plan.commands = cluster_parallel_launch_command[]{cap: 0}
+        meta.plan.commands = []cluster_parallel_launch_command{}
         meta.plan.valid = false
         meta.plan.reason = plan.reason
         meta.kept_count = 0
@@ -457,7 +457,7 @@ func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[
         meta.reason = plan.reason
         return meta
     }
-    cluster_parallel_launch_command[] commands = cluster_parallel_launch_command[]{}
+    cluster_parallel_launch_command[] commands = []cluster_parallel_launch_command{}
     int kept = 0
     int dropped = 0
     int i = 0

@@ -387,7 +387,7 @@ func (multimodal_encoder* mme) update_encoder_config(encoder_name string, config
 	return nil
 }
 
-func (multimodal_encoder* mme) list_registered_encoders() string[] {
+func (multimodal_encoder* mme) list_registered_encoders() []string {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 	encoders := make(string[], 0)

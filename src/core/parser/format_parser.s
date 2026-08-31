@@ -7,12 +7,12 @@ func detect_format(string text) FormatDetectionResult {
         return FormatDetectionResult{
             detected_format: 0,
             confidence: 1.0,
-            indicators: string[]{},
+            indicators: []string{},
             metadata: map[string]string{},
         }
     }
     first_char := trimmed[0]
-    indicators := string[]{}
+    indicators := []string{}
     if first_char == '{' || first_char == '[' {
         if is_valid_json_structure(trimmed) {
             return FormatDetectionResult{
@@ -217,7 +217,7 @@ func parse_json_output(string text) ParseResult {
         return result
     }
     if trimmed[0] == '{' {
-        result.value = create_object_value(string[]{}, []ParsedValue{})
+        result.value = create_object_value([]string{}, []ParsedValue{})
     } else if trimmed[0] == '[' {
         result.value = create_array_value([]ParsedValue{})
     } else if trimmed[0] == '"' {

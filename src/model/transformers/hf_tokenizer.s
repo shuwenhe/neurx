@@ -113,7 +113,7 @@ struct token_ids {
     int[] token_type_ids
 }
 
-func tokenize_text(string text, hf_tokenizer tokenizer) string[] {
+func tokenize_text(string text, hf_tokenizer tokenizer) []string {
     string[] tokens
     string current_token = ""
     for char in text {

@@ -1,6 +1,6 @@
 package neurx.strings
-func copy_strings(string[] values) string[] {
-    string[] out = string[]{cap: len(values)}
+func copy_strings(string[] values) []string {
+    string[] out = make([]string, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]

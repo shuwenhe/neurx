@@ -188,7 +188,7 @@ func pad_float(float val, int w, int d) string {
     s
 }
 
-func split_lines(string s) string[] {
+func split_lines(string s) []string {
     int capacity = 1
     int j = 0
     for j < len(s) {
@@ -197,7 +197,7 @@ func split_lines(string s) string[] {
         }
         j = j + 1
     }
-    string[] out = string[]{cap: capacity}
+    string[] out = make([]string, capacity)
     string line = ""
     int idx = 0
     int i = 0
@@ -323,8 +323,8 @@ struct gpt_large_state {
     bool trained
 }
 
-func default_documents() string[] {
-    string[] docs = string[]{cap: 3}
+func default_documents() []string {
+    string[] docs = make([]string, 3)
     docs[0] = "neurx trains a decoder-only transformer for language modeling."
     docs[1] = "pretraining updates attention and feed-forward blocks over token batches."
     docs[2] = "checkpointing and validation need to stay visible and resumable."

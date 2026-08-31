@@ -44,8 +44,8 @@ func new_moe_config(
     }
 }
 
-func moe_zeros(int n) float[] {
-    float[] out = float[]{cap: n}
+func moe_zeros(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -54,8 +54,8 @@ func moe_zeros(int n) float[] {
     out
 }
 
-func moe_zeros_int(int n) int[] {
-    int[] out = int[]{cap: n}
+func moe_zeros_int(int n) []int {
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = 0
@@ -64,7 +64,7 @@ func moe_zeros_int(int n) int[] {
     out
 }
 
-func moe_deterministic_weights(int n, int salt, float scale) float[] {
+func moe_deterministic_weights(int n, int salt, float scale) []float {
     float[] out = moe_zeros(n)
     int i = 0
     for i < n {
@@ -109,7 +109,7 @@ func moe_situ(float x) float {
     s * t
 }
 
-func moe_linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) float[] {
+func moe_linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) []float {
     float[] out = moe_zeros(rows * out_dim)
     int row = 0
     for row < rows {
@@ -145,7 +145,7 @@ func new_moe_weights(moe_config cfg) moe_weights {
     }
 }
 
-func moe_top_k_indices(float[] scores, int offset, int count, int top_k) int[] {
+func moe_top_k_indices(float[] scores, int offset, int count, int top_k) []int {
     int[] indices = moe_zeros_int(top_k)
     float[] selected = moe_zeros(top_k)
     int k = 0
@@ -188,7 +188,7 @@ func moe_expert_ffn(
     int w2_offset,
     int hidden,
     int ffn
-) float[] {
+) []float {
     float[] middle = moe_zeros(ffn)
     int f = 0
     for f < ffn {

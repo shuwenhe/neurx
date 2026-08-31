@@ -108,7 +108,7 @@ func (high_performance_optimization_engine* hpe) OptimizeGEMM(
 }
 
 func (high_performance_optimization_engine* hpe) OptimizeWithCUDAGraph(
-    kernels string[],
+    kernels []string,
     dependencies int[][]32,
 ) map[int32]float[]32 {
     if !hpe.config.enable_cuda_graphs || hpe.cuda_graph == nil {
@@ -121,7 +121,7 @@ func (high_performance_optimization_engine* hpe) OptimizeWithCUDAGraph(
 }
 
 func (high_performance_optimization_engine* hpe) ApplyRuntimeFusion(
-    operations string[],
+    operations []string,
     shapes int[][]32,
 ) float[][]32 {
     if !hpe.config.enable_runtime_fusion || hpe.runtime_fusion == nil {

@@ -315,7 +315,7 @@ func (loader lazy_loader*) clear_cache() {
     loader.cache = clear_map
 }
 
-func (loader lazy_loader*) preload_modules(module_names string[]) uint32 {
+func (loader lazy_loader*) preload_modules(module_names []string) uint32 {
     count := uint32(0)
     for i := 0; i < len(module_names); i = i + 1 {
         if loader.load_module(module_names[i]) {

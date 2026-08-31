@@ -1,5 +1,5 @@
 package neurx.scheduler.advanced_scheduler
-func new_request(int req_id, int input_len, int max_len) int[] {
+func new_request(int req_id, int input_len, int max_len) []int {
     int[] req = int[]{req_id, 0, input_len, max_len, 0, 0, 0, input_len}
     return req
 }
@@ -36,12 +36,12 @@ func get_seq_len(int[] req) int {
     return req[7]
 }
 
-func set_priority(int[] req, int priority) int[] {
+func set_priority(int[] req, int priority) []int {
     req[4] = priority
     return req
 }
 
-func set_status(int[] req, int status) int[] {
+func set_status(int[] req, int status) []int {
     req[1] = status
     return req
 }
@@ -89,7 +89,7 @@ func calculate_wait_time_priority(int[] req, int current_time) int {
     return 3
 }
 
-func new_scheduler_state(int max_prefill, int max_decode, int policy) int[] {
+func new_scheduler_state(int max_prefill, int max_decode, int policy) []int {
     int[] state = int[]{max_prefill, max_decode, policy, 0, 0, 0}
     return state
 }
@@ -118,7 +118,7 @@ func get_iteration_count(int[] state) int {
     return state[5]
 }
 
-func select_requests_for_prefill(int[][] requests, int[] scheduler_state, int current_time) int[] {
+func select_requests_for_prefill(int[][] requests, int[] scheduler_state, int current_time) []int {
     int max_prefill = get_max_prefill(scheduler_state)
     int policy = get_policy(scheduler_state)
     int[] candidates = []
@@ -131,7 +131,7 @@ func select_requests_for_prefill(int[][] requests, int[] scheduler_state, int cu
     }
     if policy == 0 {
         int count = 0
-        int[] result = int[]{}
+        int[] result = []int{}
         i = 0
         for i < len(candidates) {
             if count >= max_prefill {
@@ -162,10 +162,10 @@ func select_requests_for_prefill(int[][] requests, int[] scheduler_state, int cu
             result = append(result, min_element)
             return result
         }
-        int[] empty_result = int[]{}
+        int[] empty_result = []int{}
         return empty_result
     }
-    int[] result = int[]{}
+    int[] result = []int{}
     int count = 0
     i = 0
     for i < len(candidates) {
@@ -179,10 +179,10 @@ func select_requests_for_prefill(int[][] requests, int[] scheduler_state, int cu
     return result
 }
 
-func select_requests_for_decode(int[][] requests, int[] scheduler_state) int[] {
+func select_requests_for_decode(int[][] requests, int[] scheduler_state) []int {
     int max_decode = get_max_decode(scheduler_state)
     int policy = get_policy(scheduler_state)
-    int[] candidates = int[]{}
+    int[] candidates = []int{}
     int i = 0
     for i < len(requests) {
         if requests[i][1] == 2 {
@@ -211,7 +211,7 @@ func select_requests_for_decode(int[][] requests, int[] scheduler_state) int[] {
         }
         return []
     }
-    int[] result = int[]{}
+    int[] result = []int{}
     int count = 0
     i = 0
     for i < len(candidates) {
@@ -266,7 +266,7 @@ func calculate_batch_utilization(int[][] batch, int max_batch_tokens) float {
     return float(tokens) / float(max_batch_tokens)
 }
 
-func update_request_after_iteration(int[] req, int tokens_generated) int[] {
+func update_request_after_iteration(int[] req, int tokens_generated) []int {
     req[6] = req[6] + tokens_generated
     if req[6] >= req[3] {
         req[1] = 3

@@ -7,8 +7,8 @@ func embedding_lookup(
     int seq_len,
     int hidden_size,
     int vocab_size
-) float[] {
-    float[] output = float[]{cap: batch_size * seq_len * hidden_size}
+) []float {
+    float[] output = make([]float, batch_size * seq_len * hidden_size)
     int idx = 0
     for idx < batch_size * seq_len {
         int token_id = token_ids[idx]
@@ -33,8 +33,8 @@ func rms_norm(
     int seq_len,
     int hidden_size,
     float eps
-) float[] {
-    float[] output = float[]{cap: batch_size * seq_len * hidden_size}
+) []float {
+    float[] output = make([]float, batch_size * seq_len * hidden_size)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -77,8 +77,8 @@ func matmul(
     int M,
     int K,
     int N
-) float[] {
-    float[] C = float[]{cap: M * N}
+) []float {
+    float[] C = make([]float, M * N)
     int m = 0
     for m < M {
         int n = 0
@@ -101,8 +101,8 @@ func softmax(
     float[] x,
     int total_size,
     int last_dim
-) float[] {
-    float[] output = float[]{cap: total_size}
+) []float {
+    float[] output = make([]float, total_size)
     int num_softmax = total_size / last_dim
     int i = 0
     for i < num_softmax {
@@ -147,8 +147,8 @@ func exp_approx(float x) float {
     result
 }
 
-func silu(float[] x) float[] {
-    float[] output = float[]{cap: len(x)}
+func silu(float[] x) []float {
+    float[] output = make([]float, len(x))
     int i = 0
     for i < len(x) {
         float val = x[i]
@@ -158,10 +158,10 @@ func silu(float[] x) float[] {
     output
 }
 
-func add_arrays(float[] a, float[] b) float[] {
+func add_arrays(float[] a, float[] b) []float {
     int size = len(a)
     if len(b) < size { size = len(b) }
-    float[] output = float[]{cap: size}
+    float[] output = make([]float, size)
     int i = 0
     for i < size {
         output[i] = a[i] + b[i]
@@ -170,10 +170,10 @@ func add_arrays(float[] a, float[] b) float[] {
     output
 }
 
-func mul_arrays(float[] a, float[] b) float[] {
+func mul_arrays(float[] a, float[] b) []float {
     int size = len(a)
     if len(b) < size { size = len(b) }
-    float[] output = float[]{cap: size}
+    float[] output = make([]float, size)
     int i = 0
     for i < size {
         output[i] = a[i] * b[i]
@@ -192,14 +192,14 @@ func simplified_attention(
     int seq_len,
     int hidden_size,
     int num_heads
-) float[] {
+) []float {
     int total_tokens = batch_size * seq_len
     float[] q = matmul(hidden_states, q_weight, total_tokens, hidden_size, hidden_size)
     float[] k = matmul(hidden_states, k_weight, total_tokens, hidden_size, hidden_size)
     float[] v = matmul(hidden_states, v_weight, total_tokens, hidden_size, hidden_size)
     int head_dim = hidden_size / num_heads
     float scale = 1.0 / sqrt_approx(head_dim as float)
-    float[] attn_scores = float[]{cap: total_tokens * total_tokens}
+    float[] attn_scores = make([]float, total_tokens * total_tokens)
     int i = 0
     for i < total_tokens {
         int j = 0
@@ -216,7 +216,7 @@ func simplified_attention(
         i = i + 1
     }
     float[] attn_weights = softmax(attn_scores, total_tokens * total_tokens, total_tokens)
-    float[] context = float[]{cap: total_tokens * hidden_size}
+    float[] context = make([]float, total_tokens * hidden_size)
     i = 0
     for i < total_tokens {
         int h = 0
@@ -245,7 +245,7 @@ func swiglu_mlp(
     int seq_len,
     int hidden_size,
     int intermediate_size
-) float[] {
+) []float {
     int total_tokens = batch_size * seq_len
     float[] gate = matmul(hidden_states, gate_weight, total_tokens, hidden_size, intermediate_size)
     float[] up = matmul(hidden_states, up_weight, total_tokens, hidden_size, intermediate_size)
@@ -271,7 +271,7 @@ func transformer_layer(
     int hidden_size,
     int num_heads,
     int intermediate_size
-) float[] {
+) []float {
     float[] normed = rms_norm(hidden_states, input_ln_weight, batch_size, seq_len, hidden_size, 0.000001)
     float[] attn_output = simplified_attention(normed, q_weight, k_weight, v_weight, o_weight,
                                                batch_size, seq_len, hidden_size, num_heads)

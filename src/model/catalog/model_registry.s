@@ -251,7 +251,7 @@ func (model_registry* registry) add_dependency(package_id string, dep_id string)
 	defer registry.mu.Unlock()
 	deps, exists := registry.model_dependencies[package_id]
 	if !exists {
-		deps = string[]{}
+		deps = []string{}
 	}
 	for _, dep := range deps {
 		if dep == dep_id {
@@ -261,7 +261,7 @@ func (model_registry* registry) add_dependency(package_id string, dep_id string)
 	registry.model_dependencies[package_id] = append(deps, dep_id)
 }
 
-func (model_registry* registry) get_dependencies(package_id string) string[] {
+func (model_registry* registry) get_dependencies(package_id string) []string {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	return registry.model_dependencies[package_id]

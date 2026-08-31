@@ -48,7 +48,7 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
             params: params,
         }
     }
-    float[] direction = float[]{cap: n}
+    float[] direction = make([]float, n)
     if optimizer.step == 1 {
         int i = 0
         for i < n {
@@ -56,8 +56,8 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
             i = i + 1
         }
     } else {
-        float[] y = float[]{cap: n}
-        float[] s = float[]{cap: n}
+        float[] y = make([]float, n)
+        float[] s = make([]float, n)
         int i = 0
         for i < n {
             y[i] = flat_grad[i] - optimizer.prev_flat_grad[i]
@@ -79,7 +79,7 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
         float h_diag = ys / yy
         direction = two_loop_recursion(optimizer, flat_grad, h_diag, n)
     }
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = params.data[i] + optimizer.lr * direction[i]
@@ -98,15 +98,15 @@ func two_loop_recursion(
     float[] flat_grad,
     float h_diag,
     int n
-) float[] {
+) []float {
     int num_old = len(optimizer.old_dirs)
-    float[] q = float[]{cap: n}
+    float[] q = make([]float, n)
     int i = 0
     for i < n {
         q[i] = 0.0 - flat_grad[i]
         i = i + 1
     }
-    float[] alpha = float[]{cap: num_old}
+    float[] alpha = make([]float, num_old)
     int j = 0
     for j < num_old {
         alpha[j] = 0.0
@@ -146,8 +146,8 @@ struct lbfgs_optimizer_step_output {
     tensor params
 }
 
-func copy_float_array(float[] src, int n) float[] {
-    float[] out = float[]{cap: n}
+func copy_float_array(float[] src, int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = src[i]
@@ -183,7 +183,7 @@ func lbfgs_abs_max(float[] values, int n) float {
 }
 
 func pop_front_2d(float[][] arr) float[][] {
-    float[][] out = float[][]{cap: len(arr) - 1}
+    float[][] out = floatmake([][], len(arr) - 1)
     int i = 1
     for i < len(arr) {
         out[i - 1] = arr[i]
@@ -192,8 +192,8 @@ func pop_front_2d(float[][] arr) float[][] {
     out
 }
 
-func pop_front_1d(float[] arr) float[] {
-    float[] out = float[]{cap: len(arr) - 1}
+func pop_front_1d(float[] arr) []float {
+    float[] out = make([]float, len(arr) - 1)
     int i = 1
     for i < len(arr) {
         out[i - 1] = arr[i]

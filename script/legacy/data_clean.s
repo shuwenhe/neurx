@@ -109,7 +109,7 @@ pub func clean_data(clean_config config) bool {
     true
 }
 
-func find_source_files(string raw_dir) string[] {
+func find_source_files(string raw_dir) []string {
     supported := string[]{".jsonl", ".txt", ".xml", ".xml.bz2"}
     dir_list_files(raw_dir, supported)
 }
@@ -188,7 +188,7 @@ func process_text(clean_config config, string content, *clean_stats stats, map s
 }
 
 func process_xml(clean_config config, string content, *clean_stats stats, map seen_hashes[string]bool) bool {
-    text_blocks := string[]{}
+    text_blocks := []string{}
     lines := string_split(content, "\n")
     in_tag := false
     current_text := ""

@@ -111,13 +111,13 @@ func engine_string_contains(string[] values, string expected) bool {
     false
 }
 
-func engine_string_append_unique(string[] values, string value) string[] {
+func engine_string_append_unique(string[] values, string value) []string {
     if value == "" || engine_string_contains(values, value) { return values }
     append(values, value)
 }
 
-func engine_string_remove(string[] values, string expected) string[] {
-    string[] result = string[]{cap: len(values)}
+func engine_string_remove(string[] values, string expected) []string {
+    string[] result = make([]string, len(values))
     int i = 0
     for i < len(values) {
         if values[i] != expected { result = append(result, values[i]) }

@@ -190,7 +190,7 @@ func (BaseTokenizer* t) GetTokenId(string text) i32 {
     return t.special_tokens.unk_token_id
 }
 
-func (BaseTokenizer* t) tokenize_internal(string text) i32[] {
+func (BaseTokenizer* t) tokenize_internal(string text) []i32 {
     tokens := make(i32[], 0)
     words := split_string(text, " ")
     for i := 0; i < len(words); i += 1 {
@@ -211,7 +211,7 @@ func (BaseTokenizer* t) tokenize_internal(string text) i32[] {
     return tokens
 }
 
-func (BaseTokenizer* t) add_special_tokens_internal(i32[] tokens) i32[] {
+func (BaseTokenizer* t) add_special_tokens_internal(i32[] tokens) []i32 {
     result := make(i32[], 0)
     if t.config.add_bos {
         result = append(result, t.special_tokens.bos_token_id)
@@ -290,7 +290,7 @@ func current_time_ms() i64 {
     return i64(0)
 }
 
-func split_string(string s, string sep) string[] {
+func split_string(string s, string sep) []string {
     parts := make(string[], 0)
     current := ""
     for i := 0; i < len(s); i += 1 {
@@ -309,7 +309,7 @@ func split_string(string s, string sep) string[] {
     return parts
 }
 
-func append_slice(i32[] a, i32[] b) i32[] {
+func append_slice(i32[] a, i32[] b) []i32 {
     for i := 0; i < len(b); i += 1 {
         a = append(a, b[i])
     }

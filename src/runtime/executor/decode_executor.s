@@ -27,7 +27,7 @@ func (DecodeExecutor* de) Initialize() ExecutionResult {
     return de.base.Initialize()
 }
 
-func (DecodeExecutor* de) ProcessDecodeStep(sequences string[]) ExecutionResult {
+func (DecodeExecutor* de) ProcessDecodeStep(sequences []string) ExecutionResult {
     if de.base.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
             success: 0,
@@ -94,7 +94,7 @@ func (DecodeExecutor* de) compute_attention_step(sequence_id string) ExecutionRe
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DecodeExecutor* de) sample_next_tokens(sequences string[]) []i32 {
+func (DecodeExecutor* de) sample_next_tokens(sequences []string) []i32 {
     output_tokens := make([]i32, len(sequences))
     for i := 0; i < len(sequences); i++ {
         if de.decode_config.beam_width > 1 {
@@ -130,7 +130,7 @@ func (DecodeExecutor* de) update_kv_cache(sequence_id string, token i32) Executi
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DecodeExecutor* de) ProcessBeamSearch(sequences string[], beam_width i32) ExecutionResult {
+func (DecodeExecutor* de) ProcessBeamSearch(sequences []string, beam_width i32) ExecutionResult {
     if beam_width <= 0 {
         return ExecutionResult{
             success: 0,

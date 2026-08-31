@@ -13,9 +13,9 @@ struct autograd_state {
     []grad_record records
 }
 
-func copy_float(float[] data) float[] {
+func copy_float(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -24,9 +24,9 @@ func copy_float(float[] data) float[] {
     out
 }
 
-func copy_int(int[] data) int[] {
+func copy_int(int[] data) []int {
     int n = len(data)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -45,7 +45,7 @@ func copy_record(grad_record record) grad_record {
 }
 
 func copy_records([]grad_record records) []grad_record {
-    []grad_record out = []grad_record{cap: len(records)}
+    []grad_record out = make([]grad_record, len(records))
     int i = 0
     for i < len(records) {
         out[i] = copy_record(records[i])
@@ -107,18 +107,18 @@ func set_detect_anomaly(autograd_state state, bool enabled) autograd_state {
     state
 }
 
-func zeros_like(float[] data) float[] {
+func zeros_like(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         out[i] = 0.0
     }
     out
 }
 
-func ones_like(float[] data) float[] {
+func ones_like(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         out[i] = 1.0
     }
@@ -221,7 +221,7 @@ func accumulate_grad(autograd_state state, int id, float[] grad) autograd_state 
     }
 }
 
-func grad_of(autograd_state state, int id) float[] {
+func grad_of(autograd_state state, int id) []float {
     int n = len(state.records)
     for i in 0..n {
         if state.records[i].id == id {

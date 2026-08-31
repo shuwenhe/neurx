@@ -25,7 +25,7 @@ struct muon_optimizer {
 func new_muon(muon_config cfg) muon_optimizer {
     muon_optimizer {
         config: cfg,
-        param_states: []muon_param_state{cap: 0},
+        param_states: make([]muon_param_state, 0),
         global_step: 0,
         current_lr: cfg.learning_rate,
     }

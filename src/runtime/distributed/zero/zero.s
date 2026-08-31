@@ -19,8 +19,8 @@ struct zero_state {
     float last_sync_scale
 }
 
-func copy_ints(int[] values) int[] {
-    int[] out = int[]{cap: len(values)}
+func copy_ints(int[] values) []int {
+    int[] out = make([]int, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -207,14 +207,14 @@ func zero_mark_grad_ready(zero_state state, string param_name) zero_state {
     }
 }
 
-func zero_reduce_scatter_grads(zero_state state, float[] grads) float[] {
+func zero_reduce_scatter_grads(zero_state state, float[] grads) []float {
     if !zero_optimizer_sharded(state) {
         return copy_float(grads)
     }
     reduce_scatter_sum(new_process_group(state.backend, state.rank, state.world_size), grads)
 }
 
-func zero_all_gather_params(zero_state state, float[] shard_values) float[] {
+func zero_all_gather_params(zero_state state, float[] shard_values) []float {
     if !zero_optimizer_sharded(state) {
         return copy_float(shard_values)
     }

@@ -5,15 +5,15 @@ struct loss {
     string name
 }
 
-func shape1(int n) int[] {
-    int[] shape = int[]{cap: 1}
+func shape1(int n) []int {
+    int[] shape = make([]int, 1)
     shape[0] = n
     shape
 }
 
-func copy_float(float[] data) float[] {
+func copy_float(float[] data) []float {
     int n = len(data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -22,9 +22,9 @@ func copy_float(float[] data) float[] {
     out
 }
 
-func copy_int(int[] data) int[] {
+func copy_int(int[] data) []int {
     int n = len(data)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -65,7 +65,7 @@ func log_approx(float x) float {
 }
 
 func scalar(float value, bool requires_grad) tensor {
-    float[] out = float[]{cap: 1}
+    float[] out = make([]float, 1)
     out[0] = value
     new(out, shape1(1), requires_grad)
 }

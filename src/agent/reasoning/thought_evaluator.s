@@ -333,7 +333,7 @@ func (thought_evaluator* e) calculate_text_similarity(
 	return float32(common*2) / float32(total)
 }
 
-func (thought_evaluator* e) tokenize(text string) string[] {
+func (thought_evaluator* e) tokenize(text string) []string {
 	tokens := make(string[], 0)
 	current_token := ""
 	for i := int32(0); i < int32(len(text)); i++ {

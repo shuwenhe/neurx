@@ -293,7 +293,7 @@ func save_metrics(
 
 func append_frame([]metrics_frame frames, metrics_frame f) []metrics_frame {
     int n = len(frames)
-    []metrics_frame out = []metrics_frame{cap: n + 1}
+    []metrics_frame out = make([]metrics_frame, n + 1)
     int i = 0
     for i < n {
         out[i] = frames[i]
@@ -352,7 +352,7 @@ func trim_history([]metrics_frame frames, int limit) []metrics_frame {
     if n <= limit {
         return frames
     }
-    []metrics_frame out = []metrics_frame{cap: limit}
+    []metrics_frame out = make([]metrics_frame, limit)
     int start = n - limit
     int i = 0
     for i < limit {

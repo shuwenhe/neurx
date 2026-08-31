@@ -84,7 +84,7 @@ func backward_broadcast(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-func reduce_gradient(float[] grad, int[] original_shape, int[] target_shape) float[] {
+func reduce_gradient(float[] grad, int[] original_shape, int[] target_shape) []float {
     int orig_size = 1
     for s in original_shape {
         orig_size = orig_size * s

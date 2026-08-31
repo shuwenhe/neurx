@@ -302,7 +302,7 @@ func model_forward(
     max_idx
 }
 
-func tokenize(string text) int[] {
+func tokenize(string text) []int {
     int[] tokens = allocate(len(text) + 2)
     tokens[0] = 0
     int i = 0
@@ -391,7 +391,7 @@ func main() {
     println("✓ Inference complete")
 }
 
-func allocate(int size) float[] {
+func allocate(int size) []float {
     float[] out
     out
 }

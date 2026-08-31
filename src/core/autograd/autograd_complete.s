@@ -17,7 +17,7 @@ struct gradient_tape {
 
 func create_tape() gradient_tape {
     gradient_tape {
-        nodes: []gradient_node{cap: 1000},
+        nodes: make([]gradient_node, 1000),
         node_counter: 0,
         recording: true,
     }
@@ -267,7 +267,7 @@ func backward_tape(
     tensor final_grad
 ) []tensor {
     int num_nodes = tape.node_counter
-    []tensor gradients = []tensor{cap: num_nodes}
+    []tensor gradients = make([]tensor, num_nodes)
     int i = 0
     for i < num_nodes {
         gradients = append(gradients, zeros(tape.nodes[i].value.shape))

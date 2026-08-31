@@ -111,8 +111,8 @@ func quantize_int8(
     float[] data,
     float scale,
     int zero_point
-) int[] {
-    quantized = int[]{}
+) []int {
+    quantized = []int{}
     i = 0
     for i < len(data) {
         val = data[i]
@@ -133,8 +133,8 @@ func quantize_int4(
     float[] data,
     float scale,
     int zero_point
-) int[] {
-    quantized = int[]{}
+) []int {
+    quantized = []int{}
     i = 0
     for i < len(data) {
         val = data[i]
@@ -151,8 +151,8 @@ func quantize_int4(
     return quantized
 }
 
-func quantize_fp8(float[] data, float scale) int[] {
-    quantized = int[]{}
+func quantize_fp8(float[] data, float scale) []int {
+    quantized = []int{}
     i = 0
     for i < len(data) {
         val = data[i]
@@ -173,8 +173,8 @@ func dequantize_int8(
     int[] data,
     float scale,
     int zero_point
-) float[] {
-    dequantized = float[]{}
+) []float {
+    dequantized = []float{}
     i = 0
     for i < len(data) {
         val = f(data[i])
@@ -237,7 +237,7 @@ func quantize_tensor(
         return new_engine, q_tensor
     }
     q_tensor = quantized_tensor {
-        data: int[]{},
+        data: []int{},
         scale: 1.0,
         zero_point: 0,
         bits: 32,
@@ -246,11 +246,11 @@ func quantize_tensor(
     return new_engine, q_tensor
 }
 
-func dequantize_tensor(quantized_tensor q_tensor) float[] {
+func dequantize_tensor(quantized_tensor q_tensor) []float {
     if q_tensor.bits == 8 && q_tensor.dtype == "int8" {
         return dequantize_int8(q_tensor.data, q_tensor.scale, q_tensor.zero_point)
     }
-    result = float[]{}
+    result = []float{}
     i = 0
     for i < len(q_tensor.data) {
         result = append(result, f(q_tensor.data[i]))

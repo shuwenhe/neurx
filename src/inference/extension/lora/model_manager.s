@@ -119,7 +119,7 @@ func (model_manager* mgr) get_adapter(string adapter_name) lora_model* {
     return nil
 }
 
-func (model_manager* mgr) list_adapters() string[] {
+func (model_manager* mgr) list_adapters() []string {
     adapters := make(string[])
     for name := range mgr.adapters {
         adapters = append(adapters, name)
@@ -127,7 +127,7 @@ func (model_manager* mgr) list_adapters() string[] {
     return adapters
 }
 
-func (model_manager* mgr) list_loaded_adapters() string[] {
+func (model_manager* mgr) list_loaded_adapters() []string {
     loaded := make(string[])
     for name := range mgr.adapters {
         registry := mgr.adapters[name]

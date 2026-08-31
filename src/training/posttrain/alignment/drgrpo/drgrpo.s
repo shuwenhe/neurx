@@ -51,7 +51,7 @@ func drgrpo_compute_group_baselines(
     int group_size
 ) []tensor {
     int n = rewards.len
-    []tensor baselines = []tensor{cap: n}
+    []tensor baselines = make([]tensor, n)
     int i = 0
     for i < n {
         int group_idx = i / group_size
@@ -78,7 +78,7 @@ func drgrpo_compute_divergence(
 ) tensor {
     int batch_size = log_probs.shape[0]
     int num_groups = batch_size / group_size
-    []tensor divergences = []tensor{cap: num_groups}
+    []tensor divergences = make([]tensor, num_groups)
     int g = 0
     for g < num_groups {
         int start = g * group_size
@@ -112,7 +112,7 @@ func drgrpo_step(
         rewards,
         cfg.group_size
     )
-    []tensor advantages = []tensor{cap: rewards.len}
+    []tensor advantages = make([]tensor, rewards.len)
     int i = 0
     for i < rewards.len {
         advantages[i] = tensor_ops.sub(rewards[i], baselines[i])

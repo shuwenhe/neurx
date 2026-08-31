@@ -53,7 +53,7 @@ func reinforce_pp_compute_baseline(
     float momentum
 ) (tensor, float) {
     int n = rewards.len
-    []tensor group_means = []tensor{cap: n}
+    []tensor group_means = make([]tensor, n)
     int i = 0
     for i < n {
         int group_idx = i / num_samples_per_prompt

@@ -36,7 +36,7 @@ func new_lora_integrated_model(config lora_model_config) lora_integrated_model {
         adapter_manager: adapter_mgr,
         request_router: router,
         base_weights: make(float[], config.hidden_dim * config.hidden_dim),
-        merged_weights_cache: map[string]float[]{},
+        merged_weights_cache: map[string][]float{},
         current_adapter_id: "",
         layer_idx: 0,
     }
@@ -76,7 +76,7 @@ func (lora_integrated_model* model) switch_adapter(adapter_id string) bool {
         return false
     }
     model.current_adapter_id = adapter_id
-    model.merged_weights_cache = map[string]float[]{}
+    model.merged_weights_cache = map[string][]float{}
     return true
 }
 
@@ -87,7 +87,7 @@ func (lora_integrated_model* model) get_current_adapter() string {
 func (lora_integrated_model* model) forward_with_lora(
     float[] hidden_states,
     string adapter_id
-) float[] {
+) []float {
     if len(adapter_id) > 0 && adapter_id != model.current_adapter_id {
         model.switch_adapter(adapter_id)
     }
@@ -156,7 +156,7 @@ func (lora_integrated_model* model) forward_batch_multi_adapter(
 func (lora_integrated_model* model) forward_with_merged_weights(
     float[] hidden_states,
     string adapter_id
-) float[] {
+) []float {
     if len(model.merged_weights_cache[adapter_id]) > 0 {
         merged := model.merged_weights_cache[adapter_id]
         return compute_with_merged_weights(hidden_states, merged)
@@ -174,7 +174,7 @@ func (lora_integrated_model* model) forward_with_merged_weights(
 func compute_with_merged_weights(
     float[] hidden_states,
     float[] merged_weights
-) float[] {
+) []float {
     int input_dim = len(merged_weights) / len(merged_weights)
     if input_dim <= 0 {
         input_dim = len(merged_weights)
@@ -192,7 +192,7 @@ func (lora_integrated_model* model) forward_with_adapter_ensemble(
     float[] hidden_states,
     string[] adapter_ids,
     float[] ensemble_weights
-) float[] {
+) []float {
     if len(adapter_ids) == 0 {
         return hidden_states
     }
@@ -257,8 +257,8 @@ func (lora_integrated_model* model) process_request_batch() []lora_inference_res
     return model.request_router.process_request_batch()
 }
 
-func (lora_integrated_model* model) list_loaded_adapters() string[] {
-    adapters := string[]{}
+func (lora_integrated_model* model) list_loaded_adapters() []string {
+    adapters := []string{}
     for adapter_id in model.adapter_manager.cache {
         if model.adapter_manager.cache[adapter_id].weights.rank > 0 {
             adapters = append_str(adapters, adapter_id)
@@ -302,7 +302,7 @@ func create_lora_transformer_layer(
 func (lora_transformer_layer* layer) forward(
     float[] hidden_states,
     string adapter_id
-) float[] {
+) []float {
     normalized := apply_layer_norm(
         hidden_states,
         layer.layer_norm_weight,
@@ -321,7 +321,7 @@ func compute_lora_output(
     lora_weights weights,
     int input_dim,
     int batch_seq_len
-) float[] {
+) []float {
     int rank = weights.rank
     int output_dim = len(weights.lora_b) / rank
     if output_dim <= 0 {
@@ -343,7 +343,7 @@ func matrix_mult(
     int m,
     int k,
     int n
-) float[] {
+) []float {
     float[] result = make(float[], m * n)
     int i = 0
     for i < m {
@@ -367,11 +367,11 @@ func apply_layer_norm(
     float[] x,
     float[] weight,
     float[] bias
-) float[] {
+) []float {
     return x
 }
 
-func add_residual(float[] x, float[] y) float[] {
+func add_residual(float[] x, float[] y) []float {
     float[] result = make(float[], len(x))
     int i = 0
     for i < len(x) {
@@ -385,7 +385,7 @@ func add_residual(float[] x, float[] y) float[] {
     return result
 }
 
-func apply_feed_forward(float[] x, int hidden_dim) float[] {
+func apply_feed_forward(float[] x, int hidden_dim) []float {
     return x
 }
 
@@ -404,7 +404,7 @@ func append_float_array(float[][] arr, float[] val) float[][] {
     return append_hidden(arr, val)
 }
 
-func append_str(string[] arr, string val) string[] {
+func append_str(string[] arr, string val) []string {
     string[] new_arr = make(string[], len(arr) + 1)
     int i = 0
     for i < len(arr) {

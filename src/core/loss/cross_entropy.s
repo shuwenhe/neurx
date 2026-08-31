@@ -82,8 +82,8 @@ func cross_entropy_gradient(
     int seq_len,
     int vocab_size,
     int ignore_index
-) float[] {
-    float[] grad = float[]{cap: batch_size * seq_len * vocab_size}
+) []float {
+    float[] grad = make([]float, batch_size * seq_len * vocab_size)
     int i = 0
     for i < batch_size * seq_len {
         int label = labels[i]

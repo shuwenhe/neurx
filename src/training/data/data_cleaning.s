@@ -116,7 +116,7 @@ func clean_raw_data(cleaning_config cfg) cleaning_stats {
     io_println("🔄 startdatacleanpipeline...\n")
     io_mkdir_recursive(cfg.cleaned_dir)
     cleaning_stats total_stats = new_cleaning_stats()
-    string[] seen_texts = string[]{cap: 10000}
+    string[] seen_texts = make([]string, 10000)
     int seen_count = 0
     string[] raw_files = io_list_files(cfg.raw_dir, "*.jsonl")
     io_println("📖 startEnglish text " + string(len(raw_files)) + " English textfile...\n")

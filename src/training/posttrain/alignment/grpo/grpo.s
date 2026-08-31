@@ -115,7 +115,7 @@ func compute_reward(string output, string reference, int token_len, grpo_config 
     r
 }
 
-func compute_group_advantages(float[] rewards, float eps) float[] {
+func compute_group_advantages(float[] rewards, float eps) []float {
     int G = len(rewards)
     float mean = 0.0
     int i = 0

@@ -50,8 +50,8 @@ struct kv_event_poll_result {
     int high_watermark
 }
 
-func kv_event_zero_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func kv_event_zero_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

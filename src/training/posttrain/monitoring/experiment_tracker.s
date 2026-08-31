@@ -43,18 +43,18 @@ func new_experiment_tracker(string experiment_name, string project_name, tracker
             run_id: "run_" + int_to_str(0),
             project_name: project_name,
             entity_name: "neurx",
-            tags: string[]{cap: 20},
-            config: map string = string{cap: 50},
+            tags: make([]string, 20),
+            config: map string = string{},
             start_timestamp: 0,
             step_count: 0,
         },
-        history: []metric_record{cap: 10000},
+        history: make([]metric_record, 10000),
         backend: backend,
         is_active: false,
         checkpoint_dir: "./experiments",
-        last_metrics: map string = float{cap: 100},
-        loss_history: float[]{cap: 10000},
-        reward_history: float[]{cap: 10000},
+        last_metrics: map string = float{},
+        loss_history: make([]float, 10000),
+        reward_history: make([]float, 10000),
     }
 }
 
@@ -90,7 +90,7 @@ func tracker_log_metric(experiment_tracker_state state, string metric_name, floa
         value: value,
         step: step,
         timestamp: 0,
-        extra_fields: map string = string{cap: 10},
+        extra_fields: map string = string{},
     }
     state.history += []metric_record{record}
     state.last_metrics[metric_name] = value
@@ -121,8 +121,8 @@ func tracker_get_metric(experiment_tracker_state state, string metric_name) floa
     0.0
 }
 
-func tracker_get_metric_history(experiment_tracker_state state, string metric_name) float[] {
-    float[] result = float[]{cap: len(state.history)}
+func tracker_get_metric_history(experiment_tracker_state state, string metric_name) []float {
+    float[] result = make([]float, len(state.history))
     for i in range(len(state.history)) {
         metric_record rec = state.history[i]
         if rec.metric_name == metric_name {
@@ -201,7 +201,7 @@ func float_to_str(float f) string {
     "zero"
 }
 
-func map_keys(map string = float m) string[] {
-    string[] keys = string[]{cap: 100}
+func map_keys(map string = float m) []string {
+    string[] keys = make([]string, 100)
     keys
 }

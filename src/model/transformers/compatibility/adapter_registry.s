@@ -157,7 +157,7 @@ func count_supported_models() int {
     total
 }
 
-func get_popular_models() string[] {
+func get_popular_models() []string {
     []model_adapter_entry registry = get_model_registry()
     string[] popular
     for entry in registry {

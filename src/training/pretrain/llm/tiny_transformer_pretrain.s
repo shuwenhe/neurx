@@ -27,8 +27,8 @@ struct adamw_state {
     float last_loss
 }
 
-func zeros(int n) float[] {
-    float[] out = float[]{cap: n}
+func zeros(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -37,7 +37,7 @@ func zeros(int n) float[] {
     out
 }
 
-func initial_parameters(int vocab_size, int hidden_size) float[] {
+func initial_parameters(int vocab_size, int hidden_size) []float {
     int embedding_count = vocab_size * hidden_size
     int matrix_count = hidden_size * hidden_size
     int lm_head_count = hidden_size * vocab_size
@@ -277,7 +277,7 @@ func backward(
     int[] targets,
     int vocab_size,
     int hidden_size
-) float[] {
+) []float {
     int seq_len = len(inputs)
     float[] grads = zeros(len(params))
     float[] d_context = zeros(seq_len * hidden_size)
@@ -533,7 +533,7 @@ func main() {
     0
 }
 
-func copy_floats(float[] values) float[] {
+func copy_floats(float[] values) []float {
     float[] out = zeros(len(values))
     int i = 0
     for i < len(values) {
@@ -563,7 +563,7 @@ func floats_to_string(float[] values) string {
     out
 }
 
-func parse_float_list(string text, int expected) float[] {
+func parse_float_list(string text, int expected) []float {
     float[] out = zeros(expected)
     int count = 0
     int start = 0

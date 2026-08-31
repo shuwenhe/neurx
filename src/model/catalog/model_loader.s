@@ -95,7 +95,7 @@ func create_model_loader() *model_loader {
 		status: LOADER_STATUS_IDLE,
 		loaded_packages: make(map[string]*model_package),
 		loading_packages: make(map[string]*model_package),
-		model_paths: string[]{},
+		model_paths: []string{},
 		max_concurrent_loads: 4,
 		cache_enabled: true,
 		cache_dir: "/tmp/model_cache",
@@ -205,8 +205,8 @@ func (model_loader* loader) find_package_by_id(package_id string) *model_package
 func (model_loader* loader) validate_model_package(model_package* pkg) *load_validation_result {
 	result := *load_validation_result{
 		valid: true,
-		errors: string[]{},
-		warnings: string[]{},
+		errors: []string{},
+		warnings: []string{},
 	}
 	start_time := time.Now()
 	if pkg == nil {
@@ -264,7 +264,7 @@ func (model_loader* loader) reload_model(package_id string, device model_device_
 	return loader.load_model(package_id, TYPE_CUSTOM, device)
 }
 
-func (model_loader* loader) get_loaded_models() string[] {
+func (model_loader* loader) get_loaded_models() []string {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
 	models := make(string[], 0, len(loader.loaded_packages))

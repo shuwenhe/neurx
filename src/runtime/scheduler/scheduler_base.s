@@ -7,7 +7,7 @@ struct scheduler_base {
 }
 
 func new_scheduler_base(float base_lr, int last_epoch, bool verbose) scheduler_base {
-    float[] lrs = float[]{cap: 1}
+    float[] lrs = make([]float, 1)
     lrs[0] = base_lr
     scheduler_base {
         base_lr: base_lr,
@@ -17,7 +17,7 @@ func new_scheduler_base(float base_lr, int last_epoch, bool verbose) scheduler_b
     }
 }
 
-func scheduler_get_last_lr(scheduler_base sched) float[] {
+func scheduler_get_last_lr(scheduler_base sched) []float {
     return clone_lr_array(sched.last_lr)
 }
 
@@ -37,8 +37,8 @@ func scheduler_print_if_verbose(scheduler_base sched, string msg) {
     }
 }
 
-func clone_lr_array(float[] values) float[] {
-    float[] out = float[]{cap: len(values)}
+func clone_lr_array(float[] values) []float {
+    float[] out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]

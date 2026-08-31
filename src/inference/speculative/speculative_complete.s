@@ -68,7 +68,7 @@ func medusa_generate_draft_tokens(
     int[][] draft_tokens = int[][]{}
     for head_idx = 0; head_idx < len(model.heads); head_idx = head_idx + 1 {
         medusa_head head = model.heads[head_idx]
-        int[] head_tokens = int[]{}
+        int[] head_tokens = []int{}
         for t = 0; t < num_tokens && t < head.num_tokens; t = t + 1 {
             int token = t % 100
             head_tokens = append(head_tokens, token)
@@ -85,9 +85,9 @@ func medusa_verify_and_accept(
     float acceptance_threshold
 ) speculative_decoding_output {
     speculative_decoding_output output
-    output.output_tokens = int[]{}
-    output.draft_tokens = int[]{}
-    output.accepted_flags = bool[]{}
+    output.output_tokens = []int{}
+    output.draft_tokens = []int{}
+    output.accepted_flags = []bool{}
     output.num_accepted = 0
     output.num_drafted = 0
     output.acceptance_rate = 0.0
@@ -127,7 +127,7 @@ func new_eagle_model(eagle_config cfg) eagle_model {
     model.layer_weights = float[][]{}
     model.vocabulary_projection = float[][]{}
     for i = 0; i < cfg.num_layers; i = i + 1 {
-        float[] layer = float[]{}
+        float[] layer = []float{}
         model.layer_weights = append(model.layer_weights, layer)
     }
     model
@@ -137,8 +137,8 @@ func eagle_generate_draft_tokens(
     float[] input_hidden_state,
     eagle_model model,
     int num_tokens
-) int[] {
-    int[] draft_tokens = int[]{}
+) []int {
+    int[] draft_tokens = []int{}
     float[] current_hidden = input_hidden_state
     for t = 0; t < num_tokens; t = t + 1 {
         for layer = 0; layer < len(model.layer_weights); layer = layer + 1 {
@@ -156,9 +156,9 @@ func eagle_verify(
     float threshold
 ) speculative_decoding_output {
     speculative_decoding_output output
-    output.output_tokens = int[]{}
+    output.output_tokens = []int{}
     output.draft_tokens = draft_tokens
-    output.accepted_flags = bool[]{}
+    output.accepted_flags = []bool{}
     output.num_drafted = len(draft_tokens)
     output.num_accepted = 0
     for i = 0; i < len(draft_tokens); i = i + 1 {
@@ -209,14 +209,14 @@ func lookahead_decode(
     float[] input_hidden_state,
     lookahead_decoder decoder,
     int target_length
-) int[] {
-    int[] final_tokens = int[]{}
+) []int {
+    int[] final_tokens = []int{}
     for step = 0; step < target_length; step = step + 1 {
         []lookahead_branch branches_at_step = []lookahead_branch{}
         for branch_idx = 0; branch_idx < decoder.config.num_branches; branch_idx = branch_idx + 1 {
             lookahead_branch branch
-            branch.tokens = int[]{}
-            branch.scores = float[]{}
+            branch.tokens = []int{}
+            branch.scores = []float{}
             branch.branch_score = 0.0
             for inner_step = 0; inner_step < decoder.config.num_steps_per_branch; inner_step = inner_step + 1 {
                 int token = branch_idx * 10 + inner_step
@@ -247,9 +247,9 @@ func speculative_decoding_step(
     float[] main_model_logits
 ) speculative_decoding_output {
     speculative_decoding_output output
-    output.output_tokens = int[]{}
-    output.draft_tokens = int[]{}
-    output.accepted_flags = bool[]{}
+    output.output_tokens = []int{}
+    output.draft_tokens = []int{}
+    output.accepted_flags = []bool{}
     output.num_accepted = 0
     output.num_drafted = 0
     output.acceptance_rate = 0.0
@@ -286,9 +286,9 @@ func get_cached_output(
     string key
 ) speculative_decoding_output {
     speculative_decoding_output output
-    output.output_tokens = int[]{}
-    output.draft_tokens = int[]{}
-    output.accepted_flags = bool[]{}
+    output.output_tokens = []int{}
+    output.draft_tokens = []int{}
+    output.accepted_flags = []bool{}
     output.num_accepted = 0
     output.num_drafted = 0
     output.acceptance_rate = 0.0
@@ -362,9 +362,9 @@ func joint_speculative_decoding(
     speculative_decoding_config cfg
 ) speculative_decoding_output {
     speculative_decoding_output output
-    output.output_tokens = int[]{}
-    output.draft_tokens = int[]{}
-    output.accepted_flags = bool[]{}
+    output.output_tokens = []int{}
+    output.draft_tokens = []int{}
+    output.accepted_flags = []bool{}
     output.num_accepted = 0
     output.num_drafted = 0
     output.acceptance_rate = 0.0

@@ -355,7 +355,7 @@ func industrial_trim(string text) string {
     result
 }
 
-func industrial_split_lines(string text) string[] {
+func industrial_split_lines(string text) []string {
     int count = 1
     int i = 0
     for i < len(text) {
@@ -364,7 +364,7 @@ func industrial_split_lines(string text) string[] {
         }
         i = i + 1
     }
-    string[] lines = string[]{cap: count}
+    string[] lines = make([]string, count)
     string current = ""
     int line_idx = 0
     i = 0
@@ -383,7 +383,7 @@ func industrial_split_lines(string text) string[] {
     lines
 }
 
-func industrial_split_words(string text) string[] {
+func industrial_split_words(string text) []string {
     int count = 0
     bool in_word = false
     int i = 0
@@ -403,7 +403,7 @@ func industrial_split_words(string text) string[] {
     if in_word {
         count = count + 1
     }
-    string[] words = string[]{cap: count}
+    string[] words = make([]string, count)
     string current = ""
     int word_idx = 0
     i = 0
@@ -833,8 +833,8 @@ func industrial_json_string_value(string text, string key) string {
     industrial_substring(text, start + 1, finish)
 }
 
-func industrial_manifest_paths_from_json(string manifest_path, string manifest) string[] {
-    string[] paths = string[]{cap: 0}
+func industrial_manifest_paths_from_json(string manifest_path, string manifest) []string {
+    string[] paths = []string{}
     string shard_list_path = industrial_json_string_value(manifest, "\"shard_list_path\"")
     if len(shard_list_path) > 0 {
         string resolved_shard_list = industrial_manifest_entry_resolve(manifest_path, shard_list_path)
@@ -846,7 +846,7 @@ func industrial_manifest_paths_from_json(string manifest_path, string manifest) 
     if len(source_path) > 0 {
         string resolved_source = industrial_manifest_entry_resolve(manifest_path, source_path)
         if runtime_file_exists(resolved_source) {
-            paths = string[]{cap: 1}
+            paths = make([]string, 1)
             paths[0] = resolved_source
             return paths
         }
@@ -864,7 +864,7 @@ func industrial_manifest_paths_from_json(string manifest_path, string manifest) 
     if count == 0 {
         return paths
     }
-    paths = string[]{cap: count}
+    paths = make([]string, count)
     int path_idx = 0
     i = 0
     for i < len(lines) {
@@ -880,7 +880,7 @@ func industrial_manifest_paths_from_json(string manifest_path, string manifest) 
         i = i + 1
     }
     if path_idx < len(paths) {
-        string[] compact = string[]{cap: path_idx}
+        string[] compact = make([]string, path_idx)
         i = 0
         for i < path_idx {
             compact[i] = paths[i]
@@ -891,12 +891,12 @@ func industrial_manifest_paths_from_json(string manifest_path, string manifest) 
     paths
 }
 
-func industrial_init_params(int param_count) float[] {
+func industrial_init_params(int param_count) []float {
     int count = param_count
     if count < 1 {
         count = 1
     }
-    float[] params = float[]{cap: count}
+    float[] params = make([]float, count)
     int i = 0
     for i < count {
         params[i] = 0.01 + industrial_float_from_int(i) * 0.0001
@@ -905,8 +905,8 @@ func industrial_init_params(int param_count) float[] {
     params
 }
 
-func industrial_manifest_paths(string manifest_path) string[] {
-    string[] paths = string[]{cap: 0}
+func industrial_manifest_paths(string manifest_path) []string {
+    string[] paths = []string{}
     if !runtime_file_exists(manifest_path) {
         return paths
     }
@@ -914,7 +914,7 @@ func industrial_manifest_paths(string manifest_path) string[] {
     if industrial_string_has_suffix(manifest_path, ".jsonl") {
         string resolved_single = industrial_manifest_entry_resolve(manifest_path, manifest_path)
         if len(resolved_single) > 0 {
-            paths = string[]{cap: 1}
+            paths = make([]string, 1)
             paths[0] = resolved_single
         }
         return paths
@@ -932,7 +932,7 @@ func industrial_manifest_paths(string manifest_path) string[] {
         }
         i = i + 1
     }
-    paths = string[]{cap: count}
+    paths = make([]string, count)
     int path_idx = 0
     i = 0
     for i < len(lines) {
@@ -947,7 +947,7 @@ func industrial_manifest_paths(string manifest_path) string[] {
         i = i + 1
     }
     if path_idx < len(paths) {
-        string[] compact = string[]{cap: path_idx}
+        string[] compact = make([]string, path_idx)
         i = 0
         for i < path_idx {
             compact[i] = paths[i]
@@ -976,14 +976,14 @@ func industrial_dataset_new(
     }
 }
 
-func industrial_tokenize_text(string text, int vocab_size) int[] {
+func industrial_tokenize_text(string text, int vocab_size) []int {
     string[] words = industrial_split_words(text)
     if len(words) == 0 {
-        int[] token_ids = int[]{cap: 1}
+        int[] token_ids = make([]int, 1)
         token_ids[0] = 0
         return token_ids
     }
-    int[] token_ids = int[]{cap: len(words)}
+    int[] token_ids = make([]int, len(words))
     int i = 0
     for i < len(words) {
         token_ids[i] = industrial_hash_token(words[i], vocab_size)
@@ -1020,8 +1020,8 @@ func industrial_pack_batch(
     int vocab_size
 ) industrial_batch {
     int total = batch_size * seq_len
-    int[] tokens = int[]{cap: total}
-    int[] labels = int[]{cap: total}
+    int[] tokens = make([]int, total)
+    int[] labels = make([]int, total)
     int i = 0
     int token_count = len(token_ids)
     for i < total {
@@ -1118,8 +1118,8 @@ func industrial_partition_batch(
     if local_tokens < 1 {
         local_tokens = batch.seq_len
     }
-    int[] tokens = int[]{cap: local_tokens}
-    int[] labels = int[]{cap: local_tokens}
+    int[] tokens = make([]int, local_tokens)
+    int[] labels = make([]int, local_tokens)
     int i = 0
     int total_tokens = batch.batch_size * batch.seq_len
     for i < local_tokens {
@@ -1136,8 +1136,8 @@ func industrial_partition_batch(
     }
 }
 
-func industrial_average_vector(float[] values, int value_count, int world_size) float[] {
-    float[] out = float[]{cap: value_count}
+func industrial_average_vector(float[] values, int value_count, int world_size) []float {
+    float[] out = make([]float, value_count)
     float scale = 1.0
     if world_size > 1 {
         scale = 1.0 / industrial_float_from_int(world_size)
@@ -1181,8 +1181,8 @@ func industrial_optimizer_new(int param_count, float learning_rate) industrial_o
         beta1: 0.9,
         beta2: 0.999,
         epsilon: 1e-8,
-        m: float[]{cap: param_count},
-        v: float[]{cap: param_count},
+        m: make([]float, param_count),
+        v: make([]float, param_count),
         scalar_momentum: 0.0,
         scalar_variance: 0.0,
     }
@@ -1232,13 +1232,13 @@ func industrial_vector_norm(float[] values, int value_count) float {
     industrial_sqrt_approx(sum)
 }
 
-func industrial_clip_gradients(float[] grads, int grad_count, float max_norm) float[] {
+func industrial_clip_gradients(float[] grads, int grad_count, float max_norm) []float {
     float norm = industrial_vector_norm(grads, grad_count)
     float scale = 1.0
     if norm > max_norm && norm > 0.0 {
         scale = max_norm / norm
     }
-    float[] clipped = float[]{cap: grad_count}
+    float[] clipped = make([]float, grad_count)
     int i = 0
     for i < grad_count {
         clipped[i] = grads[i] * scale
@@ -1275,8 +1275,8 @@ func industrial_model_backward(
     int param_count,
     industrial_batch batch,
     float loss_scale
-) float[] {
-    float[] grads = float[]{cap: param_count}
+) []float {
+    float[] grads = make([]float, param_count)
     int i = 0
     int total = batch.batch_size * batch.seq_len
     for i < total {
@@ -1400,7 +1400,7 @@ func industrial_adamw_step(
     int param_count
 ) industrial_adamw_result {
     opt.step = opt.step + 1
-    float[] updated = float[]{cap: param_count}
+    float[] updated = make([]float, param_count)
     int i = 0
     for i < param_count {
         float g = grads[i]
@@ -1618,7 +1618,7 @@ func industrial_checkpoint_load(
     if len(text) == 0 {
         industrial_checkpoint_load_result empty_result = industrial_checkpoint_load_result {
             ckpt: ckpt,
-            params: float[]{cap: 0},
+            params: []float{},
             opt: industrial_optimizer_state {
                 step: 0,
                 param_count: 0,
@@ -1627,8 +1627,8 @@ func industrial_checkpoint_load(
                 beta1: 0.0,
                 beta2: 0.0,
                 epsilon: 0.0,
-                m: float[]{cap: 0},
-                v: float[]{cap: 0},
+                m: []float{},
+                v: []float{},
                 scalar_momentum: 0.0,
                 scalar_variance: 0.0,
             },
@@ -1678,8 +1678,8 @@ func industrial_checkpoint_load(
         beta1: 0.9,
         beta2: 0.999,
         epsilon: 1e-8,
-        m: float[]{cap: 0},
-        v: float[]{cap: 0},
+        m: []float{},
+        v: []float{},
         scalar_momentum: 0.0,
         scalar_variance: 0.0,
     }
@@ -1787,9 +1787,9 @@ func industrial_checkpoint_load(
     if param_count < 1 {
         param_count = 1
     }
-    float[] params = float[]{cap: param_count}
-    float[] m = float[]{cap: param_count}
-    float[] v = float[]{cap: param_count}
+    float[] params = make([]float, param_count)
+    float[] m = make([]float, param_count)
+    float[] v = make([]float, param_count)
     i = 0
     for i < len(lines) {
         string line = industrial_trim(lines[i])

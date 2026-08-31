@@ -45,8 +45,8 @@ struct plugin_registration_result {
     int error_code
 }
 
-func plugin_zero_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func plugin_zero_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

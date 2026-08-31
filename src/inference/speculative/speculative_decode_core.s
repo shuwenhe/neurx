@@ -69,7 +69,7 @@ func new_verification_result(bool accepted, int num_accepted, int fallback_id) v
         accepted: accepted,
         num_accepted_tokens: num_accepted,
         fallback_token_id: fallback_id,
-        verification_logits: float[]{},
+        verification_logits: []float{},
     }
     vr
 }
@@ -87,8 +87,8 @@ func new_speculative_batch(int batch_id, int[] seq_ids) speculative_batch {
     sb
 }
 
-func compute_logits_probability(float[] logits, float temperature) float[] {
-    probs := float[]{}
+func compute_logits_probability(float[] logits, float temperature) []float {
+    probs := []float{}
     max_logit := -1000000.0
     i := 0
     for i < logits.len {
@@ -116,8 +116,8 @@ func compute_logits_probability(float[] logits, float temperature) float[] {
 
 func sample_top_k(float[] logits, int k, float temperature) int {
     probs := compute_logits_probability(logits, temperature)
-    top_k_indices := int[]{}
-    top_k_probs := float[]{}
+    top_k_indices := []int{}
+    top_k_probs := []float{}
     i := 0
     for i < logits.len {
         if i < k || i == 0 {

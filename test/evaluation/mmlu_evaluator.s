@@ -55,8 +55,8 @@ func build_mmlu_fewshot_prompt(
     prompt
 }
 
-func mmlu_get_choice_tokens(string choice, bool for_answer) int[] {
-    int[] tokens = int[]{}
+func mmlu_get_choice_tokens(string choice, bool for_answer) []int {
+    int[] tokens = []int{}
     if choice == "A" {
         tokens = append(tokens, 362)
     } else if choice == "B" {
@@ -252,8 +252,8 @@ func evaluate_mmlu_benchmark(
     }
 }
 
-func tokenize_prompt(string prompt) int[] {
-    int[] tokens = int[]{}
+func tokenize_prompt(string prompt) []int {
+    int[] tokens = []int{}
     int i = 0
     for i < len(prompt) && i < 4096 {
         tokens = append(tokens, i)
@@ -262,8 +262,8 @@ func tokenize_prompt(string prompt) int[] {
     tokens
 }
 
-func concat_token_sequences(int[] a, int[] b) int[] {
-    int[] result = int[]{}
+func concat_token_sequences(int[] a, int[] b) []int {
+    int[] result = []int{}
     int i = 0
     for i < len(a) {
         result = append(result, a[i])

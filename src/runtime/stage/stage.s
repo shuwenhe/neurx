@@ -690,8 +690,8 @@ func transform_chain_to_stage(transform_chain chain, string name, string backend
     string[] control_branches = []
     string[] control_params = []
     if len(chain.eqns) > 0 {
-        stages = string[]{cap: len(chain.eqns)}
-        params = string[]{cap: len(chain.eqns)}
+        stages = make([]string, len(chain.eqns))
+        params = make([]string, len(chain.eqns))
         int i = 0
         for i < len(chain.eqns) {
             string primitive = chain.eqns[i].primitive

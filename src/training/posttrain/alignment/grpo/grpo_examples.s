@@ -40,8 +40,8 @@ func create_grpo_example_config() grpo_train_config {
 
 func create_grpo_example_dataset() grpo_dataset {
     grpo_dataset {
-        prompts: string[]{},
-        reference_answers: string[]{},
+        prompts: []string{},
+        reference_answers: []string{},
         size: 10000,
         source_path: "./data/grpo/math_reasoning.jsonl",
         group_size: 8,
@@ -277,9 +277,9 @@ func create_grpo_trainer(
         running_clip_fraction: 0.0,
         running_group_reward: 0.0,
         running_advantage_magnitude: 0.0,
-        loss_history: float[]{},
-        reward_history: float[]{},
-        kl_history: float[]{},
+        loss_history: []float{},
+        reward_history: []float{},
+        kl_history: []float{},
         train_loader: dataloader{},
         eval_loader: dataloader{},
     }

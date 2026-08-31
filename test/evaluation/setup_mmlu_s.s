@@ -10,7 +10,7 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
-func all_mmlu_stem_tasks() string[] {
+func all_mmlu_stem_tasks() []string {
     string[]{
         "abstract_algebra",
         "anatomy",
@@ -34,7 +34,7 @@ func all_mmlu_stem_tasks() string[] {
     }
 }
 
-func all_mmlu_social_tasks() string[] {
+func all_mmlu_social_tasks() []string {
     string[]{
         "econometrics",
         "high_school_government_and_politics",
@@ -51,7 +51,7 @@ func all_mmlu_social_tasks() string[] {
     }
 }
 
-func all_mmlu_humanities_tasks() string[] {
+func all_mmlu_humanities_tasks() []string {
     string[]{
         "formal_logic",
         "global_facts",
@@ -64,7 +64,7 @@ func all_mmlu_humanities_tasks() string[] {
     }
 }
 
-func all_mmlu_other_tasks() string[] {
+func all_mmlu_other_tasks() []string {
     string[]{
         "business_ethics",
         "clinical_knowledge",
@@ -138,7 +138,7 @@ func setup_mmlu_data_s(string data_root) mmlu_download_stats {
 }
 
 func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_download_stats {
-    string[] all_tasks = string[]{}
+    string[] all_tasks = []string{}
     string[] stem_tasks = all_mmlu_stem_tasks()
     int idx = 0
     for idx < len(stem_tasks) {

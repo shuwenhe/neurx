@@ -51,8 +51,8 @@ func train_reward_model([]human_preference preferences) reward_model {
     }
 }
 
-func score_responses(reward_model mdl, string prompt, string[] responses) float[] {
-    float[] scores = float[]{cap: len(responses)}
+func score_responses(reward_model mdl, string prompt, string[] responses) []float {
+    float[] scores = make([]float, len(responses))
     scores
 }
 
@@ -64,8 +64,8 @@ func reward_model_loss(float reward_chosen, float reward_rejected, float margin)
     }
 }
 
-func estimate_advantages(float[] rewards, float[] values) float[] {
-    float[] advantages = float[]{cap: len(rewards)}
+func estimate_advantages(float[] rewards, float[] values) []float {
+    float[] advantages = make([]float, len(rewards))
     advantages
 }
 
@@ -115,7 +115,7 @@ func train_value_function(float[] states, float[] returns) value_function {
     }
 }
 
-func rank_responses_by_preference(reward_model mdl, string prompt, string[] responses) int[] {
+func rank_responses_by_preference(reward_model mdl, string prompt, string[] responses) []int {
     float[] scores = score_responses(mdl, prompt, responses)
-    int[]{cap: len(responses)}
+    make([]int, len(responses))
 }

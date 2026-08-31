@@ -125,9 +125,9 @@ func new_disaggregated_result(disaggregated_runtime_state state, disaggregated_r
 
 func new_disaggregated_runtime() disaggregated_runtime_state {
     disaggregated_runtime_state state
-    state.workers = []inference_worker{cap: 64}
-    state.requests = []disaggregated_request{cap: 1024}
-    state.transfers = []kv_transfer_ticket{cap: 1024}
+    state.workers = make([]inference_worker, 64)
+    state.requests = make([]disaggregated_request, 1024)
+    state.transfers = make([]kv_transfer_ticket, 1024)
     state.kv_handoffs = 0
     state.transfer_failures = 0
     state

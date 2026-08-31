@@ -23,7 +23,7 @@ struct swap_manager {
 }
 
 func (swap_manager* swm) init(int total_swap_mb) (int, string) {
-    swm.swap_devices = swap_device[]{}
+    swm.swap_devices = []swap_device{}
     swm.total_swap_space = total_swap_mb
     swm.used_swap_space = 0
     swm.swap_operations = 0
@@ -39,7 +39,7 @@ func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
         size: size_mb,
         used_space: 0,
         free_space: size_mb,
-        swap_pages: swap_page[]{}
+        swap_pages: []swap_page{}
     }
     swm.swap_devices = append(swm.swap_devices, device)
     swm.used_swap_space = swm.used_swap_space + size_mb
@@ -112,7 +112,7 @@ struct numa_manager {
 }
 
 func (numa_manager* nm) init(int num_nodes) (int, string) {
-    nm.nodes = numa_node[]{}
+    nm.nodes = []numa_node{}
     nm.num_nodes = num_nodes
     i := 0
     for i < num_nodes {
@@ -180,7 +180,7 @@ struct oom_manager {
 }
 
 func (oom_manager* om) init(int memory_threshold_mb) (int, string) {
-    om.processes = process[]{}"
+    om.processes = []process{}"
     om.memory_threshold = memory_threshold_mb
     om.killed_processes = 0
     return 0, ""

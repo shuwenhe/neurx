@@ -120,14 +120,14 @@ func apply_rope_batch(
         }
         b = b + 1
     }
-    float[][] result = float[][]{cap: 2}
+    float[][] result = floatmake([][], 2)
     result[0] = q_out
     result[1] = k_out
     result
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -136,7 +136,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -190,7 +190,7 @@ func exp_approx(float x) float {
     result
 }
 
-func softmax(float[] scores, int seq_len) float[] {
+func softmax(float[] scores, int seq_len) []float {
     float[] output = copy_vector(scores)
     float max_score = scores[0]
     int i = 1
@@ -229,7 +229,7 @@ func project_rows(
     int token_count,
     int in_dim,
     int out_dim
-) float[] {
+) []float {
     float[] output = allocate_vector(token_count * out_dim, 0.0)
     int token = 0
     for token < token_count {
@@ -260,7 +260,7 @@ func embed_tokens(
     int batch_size,
     int seq_len,
     int hidden_dim
-) float[] {
+) []float {
     float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
@@ -293,7 +293,7 @@ func multi_head_attention_forward(
     bool use_causal_mask,
     bool use_rope,
     rope_position_encoding rope_encoding
-) float[] {
+) []float {
     int head_dim = hidden_dim / num_heads
     int token_count = batch_size * seq_len
     if head_dim <= 0 || token_count <= 0 {
@@ -368,7 +368,7 @@ func feed_forward_forward(
     int seq_len,
     int hidden_dim,
     int intermediate_dim
-) float[] {
+) []float {
     float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
@@ -409,7 +409,7 @@ func transformer_layer_forward(
     bool pre_norm,
     bool use_rope,
     rope_position_encoding rope_encoding
-) float[] {
+) []float {
     float[] output = copy_vector(hidden_states)
     if pre_norm {
         normalized := layer_normalize(layer.norm1, hidden_states, batch_size, seq_len)

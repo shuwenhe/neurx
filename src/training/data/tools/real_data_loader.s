@@ -36,7 +36,7 @@ func create_tokenizer(int vocab_size) tokenizer {
     }
 }
 
-func encode(tokenizer tok, string text) int[] {
+func encode(tokenizer tok, string text) []int {
     words := strings.split(text, " ")
     token_ids := make(int[], len(words))
     for i := 0; i < len(words); i += 1 {

@@ -269,7 +269,7 @@ func run_posttrain_lora_sft() int {
     println("  Improvement:       " + float_to_str(improvement, 2) + "%")
     return 0
     }
-    []named_lora_module modules = []named_lora_module{cap: num_layers * 2}
+    []named_lora_module modules = make([]named_lora_module, num_layers * 2)
     int layer_idx = 0
     int module_idx = 0
     for layer_idx < num_layers {
@@ -286,15 +286,15 @@ func run_posttrain_lora_sft() int {
         q_layer.rank = rank
         q_layer.scaling = alpha / (rank as float)
         q_layer.dropout_rate = dropout
-        q_layer.last_input = float[]{cap: 0}
+        q_layer.last_input = []float{}
         q_module.layer = q_layer
-        q_module.initial_a = float[]{cap: rank * hidden_size}
+        q_module.initial_a = make([]float, rank * hidden_size)
         int q_a_idx = 0
         for q_a_idx < rank * hidden_size {
             q_module.initial_a[q_a_idx] = q_layer.lora_A[q_a_idx]
             q_a_idx = q_a_idx + 1
         }
-        q_module.initial_b = float[]{cap: hidden_size * rank}
+        q_module.initial_b = make([]float, hidden_size * rank)
         int q_b_idx = 0
         for q_b_idx < hidden_size * rank {
             q_module.initial_b[q_b_idx] = q_layer.lora_B[q_b_idx]
@@ -313,15 +313,15 @@ func run_posttrain_lora_sft() int {
         v_layer.rank = rank
         v_layer.scaling = alpha / (rank as float)
         v_layer.dropout_rate = dropout
-        v_layer.last_input = float[]{cap: 0}
+        v_layer.last_input = []float{}
         v_module.layer = v_layer
-        v_module.initial_a = float[]{cap: rank * hidden_size}
+        v_module.initial_a = make([]float, rank * hidden_size)
         int v_a_idx = 0
         for v_a_idx < rank * hidden_size {
             v_module.initial_a[v_a_idx] = v_layer.lora_A[v_a_idx]
             v_a_idx = v_a_idx + 1
         }
-        v_module.initial_b = float[]{cap: v_out * rank}
+        v_module.initial_b = make([]float, v_out * rank)
         int v_b_idx = 0
         for v_b_idx < v_out * rank {
             v_module.initial_b[v_b_idx] = v_layer.lora_B[v_b_idx]
@@ -365,7 +365,7 @@ func run_posttrain_lora_sft() int {
         target_v[target_v_idx] = value + 0.0001
         target_v_idx = target_v_idx + 1
     }
-    float[] loss_history = float[]{cap: epochs}
+    float[] loss_history = make([]float, epochs)
     int epoch = 0
     println("Training loop start")
     for epoch < epochs {
@@ -493,8 +493,8 @@ func train_named_module(named_lora_module module, float[] input_vec, float[] tar
     module
 }
 
-func fill_lora(int n, float val) float[] {
-    float[] result = float[]{cap: n}
+func fill_lora(int n, float val) []float {
+    float[] result = make([]float, n)
     int i = 0
     for i < n {
         result[i] = val
@@ -503,8 +503,8 @@ func fill_lora(int n, float val) float[] {
     result
 }
 
-func init_gaussian(int n, float std) float[] {
-    float[] result = float[]{cap: n}
+func init_gaussian(int n, float std) []float {
+    float[] result = make([]float, n)
     int i = 0
     for i < n {
         float val = ((i + 1) as float) * std * 0.001
@@ -586,7 +586,7 @@ func write_simple_adapter_checkpoint(
 ) {
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
-    int[] q_a_shape = int[]{cap: 2}
+    int[] q_a_shape = make([]int, 2)
     q_a_shape[0] = rank
     q_a_shape[1] = 896
     tensor q_a_tensor = tensor {
@@ -598,7 +598,7 @@ func write_simple_adapter_checkpoint(
         data_count: len(q_a),
     }
     safetensors_writer_add_tensor(writer, q_a_tensor)
-    int[] q_b_shape = int[]{cap: 2}
+    int[] q_b_shape = make([]int, 2)
     q_b_shape[0] = 896
     q_b_shape[1] = rank
     tensor q_b_tensor = tensor {
@@ -610,7 +610,7 @@ func write_simple_adapter_checkpoint(
         data_count: len(q_b),
     }
     safetensors_writer_add_tensor(writer, q_b_tensor)
-    int[] v_a_shape = int[]{cap: 2}
+    int[] v_a_shape = make([]int, 2)
     v_a_shape[0] = rank
     v_a_shape[1] = 896
     tensor v_a_tensor = tensor {
@@ -622,7 +622,7 @@ func write_simple_adapter_checkpoint(
         data_count: len(v_a),
     }
     safetensors_writer_add_tensor(writer, v_a_tensor)
-    int[] v_b_shape = int[]{cap: 2}
+    int[] v_b_shape = make([]int, 2)
     v_b_shape[0] = v_out
     v_b_shape[1] = rank
     tensor v_b_tensor = tensor {
@@ -850,19 +850,19 @@ func write_adapter_checkpoint(
         named_lora_module module = modules[module_idx]
         int a_len = module.layer.rank * module.layer.in_dim
         int b_len = module.layer.out_dim * module.layer.rank
-        float[] a_data = float[]{cap: a_len}
+        float[] a_data = make([]float, a_len)
         int a_idx = 0
         for a_idx < a_len {
             a_data[a_idx] = module.layer.lora_A[a_idx]
             a_idx = a_idx + 1
         }
-        float[] b_data = float[]{cap: b_len}
+        float[] b_data = make([]float, b_len)
         int b_idx = 0
         for b_idx < b_len {
             b_data[b_idx] = module.layer.lora_B[b_idx]
             b_idx = b_idx + 1
         }
-        int[] a_shape = int[]{cap: 2}
+        int[] a_shape = make([]int, 2)
         a_shape[0] = module.layer.rank
         a_shape[1] = module.layer.in_dim
         tensor a_tensor = tensor {
@@ -873,7 +873,7 @@ func write_adapter_checkpoint(
             shape_count: 2,
             data_count: a_len,
         }
-        int[] b_shape = int[]{cap: 2}
+        int[] b_shape = make([]int, 2)
         b_shape[0] = module.layer.out_dim
         b_shape[1] = module.layer.rank
         tensor b_tensor = tensor {
@@ -982,7 +982,7 @@ func build_training_state_json(
     json
 }
 
-func text_to_vector(string text, int dim) float[] {
+func text_to_vector(string text, int dim) []float {
     float[] vec = fill_lora(dim, 0.0)
     int i = 0
     float length_scale = (dim as float + 1.0) * 0.0001
@@ -1015,7 +1015,7 @@ func mse_loss(float[] predictions, float[] targets) float {
     loss
 }
 
-func mse_gradient(float[] predictions, float[] targets) float[] {
+func mse_gradient(float[] predictions, float[] targets) []float {
     int limit = len(predictions)
     if len(targets) < limit {
         limit = len(targets)
@@ -1036,8 +1036,8 @@ func abs_float(float value) float {
     value
 }
 
-func copy_float_array(float[] source) float[] {
-    float[] result = float[]{cap: len(source)}
+func copy_float_array(float[] source) []float {
+    float[] result = make([]float, len(source))
     int i = 0
     for i < len(source) {
         result[i] = source[i]
@@ -1161,8 +1161,8 @@ func find_substring(string text, string pattern) int {
     -1
 }
 
-func make_shape(int a, int b) int[] {
-    int[] shape = int[]{cap: 2}
+func make_shape(int a, int b) []int {
+    int[] shape = make([]int, 2)
     shape[0] = a
     shape[1] = b
     shape

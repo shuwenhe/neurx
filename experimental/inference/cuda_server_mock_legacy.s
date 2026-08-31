@@ -204,7 +204,7 @@ func generate_response_for_prompt(string prompt) string {
     string response = prefix + prompt + ". [GPU-based processing completed successfully]"
     return response
 func handle_client_gpu(int client_fd, string model_path, string device_type) {
-    int[] input_buffer = int[]{cap: 4096}
+    int[] input_buffer = make([]int, 4096)
     string request = __sys_read_string(client_fd, 4096)
     int slice_end = len(request)
     if slice_end > 100 {

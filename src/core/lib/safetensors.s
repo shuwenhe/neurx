@@ -92,7 +92,7 @@ func parse_json_string(string json, int start, int length) string {
     return json.substring(start, start + length)
 }
 
-func parse_json_array(string json, int start, int length) int[] {
+func parse_json_array(string json, int start, int length) []int {
     int[] result = []
     string array_str = json.substring(start, start + length)
     int i = 0

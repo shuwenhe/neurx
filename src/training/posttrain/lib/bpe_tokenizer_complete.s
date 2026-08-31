@@ -29,7 +29,7 @@ func normalize_text(string text) string {
     return normalize_ascii_text(text)
 }
 
-func pretokenize(string text) string[] {
+func pretokenize(string text) []string {
     string[] tokens
     string current = ""
     int i = 0
@@ -58,7 +58,7 @@ func pretokenize(string text) string[] {
     return tokens
 }
 
-func word_to_byte_tokens(string word) string[] {
+func word_to_byte_tokens(string word) []string {
     string[] tokens
     int i = 0
     for i < len(word) {
@@ -78,7 +78,7 @@ func word_to_byte_tokens(string word) string[] {
     return tokens
 }
 
-func apply_bpe(string[] tokens, map[string]int merge_rank) string[] {
+func apply_bpe(string[] tokens, map[string]int merge_rank) []string {
     string[] result = tokens
     int iteration = 0
     for iteration < 100 {
@@ -118,7 +118,7 @@ func apply_bpe(string[] tokens, map[string]int merge_rank) string[] {
     return result
 }
 
-func encode(bpe_tokenizer tokenizer, string text) int[] {
+func encode(bpe_tokenizer tokenizer, string text) []int {
     int[] result
     if tokenizer.add_bos_token {
         result = append(result, tokenizer.bos_token_id)
@@ -186,9 +186,9 @@ func decode(bpe_tokenizer tokenizer, int[] token_ids) string {
 func create_tokenizer() bpe_tokenizer {
     bpe_tokenizer tokenizer
     tokenizer.vocab = map[string]int{}
-    tokenizer.id_to_token = string[]{}
+    tokenizer.id_to_token = []string{}
     tokenizer.bpe_merges = map[string]int{}
-    tokenizer.special_tokens = string[]{}
+    tokenizer.special_tokens = []string{}
     tokenizer.unk_token_id = 0
     tokenizer.pad_token_id = 0
     tokenizer.bos_token_id = 1

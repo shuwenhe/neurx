@@ -18,7 +18,7 @@ func process_logits(
     int vocab_size,
     string processor_type,
     map[string]float params
-) float[] {
+) []float {
     if processor_type == "temperature" {
         return apply_temperature(logits, params)
     } else if processor_type == "top_k" {
@@ -33,7 +33,7 @@ func process_logits(
     return logits
 }
 
-func apply_temperature(float[] logits, map[string]float params) float[] {
+func apply_temperature(float[] logits, map[string]float params) []float {
     float temperature = params["temperature"]
     if temperature <= 0.0 {
         temperature = 1.0
@@ -47,7 +47,7 @@ func apply_temperature(float[] logits, map[string]float params) float[] {
     return result
 }
 
-func apply_top_k(float[] logits, map[string]float params) float[] {
+func apply_top_k(float[] logits, map[string]float params) []float {
     int k = int(params["k"])
     if k <= 0 {
         k = 40
@@ -70,7 +70,7 @@ func apply_top_k(float[] logits, map[string]float params) float[] {
     return result
 }
 
-func get_top_k_values(float[] logits, int k) float[] {
+func get_top_k_values(float[] logits, int k) []float {
     float[] sorted_logits = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
@@ -104,7 +104,7 @@ func sort_descending(float[] arr) {
     }
 }
 
-func apply_top_p(float[] logits, map[string]float params) float[] {
+func apply_top_p(float[] logits, map[string]float params) []float {
     float p = params["p"]
     if p <= 0.0 || p > 1.0 {
         p = 0.9
@@ -131,7 +131,7 @@ func apply_top_p(float[] logits, map[string]float params) float[] {
     return result
 }
 
-func softmax(float[] logits) float[] {
+func softmax(float[] logits) []float {
     float max_logit = logits[0]
     int i = 1
     for i < len(logits) {
@@ -161,7 +161,7 @@ func softmax(float[] logits) float[] {
     return probs
 }
 
-func get_sorted_indices_descending(float[] arr) int[] {
+func get_sorted_indices_descending(float[] arr) []int {
     int[] indices = make(int[], len(arr))
     int i = 0
     for i < len(arr) {
@@ -197,7 +197,7 @@ func sort_indices_by_values(int[] indices, float[] values, bool descending) {
     }
 }
 
-func apply_min_p(float[] logits, map[string]float params) float[] {
+func apply_min_p(float[] logits, map[string]float params) []float {
     float min_p = params["min_p"]
     if min_p <= 0.0 {
         min_p = 0.0
@@ -225,7 +225,7 @@ func apply_min_p(float[] logits, map[string]float params) float[] {
     return result
 }
 
-func apply_repetition_penalty(float[] logits, map[string]float params) float[] {
+func apply_repetition_penalty(float[] logits, map[string]float params) []float {
     float penalty = params["penalty"]
     if penalty <= 0.0 {
         penalty = 1.0
@@ -284,7 +284,7 @@ func (logits_processor_manager* mgr) add_processor(config logits_processor_confi
     mgr.sorting_by_priority = true
 }
 
-func (logits_processor_manager* mgr) process(float[] logits) float[] {
+func (logits_processor_manager* mgr) process(float[] logits) []float {
     if mgr.sorting_by_priority {
         sort_processors_by_priority(mgr.processors)
         mgr.sorting_by_priority = false

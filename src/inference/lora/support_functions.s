@@ -21,7 +21,7 @@ func create_lora_config(
         r_init_std: 0.02,
         use_rslora: false,
         use_dora: false,
-        modules_to_save: string[]{},
+        modules_to_save: []string{},
         target_modules: string[]{"q_proj", "v_proj", "k_proj", "o_proj"},
     }
 }

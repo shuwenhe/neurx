@@ -99,7 +99,7 @@ func hetero_topology_node_new(int node_id, string node_name, string host, int po
 func hetero_topology_new(string cluster_name) hetero_topology {
     hetero_topology {
         cluster_name: cluster_name,
-        nodes: hetero_topology_node[]{cap: 0},
+        nodes: []hetero_topology_node{},
         world_size: 0,
         healthy_nodes: 0,
         total_devices: 0,
@@ -237,8 +237,8 @@ func hetero_build_launch_plan(hetero_placement_result placement, string worker_b
 
 func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string chip_type, string worker_bin, string master_addr, int master_port, int min_devices, int min_memory_gb) hetero_multi_launch_plan {
     hetero_multi_launch_plan plan
-    plan.placements = hetero_placement_result[]{cap: len(topo.nodes)}
-    plan.commands = hetero_launch_command[]{cap: topo.total_devices}
+    plan.placements = make([]hetero_placement_result, len(topo.nodes))
+    plan.commands = make([]hetero_launch_command, topo.total_devices)
     plan.world_size = 0
     plan.valid = false
     plan.reason = ""

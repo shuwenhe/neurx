@@ -116,7 +116,7 @@ func new_distributed_model_shards(
     }
     int layers_per_rank = cfg.num_layers / cfg.pipeline_parallel_size
     int start_layer = cfg.rank * layers_per_rank
-    shards.layer_assignments = int[]{}
+    shards.layer_assignments = []int{}
     for i = 0; i < layers_per_rank; i = i + 1 {
         int layer_id = start_layer + i
         shards.layer_assignments = append(shards.layer_assignments, layer_id)
@@ -134,8 +134,8 @@ func new_distributed_kv_cache(
     cache.max_cache_len = cfg.max_seq_len
     cache.key_cache = float[][]{}
     cache.value_cache = float[][]{}
-    cache.cache_seq_lens = int[]{}
-    cache.cache_batch_indices = int[]{}
+    cache.cache_seq_lens = []int{}
+    cache.cache_batch_indices = []int{}
     cache
 }
 
@@ -144,7 +144,7 @@ func new_communication_buffer(int max_size) communication_buffer {
     buf.max_buffer_size = max_size
     buf.send_buffer = float[][]{}
     buf.recv_buffer = float[][]{}
-    buf.buffer_sizes = int[]{}
+    buf.buffer_sizes = []int{}
     buf
 }
 
@@ -187,7 +187,7 @@ func all_gather(
 func reduce_scatter(
     float[][] global_data,
     distributed_inference_config cfg
-) float[] {
+) []float {
     int data_size = len(global_data) / cfg.world_size
     float[] local_chunk
     local_chunk
@@ -198,7 +198,7 @@ func forward_tensor_parallel(
     distributed_model_shards shards,
     distributed_inference_config cfg,
     communication_buffer comm_buf
-) float[] {
+) []float {
     int local_hidden = cfg.hidden_dim / cfg.tensor_parallel_size
     float[] local_output
     if cfg.tensor_parallel_size > 1 {
@@ -215,7 +215,7 @@ func attention_tensor_parallel(
     float[] value,
     distributed_inference_config cfg,
     communication_buffer comm_buf
-) float[] {
+) []float {
     float[] output
     output
 }
@@ -232,7 +232,7 @@ func forward_pipeline_parallel(
     []pipeline_stage stages,
     distributed_inference_config cfg,
     communication_buffer comm_buf
-) float[] {
+) []float {
     float[] current_activation = input_hidden
     for i = 0; i < len(stages); i = i + 1 {
         pipeline_stage stage = stages[i]
@@ -252,7 +252,7 @@ func backward_pipeline_parallel(
     float[] grad_output,
     []pipeline_stage stages,
     distributed_inference_config cfg
-) float[] {
+) []float {
     float[] grad_input = grad_output
     grad_input
 }
@@ -280,8 +280,8 @@ func compute_rank_mapping(
     string strategy,
     int world_size,
     int rank
-) int[] {
-    int[] mapping = int[]{}
+) []int {
+    int[] mapping = []int{}
     if strategy == "tensor" {
         mapping = append(mapping, rank)
         mapping = append(mapping, 0)
@@ -312,8 +312,8 @@ func run_distributed_inference(
     distributed_inference_response response
     response.request_id = request.request_id
     response.dest_rank = 0
-    response.output_ids = int[]{}
-    response.logits = float[]{}
+    response.output_ids = []int{}
+    response.logits = []float{}
     response.generated_len = 0
     float[] hidden_state
     if cfg.strategy == "tensor" {

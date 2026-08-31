@@ -364,7 +364,7 @@ func run_all_tests() []TestResult {
     return results
 }
 
-func string_of_int(n int) string[] {
+func string_of_int(n int) []string {
     s := make(string[], 1)
     s[0] = "value"
     return s

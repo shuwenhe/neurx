@@ -63,7 +63,7 @@ func initialize_verifier_embeddings(verifier_executor executor, int vocab_size, 
     updated := executor
     i := 0
     for i < vocab_size {
-        embedding := float[]{}
+        embedding := []float{}
         j := 0
         for j < embed_dim {
             embedding = append(embedding, 0.02)
@@ -75,16 +75,16 @@ func initialize_verifier_embeddings(verifier_executor executor, int vocab_size, 
     updated
 }
 
-func verifier_embedding_lookup(verifier_executor executor, int token_id) float[] {
+func verifier_embedding_lookup(verifier_executor executor, int token_id) []float {
     if token_id >= 0 && token_id < executor.model_embeddings.len {
         executor.model_embeddings[token_id]
     } else {
-        float[]{}
+        []float{}
     }
 }
 
-func verifier_layer_forward(float[] input, float[] layer_weight, int hidden_dim) float[] {
-    output := float[]{}
+func verifier_layer_forward(float[] input, float[] layer_weight, int hidden_dim) []float {
+    output := []float{}
     i := 0
     for i < hidden_dim {
         val := 0.0
@@ -102,8 +102,8 @@ func verifier_layer_forward(float[] input, float[] layer_weight, int hidden_dim)
     output
 }
 
-func verifier_apply_residual(float[] original, float[] transformed) float[] {
-    result := float[]{}
+func verifier_apply_residual(float[] original, float[] transformed) []float {
+    result := []float{}
     i := 0
     for i < original.len && i < transformed.len {
         result = append(result, original[i] + transformed[i])
@@ -112,10 +112,10 @@ func verifier_apply_residual(float[] original, float[] transformed) float[] {
     result
 }
 
-func verifier_forward_single(verifier_executor executor, int token_id, int hidden_dim) float[] {
+func verifier_forward_single(verifier_executor executor, int token_id, int hidden_dim) []float {
     hidden := verifier_embedding_lookup(executor, token_id)
     if hidden.len == 0 {
-        return float[]{}
+        return []float{}
     }
     i := 0
     for i < executor.model_weights.len && i < 24 {
@@ -128,8 +128,8 @@ func verifier_forward_single(verifier_executor executor, int token_id, int hidde
     hidden
 }
 
-func verifier_output_logits(float[] hidden_states, int vocab_size) float[] {
-    logits := float[]{}
+func verifier_output_logits(float[] hidden_states, int vocab_size) []float {
+    logits := []float{}
     i := 0
     for i < vocab_size {
         score := 0.0

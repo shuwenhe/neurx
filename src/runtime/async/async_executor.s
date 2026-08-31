@@ -321,7 +321,7 @@ func (e async_executor*) shutdown(timeout_ms int64) {
 	e.wait_for_completion(timeout_ms)
 }
 
-func (e async_executor*) get_pending_results() task_result[] {
+func (e async_executor*) get_pending_results() []task_result {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	results := make(task_result[], 0, len(e.completed_tasks))

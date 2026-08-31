@@ -36,7 +36,7 @@ func compute_memory_usage(*computation_graph g) memory_usage {
     }
 }
 
-func find_reusable_values(*computation_graph g, *int[] lifetime) int[] {
+func find_reusable_values(*computation_graph g, *int[] lifetime) []int {
     reusable = int[]()
 
     for i in range(len(g.values)) {
@@ -55,7 +55,7 @@ func find_reusable_values(*computation_graph g, *int[] lifetime) int[] {
     reusable
 }
 
-func compute_value_lifetime(*computation_graph g) int[] {
+func compute_value_lifetime(*computation_graph g) []int {
     lifetime = new int[len(g.values)]
     for i in range(len(g.values)) {
         lifetime[i] = 0

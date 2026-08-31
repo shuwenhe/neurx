@@ -39,10 +39,10 @@ func init_distributed_kv_cache(
     cache.layout = layout
     cache.local_key_caches = float[][]{}
     cache.local_value_caches = float[][]{}
-    cache.seq_lens = int[]{}
+    cache.seq_lens = []int{}
     for i = 0; i < num_layers; i = i + 1 {
-        cache.local_key_caches = append(cache.local_key_caches, float[]{})
-        cache.local_value_caches = append(cache.local_value_caches, float[]{})
+        cache.local_key_caches = append(cache.local_key_caches, []float{})
+        cache.local_value_caches = append(cache.local_value_caches, []float{})
         cache.seq_lens = append(cache.seq_lens, 0)
     }
     cache
@@ -71,7 +71,7 @@ func get_kv_local(
     int layer_idx
 ) (float[], float[]) {
     if layer_idx >= cache.num_layers {
-        return float[]{}, float[]{}
+        return []float{}, []float{}
     }
     (cache.local_key_caches[layer_idx], cache.local_value_caches[layer_idx])
 }
@@ -98,9 +98,9 @@ func get_remote_kv(
 ) (float[], float[]) {
     println("Fetching KV from remote rank...")
     if remote_rank < cache.world_size {
-        (float[]{}, float[]{})
+        ([]float{}, []float{})
     } else {
-        (float[]{}, float[]{})
+        ([]float{}, []float{})
     }
 }
 
@@ -148,7 +148,7 @@ func clear_cache(
 ) {
     cache.local_key_caches = float[][]{}
     cache.local_value_caches = float[][]{}
-    cache.seq_lens = int[]{}
+    cache.seq_lens = []int{}
 }
 
 func log_cache_state(

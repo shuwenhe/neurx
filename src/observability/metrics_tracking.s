@@ -247,7 +247,7 @@ func (metrics_tracker* mt) reset() {
     mt.start_time = current_time_ns()
 }
 
-func quick_sort_int32(int32[] arr) int32[] {
+func quick_sort_int32(int32[] arr) []int32 {
     if len(arr) <= 1 {
         return arr
     }

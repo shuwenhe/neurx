@@ -83,7 +83,7 @@ func (log_collector* c) collect_all() {
 	}
 }
 
-func (log_collector* c) get_collected_entries() log_entry[] {
+func (log_collector* c) get_collected_entries() []log_entry {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	result := make(log_entry[], 0)

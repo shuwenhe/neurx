@@ -77,7 +77,7 @@ struct device_tree {
 
 // Global device registry
 device_tree global_device_tree = device_tree {
-    devices: device[]{cap: 128},
+    devices: make([]device, 128),
     device_count: 0,
     root_device_id: "root",
 }
@@ -149,8 +149,8 @@ func device_get(string device_id) device {
 }
 
 // List devices of a given class
-func device_list_by_class(string device_class) string[] {
-    string[] result = string[]{cap: 64}
+func device_list_by_class(string device_class) []string {
+    string[] result = make([]string, 64)
     int count = 0
     
     int i = 0
@@ -166,8 +166,8 @@ func device_list_by_class(string device_class) string[] {
 }
 
 // List all devices of a given type
-func device_list_by_type(string device_type) string[] {
-    string[] result = string[]{cap: 64}
+func device_list_by_type(string device_type) []string {
+    string[] result = make([]string, 64)
     int count = 0
     
     int i = 0
@@ -183,12 +183,12 @@ func device_list_by_type(string device_type) string[] {
 }
 
 // Get all GPUs in system
-func device_get_all_gpus() string[] {
+func device_get_all_gpus() []string {
     return device_list_by_class("gpu")
 }
 
 // Get all NPUs in system
-func device_get_all_npus() string[] {
+func device_get_all_npus() []string {
     return device_list_by_class("npu")
 }
 

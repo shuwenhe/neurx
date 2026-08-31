@@ -123,7 +123,7 @@ func (cpufreq_policy* policy) scale_frequency(int target_freq_mhz) (int, string)
 func cpuidle_device_create(int cpu_id) cpuidle_device {
     device := cpuidle_device {
         cpu_id: cpu_id,
-        states: cpuidle_state[]{},
+        states: []cpuidle_state{},
         cur_state: 0,
         idle_time_us: 0,
         wakeup_latency_us: 0
@@ -225,9 +225,9 @@ func (power_domain* domain) power_off() (bool, string) {
 
 func power_manager_create(int nr_cpus) power_manager {
     mgr := power_manager {
-        cpufreq_policies: cpufreq_policy[]{},
-        cpuidle_devices: cpuidle_device[]{},
-        power_domains: power_domain[]{},
+        cpufreq_policies: []cpufreq_policy{},
+        cpuidle_devices: []cpuidle_device{},
+        power_domains: []power_domain{},
         nr_cpus: nr_cpus,
         system_state: power_state_power_on,
         total_transitions: 0,

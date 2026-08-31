@@ -221,7 +221,7 @@ func init_orchestrator(training_orchestrator_config cfg, int global_rank) orches
 }
 
 func build_topology(int world_size, int tp, int pp, int dp) []gpu_topology_entry {
-    []gpu_topology_entry map = []gpu_topology_entry{cap: world_size}
+    []gpu_topology_entry map = make([]gpu_topology_entry, world_size)
     int gpus_per_node = 8
     int rank = 0
     for rank < world_size {

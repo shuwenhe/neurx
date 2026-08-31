@@ -30,8 +30,8 @@ use neurx.model.transformer.transformer_backward.{
     backward_pass_output
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -40,7 +40,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -74,7 +74,7 @@ func test_layer_norm_forward_basic() {
         use_bias: true,
     }
     ln := new_layer_norm(cfg)
-    float[] input = float[]{cap: 16}
+    float[] input = make([]float, 16)
     int i = 0
     for i < 16 {
         input[i] = 1.0 + (i * 1.0) / 16.0
@@ -98,8 +98,8 @@ func test_layer_norm_with_gamma_beta() {
         use_bias: true,
     }
     ln := new_layer_norm(cfg)
-    ln.gamma = float[]{cap: 4}
-    ln.beta = float[]{cap: 4}
+    ln.gamma = make([]float, 4)
+    ln.beta = make([]float, 4)
     int i = 0
     for i < 4 {
         ln.gamma[i] = 2.0
@@ -150,7 +150,7 @@ func test_embed_tokens_basic() {
     int batch_size = 2
     int seq_len = 4
     float[] embedding = allocate_vector(vocab_size * hidden_dim, 0.1)
-    int[] token_ids = int[]{cap: batch_size * seq_len}
+    int[] token_ids = make([]int, batch_size * seq_len)
     int i = 0
     for i < batch_size * seq_len {
         token_ids[i] = i % vocab_size
@@ -172,7 +172,7 @@ func test_embed_tokens_correct_values() {
         embedding[hidden_dim + i] = 2.0 + (i * 1.0)
         i = i + 1
     }
-    int[] token_ids = int[]{cap: 2}
+    int[] token_ids = make([]int, 2)
     token_ids[0] = 0
     token_ids[1] = 1
     embedded := embed_tokens(embedding, token_ids, batch_size, seq_len, hidden_dim)
@@ -215,7 +215,7 @@ func test_cross_entropy_loss_gradient() {
     int seq_len = 2
     int vocab_size = 10
     float[] logits = allocate_vector(batch_size * seq_len * vocab_size, 0.1)
-    int[] targets = int[]{cap: batch_size * seq_len}
+    int[] targets = make([]int, batch_size * seq_len)
     targets[0] = 1
     targets[1] = 2
     targets[2] = 3

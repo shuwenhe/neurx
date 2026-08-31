@@ -12,7 +12,7 @@ struct processor_result {
     float[] top_token_probs
 }
 
-func softmax(float[] logits) float[] {
+func softmax(float[] logits) []float {
     float max_logit = logits[0]
     for i = 1; i < len(logits); i = i + 1 {
         if logits[i] > max_logit {
@@ -33,7 +33,7 @@ func softmax(float[] logits) float[] {
     probs
 }
 
-func log_softmax(float[] logits) float[] {
+func log_softmax(float[] logits) []float {
     float max_logit = logits[0]
     for i = 1; i < len(logits); i = i + 1 {
         if logits[i] > max_logit {
@@ -87,7 +87,7 @@ func get_top_k_tokens(
 func apply_token_mask(
     logits: float[],
     mask: bool[]
-) float[] {
+) []float {
     float[] masked_logits
     for i = 0; i < len(logits); i = i + 1 {
         if mask[i] {
@@ -106,7 +106,7 @@ func find_token_index(int token_id, int vocab_size) int {
     token_id
 }
 
-func cumulative_softmax(float[] probs) float[] {
+func cumulative_softmax(float[] probs) []float {
     float[] cum_probs
     float cumsum = 0.0
     for i = 0; i < len(probs); i = i + 1 {

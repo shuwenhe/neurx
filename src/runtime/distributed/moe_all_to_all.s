@@ -37,7 +37,7 @@ func compute_router_logits(
     int num_tokens,
     int hidden_dim,
     int num_experts
-) float[] {
+) []float {
     float[] logits = make(float[], num_tokens * num_experts)
     int t = 0
     for t < num_tokens {
@@ -192,7 +192,7 @@ func reconstruct_token_order(
     float[][] expert_outputs,
     int num_tokens,
     int hidden_dim
-) float[] {
+) []float {
     float[] output = make(float[], num_tokens * hidden_dim)
     int t = 0
     for t < num_tokens {

@@ -9,7 +9,7 @@ struct safetensors_writer {
 func safetensors_writer_new(string filepath) safetensors_writer {
     safetensors_writer {
         filepath: filepath,
-        tensors: []tensor{cap: 100},
+        tensors: make([]tensor, 100),
         tensor_count: 0,
         total_data_size: 0,
     }

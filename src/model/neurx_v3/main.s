@@ -166,7 +166,7 @@ func demonstrate_mtp() {
         main_hidden[i] = 0.1
         i = i + 1
     }
-    int[] targets = int[]{cap: 4}
+    int[] targets = make([]int, 4)
     targets[0] = 42
     targets[1] = 100
     targets[2] = 5000
@@ -199,17 +199,17 @@ func demonstrate_grpo() {
     println("  - A_i = (r_i - mean) / std (within group)")
     println("")
     int G = cfg.group_size
-    []neurx_r1_grpo.generation_output outputs = []neurx_r1_grpo.generation_output{cap: G}
+    []neurx_r1_grpo.generation_output outputs = make([]neurx_r1_grpo.generation_output, G)
     int i = 0
     for i < G {
         float quality = (i as float + 1.0) / G as float * 2.0
-        float[] log_probs = float[]{cap: 10}
+        float[] log_probs = make([]float, 10)
         int j = 0
         for j < 10 {
             log_probs[j] = -0.1 * quality + (j as float - 5.0) * 0.05
             j = j + 1
         }
-        int[] token_ids = int[]{cap: 10}
+        int[] token_ids = make([]int, 10)
         j = 0
         for j < 10 {
             token_ids[j] = j * 10 + i

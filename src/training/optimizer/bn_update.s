@@ -109,8 +109,8 @@ func apply_batch_norm(
     return new(out, input_data.shape, input_data.requires_grad)
 }
 
-func make_zeros(int n) float[] {
-    float[] arr = float[]{cap: n}
+func make_zeros(int n) []float {
+    float[] arr = make([]float, n)
     int i = 0
     for i < n {
         arr[i] = 0.0
@@ -119,8 +119,8 @@ func make_zeros(int n) float[] {
     return arr
 }
 
-func make_ones(int n) float[] {
-    float[] arr = float[]{cap: n}
+func make_ones(int n) []float {
+    float[] arr = make([]float, n)
     int i = 0
     for i < n {
         arr[i] = 1.0

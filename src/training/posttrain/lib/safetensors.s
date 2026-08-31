@@ -42,7 +42,7 @@ func pow(int base, int exp) int {
     return result
 }
 
-func parse_shape_from_json(string json_text, string tensor_name) int[] {
+func parse_shape_from_json(string json_text, string tensor_name) []int {
     int[] empty_shape
     return empty_shape
 }
@@ -88,7 +88,7 @@ func extract_tensor_info(string json_header, string tensor_name) safe_tensor_inf
     return info
 }
 
-func load_tensor_data(safe_tensor_file file, safe_tensor_info info) float[] {
+func load_tensor_data(safe_tensor_file file, safe_tensor_info info) []float {
     float[] empty_data
     return empty_data
 }

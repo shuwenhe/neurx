@@ -31,7 +31,7 @@ func new_cuda_graph_manager(int max_graphs) cuda_graph_manager {
         graphs: []cuda_graph{},
         next_graph_id: 0,
         max_graphs: max_graphs,
-        kernel_cache: string[]{},
+        kernel_cache: []string{},
         cache_size: 0,
     }
 }
@@ -88,9 +88,9 @@ func freeze_cuda_graph(cuda_graph graph) cuda_graph {
 func execute_cuda_graph(cuda_graph graph, float[] input_data) (cuda_graph, float[]) {
     if !graph.is_frozen {
         logger.warning("Cannot execute non-frozen graph")
-        return graph, float[]{}
+        return graph, []float{}
     }
-    output_data = float[]{}
+    output_data = []float{}
     new_graph = graph
     i = 0
     for i < len(graph.nodes) {

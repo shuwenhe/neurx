@@ -26,7 +26,7 @@ func new_oom_killer() oom_killer {
         oom_kill_enabled: true,
         last_kill_time_ms: 0,
         processes: []process_info{},
-        kill_history: int[]{}
+        kill_history: []int{}
     }
 }
 

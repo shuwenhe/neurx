@@ -34,7 +34,7 @@ struct tree_search_result {
 }
 
 func new_radix_tree() radix_tree {
-    root := new_radix_node_internal("root", int32[]{}, nil)
+    root := new_radix_node_internal("root", []int32{}, nil)
     radix_tree {
         root: *root,
         total_nodes: 1,
@@ -137,7 +137,7 @@ func (radix_tree* tree) find_longest_prefix(int32[] query_tokens) tree_search_re
         matched_node: matched_node,
         matched_length: matched_length,
         remaining_tokens: 0,
-        remaining_ids: int32[]{},
+        remaining_ids: []int32{},
     }
 }
 

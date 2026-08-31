@@ -135,7 +135,7 @@ func (metrics_registry* r) get_metric(metric_name string) (metric_series, bool) 
 	return series, exists
 }
 
-func (metrics_registry* r) get_all_metrics() metric_series[] {
+func (metrics_registry* r) get_all_metrics() []metric_series {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	result := make(metric_series[], 0, len(r.metrics))

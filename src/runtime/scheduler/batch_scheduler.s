@@ -1,5 +1,5 @@
 package neurx.scheduler.batch_scheduler
-func new_batch_request(int req_id) int[] {
+func new_batch_request(int req_id) []int {
     int[] req = int[]{req_id, 0, 0, 0}
     return req
 }
@@ -20,22 +20,22 @@ func get_req_step(int[] req) int {
     return req[3]
 }
 
-func set_req_status(int[] req, int status) int[] {
+func set_req_status(int[] req, int status) []int {
     req[1] = status
     return req
 }
 
-func set_req_tokens(int[] req, int tokens) int[] {
+func set_req_tokens(int[] req, int tokens) []int {
     req[2] = tokens
     return req
 }
 
-func increment_req_step(int[] req) int[] {
+func increment_req_step(int[] req) []int {
     req[3] = req[3] + 1
     return req
 }
 
-func new_scheduler_state(int max_prefill, int max_decode) int[] {
+func new_scheduler_state(int max_prefill, int max_decode) []int {
     int[] state = int[]{0, max_prefill, max_decode, 0, 0}
     return state
 }
@@ -93,7 +93,7 @@ func count_finished_requests(int[][] queue) int {
     return count
 }
 
-func select_prefill_requests(int[][] queue, int capacity) int[] {
+func select_prefill_requests(int[][] queue, int capacity) []int {
     int[] selected = []
     int count = 0
     int i = 0
@@ -110,7 +110,7 @@ func select_prefill_requests(int[][] queue, int capacity) int[] {
     return selected
 }
 
-func select_decode_requests(int[][] queue, int capacity) int[] {
+func select_decode_requests(int[][] queue, int capacity) []int {
     int[] selected = []
     int count = 0
     int i = 0
@@ -182,10 +182,10 @@ func get_scheduler_stats(int[][] queue) string {
     return stats
 }
 
-func get_prefill_indices(int[][] queue, int prefill_capacity) int[] {
+func get_prefill_indices(int[][] queue, int prefill_capacity) []int {
     return select_prefill_requests(queue, prefill_capacity)
 }
 
-func get_decode_indices(int[][] queue, int decode_capacity) int[] {
+func get_decode_indices(int[][] queue, int decode_capacity) []int {
     return select_decode_requests(queue, decode_capacity)
 }

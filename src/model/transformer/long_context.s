@@ -111,7 +111,7 @@ func new_paged_kv_cache(long_context_config config) paged_kv_cache {
     int num_heads = 32
     int head_dim = config.max_context_length / num_heads
     paged_kv_cache cache {
-        blocks: []kv_cache_block{cap: config.num_kv_blocks},
+        blocks: make([]kv_cache_block, config.num_kv_blocks),
         block_size: config.kv_cache_block_size,
         num_blocks: config.num_kv_blocks,
         num_heads: num_heads,
@@ -133,12 +133,12 @@ func new_long_context_state(long_context_config config) long_context_state {
         config: config,
         sw_state: new_sliding_window_state(config),
         kv_cache: new_paged_kv_cache(config),
-        segments: []segment_info{cap: config.max_context_length / config.segment_size},
+        segments: make([]segment_info, config.max_context_length / config.segment_size),
         current_segment_idx: 0,
     }
 }
 
-func compute_dynamic_position_encoding(int position, int segment_id, long_context_config config) float[] {
+func compute_dynamic_position_encoding(int position, int segment_id, long_context_config config) []float {
     int hidden_dim = 8192
     float[] encoding = math.allocate_float(hidden_dim, 0.0)
     float base = config.rope_base * math.exp_approx(float(segment_id) * 0.5)
@@ -157,7 +157,7 @@ func compute_dynamic_position_encoding(int position, int segment_id, long_contex
     encoding
 }
 
-func compute_segment_embedding(int segment_id, int hidden_dim) float[] {
+func compute_segment_embedding(int segment_id, int hidden_dim) []float {
     float[] embedding = math.allocate_float(hidden_dim, 0.0)
     float base = 10000.0
     int dim = 0
@@ -176,7 +176,7 @@ func compute_segment_embedding(int segment_id, int hidden_dim) float[] {
 
 func sliding_window_attention(float[] queries, float[] keys, float[] values,
                               int num_heads, int head_dim, int seq_len,
-                              int window_size, int current_position) float[] {
+                              int window_size, int current_position) []float {
     int hidden_dim = num_heads * head_dim
     float[] output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int effective_seq_len = math.min_int(seq_len, window_size)
@@ -271,7 +271,7 @@ func paged_kv_cache_get_block(paged_kv_cache cache, int position) kv_cache_block
 }
 
 func paged_kv_cache_attention(float[] queries, paged_kv_cache cache, int query_position,
-                              int num_heads, int head_dim, int seq_len) float[] {
+                              int num_heads, int head_dim, int seq_len) []float {
     int hidden_dim = num_heads * head_dim
     float[] output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int window_size = cache.block_size * 4
@@ -331,7 +331,7 @@ func paged_kv_cache_attention(float[] queries, paged_kv_cache cache, int query_p
 }
 
 func long_context_attention(long_context_state state, float[] queries, float[] keys, float[] values,
-                            int num_heads, int head_dim, int seq_len, int current_position) float[] {
+                            int num_heads, int head_dim, int seq_len, int current_position) []float {
     long_context_config config = state.config
     if config.use_sliding_window && !config.use_paged_kv_cache {
         return sliding_window_attention(queries, keys, values, num_heads, head_dim, seq_len,
@@ -380,7 +380,7 @@ func long_context_attention(long_context_state state, float[] queries, float[] k
 }
 
 func chunked_attention(float[] queries, float[] keys, float[] values,
-                       int num_heads, int head_dim, int seq_len, int chunk_size) float[] {
+                       int num_heads, int head_dim, int seq_len, int chunk_size) []float {
     int hidden_dim = num_heads * head_dim
     float[] output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int num_chunks = (seq_len + chunk_size - 1) / chunk_size
@@ -432,7 +432,7 @@ func chunked_attention(float[] queries, float[] keys, float[] values,
     output
 }
 
-func long_context_compute_position_ids(int start_pos, int seq_len, long_context_config config) int[] {
+func long_context_compute_position_ids(int start_pos, int seq_len, long_context_config config) []int {
     int[] position_ids = math.allocate_int(seq_len, 0)
     int i = 0
     for i < seq_len {
@@ -442,7 +442,7 @@ func long_context_compute_position_ids(int start_pos, int seq_len, long_context_
     position_ids
 }
 
-func long_context_compute_segment_ids(int start_pos, int seq_len, int segment_size) int[] {
+func long_context_compute_segment_ids(int start_pos, int seq_len, int segment_size) []int {
     int[] segment_ids = math.allocate_int(seq_len, 0)
     int i = 0
     for i < seq_len {
@@ -495,7 +495,7 @@ func long_context_reset(long_context_state state) long_context_state {
         state.kv_cache.block_mapping[i] = -1
         i = i + 1
     }
-    state.segments = []segment_info{cap: state.config.max_context_length / state.config.segment_size}
+    state.segments = make([]segment_info, state.config.max_context_length / state.config.segment_size)
     state.current_segment_idx = 0
     state
 }

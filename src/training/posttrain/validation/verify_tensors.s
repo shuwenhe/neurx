@@ -133,7 +133,7 @@ func read_tensor_sample(int[] file_bytes, string header, string tensor_name) ten
         tensor_sample missing
         missing.name = tensor_name
         missing.dtype = ""
-        missing.values = float[]{}
+        missing.values = []float{}
         missing.data_start = 0
         missing.data_end = 0
         return missing
@@ -159,8 +159,8 @@ func read_tensor_sample(int[] file_bytes, string header, string tensor_name) ten
     }
 }
 
-func decode_f32_values(int[] bytes, int start, int end) float[] {
-    float[] values = float[]{}
+func decode_f32_values(int[] bytes, int start, int end) []float {
+    float[] values = []float{}
     int i = start
     for i + 3 < end {
         values = append(values, f32_from_le_bytes(bytes, i))

@@ -57,9 +57,9 @@ func max(int a, int b) int {
     b
 }
 
-func copy_ids(int[] data) int[] {
+func copy_ids(int[] data) []int {
     int n = len(data)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -68,12 +68,12 @@ func copy_ids(int[] data) int[] {
     out
 }
 
-func extract_generated_part(int[] full_ids, int prompt_length) int[] {
+func extract_generated_part(int[] full_ids, int prompt_length) []int {
     int n = len(full_ids) - prompt_length
     if n <= 0 {
         return []
     }
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = full_ids[prompt_length + i]
@@ -107,7 +107,7 @@ func check_all_finished(int[][] sequences, int eos_id) bool {
     true
 }
 
-func append_sequence_score(float[] scores, float score) float[] {
+func append_sequence_score(float[] scores, float score) []float {
     scores = append(scores, score)
     scores
 }
@@ -153,11 +153,11 @@ func stub_next_logits(
     int step,
     int max_steps,
     int vocab_size
-) float[] {
+) []float {
     if vocab_size <= 0 {
         vocab_size = 16
     }
-    float[] logits = float[]{cap: vocab_size}
+    float[] logits = make([]float, vocab_size)
     int signature = (len(current_ids) + 1) * 97 + step * 31 + max_steps * 11
     int i = 0
     for i < len(current_ids) {
@@ -201,7 +201,7 @@ func stub_next_logits(
     logits
 }
 
-func take_generation_output(int[] prompt_ids, int[] generated_ids, bool return_full_text) int[] {
+func take_generation_output(int[] prompt_ids, int[] generated_ids, bool return_full_text) []int {
     if return_full_text {
         int[] full = copy_ids(prompt_ids)
         int i = 0
@@ -214,7 +214,7 @@ func take_generation_output(int[] prompt_ids, int[] generated_ids, bool return_f
     copy_ids(generated_ids)
 }
 
-func log_softmax(float[] logits) float[] {
+func log_softmax(float[] logits) []float {
     int n = len(logits)
     if n == 0 {
         return []
@@ -234,7 +234,7 @@ func log_softmax(float[] logits) float[] {
         i = i + 1
     }
     float log_sum_exp = neurx.inference.sampling_strategies.log_approx(sum_exp) + max_val
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     i = 0
     for i < n {
         out[i] = logits[i] - log_sum_exp
@@ -252,7 +252,7 @@ func collect_top_logprobs(float[] log_probs, int top_n) []top_logprob_candidate 
     if top_n > n {
         top_n = n
     }
-    []top_logprob_candidate out = []top_logprob_candidate{cap: top_n}
+    []top_logprob_candidate out = make([]top_logprob_candidate, top_n)
     int i = 0
     for i < top_n {
         int token_id = ranked[i]
@@ -277,7 +277,7 @@ func generate_one_sequence(
     bool finished = false
     int generated = 0
     if cfg.sampling.strategy == "beam_search" && cfg.sampling.num_beams > 1 {
-        float[][] all_logits = float[][]{cap: max_steps}
+        float[][] all_logits = floatmake([][], max_steps)
         int step = 0
         for step < max_steps {
             all_logits = append(all_logits, stub_next_logits(current_ids, cfg, step, max_steps, vocab_size))
@@ -312,8 +312,8 @@ func generate_one_sequence(
         )
     }
     int step = 0
-    float[] step_logprobs = float[]{cap: max_steps}
-    [][]top_logprob_candidate step_top_logprobs = [][]top_logprob_candidate{cap: max_steps}
+    float[] step_logprobs = make([]float, max_steps)
+    [][]top_logprob_candidate step_top_logprobs = []make([]top_logprob_candidate, max_steps)
     for step < max_steps {
         float[] raw_logits = stub_next_logits(current_ids, cfg, step, max_steps, vocab_size)
         int[] gen_part = extract_generated_part(current_ids, len(prompt_ids))
@@ -369,7 +369,7 @@ func generate_one_sequence_with_forward(
     bool finished = false
     int generated = 0
     if cfg.sampling.strategy == "beam_search" && cfg.sampling.num_beams > 1 {
-        float[][] all_logits = float[][]{cap: max_steps}
+        float[][] all_logits = floatmake([][], max_steps)
         int step = 0
         for step < max_steps {
             float[] step_logits = forward_fn(current_ids)
@@ -407,8 +407,8 @@ func generate_one_sequence_with_forward(
         )
     }
     int step = 0
-    float[] step_logprobs = float[]{cap: max_steps}
-    [][]top_logprob_candidate step_top_logprobs = [][]top_logprob_candidate{cap: max_steps}
+    float[] step_logprobs = make([]float, max_steps)
+    [][]top_logprob_candidate step_top_logprobs = []make([]top_logprob_candidate, max_steps)
     for step < max_steps {
         float[] raw_logits = forward_fn(current_ids)
         int[] gen_part = extract_generated_part(current_ids, len(prompt_ids))
@@ -457,10 +457,10 @@ func generate(
     generator_config cfg
 ) generation_result {
     int count = max(1, cfg.num_return_sequences)
-    int[][] all_sequences = int[][]{cap: count}
-    float[] all_scores = float[]{cap: count}
-    float[][] all_token_logprobs = float[][]{cap: count}
-    [][][]top_logprob_candidate all_top_logprobs = [][][]top_logprob_candidate{cap: count}
+    int[][] all_sequences = intmake([][], count)
+    float[] all_scores = make([]float, count)
+    float[][] all_token_logprobs = floatmake([][], count)
+    [][][]top_logprob_candidate all_top_logprobs = [][]make([]top_logprob_candidate, count)
     uint64 rng = cfg.sampling.seed
     bool all_finished = true
     int i = 0
@@ -499,10 +499,10 @@ func generate_with_forward(
     generator_config cfg
 ) generation_result {
     int count = max(1, cfg.num_return_sequences)
-    int[][] all_sequences = int[][]{cap: count}
-    float[] all_scores = float[]{cap: count}
-    float[][] all_token_logprobs = float[][]{cap: count}
-    [][][]top_logprob_candidate all_top_logprobs = [][][]top_logprob_candidate{cap: count}
+    int[][] all_sequences = intmake([][], count)
+    float[] all_scores = make([]float, count)
+    float[][] all_token_logprobs = floatmake([][], count)
+    [][][]top_logprob_candidate all_top_logprobs = [][]make([]top_logprob_candidate, count)
     uint64 rng = cfg.sampling.seed
     bool all_finished = true
     int i = 0

@@ -165,7 +165,7 @@ func make_capability(
 }
 
 func current_neurx_frontier_capabilities() []frontier_capability {
-    []frontier_capability caps = []frontier_capability{cap: 16}
+    []frontier_capability caps = make([]frontier_capability, 16)
     caps[0] = make_capability(
         "real_corpus_pipeline",
         "data",
@@ -376,7 +376,7 @@ func frontier_launch_decision(frontier_audit audit) string {
 }
 
 func next_frontier_p0_work(frontier_audit audit) []frontier_capability {
-    []frontier_capability work = []frontier_capability{cap: audit.total}
+    []frontier_capability work = make([]frontier_capability, audit.total)
     int out = 0
     int i = 0
     for i < audit.total {

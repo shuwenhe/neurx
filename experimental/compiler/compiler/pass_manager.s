@@ -158,7 +158,7 @@ func apply_pass(*computation_graph g, pass_type pass_kind) pass_result {
     }
 }
 
-func run_pass_pipeline(*computation_graph g, *pass_pipeline pipeline) pass_result[] {
+func run_pass_pipeline(*computation_graph g, *pass_pipeline pipeline) []pass_result {
     results = pass_result[]()
 
     for pass_cfg in pipeline.passes {

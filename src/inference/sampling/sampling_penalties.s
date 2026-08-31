@@ -3,7 +3,7 @@ func apply_repetition_penalty(
     float[] logits,
     int[] generated_ids,
     float penalty
-) float[] {
+) []float {
     if penalty == 1.0 || len(generated_ids) == 0 {
         return logits
     }
@@ -24,8 +24,8 @@ func apply_repetition_penalty(
     penalized
 }
 
-func copy_float_array(float[] arr) float[] {
-    float[] copy = float[]{cap: len(arr)}
+func copy_float_array(float[] arr) []float {
+    float[] copy = make([]float, len(arr))
     for i in 0..len(arr) {
         copy[i] = arr[i]
     }

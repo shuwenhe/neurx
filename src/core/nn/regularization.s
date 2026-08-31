@@ -66,7 +66,7 @@ func cutout_mask(float[][] data, int cut_size, float prob) float[][] {
     return data
 }
 
-func mixup_batch(float[][] x_a, float[][] x_b, float[] y_a, float[] y_b, float alpha) float[] {
+func mixup_batch(float[][] x_a, float[][] x_b, float[] y_a, float[] y_b, float alpha) []float {
     float lam = beta_random(alpha, alpha)
     int i = 0
     for i < len(x_a) {
@@ -82,13 +82,13 @@ func mixup_batch(float[][] x_a, float[][] x_b, float[] y_a, float[] y_b, float a
         y_a[i] = lam * y_a[i] + (1.0 - lam) * y_b[i]
         i = i + 1
     }
-    float[] result = float[]{cap: 1}
+    float[] result = make([]float, 1)
     result[0] = lam
     return result
 }
 
-func label_smoothing(float[] labels, int num_classes, float smoothing) float[] {
-    float[] smoothed = float[]{cap: len(labels)}
+func label_smoothing(float[] labels, int num_classes, float smoothing) []float {
+    float[] smoothed = make([]float, len(labels))
     int i = 0
     for i < len(labels) {
         int label_idx = int(labels[i])
@@ -102,11 +102,11 @@ func label_smoothing(float[] labels, int num_classes, float smoothing) float[] {
     return smoothed
 }
 
-func dropout_mask(float[] data, float p, bool training) float[] {
+func dropout_mask(float[] data, float p, bool training) []float {
     if !training {
         return data
     }
-    float[] masked = float[]{cap: len(data)}
+    float[] masked = make([]float, len(data))
     float keep_prob = 1.0 - p
     float scale = 1.0 / (keep_prob + 0.0000001)
     int i = 0

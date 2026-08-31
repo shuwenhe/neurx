@@ -46,14 +46,14 @@ func new_tool_schema(string name, string description) tool_schema {
     tool_schema {
         name:        name,
         description: description,
-        params:      []tool_param_schema{cap: 8},
+        params:      make([]tool_param_schema, 8),
         param_count: 0,
     }
 }
 
 func tool_schema_add_param(tool_schema schema, tool_param_schema param) tool_schema {
     int n = schema.param_count
-    []tool_param_schema next = []tool_param_schema{cap: n + 1}
+    []tool_param_schema next = make([]tool_param_schema, n + 1)
     int i = 0
     for i < n {
         next[i] = schema.params[i]
@@ -70,14 +70,14 @@ func tool_schema_add_param(tool_schema schema, tool_param_schema param) tool_sch
 
 func new_tool_schema_registry() tool_schema_registry {
     tool_schema_registry {
-        schemas: []tool_schema{cap: 16},
+        schemas: make([]tool_schema, 16),
         count:   0,
     }
 }
 
 func tool_schema_registry_register(tool_schema_registry reg, tool_schema schema) tool_schema_registry {
     int n = reg.count
-    []tool_schema next = []tool_schema{cap: n + 1}
+    []tool_schema next = make([]tool_schema, n + 1)
     int i = 0
     for i < n {
         next[i] = reg.schemas[i]

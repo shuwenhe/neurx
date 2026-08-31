@@ -96,8 +96,8 @@ func new_trae_moe_layer(trae_moe_config config) trae_moe_layer {
         config: config,
         router_state: new_trae_router_state(config),
         gate: new_attention_gate(config),
-        expert_weights: float[][]{cap: config.num_experts},
-        expert_biases: float[][]{cap: config.num_experts},
+        expert_weights: floatmake([][], config.num_experts),
+        expert_biases: floatmake([][], config.num_experts),
         output_weights: math.allocate_float(config.hidden_dim * config.hidden_dim, 0.0),
         output_biases: math.allocate_float(config.hidden_dim, 0.0),
     }
@@ -299,7 +299,7 @@ func trae_moe_forward(trae_moe_layer layer, float[] hidden_states, int batch_siz
     }
 }
 
-func expert_forward(float[] weights, float[] biases, float[] input, int in_dim, int out_dim) float[] {
+func expert_forward(float[] weights, float[] biases, float[] input, int in_dim, int out_dim) []float {
     float[] hidden = math.allocate_float(out_dim, 0.0)
     int i = 0
     for i < out_dim {
@@ -316,7 +316,7 @@ func expert_forward(float[] weights, float[] biases, float[] input, int in_dim, 
 }
 
 func trae_moe_backward(trae_moe_layer layer, float[] grad_output, float[] hidden_states,
-                       int batch_size, int seq_len) float[] {
+                       int batch_size, int seq_len) []float {
     int total_tokens = batch_size * seq_len
     int hidden_dim = layer.config.hidden_dim
     float[] grad_input = math.allocate_float(total_tokens * hidden_dim, 0.0)

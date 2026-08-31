@@ -146,7 +146,7 @@ func (video_processor* proc) extract_frames(video_data* vid, int32 num_frames) v
     return proc.extract_frames_uniform(vid, num_frames)
 }
 
-func (video_processor* proc) detect_scene_changes(video_data* vid) int32[] {
+func (video_processor* proc) detect_scene_changes(video_data* vid) []int32 {
     scene_changes := make(int32[])
     if vid == nil || len(vid.frames) < 2 {
         return scene_changes

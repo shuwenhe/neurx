@@ -32,15 +32,15 @@ struct parallel_sampling_result {
     bool accepted
 }
 
-func parallel_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func parallel_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
-func parallel_float_array(int capacity) float[] {
-    float[] values = float[]{cap: capacity}
+func parallel_float_array(int capacity) []float {
+    float[] values = make([]float, capacity)
     int i = 0
     for i < capacity { values[i] = 0.0; i = i + 1 }
     values

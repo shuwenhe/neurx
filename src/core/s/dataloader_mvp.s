@@ -88,7 +88,7 @@ func dataloader_state_cursor(dataloader_state state) int {
     state.cursor
 }
 
-func dataloader_state_tokens(dataloader_state state) int[] {
+func dataloader_state_tokens(dataloader_state state) []int {
     state.token_ids
 }
 
@@ -96,11 +96,11 @@ func dataloader_state_config(dataloader_state state) dataloader_config {
     state.config
 }
 
-func dataloader_batch_input_ids(dataloader_batch batch) int[] {
+func dataloader_batch_input_ids(dataloader_batch batch) []int {
     batch.input_ids
 }
 
-func dataloader_batch_target_ids(dataloader_batch batch) int[] {
+func dataloader_batch_target_ids(dataloader_batch batch) []int {
     batch.target_ids
 }
 

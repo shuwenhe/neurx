@@ -139,8 +139,8 @@ func exp_stable(float x) float {
     1.0 + x + x2/2.0 + x3/6.0 + x4/24.0 + x5/120.0 + x6/720.0
 }
 
-func zeros(int n) float[] {
-    float[] out = float[]{cap: n}
+func zeros(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out = append(out, 0.0)
@@ -149,8 +149,8 @@ func zeros(int n) float[] {
     out
 }
 
-func fill(int n, float val) float[] {
-    float[] out = float[]{cap: n}
+func fill(int n, float val) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out = append(out, val)
@@ -160,7 +160,7 @@ func fill(int n, float val) float[] {
 }
 
 func allocate_2d_tensor(int rows, int cols) float[][] {
-    float[][] t = float[][]{cap: rows}
+    float[][] t = floatmake([][], rows)
     int i = 0
     for i < rows {
         t[i] = fill(cols, 0.0)
@@ -170,7 +170,7 @@ func allocate_2d_tensor(int rows, int cols) float[][] {
 }
 
 func allocate_3d_tensor(int d1, int d2, int d3) float[][][] {
-    float[][][] t = float[][][]{cap: d1}
+    float[][][] t = floatmake([][][], d1)
     int i = 0
     for i < d1 {
         t[i] = allocate_2d_tensor(d2, d3)
@@ -532,7 +532,7 @@ func sp_layernorm_ring_reduce(
     return out
 }
 
-func ring_allreduce_sum(float[] input, sequence_parallel_config sp_cfg) float[] {
+func ring_allreduce_sum(float[] input, sequence_parallel_config sp_cfg) []float {
     int P = sp_cfg.sp_degree
     int N = len(input)
     float[] result = fill(N, 0.0)

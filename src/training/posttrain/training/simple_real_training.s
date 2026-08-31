@@ -91,8 +91,8 @@ func main() {
     int lora_a_size = lora_rank * hidden_size
     int lora_b_size = hidden_size * lora_rank
     println("[Initializing LoRA Weights]")
-    float[] lora_a = float[]{cap: lora_a_size}
-    float[] lora_b = float[]{cap: lora_b_size}
+    float[] lora_a = make([]float, lora_a_size)
+    float[] lora_b = make([]float, lora_b_size)
     int seed = 42
     int i = 0
     for i < lora_a_size {
@@ -151,7 +151,7 @@ func main() {
     println("[Saving LoRA Weights]")
     println("Output Directory: " + output_dir)
     string lora_path = output_dir + "/adapter_model.bin"
-    []byte buffer = []byte{cap: (lora_a_size + lora_b_size) * 4 + 16}
+    []byte buffer = make([]byte, (lora_a_size + lora_b_size) * 4 + 16)
     i = 0
     for i < 16 {
         buffer = append(buffer, byte(0))
@@ -178,7 +178,7 @@ func main() {
     runtime_write_binary_file(lora_path, buffer)
     println("✓ Saved LoRA weights (" + int_to_str(len(buffer)) + " bytes)")
     string config_json = "{\"lora_rank\":" + int_to_str(lora_rank) + ",\"lora_alpha\":" + float_to_str(lora_alpha, 1) + ",\"learning_rate\":" + float_to_str(learning_rate, 6) + "}"
-    []byte config_bytes = []byte{cap: len(config_json)}
+    []byte config_bytes = make([]byte, len(config_json))
     i = 0
     for i < len(config_json) {
         config_bytes = append(config_bytes, byte(config_json[i]))

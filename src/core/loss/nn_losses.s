@@ -1,8 +1,8 @@
 package neurx.loss.nn_losses
 use neurx.tensor.tensor
-func copy_int(int[] data) int[] {
+func copy_int(int[] data) []int {
     int n = len(data)
-    int[] out = int[]{cap: n}
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -100,7 +100,7 @@ func smooth_l1_loss(tensor input, tensor target, float beta) tensor {
     tensor diff = neurx.tensor.sub(input, target)
     tensor abs_diff = neurx.tensor.abs(diff)
     int n = len(abs_diff.data)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         float d = abs_diff.data[i]

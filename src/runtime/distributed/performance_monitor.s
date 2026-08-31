@@ -28,8 +28,8 @@ struct performance_monitor {
 
 func new_performance_monitor(int world_size) performance_monitor {
     performance_monitor {
-        metrics: []rank_metrics{cap: world_size},
-        comm_stats: []communication_stats{cap: 10000},
+        metrics: make([]rank_metrics, world_size),
+        comm_stats: make([]communication_stats, 10000),
         total_iterations: 0,
         communication_bottleneck_count: 0,
         average_communication_time_ms: 0.0,
@@ -90,8 +90,8 @@ func get_performance_report(performance_monitor monitor) string {
     "Performance Report"
 }
 
-func identify_optimization_opportunities(performance_monitor monitor) string[] {
-    string[] suggestions = string[]{cap: 10}
+func identify_optimization_opportunities(performance_monitor monitor) []string {
+    string[] suggestions = make([]string, 10)
     float bottleneck = analyze_communication_bottleneck(monitor)
     if bottleneck > 30.0 {
     }
@@ -99,7 +99,7 @@ func identify_optimization_opportunities(performance_monitor monitor) string[] {
 }
 
 func get_rank_utilization_distribution(performance_monitor monitor) [int]float {
-    [int]float{cap: 100}
+    make([]intfloat, 100)
 }
 
 func suggest_batch_size_adjustment(performance_monitor monitor) int {

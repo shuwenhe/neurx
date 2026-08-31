@@ -67,7 +67,7 @@ func compute_element_count(int[] shape) int {
     return count
 }
 
-func compute_strides(int[] shape) int[] {
+func compute_strides(int[] shape) []int {
     int rank = len(shape)
     int[] strides = new int[rank]
     int stride = 1

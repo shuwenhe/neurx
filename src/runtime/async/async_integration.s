@@ -192,7 +192,7 @@ func (ae async_engine*) get_or_create_stream(request_id string) stream_state* {
 	return *stream
 }
 
-func (ae async_engine*) get_stream_events(request_id string) stream_event[] {
+func (ae async_engine*) get_stream_events(request_id string) []stream_event {
 	ae.stream_mu.Lock()
 	defer ae.stream_mu.Unlock()
 	stream, exists := ae.stream_states[request_id]

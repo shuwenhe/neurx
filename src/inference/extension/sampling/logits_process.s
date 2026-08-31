@@ -52,7 +52,7 @@ func (logits_processor* processor) add_processor(processor_type type, float32 th
     processor.processors = append(processor.processors, config)
 }
 
-func (logits_processor* processor) apply_temperature(float32[] logits, float32 temperature) float32[] {
+func (logits_processor* processor) apply_temperature(float32[] logits, float32 temperature) []float32 {
     if temperature <= 0.0 {
         temperature = 1.0
     }
@@ -64,7 +64,7 @@ func (logits_processor* processor) apply_temperature(float32[] logits, float32 t
     return scaled
 }
 
-func (logits_processor* processor) apply_top_k(float32[] logits, int32 k) float32[] {
+func (logits_processor* processor) apply_top_k(float32[] logits, int32 k) []float32 {
     if k <= 0 || int32(k) >= int32(len(logits)) {
         return logits
     }
@@ -90,7 +90,7 @@ func (logits_processor* processor) apply_top_k(float32[] logits, int32 k) float3
     return result
 }
 
-func (logits_processor* processor) apply_top_p(float32[] logits, float32 top_p) float32[] {
+func (logits_processor* processor) apply_top_p(float32[] logits, float32 top_p) []float32 {
     if top_p >= 1.0 {
         return logits
     }
@@ -130,7 +130,7 @@ func (logits_processor* processor) apply_top_p(float32[] logits, float32 top_p) 
     return result
 }
 
-func (logits_processor* processor) apply_top_a(float32[] logits, float32 top_a) float32[] {
+func (logits_processor* processor) apply_top_a(float32[] logits, float32 top_a) []float32 {
     if top_a <= 0.0 {
         return logits
     }
@@ -161,7 +161,7 @@ func (logits_processor* processor) apply_top_a(float32[] logits, float32 top_a) 
     return result
 }
 
-func (logits_processor* processor) apply_min_p(float32[] logits, float32 min_p) float32[] {
+func (logits_processor* processor) apply_min_p(float32[] logits, float32 min_p) []float32 {
     if min_p <= 0.0 {
         return logits
     }
@@ -193,7 +193,7 @@ func (logits_processor* processor) apply_min_p(float32[] logits, float32 min_p) 
     return result
 }
 
-func (logits_processor* processor) apply_frequency_penalty(float32[] logits, map[int32]int32 token_counts, float32 penalty) float32[] {
+func (logits_processor* processor) apply_frequency_penalty(float32[] logits, map[int32]int32 token_counts, float32 penalty) []float32 {
     result := make(float32[])
     for i := 0; i < len(logits); i = i + 1 {
         if count, exists := token_counts[int32(i)]; exists {
@@ -209,7 +209,7 @@ func (logits_processor* processor) apply_frequency_penalty(float32[] logits, map
     return result
 }
 
-func (logits_processor* processor) apply_presence_penalty(float32[] logits, map[int32]int32 token_counts, float32 penalty) float32[] {
+func (logits_processor* processor) apply_presence_penalty(float32[] logits, map[int32]int32 token_counts, float32 penalty) []float32 {
     result := make(float32[])
     for i := 0; i < len(logits); i = i + 1 {
         if _, exists := token_counts[int32(i)]; exists {
@@ -225,7 +225,7 @@ func (logits_processor* processor) apply_presence_penalty(float32[] logits, map[
     return result
 }
 
-func (logits_processor* processor) apply_logit_bias(float32[] logits, map[int32]float32 bias_map) float32[] {
+func (logits_processor* processor) apply_logit_bias(float32[] logits, map[int32]float32 bias_map) []float32 {
     result := make(float32[])
     for i := 0; i < len(logits); i = i + 1 {
         if bias, exists := bias_map[int32(i)]; exists {
@@ -237,7 +237,7 @@ func (logits_processor* processor) apply_logit_bias(float32[] logits, map[int32]
     return result
 }
 
-func (logits_processor* processor) apply_all_processors(float32[] logits, sampling_params* params) float32[] {
+func (logits_processor* processor) apply_all_processors(float32[] logits, sampling_params* params) []float32 {
     processor.status = status_processing
     result := logits
     if params.temperature != 1.0 {

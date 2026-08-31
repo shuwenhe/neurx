@@ -61,7 +61,7 @@ func open_safetensors(string path) safe_tensor_file {
     return file
 }
 
-func load_tensor_float(safe_tensor_file file, safe_tensor_info info) float[] {
+func load_tensor_float(safe_tensor_file file, safe_tensor_info info) []float {
     float[] result
     return result
 }

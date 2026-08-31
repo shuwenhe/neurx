@@ -108,34 +108,34 @@ struct transformer_layer_adamw {
     float[] m_ffn_down_w   float[] v_ffn_down_w
 }
 
-func bk_alloc(int n) float[] {
-    float[] v = float[]{cap: n}
+func bk_alloc(int n) []float {
+    float[] v = make([]float, n)
     int i = 0
     for i < n { v[i] = 0.0; i = i + 1 }
     v
 }
 
-func bk_copy(float[] src) float[] {
+func bk_copy(float[] src) []float {
     float[] out = bk_alloc(len(src))
     int i = 0
     for i < len(src) { out[i] = src[i]; i = i + 1 }
     out
 }
 
-func bk_add_inplace(float[] a, float[] b) float[] {
+func bk_add_inplace(float[] a, float[] b) []float {
     int i = 0
     for i < len(a) { a[i] = a[i] + b[i]; i = i + 1 }
     a
 }
 
-func bk_scale(float[] v, float s) float[] {
+func bk_scale(float[] v, float s) []float {
     float[] out = bk_alloc(len(v))
     int i = 0
     for i < len(v) { out[i] = v[i] * s; i = i + 1 }
     out
 }
 
-func bk_matmul_da(float[] d_c, float[] b, int m, int k, int n) float[] {
+func bk_matmul_da(float[] d_c, float[] b, int m, int k, int n) []float {
     float[] d_a = bk_alloc(m * k)
     int i = 0
     for i < m {
@@ -155,7 +155,7 @@ func bk_matmul_da(float[] d_c, float[] b, int m, int k, int n) float[] {
     d_a
 }
 
-func bk_matmul_db(float[] a, float[] d_c, int m, int k, int n) float[] {
+func bk_matmul_db(float[] a, float[] d_c, int m, int k, int n) []float {
     float[] d_b = bk_alloc(k * n)
     int l = 0
     for l < k {
@@ -175,7 +175,7 @@ func bk_matmul_db(float[] a, float[] d_c, int m, int k, int n) float[] {
     d_b
 }
 
-func bk_matmul_t_da(float[] d_c, float[] b, int m, int k, int n) float[] {
+func bk_matmul_t_da(float[] d_c, float[] b, int m, int k, int n) []float {
     float[] d_a = bk_alloc(m * k)
     int i = 0
     for i < m {
@@ -195,7 +195,7 @@ func bk_matmul_t_da(float[] d_c, float[] b, int m, int k, int n) float[] {
     d_a
 }
 
-func bk_matmul_t_db(float[] a, float[] d_c, int m, int k, int n) float[] {
+func bk_matmul_t_db(float[] a, float[] d_c, int m, int k, int n) []float {
     float[] d_b = bk_alloc(n * k)
     int j = 0
     for j < n {
@@ -215,7 +215,7 @@ func bk_matmul_t_db(float[] a, float[] d_c, int m, int k, int n) float[] {
     d_b
 }
 
-func bk_matmul_kv_da(float[] d_c, float[] b, int m, int k, int n, int full_n) float[] {
+func bk_matmul_kv_da(float[] d_c, float[] b, int m, int k, int n, int full_n) []float {
     float[] d_a = bk_alloc(m * k)
     int i = 0
     for i < m {
@@ -235,7 +235,7 @@ func bk_matmul_kv_da(float[] d_c, float[] b, int m, int k, int n, int full_n) fl
     d_a
 }
 
-func bk_matmul_kv_db(float[] a, float[] d_c, int m, int k, int n, int full_n) float[] {
+func bk_matmul_kv_db(float[] a, float[] d_c, int m, int k, int n, int full_n) []float {
     float[] d_b = bk_alloc(k * full_n)
     int l = 0
     for l < k {
@@ -255,7 +255,7 @@ func bk_matmul_kv_db(float[] a, float[] d_c, int m, int k, int n, int full_n) fl
     d_b
 }
 
-func bk_softmax_row(float[] d_weights, float[] weights, int size) float[] {
+func bk_softmax_row(float[] d_weights, float[] weights, int size) []float {
     float dot = 0.0
     int i = 0
     for i < size { dot = dot + d_weights[i] * weights[i]; i = i + 1 }
@@ -349,7 +349,7 @@ func transformer_layer_forward_cached(
         }
         b = b + 1
     }
-    []gpt_sdpa_cache sdpa_caches = []gpt_sdpa_cache{cap: batch_size}
+    []gpt_sdpa_cache sdpa_caches = make([]gpt_sdpa_cache, batch_size)
     float[] attn_out = bk_alloc(total * D)
     b = 0
     for b < batch_size {
@@ -420,7 +420,7 @@ func transformer_layer_forward_cached(
 func bk_compute_attn_weights(
     float[] q, float[] k,
     int seq_len, int nh, int nkv, int hd
-) float[] {
+) []float {
     float[] weights = bk_alloc(nh * seq_len * seq_len)
     float scale = 1.0 / gpt_sqrt(hd * 1.0)
     float NEG_INF = -1000000.0
@@ -466,7 +466,7 @@ func gpt_forward_cached(
     int V = model.vocab_size
     int total = batch_size * seq_len
     float[] emb = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, D)
-    []transformer_layer_cache layer_caches = []transformer_layer_cache{cap: model.n_layer}
+    []transformer_layer_cache layer_caches = make([]transformer_layer_cache, model.n_layer)
     float[] hidden = gpt_copy(emb)
     int l = 0
     for l < model.n_layer {
@@ -502,7 +502,7 @@ func gpt_ce_backward(
     int[] targets,
     int total_tokens,
     int vocab_size
-) float[] {
+) []float {
     float[] d_logits = bk_alloc(total_tokens * vocab_size)
     int count = 0
     int i = 0
@@ -659,7 +659,7 @@ func bk_causal_sdpa(
     sdpa_bk_result { d_q: d_q, d_k: d_k, d_v: d_v }
 }
 
-func bk_rope_q(float[] d_q_rope, int batch_size, int seq_len, int nh, int hd, int D, float[] freqs) float[] {
+func bk_rope_q(float[] d_q_rope, int batch_size, int seq_len, int nh, int hd, int D, float[] freqs) []float {
     float[] d_q = gpt_copy(d_q_rope)
     int pair_dim = hd / 2
     int b = 0
@@ -690,7 +690,7 @@ func bk_rope_q(float[] d_q_rope, int batch_size, int seq_len, int nh, int hd, in
     d_q
 }
 
-func bk_rope_k(float[] d_k_rope, int batch_size, int seq_len, int nkv, int hd, int kv_d, float[] freqs) float[] {
+func bk_rope_k(float[] d_k_rope, int batch_size, int seq_len, int nkv, int hd, int kv_d, float[] freqs) []float {
     float[] d_k = gpt_copy(d_k_rope)
     int pair_dim = hd / 2
     int b = 0
@@ -842,7 +842,7 @@ func model_backward
     float[] hidden_before_norm = gpt_add(last_cache.h_attn, last_cache.ffn_out)
     float[] d_hidden
     (d_hidden, d_final_gamma) = bk_rmsn(model.final_norm, d_final_normed, hidden_before_norm, fc.batch_size, fc.seq_len)
-    []transformer_layer_grads layer_grads = []transformer_layer_grads{cap: model.n_layer}
+    []transformer_layer_grads layer_grads = make([]transformer_layer_grads, model.n_layer)
     int l = model.n_layer - 1
     for l >= 0 {
         transformer_layer layer = transformer_layer_at(model.layers, l)
@@ -885,7 +885,7 @@ func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta
     int V = model.vocab_size
     int B = model.block_size
     int nl = model.n_layer
-    []transformer_layer_adamw layer_states = []transformer_layer_adamw{cap: nl}
+    []transformer_layer_adamw layer_states = make([]transformer_layer_adamw, nl)
     int l = 0
     for l < nl {
         transformer_layer layer = transformer_layer_at(model.layers, l)
@@ -915,7 +915,7 @@ func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta
     }
 }
 
-func adamw_update_vec(float[] param, float[] grad, float[] m, float[] v, int step, float lr, float b1, float b2, float eps, float wd) float[] {
+func adamw_update_vec(float[] param, float[] grad, float[] m, float[] v, int step, float lr, float b1, float b2, float eps, float wd) []float {
     float bc1 = 1.0 - bk_pow(b1, step)
     float bc2 = 1.0 - bk_pow(b2, step)
     int n = len(param)

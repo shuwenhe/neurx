@@ -59,8 +59,8 @@ struct production_admission_result {
     string error_message
 }
 
-func production_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func production_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int index = 0
     for index < capacity { values[index] = 0; index = index + 1 }
     values

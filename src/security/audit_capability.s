@@ -34,8 +34,8 @@ struct audit_manager {
 }
 
 func (audit_manager* am) init(int max_log_size) (int, string) {
-    am.log_entries = audit_log_entry[]{}
-    am.ruleset.rules = audit_rule[]{}
+    am.log_entries = []audit_log_entry{}
+    am.ruleset.rules = []audit_rule{}
     am.ruleset.max_rules = 1024
     am.max_log_size = max_log_size
     am.log_count = 0
@@ -111,7 +111,7 @@ func (audit_manager* am) log_event(int pid, int uid, int event_type, string even
 }
 
 func (audit_manager am) query_logs(int event_type) (audit_log_entry[], string) {
-    matching_logs := audit_log_entry[]{}
+    matching_logs := []audit_log_entry{}
     i := 0
     for i < len(am.log_entries) {
         entry := am.log_entries[i]
@@ -158,7 +158,7 @@ struct capability_manager {
 }
 
 func (capability_manager* capm) init() (int, string) {
-    capm.process_caps = process_capabilities[]{}
+    capm.process_caps = []process_capabilities{}
     capm.next_cap_id = 0
     return 0, ""
 }
@@ -181,9 +181,9 @@ func (capability_manager* capm) add_capability_to_process(int pid, int cap_id) (
     }
     new_proc_cap := process_capabilities{
         pid: pid,
-        effective_caps: capability[]{},
-        permitted_caps: capability[]{},
-        inheritable_caps: capability[]{}
+        effective_caps: []capability{},
+        permitted_caps: []capability{},
+        inheritable_caps: []capability{}
     }
     cap := capability{
         cap_id: cap_id,

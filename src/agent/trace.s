@@ -32,16 +32,16 @@ func new_agent_trace_state() agent_trace_state {
 
 func agent_trace_append(agent_trace_state state, int step, string task, string input, string action, string observation, string active_skill, string tool_name, int timeout_ms, int retries, bool ok) agent_trace_state {
     int size = len(state.steps)
-    int[] steps = int[]{cap: size + 1}
-    string[] tasks = string[]{cap: size + 1}
-    string[] inputs = string[]{cap: size + 1}
-    string[] actions = string[]{cap: size + 1}
-    string[] observations = string[]{cap: size + 1}
-    string[] active_skills = string[]{cap: size + 1}
-    string[] tool_names = string[]{cap: size + 1}
-    int[] tool_timeout_ms = int[]{cap: size + 1}
-    int[] tool_retries = int[]{cap: size + 1}
-    bool[] ok_flags = bool[]{cap: size + 1}
+    int[] steps = make([]int, size + 1)
+    string[] tasks = make([]string, size + 1)
+    string[] inputs = make([]string, size + 1)
+    string[] actions = make([]string, size + 1)
+    string[] observations = make([]string, size + 1)
+    string[] active_skills = make([]string, size + 1)
+    string[] tool_names = make([]string, size + 1)
+    int[] tool_timeout_ms = make([]int, size + 1)
+    int[] tool_retries = make([]int, size + 1)
+    bool[] ok_flags = make([]bool, size + 1)
     int i = 0
     for i < size {
         steps[i] = state.steps[i]
@@ -181,16 +181,16 @@ func agent_trace_window(agent_trace_state state, int max_entries) agent_trace_st
         return state
     }
     int start = size - keep
-    int[] steps = int[]{cap: keep}
-    string[] tasks = string[]{cap: keep}
-    string[] inputs = string[]{cap: keep}
-    string[] actions = string[]{cap: keep}
-    string[] observations = string[]{cap: keep}
-    string[] active_skills = string[]{cap: keep}
-    string[] tool_names = string[]{cap: keep}
-    int[] tool_timeout_ms = int[]{cap: keep}
-    int[] tool_retries = int[]{cap: keep}
-    bool[] ok_flags = bool[]{cap: keep}
+    int[] steps = make([]int, keep)
+    string[] tasks = make([]string, keep)
+    string[] inputs = make([]string, keep)
+    string[] actions = make([]string, keep)
+    string[] observations = make([]string, keep)
+    string[] active_skills = make([]string, keep)
+    string[] tool_names = make([]string, keep)
+    int[] tool_timeout_ms = make([]int, keep)
+    int[] tool_retries = make([]int, keep)
+    bool[] ok_flags = make([]bool, keep)
     int i = 0
     for i < keep {
         steps[i] = state.steps[start + i]
@@ -253,7 +253,7 @@ func agent_trace_ok_rate(agent_trace_state state) float {
     float(ok_count) / float(size)
 }
 
-func agent_trace_filter_task_obs(agent_trace_state state, string task) string[] {
+func agent_trace_filter_task_obs(agent_trace_state state, string task) []string {
     int count = 0
     int i = 0
     for i < len(state.tasks) {
@@ -262,7 +262,7 @@ func agent_trace_filter_task_obs(agent_trace_state state, string task) string[] 
         }
         i = i + 1
     }
-    string[] out = string[]{cap: count}
+    string[] out = make([]string, count)
     int wi = 0
     i = 0
     for i < len(state.tasks) {

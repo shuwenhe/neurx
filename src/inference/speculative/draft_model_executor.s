@@ -57,7 +57,7 @@ func initialize_draft_embeddings(draft_model_executor executor, int vocab_size, 
     updated := executor
     i := 0
     for i < vocab_size {
-        embedding := float[]{}
+        embedding := []float{}
         j := 0
         for j < embed_dim {
             embedding = append(embedding, 0.01)
@@ -73,7 +73,7 @@ func initialize_draft_layers(draft_model_executor executor, int num_layers, int 
     updated := executor
     i := 0
     for i < num_layers {
-        layer_weight := float[]{}
+        layer_weight := []float{}
         j := 0
         for j < hidden_dim * hidden_dim / 8 {
             layer_weight = append(layer_weight, 0.01)
@@ -85,16 +85,16 @@ func initialize_draft_layers(draft_model_executor executor, int num_layers, int 
     updated
 }
 
-func draft_embedding_lookup(draft_model_executor executor, int token_id) float[] {
+func draft_embedding_lookup(draft_model_executor executor, int token_id) []float {
     if token_id >= 0 && token_id < executor.embeddings.len {
         executor.embeddings[token_id]
     } else {
-        float[]{}
+        []float{}
     }
 }
 
-func draft_layer_forward(float[] input, float[] layer_weight, int hidden_dim) float[] {
-    output := float[]{}
+func draft_layer_forward(float[] input, float[] layer_weight, int hidden_dim) []float {
+    output := []float{}
     i := 0
     for i < hidden_dim {
         val := 0.0
@@ -112,8 +112,8 @@ func draft_layer_forward(float[] input, float[] layer_weight, int hidden_dim) fl
     output
 }
 
-func draft_apply_activation(float[] hidden_states) float[] {
-    activated := float[]{}
+func draft_apply_activation(float[] hidden_states) []float {
+    activated := []float{}
     i := 0
     for i < hidden_states.len {
         x := hidden_states[i]
@@ -127,7 +127,7 @@ func draft_apply_activation(float[] hidden_states) float[] {
     activated
 }
 
-func draft_normalize(float[] hidden_states) float[] {
+func draft_normalize(float[] hidden_states) []float {
     mean := 0.0
     i := 0
     for i < hidden_states.len {
@@ -147,7 +147,7 @@ func draft_normalize(float[] hidden_states) float[] {
     if hidden_states.len > 0 {
         variance = variance / (hidden_states.len as float)
     }
-    normalized := float[]{}
+    normalized := []float{}
     i = 0
     for i < hidden_states.len {
         normalized = append(normalized, (hidden_states[i] - mean) / (1e-5 + (variance ^ 0.5)))
@@ -156,10 +156,10 @@ func draft_normalize(float[] hidden_states) float[] {
     normalized
 }
 
-func draft_forward_single(draft_model_executor executor, int token_id) float[] {
+func draft_forward_single(draft_model_executor executor, int token_id) []float {
     hidden := draft_embedding_lookup(executor, token_id)
     if hidden.len == 0 {
-        return float[]{}
+        return []float{}
     }
     i := 0
     for i < executor.config.num_layers && i < executor.layer_weights.len {
@@ -171,8 +171,8 @@ func draft_forward_single(draft_model_executor executor, int token_id) float[] {
     hidden
 }
 
-func draft_output_logits(draft_model_executor executor, float[] hidden_states) float[] {
-    logits := float[]{}
+func draft_output_logits(draft_model_executor executor, float[] hidden_states) []float {
+    logits := []float{}
     i := 0
     for i < executor.config.vocab_size {
         score := 0.0

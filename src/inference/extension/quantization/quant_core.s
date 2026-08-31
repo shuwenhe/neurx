@@ -212,7 +212,7 @@ func quantize_tensor(float[] values, quantization_config config) quantization_re
     quantize_int4_groupwise(values, config.group_size)
 }
 
-func dequantize_tensor(quantized_tensor tensor) float[] {
+func dequantize_tensor(quantized_tensor tensor) []float {
     float[] output = []
     if tensor.element_count <= 0 || len(tensor.scales) == 0 { return output }
     if tensor.quant_type == quant_type_int8() {

@@ -149,7 +149,7 @@ func generate_request_id(int32 counter) string {
     return "req_" + int32_to_string(counter)
 }
 
-func tokenize_prompt(string prompt) int32[] {
+func tokenize_prompt(string prompt) []int32 {
     tokens := make(int32[])
     for i := 0; i < len(prompt); i = i + 1 {
         tokens = append(tokens, int32(prompt[i]))

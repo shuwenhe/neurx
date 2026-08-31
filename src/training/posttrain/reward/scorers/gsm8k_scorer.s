@@ -90,7 +90,7 @@ func extract_leading_number(string text) string {
     return result
 }
 
-func extract_all_numbers(string text) string[] {
+func extract_all_numbers(string text) []string {
     string[] numbers = make(string[], 0)
     int text_len = len(text)
     string current = ""

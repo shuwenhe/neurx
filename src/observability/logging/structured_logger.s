@@ -137,7 +137,7 @@ func (structured_logger* s) set_min_level(level log_level) {
 	s.min_level = level
 }
 
-func (structured_logger* s) get_entries() log_entry[] {
+func (structured_logger* s) get_entries() []log_entry {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	result := make(log_entry[], 0, len(s.entries))

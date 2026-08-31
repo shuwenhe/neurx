@@ -43,7 +43,7 @@ func softmax_backward(
     float[] input_grad,
     float[] softmax_output,
     int seq_len
-) float[] {
+) []float {
     float[] output_grad = allocate_vector(seq_len, 0.0)
     float sum_grad_softmax = 0.0
     int i = 0
@@ -198,7 +198,7 @@ func attention_backward(
     return grads
 }
 
-func slice_row(float[] matrix, int row_start, int row_len) float[] {
+func slice_row(float[] matrix, int row_start, int row_len) []float {
     float[] row = allocate_vector(row_len, 0.0)
     int i = 0
     for i < row_len {
@@ -208,7 +208,7 @@ func slice_row(float[] matrix, int row_start, int row_len) float[] {
     return row
 }
 
-func matrix_multiply_transpose(float[] a, float[] b, int m, int k, int n) float[] {
+func matrix_multiply_transpose(float[] a, float[] b, int m, int k, int n) []float {
     float[] result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
@@ -230,7 +230,7 @@ func matrix_multiply_transpose(float[] a, float[] b, int m, int k, int n) float[
     return result
 }
 
-func matrix_multiply_transpose_lhs(float[] a, float[] b, int m, int k, int n) float[] {
+func matrix_multiply_transpose_lhs(float[] a, float[] b, int m, int k, int n) []float {
     float[] result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
@@ -252,7 +252,7 @@ func matrix_multiply_transpose_lhs(float[] a, float[] b, int m, int k, int n) fl
     return result
 }
 
-func reshape_for_heads(float[] x, int seq_len, int num_heads, int head_dim) float[] {
+func reshape_for_heads(float[] x, int seq_len, int num_heads, int head_dim) []float {
     int size = seq_len * num_heads * head_dim
     float[] reshaped = allocate_vector(size, 0.0)
     int i = 0
@@ -263,7 +263,7 @@ func reshape_for_heads(float[] x, int seq_len, int num_heads, int head_dim) floa
     return reshaped
 }
 
-func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) float[] {
+func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) []float {
     int hidden_dim = num_heads * head_dim
     int size = seq_len * hidden_dim
     float[] reshaped = allocate_vector(size, 0.0)
@@ -275,8 +275,8 @@ func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) flo
     return reshaped
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v = append(v, init_val)

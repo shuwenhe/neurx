@@ -73,8 +73,8 @@ func cpu_exp(float value) float {
     cpu_exp_positive(bounded)
 }
 
-func cpu_rms_norm(float[] input) float[] {
-    float[] output = float[]{cap: len(input)}
+func cpu_rms_norm(float[] input) []float {
+    float[] output = make([]float, len(input))
     float squares = 0.0
     int i = 0
     for i < len(input) { squares = squares + input[i] * input[i]; i = i + 1 }
@@ -84,9 +84,9 @@ func cpu_rms_norm(float[] input) float[] {
     output
 }
 
-func hf_rms_norm(float[] input, float[] weight, float epsilon) float[] {
-    if len(input) != len(weight) { return float[]{} }
-    float[] output = float[]{cap: len(input)}
+func hf_rms_norm(float[] input, float[] weight, float epsilon) []float {
+    if len(input) != len(weight) { return []float{} }
+    float[] output = make([]float, len(input))
     float squares = 0.0
     int i = 0
     for i < len(input) { squares = squares + input[i] * input[i]; i = i + 1 }
@@ -96,9 +96,9 @@ func hf_rms_norm(float[] input, float[] weight, float epsilon) float[] {
     output
 }
 
-func hf_matvec(float[] weight, int rows, int columns, float[] input) float[] {
-    if len(weight) != rows * columns || len(input) != columns { return float[]{} }
-    float[] output = float[]{cap: rows}
+func hf_matvec(float[] weight, int rows, int columns, float[] input) []float {
+    if len(weight) != rows * columns || len(input) != columns { return []float{} }
+    float[] output = make([]float, rows)
     int row = 0
     for row < rows {
         float value = 0.0
@@ -110,8 +110,8 @@ func hf_matvec(float[] weight, int rows, int columns, float[] input) float[] {
     output
 }
 
-func hf_rope(float[] input, int heads, int head_dim, int position, float theta) float[] {
-    float[] output = float[]{cap: len(input)}
+func hf_rope(float[] input, int heads, int head_dim, int position, float theta) []float {
+    float[] output = make([]float, len(input))
     int i = 0
     for i < len(input) { output[i] = input[i]; i = i + 1 }
     int head = 0
@@ -138,7 +138,7 @@ func hf_rope(float[] input, int heads, int head_dim, int position, float theta) 
 }
 
 func new_hf_kv_cache(int capacity, int kv_width) hf_kv_cache {
-    hf_kv_cache { keys: float[]{cap: capacity * kv_width}, values: float[]{cap: capacity * kv_width}, length: 0, capacity: capacity, kv_width: kv_width }
+    hf_kv_cache { keys: make([]float, capacity * kv_width), values: make([]float, capacity * kv_width), length: 0, capacity: capacity, kv_width: kv_width }
 }
 
 func hf_silu(float value) float {
@@ -160,12 +160,12 @@ func hf_cpu_layer(hf_cpu_config config, hf_layer_weights weights, float[] input,
     int i = 0
     for i < kv_width { cache.keys[cache.length * kv_width + i] = key[i]; cache.values[cache.length * kv_width + i] = value[i]; i = i + 1 }
     cache.length = cache.length + 1
-    float[] attended = float[]{cap: config.attention_heads * config.head_dim}
+    float[] attended = make([]float, config.attention_heads * config.head_dim)
     int group_size = config.attention_heads / config.kv_heads
     int head = 0
     for head < config.attention_heads {
         int kv_head = head / group_size
-        float[] scores = float[]{cap: cache.length}
+        float[] scores = make([]float, cache.length)
         float maximum = -1000000.0
         int token = 0
         for token < cache.length {
@@ -194,7 +194,7 @@ func hf_cpu_layer(hf_cpu_config config, hf_layer_weights weights, float[] input,
         head = head + 1
     }
     float[] projected = hf_matvec(weights.o_proj, config.hidden_size, config.attention_heads * config.head_dim, attended)
-    float[] residual = float[]{cap: config.hidden_size}
+    float[] residual = make([]float, config.hidden_size)
     i = 0
     for i < config.hidden_size { residual[i] = input[i] + projected[i]; i = i + 1 }
     normalized = hf_rms_norm(residual, weights.post_norm, config.rms_epsilon)
@@ -282,9 +282,9 @@ func hf_forward_token(hf_model_weights model, int token_id, float[] cache_keys, 
     hf_layer_result { ok: true, hidden: hidden, cache: empty_cache, error_code: "" }
 }
 
-func hf_float_slice(float[] values, int offset, int count) float[] {
-    if offset < 0 || count < 0 || offset + count > len(values) { return float[]{} }
-    float[] output = float[]{cap: count}
+func hf_float_slice(float[] values, int offset, int count) []float {
+    if offset < 0 || count < 0 || offset + count > len(values) { return []float{} }
+    float[] output = make([]float, count)
     int i = 0
     for i < count { output[i] = values[offset + i]; i = i + 1 }
     output
@@ -299,8 +299,8 @@ func hf_generate_until(hf_model_weights model, int[] prompt_tokens, int maximum_
     if !model.valid || len(prompt_tokens) == 0 || maximum_new_tokens <= 0 { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: "invalid_generation_input" } }
     int capacity = len(prompt_tokens) + maximum_new_tokens
     int cache_elements = model.config.layers * capacity * model.config.kv_heads * model.config.head_dim
-    float[] cache_keys = float[]{cap: cache_elements}
-    float[] cache_values = float[]{cap: cache_elements}
+    float[] cache_keys = make([]float, cache_elements)
+    float[] cache_values = make([]float, cache_elements)
     hf_kv_cache empty_cache = hf_kv_cache { keys: [], values: [], length: 0, capacity: 0, kv_width: 0 }
     hf_layer_result state = hf_layer_result { ok: false, hidden: [], cache: empty_cache, error_code: "empty_prefill" }
     int position = 0
@@ -309,7 +309,7 @@ func hf_generate_until(hf_model_weights model, int[] prompt_tokens, int maximum_
         if !state.ok { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: state.error_code } }
         position = position + 1
     }
-    int[] generated = int[]{cap: maximum_new_tokens}
+    int[] generated = make([]int, maximum_new_tokens)
     int step = 0
     for step < maximum_new_tokens {
         int next_token = hf_argmax_logits(model, state.hidden)
@@ -317,7 +317,7 @@ func hf_generate_until(hf_model_weights model, int[] prompt_tokens, int maximum_
         generated[step] = next_token
         step = step + 1
         if eos_id >= 0 && next_token == eos_id {
-            int[] stopped = int[]{cap: step}
+            int[] stopped = make([]int, step)
             int i = 0
             for i < step { stopped[i] = generated[i]; i = i + 1 }
             return hf_generation_result { ok: true, token_ids: stopped, eos_reached: true, finish_reason: "stop", error_code: "" }
@@ -335,10 +335,10 @@ func hf_generate(hf_model_weights model, int[] prompt_tokens, int maximum_new_to
     hf_generate_until(model, prompt_tokens, maximum_new_tokens, -1)
 }
 
-func cpu_reference_mlp(float[] input) float[] {
+func cpu_reference_mlp(float[] input) []float {
     int width = len(input)
-    float[] up = float[]{cap: width}
-    float[] output = float[]{cap: width}
+    float[] up = make([]float, width)
+    float[] output = make([]float, width)
     int row = 0
     for row < width {
         float value = 0.0
@@ -369,20 +369,20 @@ func cpu_reference_mlp(float[] input) float[] {
     output
 }
 
-func cpu_prefill_hidden(safetensors_embedding embedding, int[] token_ids, int token_count) float[] {
+func cpu_prefill_hidden(safetensors_embedding embedding, int[] token_ids, int token_count) []float {
     int width = embedding.columns
-    float[] queries = float[]{cap: token_count * width}
+    float[] queries = make([]float, token_count * width)
     int token = 0
     for token < token_count {
         embedding_lookup_result row = lookup_f32_embedding(embedding, token_ids[token])
-        if !row.ok { return float[]{} }
+        if !row.ok { return []float{} }
         float[] normalized = cpu_rms_norm(row.values)
         int column = 0
         for column < width { queries[token * width + column] = normalized[column]; column = column + 1 }
         token = token + 1
     }
 
-    float[] scores = float[]{cap: token_count}
+    float[] scores = make([]float, token_count)
     float maximum = -1000000.0
     token = 0
     for token < token_count {
@@ -401,7 +401,7 @@ func cpu_prefill_hidden(safetensors_embedding embedding, int[] token_ids, int to
     float denominator = 0.0
     token = 0
     for token < token_count { scores[token] = cpu_exp(scores[token] - maximum); denominator = denominator + scores[token]; token = token + 1 }
-    float[] attention = float[]{cap: width}
+    float[] attention = make([]float, width)
     int column = 0
     for column < width {
         float value = 0.0
@@ -412,7 +412,7 @@ func cpu_prefill_hidden(safetensors_embedding embedding, int[] token_ids, int to
     }
 
     embedding_lookup_result residual_row = lookup_f32_embedding(embedding, token_ids[token_count - 1])
-    float[] residual = float[]{cap: width}
+    float[] residual = make([]float, width)
     column = 0
     for column < width { residual[column] = residual_row.values[column] + attention[column]; column = column + 1 }
     float[] mlp = cpu_reference_mlp(cpu_rms_norm(residual))
@@ -443,7 +443,7 @@ func cpu_transformer_prefill_decode(safetensors_embedding embedding, int[] promp
     int steps = decode_steps
     if steps <= 0 { return cpu_transformer_result { ok: false, next_token: -1, generated_tokens: 0, last_logit: 0.0, error_code: "invalid_decode_steps" } }
     if steps > 8 { steps = 8 }
-    int[] context = int[]{cap: len(prompt_tokens) + steps}
+    int[] context = make([]int, len(prompt_tokens) + steps)
     int i = 0
     for i < len(prompt_tokens) { context[i] = prompt_tokens[i]; i = i + 1 }
     int count = len(prompt_tokens)

@@ -155,7 +155,7 @@ func decode_token(int token_id) string {
     return result
 }
 
-func generate_tokens(int input_hash, int num_tokens) int[] {
+func generate_tokens(int input_hash, int num_tokens) []int {
     int[] tokens = make(int[], 0)
     int seed = input_hash + 1337
     int i = 0

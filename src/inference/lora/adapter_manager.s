@@ -44,8 +44,8 @@ func new_lora_adapter_manager(int max_cache_size_mb) lora_adapter_manager {
         cache: map[string]lora_cache_entry{},
         max_cache_size_mb: max_cache_size_mb,
         current_cache_used_mb: 0,
-        loaded_adapters: string[]{},
-        pinned_adapters: string[]{},
+        loaded_adapters: []string{},
+        pinned_adapters: []string{},
         active_adapter_id: "",
         cache_hits: 0,
         cache_misses: 0,
@@ -84,7 +84,7 @@ func compute_lora_output(
     lora_weights weights,
     int input_dim,
     int batch_seq_len
-) float[] {
+) []float {
     int rank = weights.rank
     int output_dim = len(weights.lora_b) / rank
     if output_dim <= 0 {
@@ -103,7 +103,7 @@ func compute_lora_output(
 func apply_lora_to_output(
     float[] original_output,
     float[] lora_output
-) float[] {
+) []float {
     float[] result = make(float[], len(original_output))
     int i = 0
     for i < len(original_output) {
@@ -123,7 +123,7 @@ func matrix_mult(
     int m,
     int k,
     int n
-) float[] {
+) []float {
     float[] result = make(float[], m * n)
     int i = 0
     for i < m {
@@ -312,8 +312,8 @@ func get_timestamp() int64 {
     return 0
 }
 
-func remove_string(string[] arr, string val) string[] {
-    string[] result = string[]{}
+func remove_string(string[] arr, string val) []string {
+    string[] result = []string{}
     int i = 0
     for i < len(arr) {
         if arr[i] != val {
@@ -324,7 +324,7 @@ func remove_string(string[] arr, string val) string[] {
     return result
 }
 
-func append(string[] arr, string val) string[] {
+func append(string[] arr, string val) []string {
     string[] new_arr = make(string[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
@@ -355,8 +355,8 @@ func (lora_adapter_manager* mgr) switch_adapter(adapter_id string) bool {
 func (lora_adapter_manager* mgr) get_active_adapter() lora_weights {
     if len(mgr.active_adapter_id) == 0 {
         return lora_weights{
-            lora_a: float[]{},
-            lora_b: float[]{},
+            lora_a: []float{},
+            lora_b: []float{},
             scaling: 0.0,
             rank: 0,
         }
@@ -369,7 +369,7 @@ func (lora_adapter_manager* mgr) merge_adapter_to_base_weights(
     string adapter_id,
     int input_dim,
     int output_dim
-) float[] {
+) []float {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return base_weights
     }
@@ -389,7 +389,7 @@ func (lora_adapter_manager* mgr) merge_adapter_to_base_weights(
     return merged
 }
 
-func transpose(float[] matrix, int rows, int cols) float[] {
+func transpose(float[] matrix, int rows, int cols) []float {
     float[] result = make(float[], rows * cols)
     int i = 0
     for i < rows {
@@ -409,7 +409,7 @@ func (lora_adapter_manager* mgr) merge_multiple_adapters(
     float[] weights_per_adapter,
     int input_dim,
     int output_dim
-) float[] {
+) []float {
     float[] result = make(float[], len(base_weights))
     int i = 0
     for i < len(base_weights) {
@@ -441,7 +441,7 @@ func (lora_adapter_manager* mgr) unmerge_adapter_from_weights(
     float[] base_weights,
     int input_dim,
     int output_dim
-) float[] {
+) []float {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return merged_weights
     }
@@ -495,7 +495,7 @@ func (lora_adapter_manager* mgr) get_memory_stats() map[string]float {
     return stats
 }
 
-func (lora_adapter_manager* mgr) list_loaded_adapters() string[] {
+func (lora_adapter_manager* mgr) list_loaded_adapters() []string {
     return mgr.loaded_adapters
 }
 

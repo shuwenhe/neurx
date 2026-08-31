@@ -131,7 +131,7 @@ func (computation_graph* g) is_valid() bool {
     true
 }
 
-func (computation_graph* g) find_producers(int value_id) operation[] {
+func (computation_graph* g) find_producers(int value_id) []operation {
     producers = operation[]()
     for op in g.operations {
         for output_id in op.output_ids {
@@ -143,7 +143,7 @@ func (computation_graph* g) find_producers(int value_id) operation[] {
     producers
 }
 
-func (computation_graph* g) find_consumers(int value_id) operation[] {
+func (computation_graph* g) find_consumers(int value_id) []operation {
     consumers = operation[]()
     for op in g.operations {
         for input_id in op.input_ids {
@@ -155,7 +155,7 @@ func (computation_graph* g) find_consumers(int value_id) operation[] {
     consumers
 }
 
-func (computation_graph* g) topological_sort() int[] {
+func (computation_graph* g) topological_sort() []int {
     sorted_ops = int[]()
     in_degree = new int[len(g.operations)]
     for i in range(len(g.operations)) {

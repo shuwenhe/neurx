@@ -26,7 +26,7 @@ struct optimizer {
 }
 
 func copy_tensors([]tensor values) []tensor {
-    []tensor out = []tensor{cap: len(values)}
+    []tensor out = make([]tensor, len(values))
     int i = 0
     for i < len(values) {
         out[i] = neurx.tensor.clone(values[i])
@@ -35,8 +35,8 @@ func copy_tensors([]tensor values) []tensor {
     return out
 }
 
-func copy_float(float[] data) float[] {
-    float[] out = float[]{cap: len(data)}
+func copy_float(float[] data) []float {
+    float[] out = make([]float, len(data))
     int i = 0
     for i < len(data) {
         out[i] = data[i]
@@ -45,8 +45,8 @@ func copy_float(float[] data) float[] {
     return out
 }
 
-func copy_int(int[] data) int[] {
-    int[] out = int[]{cap: len(data)}
+func copy_int(int[] data) []int {
+    int[] out = make([]int, len(data))
     int i = 0
     for i < len(data) {
         out[i] = data[i]
@@ -57,7 +57,7 @@ func copy_int(int[] data) int[] {
 
 func optimizer_zero_moment(tensor value) tensor {
     int n = len(value.data)
-    float[] data = float[]{cap: n}
+    float[] data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = 0.0
@@ -84,7 +84,7 @@ func copy_param_group(optimizer_param_group group) optimizer_param_group {
 }
 
 func copy_param_groups([]optimizer_param_group groups) []optimizer_param_group {
-    []optimizer_param_group out = []optimizer_param_group{cap: len(groups)}
+    []optimizer_param_group out = make([]optimizer_param_group, len(groups))
     int i = 0
     for i < len(groups) {
         out[i] = copy_param_group(groups[i])
@@ -97,7 +97,7 @@ func new_optimizer() optimizer {
     return optimizer {
         kind: "none",
         step: 0,
-        param_groups: []optimizer_param_group{cap: 0},
+        param_groups: make([]optimizer_param_group, 0),
         scheduler: new_lr_scheduler(0.0),
         has_scheduler: false,
     }
@@ -105,11 +105,11 @@ func new_optimizer() optimizer {
 
 func optimizer_make_group([]tensor params, float lr, float weight_decay, float beta1, float beta2, float eps, string kind) optimizer_param_group {
     int n = len(params)
-    []tensor first_moments = []tensor{cap: n}
-    []tensor second_moments = []tensor{cap: n}
-    int[] param_steps = int[]{cap: n}
-    float[] beta1_pows = float[]{cap: n}
-    float[] beta2_pows = float[]{cap: n}
+    []tensor first_moments = make([]tensor, n)
+    []tensor second_moments = make([]tensor, n)
+    int[] param_steps = make([]int, n)
+    float[] beta1_pows = make([]float, n)
+    float[] beta2_pows = make([]float, n)
     int i = 0
     for i < n {
         first_moments[i] = optimizer_zero_moment(params[i])

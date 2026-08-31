@@ -106,7 +106,7 @@ func (ten_thousand_gpu_coordinator* coordinator) training_loop_iteration(
     float[] targets
 ) (float, bool) {
     if coordinator.recovery_manager.is_recovering() {
-        success, msg := coordinator.recovery_manager.execute_recovery_steps(batch_input, float[]{}, coordinator.config.tp_size, coordinator.config.pp_size, coordinator.config.dp_size)
+        success, msg := coordinator.recovery_manager.execute_recovery_steps(batch_input, []float{}, coordinator.config.tp_size, coordinator.config.pp_size, coordinator.config.dp_size)
         if !success {
             return 0.0, false
         }
@@ -126,8 +126,8 @@ func (ten_thousand_gpu_coordinator* coordinator) training_loop_iteration(
         coordinator.recovery_manager.save_async_checkpoint(
             coordinator.current_global_step,
             batch_input,
-            float[]{},
-            int[]{},
+            []float{},
+            []int{},
             coordinator.config.tp_size,
             coordinator.config.pp_size,
             coordinator.config.dp_size

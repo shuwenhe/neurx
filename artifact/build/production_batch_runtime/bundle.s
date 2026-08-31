@@ -213,7 +213,7 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int stream_handle = device_stream_open_handle(context.handle, stream_priority)
     if stream_handle <= 0 { return transformer_plan_invalid(backend, "stream_create_failed") }
     int count = len(descriptor)
-    int[] compiled = int[]{cap: count}
+    int[] compiled = make([]int, count)
     int index = 0
     for index < count {
         if len(descriptor[index]) == 0 {
@@ -339,8 +339,8 @@ struct production_admission_result {
     string error_message
 }
 
-func production_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func production_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int index = 0
     for index < capacity { values[index] = 0; index = index + 1 }
     values

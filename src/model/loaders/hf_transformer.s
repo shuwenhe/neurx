@@ -147,15 +147,15 @@ func load_hf_model(string model_dir) hf_model_weights {
     int hidden_square = config.hidden_size * config.hidden_size
     int kv_size = config.kv_heads * config.head_dim * config.hidden_size
     int mlp_size = config.intermediate_size * config.hidden_size
-    float[] input_norm = float[]{cap: config.layers * config.hidden_size}
-    float[] q_proj = float[]{cap: config.layers * hidden_square}
-    float[] k_proj = float[]{cap: config.layers * kv_size}
-    float[] v_proj = float[]{cap: config.layers * kv_size}
-    float[] o_proj = float[]{cap: config.layers * hidden_square}
-    float[] post_norm = float[]{cap: config.layers * config.hidden_size}
-    float[] gate_proj = float[]{cap: config.layers * mlp_size}
-    float[] up_proj = float[]{cap: config.layers * mlp_size}
-    float[] down_proj = float[]{cap: config.layers * mlp_size}
+    float[] input_norm = make([]float, config.layers * config.hidden_size)
+    float[] q_proj = make([]float, config.layers * hidden_square)
+    float[] k_proj = make([]float, config.layers * kv_size)
+    float[] v_proj = make([]float, config.layers * kv_size)
+    float[] o_proj = make([]float, config.layers * hidden_square)
+    float[] post_norm = make([]float, config.layers * config.hidden_size)
+    float[] gate_proj = make([]float, config.layers * mlp_size)
+    float[] up_proj = make([]float, config.layers * mlp_size)
+    float[] down_proj = make([]float, config.layers * mlp_size)
     int layer = 0
     for layer < config.layers {
         hf_layer_weights weights = load_hf_model_layer(model_dir, layer)

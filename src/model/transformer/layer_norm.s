@@ -30,8 +30,8 @@ struct rms_norm_output {
     float[] variance
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -40,7 +40,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -179,7 +179,7 @@ func layer_norm_backward(
         }
         b = b + 1
     }
-    float[][] result = float[][]{cap: 3}
+    float[][] result = floatmake([][], 3)
     result[0] = grad_input
     result[1] = grad_gamma
     result[2] = grad_beta
@@ -276,7 +276,7 @@ func rms_norm_backward(
         }
         b = b + 1
     }
-    float[][] result = float[][]{cap: 2}
+    float[][] result = floatmake([][], 2)
     result[0] = grad_input
     result[1] = grad_gamma
     result

@@ -79,7 +79,7 @@ func (diversity_processor* processor) enable_cooling(bool enable, float factor) 
 
 func (diversity_processor* processor) process_logits(
     float[] logits
-) float[] {
+) []float {
     float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
@@ -207,7 +207,7 @@ func (diversity_processor* processor) apply_contrastive_search(
     float[][] embedding_history,
     float[] current_embedding,
     float alpha
-) float[] {
+) []float {
     float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
@@ -232,7 +232,7 @@ func (diversity_processor* processor) apply_mutual_information(
     float[] logits,
     float[][] past_embeddings,
     float lambda
-) float[] {
+) []float {
     float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
@@ -328,7 +328,7 @@ func (diversity_processor* processor) get_entropy() float {
     return entropy
 }
 
-func append_int(int[] arr, int val) int[] {
+func append_int(int[] arr, int val) []int {
     int[] new_arr = make(int[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
@@ -356,7 +356,7 @@ func sort_array_descending(float[] arr) {
     }
 }
 
-func compute_softmax(float[] logits) float[] {
+func compute_softmax(float[] logits) []float {
     float max_logit = logits[0]
     int i = 1
     for i < len(logits) {
@@ -386,7 +386,7 @@ func compute_softmax(float[] logits) float[] {
     return probs
 }
 
-func get_sorted_indices(float[] arr, bool descending) int[] {
+func get_sorted_indices(float[] arr, bool descending) []int {
     int[] indices = make(int[], len(arr))
     int i = 0
     for i < len(arr) {
@@ -419,7 +419,7 @@ func get_sorted_indices(float[] arr, bool descending) int[] {
 func compute_similarity_with_history(
     float[] current,
     float[][] history
-) float[] {
+) []float {
     float[] similarities = make(float[], len(current))
     return similarities
 }

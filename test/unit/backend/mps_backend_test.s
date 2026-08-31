@@ -76,7 +76,7 @@ func amp_smoke() int {
 
 func checkpoint_smoke() int {
     int status = 0
-    []tensor params = []tensor{cap: 0}
+    []tensor params = make([]tensor, 0)
     checkpoint ckpt = new_checkpoint(3, 0.5, params)
     status = status + assert_eq_int(checkpoint_step(ckpt), 3, "checkpoint step should be 3")
     status = status + assert_eq_float(checkpoint_loss(ckpt), 0.5, "checkpoint loss should be 0.5")

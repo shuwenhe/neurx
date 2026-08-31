@@ -38,7 +38,7 @@ func new_rope_encoding_state_s(int dim) rope_encoding_state_s {
     }
 }
 
-func compute_rope_freqs(rope_encoding_state_s state, int position) float[] {
+func compute_rope_freqs(rope_encoding_state_s state, int position) []float {
     float[] freqs
     int i = 0
     for i < state.dim {
@@ -50,7 +50,7 @@ func compute_rope_freqs(rope_encoding_state_s state, int position) float[] {
     freqs
 }
 
-func apply_rope_s(float[] token_emb, int position, rope_encoding_state_s rope_state) float[] {
+func apply_rope_s(float[] token_emb, int position, rope_encoding_state_s rope_state) []float {
     float[] rotated
     float[] freqs = compute_rope_freqs(rope_state, position)
     int dim = len(token_emb)

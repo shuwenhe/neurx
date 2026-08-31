@@ -168,7 +168,7 @@ func main() {
     }
 }
 
-func generate_data(int n_tokens, int vocab_size) int[] {
+func generate_data(int n_tokens, int vocab_size) []int {
     int[] data = new int[n_tokens]
     int[] pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
@@ -186,7 +186,7 @@ func generate_data(int n_tokens, int vocab_size) int[] {
     data
 }
 
-func get_batch(int[] data, int offset, int count) int[] {
+func get_batch(int[] data, int offset, int count) []int {
     int[] batch = new int[count]
     int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
     int i = 0
@@ -197,7 +197,7 @@ func get_batch(int[] data, int offset, int count) int[] {
     batch
 }
 
-func make_targets(int[] token_ids, int batch_size) int[] {
+func make_targets(int[] token_ids, int batch_size) []int {
     int[] targets = new int[batch_size]
     int i = 0
     for i < batch_size {

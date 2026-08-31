@@ -173,7 +173,7 @@ func (distributed_trace* t) get_trace_summary() map[string]interface{} {
 	return summary
 }
 
-func (distributed_trace* t) get_critical_path() trace_span[] {
+func (distributed_trace* t) get_critical_path() []trace_span {
 	result := make(trace_span[], 0)
 	for span := range t.spans {
 		if span.parent_span_id == "" || span.parent_span_id == t.root_span_id {

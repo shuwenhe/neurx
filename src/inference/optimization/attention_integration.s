@@ -63,7 +63,7 @@ func new_attention_layer_manager(
         current_method: method,
         total_forward_calls: 0,
         total_skipped_calls: 0,
-        method_timings: float[]{},
+        method_timings: []float{},
     }
 }
 
@@ -71,7 +71,7 @@ func (attention_layer_manager* mgr) forward(
     float[] queries,
     float[] keys,
     float[] values
-) float[] {
+) []float {
     mgr.total_forward_calls = mgr.total_forward_calls + 1
     if mgr.current_method == "flash" {
         return flash_attention_forward(
@@ -198,7 +198,7 @@ func create_layer_with_optimized_attention(
 func (transformer_layer_with_optimized_attention* layer) forward(
     float[] hidden_states,
     float[] position_ids
-) float[] {
+) []float {
     normalized := apply_layer_norm(
         hidden_states,
         layer.layer_norm_weight,
@@ -354,7 +354,7 @@ func apply_layer_norm(
     float[] x,
     float[] weight,
     float[] bias
-) float[] {
+) []float {
     int dim = len(weight)
     if dim <= 0 {
         return x

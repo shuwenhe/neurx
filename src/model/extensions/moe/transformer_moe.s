@@ -60,8 +60,8 @@ func new_moe_config(int hidden_dim, int expert_dim, int num_experts) moe_config 
     }
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -70,7 +70,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func fill_ramp(int size, float scale) float[] {
+func fill_ramp(int size, float scale) []float {
     float[] values = allocate_vector(size, 0.0)
     int i = 0
     for i < size {
@@ -89,14 +89,14 @@ func new_moe_layer(moe_config cfg) moe_layer {
         gate_weight: fill_ramp(hidden_dim * num_experts, 0.01),
         gate_bias: allocate_vector(num_experts, 0.0),
     }
-    layer.expert_w1 = float[][]{cap: num_experts}
-    layer.expert_w2 = float[][]{cap: num_experts}
-    layer.expert_w3 = float[][]{cap: num_experts}
-    layer.expert_b1 = float[]{cap: num_experts}
-    layer.expert_b2 = float[]{cap: num_experts}
-    layer.expert_b3 = float[]{cap: num_experts}
-    layer.router_logits = float[]{}
-    layer.expert_indices = int[]{}
+    layer.expert_w1 = floatmake([][], num_experts)
+    layer.expert_w2 = floatmake([][], num_experts)
+    layer.expert_w3 = floatmake([][], num_experts)
+    layer.expert_b1 = make([]float, num_experts)
+    layer.expert_b2 = make([]float, num_experts)
+    layer.expert_b3 = make([]float, num_experts)
+    layer.router_logits = []float{}
+    layer.expert_indices = []int{}
     layer.expert_counts = allocate_vector(num_experts, 0)
     int e = 0
     for e < num_experts {
@@ -111,7 +111,7 @@ func new_moe_layer(moe_config cfg) moe_layer {
     layer
 }
 
-func matmul_flat(float[] a, float[] b, int m, int k, int n) float[] {
+func matmul_flat(float[] a, float[] b, int m, int k, int n) []float {
     float[] result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
@@ -149,7 +149,7 @@ func exp_approx(float x) float {
     result
 }
 
-func softmax_row(float[] row, int size) float[] {
+func softmax_row(float[] row, int size) []float {
     float[] out = allocate_vector(size, 0.0)
     float max_val = row[0]
     int i = 1
@@ -177,10 +177,10 @@ func softmax_row(float[] row, int size) float[] {
     out
 }
 
-func top_k_indices(float[] values, int k) int[] {
+func top_k_indices(float[] values, int k) []int {
     int n = len(values)
-    int[] indices = int[]{cap: n}
-    float[] vals = float[]{cap: n}
+    int[] indices = make([]int, n)
+    float[] vals = make([]float, n)
     int i = 0
     for i < n {
         indices[i] = i
@@ -207,7 +207,7 @@ func top_k_indices(float[] values, int k) int[] {
         vals[max_idx] = temp_val
         j = j + 1
     }
-    int[] result = int[]{cap: k}
+    int[] result = make([]int, k)
     int m = 0
     for m < k {
         result[m] = indices[m]
@@ -230,8 +230,8 @@ func route_tokens(moe_layer layer, float[] hidden_states, int seq_len) moe_route
         }
         i = i + 1
     }
-    int[] expert_indices = int[]{cap: num_tokens * layer.config.num_experts_per_token}
-    float[] router_probs = float[]{cap: num_tokens * num_experts}
+    int[] expert_indices = make([]int, num_tokens * layer.config.num_experts_per_token)
+    float[] router_probs = make([]float, num_tokens * num_experts)
     i = 0
     for i < num_tokens {
         float[] row = gate_logits[i * num_experts..(i+1) * num_experts]
@@ -255,7 +255,7 @@ func route_tokens(moe_layer layer, float[] hidden_states, int seq_len) moe_route
     }
 }
 
-func expert_forward(moe_layer layer, int expert_id, float[] input, int batch_size) float[] {
+func expert_forward(moe_layer layer, int expert_id, float[] input, int batch_size) []float {
     int hidden_dim = layer.config.hidden_dim
     int expert_dim = layer.config.expert_dim
     float[] w1 = layer.expert_w1[expert_id]
@@ -336,7 +336,7 @@ func moe_forward(moe_layer layer, float[] hidden_states, int seq_len) moe_forwar
     int[] expert_load = allocate_vector(num_experts, 0)
     int e = 0
     for e < num_experts {
-        int[] token_indices = int[]{}
+        int[] token_indices = []int{}
         int t = 0
         for t < num_tokens {
             int offset = t * num_experts_per_token
@@ -401,14 +401,14 @@ func moe_forward(moe_layer layer, float[] hidden_states, int seq_len) moe_forwar
     }
 }
 
-func moe_backward(moe_layer layer, float[] grad_output, int seq_len) float[] {
+func moe_backward(moe_layer layer, float[] grad_output, int seq_len) []float {
     int hidden_dim = layer.config.hidden_dim
     int num_tokens = seq_len
     float[] grad_input = allocate_vector(num_tokens * hidden_dim, 0.0)
     float[] grad_gate = allocate_vector(len(layer.gate_weight), 0.0)
     int e = 0
     for e < layer.config.num_experts {
-        int[] token_indices = int[]{}
+        int[] token_indices = []int{}
         int t = 0
         for t < num_tokens {
             int offset = t * layer.config.num_experts_per_token
@@ -455,7 +455,7 @@ func moe_backward(moe_layer layer, float[] grad_output, int seq_len) float[] {
     grad_input
 }
 
-func moe_backward_expert(moe_layer layer, int expert_id, float[] grad_output, int batch_size) float[] {
+func moe_backward_expert(moe_layer layer, int expert_id, float[] grad_output, int batch_size) []float {
     int hidden_dim = layer.config.hidden_dim
     int expert_dim = layer.config.expert_dim
     float[] w1 = layer.expert_w1[expert_id]
@@ -467,7 +467,7 @@ func moe_backward_expert(moe_layer layer, int expert_id, float[] grad_output, in
     grad_input
 }
 
-func transpose(float[] matrix, int rows, int cols) float[] {
+func transpose(float[] matrix, int rows, int cols) []float {
     float[] result = allocate_vector(rows * cols, 0.0)
     int i = 0
     for i < rows {
@@ -481,8 +481,8 @@ func transpose(float[] matrix, int rows, int cols) float[] {
     result
 }
 
-func moe_layer_parameters(moe_layer layer) float[] {
-    float[] params = float[]{}
+func moe_layer_parameters(moe_layer layer) []float {
+    float[] params = []float{}
     params = params + layer.gate_weight
     params = params + layer.gate_bias
     int e = 0

@@ -26,8 +26,8 @@ struct cluster_heartbeat_scan_result {
     bool healthy
 }
 
-func cluster_heartbeat_zero_records(int capacity) cluster_heartbeat_record[] {
-    cluster_heartbeat_record[] records = cluster_heartbeat_record[]{}
+func cluster_heartbeat_zero_records(int capacity) []cluster_heartbeat_record {
+    cluster_heartbeat_record[] records = []cluster_heartbeat_record{}
     int i = 0
     for i < capacity {
         records = append(records, cluster_heartbeat_record {
@@ -106,7 +106,7 @@ func cluster_heartbeat_scan(cluster_heartbeat_state state, int total_ranks) clus
     result.total_ranks = total_ranks
     result.live_ranks = 0
     result.failed_ranks = 0
-    result.failed_rank_ids = int[]{}
+    result.failed_rank_ids = []int{}
     int rank = 0
     for rank < total_ranks {
         if cluster_heartbeat_is_live(state, rank) {

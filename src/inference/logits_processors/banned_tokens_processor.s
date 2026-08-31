@@ -104,7 +104,7 @@ func (banned_tokens_processor* processor) clear_all_bans() {
 
 func (banned_tokens_processor* processor) process_logits(
     float[] logits
-) float[] {
+) []float {
     float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
@@ -181,7 +181,7 @@ func (banned_tokens_processor* processor) anneal_bans(float progress) {
     }
 }
 
-func create_safety_ban_list() string[] {
+func create_safety_ban_list() []string {
     return string[]{
         "badword1", "badword2", "badword3",
         "offensive1", "offensive2",
@@ -189,12 +189,12 @@ func create_safety_ban_list() string[] {
     }
 }
 
-func create_special_token_ban_list() int[] {
+func create_special_token_ban_list() []int {
     int[] bans = make(int[], 0)
     return bans
 }
 
-func create_malformed_symbol_bans() string[] {
+func create_malformed_symbol_bans() []string {
     return string[]{
         "<<<", ">>>",
         "###", "***",
@@ -206,7 +206,7 @@ func (banned_tokens_processor* processor) get_banned_count() int {
     return len(processor.config.banned_token_ids)
 }
 
-func (banned_tokens_processor* processor) get_banned_tokens() int[] {
+func (banned_tokens_processor* processor) get_banned_tokens() []int {
     int[] result = make(int[], len(processor.config.banned_token_ids))
     int i = 0
     for i < len(processor.config.banned_token_ids) {
@@ -261,7 +261,7 @@ func (banned_tokens_processor* processor) apply_adaptive_bans(
     }
 }
 
-func append_int(int[] arr, int val) int[] {
+func append_int(int[] arr, int val) []int {
     int[] new_arr = make(int[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
@@ -272,7 +272,7 @@ func append_int(int[] arr, int val) int[] {
     return new_arr
 }
 
-func append_str(string[] arr, string val) string[] {
+func append_str(string[] arr, string val) []string {
     string[] new_arr = make(string[], len(arr) + 1)
     int i = 0
     for i < len(arr) {

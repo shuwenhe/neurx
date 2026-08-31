@@ -90,7 +90,7 @@ func (logits_processor_manager* mgr) enable_processor(string name) bool {
 
 func (logits_processor_manager* mgr) process_logits(
     float[] logits
-) float[] {
+) []float {
     if !mgr.enabled || len(mgr.processors) == 0 {
         return logits
     }
@@ -123,7 +123,7 @@ func apply_single_processor(
     logits_processor_config config,
     string name,
     *logits_processor_manager mgr
-) float[] {
+) []float {
     float[] result = logits
     if config.processor_type == "temperature" {
         result = apply_temperature(result, config.params)
@@ -257,7 +257,7 @@ func select_beam_token(float[] logits) int {
     return select_greedy_token(logits)
 }
 
-func softmax_probs(float[] logits) float[] {
+func softmax_probs(float[] logits) []float {
     float max_logit = logits[0]
     int i = 1
     for i < len(logits) {
@@ -320,7 +320,7 @@ func append_config(
     return new_arr
 }
 
-func append_str(string[] arr, string val) string[] {
+func append_str(string[] arr, string val) []string {
     string[] new_arr = make(string[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
@@ -331,7 +331,7 @@ func append_str(string[] arr, string val) string[] {
     return new_arr
 }
 
-func append_int(int[] arr, int val) int[] {
+func append_int(int[] arr, int val) []int {
     int[] new_arr = make(int[], len(arr) + 1)
     int i = 0
     for i < len(arr) {

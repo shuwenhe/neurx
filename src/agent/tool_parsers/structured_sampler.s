@@ -30,7 +30,7 @@ func create_structured_sampler(*json_schema schema, string mode) structured_samp
     return sampler
 }
 
-func filter_logits(*structured_sampler sampler, float[] logits) float[] {
+func filter_logits(*structured_sampler sampler, float[] logits) []float {
     result := logits
     i := 0
     for i < len(result) {

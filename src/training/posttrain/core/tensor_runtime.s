@@ -38,7 +38,7 @@ func new_tensor_s(float[] data_ptr, int[] shape_list) tensor_s {
     }
 }
 
-func compute_strides_s(int[] shape_list) int[] {
+func compute_strides_s(int[] shape_list) []int {
     int[] strides
     if len(shape_list) == 0 {
         return strides
@@ -53,7 +53,7 @@ func compute_strides_s(int[] shape_list) int[] {
     reverse_int_array_s(strides)
 }
 
-func reverse_int_array_s(int[] arr) int[] {
+func reverse_int_array_s(int[] arr) []int {
     int[] reversed
     int i = len(arr) - 1
     for i >= 0 {

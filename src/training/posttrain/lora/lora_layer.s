@@ -49,7 +49,7 @@ func create_lora_linear(int in_dim, int out_dim, int rank, float alpha, float dr
     return layer
 }
 
-func lora_linear_forward(lora_linear layer, float[] input) float[] {
+func lora_linear_forward(lora_linear layer, float[] input) []float {
     float[] output = fill_model_tensor(layer.out_dim, 0.0)
     int out_idx = 0
     for out_idx < layer.out_dim {
@@ -157,7 +157,7 @@ func get_total_lora_params(lora_adapter adapter) int {
     return total
 }
 
-func lora_adapter_forward(lora_adapter adapter, int layer_idx, float[] hidden_state, string module_name) float[] {
+func lora_adapter_forward(lora_adapter adapter, int layer_idx, float[] hidden_state, string module_name) []float {
     if layer_idx < 0 || layer_idx >= adapter.num_layers {
         return hidden_state
     }

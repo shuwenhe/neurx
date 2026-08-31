@@ -62,7 +62,7 @@ func new_backend_selection_result(inference_backend_capability backend, bool sel
 
 func new_backend_registry() backend_registry_state {
     backend_registry_state state
-    state.backends = []inference_backend_capability{cap: 16}
+    state.backends = make([]inference_backend_capability, 16)
     state
 }
 

@@ -32,15 +32,15 @@ func eplb_config_valid(eplb_config config) bool {
     config.expert_count > 0 && config.rank_count > 0 && config.replicas_per_expert > 0 && config.rebalance_threshold_percent >= 0
 }
 
-func eplb_zero_array(int count) int[] {
-    int[] values = int[]{cap: count}
+func eplb_zero_array(int count) []int {
+    int[] values = make([]int, count)
     int i = 0
     for i < count { values[i] = 0; i = i + 1 }
     values
 }
 
-func eplb_initial_placement(int expert_count, int rank_count) int[] {
-    int[] placement = int[]{cap: expert_count}
+func eplb_initial_placement(int expert_count, int rank_count) []int {
+    int[] placement = make([]int, expert_count)
     int i = 0
     for i < expert_count {
         placement[i] = i - (i / rank_count) * rank_count

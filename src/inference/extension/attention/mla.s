@@ -52,8 +52,8 @@ func sqrt_approx(float x) float {
     y
 }
 
-func zeros(int n) float[] {
-    float[] out = float[]{cap: n}
+func zeros(int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -62,8 +62,8 @@ func zeros(int n) float[] {
     out
 }
 
-func fill_ramp(int n, float scale) float[] {
-    float[] out = float[]{cap: n}
+func fill_ramp(int n, float scale) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = scale * (i + 1) as float / (n + 1) as float
@@ -86,7 +86,7 @@ func exp_approx(float x) float {
     result
 }
 
-func matmul(float[] a, float[] b, int m, int k, int n) float[] {
+func matmul(float[] a, float[] b, int m, int k, int n) []float {
     float[] result = zeros(m * n)
     int i = 0
     for i < m {
@@ -106,8 +106,8 @@ func matmul(float[] a, float[] b, int m, int k, int n) float[] {
     result
 }
 
-func rms_norm(float[] x, int n, float eps) float[] {
-    float[] out = float[]{cap: n}
+func rms_norm(float[] x, int n, float eps) []float {
+    float[] out = make([]float, n)
     float sum_sq = 0.0
     int i = 0
     for i < n {
@@ -145,8 +145,8 @@ func new_mla_weights(mla_config cfg) mla_weights {
     }
 }
 
-func apply_rope(float[] x, int seq_len, int head_dim, int start_pos) float[] {
-    float[] out = float[]{cap: seq_len * head_dim}
+func apply_rope(float[] x, int seq_len, int head_dim, int start_pos) []float {
+    float[] out = make([]float, seq_len * head_dim)
     int s = 0
     for s < seq_len {
         int pos = start_pos + s
@@ -245,8 +245,8 @@ func mla_forward(mla_weights w, float[] h, int seq_len, int start_pos) (float[],
     k_rope = apply_rope(k_rope, seq_len, n_h * d_r, start_pos)
     int total_q_dim = n_h * (d_h + d_r)
     int total_kv_dim = n_h * (d_h + d_r)
-    float[] q_full = float[]{cap: seq_len * total_q_dim}
-    float[] k_full = float[]{cap: seq_len * total_kv_dim}
+    float[] q_full = make([]float, seq_len * total_q_dim)
+    float[] k_full = make([]float, seq_len * total_kv_dim)
     int s = 0
     for s < seq_len {
         int h_idx = 0
@@ -296,7 +296,7 @@ func mla_attention_core(
     float[] q, float[] k, float[] v,
     int seq_len, int n_h, int d_h, int d_r,
     float scale, bool causal
-) float[] {
+) []float {
     int combined_dim = d_h + d_r
     float[] output = zeros(seq_len * n_h * d_h)
     int h = 0
@@ -306,7 +306,7 @@ func mla_attention_core(
         int h_offset_o = h * d_h
         int i = 0
         for i < seq_len {
-            float[] scores = float[]{cap: seq_len}
+            float[] scores = make([]float, seq_len)
             float max_score = -1e9
             int j = 0
             for j < seq_len {
@@ -324,7 +324,7 @@ func mla_attention_core(
                 if score > max_score { max_score = score }
                 j = j + 1
             }
-            float[] weights = float[]{cap: seq_len}
+            float[] weights = make([]float, seq_len)
             float sum_exp = 0.0
             j = 0
             for j < seq_len {
@@ -393,7 +393,7 @@ func mla_forward_incremental(
     float[] q_rope = matmul(h, w.w_qr, 1, d, n_h * d_r)
     q_rope = apply_rope(q_rope, 1, n_h * d_r, pos)
     int total_q_dim = n_h * (d_h + d_r)
-    float[] q_full = float[]{cap: total_q_dim}
+    float[] q_full = make([]float, total_q_dim)
     int h_idx = 0
     for h_idx < n_h {
         int d_idx = 0
@@ -428,7 +428,7 @@ func mla_forward_incremental(
     float[] k_main = matmul(cache.kv_latent, w.w_uk, cached_len, d_c, n_h * d_h)
     float[] v_all = matmul(cache.kv_latent, w.w_uv, cached_len, d_c, n_h * d_h)
     int total_kv_dim = n_h * (d_h + d_r)
-    float[] k_full = float[]{cap: cached_len * total_kv_dim}
+    float[] k_full = make([]float, cached_len * total_kv_dim)
     int s = 0
     for s < cached_len {
         h_idx = 0
@@ -460,12 +460,12 @@ func mla_forward_incremental(
 func mla_attention_single_query(
     float[] q, float[] k, float[] v,
     int kv_len, int n_h, int d_h, int d_r, float scale
-) float[] {
+) []float {
     int combined_dim = d_h + d_r
     float[] output = zeros(n_h * d_h)
     int h = 0
     for h < n_h {
-        float[] scores = float[]{cap: kv_len}
+        float[] scores = make([]float, kv_len)
         float max_score = -1e9
         int j = 0
         for j < kv_len {
@@ -481,7 +481,7 @@ func mla_attention_single_query(
             if scores[j] > max_score { max_score = scores[j] }
             j = j + 1
         }
-        float[] weights = float[]{cap: kv_len}
+        float[] weights = make([]float, kv_len)
         float sum_exp = 0.0
         j = 0
         for j < kv_len {

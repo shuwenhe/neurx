@@ -23,7 +23,7 @@ func create_lru_cache(int capacity) lru_cache {
     lru.head_idx = -1
     lru.tail_idx = -1
     lru.current_time = 0
-    lru.nodes = []lru_node{cap: capacity}
+    lru.nodes = make([]lru_node, capacity)
     print("[LRUCache] Created with capacity " + int_to_string(capacity) + "\n")
     return lru
 }

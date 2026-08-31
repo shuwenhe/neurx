@@ -84,7 +84,7 @@ func new_gpt_moe_model(gpt_moe_config cfg) gpt_moe_model {
     int H = cfg.base.n_embd
     int moe_freq = cfg.moe_frequency
     if moe_freq < 1 { moe_freq = 1 }
-    []gpt_moe_block blocks = []gpt_moe_block{cap: nl}
+    []gpt_moe_block blocks = make([]gpt_moe_block, nl)
     int num_moe = 0
     int l = 0
     for l < nl {
@@ -232,7 +232,7 @@ func gpt_moe_block_forward(
     gpt_moe_block_forward_ret { output: gpt_add(h_attn, ffn_out), aux_loss: aux_loss }
 }
 
-func gpt_dense_ffn_forward(transformer_layer layer, float[] normed2, int total) float[] {
+func gpt_dense_ffn_forward(transformer_layer layer, float[] normed2, int total) []float {
     int H = layer.hidden_dim
     int ffn_d = len(layer.ffn.glu_ffn.gate_weight) / H
     float[] gate = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, H, ffn_d)

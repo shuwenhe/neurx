@@ -86,9 +86,9 @@ func (sft_trainer* trainer) load_instruction_data(data_path string) {
     fmt.Printf("  Total tokens: %d\n", trainer.dataset.total_tokens)
 }
 
-func (sft_trainer* trainer) tokenize(text string) int[] {
+func (sft_trainer* trainer) tokenize(text string) []int {
     words := strings.Split(text, " ")
-    tokens := int[]{}
+    tokens := []int{}
     for i, word := range words {
         token := (len(word) + i*73) % 128000
         tokens = append(tokens, token)
@@ -152,7 +152,7 @@ func (sft_trainer* trainer) train_step(batch_inputs int[][], int[][] batch_label
     return total_loss / float64(len(batch_inputs))
 }
 
-func (sft_trainer* trainer) model_forward(tokens int[]) float[][]64 {
+func (sft_trainer* trainer) model_forward(tokens []int) float[][]64 {
     batch_size := 1
     vocab_size := 128000
     seq_len := len(tokens)
@@ -202,7 +202,7 @@ func (sft_trainer* trainer) get_learning_rate() float64 {
     }
 }
 
-func (sft_trainer* trainer) calculate_bleu(reference int[], int[] generated, int n_gram) float64 {
+func (sft_trainer* trainer) calculate_bleu(reference []int, int[] generated, int n_gram) float64 {
     if len(generated) == 0 {
         return 0.0
     }
@@ -231,7 +231,7 @@ func (sft_trainer* trainer) calculate_bleu(reference int[], int[] generated, int
     return float64(matches) / float64(total)
 }
 
-func (sft_trainer* trainer) calculate_rouge_l(reference int[], int[] generated) float64 {
+func (sft_trainer* trainer) calculate_rouge_l(reference []int, int[] generated) float64 {
     if len(reference) == 0 || len(generated) == 0 {
         return 0.0
     }
@@ -245,7 +245,7 @@ func (sft_trainer* trainer) calculate_rouge_l(reference int[], int[] generated) 
     return f1
 }
 
-func (sft_trainer* trainer) compute_lcs(a int[], int[] b) int {
+func (sft_trainer* trainer) compute_lcs(a []int, int[] b) int {
     dp := make(int[][], len(a)+1)
     for i := range dp {
         dp[i] = make(int[], len(b)+1)

@@ -245,7 +245,7 @@ func (multi_model_serving_manager* mms) UnloadModel(model_name string) {
     delete(mms.model_cache, model_name)
 }
 
-func (multi_model_serving_manager* mms) GetLoadedModels() string[] {
+func (multi_model_serving_manager* mms) GetLoadedModels() []string {
     models := make(string[], 0)
     for name := range mms.loaded_models {
         models = append(models, name)

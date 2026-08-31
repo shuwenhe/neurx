@@ -257,7 +257,7 @@ func test_complete_pipeline() {
         frequency_penalty: 0.0,
         presence_penalty: 0.0,
         stream: false,
-        stop: string[]{},
+        stop: []string{},
     }
     openai_compatible.chat_completion_response api_resp = inference_system.handle_openai_request(sys, api_req)
     print("   ✓ API Request: chat/completions\n")

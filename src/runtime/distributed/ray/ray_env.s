@@ -189,7 +189,7 @@ func (env ray_env*) get_actor(name string) interface{} {
     return actor
 }
 
-func (env ray_env*) list_actors() string[] {
+func (env ray_env*) list_actors() []string {
     names := make(string[], 0)
     for name := range env.actors {
         names = append(names, name)
@@ -215,7 +215,7 @@ func (env ray_env*) get_placement_group(name string) placement_group* {
     return pg
 }
 
-func (env ray_env*) list_placement_groups() string[] {
+func (env ray_env*) list_placement_groups() []string {
     names := make(string[], 0)
     for name := range env.placement_groups {
         names = append(names, name)

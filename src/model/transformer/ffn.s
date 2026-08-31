@@ -40,8 +40,8 @@ struct ffn_layer {
     feed_forward_network network
 }
 
-func allocate_vector(int size, float init_val) float[] {
-    float[] v = float[]{cap: size}
+func allocate_vector(int size, float init_val) []float {
+    float[] v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -50,7 +50,7 @@ func allocate_vector(int size, float init_val) float[] {
     v
 }
 
-func copy_vector(float[] src) float[] {
+func copy_vector(float[] src) []float {
     float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
@@ -138,7 +138,7 @@ func new_ffn_layer(int hidden_dim, string activation_type) ffn_layer {
     }
 }
 
-func build_ramp(int size, float scale) float[] {
+func build_ramp(int size, float scale) []float {
     float[] values = allocate_vector(size, 0.0)
     int i = 0
     for i < size {
@@ -184,7 +184,7 @@ func new_glu_ffn(ffn_config cfg) feed_forward_network {
     }
 }
 
-func matmul_flat(float[] a, float[] b, int m, int k, int n) float[] {
+func matmul_flat(float[] a, float[] b, int m, int k, int n) []float {
     float[] result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
@@ -207,7 +207,7 @@ func matmul_flat(float[] a, float[] b, int m, int k, int n) float[] {
 func apply_activation(
     float[] hidden,
     string activation_type
-) float[] {
+) []float {
     float[] out = copy_vector(hidden)
     int i = 0
     for i < len(out) {
@@ -229,7 +229,7 @@ func forward_standard_ffn(
     feed_forward_network ffn,
     float[] hidden_states,
     int tokens
-) float[] {
+) []float {
     int hidden_dim = ffn.standard_ffn.hidden_dim
     int intermediate_dim = ffn.standard_ffn.intermediate_dim
     float[] up = matmul_flat(hidden_states, ffn.standard_ffn.up_weight, tokens, hidden_dim, intermediate_dim)
@@ -252,7 +252,7 @@ func forward_ffn_layer(
     ffn_layer layer,
     float[] hidden_states,
     int tokens
-) float[] {
+) []float {
     if layer.config.activation_type == "swiglu" || layer.config.activation_type == "geglu" {
         return forward_swiglu_ffn(layer.network, hidden_states, tokens)
     }
@@ -263,7 +263,7 @@ func forward_glu_ffn(
     feed_forward_network ffn,
     float[] hidden_states,
     int tokens
-) float[] {
+) []float {
     int hidden_dim = ffn.glu_ffn.hidden_dim
     int intermediate_dim = ffn.glu_ffn.intermediate_dim
     float[] gate = matmul_flat(hidden_states, ffn.glu_ffn.gate_weight, tokens, hidden_dim, intermediate_dim)
@@ -288,7 +288,7 @@ func forward_swiglu_ffn(
     feed_forward_network ffn,
     float[] hidden_states,
     int tokens
-) float[] {
+) []float {
     int hidden_dim = ffn.glu_ffn.hidden_dim
     int intermediate_dim = ffn.glu_ffn.intermediate_dim
     float[] gate = matmul_flat(hidden_states, ffn.glu_ffn.gate_weight, tokens, hidden_dim, intermediate_dim)
@@ -313,7 +313,7 @@ func apply_dropout(
     float[] hidden,
     float dropout_rate,
     int seed
-) float[] {
+) []float {
     if dropout_rate <= 0.0 {
         return copy_vector(hidden)
     }
@@ -337,7 +337,7 @@ func compute_router_probs(
     int seq_len,
     int num_experts,
     int num_active_experts
-) float[] {
+) []float {
     int total = seq_len * num_experts
     float[] probs = allocate_vector(total, 0.0)
     int s = 0

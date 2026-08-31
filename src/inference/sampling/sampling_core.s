@@ -3,7 +3,7 @@ func greedy_decode(
     float[][] all_logits,
     sampling_config config,
     int eos_token_id
-) int[] {
+) []int {
     int max_steps = min(config.max_length, len(all_logits))
     int[] generated = []
     for step in 0..max_steps {

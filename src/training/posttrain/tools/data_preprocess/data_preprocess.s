@@ -132,12 +132,12 @@ func tokenize_with_padding(
     int max_length,
     int pad_token_id
 ) int[][] {
-    int[][] tokenized = int[][]{cap: texts.len}
+    int[][] tokenized = intmake([][], texts.len)
     int i = 0
     for i < texts.len {
         int[] tokens = tokenize_text(texts[i])
         if tokens.len > max_length {
-            int[] truncated = int[]{cap: max_length}
+            int[] truncated = make([]int, max_length)
             int j = 0
             for j < max_length {
                 truncated[j] = tokens[j]
@@ -158,10 +158,10 @@ func create_attention_masks(
     int[][] token_ids,
     int pad_token_id
 ) int[][] {
-    int[][] masks = int[][]{cap: token_ids.len}
+    int[][] masks = intmake([][], token_ids.len)
     int i = 0
     for i < token_ids.len {
-        int[] mask = int[]{cap: token_ids[i].len}
+        int[] mask = make([]int, token_ids[i].len)
         int j = 0
         for j < token_ids[i].len {
             if token_ids[i][j] == pad_token_id {
@@ -182,7 +182,7 @@ func batch_samples(
     int batch_size
 ) [][]rl_sample {
     int num_batches = (samples.len + batch_size - 1) / batch_size
-    [][]rl_sample batches = [][]rl_sample{cap: num_batches}
+    [][]rl_sample batches = []make([]rl_sample, num_batches)
     int b = 0
     for b < num_batches {
         int start = b * batch_size
@@ -190,7 +190,7 @@ func batch_samples(
         if end > samples.len {
             end = samples.len
         }
-        []rl_sample batch = []rl_sample{cap: end - start}
+        []rl_sample batch = make([]rl_sample, end - start)
         int i = start
         for i < end {
             batch[i - start] = samples[i]
@@ -202,7 +202,7 @@ func batch_samples(
     batches
 }
 
-func argsort_descending(float[] arr) int[] { int[]{} }
+func argsort_descending(float[] arr) []int { []int{} }
 
 func int_to_string(int n) string { "" }
 
@@ -214,4 +214,4 @@ func index_of_from(string s, string sub, int from) int { 0 }
 
 func substring(string s, int start, int end) string { s }
 
-func tokenize_text(string text) int[] { int[]{} }
+func tokenize_text(string text) []int { []int{} }

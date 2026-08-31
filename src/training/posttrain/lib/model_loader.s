@@ -64,7 +64,7 @@ func load_model(string directory) runtime_model {
     return model
 }
 
-func generate(runtime_model model, string prompt, int max_tokens) int[] {
+func generate(runtime_model model, string prompt, int max_tokens) []int {
     eprintln("Generating tokens from prompt...")
     int[] tokens
     return tokens

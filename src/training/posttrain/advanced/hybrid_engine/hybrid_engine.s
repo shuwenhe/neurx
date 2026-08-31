@@ -59,10 +59,10 @@ func compute_resharding_plan(
 ) resharding_plan {
     int src_tp = config.tensor_parallel_size_train
     int dst_tp = config.tensor_parallel_size_gen
-    int[] src_ranks = int[]{}
-    int[] dst_ranks = int[]{}
-    int[] param_indices = int[]{}
-    int[] sizes = int[]{}
+    int[] src_ranks = []int{}
+    int[] dst_ranks = []int{}
+    int[] param_indices = []int{}
+    int[] sizes = []int{}
     int i = 0
     for i < src.params.len {
         tensor param = src.params[i]
@@ -177,7 +177,7 @@ func new_hybrid_engine(
         mode: "train",
     }
     model_partition gen_part = model_partition {
-        params: []tensor{cap: params.len},
+        params: make([]tensor, params.len),
         tp_rank: ctx.rank % config.tensor_parallel_size_gen,
         pp_rank: 0,
         dp_rank: 0,

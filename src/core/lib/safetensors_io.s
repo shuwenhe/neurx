@@ -41,7 +41,7 @@ func parse_safetensors_header(string filepath) safe_tensors_file {
     return file
 }
 
-func load_tensor_weight(safe_tensors_file file, string tensor_name) float[] {
+func load_tensor_weight(safe_tensors_file file, string tensor_name) []float {
     float[] weights
     for i in 0..file.tensor_count {
         if file.tensors[i].name == tensor_name {

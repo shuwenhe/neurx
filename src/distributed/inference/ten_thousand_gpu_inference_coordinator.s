@@ -40,7 +40,7 @@ func new_ten_thousand_gpu_inference_coordinator(
         max_seq_length: 4096,
         num_gpus: world_size,
         device_mem_per_gpu_mb: 40000,
-        block_tables: int[][]{cap: 100000},
+        block_tables: intmake([][], 100000),
         total_hits: 0,
         total_misses: 0,
     }

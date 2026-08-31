@@ -6,7 +6,7 @@ func normalize_text(string text) string {
     return normalize_ascii_text(text)
 }
 
-func pretokenize(string text) string[] {
+func pretokenize(string text) []string {
     string[] tokens
     string current_token = ""
     int idx = 0
@@ -34,7 +34,7 @@ func pretokenize(string text) string[] {
     return tokens
 }
 
-func word_to_tokens(string word) string[] {
+func word_to_tokens(string word) []string {
     string[] result
     int i = 0
     for i < len(word) {
@@ -44,7 +44,7 @@ func word_to_tokens(string word) string[] {
     return result
 }
 
-func apply_bpe_merges(string[] tokens) string[] {
+func apply_bpe_merges(string[] tokens) []string {
     string[] result = tokens
     int iteration = 0
     for iteration < 10 {
@@ -72,7 +72,7 @@ func apply_bpe_merges(string[] tokens) string[] {
     return result
 }
 
-func encode(string text) int[] {
+func encode(string text) []int {
     int[] result
     result = append(result, 1)
     string normalized = normalize_text(text)

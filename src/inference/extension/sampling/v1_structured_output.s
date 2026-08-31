@@ -93,7 +93,7 @@ func (structured_generator* gen) validate_output(string output) bool {
     return true
 }
 
-func (structured_generator* gen) filter_valid_tokens(int32[] token_ids) int32[] {
+func (structured_generator* gen) filter_valid_tokens(int32[] token_ids) []int32 {
     if !gen.config.enable_structured_output {
         return token_ids
     }

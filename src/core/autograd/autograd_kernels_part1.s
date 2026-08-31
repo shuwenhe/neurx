@@ -20,7 +20,7 @@ func matmul_transpose_b(float[] grad, float[] b, int[] shape_grad, int[] shape_b
     int M = shape_grad[0]
     int K = shape_grad[1] if len(shape_grad) > 1 else shape_b[0]
     int N = shape_b[1] if len(shape_b) > 1 else K
-    float[] result = float[]{cap: M * N}
+    float[] result = make([]float, M * N)
     for i in 0..M*N {
         result[i] = 0.0
     }
@@ -40,7 +40,7 @@ func matmul_transpose_a(float[] a, float[] grad, int[] shape_a, int[] shape_grad
     int M = shape_a[0]
     int K = shape_a[1] if len(shape_a) > 1 else shape_grad[0]
     int N = shape_grad[1] if len(shape_grad) > 1 else K
-    float[] result = float[]{cap: M * N}
+    float[] result = make([]float, M * N)
     for i in 0..M*N {
         result[i] = 0.0
     }
@@ -82,15 +82,15 @@ func backward_add(node n, tensor grad_output) backward_result {
 }
 
 func copy_tensor_with_grad(tensor t) tensor {
-    float[] data = float[]{cap: len(t.data)}
+    float[] data = make([]float, len(t.data))
     for i in 0..len(t.data) {
         data[i] = t.data[i]
     }
     tensor { data: data, grad: [], shape: copy_shape(t.shape), requires_grad: true }
 }
 
-func copy_shape(int[] s) int[] {
-    int[] out = int[]{cap: len(s)}
+func copy_shape(int[] s) []int {
+    int[] out = make([]int, len(s))
     for i in 0..len(s) {
         out[i] = s[i]
     }
@@ -118,9 +118,9 @@ func backward_mul(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [grad_a, grad_b], success: true }
 }
 
-func elementwise_mul(float[] a, float[] b) float[] {
+func elementwise_mul(float[] a, float[] b) []float {
     int n = min_len(a, b)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         out[i] = a[i] * b[i]
     }
@@ -141,8 +141,8 @@ func backward_sub(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [grad_a, grad_b], success: true }
 }
 
-func negate(float[] data) float[] {
-    float[] out = float[]{cap: len(data)}
+func negate(float[] data) []float {
+    float[] out = make([]float, len(data))
     for i in 0..len(data) {
         out[i] = -data[i]
     }
@@ -164,9 +164,9 @@ func backward_div(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [grad_a, grad_b], success: true }
 }
 
-func elementwise_div(float[] a, float[] b) float[] {
+func elementwise_div(float[] a, float[] b) []float {
     int n = min_len(a, b)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     for i in 0..n {
         if abs_float(b[i]) > 1e-8 {
             out[i] = a[i] / b[i]

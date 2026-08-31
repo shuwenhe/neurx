@@ -48,7 +48,7 @@ func beam_search_decode(
     sampling_config config,
     int eos_token_id,
     int pad_token_id
-) int[] {
+) []int {
     int num_beams = max(1, config.num_beams)
     int max_length = min(config.max_length, len(all_logits))
     []beam_state beams = []

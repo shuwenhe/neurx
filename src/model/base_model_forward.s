@@ -14,7 +14,7 @@ func model_forward(
     int num_heads,
     int intermediate_size,
     int vocab_size
-) float[] {
+) []float {
     eprintln("[Model Forward] Starting forward pass")
     eprintln("[Model Forward] Batch=" + int_to_str(batch_size) +
              " Seq=" + int_to_str(seq_len) +
@@ -83,7 +83,7 @@ func model_forward_with_lora(
     int num_heads,
     int intermediate_size,
     int vocab_size
-) float[] {
+) []float {
     model_forward(
         input_ids, weights,
         batch_size, seq_len, hidden_size,

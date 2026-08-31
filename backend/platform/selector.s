@@ -23,7 +23,7 @@ func select_platform_backend(string platform_name, int requirements) registry.pl
     registry.select_platform(request)
 }
 
-func list_available_platforms() string[] {
+func list_available_platforms() []string {
     ["cuda", "rocm", "xpu", "tpu", "ascend", "cpu"]
 }
 

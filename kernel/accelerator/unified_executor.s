@@ -440,7 +440,7 @@ func kernel_config_create(
         grid_x: grid_x, grid_y: grid_y, grid_z: grid_z,
         block_x: block_x, block_y: block_y, block_z: block_z,
         shared_memory_bytes: shared_mem,
-        args: int[]{cap: 0},
+        args: []int{},
         args_size: 0,
     }
 }

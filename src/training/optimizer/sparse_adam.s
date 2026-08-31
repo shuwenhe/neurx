@@ -36,7 +36,7 @@ func sparse_adam_step(
     optimizer.exp_avg = ensure_sparse_adam_state(optimizer.exp_avg, n)
     optimizer.exp_avg_sq = ensure_sparse_adam_state(optimizer.exp_avg_sq, n)
     optimizer.step_count = ensure_sparse_adam_step_count(optimizer.step_count, n)
-    float[] out = float[]{cap: n}
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = params.data[i]
@@ -68,8 +68,8 @@ struct sparse_adam_optimizer_step_output {
     tensor params
 }
 
-func ensure_sparse_adam_state(float[] values, int n) float[] {
-    float[] out = float[]{cap: n}
+func ensure_sparse_adam_state(float[] values, int n) []float {
+    float[] out = make([]float, n)
     int i = 0
     for i < n {
         if i < len(values) {
@@ -82,8 +82,8 @@ func ensure_sparse_adam_state(float[] values, int n) float[] {
     out
 }
 
-func ensure_sparse_adam_step_count(int[] values, int n) int[] {
-    int[] out = int[]{cap: n}
+func ensure_sparse_adam_step_count(int[] values, int n) []int {
+    int[] out = make([]int, n)
     int i = 0
     for i < n {
         if i < len(values) {

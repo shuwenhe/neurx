@@ -131,8 +131,8 @@ func vlm_grpo_step(
     float kl_coef
 ) tensor {
     int batch_size = inputs.len
-    []vlm_output outputs = []vlm_output{cap: batch_size}
-    []vlm_output ref_outputs = []vlm_output{cap: batch_size}
+    []vlm_output outputs = make([]vlm_output, batch_size)
+    []vlm_output ref_outputs = make([]vlm_output, batch_size)
     int i = 0
     for i < batch_size {
         outputs[i] = policy.forward_vlm(inputs[i])
@@ -141,7 +141,7 @@ func vlm_grpo_step(
         }
         i = i + 1
     }
-    []tensor baselines = []tensor{cap: batch_size}
+    []tensor baselines = make([]tensor, batch_size)
     i = 0
     for i < batch_size {
         int group_idx = i / group_size
@@ -158,7 +158,7 @@ func vlm_grpo_step(
         baselines[i] = tensor_ops.div_scalar(sum, count * 1.0)
         i = i + 1
     }
-    []tensor advantages = []tensor{cap: batch_size}
+    []tensor advantages = make([]tensor, batch_size)
     i = 0
     for i < batch_size {
         advantages[i] = tensor_ops.sub(rewards[i], baselines[i])

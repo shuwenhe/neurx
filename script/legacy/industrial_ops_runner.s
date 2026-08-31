@@ -36,8 +36,8 @@ func ops_trim(string s) string {
     out
 }
 
-func ops_split_lines(string text) string[] {
-    string[] lines = string[]{cap: 0}
+func ops_split_lines(string text) []string {
+    string[] lines = []string{}
     string current := ""
     int i := 0
     for i < len(text) {
@@ -292,7 +292,7 @@ func rag_execute_from_corpus(string corpus_path, string query, string output_dir
     }
     string corpus := runtime_read_text_file(corpus_path)
     string[] lines := ops_split_lines(corpus)
-    string[] selected := string[]{cap: 8}
+    string[] selected := make([]string, 8)
     int selected_count := 0
     float64 best_score := 0.0
     int i := 0
@@ -338,7 +338,7 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
     int duplicates := 0
     float64 total_chars := 0.0
     float64 seen_quality := 0.0
-    int[] seen_hashes := int[]{cap: 2048}
+    int[] seen_hashes := make([]int, 2048)
     int seen_count := 0
     int i := 0
     for i < len(lines) {

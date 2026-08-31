@@ -27,8 +27,8 @@ func init_adam_state(
     []tensor parameters,
     optimizer_config config
 ) adam_state {
-    []tensor m_states = []tensor{cap: len(parameters)}
-    []tensor v_states = []tensor{cap: len(parameters)}
+    []tensor m_states = make([]tensor, len(parameters))
+    []tensor v_states = make([]tensor, len(parameters))
     int i = 0
     for i < len(parameters) {
         m_states = append(m_states, zeros(parameters[i].shape))

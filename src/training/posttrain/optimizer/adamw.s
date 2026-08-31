@@ -76,7 +76,7 @@ func create_adamw_optimizer(int num_params, optimizer_config config) adamw_optim
     return optimizer
 }
 
-func clip_grad_norm(float[] gradients, float max_norm) float[] {
+func clip_grad_norm(float[] gradients, float max_norm) []float {
     float total_norm = 0.0
     int i = 0
     for i < len(gradients) {

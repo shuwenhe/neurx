@@ -124,7 +124,7 @@ func moe_1t_token_loader_new(
 
 func moe_1t_assign_shard_partition(
     moe_1t_token_loader loader
-) int[] {
+) []int {
     int total_shards = loader.shard_dir.total_shards
     int dp_size = loader.dp_size
     int dp_rank = loader.dp_rank
@@ -164,7 +164,7 @@ func moe_1t_validate_tokens(
 func moe_1t_dedup_tokens(
     int[] tokens,
     float max_dup_ratio
-) int[] {
+) []int {
     int write_idx = 0
     int i = 0
     int consecutive_same = 1

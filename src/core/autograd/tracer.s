@@ -57,7 +57,7 @@ func copy_eqn(ir_eqn eqn) ir_eqn {
 }
 
 func copy_eqns([]ir_eqn values) []ir_eqn {
-    []ir_eqn out = []ir_eqn{cap: len(values)}
+    []ir_eqn out = make([]ir_eqn, len(values))
     int i = 0
     for i < len(values) {
         out[i] = copy_eqn(values[i])
@@ -254,11 +254,11 @@ func tracer_add_output(tracer_state state, string output) tracer_state {
     }
 }
 
-func eqn_inputs(string[] inputs) string[] {
+func eqn_inputs(string[] inputs) []string {
     copy_strings(inputs)
 }
 
-func eqn_outputs(string[] outputs) string[] {
+func eqn_outputs(string[] outputs) []string {
     copy_strings(outputs)
 }
 
@@ -307,7 +307,7 @@ func tracer_add_eqn(tracer_state state, string primitive) tracer_state {
 }
 
 func tracer_add_eqn_with_param(tracer_state state, string primitive, string param) tracer_state {
-    string[] params = string[]{cap: 1}
+    string[] params = make([]string, 1)
     params[0] = param
     tracer_add_eqn_with_io(state, primitive, params, [], [])
 }
@@ -448,18 +448,18 @@ func tracer_to_transform_chain(tracer_state state) transform_chain {
 func transform_chain_to_tracer(transform_chain chain, string name) tracer_state {
     []ir_eqn eqns = copy_eqns(chain.eqns)
     if len(eqns) == 0 {
-        eqns = []ir_eqn{cap: len(chain.steps)}
+        eqns = make([]ir_eqn, len(chain.steps))
         int i = 0
         for i < len(chain.steps) {
             string step = get_chain_step(chain, i)
             eqns[i] = ir_eqn {
                 primitive: step,
-                params: copy_strings(string[]{cap: 0}),
+                params: copy_strings([]string{}),
                 inputs: [],
                 outputs: [],
             }
             if i < len(chain.params) && get_chain_param(chain, i) != "" {
-                string[] params = string[]{cap: 1}
+                string[] params = make([]string, 1)
                 params[0] = get_chain_param(chain, i)
                 eqns[i].params = params
             }

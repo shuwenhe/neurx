@@ -153,8 +153,8 @@ func worker_string_at(string[] values, int index) string {
     values[index]
 }
 
-func worker_string_remove(string[] values, string value) string[] {
-    string[] filtered = string[]{cap: len(values)}
+func worker_string_remove(string[] values, string value) []string {
+    string[] filtered = make([]string, len(values))
     int i = 0
     for i < len(values) {
         if values[i] != value { filtered = append(filtered, values[i]) }

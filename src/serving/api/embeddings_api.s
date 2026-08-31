@@ -59,7 +59,7 @@ func (h embeddings_handler*) compute_embeddings(
 	return response, nil
 }
 
-func (h embeddings_handler*) compute_text_embedding(text string) float32[] {
+func (h embeddings_handler*) compute_text_embedding(text string) []float32 {
 	embedding_dim := 768
 	embedding := make(float32[], 0, embedding_dim)
 	for i := int32(0); i < int32(embedding_dim); i++ {
@@ -73,7 +73,7 @@ func (h embeddings_handler*) count_tokens(text string) int32 {
 }
 
 func (h embeddings_handler*) batch_compute_embeddings(
-	texts string[],
+	texts []string,
 ) float32[][]] {
 	embeddings := make(float32[][]], 0, len(texts))
 	for text := range texts {
@@ -84,7 +84,7 @@ func (h embeddings_handler*) batch_compute_embeddings(
 }
 
 func (h embeddings_handler*) compute_similarity(
-	embedding1 float32[],
+	embedding1 []float32,
 	embedding2 float32[],
 ) float32 {
 	if int32(len(embedding1)) != int32(len(embedding2)) {
@@ -248,7 +248,7 @@ func (bp batch_embeddings_processor*) process_batch_with_cache() int32 {
 	return processed
 }
 
-func (bp batch_embeddings_processor*) get_results() embedding_response[] {
+func (bp batch_embeddings_processor*) get_results() []embedding_response {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 	results := make(embedding_response[], 0, len(bp.results))

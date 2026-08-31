@@ -229,7 +229,7 @@ func (job_scheduler* scheduler) schedule_jobs(cluster_manager* manager) {
             fmt.Printf("[Scheduler] Job %s → Node %d\n", job, i)
         }
     }
-    scheduler.pending_jobs = string[]{}
+    scheduler.pending_jobs = []string{}
 }
 
 func (job_scheduler* scheduler) complete_jobs() {
@@ -238,7 +238,7 @@ func (job_scheduler* scheduler) complete_jobs() {
         scheduler.completed_jobs = append(scheduler.completed_jobs, job)
         fmt.Printf("[Scheduler] Completed: %s\n", job)
     }
-    scheduler.running_jobs = string[]{}
+    scheduler.running_jobs = []string{}
 }
 
 func (cluster_manager* manager) handle_node_failure(node_id int) {
@@ -304,16 +304,16 @@ func (cluster_manager* manager) run_full_deployment() {
     monitor := *cluster_monitor{
         manager:    manager,
         metrics:    make(map[string]float64),
-        alerts:     string[]{},
+        alerts:     []string{},
         health_status: "unknown",
     }
     monitor.collect_metrics()
     monitor.assess_health()
     scheduler := *job_scheduler{
-        pending_jobs:   string[]{},
-        running_jobs:   string[]{},
-        completed_jobs: string[]{},
-        failed_jobs:    string[]{},
+        pending_jobs:   []string{},
+        running_jobs:   []string{},
+        completed_jobs: []string{},
+        failed_jobs:    []string{},
     }
     scheduler.submit_job("training-job-1")
     scheduler.schedule_jobs(manager)

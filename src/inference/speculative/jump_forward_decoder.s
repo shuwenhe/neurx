@@ -16,8 +16,8 @@ struct jump_forward_result {
     bool jumped
 }
 
-func jump_forward_int_array(int capacity) int[] {
-    int[] values = int[]{cap: capacity}
+func jump_forward_int_array(int capacity) []int {
+    int[] values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
