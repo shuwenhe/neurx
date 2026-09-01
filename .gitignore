@@ -1,0 +1,63 @@
+# 编译中间产物 - 不应该提交到版本控制
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+
+# 构建目录
+build/
+dist/
+target/
+out/
+bin/
+obj/
+
+# 编译输出
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+
+# 调试文件
+*.dSYM/
+*.su
+*.gch
+*.pch
+*.asm
+
+# 缓存文件
+*.pyc
+*.pyo
+__pycache__/
+*.cache
+.pytest_cache/
+
+# IDE 和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-*
+.project
+.classpath
+
+# 环境文件
+.env
+.env.local
+venv/
+env/
+node_modules/
+
+# 日志和临时文件
+*.log
+*.tmp
+*.pid
+*.sock
+
+# 系统文件
+.DS_Store
+Thumbs.db
