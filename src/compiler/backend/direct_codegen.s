@@ -2,7 +2,7 @@ package neurx.compile.backend.direct_codegen
 
 use neurx.compile.ir
 use neurx.strings
-use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file, runtime_run_command, runtime_shell_escape}
+use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file, runtime_write_binary_file, runtime_run_command, runtime_shell_escape}
 
 struct target_arch_state {
     string name
@@ -114,44 +114,44 @@ func direct_codegen_supported(target_arch_state target) bool {
 }
 
 func direct_codegen_emit_prologue(target_arch_state target) []machine_instruction_state {
+    // Leaf functions do not need a frame.  Keeping the entry sequence empty is
+    // also important: unlike the former assembly printer, this backend emits
+    // the bytes below itself and therefore cannot leave a symbolic frame size.
     []machine_instruction_state out = []
-    out = append(out, new_machine_instruction_state("push", ["rbp"], "stack"))
-    out = append(out, new_machine_instruction_state("mov", ["rbp", "rsp"], "move"))
-    out = append(out, new_machine_instruction_state("sub", ["rsp", "stack_frame"], "stack"))
-    out
+    return out
 }
 
 func direct_codegen_emit_epilogue(target_arch_state target) []machine_instruction_state {
     []machine_instruction_state out = []
-    out = append(out, new_machine_instruction_state("mov", ["rsp", "rbp"], "move"))
-    out = append(out, new_machine_instruction_state("pop", ["rbp"], "stack"))
-    out = append(out, new_machine_instruction_state("ret", [], "control"))
-    out
+    return out
 }
 
 func direct_codegen_lower_ir_node(ir_node_state node) []machine_instruction_state {
     []machine_instruction_state out = []
     if node.op == "module_entry" {
-        out = append(out, new_machine_instruction_state("label", [node.name], "label"))
+        out = append(out, new_machine_instruction_state("label", node.inputs, "label"))
         return out
     }
     if node.op == "module_exit" {
-        out = append(out, new_machine_instruction_state("jmp", ["exit"], "control"))
+        // SysV returns an integer result in eax.  The default module graph has
+        // no result expression, so its native entry point returns zero.
+        out = append(out, new_machine_instruction_state("xor", node.inputs, "alu"))
+        out = append(out, new_machine_instruction_state("ret", node.inputs, "control"))
         return out
     }
     if node.op == "add" {
-        out = append(out, new_machine_instruction_state("mov", ["rax", node.inputs[0]], "alu"))
-        out = append(out, new_machine_instruction_state("add", ["rax", node.inputs[1]], "alu"))
-        out = append(out, new_machine_instruction_state("mov", [node.outputs[0], "rax"], "alu"))
+        out = append(out, new_machine_instruction_state("mov", node.inputs, "alu"))
+        out = append(out, new_machine_instruction_state("add", node.inputs, "alu"))
+        out = append(out, new_machine_instruction_state("mov", node.outputs, "alu"))
         return out
     }
     if node.op == "sub" {
-        out = append(out, new_machine_instruction_state("mov", ["rax", node.inputs[0]], "alu"))
-        out = append(out, new_machine_instruction_state("sub", ["rax", node.inputs[1]], "alu"))
-        out = append(out, new_machine_instruction_state("mov", [node.outputs[0], "rax"], "alu"))
+        out = append(out, new_machine_instruction_state("mov", node.inputs, "alu"))
+        out = append(out, new_machine_instruction_state("sub", node.inputs, "alu"))
+        out = append(out, new_machine_instruction_state("mov", node.outputs, "alu"))
         return out
     }
-    out = append(out, new_machine_instruction_state("call", ["runtime_dispatch_" + node.op], "call"))
+    out = append(out, new_machine_instruction_state("unsupported", node.inputs, "unsupported"))
     out
 }
 
@@ -187,9 +187,9 @@ func direct_codegen_allocate_registers([]machine_instruction_state instructions,
     int i = 0
     for i < len(instructions) {
         machine_instruction_state inst = instructions[i]
-        if inst.op == "mov" && len(inst.operands) == 2 && inst.operands[0] == "rax" {
-            inst.operands[0] = "r10"
-        }
+        // This first direct backend uses the SysV argument and return
+        // registers directly.  Do not rewrite virtual names after selection:
+        // an encoder must see the same register assignment it encodes.
         out = append(out, inst)
         i = i + 1
     }
@@ -197,6 +197,9 @@ func direct_codegen_allocate_registers([]machine_instruction_state instructions,
 }
 
 func direct_codegen_encode_instruction(machine_instruction_state inst) string {
+    if inst.op == "label" {
+        return ""
+    }
     if inst.op == "ret" {
         return "c3"
     }
@@ -206,22 +209,29 @@ func direct_codegen_encode_instruction(machine_instruction_state inst) string {
     if inst.op == "pop" {
         return "5d"
     }
-    if inst.op == "mov" {
-        return "89"
+    if inst.op == "mov" && len(inst.operands) == 2 {
+        if inst.operands[0] == "rax" && inst.operands[1] == "rdi" {
+            return "48 89 f8"
+        }
+        if inst.operands[0] == "r10" && inst.operands[1] == "rdi" {
+            return "49 89 fa"
+        }
+        if inst.operands[0] == "rbp" && inst.operands[1] == "rsp" {
+            return "48 89 e5"
+        }
     }
     if inst.op == "add" {
-        return "01"
+        return "48 01 f0"
     }
     if inst.op == "sub" {
-        return "29"
+        return "48 29 f0"
     }
-    if inst.op == "jmp" {
-        return "e9"
+    if inst.op == "xor" {
+        return "31 c0"
     }
-    if inst.op == "call" {
-        return "e8"
-    }
-    "90"
+    // Unknown IR must never silently turn into a NOP: callers can inspect the
+    // empty encoding and reject it before writing an object file.
+    ""
 }
 
 func direct_codegen_emit_blob(string target_name, []machine_instruction_state instructions, direct_codegen_plan_state plan) machine_code_blob_state {
@@ -230,13 +240,16 @@ func direct_codegen_emit_blob(string target_name, []machine_instruction_state in
     blob.symbols = append(blob.symbols, plan.entry_symbol)
     int i = 0
     for i < len(instructions) {
-        blob.bytes_hex = append(blob.bytes_hex, direct_codegen_encode_instruction(instructions[i]))
+        string encoded = direct_codegen_encode_instruction(instructions[i])
+        if encoded != "" {
+            blob.bytes_hex = append(blob.bytes_hex, encoded)
+        }
         i = i + 1
     }
     if plan.emit_object || plan.emit_executable {
         blob.executable = plan.emit_executable
     }
-    blob.object_format = "native-object"
+    blob.object_format = "elf64-relocatable"
     blob.abi = plan.target.abi
     blob.linker_script = "SECTIONS{.text : { *(.text) } }"
     blob
@@ -333,13 +346,152 @@ func direct_codegen_write_blob(string output_dir, string module_name, machine_co
     path
 }
 
-func direct_codegen_write_object_file(string output_dir, string module_name, []machine_instruction_state instructions, string entry_symbol) string {
-    string asm_path = output_dir + "/" + module_name + ".native.s"
+func direct_codegen_hex_digit(byte value) int {
+    int code = int(value)
+    if code >= 48 && code <= 57 { return code - 48 }
+    if code >= 97 && code <= 102 { return code - 97 + 10 }
+    if code >= 65 && code <= 70 { return code - 65 + 10 }
+    -1
+}
+
+func direct_codegen_text_bytes(machine_code_blob_state blob) []byte {
+    []byte out = []byte{}
+    int i = 0
+    while i < len(blob.bytes_hex) {
+        string encoded = blob.bytes_hex[i]
+        int j = 0
+        while j + 1 < len(encoded) {
+            if encoded[j] == byte(32) || encoded[j] == byte(9) {
+                j = j + 1
+                continue
+            }
+            int hi = direct_codegen_hex_digit(byte(encoded[j]))
+            int lo = direct_codegen_hex_digit(byte(encoded[j + 1]))
+            if hi >= 0 && lo >= 0 {
+                out = append(out, byte(hi * 16 + lo))
+            }
+            j = j + 2
+        }
+        i = i + 1
+    }
+    out
+}
+
+func direct_codegen_append_u16_le([]byte out, int value) []byte {
+    []byte result = out
+    result = append(result, byte(value % 256))
+    result = append(result, byte((value / 256) % 256))
+    result
+}
+
+func direct_codegen_byte_divisor(int byte_index) int {
+    int divisor = 1
+    int i = 0
+    while i < byte_index {
+        divisor = divisor * 256
+        i = i + 1
+    }
+    divisor
+}
+
+func direct_codegen_append_u32_le([]byte out, int value) []byte {
+    []byte result = out
+    int i = 0
+    while i < 4 {
+        result = append(result, byte((value / direct_codegen_byte_divisor(i)) % 256))
+        i = i + 1
+    }
+    result
+}
+
+func direct_codegen_append_u64_le([]byte out, int value) []byte {
+    []byte result = out
+    int i = 0
+    while i < 8 {
+        result = append(result, byte((value / direct_codegen_byte_divisor(i)) % 256))
+        i = i + 1
+    }
+    result
+}
+
+func direct_codegen_align([]byte out, int alignment) []byte {
+    []byte result = out
+    while len(result) % alignment != 0 { result = append(result, byte(0)) }
+    result
+}
+
+func direct_codegen_append_section_header([]byte out, int name, int kind, int flags, int offset, int size, int link, int info, int alignment, int entry_size) []byte {
+    []byte result = out
+    result = direct_codegen_append_u32_le(result, name)
+    result = direct_codegen_append_u32_le(result, kind)
+    result = direct_codegen_append_u64_le(result, flags)
+    result = direct_codegen_append_u64_le(result, 0)
+    result = direct_codegen_append_u64_le(result, offset)
+    result = direct_codegen_append_u64_le(result, size)
+    result = direct_codegen_append_u32_le(result, link)
+    result = direct_codegen_append_u32_le(result, info)
+    result = direct_codegen_append_u64_le(result, alignment)
+    direct_codegen_append_u64_le(result, entry_size)
+}
+
+// Produce an ELF64 ET_REL file directly.  It contains .text, .symtab,
+// .strtab, and .shstrtab and can be passed straight to an ELF linker.
+func direct_codegen_elf_object(machine_code_blob_state blob, string entry_symbol) []byte {
+    []byte text = direct_codegen_text_bytes(blob)
+    string strtab = "\u0000" + entry_symbol + "\u0000"
+    string shstrtab = "\u0000.text\u0000.symtab\u0000.strtab\u0000.shstrtab\u0000"
+    int text_offset = 64
+    int symtab_offset = text_offset + len(text)
+    if symtab_offset % 8 != 0 { symtab_offset = symtab_offset + (8 - symtab_offset % 8) }
+    int strtab_offset = symtab_offset + 48
+    int shstrtab_offset = strtab_offset + len(strtab)
+    int section_offset = shstrtab_offset + len(shstrtab)
+    if section_offset % 8 != 0 { section_offset = section_offset + (8 - section_offset % 8) }
+
+    []byte out = []byte{}
+    out = append(out, byte(127), byte(69), byte(76), byte(70), byte(2), byte(1), byte(1), byte(0))
+    int ident_padding = 0
+    while ident_padding < 8 { out = append(out, byte(0)); ident_padding = ident_padding + 1 }
+    out = direct_codegen_append_u16_le(out, 1) // ET_REL
+    out = direct_codegen_append_u16_le(out, 62) // EM_X86_64
+    out = direct_codegen_append_u32_le(out, 1)
+    out = direct_codegen_append_u64_le(out, 0)
+    out = direct_codegen_append_u64_le(out, 0)
+    out = direct_codegen_append_u64_le(out, section_offset)
+    out = direct_codegen_append_u32_le(out, 0)
+    out = direct_codegen_append_u16_le(out, 64)
+    out = direct_codegen_append_u16_le(out, 0)
+    out = direct_codegen_append_u16_le(out, 0)
+    out = direct_codegen_append_u16_le(out, 64)
+    out = direct_codegen_append_u16_le(out, 5)
+    out = direct_codegen_append_u16_le(out, 4)
+    out = append(out, text)
+    out = direct_codegen_align(out, 8)
+    // Null symbol then STB_GLOBAL|STT_FUNC entry symbol in .text.
+    int symbol_padding = 0
+    while symbol_padding < 24 { out = append(out, byte(0)); symbol_padding = symbol_padding + 1 }
+    out = direct_codegen_append_u32_le(out, 1)
+    out = append(out, byte(18), byte(0))
+    out = direct_codegen_append_u16_le(out, 1)
+    out = direct_codegen_append_u64_le(out, 0)
+    out = direct_codegen_append_u64_le(out, len(text))
+    int str_i = 0
+    while str_i < len(strtab) { out = append(out, byte(strtab[str_i])); str_i = str_i + 1 }
+    int shstr_i = 0
+    while shstr_i < len(shstrtab) { out = append(out, byte(shstrtab[shstr_i])); shstr_i = shstr_i + 1 }
+    out = direct_codegen_align(out, 8)
+    out = direct_codegen_append_section_header(out, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    out = direct_codegen_append_section_header(out, 1, 1, 6, text_offset, len(text), 0, 0, 16, 0)
+    out = direct_codegen_append_section_header(out, 7, 2, 0, symtab_offset, 48, 3, 1, 8, 24)
+    out = direct_codegen_append_section_header(out, 15, 3, 0, strtab_offset, len(strtab), 0, 0, 1, 0)
+    out = direct_codegen_append_section_header(out, 23, 3, 0, shstrtab_offset, len(shstrtab), 0, 0, 1, 0)
+    out
+}
+
+func direct_codegen_write_object_file(string output_dir, string module_name, machine_code_blob_state blob, string entry_symbol) string {
     string object_path = output_dir + "/" + module_name + ".o"
     runtime_make_dirs(output_dir)
-    runtime_write_text_file(asm_path, direct_codegen_instructions_to_asm(instructions, entry_symbol))
-    string command = "cc -c -x assembler -o " + runtime_shell_escape(object_path) + " " + runtime_shell_escape(asm_path)
-    runtime_run_command(command)
+    runtime_write_binary_file(object_path, direct_codegen_elf_object(blob, entry_symbol))
     object_path
 }
 
@@ -387,6 +539,18 @@ func direct_codegen_compile_ir(ir_graph_state graph, direct_codegen_plan_state p
     }
     []machine_instruction_state selected = direct_codegen_select_instructions(graph, plan)
     []machine_instruction_state allocated = direct_codegen_allocate_registers(selected, plan.target)
+    int i = 0
+    while i < len(allocated) {
+        if allocated[i].op != "label" && direct_codegen_encode_instruction(allocated[i]) == "" {
+            return direct_codegen_result_state {
+                blob: new_machine_code_blob_state(plan.target.name),
+                instructions: [],
+                ok: false,
+                error_message: "unsupported x86_64 instruction: " + allocated[i].op,
+            }
+        }
+        i = i + 1
+    }
     machine_code_blob_state blob = direct_codegen_emit_blob(plan.target.name, allocated, plan)
     direct_codegen_result_state {
         blob: blob,

@@ -131,7 +131,7 @@ func compile_module(string module_name, compile_options options) compile_result 
             runtime_make_dirs(native_ir_dir)
             runtime_write_text_file(native_ir_dir + "/" + module_name + ".native.ir", ir_graph_to_text(graph))
             direct_codegen_write_blob(native_object_dir, module_name, state.native_blob)
-            string native_object_path = direct_codegen_write_object_file(native_object_dir, module_name, native_result.instructions, "main")
+            string native_object_path = direct_codegen_write_object_file(native_object_dir, module_name, state.native_blob, "main")
             direct_codegen_link_executable(native_object_dir, module_name, native_object_path)
             state.pass_count = 3
             state.graph_node_count = len(graph.nodes)
