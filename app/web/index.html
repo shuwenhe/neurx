@@ -513,12 +513,14 @@
       </div>
 
       <div class="param-group">
-        <div class="param-label">模型</div>
-        <select id="modelSelect" onchange="app.state.model = this.value">
-          <option value="default">NeurX Default</option>
-          <option value="gpu">GPU加速</option>
-          <option value="cpu">CPU</option>
+        <div class="param-label">模型选择</div>
+        <select id="modelSelect" onchange="app.onModelChange(this.value)">
+          <option value="qwen-0.5b">Qwen2.5-0.5B-Instruct (轻量级)</option>
+          <option value="qwen-vl-7b">Qwen2.5-VL-7B (视觉-语言)</option>
         </select>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; padding: 8px; background: var(--bg-tertiary); border-radius: 4px;">
+          <div id="modelStatus">当前模型: Qwen2.5-0.5B-Instruct</div>
+        </div>
       </div>
 
       <div class="param-group">
@@ -559,7 +561,7 @@
         maxTokens: 256,
         topP: 0.9,
         topK: 40,
-        model: 'default',
+        model: 'qwen-0.5b',  // 默认使用 Qwen2.5-0.5B-Instruct
         server: 'auto'  // 服务器选择: auto | Controller | Worker
       },
 
@@ -567,6 +569,7 @@
         console.log('Initializing app...');
         this.checkBackendStatus();
         setInterval(() => this.checkBackendStatus(), 5000);
+        this.loadModelList();
         this.render();
         const input = document.getElementById('messageInput');
         if (input) {
@@ -583,6 +586,29 @@
           console.log('Message input initialized');
         } else {
           console.error('Message input element not found!');
+        }
+      },
+
+      async loadModelList() {
+        try {
+          const response = await fetch(`${API_BASE}/api/models`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Available models:', data.models);
+            // 更新模型状态显示
+            const modelSelect = document.getElementById('modelSelect');
+            const modelStatus = document.getElementById('modelStatus');
+            if (modelSelect && modelStatus) {
+              const selectedOption = modelSelect.options[modelSelect.selectedIndex];
+              const selectedText = selectedOption ? selectedOption.text : 'Unknown';
+              modelStatus.textContent = `当前模型: ${selectedText}`;
+            }
+          }
+        } catch (e) {
+          console.log('Could not load model list:', e);
         }
       },
 
@@ -710,6 +736,18 @@
       toggleParams() {
         const panel = document.getElementById('paramsPanel');
         panel.classList.toggle('open');
+      },
+
+      onModelChange(modelId) {
+        this.state.model = modelId;
+        const modelSelect = document.getElementById('modelSelect');
+        const modelStatus = document.getElementById('modelStatus');
+        if (modelSelect && modelStatus) {
+          const selectedOption = modelSelect.options[modelSelect.selectedIndex];
+          const selectedText = selectedOption ? selectedOption.text : 'Unknown';
+          modelStatus.textContent = `当前模型: ${selectedText}`;
+          console.log(`[Model Changed] Now using: ${selectedText} (${modelId})`);
+        }
       },
 
       render() {
