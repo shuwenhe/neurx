@@ -56,7 +56,7 @@ S_COMPILER_EMIT_CWD ?= $(S_REPO_ROOT)
 S_RUNNER_SRC := $(CURDIR_UNIX)/tool/s_ir_runner.s
 S_RUNNER_C_SRC := $(CURDIR_UNIX)/tool/s_ir_runner.c
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/s_runner
-S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
+S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/NeurX$(BIN_EXT)
 S_GPU_RUNTIME_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/s_gpu_runtime
 S_GPU_RUNTIME_LIB := $(S_GPU_RUNTIME_BUILD_DIR)/libneurx_s_cuda.so
 POSTTRAIN_SFT_NATIVE_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/posttrain_sft_native
@@ -1031,7 +1031,7 @@ build-real-chat-s:
 	}
 	@echo "✓ Compiled to IR successfully"
 	@echo "Creating Real Chat runner script..."
-	@printf '#!/bin/bash\n%s/artifact/build/s_runner/s_ir_runner %s/artifact/build/real_chat/real_chat.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/real_chat/real_chat
+	@printf '#!/bin/bash\n%s/artifact/build/s_runner/NeurX %s/artifact/build/real_chat/real_chat.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/real_chat/real_chat
 	@chmod +x artifact/build/real_chat/real_chat
 	@echo "✓ Real Chat ready"
 
@@ -1289,7 +1289,7 @@ chat-gpu-native: build-production-s-inference
 	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference - Native)"
 	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: Qwen2.5-0.5B-Instruct"
 	@echo "   Note: GPU backend may fail with socket binding issues"
-	@pkill -9 s_ir_runner 2>/dev/null || true
+	@pkill -9 NeurX 2>/dev/null || true
 	@sleep 3
 	@echo "   Waiting for OS to release port $(GPU_BACKEND_PORT)..."
 	@for i in 1 2 3 4 5 6 7; do if lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1; then sleep 1; else break; fi; done
@@ -1308,7 +1308,7 @@ chat-cpu: build-production-s-inference
 		exit 1; \
 	}
 	@mkdir -p /tmp
-	@pkill -f "s_ir_runner.*cpu_backend" || true
+	@pkill -f "NeurX.*cpu_backend" || true
 	@sleep 1
 	@echo "🚀 Starting CPU backend service in background..."
 	@NEURX_ROOT='$(CURDIR_UNIX)' \
@@ -1332,7 +1332,7 @@ streaming-chat: build-production-s-inference
 		exit 1; \
 	}
 	@mkdir -p /tmp
-	@pkill -f "s_ir_runner.*cpu_backend" || true
+	@pkill -f "NeurX.*cpu_backend" || true
 	@sleep 1
 	@echo "🚀 Starting CPU backend service for streaming chat..."
 	@NEURX_ROOT='$(CURDIR_UNIX)' \
@@ -1357,8 +1357,8 @@ web-ui: build-production-s-inference
 		exit 1; \
 	}
 	@mkdir -p /tmp
-	@pkill -f "s_ir_runner.*cpu_backend" || true
-	@pkill -f "s_ir_runner.*web_ui_server" || true
+	@pkill -f "NeurX.*cpu_backend" || true
+	@pkill -f "NeurX.*web_ui_server" || true
 	@sleep 1
 	@echo "🚀 Starting CPU backend service on port 18084..."
 	@NEURX_ROOT='$(CURDIR_UNIX)' \
@@ -1414,7 +1414,7 @@ backend: build-s-ir-runner build-s-gpu-cuda-runtime $(PRODUCTION_S_GPU_BACKEND_E
 
 backend-stop:
 	@echo "🛑 Stopping NeurX GPU Backend..."
-	@pkill -f "s_ir_runner.*gpu_backend" 2>/dev/null && echo "✅ Backend stopped" || echo "ℹ️  Backend not running"
+	@pkill -f "NeurX.*gpu_backend" 2>/dev/null && echo "✅ Backend stopped" || echo "ℹ️  Backend not running"
 	@sleep 1
 	@lsof -i :18084 2>/dev/null || echo "✅ Port 18084 is now free"
 
@@ -1461,7 +1461,7 @@ start-frontend: frontend
 
 frontend-stop:
 	@echo "🛑 Stopping NeurX Web UI Frontend..."
-	@pkill -f "s_ir_runner.*web_ui_server" 2>/dev/null && echo "✅ Frontend stopped" || echo "ℹ️  Frontend not running"
+	@pkill -f "NeurX.*web_ui_server" 2>/dev/null && echo "✅ Frontend stopped" || echo "ℹ️  Frontend not running"
 	@sleep 1
 	@lsof -i :8081 2>/dev/null || echo "✅ Port 8081 is now free"
 
@@ -1476,7 +1476,7 @@ system-status:
 	@echo "=== NeurX System Status ==="
 	@echo ""
 	@echo "🔍 Running Processes:"
-	@pgrep -a s_ir_runner | grep -E "(gpu_backend|web_ui_server)" || echo "❌ No NeurX services running"
+	@pgrep -a NeurX | grep -E "(gpu_backend|web_ui_server)" || echo "❌ No NeurX services running"
 	@echo ""
 	@echo "🔌 Open Ports:"
 	@lsof -i :18084 -n 2>/dev/null | grep LISTEN > /dev/null && echo "✅ Port 18084 (Backend): OPEN" || echo "❌ Port 18084: CLOSED"
@@ -1577,7 +1577,7 @@ chat-real-inference: build-s-ir-runner build-real-inference-s build-neurx-intera
 		echo "✓ Model found: base-model-posttrain"; \
 		echo "✓ Running pure S medical knowledge inference"; \
 		mkdir -p artifact/logs; \
-		$(CURDIR_UNIX)/artifact/build/s_runner/s_ir_runner $(CURDIR_UNIX)/artifact/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1; \
+		$(CURDIR_UNIX)/artifact/build/s_runner/NeurX $(CURDIR_UNIX)/artifact/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1; \
 	else \
 		echo "❌ Model not found"; \
 	fi
@@ -1609,14 +1609,14 @@ build-posttrain-chat-s:
 	}
 	@echo "✓ Compiled to IR successfully"
 	@echo "Creating PostTrain Chat runner script..."
-	@printf '#!/bin/bash\n%s/artifact/build/s_runner/s_ir_runner %s/artifact/build/posttrain_chat/posttrain_chat.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/posttrain_chat/posttrain_chat
+	@printf '#!/bin/bash\n%s/artifact/build/s_runner/NeurX %s/artifact/build/posttrain_chat/posttrain_chat.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/posttrain_chat/posttrain_chat
 	@chmod +x artifact/build/posttrain_chat/posttrain_chat
 	@echo "✓ PostTrain Chat ready"
 build-real-inference-s: build-s-ir-runner
 	@mkdir -p artifact/build/real_inference
 	@echo "Compiling NeurX inference entrypoint (S)..."
 	@$(S_SEED_COMPILER) src/inference/runtime/core/real_inference.s artifact/build/real_inference/real_inference.ir
-	@printf '#!/usr/bin/env bash\n# Inference engine wrapper - works in Docker and locally\nSCRIPT_DIR="$$(cd "$$(dirname "$$0")" && pwd)"\nPROJECT_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"\nS_IR_RUNNER="$$PROJECT_ROOT/artifact/build/s_runner/s_ir_runner"\nif [ ! -f "$$S_IR_RUNNER" ]; then S_IR_RUNNER="$$(dirname "$$0")/../s_runner/s_ir_runner"; fi\nexec "$$S_IR_RUNNER" "$$SCRIPT_DIR/real_inference.ir" "$$@"\n' > artifact/build/real_inference/real_inference
+	@printf '#!/usr/bin/env bash\n# Inference engine wrapper - works in Docker and locally\nSCRIPT_DIR="$$(cd "$$(dirname "$$0")" && pwd)"\nPROJECT_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"\nS_IR_RUNNER="$$PROJECT_ROOT/artifact/build/s_runner/NeurX"\nif [ ! -f "$$S_IR_RUNNER" ]; then S_IR_RUNNER="$$(dirname "$$0")/../s_runner/NeurX"; fi\nexec "$$S_IR_RUNNER" "$$SCRIPT_DIR/real_inference.ir" "$$@"\n' > artifact/build/real_inference/real_inference
 	@chmod +x artifact/build/real_inference/real_inference
 	@echo "✓ NeurX S inference runner ready"
 
@@ -1644,7 +1644,7 @@ build-fast-chat-inference-s:
 	}
 	@echo "✓ Compiled to IR successfully"
 	@echo "Creating Fast Chat Inference runner script..."
-	@printf '#!/bin/bash\n%s/artifact/build/s_runner/s_ir_runner %s/artifact/build/fast_chat_inference/fast_chat_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/fast_chat_inference/fast_chat_inference
+	@printf '#!/bin/bash\n%s/artifact/build/s_runner/NeurX %s/artifact/build/fast_chat_inference/fast_chat_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/fast_chat_inference/fast_chat_inference
 	@chmod +x artifact/build/fast_chat_inference/fast_chat_inference
 	@echo "✓ Fast Chat Inference ready"
 build-real-inference-interactive-s:
@@ -1656,7 +1656,7 @@ build-real-inference-interactive-s:
 	}
 	@echo "✓ Compiled to IR successfully"
 	@echo "Creating Real Inference Interactive runner script..."
-	@printf '#!/bin/bash\n%s/artifact/build/s_runner/s_ir_runner %s/artifact/build/real_inference_interactive/real_inference_interactive.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/real_inference_interactive/real_inference_interactive
+	@printf '#!/bin/bash\n%s/artifact/build/s_runner/NeurX %s/artifact/build/real_inference_interactive/real_inference_interactive.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/real_inference_interactive/real_inference_interactive
 	@chmod +x artifact/build/real_inference_interactive/real_inference_interactive
 	@echo "✓ Real Inference Interactive ready"
 build-real-inference-with-model-s:
@@ -1668,7 +1668,7 @@ build-real-inference-with-model-s:
 	}
 	@echo "✓ Compiled to IR successfully"
 	@echo "Creating Real Inference with Model runner script..."
-	@printf '#!/bin/bash\n%s/artifact/build/s_runner/s_ir_runner %s/artifact/build/real_inference_with_model/real_inference_with_model.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/real_inference_with_model/real_inference_with_model
+	@printf '#!/bin/bash\n%s/artifact/build/s_runner/NeurX %s/artifact/build/real_inference_with_model/real_inference_with_model.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifact/build/real_inference_with_model/real_inference_with_model
 	@chmod +x artifact/build/real_inference_with_model/real_inference_with_model
 	@echo "✓ Real Inference with Model ready"
 build-hf-posttrain-chat-s: build-real-inference-s build-s-ir-runner
