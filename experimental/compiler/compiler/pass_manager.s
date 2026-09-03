@@ -6,7 +6,6 @@ use neurx.experimental.compiler.passes.op_fusion.{apply_op_fusion, fusion_result
 use neurx.experimental.compiler.passes.dead_code_elim.{remove_dead_code, dead_code_result}
 use neurx.experimental.compiler.passes.memory_opt.{apply_memory_optimization, memory_opt_result}
 
-
     constant_folding,
     op_fusion,
     dead_code_elim,

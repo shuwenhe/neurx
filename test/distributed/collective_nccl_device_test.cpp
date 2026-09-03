@@ -91,7 +91,7 @@ cleanup:
   if (receive) cuda->free_device(receive);
   if (send) cuda->free_device(send);
 }
-}  // namespace
+}
 
 int main() {
   cuda_api cuda;

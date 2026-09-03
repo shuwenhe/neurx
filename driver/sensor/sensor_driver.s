@@ -1,6 +1,5 @@
 package neurx.driver.sensor
 
-
     lidar_3d,
     camera_rgb,
     camera_thermal,

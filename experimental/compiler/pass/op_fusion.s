@@ -3,7 +3,6 @@ package neurx.experimental.compiler.passes.op_fusion
 use neurx.experimental.compiler.ir.graph.computation_graph
 use neurx.experimental.compiler.ir.operation.op_type
 
-
     conv_bn,
     conv_relu,
     linear_relu,

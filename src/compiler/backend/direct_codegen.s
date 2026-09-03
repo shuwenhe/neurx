@@ -114,9 +114,7 @@ func direct_codegen_supported(target_arch_state target) bool {
 }
 
 func direct_codegen_emit_prologue(target_arch_state target) []machine_instruction_state {
-    // Leaf functions do not need a frame.  Keeping the entry sequence empty is
-    // also important: unlike the former assembly printer, this backend emits
-    // the bytes below itself and therefore cannot leave a symbolic frame size.
+
     []machine_instruction_state out = []
     return out
 }
@@ -133,8 +131,7 @@ func direct_codegen_lower_ir_node(ir_node_state node) []machine_instruction_stat
         return out
     }
     if node.op == "module_exit" {
-        // SysV returns an integer result in eax.  The default module graph has
-        // no result expression, so its native entry point returns zero.
+
         out = append(out, new_machine_instruction_state("xor", node.inputs, "alu"))
         out = append(out, new_machine_instruction_state("ret", node.inputs, "control"))
         return out
@@ -187,9 +184,7 @@ func direct_codegen_allocate_registers([]machine_instruction_state instructions,
     int i = 0
     for i < len(instructions) {
         machine_instruction_state inst = instructions[i]
-        // This first direct backend uses the SysV argument and return
-        // registers directly.  Do not rewrite virtual names after selection:
-        // an encoder must see the same register assignment it encodes.
+
         out = append(out, inst)
         i = i + 1
     }
@@ -229,8 +224,7 @@ func direct_codegen_encode_instruction(machine_instruction_state inst) string {
     if inst.op == "xor" {
         return "31 c0"
     }
-    // Unknown IR must never silently turn into a NOP: callers can inspect the
-    // empty encoding and reject it before writing an object file.
+
     ""
 }
 
@@ -434,8 +428,6 @@ func direct_codegen_append_section_header([]byte out, int name, int kind, int fl
     direct_codegen_append_u64_le(result, entry_size)
 }
 
-// Produce an ELF64 ET_REL file directly.  It contains .text, .symtab,
-// .strtab, and .shstrtab and can be passed straight to an ELF linker.
 func direct_codegen_elf_object(machine_code_blob_state blob, string entry_symbol) []byte {
     []byte text = direct_codegen_text_bytes(blob)
     string strtab = "\u0000" + entry_symbol + "\u0000"
@@ -452,8 +444,8 @@ func direct_codegen_elf_object(machine_code_blob_state blob, string entry_symbol
     out = append(out, byte(127), byte(69), byte(76), byte(70), byte(2), byte(1), byte(1), byte(0))
     int ident_padding = 0
     while ident_padding < 8 { out = append(out, byte(0)); ident_padding = ident_padding + 1 }
-    out = direct_codegen_append_u16_le(out, 1) // ET_REL
-    out = direct_codegen_append_u16_le(out, 62) // EM_X86_64
+    out = direct_codegen_append_u16_le(out, 1)
+    out = direct_codegen_append_u16_le(out, 62)
     out = direct_codegen_append_u32_le(out, 1)
     out = direct_codegen_append_u64_le(out, 0)
     out = direct_codegen_append_u64_le(out, 0)
@@ -467,7 +459,7 @@ func direct_codegen_elf_object(machine_code_blob_state blob, string entry_symbol
     out = direct_codegen_append_u16_le(out, 4)
     out = append(out, text)
     out = direct_codegen_align(out, 8)
-    // Null symbol then STB_GLOBAL|STT_FUNC entry symbol in .text.
+
     int symbol_padding = 0
     while symbol_padding < 24 { out = append(out, byte(0)); symbol_padding = symbol_padding + 1 }
     out = direct_codegen_append_u32_le(out, 1)

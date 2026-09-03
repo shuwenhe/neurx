@@ -2,12 +2,10 @@ package neurx.kernel.sched
 
 use std.slices
 
-
     training_task,
     inference_task,
     system_task
 }
-
 
     ready,
     running,

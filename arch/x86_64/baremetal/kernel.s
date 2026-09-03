@@ -1,6 +1,5 @@
 package neurx.baremetal.kernel
 
-
 extern func baremetal_stage(int stage) int
 extern func baremetal_interrupt_init() int
 extern func baremetal_apic_init() int

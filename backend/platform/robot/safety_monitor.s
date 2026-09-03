@@ -3,7 +3,6 @@ package neurx.backend.platform.robot
 use std.slices
 use std.io.println
 
-
     safe,
     warning,
     critical,

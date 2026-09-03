@@ -2,19 +2,16 @@ package neurx.sys.device_abi
 
 use std.slices
 
-
 struct cuda_error {
     int code
     string message
 }
-
 
 struct device_init_params {
     int device_id
     bool async_enabled
     int max_threads_per_block
 }
-
 
 struct device_memory_allocation {
     int allocation_id
@@ -23,7 +20,6 @@ struct device_memory_allocation {
     int size_bytes
     bool is_allocated
 }
-
 
 struct kernel_launch_request {
     int kernel_id
@@ -37,7 +33,6 @@ struct kernel_launch_request {
     int shared_memory_bytes
 }
 
-
 struct collective_launch_request {
     int op_id
     string op_type              
@@ -45,7 +40,6 @@ struct collective_launch_request {
     int world_size
     int tensor_size
 }
-
 
 struct cuda_api_call {
     int api_id
@@ -55,7 +49,6 @@ struct cuda_api_call {
     int error_code
     int timestamp_us
 }
-
 
 struct device_memory_stats {
     int device_id
@@ -67,32 +60,25 @@ struct device_memory_stats {
     int deallocation_count
 }
 
-
 struct device_abi_context {
     int device_id
     bool initialized
     
-    
     device_memory_allocation[] allocations
     device_memory_stats memory_stats
-    
     
     kernel_launch_request[] pending_kernels
     int kernel_launch_count
     int total_kernel_time_us
     
-    
     collective_launch_request[] pending_collectives
-    
     
     cuda_api_call[] api_calls
     int api_call_count
     
-    
     int last_cuda_error_code
     string last_error_message
 }
-
 
 func create_device_abi(int device_id) device_abi_context {
     stats := device_memory_stats {
@@ -121,7 +107,6 @@ func create_device_abi(int device_id) device_abi_context {
     }
     ctx
 }
-
 
 func alloc_device_memory(device_abi_context ctx, int size_bytes) device_abi_context {
     if size_bytes <= 0 {
@@ -167,7 +152,6 @@ func alloc_device_memory(device_abi_context ctx, int size_bytes) device_abi_cont
     }
 }
 
-
 func free_device_memory(device_abi_context ctx, int device_address, int size_bytes) device_abi_context {
     ctx.memory_stats.allocated_bytes = ctx.memory_stats.allocated_bytes - size_bytes
     ctx.memory_stats.free_bytes = ctx.memory_stats.free_bytes + size_bytes
@@ -188,7 +172,6 @@ func free_device_memory(device_abi_context ctx, int device_address, int size_byt
     
     ctx
 }
-
 
 func launch_kernel(device_abi_context ctx, int kernel_id, int grid_x, int grid_y, int grid_z, int block_x, int block_y, int block_z) device_abi_context {
     req := kernel_launch_request {
@@ -222,7 +205,6 @@ func launch_kernel(device_abi_context ctx, int kernel_id, int grid_x, int grid_y
     ctx
 }
 
-
 func synchronize_device(device_abi_context ctx) device_abi_context {
     api_call := cuda_api_call {
         api_id: ctx.api_call_count,
@@ -240,7 +222,6 @@ func synchronize_device(device_abi_context ctx) device_abi_context {
     ctx
 }
 
-
 func queue_collective_operation(device_abi_context ctx, string op_type, int rank, int world_size) device_abi_context {
     req := collective_launch_request {
         op_id: ctx.api_call_count,
@@ -255,11 +236,9 @@ func queue_collective_operation(device_abi_context ctx, string op_type, int rank
     ctx
 }
 
-
 func get_memory_stats(device_abi_context ctx) device_memory_stats {
     ctx.memory_stats
 }
-
 
 func get_last_error(device_abi_context ctx) cuda_error {
     error := cuda_error {
@@ -269,22 +248,17 @@ func get_last_error(device_abi_context ctx) cuda_error {
     error
 }
 
-
 func get_api_call_count(device_abi_context ctx) int {
     ctx.api_call_count
 }
-
 
 func get_kernel_launch_count(device_abi_context ctx) int {
     ctx.kernel_launch_count
 }
 
-
 func verify_memory_consistency(device_abi_context ctx) bool {
     alloc_total := 0
     dealloc_total := 0
-    
-    
     
     if ctx.memory_stats.allocated_bytes >= 0 {
         true
@@ -293,14 +267,7 @@ func verify_memory_consistency(device_abi_context ctx) bool {
     }
 }
 
-
 func print_abi_summary(device_abi_context ctx) bool {
-    
-    
-    
-    
-    
-    
     
     true
 }

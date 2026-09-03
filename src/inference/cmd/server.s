@@ -51,7 +51,7 @@ func main() {
     }
     
     print("🧪 Quick Test:\n")
-    print("   curl -X POST http://127.0.0.1:8000/api/generate \\\n")
+    print("   curl -X POST http:
     print("     -H 'Content-Type: application/json' \\\n")
     print("     -d '{\"prompt\": \"医学术语\", \"max_tokens\": 100}'\n\n")
     print("📝 Type 'quit' to shutdown server\n")

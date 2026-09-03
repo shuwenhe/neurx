@@ -79,7 +79,6 @@ struct tool_call {
     retry_count: int = 0
 }
 
-
     PENDING
     RUNNING
     COMPLETED

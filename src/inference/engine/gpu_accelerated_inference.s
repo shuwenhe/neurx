@@ -5,8 +5,6 @@ use neurx.compute.gpu_gemm_engine
 use neurx.device.cuda_runtime_binding
 use neurx.inference.runtime.real_text_engine
 
-// GPU-accelerated inference engine
-// Strategy: Use GPU for heavy GEMM operations, CPU for control flow
 struct gpu_accelerated_engine {
     real_text_engine_state cpu_engine
     gpu_gemm_engine* gpu_engine
@@ -29,7 +27,6 @@ func new_gpu_accelerated_engine(string model_path, int device_id) (gpu_accelerat
         return engine, false, "failed to load model"
     }
     
-    // Try to initialize GPU
     ok, err := cuda_set_device(device_id)
     if !ok {
         return engine, true, ""
@@ -46,7 +43,6 @@ func new_gpu_accelerated_engine(string model_path, int device_id) (gpu_accelerat
     return engine, true, ""
 }
 
-// GPU-accelerated forward pass
 func gpu_accelerated_forward(gpu_accelerated_engine* engine,
                             float[] hidden_state,
                             int layer_idx) (float[], bool, string) {
@@ -62,28 +58,18 @@ func gpu_accelerated_forward(gpu_accelerated_engine* engine,
     hidden_size := len(hidden_state)
     batch := 1
     
-    // For now, use CPU computation (GPU optimization to come)
-    // This is a placeholder that validates the structure
-    
-    // In production, this would:
-    // 1. Upload hidden_state to GPU
-    // 2. Run transformer layer on GPU
-    // 3. Download result to CPU
-    
     return hidden_state, true, ""
 }
 
-// Simplified GPU GEMM wrapper for linear layers
 func gpu_linear_forward(gpu_accelerated_engine* engine,
-                       float[] input,       // [batch, in_features]
-                       string weight_name,  // e.g., "layer.0.weight"
+                       float[] input,
+                       string weight_name,
                        float[] bias) float[] {
     
     if len(input) == 0 {
         return make([]float, 0)
     }
     
-    // Get weight dimensions from model
     weight_rows := engine.cpu_engine.model.num_tensors
     weight_cols := len(input)
     
@@ -91,20 +77,11 @@ func gpu_linear_forward(gpu_accelerated_engine* engine,
         return make([]float, 0)
     }
     
-    // Allocate output
     output := make([]float, weight_rows)
     
-    // In production GPU path:
-    // 1. Create GPU matrices
-    // 2. Copy input and weight to GPU
-    // 3. Call gpu_gemm
-    // 4. Copy output back
-    
-    // For now, return input as-is
     return output
 }
 
-// Generate with GPU acceleration
 func gpu_accelerated_generate(gpu_accelerated_engine* engine,
                              string prompt,
                              int max_tokens,
@@ -114,7 +91,6 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
         return "", 0, 0, false, "model not loaded"
     }
     
-    // Tokenize prompt
     int[] prompt_tokens = tokenize_prompt(prompt)
     int prompt_len = len(prompt_tokens)
     
@@ -123,7 +99,6 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
         return result_text, 0, 0, true, ""
     }
     
-    // Initialize hidden state
     float[] hidden = load_embedding_row(
         engine.cpu_engine.model,
         "model.embed_tokens.weight",
@@ -137,7 +112,6 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
         return result_text, 0, 0, true, ""
     }
     
-    // Process prompt tokens
     int idx = 1
     for idx < prompt_len {
         float[] embed = load_embedding_row(
@@ -159,20 +133,18 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
         idx = idx + 1
     }
     
-    // Generate tokens
     string response = ""
     int gen_count = 0
     int vocab_size = safe_vocab_size(&engine.cpu_engine)
     
     for gen_count < max_tokens {
-        // Project to logits
+
         float[] logits = project_logits(&engine.cpu_engine, hidden)
         
         if len(logits) <= 0 {
             break
         }
         
-        // Sample next token
         int next_token = sample_token_from_logits(
             logits,
             make([]int, 0),
@@ -183,12 +155,10 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
             next_token = 0
         }
         
-        // Check for EOS
         if next_token == safe_eos_token_id(&engine.cpu_engine) {
             break
         }
         
-        // Decode token
         string word = token_to_word(next_token)
         if len(word) > 0 {
             if len(response) > 0 {
@@ -197,7 +167,6 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
             response = response + word
         }
         
-        // Update hidden state
         float[] next_embed = load_embedding_row(
             engine.cpu_engine.model,
             "model.embed_tokens.weight",
@@ -224,12 +193,10 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
     return response, prompt_len, gen_count, true, ""
 }
 
-// Measure GPU performance
 func gpu_benchmark(gpu_accelerated_engine* engine) (float, bool, string) {
     prompt := "artificial intelligence"
     tokens := 20
     
-    // Measure inference time
     int64 start_time = get_current_time_ms()
     
     response, _, _, ok, err := gpu_accelerated_generate(engine, prompt, tokens, 0.7)
@@ -246,7 +213,6 @@ func gpu_benchmark(gpu_accelerated_engine* engine) (float, bool, string) {
     return tokens_per_sec, true, ""
 }
 
-// Export functions
 extern func tokenize_prompt(string prompt) int[]
 extern func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) []float
 extern func safe_hidden_size(real_text_engine_state* state) int

@@ -1,6 +1,5 @@
 package config
 
-
     cuda
     rocm
     cpu
@@ -8,7 +7,6 @@ package config
     xpu
     unknown
 }
-
 
     x86
     arm

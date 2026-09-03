@@ -12,7 +12,6 @@ use neurx.inference.engine.gpu_inference_complete
 func test_weight_loading() (bool, string) {
     println("=== Testing Weight Loading ===")
     
-    // Test loading model weights
     weights, ok, err := load_model_weights("models/llama-7b.safetensors", 0)
     if !ok {
         return false, "weight loading failed: " + err
@@ -23,7 +22,6 @@ func test_weight_loading() (bool, string) {
     println("✓ Total size: " + (total / 1024 / 1024 as string) + "MB")
     println("✓ Largest: " + largest_name + " (" + (largest / 1024 / 1024 as string) + "MB)")
     
-    // Verify weights
     ok, err = verify_model_weights(&weights, "llama-7b")
     if !ok {
         return false, "weight verification failed: " + err
@@ -43,13 +41,11 @@ func test_transformer_forward() (bool, string) {
         return false, "no CUDA devices"
     }
     
-    // Create GEMM engine
     engine, ok, err := new_gpu_gemm_engine(0, 8)
     if !ok {
         return false, err
     }
     
-    // Create test input
     batch := 1
     seq_len := 10
     hidden := 768
@@ -66,9 +62,6 @@ func test_transformer_forward() (bool, string) {
     }
     
     println("✓ Created tensors: input [" + (batch as string) + "," + (seq_len as string) + "], logits [" + (batch as string) + "," + (vocab as string) + "]")
-    
-    // In real scenario, would load model weights and run forward
-    // gpu_model_forward(engine, input_ids, &weights, &config, &logits)
     
     gpu_matrix_free(engine, &input_ids)
     gpu_matrix_free(engine, &logits)
@@ -95,16 +88,12 @@ func test_nccl_communication() (bool, string) {
         return true, ""
     }
     
-    // Initialize NCCL for 2 GPUs
     comm0, ok, err := nccl_init_rank(0, 2)
     if !ok {
         return false, err
     }
     
     println("✓ NCCL Rank 0 initialized (world_size=2)")
-    
-    // In real scenario, rank 1 would also be initialized
-    // and collective operations would be tested
     
     ok, err = nccl_comm_destroy(&comm0)
     if !ok {
@@ -118,7 +107,6 @@ func test_nccl_communication() (bool, string) {
 func test_inference_engine() (bool, string) {
     println("=== Testing Complete Inference Engine ===")
     
-    // Initialize inference engine
     engine, ok, err := new_gpu_inference_engine("models/llama-7b.safetensors", 0)
     if !ok {
         println("⚠ Model loading skipped (model not available): " + err)
@@ -127,10 +115,9 @@ func test_inference_engine() (bool, string) {
     
     println("✓ Inference engine initialized")
     
-    // Create inference request
     input_ids := vec[int]()
-    input_ids.push(1)   // "Hello"
-    input_ids.push(2)   // "world"
+    input_ids.push(1)
+    input_ids.push(2)
     
     req := inference_request{
         request_id: "test-1",
@@ -141,7 +128,6 @@ func test_inference_engine() (bool, string) {
         top_k: 50,
     }
     
-    // Run inference
     result := inference_single(engine, &req)
     
     if result.success {
@@ -151,7 +137,6 @@ func test_inference_engine() (bool, string) {
         println("⚠ Inference failed: " + result.error_msg)
     }
     
-    // Cleanup
     ok, err = gpu_inference_engine_finalize(engine)
     if !ok {
         return false, err
@@ -174,25 +159,16 @@ func test_distributed_inference() (bool, string) {
         return true, ""
     }
     
-    // Test tensor parallelism
     println("Testing Tensor Parallelism...")
     
     engines := box[gpu_inference_engine*]()
-    // engines[0] and engines[1] would be initialized for GPU 0,1
-    
+
     input_ids := vec[int]()
     input_ids.push(1)
     
-    // output, ok, err := infer_tensor_parallel(engines as gpu_inference_engine*[], input_ids as int[], 10)
-    // if !ok { return false, err }
-    
     println("✓ Tensor parallelism structure verified")
     
-    // Test pipeline parallelism
     println("Testing Pipeline Parallelism...")
-    
-    // output, ok, err = infer_pipeline_parallel(engines as gpu_inference_engine*[], input_ids as int[], 10)
-    // if !ok { return false, err }
     
     println("✓ Pipeline parallelism structure verified")
     

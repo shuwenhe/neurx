@@ -166,7 +166,7 @@ bool decode_hex(const char* input, nccl_unique_id* output) {
   }
   return true;
 }
-}  // namespace
+}
 
 extern "C" int neurx_collective_probe(const char* backend) {
   std::lock_guard<std::mutex> lock(state_mutex);

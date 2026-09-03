@@ -2,14 +2,8 @@ package neurx.test
 
 use neurx.integration.os_features_tier3_integration
 
-
 func main() {
     osfi3 := new_os_features_tier3_integration()
-    
-    
-    
-    
-    
     
     pidns, pidns_err := osfi3.create_pid_namespace(1)
     if pidns_err == "" {
@@ -17,13 +11,11 @@ func main() {
         print_int(pidns.ns_id)
     }
     
-    
     netns, netns_err := osfi3.create_network_namespace()
     if netns_err == "" {
         print("✓ Network Namespace 创建成功: ns_id = ")
         print_int(netns.ns_id)
     }
-    
     
     mntns, mntns_err := osfi3.create_mount_namespace()
     if mntns_err == "" {
@@ -31,17 +23,11 @@ func main() {
         print_int(mntns.ns_id)
     }
     
-    
     userns, userns_err := osfi3.create_user_namespace(0)
     if userns_err == "" {
         print("✓ User Namespace 创建成功: ns_id = ")
         print_int(userns.ns_id)
     }
-    
-    
-    
-    
-    
     
     cg, cg_err := osfi3.create_cgroup("docker_container_1")
     if cg_err == "" {
@@ -49,40 +35,30 @@ func main() {
         print_int(cg.group_id)
     }
     
-    
     add_proc, add_proc_err := osfi3.add_process_to_cgroup(0, 1234)
     if add_proc_err == "" {
         print("✓ 进程添加到 cgroup 成功: pid = 1234")
     }
-    
     
     cpu_limit, cpu_err := osfi3.set_cpu_limit(0, 50000, 100000)
     if cpu_err == "" {
         print("✓ CPU 限制设置成功 (50%)")
     }
     
-    
     mem_limit, mem_err := osfi3.set_memory_limit(0, 512)
     if mem_err == "" {
         print("✓ 内存限制设置成功 (512MB)")
     }
-    
     
     io_limit, io_err := osfi3.set_io_limit(0, 52428800, 52428800)  
     if io_err == "" {
         print("✓ I/O 限制设置成功 (50MB/s)")
     }
     
-    
     check_limits, check_err := osfi3.check_cgroup_limits(0)
     if check_err == "" {
         print("✓ cgroup 限制检查成功")
     }
-    
-    
-    
-    
-    
     
     audit_rule, audit_err := osfi3.add_audit_rule(0, "/etc/passwd", 0)  
     if audit_err == "" {
@@ -90,33 +66,21 @@ func main() {
         print_int(audit_rule.rule_id)
     }
     
-    
     log_event, log_err := osfi3.log_audit_event(1234, 1000, 1, "open_file", "/etc/passwd", 0)
     if log_err == "" {
         print("✓ 审计事件记录成功: entry_id = ")
         print_int(log_event)
     }
     
-    
-    
-    
-    
-    
     cap_add, cap_add_err := osfi3.add_capability(1234, 1)  
     if cap_add_err == "" {
         print("✓ 权限能力添加成功: CAP_CHOWN")
     }
     
-    
     has_cap, has_cap_err := osfi3.check_capability(1234, 1)
     if has_cap_err == "" && has_cap == 1 {
         print("✓ 权限能力检查成功: 进程具有 CAP_CHOWN")
     }
-    
-    
-    
-    
-    
     
     user_new, user_err := osfi3.create_user("john", "/home/john", 1000)
     if user_err == "" {
@@ -124,29 +88,21 @@ func main() {
         print_int(user_new.uid)
     }
     
-    
     group_new, group_err := osfi3.create_group("developers")
     if group_err == "" {
         print("✓ 用户组创建成功: gid = ")
         print_int(group_new.gid)
     }
     
-    
     add_user, add_user_err := osfi3.add_user_to_group(1000, 1000)
     if add_user_err == "" {
         print("✓ 用户添加到组成功")
     }
     
-    
-    
-    
-    
-    
     file_perm, file_perm_err := osfi3.set_file_permission(100, 1000, 1000, 0o755)
     if file_perm_err == "" {
         print("✓ 文件权限设置成功: mode = 755")
     }
-    
     
     acl_add, acl_err := osfi3.add_acl_entry(100, 1001, 0, 5)  
     if acl_err == "" {
@@ -154,14 +110,10 @@ func main() {
         print_int(acl_add)
     }
     
-    
     check_perm, check_perm_err := osfi3.check_file_permission(100, 1000, 0)  
     if check_perm_err == "" && check_perm == 1 {
         print("✓ 文件权限检查成功: 用户有读权限")
     }
-    
-    
-    
     
     vm_u, fs_u, tasks, namespaces, cgroup_count, users_count, audit_logs := osfi3.get_system_stats_tier3()
     print("✓ 系统统计 (Tier 3):")
@@ -180,7 +132,6 @@ func main() {
     print("  审计日志: ")
     print_int(audit_logs)
 }
-
 
 func print(string s) {
     

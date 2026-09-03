@@ -2,12 +2,8 @@ package neurx.test
 
 use neurx.integration.os_features_tier2_integration
 
-
 func main() {
     osfi2 := new_os_features_tier2_integration()
-    
-    
-    
     
     sem, sem_err := osfi2.create_semaphore(5)
     if sem_err == "" {
@@ -25,9 +21,6 @@ func main() {
         print("✓ 信号量 V 操作成功")
     }
     
-    
-    
-    
     mq, mq_err := osfi2.create_message_queue(10)
     if mq_err == "" {
         print("✓ 消息队列创建成功: queue_id = ")
@@ -40,9 +33,6 @@ func main() {
         print_int(msg_id)
     }
     
-    
-    
-    
     shm, shm_err := osfi2.create_shared_memory(4096)
     if shm_err == "" {
         print("✓ 共享内存创建成功: shmid = ")
@@ -53,9 +43,6 @@ func main() {
     if attach_err == "" {
         print("✓ 共享内存挂载成功")
     }
-    
-    
-    
     
     reg_result, reg_err := osfi2.register_signal_pid(300)
     if reg_err == "" {
@@ -73,9 +60,6 @@ func main() {
         print_str(signal_err)
     }
     
-    
-    
-    
     irq_result, irq_err := osfi2.register_irq(5, 10)
     if irq_err == "" {
         print("✓ 中断处理器注册成功: irq = 5")
@@ -86,17 +70,11 @@ func main() {
         print("✓ 中断处理成功")
     }
     
-    
-    
-    
     timer_result, timer_err := osfi2.create_timer(400, 1000, 500)
     if timer_err == "" {
         print("✓ 定时器创建成功: timer_id = ")
         print_int(timer_result.timer_id)
     }
-    
-    
-    
     
     wq, wq_err := osfi2.create_workqueue(4)
     if wq_err == "" {
@@ -110,9 +88,6 @@ func main() {
         print_int(work_id)
     }
     
-    
-    
-    
     swap_dev, swap_err := osfi2.create_swap_device(1024)  
     if swap_err == "" {
         print("✓ Swap 设备创建成功: device_id = ")
@@ -125,9 +100,6 @@ func main() {
         print_int(swap_out_result)
     }
     
-    
-    
-    
     local_result, local_err := osfi2.allocate_local(0, 512)
     if local_err == "" {
         print("✓ NUMA 本地分配成功: node = ")
@@ -139,9 +111,6 @@ func main() {
         print("✓ 页面迁移成功")
     }
     
-    
-    
-    
     oom_reg, oom_reg_err := osfi2.register_process_memory(500, 1024)
     if oom_reg_err == "" {
         print("✓ 进程内存注册成功: pid = 500")
@@ -151,9 +120,6 @@ func main() {
     if oom_check_err == "" || oom_check_err != "No OOM" {
         print("✓ OOM 检查完成")
     }
-    
-    
-    
     
     vm_u, fs_u, tasks, swap_u, timers, killed := osfi2.get_system_stats_tier2()
     print("✓ 系统统计 (Tier 2):")
@@ -172,7 +138,6 @@ func main() {
     print_int(killed)
     print(" 个进程")
 }
-
 
 func print(string s) {
     

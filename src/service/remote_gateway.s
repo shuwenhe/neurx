@@ -5,31 +5,21 @@ use std.strings.int_to_string
 use std.io.eprintln
 use std.io.println
 
-// ============================================================================
-// HTTP 远端推理服务网关
-// ============================================================================
-
-// 节点配置
 struct Node {
     name: string
     ip: string
     port: int
     tunnel_port: int
-    status: string  // "online" | "offline"
+    status: string
 }
 
-// 推理请求参数
 struct InferRequest {
     prompt: string
     max_tokens: int
     temperature: float
     model: string
-    server: string  // "auto" | "Controller" | "Worker"
+    server: string
 }
-
-// ============================================================================
-// 远端节点管理
-// ============================================================================
 
 var controller: Node = Node{
     name: "Controller",
@@ -47,12 +37,10 @@ var worker: Node = Node{
     status: "offline"
 }
 
-// 获取所有节点
 func get_all_nodes(): Node[] {
     return Node[]{controller, worker}
 }
 
-// 按名称获取节点
 func get_node_by_name(name: string): Node {
     if name == "Controller" {
         return controller
@@ -69,22 +57,16 @@ func get_node_by_name(name: string): Node {
     }
 }
 
-// 获取第一个在线节点
 func get_first_online_node(): Node {
     if controller.status == "online" {
         return controller
     } else if worker.status == "online" {
         return worker
     } else {
-        return controller  // 默认返回 Controller，但离线状态
+        return controller
     }
 }
 
-// ============================================================================
-// 节点状态管理
-// ============================================================================
-
-// 更新节点状态
 func update_node_status(name: string, status: string) {
     if name == "Controller" {
         controller.status = status
@@ -95,18 +77,12 @@ func update_node_status(name: string, status: string) {
     }
 }
 
-// 检查节点健康状态（模拟）
 func check_health(node: Node): bool {
     println("[HEALTH] 检查 " + node.name + "...")
-    // 实际实现中，这里会发送 HTTP 请求到 127.0.0.1:tunnel_port/health
+
     return node.status == "online"
 }
 
-// ============================================================================
-// 推理请求处理
-// ============================================================================
-
-// 处理推理请求
 func handle_inference(req: InferRequest): string {
     println("[INFER] 处理推理请求")
     println("[INFER] 模型: " + req.model)
@@ -123,26 +99,22 @@ func handle_inference(req: InferRequest): string {
         println("[INFER] 手动选择: " + target_node.name)
     }
     
-    // 检查节点状态
     if target_node.status != "online" {
         println("[INFER] ❌ 节点离线: " + target_node.name)
         return "{\"error\": \"节点 " + target_node.name + " 不可用\"}"
     }
     
-    // 构造转发 URL
-    var forward_url: string = "http://127.0.0.1:"
+    var forward_url: string = "http:
     forward_url = forward_url + int_to_string(target_node.tunnel_port)
     forward_url = forward_url + "/v1/chat/completions"
     
     println("[INFER] 转发到: " + forward_url)
     
-    // 模拟推理执行
     var result: string = "{\"choices\": [{\"message\": {\"content\": \"[" + target_node.name + "] 推理结果\"}}]}"
     
     return result
 }
 
-// 处理健康检查请求
 func handle_health(): string {
     println("[API] GET /health")
     
@@ -168,7 +140,6 @@ func handle_health(): string {
     return response
 }
 
-// 处理服务器列表请求
 func handle_servers(): string {
     println("[API] GET /servers")
     
@@ -187,11 +158,6 @@ func handle_servers(): string {
     return response
 }
 
-// ============================================================================
-// HTTP API 端点
-// ============================================================================
-
-// 处理 HTTP 请求
 func handle_request(method: string, path: string, body: string): string {
     println("[HTTP] " + method + " " + path)
     
@@ -205,7 +171,7 @@ func handle_request(method: string, path: string, body: string): string {
         }
     } else if method == "POST" {
         if path == "/v1/chat/completions" {
-            // 解析请求体（简化实现）
+
             var req: InferRequest = InferRequest{
                 prompt: "Hello",
                 max_tokens: 100,
@@ -231,10 +197,6 @@ func handle_request(method: string, path: string, body: string): string {
     }
 }
 
-// ============================================================================
-// 启动服务
-// ============================================================================
-
 func start_service() {
     println("=" * 70)
     println("🚀 NeurX 远端推理网关 (S 语言)")
@@ -252,41 +214,32 @@ func start_service() {
     println("[SSH] 隧道已建立 ✅")
     println("")
     
-    // 模拟节点上线
     update_node_status("Controller", "online")
-    update_node_status("Worker", "offline")  // Worker 暂时离线
+    update_node_status("Worker", "offline")
     println("")
     
     println("[SERVICE] 监听端口: 9000")
-    println("[SERVICE] 📍 访问地址: http://127.0.0.1:9000")
-    println("[SERVICE] 🔗 Web UI: http://127.0.0.1:8081")
+    println("[SERVICE] 📍 访问地址: http:
+    println("[SERVICE] 🔗 Web UI: http:
     println("")
 }
-
-// ============================================================================
-// 主函数
-// ============================================================================
 
 func main() {
     start_service()
     
-    // 测试 API 调用
     println("[TEST] 测试 API 端点...")
     println("")
     
-    // 测试健康检查
     println("[TEST] 请求: GET /health")
     var health_response: string = handle_health()
     println("[TEST] 响应: " + health_response)
     println("")
     
-    // 测试服务器列表
     println("[TEST] 请求: GET /servers")
     var servers_response: string = handle_servers()
     println("[TEST] 响应: " + servers_response)
     println("")
     
-    // 测试推理请求
     println("[TEST] 请求: POST /v1/chat/completions")
     var infer_req: InferRequest = InferRequest{
         prompt: "什么是 AI？",

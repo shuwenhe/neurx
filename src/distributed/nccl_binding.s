@@ -3,8 +3,6 @@ package neurx.distributed.nccl_binding
 use std.vec.vec
 use neurx.device.cuda_runtime_binding
 
-// NCCL FFI Bindings for collective communication
-
 extern func ncclGetUniqueId(void* unique_id) -> int
 extern func ncclCommInitRank(void* comm_ptr, int nranks, void* unique_id, int rank) -> int
 extern func ncclCommDestroy(int64 comm) -> int
@@ -19,21 +17,18 @@ extern func ncclAllGather(void* send_buff, void* recv_buff, int64 send_count,
 extern func ncclReduceScatter(void* send_buff, void* recv_buff, int64 recv_count,
                              int data_type, int op, int64 comm, int64 stream) -> int
 
-// NCCL data types
 int NCCL_FLOAT32 = 0
 int NCCL_FLOAT16 = 1
 int NCCL_INT8 = 2
 int NCCL_INT32 = 3
 int NCCL_INT64 = 4
 
-// NCCL operations
 int NCCL_SUM = 0
 int NCCL_PROD = 1
 int NCCL_MAX = 2
 int NCCL_MIN = 3
 int NCCL_AVG = 4
 
-// NCCL status codes
 int NCCL_SUCCESS = 0
 
 struct nccl_unique_id {
@@ -47,11 +42,9 @@ struct nccl_comm {
     bool is_valid
 }
 
-// Initialize NCCL communicator for a single rank
 func nccl_init_rank(int rank, int world_size) (nccl_comm, bool, string) {
     unique_id := nccl_unique_id{}
     
-    // Get unique ID (usually called on rank 0, broadcast to all)
     status := ncclGetUniqueId(&unique_id)
     if status != NCCL_SUCCESS {
         return nccl_comm{}, false, "nccl init failed"
@@ -71,7 +64,6 @@ func nccl_init_rank(int rank, int world_size) (nccl_comm, bool, string) {
     }, true, ""
 }
 
-// Destroy NCCL communicator
 func nccl_comm_destroy(nccl_comm* comm) (bool, string) {
     if !comm.is_valid {
         return false, "comm invalid"
@@ -86,8 +78,6 @@ func nccl_comm_destroy(nccl_comm* comm) (bool, string) {
     return true, ""
 }
 
-// AllReduce: collective reduction and broadcast
-// Synchronizes and combines data from all ranks
 func nccl_allreduce(nccl_comm* comm,
                    int64 send_buff, int64 recv_buff,
                    int64 count, int dtype,
@@ -106,7 +96,6 @@ func nccl_allreduce(nccl_comm* comm,
     return true, ""
 }
 
-// Reduce: single rank collects reduction from all ranks
 func nccl_reduce(nccl_comm* comm,
                 int64 send_buff, int64 recv_buff,
                 int64 count, int dtype,
@@ -126,7 +115,6 @@ func nccl_reduce(nccl_comm* comm,
     return true, ""
 }
 
-// Broadcast: root rank distributes data to all ranks
 func nccl_broadcast(nccl_comm* comm,
                    int64 send_buff, int64 recv_buff,
                    int64 count, int dtype,
@@ -145,7 +133,6 @@ func nccl_broadcast(nccl_comm* comm,
     return true, ""
 }
 
-// AllGather: each rank sends data to all other ranks
 func nccl_allgather(nccl_comm* comm,
                    int64 send_buff, int64 recv_buff,
                    int64 send_count, int dtype,
@@ -164,7 +151,6 @@ func nccl_allgather(nccl_comm* comm,
     return true, ""
 }
 
-// ReduceScatter: opposite of AllGather
 func nccl_reduce_scatter(nccl_comm* comm,
                         int64 send_buff, int64 recv_buff,
                         int64 recv_count, int dtype,
@@ -183,8 +169,6 @@ func nccl_reduce_scatter(nccl_comm* comm,
     return true, ""
 }
 
-// Ring AllReduce - optimized for many GPUs
-// Algorithm: divide data into N chunks, ring-based reduction then broadcast
 struct ring_allreduce_config {
     int num_gpus
     int chunk_size
@@ -200,13 +184,11 @@ func ring_allreduce_prepare(int64 total_size, int num_gpus) ring_allreduce_confi
     }
 }
 
-// Ring AllReduce reduce-scatter phase
 func ring_allreduce_reduce_scatter(nccl_comm* comm,
                                   int64 data_buff,
                                   ring_allreduce_config config,
                                   int64 stream) (bool, string) {
     
-    // For each phase: send chunk i to next rank, receive from prev rank
     for phase := 0; phase < config.num_chunks; phase = phase + 1 {
         send_idx := (comm.rank + phase) % config.num_gpus
         recv_idx := (comm.rank - phase + config.num_gpus) % config.num_gpus
@@ -217,34 +199,27 @@ func ring_allreduce_reduce_scatter(nccl_comm* comm,
         send_buff := data_buff + send_offset as int64
         recv_buff := data_buff + recv_offset as int64
         
-        // Send to next, receive from prev, reduce operation
-        // (simplified - real implementation uses async send/recv)
     }
     
     return true, ""
 }
 
-// Ring AllReduce broadcast phase
 func ring_allreduce_broadcast(nccl_comm* comm,
                              int64 data_buff,
                              ring_allreduce_config config,
                              int64 stream) (bool, string) {
     
-    // For each phase: send reduced chunk to next rank
     for phase := 0; phase < config.num_chunks; phase = phase + 1 {
         send_idx := (comm.rank - phase + config.num_gpus) % config.num_gpus
         
         send_offset := send_idx * config.chunk_size
         send_buff := data_buff + send_offset as int64
         
-        // Send to next rank
-        // (simplified - real implementation uses async send)
     }
     
     return true, ""
 }
 
-// Complete Ring AllReduce
 func ring_allreduce(nccl_comm* comm,
                    int64 data_buff,
                    int64 total_size,
@@ -254,13 +229,11 @@ func ring_allreduce(nccl_comm* comm,
     
     config := ring_allreduce_prepare(total_size, comm.world_size)
     
-    // Phase 1: Reduce-Scatter
     ok, err := ring_allreduce_reduce_scatter(comm, data_buff, config, stream)
     if !ok {
         return false, err
     }
     
-    // Phase 2: Broadcast
     ok, err = ring_allreduce_broadcast(comm, data_buff, config, stream)
     if !ok {
         return false, err
@@ -269,7 +242,6 @@ func ring_allreduce(nccl_comm* comm,
     return true, ""
 }
 
-// Tensor Parallelism: AllReduce after GEMM
 func allreduce_after_gemm(nccl_comm* comm,
                         int64 tensor_buff,
                         int64 tensor_size,
@@ -280,7 +252,6 @@ func allreduce_after_gemm(nccl_comm* comm,
                          NCCL_SUM, stream)
 }
 
-// Pipeline Parallelism: Broadcast activations
 func broadcast_activations(nccl_comm* comm,
                           int64 activation_buff,
                           int64 activation_size,
@@ -292,7 +263,6 @@ func broadcast_activations(nccl_comm* comm,
                          root_rank, stream)
 }
 
-// Sequence Parallelism: AllGather for sequence
 func allgather_sequences(nccl_comm* comm,
                         int64 local_seq_buff,
                         int64 global_seq_buff,
@@ -304,7 +274,6 @@ func allgather_sequences(nccl_comm* comm,
                          stream)
 }
 
-// Expert Parallelism: ReduceScatter for expert outputs
 func reduce_scatter_experts(nccl_comm* comm,
                            int64 local_expert_buff,
                            int64 gathered_expert_buff,
@@ -316,7 +285,6 @@ func reduce_scatter_experts(nccl_comm* comm,
                               NCCL_SUM, stream)
 }
 
-// Get comm rank info
 func nccl_get_rank(nccl_comm* comm) int {
     return comm.rank
 }
@@ -325,7 +293,6 @@ func nccl_get_world_size(nccl_comm* comm) int {
     return comm.world_size
 }
 
-// Synchronize communication
 func nccl_stream_synchronize(int64 stream) (bool, string) {
     return cuda_stream_synchronize(stream)
 }

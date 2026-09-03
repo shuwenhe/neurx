@@ -1,7 +1,5 @@
 package neurx.kernel
 
-
-
 struct mutex {
     int state              
     int owner_pid
@@ -37,8 +35,6 @@ struct atomic_int {
     int decrement_count
     int compare_swap_count
 }
-
-
 
 struct inode {
     int ino
@@ -95,8 +91,6 @@ struct dentry_cache {
     int evictions
 }
 
-
-
 struct socket {
     int sock_fd
     int type               
@@ -135,8 +129,6 @@ struct tcp_stack {
     int retransmissions
     int connection_errors
 }
-
-
 
 func create_mutex() mutex {
     mutex { state: 0, owner_pid: 0, contention_count: 0 }
@@ -218,8 +210,6 @@ func create_tcp_stack() tcp_stack {
         connection_errors: 0
     }
 }
-
-
 
 func print_mutex_info(mutex m) {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -461,8 +451,6 @@ func print_tcp_stack_info(tcp_stack stack) {
     print("✅ TCP/IP stack operational!")
     print("")
 }
-
-
 
 func demonstrate_mutex() {
     print("")

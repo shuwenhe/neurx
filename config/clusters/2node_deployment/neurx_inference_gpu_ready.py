@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 NeurX GPU-Ready Inference Service
 支持 GPU 推理，带 CPU 自动降级
@@ -221,7 +220,6 @@ class NeurXInferenceAPI(BaseHTTPRequestHandler):
         messages = request_data.get('messages', [])
         max_tokens = min(request_data.get('max_tokens', 128), 2048)
         
-        # 提取最后一条消息作为提示
         prompt = messages[-1].get('content', '') if messages else ''
         
         result = perform_inference(prompt, max_tokens, 0.7)
@@ -281,7 +279,6 @@ def has_s_ir_runner() -> bool:
     if Config.USE_S_IR == 'true':
         return os.path.exists(Config.S_IR_RUNNER)
     
-    # auto mode
     return os.path.exists(Config.S_IR_RUNNER)
 
 def perform_inference(prompt: str, max_tokens: int, temperature: float) -> str:
@@ -309,7 +306,6 @@ def perform_inference(prompt: str, max_tokens: int, temperature: float) -> str:
 def run_gpu_inference(prompt: str, max_tokens: int, temperature: float) -> str:
     """GPU 推理实现"""
     logger.info(f"[GPU] Executing CUDA inference")
-    # 占位符实现 - 在实际部署中调用 CUDA 核心
     return f"[GPU-CUDA-Device-{Config.GPU_DEVICE}] {prompt[:30]}... → [生成的 GPU 加速文本]"
 
 def run_s_ir_inference(prompt: str, max_tokens: int) -> str:
@@ -319,7 +315,6 @@ def run_s_ir_inference(prompt: str, max_tokens: int) -> str:
 
 def run_python_inference(prompt: str, max_tokens: int, temperature: float) -> str:
     """Python 推理实现"""
-    # 优化的 Python 实现
     result = f"{prompt}\n\n[Generated Response]\n"
     result += "CPU-based optimized inference. "
     result += f"Prompt length: {len(prompt)} chars. "

@@ -4,13 +4,11 @@ import (
     "neurx.tensor.types" as ttypes
 )
 
-
     cpu,
     cuda,
     rocm,
     npu
 }
-
 
     float32,
     float16,
@@ -75,7 +73,6 @@ struct NormParams {
     bool track_running_stats
 }
 
-
     relu,
     gelu,
     silu,
@@ -107,7 +104,6 @@ struct DTypeConversionParams {
     scale_factor: f32,
     i32 zero_point
 }
-
 
     nchw,
     nhwc,

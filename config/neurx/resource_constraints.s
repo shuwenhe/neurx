@@ -1,6 +1,5 @@
 package config
 
-
     memory_constraint
     compute_constraint
     bandwidth_constraint
@@ -8,7 +7,6 @@ package config
     power_constraint
     device_constraint
 }
-
 
     satisfied
     warning

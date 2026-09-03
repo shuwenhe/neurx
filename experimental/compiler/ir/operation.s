@@ -2,7 +2,6 @@ package neurx.experimental.compiler.ir.operation
 
 use neurx.experimental.compiler.ir.value.{value_type, tensor_value, attr_value}
 
-
     add,
     subtract,
     multiply,

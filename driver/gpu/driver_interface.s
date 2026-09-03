@@ -1,6 +1,5 @@
 package neurx.driver.gpu
 
-
     nvidia_cuda,
     amd_rocm,
     intel_oneapi,

@@ -1,43 +1,29 @@
 package neurx.build.gateway
 
-// S 语言编译和构建管理器
-// 用于编译 SSH 代理服务和部署管理器
-
 use std.io.println
 
-// ============================================================================
-// 编译配置
-// ============================================================================
-
 struct CompileConfig {
-    source_file: string        // 源文件路径
-    output_file: string        // 输出文件路径
-    compiler: string           // 编译器命令
-    target: string             // 编译目标
-    optimize_level: int        // 优化级别 (0-3)
+    source_file: string
+    output_file: string
+    compiler: string
+    target: string
+    optimize_level: int
 }
 
 struct CompileResult {
-    success: bool              // 是否成功
-    source: string             // 源文件
-    output: string             // 输出文件
-    message: string            // 消息
-    build_time_seconds: int    // 编译耗时
-    binary_size_bytes: int     // 二进制大小
+    success: bool
+    source: string
+    output: string
+    message: string
+    build_time_seconds: int
+    binary_size_bytes: int
 }
 
-// ============================================================================
-// 编译函数
-// ============================================================================
-
-// 编译单个 S 语言文件
 func compile_s_file(config: CompileConfig) CompileResult {
     println("[BUILD] 编译 S 语言源文件...")
     println("[BUILD]   源文件: " + config.source_file)
     println("[BUILD]   输出文件: " + config.output_file)
     println("[BUILD]   编译器: " + config.compiler)
-    
-    // s-compiler source.s -o output -O2 --target=x86_64-linux
     
     var cmd: string = config.compiler
     cmd = cmd + " " + config.source_file
@@ -47,7 +33,6 @@ func compile_s_file(config: CompileConfig) CompileResult {
     
     println("[BUILD] 命令: " + cmd)
     
-    // 在实际实现中，这里会执行真实的编译命令
     println("[BUILD] ✅ 编译成功")
     
     var result: CompileResult = CompileResult{
@@ -61,7 +46,6 @@ func compile_s_file(config: CompileConfig) CompileResult {
     return result
 }
 
-// 编译推理网关
 func build_ssh_proxy() CompileResult {
     println("")
     println("═" * 70)
@@ -92,7 +76,6 @@ func build_ssh_proxy() CompileResult {
     return result
 }
 
-// 编译部署管理器
 func build_deployment_manager() CompileResult {
     println("")
     println("═" * 70)
@@ -123,7 +106,6 @@ func build_deployment_manager() CompileResult {
     return result
 }
 
-// 创建启动脚本
 func create_launcher_scripts() {
     println("")
     println("═" * 70)
@@ -131,7 +113,6 @@ func create_launcher_scripts() {
     println("═" * 70)
     println("")
     
-    // SSH 代理启动脚本
     var ssh_proxy_launcher: string = "#!/bin/bash\n"
     ssh_proxy_launcher = ssh_proxy_launcher + "# NeurX SSH 代理启动脚本\n"
     ssh_proxy_launcher = ssh_proxy_launcher + "SCRIPT_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\n"
@@ -152,7 +133,7 @@ func create_launcher_scripts() {
     ssh_proxy_launcher = ssh_proxy_launcher + "    echo $! > \"$PID_FILE\"\n"
     ssh_proxy_launcher = ssh_proxy_launcher + "    sleep 2\n"
     ssh_proxy_launcher = ssh_proxy_launcher + "    echo '✅ SSH 代理已启动 (PID: '$(cat \"$PID_FILE\")')'\n"
-    ssh_proxy_launcher = ssh_proxy_launcher + "    echo '📍 地址: http://127.0.0.1:9000'\n"
+    ssh_proxy_launcher = ssh_proxy_launcher + "    echo '📍 地址: http:
     ssh_proxy_launcher = ssh_proxy_launcher + "    ;;\n"
     ssh_proxy_launcher = ssh_proxy_launcher + "esac\n"
     
@@ -161,10 +142,6 @@ func create_launcher_scripts() {
     
     println("")
 }
-
-// ============================================================================
-// 辅助函数
-// ============================================================================
 
 func int_to_string(n: int) string {
     if n == 0 {
@@ -192,10 +169,6 @@ func int_to_string(n: int) string {
     return result
 }
 
-// ============================================================================
-// 主构建流程
-// ============================================================================
-
 func build_all() {
     println("")
     println("╔" + "═" * 68 + "╗")
@@ -208,16 +181,12 @@ func build_all() {
     println("[INIT] 输出目录: /Users/shuwen/shuwen/neurx/build/bin")
     println("")
     
-    // 编译 SSH 代理
     var ssh_proxy_result: CompileResult = build_ssh_proxy()
     
-    // 编译部署管理器
     var deployment_mgr_result: CompileResult = build_deployment_manager()
     
-    // 创建启动脚本
     create_launcher_scripts()
     
-    // 构建摘要
     println("╔" + "═" * 68 + "╗")
     println("║ 构建摘要" + " " * 58 + "║")
     println("╚" + "═" * 68 + "╝")
@@ -245,9 +214,9 @@ func build_all() {
     println("  部署管理器:    /Users/shuwen/shuwen/neurx/build/bin/deployment_manager")
     println("")
     println("📍 访问地址:")
-    println("  Web UI:        http://127.0.0.1:8081")
-    println("  推理 API:      http://127.0.0.1:9000/v1/chat/completions")
-    println("  健康检查:      http://127.0.0.1:9000/health")
+    println("  Web UI:        http:
+    println("  推理 API:      http:
+    println("  健康检查:      http:
     println("")
     
     var total_success: bool = ssh_proxy_result.success && deployment_mgr_result.success
@@ -261,7 +230,6 @@ func build_all() {
     println("")
 }
 
-// 主函数
 func main() {
     build_all()
 }

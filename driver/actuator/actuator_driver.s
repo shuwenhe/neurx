@@ -1,6 +1,5 @@
 package neurx.driver.actuator
 
-
     motor_brushless,
     servo_precision,
     linear_actuator,

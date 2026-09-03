@@ -2,7 +2,6 @@ package neurx.sys.monitor
 
 use std.slices
 
-
     latency,
     throughput,
     gpu_utilization,

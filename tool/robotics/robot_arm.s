@@ -1,6 +1,5 @@
 package neurx.tool.robotics
 
-
     revolute,
     prismatic,
     continuous

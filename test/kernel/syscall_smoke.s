@@ -5,7 +5,6 @@ use kernel.syscall
 func main() {
     init_syscall_table()
     
-    
     fd := syscall_dispatch(2, int[]{1, 0})
     if fd != 3 {
         return 2

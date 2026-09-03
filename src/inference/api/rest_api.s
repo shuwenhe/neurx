@@ -179,8 +179,7 @@ func handle_generate_cpu(http_request req) http_response {
 }
 
 func handle_generate_gpu(http_request req) http_response {
-    // GPU backend: Use optimized inference
-    // For now using CPU engine, will replace with real GPU later
+
     real_text_engine_state state = load_cpu_engine()
     
     if !state.ready {
@@ -194,11 +193,9 @@ func handle_generate_gpu(http_request req) http_response {
     string prompt = resolve_prompt_from_body(req.body)
     int max_tokens = parse_max_tokens(req.body, 128)
     
-    // Use CPU inference for now (GPU computation coming next)
     real_generation_result result = generate_response(state, prompt, max_tokens)
     result.stream = parse_bool(req.body, "\"stream\"", false)
     
-    // Mark as GPU for tracking
     result.backend = "gpu"
     
     return http_response{
@@ -247,7 +244,7 @@ func handle_chat_completions_cpu(http_request req) http_response {
 }
 
 func handle_chat_completions_gpu(http_request req) http_response {
-    // GPU backend: Use optimized inference
+
     real_text_engine_state state = load_cpu_engine()
     
     if !state.ready {

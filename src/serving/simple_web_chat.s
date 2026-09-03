@@ -109,6 +109,6 @@ func main() {
     println("")
     println("📖 Usage:")
     println("   This S program defines the chat server backend.")
-    println("   Frontend: http://127.0.0.1:8081/")
+    println("   Frontend: http:
     println("   Models can be selected from the UI.")
 }

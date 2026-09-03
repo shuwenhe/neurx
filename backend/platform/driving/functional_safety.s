@@ -3,14 +3,12 @@ package neurx.backend.platform.driving
 use std.slices
 use std.io.println
 
-
     qm,
     asil_a,
     asil_b,
     asil_c,
     asil_d,
 }
-
 
     sensor_fault,
     compute_fault,

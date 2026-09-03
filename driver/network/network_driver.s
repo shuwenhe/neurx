@@ -1,6 +1,5 @@
 package neurx.driver.network
 
-
     ethernet_10g,
     ethernet_100g,
     infiniband_hdr,

@@ -31,7 +31,6 @@ func test_cuda_memory_allocation() (bool, string) {
         return false, err
     }
     
-    // Allocate 1MB
     ptr, ok, err := cuda_malloc(1024 * 1024)
     if !ok {
         return false, err

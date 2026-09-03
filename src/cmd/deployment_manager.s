@@ -1,46 +1,31 @@
 package neurx.deployment.manager
 
-// S 语言部署管理器
-// 用于部署推理服务、Web UI 和 SSH 代理到远端服务器
-
 use std.io.println
 
-// ============================================================================
-// 部署配置
-// ============================================================================
-
 struct DeploymentConfig {
-    local_path: string         // 本地源路径
-    remote_host: string        // 远端主机 IP
-    remote_path: string        // 远端目标路径
-    remote_user: string        // 远端用户名
-    remote_password: string    // 远端密码
-    service_name: string       // 服务名称
-    service_port: int          // 服务端口
-    auto_start: bool           // 是否自动启动
+    local_path: string
+    remote_host: string
+    remote_path: string
+    remote_user: string
+    remote_password: string
+    service_name: string
+    service_port: int
+    auto_start: bool
 }
 
 struct DeploymentResult {
-    success: bool              // 是否成功
-    service_name: string       // 服务名
-    remote_host: string        // 远端主机
-    message: string            // 消息
-    duration_seconds: int      // 耗时
+    success: bool
+    service_name: string
+    remote_host: string
+    message: string
+    duration_seconds: int
 }
 
-// ============================================================================
-// 部署任务
-// ============================================================================
-
-// 同步文件到远端
 func sync_files_to_remote(local_path: string, remote_host: string, remote_path: string, 
                          remote_user: string, remote_password: string) bool {
     println("[SYNC] 同步文件到远端...")
     println("[SYNC]   源: " + local_path)
     println("[SYNC]   远端: " + remote_user + "@" + remote_host + ":" + remote_path)
-    
-    // rsync -avz --delete -e "sshpass -p password ssh -o StrictHostKeyChecking=no" \
-    //   source/ user@host:target/
     
     var cmd: string = "rsync -avz --delete --exclude='.git' --exclude='*.pyc' "
     cmd = cmd + "-e \"sshpass -p " + remote_password + " ssh -o StrictHostKeyChecking=no\" "
@@ -49,19 +34,15 @@ func sync_files_to_remote(local_path: string, remote_host: string, remote_path: 
     
     println("[SYNC] 命令: " + cmd)
     
-    // 在实际实现中，这里会执行真实的 rsync 命令
     println("[SYNC] ✅ 文件同步完成")
     return true
 }
 
-// 在远端执行命令
 func run_remote_command(remote_host: string, remote_user: string, remote_password: string, 
                        script: string) bool {
     println("[REMOTE] 在远端执行命令...")
     println("[REMOTE]   主机: " + remote_host)
     println("[REMOTE]   用户: " + remote_user)
-    
-    // sshpass -p password ssh -o StrictHostKeyChecking=no user@host 'command'
     
     var cmd: string = "sshpass -p " + remote_password
     cmd = cmd + " ssh -o StrictHostKeyChecking=no "
@@ -73,12 +54,10 @@ func run_remote_command(remote_host: string, remote_user: string, remote_passwor
     println("[REMOTE] 执行脚本:")
     println(script)
     
-    // 在实际实现中，这里会执行真实的 SSH 命令
     println("[REMOTE] ✅ 命令执行完成")
     return true
 }
 
-// 部署推理服务
 func deploy_inference_service(config: DeploymentConfig) DeploymentResult {
     println("")
     println("=" * 70)
@@ -86,7 +65,6 @@ func deploy_inference_service(config: DeploymentConfig) DeploymentResult {
     println("=" * 70)
     println("")
     
-    // 步骤 1: 同步文件
     println("[STEP 1] 同步推理服务文件...")
     if !sync_files_to_remote(config.local_path, config.remote_host, config.remote_path,
                              config.remote_user, config.remote_password) {
@@ -100,7 +78,6 @@ func deploy_inference_service(config: DeploymentConfig) DeploymentResult {
         return result
     }
     
-    // 步骤 2: 准备启动脚本
     println("[STEP 2] 准备启动脚本...")
     
     var startup_script: string = "#!/bin/bash\n"
@@ -118,9 +95,8 @@ func deploy_inference_service(config: DeploymentConfig) DeploymentResult {
     startup_script = startup_script + "python3 neurx_inference_gpu_ready.py &\n"
     startup_script = startup_script + "sleep 2\n"
     startup_script = startup_script + "# 验证服务\n"
-    startup_script = startup_script + "curl -s http://127.0.0.1:" + int_to_string(config.service_port) + "/health >/dev/null && echo 'Service running'\n"
+    startup_script = startup_script + "curl -s http:
     
-    // 步骤 3: 执行启动脚本
     println("[STEP 3] 启动推理服务...")
     if !run_remote_command(config.remote_host, config.remote_user, config.remote_password, startup_script) {
         var result: DeploymentResult = DeploymentResult{
@@ -146,7 +122,6 @@ func deploy_inference_service(config: DeploymentConfig) DeploymentResult {
     return result
 }
 
-// 部署 Web UI
 func deploy_web_ui(local_path: string, remote_host: string, remote_path: string,
                    remote_user: string, remote_password: string) DeploymentResult {
     println("")
@@ -155,7 +130,6 @@ func deploy_web_ui(local_path: string, remote_host: string, remote_path: string,
     println("=" * 70)
     println("")
     
-    // 同步 Web UI 文件
     println("[STEP 1] 同步 Web UI 文件...")
     if !sync_files_to_remote(local_path, remote_host, remote_path,
                              remote_user, remote_password) {
@@ -181,7 +155,6 @@ func deploy_web_ui(local_path: string, remote_host: string, remote_path: string,
     return result
 }
 
-// 部署 SSH 代理
 func deploy_ssh_proxy(local_path: string, remote_host: string, remote_path: string,
                       remote_user: string, remote_password: string) DeploymentResult {
     println("")
@@ -190,7 +163,6 @@ func deploy_ssh_proxy(local_path: string, remote_host: string, remote_path: stri
     println("=" * 70)
     println("")
     
-    // 同步代理文件
     println("[STEP 1] 同步 SSH 代理文件...")
     if !sync_files_to_remote(local_path, remote_host, remote_path,
                              remote_user, remote_password) {
@@ -204,7 +176,6 @@ func deploy_ssh_proxy(local_path: string, remote_host: string, remote_path: stri
         return result
     }
     
-    // 编译和启动
     println("[STEP 2] 编译 SSH 代理...")
     
     var compile_script: string = "#!/bin/bash\n"
@@ -238,10 +209,6 @@ func deploy_ssh_proxy(local_path: string, remote_host: string, remote_path: stri
     return result
 }
 
-// ============================================================================
-// 辅助函数
-// ============================================================================
-
 func int_to_string(n: int) string {
     if n == 0 {
         return "0"
@@ -268,10 +235,6 @@ func int_to_string(n: int) string {
     return result
 }
 
-// ============================================================================
-// 全局部署流程
-// ============================================================================
-
 func deploy_all_services() {
     println("")
     println("╔" + "═" * 68 + "╗")
@@ -279,7 +242,6 @@ func deploy_all_services() {
     println("╚" + "═" * 68 + "╝")
     println("")
     
-    // 部署到 Controller (192.168.10.39)
     println("📍 目标 1: Controller (192.168.10.39)")
     println("")
     
@@ -304,7 +266,6 @@ func deploy_all_services() {
     
     println("")
     
-    // 部署到 Worker (192.168.10.75)
     println("📍 目标 2: Worker (192.168.10.75)")
     println("")
     
@@ -335,12 +296,12 @@ func deploy_all_services() {
     
     if controller_result.success {
         println("✅ Controller (192.168.10.39)")
-        println("   推理服务: http://192.168.10.39:8000")
+        println("   推理服务: http:
     }
     
     if worker_result.success {
         println("✅ Worker (192.168.10.75)")
-        println("   推理服务: http://192.168.10.75:8000")
+        println("   推理服务: http:
     }
     
     println("")
@@ -349,12 +310,11 @@ func deploy_all_services() {
     println("   Worker:    ssh -L 9002:127.0.0.1:8000 shuwen@192.168.10.75")
     println("")
     println("🚀 本地代理服务:")
-    println("   地址: http://127.0.0.1:9000")
+    println("   地址: http:
     println("")
     println("✅ 部署完成")
 }
 
-// 主函数
 func main() {
     deploy_all_services()
 }

@@ -79,7 +79,6 @@ func gpu_matrix_d2h(gpu_gemm_engine* engine, gpu_matrix* matrix, int64 host_data
     return cuda_memcpy_d2h(matrix.device_ptr, host_data, matrix.size_bytes)
 }
 
-// Standard GEMM: C = alpha * A * B + beta * C
 func gpu_gemm(gpu_gemm_engine* engine,
              gpu_matrix a, gpu_matrix b,
              gpu_matrix* c,
@@ -94,7 +93,7 @@ func gpu_gemm(gpu_gemm_engine* engine,
     
     ok, err := cublas_sgemm(
         engine.handle.handle,
-        0, 0,  // CUBLAS_OP_N, CUBLAS_OP_N
+        0, 0,
         a.rows, b.cols, a.cols,
         alpha,
         a.device_ptr, a.rows,
@@ -106,7 +105,6 @@ func gpu_gemm(gpu_gemm_engine* engine,
     return ok, err
 }
 
-// Batched GEMM for inference (faster for multiple matrices)
 func gpu_gemm_batch(gpu_gemm_engine* engine,
                    vec[gpu_matrix] a_batch,
                    vec[gpu_matrix] b_batch,
@@ -127,11 +125,10 @@ func gpu_gemm_batch(gpu_gemm_engine* engine,
     return true, ""
 }
 
-// Linear layer: output = input @ weight^T + bias
 func gpu_linear(engine: gpu_gemm_engine*,
-               input: gpu_matrix,              // [batch_size, in_features]
-               weight: gpu_matrix,             // [out_features, in_features]
-               bias: gpu_matrix*,              // [out_features]
+               input: gpu_matrix,
+               weight: gpu_matrix,
+               bias: gpu_matrix*,
                output: gpu_matrix*) (bool, string) {
     
     if input.cols != weight.cols {
@@ -141,7 +138,6 @@ func gpu_linear(engine: gpu_gemm_engine*,
         return false, "output dimension mismatch"
     }
     
-    // output = input @ weight^T (weight is transposed)
     ok, err := cublas_matmul_tb(
         engine.handle.handle,
         input.device_ptr, input.rows, input.cols,
@@ -153,12 +149,9 @@ func gpu_linear(engine: gpu_gemm_engine*,
         return false, err
     }
     
-    // TODO: Add bias (requires separate kernel or cublas call)
-    
     return true, ""
 }
 
-// Matrix transpose on GPU
 func gpu_transpose(gpu_gemm_engine* engine,
                   gpu_matrix input,
                   gpu_matrix* output) (bool, string) {
@@ -167,14 +160,13 @@ func gpu_transpose(gpu_gemm_engine* engine,
         return false, "output shape should be transposed input"
     }
     
-    // Use GEMM with alpha=1, beta=0 and appropriate transpose flags
     ok, err := cublas_sgemm(
         engine.handle.handle,
-        1, 0,  // CUBLAS_OP_T, CUBLAS_OP_N
+        1, 0,
         input.cols, input.rows, input.rows,
         1.0,
         input.device_ptr, input.rows,
-        input.device_ptr, input.rows,  // Dummy (not used)
+        input.device_ptr, input.rows,
         0.0,
         output.device_ptr, input.cols
     )

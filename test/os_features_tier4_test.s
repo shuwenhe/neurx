@@ -8,10 +8,6 @@ use neurx.net as net_mod
 use neurx.kernel as kernel_mod
 use neurx.driver as driver_mod
 
-
-
-
-
 func test_sha256() (int, string) {
     data := {}
     data = append(data, 72)  
@@ -235,11 +231,9 @@ func test_route_table() (int, string) {
     return 1, ""
 }
 
-
 func run_all_tier4_tests() (int, string) {
     total_tests := 0
     passed_tests := 0
-    
     
     result, _ := test_sha256()
     if result == 1 {
@@ -247,13 +241,11 @@ func run_all_tier4_tests() (int, string) {
     }
     total_tests = total_tests + 1
     
-    
     result, _ = test_aes_encryption()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
-    
     
     result, _ = test_io_uring()
     if result == 1 {
@@ -261,13 +253,11 @@ func run_all_tier4_tests() (int, string) {
     }
     total_tests = total_tests + 1
     
-    
     result, _ = test_tcp_stack()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
-    
     
     result, _ = test_udp_stack()
     if result == 1 {
@@ -275,13 +265,11 @@ func run_all_tier4_tests() (int, string) {
     }
     total_tests = total_tests + 1
     
-    
     result, _ = test_selinux()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
-    
     
     result, _ = test_seccomp()
     if result == 1 {
@@ -289,13 +277,11 @@ func run_all_tier4_tests() (int, string) {
     }
     total_tests = total_tests + 1
     
-    
     result, _ = test_virtualizer()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
-    
     
     result, _ = test_power_management()
     if result == 1 {
@@ -303,13 +289,11 @@ func run_all_tier4_tests() (int, string) {
     }
     total_tests = total_tests + 1
     
-    
     result, _ = test_device_framework()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
-    
     
     result, _ = test_tier4_integration()
     if result == 1 {
@@ -317,20 +301,17 @@ func run_all_tier4_tests() (int, string) {
     }
     total_tests = total_tests + 1
     
-    
     result, _ = test_crypto_manager()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    
     result, _ = test_uring_manager()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
-    
     
     result, _ = test_route_table()
     if result == 1 {
@@ -340,7 +321,6 @@ func run_all_tier4_tests() (int, string) {
     
     return passed_tests, ""
 }
-
 
 func main() (int, string) {
     passed, _ := run_all_tier4_tests()

@@ -617,7 +617,6 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
     result.ok = false
     result.error_message = ""
     
-    // Start timing (simple counter-based measurement)
     int perf_counter_start = 0
     
     if !state.ready {
@@ -689,12 +688,9 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
     result.text = response_text
     result.generated_tokens = generated_count
     
-    // Calculate realistic latency based on actual work done
-    // CPU inference: ~20-50ms per prompt token + ~50-100ms per generated token
     int prompt_tokens = result.prompt_tokens
     int generated_tokens = result.generated_tokens
     
-    // More realistic estimate based on measured CPU performance
     float prompt_latency = float(prompt_tokens) * 25.0
     float generation_latency = float(generated_tokens) * 75.0
     float overhead_latency = 50.0

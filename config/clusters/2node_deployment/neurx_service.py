@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 NeurX Distributed Inference Service - Python Mock Implementation
 Demonstrates the distributed inference architecture without S compiler dependency
@@ -15,7 +14,6 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 import signal
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s - %(message)s'
@@ -95,7 +93,6 @@ class DistributedController(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
             
-            # Simulate inference
             model = request_data.get('model', Config.MODEL_NAME)
             prompt = request_data.get('prompt', '')
             max_tokens = request_data.get('max_tokens', 100)
@@ -103,7 +100,6 @@ class DistributedController(BaseHTTPRequestHandler):
             
             logger.info(f"[INFERENCE] Model: {model}, Prompt length: {len(prompt)}, Max tokens: {max_tokens}")
             
-            # Simulate inference delay
             inference_time = 0.1 + (max_tokens / 100.0)
             
             if stream:
@@ -174,7 +170,7 @@ class DistributedController(BaseHTTPRequestHandler):
             
             self.wfile.write(f"data: {json.dumps(chunk)}\n\n".encode())
             self.wfile.flush()
-            time.sleep(0.05)  # Simulate token generation delay
+            time.sleep(0.05)
         
         logger.info(f"[STREAM] Streaming completed: {max_tokens} tokens")
     

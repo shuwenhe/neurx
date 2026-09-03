@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 NeurX Inference Service - S Language Implementation Bridge
 使用 Python 调用 S 编译的推理引擎，提供 OpenAI 兼容 API
@@ -97,7 +96,6 @@ class NeurXInferenceHandler(BaseHTTPRequestHandler):
             
             logger.info(f"[INFERENCE] Prompt: {prompt[:50]}... | Max tokens: {max_tokens} | Stream: {stream}")
             
-            # 尝试使用 S 推理，如果失败回到 Python
             try:
                 if should_use_s_inference():
                     self._handle_s_inference(model, prompt, max_tokens, stream)
@@ -122,7 +120,6 @@ class NeurXInferenceHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json' if not stream else 'text/event-stream')
         self.end_headers()
         
-        # 模拟推理
         generated_text = f"[NeurX S Native] {prompt[:20]}... generated response"
         
         if stream:
@@ -160,7 +157,7 @@ class NeurXInferenceHandler(BaseHTTPRequestHandler):
         logger.info(f"[RESPONSE] Inference completed")
     
     def log_message(self, format, *args):
-        pass  # 抑制默认日志
+        pass
 
 def should_use_s_inference() -> bool:
     """判断是否应该使用 S 推理"""

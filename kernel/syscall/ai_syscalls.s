@@ -2,12 +2,6 @@ package neurx.kernel.syscall.ai_syscalls
 
 use neurx.kernel.accelerator.unified_executor.{executor_context, execution_result}
 
-// ============================================================================
-// AI Operating System System Calls
-// Similar to Linux syscalls but for AI workloads
-// ============================================================================
-
-// Syscall error codes
 enum syscall_error {
     ESYSCALL_OK,
     ESYSCALL_INVALID_ARG,
@@ -20,24 +14,17 @@ enum syscall_error {
     ESYSCALL_UNKNOWN,
 }
 
-// Result wrapper for syscalls
 struct syscall_result {
     bool success
     syscall_error error_code
     string error_message
-    int return_value        // for integer returns
+    int return_value
 }
 
-// ============================================================================
-// Inference Syscall
-// ============================================================================
-
-// neuray_infer - Perform inference
-// Similar to: result = model.forward(input, params)
 struct infer_request {
-    string model_id         // "qwen:0.5b" or "llama:13b"
-    string request_id       // for tracking
-    []byte input_data       // serialized input tensor
+    string model_id
+    string request_id
+    []byte input_data
     int input_size_bytes
     int max_output_tokens
     int timeout_ms
@@ -46,23 +33,15 @@ struct infer_request {
 
 struct infer_response {
     string request_id
-    []byte output_data      // serialized output tensor
+    []byte output_data
     int output_size_bytes
-    int actual_tokens       // tokens generated
-    string finish_reason    // "max_tokens", "eos", "timeout"
+    int actual_tokens
+    string finish_reason
     int latency_ms
 }
 
-// Perform inference request
 func neuray_infer(infer_request req) infer_response {
-    // 1. Validate request
-    // 2. Load model if not cached
-    // 3. Allocate GPU memory for input/output
-    // 4. Copy input to GPU
-    // 5. Launch inference kernel(s)
-    // 6. Copy output back to CPU
-    // 7. Return response
-    
+
     return infer_response {
         request_id: req.request_id,
         output_data: make([]byte, 0),
@@ -73,16 +52,13 @@ func neuray_infer(infer_request req) infer_response {
     }
 }
 
-// Async inference - returns immediately with request ID
 func neuray_infer_async(infer_request req) string {
-    // Queue request and return immediately
-    // Application polls for results via neuray_infer_result_get()
+
     return req.request_id
 }
 
-// Get async inference result
 func neuray_infer_result_get(string request_id) infer_response {
-    // Poll result queue for this request_id
+
     return infer_response {
         request_id: request_id,
         output_data: make([]byte, 0),
@@ -92,46 +68,20 @@ func neuray_infer_result_get(string request_id) infer_response {
     }
 }
 
-// ============================================================================
-// Memory Management Syscalls
-// ============================================================================
-
-// Flags for memory allocation
 enum mem_alloc_flags {
-    MEM_GPU_DEVICE,         // On-device GPU memory
-    MEM_GPU_HOST,           // Host-pinned memory
-    MEM_DMA_BUFFER,         // DMA-capable buffer
-    MEM_PERSISTENT,         // Keep allocated for session
-    MEM_ASYNC_READY,        // Optimize for async transfers
+    MEM_GPU_DEVICE,
+    MEM_GPU_HOST,
+    MEM_DMA_BUFFER,
+    MEM_PERSISTENT,
+    MEM_ASYNC_READY,
 }
 
-// neuray_alloc - Allocate memory on device
-// Similar to: ptr = cuda.malloc(bytes)
 func neuray_alloc(
     int bytes,
     mem_alloc_flags flags,
-    string device_id        // "cuda:0" or "npu:0"
+    string device_id
 ) syscall_result {
-    // 1. Validate request
-    // 2. Find device
-    // 3. Allocate from device memory pool
-    // 4. Register in allocation tracking
-    
-    return syscall_result {
-        success: true,
-        error_code: ESYSCALL_OK,
-        error_message: "",
-        return_value: 0,  // would be device pointer
-    }
-}
 
-// neuray_free - Free device memory
-// Similar to: cuda.free(ptr)
-func neuray_free(int gpu_ptr) syscall_result {
-    // 1. Find allocation by pointer
-    // 2. Deallocate from device memory pool
-    // 3. Update allocation tracking
-    
     return syscall_result {
         success: true,
         error_code: ESYSCALL_OK,
@@ -140,12 +90,20 @@ func neuray_free(int gpu_ptr) syscall_result {
     }
 }
 
-// neuray_memcpy - Copy memory between devices/host
-// Similar to: cuda.memcpy(dst, src, nbytes, direction)
+func neuray_free(int gpu_ptr) syscall_result {
+
+    return syscall_result {
+        success: true,
+        error_code: ESYSCALL_OK,
+        error_message: "",
+        return_value: 0,
+    }
+}
+
 enum memcpy_direction {
-    MEMCPY_H2D,             // Host to Device
-    MEMCPY_D2H,             // Device to Host
-    MEMCPY_D2D,             // Device to Device
+    MEMCPY_H2D,
+    MEMCPY_D2H,
+    MEMCPY_D2D,
 }
 
 func neuray_memcpy(
@@ -153,14 +111,11 @@ func neuray_memcpy(
     int src_ptr,
     int bytes,
     memcpy_direction direction,
-    string dst_device,      // "cuda:0" for D2D
-    string src_device,      // "cuda:0" for D2D
+    string dst_device,
+    string src_device,
     int timeout_ms
 ) syscall_result {
-    // 1. Validate pointers and devices
-    // 2. Set up DMA transfer
-    // 3. Wait for completion (with timeout)
-    
+
     return syscall_result {
         success: true,
         error_code: ESYSCALL_OK,
@@ -169,7 +124,6 @@ func neuray_memcpy(
     }
 }
 
-// neuray_mem_query - Query memory status
 struct memory_status {
     int total_bytes
     int allocated_bytes
@@ -188,51 +142,24 @@ func neuray_mem_query(string device_id) memory_status {
     }
 }
 
-// ============================================================================
-// Workload Scheduling Syscalls
-// ============================================================================
-
-// Workload types for scheduling
 enum workload_type {
-    WL_INFERENCE_LATENCY,   // Low-latency interactive
-    WL_INFERENCE_BATCH,     // Batch inference
-    WL_TRAINING,            // Training task
-    WL_DATA_LOAD,           // Data loading
-    WL_SYNC_POINT,          // Synchronization barrier
+    WL_INFERENCE_LATENCY,
+    WL_INFERENCE_BATCH,
+    WL_TRAINING,
+    WL_DATA_LOAD,
+    WL_SYNC_POINT,
 }
 
-// neuray_schedule - Schedule workload for execution
 struct workload_schedule {
     string workload_id
     workload_type wl_type
-    int priority            // 0=highest, 10=lowest
-    int deadline_ms         // relative to now, 0=no deadline
-    string[] resource_hints // "batch_size=64", "use_tensorcore"
+    int priority
+    int deadline_ms
+    string[] resource_hints
 }
 
 func neuray_schedule(workload_schedule wl) syscall_result {
-    // 1. Classify workload
-    // 2. Allocate resources (GPU time, memory)
-    // 3. Queue in scheduler
-    // 4. Return scheduling decision
-    
-    return syscall_result {
-        success: true,
-        error_code: ESYSCALL_OK,
-        error_message: "",
-        return_value: 0,  // schedule_id
-    }
-}
 
-// neuray_schedule_wait - Wait for workload to complete
-func neuray_schedule_wait(
-    int schedule_id,
-    int timeout_ms
-) syscall_result {
-    // 1. Find workload in scheduler
-    // 2. Wait for completion (with timeout)
-    // 3. Return result
-    
     return syscall_result {
         success: true,
         error_code: ESYSCALL_OK,
@@ -241,11 +168,19 @@ func neuray_schedule_wait(
     }
 }
 
-// ============================================================================
-// Device Control Syscalls
-// ============================================================================
+func neuray_schedule_wait(
+    int schedule_id,
+    int timeout_ms
+) syscall_result {
 
-// neuray_device_ctl - Device control operations
+    return syscall_result {
+        success: true,
+        error_code: ESYSCALL_OK,
+        error_message: "",
+        return_value: 0,
+    }
+}
+
 enum device_ctl_command {
     DEV_CTL_QUERY_STATUS,
     DEV_CTL_SET_CLOCK,
@@ -262,10 +197,7 @@ func neuray_device_ctl(
     []byte params,
     int params_size
 ) syscall_result {
-    // 1. Validate device
-    // 2. Execute control command
-    // 3. Return result
-    
+
     return syscall_result {
         success: true,
         error_code: ESYSCALL_OK,
@@ -274,11 +206,6 @@ func neuray_device_ctl(
     }
 }
 
-// ============================================================================
-// Monitoring & Profiling Syscalls
-// ============================================================================
-
-// Metric types
 enum metric_type {
     METRIC_UTILIZATION,
     METRIC_POWER,
@@ -288,23 +215,19 @@ enum metric_type {
     METRIC_LATENCY,
 }
 
-// neuray_get_metric - Get device metrics
 func neuray_get_metric(
     string device_id,
     metric_type metric
 ) syscall_result {
-    // 1. Query device metric
-    // 2. Return current value
-    
+
     return syscall_result {
         success: true,
         error_code: ESYSCALL_OK,
         error_message: "",
-        return_value: 0,  // metric value
+        return_value: 0,
     }
 }
 
-// Start recording metrics
 func neuray_metrics_start(string device_id) syscall_result {
     return syscall_result {
         success: true,
@@ -314,11 +237,10 @@ func neuray_metrics_start(string device_id) syscall_result {
     }
 }
 
-// Stop recording and get metrics
 struct recorded_metrics {
     int sample_count
-    int[] timestamps        // milliseconds
-    int[] utilization       // 0-100%
+    int[] timestamps
+    int[] utilization
     int[] power_watts
     int[] temperature_c
     int[] bandwidth_gbps
@@ -335,17 +257,11 @@ func neuray_metrics_get(string device_id) recorded_metrics {
     }
 }
 
-// ============================================================================
-// Debugging Syscalls
-// ============================================================================
-
-// neuray_get_error - Get last error message
 func neuray_get_error() string {
-    // Return last error from kernel
+
     return ""
 }
 
-// neuray_clear_error - Clear error state
 func neuray_clear_error() syscall_result {
     return syscall_result {
         success: true,
@@ -355,9 +271,8 @@ func neuray_clear_error() syscall_result {
     }
 }
 
-// neuray_trace_enable - Enable tracing for debugging
 func neuray_trace_enable(string component) syscall_result {
-    // component: "all", "inference", "memory", "scheduler"
+
     return syscall_result {
         success: true,
         error_code: ESYSCALL_OK,
@@ -366,7 +281,6 @@ func neuray_trace_enable(string component) syscall_result {
     }
 }
 
-// neuray_trace_disable - Disable tracing
 func neuray_trace_disable(string component) syscall_result {
     return syscall_result {
         success: true,
@@ -376,14 +290,6 @@ func neuray_trace_disable(string component) syscall_result {
     }
 }
 
-// ============================================================================
-// Syscall Dispatcher
-// ============================================================================
-
-// Global syscall table (would normally be an array of function pointers)
-// This demonstrates the pattern
-
-// Syscall IDs
 enum syscall_id {
     SYS_INFER = 1,
     SYS_ALLOC = 2,
@@ -395,14 +301,10 @@ enum syscall_id {
     SYS_GET_ERROR = 8,
 }
 
-// Main syscall dispatcher
-// Applications call: dispatcher.dispatch(syscall_id, args)
 struct syscall_dispatcher {
-    // In a real implementation, this would have a table of 100+ syscalls
-    // For now, this shows the pattern
+
 }
 
-// Helper to format syscall results
 func syscall_ok(int return_value) syscall_result {
     return syscall_result {
         success: true,
@@ -421,7 +323,6 @@ func syscall_error(syscall_error error_code, string message) syscall_result {
     }
 }
 
-// Convert error code to string
 func error_to_string(syscall_error err) string {
     if err == ESYSCALL_OK { return "OK" }
     if err == ESYSCALL_INVALID_ARG { return "INVALID_ARG" }

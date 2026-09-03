@@ -32,8 +32,6 @@ func spawn_result(process_isolation isolation, resource_controller resources,
     }
 }
 
-
-
 func process_spawn_transaction(
     process_isolation isolation,
     resource_controller resources,

@@ -1,7 +1,5 @@
 package neurx.os.boot
 
-
-
 struct boot_state {
     bool early_memory_ready
     bool scheduler_ready

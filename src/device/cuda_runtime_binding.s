@@ -1,8 +1,5 @@
 package neurx.device.cuda_runtime_binding
 
-// CUDA Runtime API FFI Bindings
-// These are extern declarations to NVIDIA CUDA libraries
-
 extern func cudaGetDeviceCount(int* count) -> int
 extern func cudaSetDevice(int device) -> int
 extern func cudaGetDevice(int* device) -> int
@@ -19,18 +16,14 @@ extern func cudaEventRecord(void* event, void* stream) -> int
 extern func cudaEventSynchronize(void* event) -> int
 extern func cudaGetLastError() -> int
 
-// CUDA error codes
 int CUDA_SUCCESS = 0
 int CUDA_ERROR_INVALID_DEVICE = 1
 int CUDA_ERROR_OUT_OF_MEMORY = 2
 int CUDA_ERROR_NOT_INITIALIZED = 3
 
-// Memory copy kinds
 int CUDA_MEMCPY_HOST_TO_DEVICE = 1
 int CUDA_MEMCPY_DEVICE_TO_HOST = 2
 int CUDA_MEMCPY_DEVICE_TO_DEVICE = 3
-
-// Basic device operations
 
 func cuda_get_device_count() (int, bool, string) {
     count := 0
@@ -57,8 +50,6 @@ func cuda_get_current_device() (int, bool, string) {
     }
     return device, true, ""
 }
-
-// Memory management
 
 func cuda_malloc(int64 size) (int64, bool, string) {
     ptr := 0
@@ -103,8 +94,6 @@ func cuda_memcpy_d2d(int64 src, int64 dst, int64 size) (bool, string) {
     return true, ""
 }
 
-// Stream management
-
 func cuda_stream_create() (int64, bool, string) {
     stream := 0
     status := cudaStreamCreate(&stream)
@@ -133,8 +122,6 @@ func cuda_stream_synchronize(int64 stream) (bool, string) {
 func cuda_device_synchronize() (bool, string) {
     return cuda_stream_synchronize(0)
 }
-
-// Error handling
 
 func cuda_get_last_error() (int, string) {
     error_code := cudaGetLastError()

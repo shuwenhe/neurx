@@ -1,11 +1,9 @@
 package config
 
-
     strict
     normal
     lenient
 }
-
 
     range_check
     enum_check

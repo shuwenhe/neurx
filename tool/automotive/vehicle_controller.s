@@ -1,6 +1,5 @@
 package neurx.tool.automotive
 
-
     manual,
     assisted,
     autonomous,

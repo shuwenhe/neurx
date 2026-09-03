@@ -844,7 +844,6 @@ No more theory. No more refinements.
 
 ---
 
-
 ---
 
 ## FREEZE BASELINE: 2026-08-28

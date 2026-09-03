@@ -46,8 +46,7 @@ func stream_pool_acquire(stream_pool* pool) (int64, bool, string) {
 func stream_pool_release(stream_pool* pool, int64 stream) (bool, string) {
     for i := 0; i < pool.busy_streams.len(); i = i + 1 {
         if pool.busy_streams[i] == stream {
-            // Found the stream
-            // Move from busy to available
+
             pool.busy_streams[i] = pool.busy_streams[pool.busy_streams.len() - 1]
             pool.busy_streams.pop()
             pool.available_streams.push(stream)

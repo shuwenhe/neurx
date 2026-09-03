@@ -2,55 +2,41 @@ package neurx.kernel.driver_framework
 
 use neurx.kernel.device_model.{device, device_register, device_unregister, device_get}
 
-// ============================================================================
-// Driver Operations & Lifecycle
-// ============================================================================
-
-// Result type for driver operations
 struct driver_result {
     bool success
     int error_code
     string error_message
 }
 
-// Driver operation callbacks
 struct driver_ops {
-    // Device discovery and binding (mandatory)
+
     func probe(device dev) driver_result
     func remove(device dev) driver_result
     
-    // Power management (optional)
     func suspend(device dev, int state) driver_result
     func resume(device dev) driver_result
     
-    // Interrupt handling (optional)
     func irq_handler(device dev, int irq) driver_result
     
-    // Reset and recovery (optional)
     func reset(device dev) driver_result
 }
 
-// Registered driver metadata
 struct registered_driver {
     string driver_name
     string driver_version
-    string device_pattern        // e.g., "nvidia_*" or "0000:01:00.*"
+    string device_pattern
     driver_ops ops
     
-    // Driver properties
-    int priority                  // 0=highest, 10=lowest (for probe order)
-    string[] supported_devices    // list of compatible device types
-    bool auto_probe               // automatically probe for devices?
+    int priority
+    string[] supported_devices
+    bool auto_probe
     
-    // Reference counting
-    int device_count              // devices bound to this driver
+    int device_count
     
-    // Driver state
     bool is_loaded
-    int initialization_status     // 0=ok, !0=error
+    int initialization_status
 }
 
-// Global driver registry
 struct driver_registry {
     registered_driver[] drivers
     int driver_count
@@ -61,11 +47,6 @@ driver_registry global_driver_registry = driver_registry {
     driver_count: 0,
 }
 
-// ============================================================================
-// Driver Registration API
-// ============================================================================
-
-// Register a driver with the system
 func driver_register(
     string driver_name,
     string driver_version,
@@ -74,19 +55,17 @@ func driver_register(
     int priority
 ) int {
     if global_driver_registry.driver_count >= len(global_driver_registry.drivers) {
-        return -1  // registry full
+        return -1
     }
     
-    // Check for duplicate
     int i = 0
     for i < global_driver_registry.driver_count {
         if global_driver_registry.drivers[i].driver_name == driver_name {
-            return -2  // already registered
+            return -2
         }
         i = i + 1
     }
     
-    // Create new driver entry
     registered_driver drv = registered_driver {
         driver_name: driver_name,
         driver_version: driver_version,
@@ -98,7 +77,6 @@ func driver_register(
         initialization_status: 0,
     }
     
-    // Insert in priority order
     i = global_driver_registry.driver_count
     while i > 0 && global_driver_registry.drivers[i - 1].priority > priority {
         global_driver_registry.drivers[i] = global_driver_registry.drivers[i - 1]
@@ -111,7 +89,6 @@ func driver_register(
     return 0
 }
 
-// Unregister a driver
 func driver_unregister(string driver_name) int {
     int idx = -1
     int i = 0
@@ -123,15 +100,13 @@ func driver_unregister(string driver_name) int {
     }
     
     if idx < 0 {
-        return -1  // not found
+        return -1
     }
     
-    // Can't unregister if devices still bound
     if global_driver_registry.drivers[idx].device_count > 0 {
-        return -2  // devices still attached
+        return -2
     }
     
-    // Remove by shifting
     for i = idx; i < global_driver_registry.driver_count - 1; i = i + 1 {
         global_driver_registry.drivers[i] = global_driver_registry.drivers[i + 1]
     }
@@ -140,13 +115,8 @@ func driver_unregister(string driver_name) int {
     return 0
 }
 
-// ============================================================================
-// Device-Driver Binding
-// ============================================================================
-
-// Match device with driver (simple pattern matching)
 func driver_matches_device(string pattern, device dev) bool {
-    // Simple wildcard matching: "nvidia_*" matches "nvidia_gpu_0"
+
     int pat_len = len(pattern)
     int dev_len = len(dev.device_type)
     
@@ -154,8 +124,7 @@ func driver_matches_device(string pattern, device dev) bool {
         return false
     }
     
-    // Check if pattern ends with '*'
-    if pattern[pat_len - 1] == 42 {  // '*' = 42 in ASCII
+    if pattern[pat_len - 1] == 42 {
         int i = 0
         while i < pat_len - 1 {
             if pattern[i] != dev.device_type[i] {
@@ -166,27 +135,23 @@ func driver_matches_device(string pattern, device dev) bool {
         return true
     }
     
-    // Exact match
     return pattern == dev.device_type
 }
 
-// Probe a device - try to bind a driver to it
 func device_probe(device dev) driver_result {
     int i = 0
     
-    // Try drivers in priority order (already sorted)
     for i < global_driver_registry.driver_count {
         registered_driver drv = global_driver_registry.drivers[i]
         
         if driver_matches_device(drv.device_pattern, dev) {
-            // Try to probe
+
             driver_result result = drv.ops.probe(dev)
             
             if result.success {
-                // Update driver's device count
+
                 global_driver_registry.drivers[i].device_count = global_driver_registry.drivers[i].device_count + 1
                 
-                // Update device's driver binding
                 dev.driver_name = drv.driver_name
                 device_register(dev)
                 
@@ -197,7 +162,6 @@ func device_probe(device dev) driver_result {
         i = i + 1
     }
     
-    // No driver found
     return driver_result {
         success: false,
         error_code: -1,
@@ -205,7 +169,6 @@ func device_probe(device dev) driver_result {
     }
 }
 
-// Remove a device - unbind driver from it
 func device_remove(string device_id) driver_result {
     device dev = device_get(device_id)
     
@@ -225,11 +188,10 @@ func device_remove(string device_id) driver_result {
         }
     }
     
-    // Find the driver
     int i = 0
     while i < global_driver_registry.driver_count {
         if global_driver_registry.drivers[i].driver_name == dev.driver_name {
-            // Call driver's remove function
+
             driver_result result = global_driver_registry.drivers[i].ops.remove(dev)
             
             if result.success {
@@ -250,11 +212,6 @@ func device_remove(string device_id) driver_result {
     }
 }
 
-// ============================================================================
-// Power Management
-// ============================================================================
-
-// Suspend a device
 func device_suspend(string device_id, int power_state) driver_result {
     device dev = device_get(device_id)
     
@@ -274,7 +231,6 @@ func device_suspend(string device_id, int power_state) driver_result {
         }
     }
     
-    // Find and call driver
     int i = 0
     while i < global_driver_registry.driver_count {
         if global_driver_registry.drivers[i].driver_name == dev.driver_name {
@@ -290,7 +246,6 @@ func device_suspend(string device_id, int power_state) driver_result {
     }
 }
 
-// Resume a device
 func device_resume(string device_id) driver_result {
     device dev = device_get(device_id)
     
@@ -310,7 +265,6 @@ func device_resume(string device_id) driver_result {
         }
     }
     
-    // Find and call driver
     int i = 0
     while i < global_driver_registry.driver_count {
         if global_driver_registry.drivers[i].driver_name == dev.driver_name {
@@ -326,11 +280,6 @@ func device_resume(string device_id) driver_result {
     }
 }
 
-// ============================================================================
-// Query API
-// ============================================================================
-
-// Get driver by name
 func driver_get(string driver_name) registered_driver {
     int i = 0
     for i < global_driver_registry.driver_count {
@@ -345,7 +294,6 @@ func driver_get(string driver_name) registered_driver {
     }
 }
 
-// List all registered drivers
 func driver_list_all() []string {
     string[] result = make([]string, 64)
     int i = 0
@@ -356,16 +304,10 @@ func driver_list_all() []string {
     return result
 }
 
-// Get driver count
 func driver_count() int {
     return global_driver_registry.driver_count
 }
 
-// ============================================================================
-// Debug & Monitoring
-// ============================================================================
-
-// Dump driver registry
 func driver_dump_registry() string {
     string output = ""
     output = output + "Driver Registry (" + string(global_driver_registry.driver_count) + " drivers)\n"
@@ -384,7 +326,6 @@ func driver_dump_registry() string {
     return output
 }
 
-// Helper to create a dummy driver result
 func driver_success() driver_result {
     return driver_result {
         success: true,
