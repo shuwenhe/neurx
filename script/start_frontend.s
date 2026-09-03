@@ -16,7 +16,7 @@ func main() {
     system_sleep(3)
     if verify_port_listening(8081) {
         println("✅ Frontend is running on port 8081")
-            println("🌐 Access UI: http:
+        println("🌐 Access UI: http://127.0.0.1:8081")
         println("📋 Log: tail -f /tmp/neurx_frontend.log")
         println("🛑 Stop: make frontend-stop")
         println("")

@@ -370,7 +370,7 @@ func bind_backend_socket(int listener_fd, string host, int port) int {
     bind_result
 }
 
-func tokenize_text(string text) int[256] {
+func tokenize_text(string text) int[] {
     int[256] tokens
     int i = 0
     int token_count = 0
@@ -410,7 +410,7 @@ func safe_allocate_float_array(int requested_size) int {
     return requested_size
 }
 
-func streaming_matmul_bf16(string model_path, int[8192] metadata_bytes, string tensor_name, float[4096] input, int out_dim, int in_dim) float[4096] {
+func streaming_matmul_bf16(string model_path, int[] metadata_bytes, string tensor_name, float[] input, int out_dim, int in_dim) float[] {
     print("[MatMul] Streaming matmul for " + tensor_name + " (out=" + int_to_string(out_dim) + ", in=" + int_to_string(in_dim) + ")\n")
     int actual_out = safe_allocate_float_array(out_dim)
     float[4096] output
@@ -428,7 +428,7 @@ func streaming_matmul_bf16(string model_path, int[8192] metadata_bytes, string t
         }
         int chunk_rows = chunk_end - out_idx
         int bytes_needed = chunk_rows * in_dim * 2
-        int[] raw_weights = __host_read_binary_file_range(model_path, 0, bytes_needed)
+        raw_weights := __host_read_binary_file_range(model_path, 0, bytes_needed)
         if len(raw_weights) < bytes_needed {
             print("[MatMul] Read failed at idx " + int_to_string(out_idx) + "\n")
             break
@@ -455,7 +455,7 @@ func streaming_matmul_bf16(string model_path, int[8192] metadata_bytes, string t
     return output
 }
 
-func simple_transformer_layer(float[4096] input, int hidden_dim, int layer_idx) float[4096] {
+func simple_transformer_layer(float[] input, int hidden_dim, int layer_idx) float[] {
     print("[Layer " + int_to_string(layer_idx) + "] Processing input of size " + int_to_string(len(input)) + "\n")
     int output_size = safe_allocate_float_array(hidden_dim)
     float[4096] output
@@ -468,9 +468,9 @@ func simple_transformer_layer(float[4096] input, int hidden_dim, int layer_idx) 
     return output
 }
 
-func run_transformer_forward(float[4096] embeddings, int num_layers, int hidden_dim) float[4096] {
+func run_transformer_forward(float[] embeddings, int num_layers, int hidden_dim) float[] {
     print("[Inference] Starting " + int_to_string(num_layers) + " transformer layers\n")
-    float[4096] state = embeddings
+    state := embeddings
     int layer = 0
     for layer < num_layers && len(state) > 0 {
         print("[Inference] Layer " + int_to_string(layer) + " / " + int_to_string(num_layers) + "\n")
@@ -494,7 +494,7 @@ func exp_approx(float x) float {
     return 1.0 + x + x2 / 2.0 + x3 / 6.0 + x4 / 24.0
 }
 
-func softmax(float[4096] logits) float[4096] {
+func softmax(float[] logits) float[] {
     int n = len(logits)
     int output_size = safe_allocate_float_array(n)
     float[4096] probs
@@ -533,7 +533,7 @@ func softmax(float[4096] logits) float[4096] {
     return probs
 }
 
-func argmax(float[4096] v) int {
+func argmax(float[] v) int {
     int n = len(v)
     if n == 0 {
         return -1
@@ -587,7 +587,7 @@ func token_id_to_string(int id) string {
     else { return "[" + int_to_string(id) + "]" }
 }
 
-func top_k_indices(float[4096] logits, int k) int[512] {
+func top_k_indices(float[] logits, int k) int[] {
     int n = len(logits)
     if k <= 0 || n == 0 {
         int[512] empty
@@ -629,19 +629,19 @@ func top_k_indices(float[4096] logits, int k) int[512] {
     return topk
 }
 
-func top_k_sample(float[4096] logits, int k) int {
+func top_k_sample(float[] logits, int k) int {
     int n = len(logits)
     if n == 0 {
         return -1
     }
-    int[512] tk = top_k_indices(logits, k)
+    tk := top_k_indices(logits, k)
     if len(tk) == 0 {
         return argmax(logits)
     }
     return tk[0]
 }
 
-func decode_logits_greedy(float[4096] logits) string {
+func decode_logits_greedy(float[] logits) string {
     int tid = argmax(logits)
     if tid < 0 {
         return ""
@@ -759,9 +759,9 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     print("[RealInference] Prompt: '" + prompt + "'\n")
     print("[RealInference] Max tokens: " + int_to_string(max_tokens) + "\n")
 
-    int[] input_tokens = tokenize_text(prompt)
+    input_tokens := tokenize_text(prompt)
     if len(input_tokens) == 0 {
-        input_tokens = new int[1]
+        input_tokens = make(int[], 1)
         input_tokens[0] = 50256
     }
     print("[RealInference] Input tokenized: " + int_to_string(len(input_tokens)) + " tokens\n")
@@ -769,7 +769,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     int seq_len = len(input_tokens)
     if seq_len > 32 { seq_len = 32 }
 
-    float[] input_hidden = new float[seq_len * hidden_dim]
+    input_hidden := make(float[], seq_len * hidden_dim)
     int tok_idx = 0
     for tok_idx < seq_len {
         int token_id = input_tokens[tok_idx]
@@ -787,7 +787,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     }
     print("[RealInference] Input embeddings computed\n")
 
-    float[] current_hidden = input_hidden
+    current_hidden := input_hidden
     int layer_idx = 0
     int active_layers = num_layers
     if active_layers > 1 { active_layers = 1 }
@@ -795,12 +795,12 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     for layer_idx < active_layers {
 
         int attn_hidden_size = len(current_hidden)
-        float[] attn_hidden = new float[seq_len * hidden_dim]
+        attn_hidden := make(float[], seq_len * hidden_dim)
         tok_idx = 0
         for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
 
-            float[] attn_scores = new float[seq_len]
+            attn_scores := make(float[], seq_len)
             int pos = 0
             for pos < seq_len {
                 float dot_product = 0.0
@@ -838,7 +838,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
         }
 
         int ffn_hidden_size = len(current_hidden)
-        float[] ffn_hidden = new float[seq_len * hidden_dim]
+        ffn_hidden := make(float[], seq_len * hidden_dim)
         tok_idx = 0
         for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
@@ -1166,10 +1166,10 @@ func main() {
 }
 
 func load_embedding_weights(string model_path, int vocab_size, int hidden_size) float[] {
-    float[] embeddings = new float[vocab_size]
+    embeddings := make(float[], vocab_size)
     print("[Weights] Loading embeddings: " + int_to_string(vocab_size) + " × " + int_to_string(hidden_size) + "\n")
 
-    int[] header_bytes = __host_read_binary_file_range(model_path, 0, 16)
+    header_bytes := __host_read_binary_file_range(model_path, 0, 16)
     if len(header_bytes) < 8 {
         print("[Weights] ERROR: Cannot read header (got " + int_to_string(len(header_bytes)) + " bytes)\n")
         return embeddings
@@ -1194,7 +1194,7 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size) int {
 }
 
 func tokenize_with_vocab(string text) int[] {
-    int[] tokens = new int[512]
+    tokens := make(int[], 512)
     int token_count = 0
 
     int i = 0
@@ -1255,7 +1255,7 @@ func nucleus_sample(float[] logits, float p, int seed) int {
         p_val = 1.0
     }
 
-    int[] sorted_indices = new int[n]
+    sorted_indices := make(int[], n)
     int i = 0
     for i < n {
         sorted_indices[i] = i
@@ -1309,7 +1309,7 @@ func nucleus_sample(float[] logits, float p, int seed) int {
 
 func temperature_scale(float[] logits, float temperature) float[] {
     int scaled_size = len(logits)
-    float[] scaled = new float[len(logits)]
+    scaled := make(float[], len(logits))
 
     float temp_val = temperature
     if temp_val <= 0.0 {
@@ -1327,7 +1327,7 @@ func temperature_scale(float[] logits, float temperature) float[] {
 
 func init_kv_cache(int num_layers, int max_seq_len, int hidden_size) kv_cache {
     int cache_size = num_layers * max_seq_len * hidden_size
-    float[] cache_data = new float[cache_size]
+    cache_data := make(float[], cache_size)
 
     print("[Cache] Initializing KV cache: " + int_to_string(num_layers) + " layers, seq_len=" + int_to_string(max_seq_len) + "\n")
 

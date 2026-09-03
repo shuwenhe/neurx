@@ -42,7 +42,7 @@ CALL|t20|verify_port_listening|1
 JUMP_IF_FALSE|L0|t20|_
 ARG|"✅ Frontend is running on port 8081"|_|_
 CALL|t21|println|1
-ARG|"🌐 Access UI: http://localhost:8081"|_|_
+ARG|"🌐 Access UI: http://127.0.0.1:8081"|_|_
 CALL|t22|println|1
 ARG|"📋 Log: tail -f /tmp/neurx_frontend.log"|_|_
 CALL|t23|println|1

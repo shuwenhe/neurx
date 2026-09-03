@@ -447,10 +447,10 @@ func find_substring(string text, string pattern) int {
     return -1
 }
 
-func find_char_after(string text, int char_code, int start_pos) int {
+func find_char_after(string text, string character, int start_pos) int {
     int i = start_pos
     for i < len(text) {
-        if text[i] == char_code {
+        if __host_slice(text, i, i + 1) == character {
             return i
         }
         i = i + 1
@@ -579,7 +579,7 @@ func tokenize_qwen(string text) []int {
     count = count + 1
     int i = 0
     for i < len(text) {
-        int byte_val = text[i]
+        int byte_val = int(text[i])
         int token_id = char_to_token_id(byte_val)
         if token_id > 0 {
             tokens[count] = token_id
@@ -719,7 +719,7 @@ func lookup_token_id_from_python(string token_str) int {
     int i = 0
     for i < len(token_str) {
         string ch = __host_slice(token_str, i, i + 1)
-        int ascii = ch[0]
+        int ascii = int(ch[0])
         hash_val = ((hash_val * 31) + ascii) % 100000
         i = i + 1
     }
@@ -834,7 +834,7 @@ func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
         float sum = 0.0
         int j = 0
         for j < cols {
-            sum = sum + matrix[idx] * j[]
+            sum = sum + matrix[idx] * vec[j]
             idx = idx + 1
             j = j + 1
         }
@@ -1134,7 +1134,7 @@ func extract_last_user_message(string prompt) string {
     }
     int content_start = last_pos + len(marker)
     for content_start < len(prompt) {
-        int ch = prompt[content_start]
+        int ch = int(prompt[content_start])
         if ch != 32 && ch != 9 {
             break
         }
@@ -1193,7 +1193,7 @@ func find_substring_bytes([]int bytes, string needle, int start_pos) int {
         int j = 0
         int match = 1
         for j < len(needle) {
-            if i + j >= len(bytes) || bytes[i + j] != needle[j] {
+            if i + j >= len(bytes) || bytes[i + j] != int(needle[j]) {
                 match = 0
                 break
             }
@@ -2341,7 +2341,7 @@ func fast_token_generation(string prompt, int max_tokens) string {
     int seed = 0
     int i = 0
     for i < len(prompt) && i < 20 {
-        seed = seed + __host_slice(prompt, i, i + 1)[0] * (i + 1)
+        seed = seed + int(__host_slice(prompt, i, i + 1)[0]) * (i + 1)
         i = i + 1
     }
     

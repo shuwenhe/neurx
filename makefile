@@ -1072,7 +1072,8 @@ $(PRODUCTION_S_GPU_BACKEND): backend/platform/cuda/inference_server.s src/model/
 
 $(PRODUCTION_S_GPU_BACKEND_ENHANCED): backend/platform/cuda/inference_server.s src/model/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend Enhanced (Real Inference + Streaming MatMul)..."
-	@$(S_SEED_COMPILER) backend/platform/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' && \
+	@cp backend/platform/cuda/inference_server.s /tmp/neurx_gpu_inference_server.s && \
+		$(S_SEED_COMPILER) /tmp/neurx_gpu_inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' && \
 		$(S_SEED_COMPILER) src/model/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
 		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend Enhanced compilation failed!"; \

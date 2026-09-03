@@ -298,7 +298,7 @@ func main() {
         return 1
     }
     _ = __sys_write_string(1, "✅ HTTP server bound to 127.0.0.1:8081\n")
-    _ = __sys_write_string(1, "📌 Backend URL: http:
+    _ = __sys_write_string(1, "📌 Backend URL: http://127.0.0.1:18084\n")
     for 1 {
         int client = __sys_accept(listener)
         if client < 0 {

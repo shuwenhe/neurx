@@ -10,7 +10,7 @@ func parse_int_or_default(string s, int default_val) int {
     int result = 0
     int i = 0
     for i < len(s) {
-        int ch = s[i]
+        int ch = int(s[i])
         if ch >= 48 && ch <= 57 {
             result = result * 10 + (ch - 48)
         } else {

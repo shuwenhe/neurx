@@ -6,11 +6,11 @@ extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern func runtime_env_get(string key, string default_value) string
 func trim(string s) string {
     int i = 0
-    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (int(s[i]) == 32 || int(s[i]) == 9 || int(s[i]) == 10 || int(s[i]) == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (int(s[j]) == 32 || int(s[j]) == 9 || int(s[j]) == 10 || int(s[j]) == 13) {
         j = j - 1
     }
     if j < i {
@@ -53,7 +53,7 @@ func to_lowercase(string text) string {
     string result = ""
     int i = 0
     for i < len(text) {
-        int c = text[i]
+        int c = int(text[i])
         if c >= 65 && c <= 90 {
             c = c + 32
         }
