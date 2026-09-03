@@ -202,7 +202,7 @@ func sqrt_lora(float x) float {
 }
 
 func reference_fill_f32(int size, float value) []float {
-    float[] arr = make([]float, size)
+    []float arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = value
@@ -221,7 +221,7 @@ func int_to_str(int n) string {
         negative = true
         n = 0 - n
     }
-    string[] digits = string[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+    []string digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
     for n > 0 {
         int digit = n - (n / 10) * 10
         result = digits[digit] + result

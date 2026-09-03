@@ -13,8 +13,8 @@ struct task {
 }
 
 struct task_sample {
-    input                   int[]
-    target                  int[]
+    input                   []int
+    target                  []int
     task_id                 int
 }
 
@@ -31,8 +31,8 @@ struct multi_task_learner {
     config                  multi_task_config
     tasks                   []task
     shared_encoder          policy_model
-    task_heads              map[int]float[]64
-    task_losses             map[int]float[]64
+    task_heads              map[int][]float64
+    task_losses             map[int][]float64
     task_performance        map[int]float64
     uncertainty_weights     map[int]float64
 }
@@ -47,8 +47,8 @@ func (multi_task_learner* mtl) register_task(task_name string, int data_size, we
         samples: []task_sample{},
     }
     mtl.tasks = append(mtl.tasks, task)
-    mtl.task_heads[task_id] = make(float[]64, mtl.config.task_specific_size)
-    mtl.task_losses[task_id] = float[]64{}
+    mtl.task_heads[task_id] = make([]float64, mtl.config.task_specific_size)
+    mtl.task_losses[task_id] = []float64{}
     mtl.task_performance[task_id] = 0.0
     mtl.uncertainty_weights[task_id] = 1.0
     fmt.Printf("[MultiTask] Registered task: %s (ID: %d, Weight: %.2f)\n",
@@ -56,16 +56,16 @@ func (multi_task_learner* mtl) register_task(task_name string, int data_size, we
     return task_id
 }
 
-func (multi_task_learner* mtl) shared_forward(input []int) float[]64 {
-    hidden := make(float[]64, mtl.config.shared_hidden_size)
+func (multi_task_learner* mtl) shared_forward(input []int) []float64 {
+    hidden := make([]float64, mtl.config.shared_hidden_size)
     for i := 0; i < mtl.config.shared_hidden_size; i++ {
         hidden[i] = math.Sin(float64(i) / 100.0)
     }
     return hidden
 }
 
-func (multi_task_learner* mtl) task_forward(shared_hidden float[]64, int task_id) float[]64 {
-    output := make(float[]64, mtl.config.task_specific_size)
+func (multi_task_learner* mtl) task_forward(shared_hidden []float64, int task_id) []float64 {
+    output := make([]float64, mtl.config.task_specific_size)
     for i := 0; i < mtl.config.task_specific_size; i++ {
         sum := 0.0
         for j := 0; j < len(shared_hidden); j++ {
@@ -77,9 +77,9 @@ func (multi_task_learner* mtl) task_forward(shared_hidden float[]64, int task_id
 }
 
 func (multi_task_learner* mtl) compute_multi_task_loss(
-    batch_inputs int[][],
-    batch_targets int[][],
-    task_ids int[]) map[int]float64 {
+    batch_inputs []int[],
+    batch_targets []int[],
+    task_ids []int) map[int]float64 {
     losses := make(map[int]float64)
     for task_id := range mtl.tasks {
         losses[task_id] = 0.0
@@ -97,7 +97,7 @@ func (multi_task_learner* mtl) compute_multi_task_loss(
     return losses
 }
 
-func (multi_task_learner* mtl) compute_task_loss(output float[]64, int[] target) float64 {
+func (multi_task_learner* mtl) compute_task_loss(output []float64, []int target) float64 {
     loss := 0.0
     max_out := output[0]
     for _, o := range output {
@@ -145,9 +145,9 @@ func (multi_task_learner* mtl) adaptive_weight(task_id int) float64 {
 }
 
 func (multi_task_learner* mtl) train_step(
-    batch_inputs int[][],
-    batch_targets int[][],
-    task_ids int[]) float64 {
+    batch_inputs []int[],
+    batch_targets []int[],
+    task_ids []int) float64 {
     losses := mtl.compute_multi_task_loss(batch_inputs, batch_targets, task_ids)
     total_loss := 0.0
     for task_id, loss := range losses {
@@ -171,14 +171,14 @@ func (multi_task_learner* mtl) train(num_steps int) {
     fmt.Printf("  task Specific: %d\n", mtl.config.task_specific_size)
     fmt.Printf("  Loss Balancing: %s\n\n", mtl.config.loss_balancing)
     for step := 0; step < num_steps; step++ {
-        batch_inputs := int[][]{}
-        batch_targets := int[][]{}
+        batch_inputs := []int[]{}
+        batch_targets := []int[]{}
         task_ids := []int{}
         batch_size := 32
         for i := 0; i < batch_size; i++ {
             task_id := i % len(mtl.tasks)
-            batch_inputs = append(batch_inputs, int[]{1, 2, 3, 4, 5})
-            batch_targets = append(batch_targets, int[]{1, 2})
+            batch_inputs = append(batch_inputs, []int{1, 2, 3, 4, 5})
+            batch_targets = append(batch_targets, []int{1, 2})
             task_ids = append(task_ids, task_id)
         }
         loss := mtl.train_step(batch_inputs, batch_targets, task_ids)
@@ -227,8 +227,8 @@ func new_multi_task_learner(config multi_task_config) *multi_task_learner {
         config: config,
         tasks: []task{},
         shared_encoder: policy_model{},
-        task_heads: make(map[int]float[]64),
-        task_losses: make(map[int]float[]64),
+        task_heads: make(map[int][]float64),
+        task_losses: make(map[int][]float64),
         task_performance: make(map[int]float64),
         uncertainty_weights: make(map[int]float64),
     }

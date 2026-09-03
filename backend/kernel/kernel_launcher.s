@@ -13,7 +13,7 @@ struct KernelLauncher {
     device_manager: *cuda_primitives.CUDADeviceManager,
     event_manager: *cuda_primitives.CUDAEventManager,
     kernel_cache: map[string, i32],
-    execution_queue: string[],
+    execution_queue: []string,
     kernel_stats: map[string, types.KernelStats]
 }
 
@@ -25,7 +25,7 @@ func NewKernelLauncher(i32 device_id) *KernelLauncher {
         device_manager: device_mgr,
         event_manager: cuda_primitives.NewCUDAEventManager(device_mgr),
         kernel_cache: make(map[string, i32]),
-        execution_queue: make(string[], 0),
+        execution_queue: make([]string, 0),
         kernel_stats: make(map[string, types.KernelStats])
     }
 }
@@ -152,7 +152,7 @@ func (KernelLauncher* l) LaunchAttentionKernel(
 }
 
 func (KernelLauncher* l) LaunchBatch(
-    kernel_names: string[],
+    kernel_names: []string,
     configs: []types.KernelConfig
 ) []types.KernelResult {
 
@@ -203,7 +203,7 @@ func (KernelLauncher* l) Synchronize() types.KernelResult {
         }
     }
 
-    l.execution_queue = make(string[], 0)
+    l.execution_queue = make([]string, 0)
 
     return types.KernelResult{
         success: true,
@@ -256,7 +256,7 @@ func (KernelLauncher* l) RecordStats(types.KernelStats stats) {
 func (KernelLauncher* l) ClearCache() {
     l.kernel_cache = make(map[string, i32])
     l.kernel_stats = make(map[string, types.KernelStats])
-    l.execution_queue = make(string[], 0)
+    l.execution_queue = make([]string, 0)
 }
 
 func (KernelLauncher* l) GetPerformanceReport() string {

@@ -1,16 +1,16 @@
 package neurx.agent.trace
 use neurx.agent.observation
 struct agent_trace_state {
-    int[] steps
-    string[] tasks
-    string[] inputs
-    string[] actions
-    string[] observations
-    string[] active_skills
-    string[] tool_names
-    int[] tool_timeout_ms
-    int[] tool_retries
-    bool[] ok_flags
+    []int steps
+    []string tasks
+    []string inputs
+    []string actions
+    []string observations
+    []string active_skills
+    []string tool_names
+    []int tool_timeout_ms
+    []int tool_retries
+    []bool ok_flags
     int count
 }
 
@@ -32,16 +32,16 @@ func new_agent_trace_state() agent_trace_state {
 
 func agent_trace_append(agent_trace_state state, int step, string task, string input, string action, string observation, string active_skill, string tool_name, int timeout_ms, int retries, bool ok) agent_trace_state {
     int size = len(state.steps)
-    int[] steps = make([]int, size + 1)
-    string[] tasks = make([]string, size + 1)
-    string[] inputs = make([]string, size + 1)
-    string[] actions = make([]string, size + 1)
-    string[] observations = make([]string, size + 1)
-    string[] active_skills = make([]string, size + 1)
-    string[] tool_names = make([]string, size + 1)
-    int[] tool_timeout_ms = make([]int, size + 1)
-    int[] tool_retries = make([]int, size + 1)
-    bool[] ok_flags = make([]bool, size + 1)
+    []int steps = make([]int, size + 1)
+    []string tasks = make([]string, size + 1)
+    []string inputs = make([]string, size + 1)
+    []string actions = make([]string, size + 1)
+    []string observations = make([]string, size + 1)
+    []string active_skills = make([]string, size + 1)
+    []string tool_names = make([]string, size + 1)
+    []int tool_timeout_ms = make([]int, size + 1)
+    []int tool_retries = make([]int, size + 1)
+    []bool ok_flags = make([]bool, size + 1)
     int i = 0
     for i < size {
         steps[i] = state.steps[i]
@@ -181,16 +181,16 @@ func agent_trace_window(agent_trace_state state, int max_entries) agent_trace_st
         return state
     }
     int start = size - keep
-    int[] steps = make([]int, keep)
-    string[] tasks = make([]string, keep)
-    string[] inputs = make([]string, keep)
-    string[] actions = make([]string, keep)
-    string[] observations = make([]string, keep)
-    string[] active_skills = make([]string, keep)
-    string[] tool_names = make([]string, keep)
-    int[] tool_timeout_ms = make([]int, keep)
-    int[] tool_retries = make([]int, keep)
-    bool[] ok_flags = make([]bool, keep)
+    []int steps = make([]int, keep)
+    []string tasks = make([]string, keep)
+    []string inputs = make([]string, keep)
+    []string actions = make([]string, keep)
+    []string observations = make([]string, keep)
+    []string active_skills = make([]string, keep)
+    []string tool_names = make([]string, keep)
+    []int tool_timeout_ms = make([]int, keep)
+    []int tool_retries = make([]int, keep)
+    []bool ok_flags = make([]bool, keep)
     int i = 0
     for i < keep {
         steps[i] = state.steps[start + i]
@@ -262,7 +262,7 @@ func agent_trace_filter_task_obs(agent_trace_state state, string task) []string 
         }
         i = i + 1
     }
-    string[] out = make([]string, count)
+    []string out = make([]string, count)
     int wi = 0
     i = 0
     for i < len(state.tasks) {

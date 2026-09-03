@@ -2,19 +2,19 @@ package neurx.trainer.end_to_end_training
 use std.io
 use std.math
 struct data_bundle {
-    input_ids: int[][]
-    labels: int[][]
+    input_ids: []int[]
+    labels: []int[]
     int batch_size
     int seq_len
     int num_tokens
 }
 
 func create_dummy_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
-    input_ids := make(int[][], batch_size)
-    labels := make(int[][], batch_size)
+    input_ids := make([]int[], batch_size)
+    labels := make([]int[], batch_size)
     for b := 0; b < batch_size; b += 1 {
-        input_ids[b] = make(int[], seq_len)
-        labels[b] = make(int[], seq_len)
+        input_ids[b] = make([]int, seq_len)
+        labels[b] = make([]int, seq_len)
         for t := 0; t < seq_len; t += 1 {
             token := (b * seq_len + t) % vocab_size
             input_ids[b][t] = token
@@ -31,28 +31,28 @@ func create_dummy_data_bundle(int batch_size, int seq_len, int vocab_size) data_
 }
 
 struct tensor {
-    data: float[]64
-    shape: int[]
+    data: []float64
+    shape: []int
     int size
-    grad: float[]64
+    grad: []float64
     bool requires_grad
 }
 
-func create_tensor(int[] shape) tensor {
+func create_tensor([]int shape) tensor {
     size := 1
     for i := 0; i < len(shape); i += 1 {
         size = size * shape[i]
     }
     tensor{
-        data: make(float[]64, size),
+        data: make([]float64, size),
         shape: shape,
         size: size,
-        grad: make(float[]64, size),
+        grad: make([]float64, size),
         requires_grad: true,
     }
 }
 
-func create_tensor_with_data(int[] shape, float[]64 data) tensor {
+func create_tensor_with_data([]int shape, []float64 data) tensor {
     t := create_tensor(shape)
     for i := 0; i < len(data); i += 1 {
         if i < t.size {
@@ -62,7 +62,7 @@ func create_tensor_with_data(int[] shape, float[]64 data) tensor {
     t
 }
 
-func tensor_shape_string(int[] shape) string {
+func tensor_shape_string([]int shape) string {
     result := "["
     for i := 0; i < len(shape); i += 1 {
         if i > 0 {
@@ -144,7 +144,7 @@ func transformer_forward(
     logits
 }
 
-func tensor_embedding(tensor weight, int[][] input_ids) tensor {
+func tensor_embedding(tensor weight, []int[] input_ids) tensor {
     batch_size := len(input_ids)
     seq_len := len(input_ids[0])
     hidden_dim := weight.shape[1]
@@ -179,7 +179,7 @@ func simple_attention(
     output := create_tensor(input.shape)
     for b := 0; b < batch_size; b += 1 {
         for t := 0; t < seq_len; t += 1 {
-            scores := make(float[]64, seq_len)
+            scores := make([]float64, seq_len)
             max_score := -1e10
             for s := 0; s <= t; s += 1 {
                 dot_product := 0.0
@@ -281,7 +281,7 @@ func tensor_linear(tensor input, tensor weight) tensor {
     output
 }
 
-func cross_entropy_loss(tensor logits, int[][] labels) float64 {
+func cross_entropy_loss(tensor logits, []int[] labels) float64 {
     batch_size := len(labels)
     seq_len := len(labels[0])
     vocab_size := logits.shape[2]
@@ -400,7 +400,7 @@ func run_training_loop(
     optimizer := create_adamw_optimizer(learning_rate)
     println("📈 Starting training...")
     println("=" * 70)
-    losses := make(float[]64, 0)
+    losses := make([]float64, 0)
     step := 0
     for epoch := 0; epoch < num_epochs; epoch += 1 {
         printf("\n[Epoch %d/%d]\n", epoch + 1, num_epochs)
@@ -434,7 +434,7 @@ func run_training_loop(
     println("=" * 70)
 }
 
-func print_loss_curve(float[]64 losses) {
+func print_loss_curve([]float64 losses) {
     if len(losses) == 0 {
         return
     }
@@ -459,7 +459,7 @@ func print_loss_curve(float[]64 losses) {
     }
 }
 
-func verify_training_progress(float[]64 losses) {
+func verify_training_progress([]float64 losses) {
     if len(losses) < 2 {
         return
     }

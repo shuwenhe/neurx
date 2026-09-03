@@ -15,7 +15,7 @@ func get_session_turns(string session_id) int {
     return 0
 }
 
-func batch_prompts(string[] prompts) []string {
+func batch_prompts([]string prompts) []string {
     results := []string{}
     i := 0
     for i < len(prompts) {
@@ -26,7 +26,7 @@ func batch_prompts(string[] prompts) []string {
     return results
 }
 
-func parallel_process(string[] items, int workers) []string {
+func parallel_process([]string items, int workers) []string {
     return batch_prompts(items)
 }
 

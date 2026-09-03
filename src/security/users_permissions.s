@@ -11,7 +11,7 @@ struct user {
 struct user_group {
     int gid
     string group_name
-    int[] members  
+    []int members  
 }
 
 struct file_permission {

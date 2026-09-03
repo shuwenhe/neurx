@@ -4,15 +4,15 @@ import "tensor"
 struct kv_block {
     block_id          int
     tokens_per_block  int32
-    data              float[]32
+    data              []float32
     reference_count   int
-    request_ids       int[]64
+    request_ids       []int64
     is_prefix_block   bool
 }
 
 struct kv_allocation {
-    block_table       int[]
-    block_offsets     int[]32
+    block_table       []int
+    block_offsets     []int32
     num_tokens        int32
     request_id        int64
 }
@@ -30,10 +30,10 @@ struct kv_cache_config {
 struct kv_cache_pool_v2 {
     config            kv_cache_config
     blocks            []*kv_block
-    free_blocks       int[]
+    free_blocks       []int
     request_allocations map[int64]*kv_allocation
-    request_to_blocks   map[int64]int[]
-    prefix_cache_map    map[string]int[]
+    request_to_blocks   map[int64][]int
+    prefix_cache_map    map[string][]int
     total_allocated   int32
     total_free        int32
     eviction_count    int64
@@ -51,8 +51,8 @@ func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
         blocks:              []*kv_block{},
         free_blocks:         []int{},
         request_allocations: make(map[int64]*kv_allocation),
-        request_to_blocks:   make(map[int64]int[]),
-        prefix_cache_map:    make(map[string]int[]),
+        request_to_blocks:   make(map[int64][]int),
+        prefix_cache_map:    make(map[string][]int),
         total_free:          int32(config.num_blocks),
     }
     for i := 0; i < config.num_blocks; i++ {
@@ -60,9 +60,9 @@ func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
         block := *kv_block{
             block_id:          i,
             tokens_per_block:  config.block_size,
-            data:              make(float[]32, int(block_data_size)),
+            data:              make([]float32, int(block_data_size)),
             reference_count:   0,
-            request_ids:       int[]64{},
+            request_ids:       []int64{},
             is_prefix_block:   false,
         }
         pool.blocks = append(pool.blocks, block)
@@ -81,7 +81,7 @@ func (kv_cache_pool_v2* p) Allocate(request_id int64, num_tokens int32) *kv_allo
     }
     allocation := *kv_allocation{
         block_table:   []int{},
-        block_offsets: int[]32{},
+        block_offsets: []int32{},
         num_tokens:    num_tokens,
         request_id:    request_id,
     }
@@ -114,7 +114,7 @@ func (kv_cache_pool_v2* p) SharePrefix(source_id int64, target_id int64, prefix_
     if !exists {
         target_alloc = *kv_allocation{
             block_table:   []int{},
-            block_offsets: int[]32{},
+            block_offsets: []int32{},
             num_tokens:    prefix_tokens,
             request_id:    target_id,
         }
@@ -221,7 +221,7 @@ func (kv_cache_pool_v2* p) evictLRU() {
                 }
             }
             block.reference_count = 0
-            block.request_ids = int[]64{}
+            block.request_ids = []int64{}
             p.free_blocks = append(p.free_blocks, block_id)
             p.eviction_count = p.eviction_count + 1
             return

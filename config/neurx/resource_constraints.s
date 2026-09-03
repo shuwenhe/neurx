@@ -33,7 +33,7 @@ struct constraint_check {
 struct constraint_report {
     bool all_satisfied
     constraint_check[] checks
-    string[] recommendations
+    []string recommendations
     int64 check_time_ms
 }
 
@@ -359,7 +359,7 @@ func (resource_constraint_checker_impl* c) apply_conservative_limits(cfg device_
     return conservative
 }
 
-func (resource_constraint_checker_impl* c) generate_recommendations(checks []constraint_check) (string[]) {
+func (resource_constraint_checker_impl* c) generate_recommendations(checks []constraint_check) ([]string) {
     recommendations := []string{}
 
     for check in checks {

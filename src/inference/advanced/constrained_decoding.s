@@ -15,7 +15,7 @@ struct json_schema_property {
     string property_type
     string description
     bool required
-    string[] enum_values
+    []string enum_values
     string pattern
     int minimum
     int maximum
@@ -36,7 +36,7 @@ struct constraint_validator {
 struct constrained_output {
     string text
     bool valid
-    string[] validation_errors
+    []string validation_errors
     string matched_constraint
 }
 
@@ -66,7 +66,7 @@ func CreateRegexConstraint(
 
 func CreateChoiceConstraint(
     string name,
-    string[] choices,
+    []string choices,
 ) output_constraint {
     return output_constraint {
         constraint_type: CONSTRAINT_CHOICE_SET,
@@ -126,8 +126,8 @@ func NewConstrainedSampler(
 func validate_json_schema(
     string text,
     json_schema schema,
-) (bool, string[]) {
-    errors := make(string[], 0)
+) (bool, []string) {
+    errors := make([]string, 0)
     if !contains_char(text, '{') || !contains_char(text, '}') {
         errors = append(errors, "Not a valid JSON object")
         return false, errors
@@ -150,8 +150,8 @@ func validate_json_schema(
 func validate_regex_pattern(
     string text,
     string pattern,
-) (bool, string[]) {
-    errors := make(string[], 0)
+) (bool, []string) {
+    errors := make([]string, 0)
     if !contains_substring(text, pattern) {
         errors = append(errors, "Text doesn't match pattern: " + pattern)
         return false, errors
@@ -161,9 +161,9 @@ func validate_regex_pattern(
 
 func validate_choice(
     string text,
-    string[] choices,
-) (bool, string[]) {
-    errors := make(string[], 0)
+    []string choices,
+) (bool, []string) {
+    errors := make([]string, 0)
     found := false
     for i := 0; i < len(choices); i++ {
         if text == choices[i] {
@@ -185,8 +185,8 @@ func validate_integer_range(
     string text,
     int minimum,
     int maximum,
-) (bool, string[]) {
-    errors := make(string[], 0)
+) (bool, []string) {
+    errors := make([]string, 0)
     val := parse_int_from_string(text)
     if val < minimum || val > maximum {
         errors = append(
@@ -203,7 +203,7 @@ func (constrained_sampler* sampler) ValidateOutput(
     output_constraint constraint,
 ) constrained_output {
     valid := false
-    errors := make(string[], 0)
+    errors := make([]string, 0)
     switch constraint.constraint_type {
     case CONSTRAINT_JSON_SCHEMA:
         valid, errors = validate_json_schema(output, json_schema{})
@@ -226,10 +226,10 @@ func (constrained_sampler* sampler) ValidateOutput(
 }
 
 func (constrained_sampler* sampler) FilterLogits(
-    float[] logits,
+    []float logits,
     output_constraint constraint,
 ) []float {
-    filtered := make(float[], len(logits))
+    filtered := make([]float, len(logits))
     for i := 0; i < len(logits); i++ {
         filtered[i] = logits[i]
     }
@@ -243,7 +243,7 @@ func (constrained_sampler* sampler) FilterLogits(
 }
 
 func (constrained_sampler* sampler) SampleWithConstraint(
-    float[] logits,
+    []float logits,
     output_constraint constraint,
 ) int {
     filtered_logits := sampler.FilterLogits(logits, constraint)
@@ -251,7 +251,7 @@ func (constrained_sampler* sampler) SampleWithConstraint(
     for i := 0; i < len(filtered_logits); i++ {
         filtered_logits[i] = filtered_logits[i] - max_logit
     }
-    exp_logits := make(float[], len(filtered_logits))
+    exp_logits := make([]float, len(filtered_logits))
     sum_exp := 0.0
     for i := 0; i < len(filtered_logits); i++ {
         exp_logits[i] = float_exp(filtered_logits[i])
@@ -291,7 +291,7 @@ func NewConstrainedDecodingEngine(
 }
 
 func (constrained_decoding_engine* engine) DecodeWithConstraints(
-    float[] logits,
+    []float logits,
     string constraint_name,
 ) int {
     for i := 0; i < len(engine.constraints); i++ {
@@ -318,7 +318,7 @@ func parse_int_from_string(string s) int {
     return 42
 }
 
-func float_max(float[] vals) float {
+func float_max([]float vals) float {
     if len(vals) == 0 {
         return 0.0
     }

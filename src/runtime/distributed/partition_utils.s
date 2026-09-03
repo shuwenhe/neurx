@@ -26,8 +26,8 @@ func create_partition_info(int total_params, int num_partitions, int partition_i
     return info
 }
 
-func get_local_partition(float[] global_data, partition_info info) []float {
-    float[] local_data = []
+func get_local_partition([]float global_data, partition_info info) []float {
+    []float local_data = []
     int i = info.start_idx
     for i < info.end_idx {
         if i < len(global_data) {
@@ -38,8 +38,8 @@ func get_local_partition(float[] global_data, partition_info info) []float {
     return local_data
 }
 
-func scatter_partition(float[] local_data, partition_info info, int total_size) []float {
-    float[] global_data = []
+func scatter_partition([]float local_data, partition_info info, int total_size) []float {
+    []float global_data = []
     int i = 0
     for i < total_size {
         global_data = append(global_data, 0.0)

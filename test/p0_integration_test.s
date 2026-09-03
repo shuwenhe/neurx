@@ -121,7 +121,7 @@ func test_inference_engine() (bool, string) {
     
     req := inference_request{
         request_id: "test-1",
-        input_ids: input_ids as int[],
+        input_ids: input_ids as []int,
         max_tokens: 10,
         temperature: 0.7,
         top_p: 0.9,

@@ -7,19 +7,19 @@ func max(int a, int b) int {
     if a > b { a } else { b }
 }
 
-func copy_int_array(int[] arr) []int {
-    int[] copy = make([]int, len(arr))
+func copy_int_array([]int arr) []int {
+    []int copy = make([]int, len(arr))
     for i in 0..len(arr) {
         copy[i] = arr[i]
     }
     copy
 }
 
-func apply_temperature(float[] logits, float temp) []float {
+func apply_temperature([]float logits, float temp) []float {
     if temp <= 0.0 {
         return make_one_hot(argmax(logits), len(logits))
     }
-    float[] scaled = make([]float, len(logits))
+    []float scaled = make([]float, len(logits))
     float inv_temp = 1.0 / temp
     for i in 0..len(logits) {
         scaled[i] = logits[i] * inv_temp
@@ -28,7 +28,7 @@ func apply_temperature(float[] logits, float temp) []float {
 }
 
 func make_one_hot(int idx, int size) []float {
-    float[] one_hot = make([]float, size)
+    []float one_hot = make([]float, size)
     for i in 0..size {
         one_hot[i] = 0.0
     }

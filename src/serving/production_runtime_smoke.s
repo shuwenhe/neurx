@@ -16,7 +16,7 @@ func main() {
     production_schedule_result scheduled = production_schedule(state)
     if !scheduled.batch.ok || scheduled.batch.phase != "decode" { return fail("decode-priority") }
     if scheduled.batch.backend != "cuda" || scheduled.batch.dtype != "fp8" { return fail("cuda-batch-key") }
-    bool[] eos = make([]bool, 1)
+    []bool eos = make([]bool, 1)
     eos[0] = true
     state = production_complete_decode(scheduled.state, scheduled.batch, eos, true)
     scheduled = production_schedule(state)

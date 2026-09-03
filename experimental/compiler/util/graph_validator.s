@@ -11,12 +11,12 @@ struct validation_error {
 struct validation_report {
     bool is_valid
     validation_error[] errors
-    string[] warnings
+    []string warnings
 }
 
 func validate_graph(*computation_graph g) validation_report {
     errors = validation_error[]()
-    warnings = string[]()
+    warnings = []string()
 
     if !g.is_valid() {
         errors.push(validation_error {
@@ -110,7 +110,7 @@ func check_graph_connectivity(*computation_graph g) bool {
 
 func check_shape_compatibility(*computation_graph g) validation_report {
     errors = validation_error[]()
-    warnings = string[]()
+    warnings = []string()
 
     validation_report {
         is_valid: len(errors) == 0,

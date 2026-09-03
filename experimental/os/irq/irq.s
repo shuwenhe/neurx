@@ -13,9 +13,9 @@ struct irq_descriptor {
 
 struct irq_state {
     []irq_descriptor descriptors
-    int[]            pending_hardirq
-    int[]            pending_softirq
-    int[]            pending_tasklet
+    []int            pending_hardirq
+    []int            pending_softirq
+    []int            pending_tasklet
     bool             irqs_disabled
 }
 
@@ -61,8 +61,8 @@ func raise_irq(is irq_state, int irq_num) irq_state {
     return is
 }
 
-func drain_hardirq(is irq_state) (irq_state, int[]) {
-    int[] fired = is.pending_hardirq
+func drain_hardirq(is irq_state) (irq_state, []int) {
+    []int fired = is.pending_hardirq
     is.pending_hardirq = []
     return is, fired
 }

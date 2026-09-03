@@ -34,8 +34,8 @@ struct continuous_batch {
     int num_decode_slots
     int total_prefill_tokens
     int total_decode_tokens
-    float[] input_ids
-    float[] kv_cache_read_indices
+    []float input_ids
+    []float kv_cache_read_indices
     bool is_full
 }
 
@@ -82,8 +82,8 @@ func new_global_inference_scheduler(
             num_decode_slots: 0,
             total_prefill_tokens: 0,
             total_decode_tokens: 0,
-            input_ids: make(float[], config.max_prefill_batch_size * 4096),
-            kv_cache_read_indices: make(float[], config.max_decode_batch_size),
+            input_ids: make([]float, config.max_prefill_batch_size * 4096),
+            kv_cache_read_indices: make([]float, config.max_decode_batch_size),
             is_full: false,
         },
         active_batches: make([]continuous_batch, 100),
@@ -126,8 +126,8 @@ func (global_inference_scheduler* scheduler) continuous_batch_iteration() (conti
         num_decode_slots: 0,
         total_prefill_tokens: 0,
         total_decode_tokens: 0,
-        input_ids: make(float[], scheduler.config.max_prefill_batch_size * 4096),
-        kv_cache_read_indices: make(float[], scheduler.config.max_decode_batch_size),
+        input_ids: make([]float, scheduler.config.max_prefill_batch_size * 4096),
+        kv_cache_read_indices: make([]float, scheduler.config.max_decode_batch_size),
         is_full: false,
     }
     int slot_idx = 0
@@ -189,8 +189,8 @@ func (global_inference_scheduler* scheduler) update_batch_prefill_status(
 
 func (global_inference_scheduler* scheduler) decode_one_token_batch(
     continuous_batch* batch
-) (float[], bool) {
-    float[] logits = make(float[], scheduler.config.max_decode_batch_size * 32000)
+) ([]float, bool) {
+    []float logits = make([]float, scheduler.config.max_decode_batch_size * 32000)
     int active_decode_slots = 0
     int i = 0
     for i < len(batch.slots) {

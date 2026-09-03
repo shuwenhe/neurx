@@ -6,7 +6,7 @@ func backward_exp(node n, tensor grad_output) backward_result {
     }
     tensor input = n.inputs[0]
     tensor output_exp = get_context_safe_tensor(n, "output", input)
-    float[] grad_data = elementwise_mul(grad_output.data, output_exp.data)
+    []float grad_data = elementwise_mul(grad_output.data, output_exp.data)
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
@@ -16,7 +16,7 @@ func backward_log(node n, tensor grad_output) backward_result {
         return backward_result { input_grads: [], success: false }
     }
     tensor input = n.inputs[0]
-    float[] grad_data = make([]float, len(input.data))
+    []float grad_data = make([]float, len(input.data))
     for i in 0..len(input.data) {
         if abs_float(input.data[i]) > 1e-8 {
             grad_data[i] = grad_output.data[i] / input.data[i]
@@ -38,7 +38,7 @@ func backward_concat(node n, tensor grad_output) backward_result {
     for i in 0..len(n.inputs) {
         tensor inp = n.inputs[i]
         int size = inp.shape[dim] if dim < len(inp.shape) else len(inp.data)
-        float[] grad_slice = extract_slice(grad_output.data, offset, size, dim, inp.shape)
+        []float grad_slice = extract_slice(grad_output.data, offset, size, dim, inp.shape)
         tensor grad_t {
             data: grad_slice,
             grad: [],
@@ -51,8 +51,8 @@ func backward_concat(node n, tensor grad_output) backward_result {
     backward_result { input_grads: grads, success: true }
 }
 
-func extract_slice(float[] data, int start, int size, int dim, int[] target_shape) []float {
-    float[] result = make([]float, size)
+func extract_slice([]float data, int start, int size, int dim, []int target_shape) []float {
+    []float result = make([]float, size)
     if dim == 0 || len(target_shape) <= 1 {
         for i in 0..size {
             if start + i < len(data) {
@@ -88,10 +88,10 @@ func backward_cross_entropy_loss(node n, tensor grad_output) backward_result {
     tensor targets = n.inputs[1]
     tensor probs = get_context_safe_tensor(n, "softmax_probs", logits)
     float loss_scale = grad_output.data[0] if len(grad_output.data) > 0 else 1.0
-    int[] shape = logits.shape
+    []int shape = logits.shape
     int batch_size = shape[0] if len(shape) > 0 else 1
     int num_classes = shape[1] if len(shape) > 1 else len(logits.data) / batch_size
-    float[] grad_logits = make([]float, len(logits.data))
+    []float grad_logits = make([]float, len(logits.data))
     for b in 0..batch_size {
         int target_idx = int(targets.data[b]) if b < len(targets.data) else 0
         for c in 0..num_classes {

@@ -11,7 +11,7 @@ struct hf_tokenizer {
     int cls_token_id
     int sep_token_id
     int mask_token_id
-    string[] special_tokens
+    []string special_tokens
     string padding_side
     string truncation_side
     int max_length
@@ -108,13 +108,13 @@ func create_deepseek_tokenizer() hf_tokenizer {
 }
 
 struct token_ids {
-    int[] ids
-    int[] attention_mask
-    int[] token_type_ids
+    []int ids
+    []int attention_mask
+    []int token_type_ids
 }
 
 func tokenize_text(string text, hf_tokenizer tokenizer) []string {
-    string[] tokens
+    []string tokens
     string current_token = ""
     for char in text {
         if char == ' ' || char == '\n' || char == '\t' {
@@ -139,7 +139,7 @@ func tokenize_text(string text, hf_tokenizer tokenizer) []string {
 }
 
 func apply_chat_template(
-    messages: string[],
+    messages: []string,
     tokenizer: hf_tokenizer,
     bool add_generation_prompt
 ) string {

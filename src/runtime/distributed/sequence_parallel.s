@@ -2,7 +2,7 @@ package neurx.distributed
 struct sequence_parallel_config {
     int sp_degree
     int sp_rank
-    int[] sp_group
+    []int sp_group
     string sp_type
     bool sp_enable_ckpt
 }
@@ -32,7 +32,7 @@ func sp_mod_nonneg(int value, int divisor) int {
 func new_sequence_parallel_config(
     int sp_degree,
     int sp_rank,
-    int[] sp_group,
+    []int sp_group,
     string sp_type) sequence_parallel_config {
     sequence_parallel_config cfg
     cfg.sp_degree = sp_degree

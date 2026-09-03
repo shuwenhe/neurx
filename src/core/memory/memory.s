@@ -2,10 +2,10 @@ package neurx.agent.memory
 use neurx.runtime.io.{runtime_write_text_file, runtime_read_text_file, runtime_file_exists}
 
 struct agent_memory_state {
-    string[] short_keys
-    string[] short_values
-    string[] long_keys
-    string[] long_values
+    []string short_keys
+    []string short_values
+    []string long_keys
+    []string long_values
     int writes
     int reads
     int max_short_size
@@ -76,8 +76,8 @@ func agent_memory_write_short(agent_memory_state state, string key, string value
         start = new_size - max
         out_size = max
     }
-    string[] keys = make([]string, out_size)
-    string[] values = make([]string, out_size)
+    []string keys = make([]string, out_size)
+    []string values = make([]string, out_size)
     int i = 0
     for i < old_size - start {
         keys[i] = get_short_key(state, i + start)
@@ -110,8 +110,8 @@ func agent_memory_write_long(agent_memory_state state, string key, string value)
         start = new_size - max
         out_size = max
     }
-    string[] keys = make([]string, out_size)
-    string[] values = make([]string, out_size)
+    []string keys = make([]string, out_size)
+    []string values = make([]string, out_size)
     int i = 0
     for i < old_size - start {
         keys[i] = get_long_key(state, i + start)
@@ -232,7 +232,7 @@ func agent_memory_load_state_dict(agent_memory_state state, agent_memory_state o
 
 func agent_memory_short_keys(agent_memory_state state) []string {
     int size = len(state.short_keys)
-    string[] out = make([]string, size)
+    []string out = make([]string, size)
     int i = 0
     for i < size {
         out[i] = state.short_keys[i]
@@ -243,7 +243,7 @@ func agent_memory_short_keys(agent_memory_state state) []string {
 
 func agent_memory_long_keys(agent_memory_state state) []string {
     int size = len(state.long_keys)
-    string[] out = make([]string, size)
+    []string out = make([]string, size)
     int i = 0
     for i < size {
         out[i] = state.long_keys[i]
@@ -268,8 +268,8 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
         }
         i = i + 1
     }
-    string[] short_k = make([]string, s_keep)
-    string[] short_v = make([]string, s_keep)
+    []string short_k = make([]string, s_keep)
+    []string short_v = make([]string, s_keep)
     int wi = 0
     i = 0
     for i < s_size {
@@ -288,8 +288,8 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
         }
         i = i + 1
     }
-    string[] long_k = make([]string, l_keep)
-    string[] long_v = make([]string, l_keep)
+    []string long_k = make([]string, l_keep)
+    []string long_v = make([]string, l_keep)
     wi = 0
     i = 0
     for i < l_size {

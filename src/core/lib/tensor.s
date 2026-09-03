@@ -1,17 +1,17 @@
 package neurx.lib.tensor
 struct vector {
-    float[] data
+    []float data
     int size
 }
 
 struct matrix {
-    float[] data
+    []float data
     int rows
     int cols
 }
 
 struct tensor_2 {
-    float[] data
+    []float data
     int dim1
     int dim2
     int dim3
@@ -20,7 +20,7 @@ struct tensor_2 {
 func create_vector(int size) vector {
     vector v
     v.size = size
-    float[] data
+    []float data
     int i = 0
     for i < size {
         data[i] = 0.0
@@ -30,7 +30,7 @@ func create_vector(int size) vector {
     v
 }
 
-func vector_from_array(float[] values) vector {
+func vector_from_array([]float values) vector {
     vector v
     v.size = len(values)
     v.data = values
@@ -41,7 +41,7 @@ func create_matrix(int rows, int cols) matrix {
     matrix m
     m.rows = rows
     m.cols = cols
-    float[] data
+    []float data
     int i = 0
     for i < rows * cols {
         data[i] = 0.0
@@ -323,7 +323,7 @@ func vector_softmax(vector v) vector {
         }
         i = i + 1
     }
-    float[] exp_vals
+    []float exp_vals
     float sum = 0.0
     i = 0
     for i < v.size {

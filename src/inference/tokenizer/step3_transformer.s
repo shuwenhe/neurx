@@ -59,23 +59,23 @@ func create_transformer_config() transformer_config {
     }
 }
 
-func apply_rope(float[] x, int position, float theta) []float {
+func apply_rope([]float x, int position, float theta) []float {
     return x
 }
 
-func multi_head_attention(float[][] query, float[][] key, float[][] value, int num_heads) float[][] {
+func multi_head_attention([]float[] query, []float[] key, []float[] value, int num_heads) []float[] {
     return query
 }
 
-func feed_forward(float[][] x) float[][] {
+func feed_forward([]float[] x) []float[] {
     return x
 }
 
-func rms_norm(float[][] x) float[][] {
+func rms_norm([]float[] x) []float[] {
     return x
 }
 
-func transformer_layer(float[][] hidden_states) float[][] {
+func transformer_layer([]float[] hidden_states) []float[] {
     return hidden_states
 }
 
@@ -93,8 +93,8 @@ func exp_approx(float x) float {
     result
 }
 
-func softmax_row(float[] scores, int length) []float {
-    float[] out = make([]float, length)
+func softmax_row([]float scores, int length) []float {
+    []float out = make([]float, length)
     if length == 0 { return out }
     float maxv = scores[0]
     int i = 1
@@ -120,7 +120,7 @@ func softmax_row(float[] scores, int length) []float {
     out
 }
 
-func compute_matrix_stats(float[][] mat) matrix_stats {
+func compute_matrix_stats([]float[] mat) matrix_stats {
     if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int R = len(mat)
     int C = 0
@@ -153,13 +153,13 @@ func compute_matrix_stats(float[][] mat) matrix_stats {
     return matrix_stats{mean: mean, sample: sample}
 }
 
-func flatten_mat(float[][] mat) []float {
+func flatten_mat([]float[] mat) []float {
     if len(mat) == 0 { return []float{} }
     int R = len(mat)
     int C = 0
     if R > 0 { C = len(mat[0]) }
     if C == 0 { return []float{} }
-    float[] out = make([]float, R * C)
+    []float out = make([]float, R * C)
     int r = 0
     for r < R {
         int c = 0
@@ -172,12 +172,12 @@ func flatten_mat(float[][] mat) []float {
     return out
 }
 
-func transformer_forward(float[][] embeddings) float[][] {
+func transformer_forward([]float[] embeddings) []float[] {
     int seq_len = len(embeddings)
     if seq_len == 0 { return embeddings }
     int hidden = len(embeddings[0])
     string model_file = "/home/shuwen/shuwen/posttrain/model.safetensors"
-    float[] A = make([]float, seq_len * hidden)
+    []float A = make([]float, seq_len * hidden)
     int i = 0
     for i < seq_len {
         int j = 0
@@ -192,15 +192,15 @@ func transformer_forward(float[][] embeddings) float[][] {
     int total_ops = 0
     print("[TRANSFORMER INFERENCE START]\n")
     for layer < num_layers {
-        map[string]float[][] weights = load_transformer_layer(model_file, layer, hidden, 14)
+        map[string][]float[] weights = load_transformer_layer(model_file, layer, hidden, 14)
         string base = "model.layers." + int_to_string(layer) + "."
-        float[][] Wq = weights[base + "self_attn.q_proj.weight"]
-        float[][] Wk = weights[base + "self_attn.k_proj.weight"]
-        float[][] Wv = weights[base + "self_attn.v_proj.weight"]
-        float[][] Wo = weights[base + "self_attn.o_proj.weight"]
-        float[][] Wgate = weights[base + "mlp.gate_proj.weight"]
-        float[][] Wup = weights[base + "mlp.up_proj.weight"]
-        float[][] Wdown = weights[base + "mlp.down_proj.weight"]
+        []float[] Wq = weights[base + "self_attn.q_proj.weight"]
+        []float[] Wk = weights[base + "self_attn.k_proj.weight"]
+        []float[] Wv = weights[base + "self_attn.v_proj.weight"]
+        []float[] Wo = weights[base + "self_attn.o_proj.weight"]
+        []float[] Wgate = weights[base + "mlp.gate_proj.weight"]
+        []float[] Wup = weights[base + "mlp.up_proj.weight"]
+        []float[] Wdown = weights[base + "mlp.down_proj.weight"]
         matrix_stats stats_wq = compute_matrix_stats(Wq)
         matrix_stats stats_wk = compute_matrix_stats(Wk)
         matrix_stats stats_wv = compute_matrix_stats(Wv)
@@ -215,16 +215,16 @@ func transformer_forward(float[][] embeddings) float[][] {
         print("[L" + int_to_string(layer) + "] Gate mean=" + int_to_string(int(stats_gate.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_gate.sample * 1000000.0)) + "\n")
         print("[L" + int_to_string(layer) + "] Up mean=" + int_to_string(int(stats_up.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_up.sample * 1000000.0)) + "\n")
         print("[L" + int_to_string(layer) + "] Down mean=" + int_to_string(int(stats_down.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_down.sample * 1000000.0)) + "\n")
-        float[] fq = flatten_mat(Wq)
-        float[] fk = flatten_mat(Wk)
-        float[] fv = flatten_mat(Wv)
-        float[] fo = flatten_mat(Wo)
-        float[] fgate = flatten_mat(Wgate)
-        float[] fup = flatten_mat(Wup)
-        float[] fdown = flatten_mat(Wdown)
-        float[] Q = fast_matmul_flat_opt(A, fq, seq_len, hidden, hidden)
-        float[] K = fast_matmul_flat_opt(A, fk, seq_len, hidden, hidden)
-        float[] V = fast_matmul_flat_opt(A, fv, seq_len, hidden, hidden)
+        []float fq = flatten_mat(Wq)
+        []float fk = flatten_mat(Wk)
+        []float fv = flatten_mat(Wv)
+        []float fo = flatten_mat(Wo)
+        []float fgate = flatten_mat(Wgate)
+        []float fup = flatten_mat(Wup)
+        []float fdown = flatten_mat(Wdown)
+        []float Q = fast_matmul_flat_opt(A, fq, seq_len, hidden, hidden)
+        []float K = fast_matmul_flat_opt(A, fk, seq_len, hidden, hidden)
+        []float V = fast_matmul_flat_opt(A, fv, seq_len, hidden, hidden)
         pos_enc_cfg := position_encoding_config{
             hidden_dim: hidden,
             max_seq_len: seq_len,
@@ -232,19 +232,19 @@ func transformer_forward(float[][] embeddings) float[][] {
             rope_base: 10000.0,
         }
         rope_enc := new_rope_position_encoding(pos_enc_cfg)
-        float[][] rope_res = apply_rope_position(rope_enc, Q, K, seq_len, 0)
+        []float[] rope_res = apply_rope_position(rope_enc, Q, K, seq_len, 0)
         Q = rope_res[0]
         K = rope_res[1]
         int num_heads = 14
         int head_dim = hidden / num_heads
-        float[] Out = make([]float, seq_len * hidden)
+        []float Out = make([]float, seq_len * hidden)
         int qi = 0
         float scale = 1.0 / pow_f(float(head_dim), 0.5)
         for qi < seq_len {
             int h = 0
             for h < num_heads {
                 int q_off = qi * hidden + h * head_dim
-                float[] scores = make([]float, seq_len)
+                []float scores = make([]float, seq_len)
                 int kj = 0
                 for kj < seq_len {
                     int k_off = kj * hidden + h * head_dim
@@ -259,7 +259,7 @@ func transformer_forward(float[][] embeddings) float[][] {
                     scores[kj] = s
                     kj = kj + 1
                 }
-                float[] probs = make([]float, seq_len)
+                []float probs = make([]float, seq_len)
                 fast_softmax(scores, probs, seq_len)
                 int d2 = 0
                 for d2 < head_dim {
@@ -277,15 +277,15 @@ func transformer_forward(float[][] embeddings) float[][] {
             }
             qi = qi + 1
         }
-        float[] AttnProjected = fast_matmul_flat_opt(Out, fo, seq_len, hidden, hidden)
+        []float AttnProjected = fast_matmul_flat_opt(Out, fo, seq_len, hidden, hidden)
         int idx = 0
         for idx < seq_len * hidden {
             A[idx] = A[idx] + AttnProjected[idx]
             idx = idx + 1
         }
-        float[] Gate = fast_matmul_flat_opt(A, fgate, seq_len, hidden, 4864)
-        float[] Up = fast_matmul_flat_opt(A, fup, seq_len, hidden, 4864)
-        float[] Gated = make([]float, seq_len * 4864)
+        []float Gate = fast_matmul_flat_opt(A, fgate, seq_len, hidden, 4864)
+        []float Up = fast_matmul_flat_opt(A, fup, seq_len, hidden, 4864)
+        []float Gated = make([]float, seq_len * 4864)
         int ii = 0
         for ii < seq_len {
             int jj = 0
@@ -296,7 +296,7 @@ func transformer_forward(float[][] embeddings) float[][] {
             }
             ii = ii + 1
         }
-        float[] FfnOut = fast_matmul_flat_opt(Gated, fdown, seq_len, 4864, hidden)
+        []float FfnOut = fast_matmul_flat_opt(Gated, fdown, seq_len, 4864, hidden)
         int kk = 0
         for kk < seq_len * hidden {
             A[kk] = A[kk] + FfnOut[kk]
@@ -308,10 +308,10 @@ func transformer_forward(float[][] embeddings) float[][] {
         layer = layer + 1
     }
     print("[TRANSFORMER INFERENCE END] total_ops=" + int_to_string(total_ops / 1000000000) + "B\n\n")
-    float[][] result = floatmake([][], seq_len)
+    []float[] result = floatmake([][], seq_len)
     int r = 0
     for r < seq_len {
-        float[] row = make([]float, hidden)
+        []float row = make([]float, hidden)
         int c = 0
         for c < hidden {
             row = append(row, A[r * hidden + c])

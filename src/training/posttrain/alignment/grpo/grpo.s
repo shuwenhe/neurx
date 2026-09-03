@@ -58,12 +58,12 @@ func neurx_r1_grpo_config() grpo_config {
 struct grpo_group {
     string question
     string reference_answer
-    string[] outputs
-    int[]    output_lengths
-    float[]  rewards
-    float[]  advantages
-    float[]  log_probs_policy
-    float[]  log_probs_ref
+    []string outputs
+    []int    output_lengths
+    []float  rewards
+    []float  advantages
+    []float  log_probs_policy
+    []float  log_probs_ref
 }
 
 func check_format_reward(string output) float {
@@ -115,7 +115,7 @@ func compute_reward(string output, string reference, int token_len, grpo_config 
     r
 }
 
-func compute_group_advantages(float[] rewards, float eps) []float {
+func compute_group_advantages([]float rewards, float eps) []float {
     int G = len(rewards)
     float mean = 0.0
     int i = 0
@@ -133,7 +133,7 @@ func compute_group_advantages(float[] rewards, float eps) []float {
     }
     var = var / float_grpo(G)
     float std = sqrt_grpo(var)
-    float[] adv = []
+    []float adv = []
     int k = 0
     for k < G {
         float a = (rewards[k] - mean) / (std + eps)
@@ -161,13 +161,13 @@ struct grpo_step_result {
     float reward_std
     float mean_advantage
     float clip_fraction
-    float[] advantages
+    []float advantages
     int accepted_outputs
 }
 
 func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     int G = len(group.outputs)
-    float[] rewards = []
+    []float rewards = []
     int i = 0
     for i < G {
         float r = compute_reward(
@@ -179,7 +179,7 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
         rewards = append(rewards, r)
         i = i + 1
     }
-    float[] adv = compute_group_advantages(rewards, cfg.advantage_eps)
+    []float adv = compute_group_advantages(rewards, cfg.advantage_eps)
     float total_loss = 0.0
     float kl_total   = 0.0
     float clips      = 0.0

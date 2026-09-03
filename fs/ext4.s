@@ -302,7 +302,7 @@ func (ext4_filesystem* fs) write_inode(inode_num: u32, u8* data[], offset: u32) 
     (data.len(, "") as u32)
 }
 
-func (ext4_filesystem* fs) read_inode(inode_num: u32, offset: u32, size: u32) (u8), string[] {
+func (ext4_filesystem* fs) read_inode(inode_num: u32, offset: u32, size: u32) (u8), []string {
     _guard := fs.lock.lock()?
 
     buffer := u8[]()

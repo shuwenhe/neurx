@@ -1,34 +1,34 @@
 package neurx.observability.tracing.trace_integration
 import io
 struct tracing_config {
-    enabled         bool[]
-    service_name     string[]
-    sampling_rate    int[]
-    exporters       string[][]
-    jaeger_endpoint  string[]
-    otel_endpoint    string[]
-    max_spans_per_trace int[]
+    enabled         []bool
+    service_name     []string
+    sampling_rate    []int
+    exporters       []string[]
+    jaeger_endpoint  []string
+    otel_endpoint    []string
+    max_spans_per_trace []int
 struct request_tracer {
-    trace_id          string[]
-    root_span_id       string[]
+    trace_id          []string
+    root_span_id       []string
     config           tracing_config
-    start_time        int[]
-    spans            string[][]
-    span_metadata     []map[string]string[]
-    is_active         bool[]
-    sampling_decision bool[]
+    start_time        []int
+    spans            []string[]
+    span_metadata     []map[string][]string
+    is_active         []bool
+    sampling_decision []bool
 struct tracing_metrics {
-    span_count          int[]
-    event_count         int[]
-    attributes_count    int[]
-    export_duration     int[]
-    overhead_percent    int[]
+    span_count          []int
+    event_count         []int
+    attributes_count    []int
+    export_duration     []int
+    overhead_percent    []int
 func new_tracing_config() tracing_config {
     config := tracing_config{}
     config.enabled = append([]bool{}, true)
     config.service_name = append([]string{}, "neurx-inference")
     config.sampling_rate = append([]int{}, 100)
-    config.exporters = make(string[][], 1)
+    config.exporters = make([]string[], 1)
     config.exporters[0] = append([]string{}, "console", "otel")
     config.jaeger_endpoint = append([]string{}, "http:
     config.otel_endpoint = append([]string{}, "http:
@@ -40,19 +40,19 @@ func new_request_tracer(config tracing_config) request_tracer {
     rt.root_span_id = append([]string{}, "span-" + io.ToString(100))
     rt.config = config
     rt.start_time = append([]int{}, 0)
-    rt.spans = make(string[][], 0)
-    rt.span_metadata = make([]map[string]string[], 0)
+    rt.spans = make([]string[], 0)
+    rt.span_metadata = make([]map[string][]string, 0)
     rt.is_active = append([]bool{}, true)
     should_sample := 50
     rt.sampling_decision = append([]bool{}, should_sample < config.sampling_rate[0])
     return rt
-func (request_tracer* rt) start_span(span_name []string, span_kind string[]) []string {
+func (request_tracer* rt) start_span(span_name []string, span_kind []string) []string {
     if !rt.is_active[0] {
         return []string{}
     }
     span_id := append([]string{}, "span-" + io.ToString(len(rt.spans) + 1))
     rt.spans = append(rt.spans, span_id)
-    metadata := make(map[string]string[])
+    metadata := make(map[string][]string)
     metadata["name"] = span_name
     metadata["kind"] = span_kind
     metadata["start_time"] = append([]string{}, "0")
@@ -67,7 +67,7 @@ func (request_tracer* rt) end_span() {
         return
     }
     rt.spans = rt.spans[0:len(rt.spans)-1]
-func (request_tracer* rt) add_span_attribute(key []string, value string[]) {
+func (request_tracer* rt) add_span_attribute(key []string, value []string) {
     if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
     }
@@ -76,7 +76,7 @@ func (request_tracer* rt) add_span_attribute(key []string, value string[]) {
         rt.span_metadata[len(rt.span_metadata)-1][attr_key] = value
     }
 
-func (request_tracer* rt) record_span_event(event_name []string, event_value string[]) {
+func (request_tracer* rt) record_span_event(event_name []string, event_value []string) {
     if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
     }
@@ -169,7 +169,7 @@ func (request_tracer* rt) get_metrics() tracing_metrics {
     metrics.attributes_count = append([]int{}, 0)
     metrics.overhead_percent = append([]int{}, 1)
     return metrics
-func (request_tracer* rt) inject_trace_context(headers []map[string]string[]) []map[string]string[] {
+func (request_tracer* rt) inject_trace_context(headers []map[string][]string) []map[string][]string {
     if len(headers) == 0 {
         return headers
     }
@@ -178,7 +178,7 @@ func (request_tracer* rt) inject_trace_context(headers []map[string]string[]) []
         headers[0]["traceparent"] = w3c
     }
     return headers
-func extract_trace_context(headers []map[string]string[]) []string {
+func extract_trace_context(headers []map[string][]string) []string {
     if len(headers) == 0 {
         return []string{}
     }

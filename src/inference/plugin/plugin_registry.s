@@ -27,11 +27,11 @@ struct plugin_registry_config {
 
 struct plugin_registry_state {
     plugin_registry_config config
-    int[] plugin_ids
-    int[] groups
-    int[] required_task_masks
-    int[] allowlisted
-    int[] statuses
+    []int plugin_ids
+    []int groups
+    []int required_task_masks
+    []int allowlisted
+    []int statuses
     int plugin_count
     int active_count
     int failed_count
@@ -46,7 +46,7 @@ struct plugin_registration_result {
 }
 
 func plugin_zero_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

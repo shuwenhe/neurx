@@ -27,8 +27,8 @@ func expect(bool cond, string name) int {
 }
 
 func test_softmax_simple() int {
-    float[] scores = float[]{1.0, 2.0, 3.0}
-    float[] probs = compute_softmax(scores)
+    []float scores = []float{1.0, 2.0, 3.0}
+    []float probs = compute_softmax(scores)
     float sum = 0.0
     int i = 0
     for i < len(probs) {
@@ -72,8 +72,8 @@ func test_paged_kv_write_and_attention() int {
     fail = fail + expect(cache.token_to_slot[0].block_id == 0 && cache.token_to_slot[0].offset_in_block == 0, "slot 0 maps to block 0 offset 0")
     fail = fail + expect(cache.token_to_slot[2].block_id == 0 && cache.token_to_slot[2].offset_in_block == 2, "slot 2 maps to block 0 offset 2")
     int kv_stride = num_kv_heads * head_size
-    float[] keys = make(float[], seq_len * kv_stride)
-    float[] values = make(float[], seq_len * kv_stride)
+    []float keys = make([]float, seq_len * kv_stride)
+    []float values = make([]float, seq_len * kv_stride)
     int t = 0
     for t < seq_len {
         int d = 0
@@ -89,13 +89,13 @@ func test_paged_kv_write_and_attention() int {
     float first_k = cache.blocks[0].key_data[0]
     fail = fail + expect(approx(first_k, 0.1, 1.0e-6), "first key value written correctly")
     int q_stride = num_heads * head_size
-    float[] queries = make(float[], seq_len * q_stride)
+    []float queries = make([]float, seq_len * q_stride)
     int qi = 0
     for qi < seq_len * q_stride {
         queries[qi] = 0.1
         qi = qi + 1
     }
-    float[] output = make(float[], seq_len * q_stride)
+    []float output = make([]float, seq_len * q_stride)
     []slot_mapping slots = cache.token_to_slot
     output = compute_paged_attention(cache, queries, output, slots, num_heads, head_size, scale)
     fail = fail + expect(len(output) >= seq_len * q_stride, "output length covers all query tokens")

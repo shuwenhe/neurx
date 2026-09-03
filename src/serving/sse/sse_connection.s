@@ -43,7 +43,7 @@ struct sse_connection {
 	int32                   heartbeat_interval_ms
 	int32                   idle_timeout_ms
 	resume_token[]       resume_tokens
-	connection_checkpoint[] checkpoints
+	connection_checkpo[]int checkpoints
 	int32                   current_checkpoint_id
 	map[string]string       metadata
 	sync.Mutex              mu
@@ -72,7 +72,7 @@ func create_sse_connection(connection_id string, client_id string, stream_id str
 		heartbeat_interval_ms:  30000,
 		idle_timeout_ms:        300000,
 		resume_tokens:          make(resume_token[], 0),
-		checkpoints:            make(connection_checkpoint[], 0),
+		checkpoints:            make(connection_checkpo[]int, 0),
 		current_checkpoint_id:  0,
 		metadata:               make(map[string]string),
 		mu:                     sync.Mutex{},

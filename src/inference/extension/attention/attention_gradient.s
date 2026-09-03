@@ -1,15 +1,15 @@
 package neurx.attention.gradient
 struct attention_forward_cache {
-    float[] hidden_states
-    float[] concatenated
-    float[] query
-    float[] key
-    float[] value
-    float[] attention_weights
-    float[] query_reshaped
-    float[] key_reshaped
-    float[] value_reshaped
-    float[] output
+    []float hidden_states
+    []float concatenated
+    []float query
+    []float key
+    []float value
+    []float attention_weights
+    []float query_reshaped
+    []float key_reshaped
+    []float value_reshaped
+    []float output
     int seq_len
     int hidden_dim
     int num_heads
@@ -18,33 +18,33 @@ struct attention_forward_cache {
 }
 
 struct scaled_dot_product_attention_backward_result {
-    float[] d_query
-    float[] d_key
-    float[] d_value
+    []float d_query
+    []float d_key
+    []float d_value
 }
 
 struct projection_backward_result {
-    float[] d_input
-    float[] d_weights
+    []float d_input
+    []float d_weights
 }
 
 struct attention_gradients {
-    float[] d_query
-    float[] d_key
-    float[] d_value
-    float[] d_wq
-    float[] d_wk
-    float[] d_wv
-    float[] d_wo
-    float[] d_hidden_states
+    []float d_query
+    []float d_key
+    []float d_value
+    []float d_wq
+    []float d_wk
+    []float d_wv
+    []float d_wo
+    []float d_hidden_states
 }
 
 func softmax_backward(
-    float[] input_grad,
-    float[] softmax_output,
+    []float input_grad,
+    []float softmax_output,
     int seq_len
 ) []float {
-    float[] output_grad = allocate_vector(seq_len, 0.0)
+    []float output_grad = allocate_vector(seq_len, 0.0)
     float sum_grad_softmax = 0.0
     int i = 0
     for i < seq_len {
@@ -60,7 +60,7 @@ func softmax_backward(
 }
 
 func scaled_dot_product_attention_backward(
-    float[] d_output,
+    []float d_output,
     attention_forward_cache cache
 ) scaled_dot_product_attention_backward_result {
     int seq_len = cache.seq_len
@@ -68,9 +68,9 @@ func scaled_dot_product_attention_backward(
     int head_dim = cache.head_dim
     float scale = cache.scale_factor
     int size_per_head = seq_len * head_dim
-    float[] d_query = allocate_vector(seq_len * num_heads * head_dim, 0.0)
-    float[] d_key = allocate_vector(seq_len * num_heads * head_dim, 0.0)
-    float[] d_value = allocate_vector(seq_len * num_heads * head_dim, 0.0)
+    []float d_query = allocate_vector(seq_len * num_heads * head_dim, 0.0)
+    []float d_key = allocate_vector(seq_len * num_heads * head_dim, 0.0)
+    []float d_value = allocate_vector(seq_len * num_heads * head_dim, 0.0)
     int h = 0
     for h < num_heads {
         int q_offset = h * size_per_head
@@ -91,7 +91,7 @@ func scaled_dot_product_attention_backward(
                 }
                 j = j + 1
             }
-            float[] d_scores = allocate_vector(seq_len, 0.0)
+            []float d_scores = allocate_vector(seq_len, 0.0)
             j = 0
             for j < seq_len {
                 int attn_idx = h * seq_len * seq_len + i * seq_len + j
@@ -107,7 +107,7 @@ func scaled_dot_product_attention_backward(
                 d_scores[j] = grad_sum
                 j = j + 1
             }
-            float[] d_attn = softmax_backward(d_scores, slice_row(cache.attention_weights, h * seq_len * seq_len + i * seq_len, seq_len), seq_len)
+            []float d_attn = softmax_backward(d_scores, slice_row(cache.attention_weights, h * seq_len * seq_len + i * seq_len, seq_len), seq_len)
             j = 0
             for j < seq_len {
                 float d_score = d_attn[j] * scale
@@ -133,15 +133,15 @@ func scaled_dot_product_attention_backward(
 }
 
 func projection_backward(
-    float[] d_output,
-    float[] input,
-    float[] weights,
+    []float d_output,
+    []float input,
+    []float weights,
     int seq_len,
     int input_dim,
     int output_dim
 ) projection_backward_result {
-    float[] d_input = matrix_multiply_transpose(d_output, weights, seq_len, output_dim, input_dim)
-    float[] d_weights = matrix_multiply_transpose_lhs(input, d_output, input_dim, seq_len, output_dim)
+    []float d_input = matrix_multiply_transpose(d_output, weights, seq_len, output_dim, input_dim)
+    []float d_weights = matrix_multiply_transpose_lhs(input, d_output, input_dim, seq_len, output_dim)
     projection_backward_result result
     result.d_input = d_input
     result.d_weights = d_weights
@@ -149,38 +149,38 @@ func projection_backward(
 }
 
 func attention_backward(
-    float[] d_output,
+    []float d_output,
     attention_forward_cache cache,
-    float[] wq,
-    float[] wk,
-    float[] wv,
-    float[] wo
+    []float wq,
+    []float wk,
+    []float wv,
+    []float wo
 ) attention_gradients {
     int seq_len = cache.seq_len
     int hidden_dim = cache.hidden_dim
     int num_heads = cache.num_heads
     int head_dim = cache.head_dim
     projection_backward_result wo_grads = projection_backward(d_output, cache.concatenated, wo, seq_len, hidden_dim, hidden_dim)
-    float[] d_concatenated = wo_grads.d_input
-    float[] d_wo = wo_grads.d_weights
-    float[] d_reshaped = reshape_for_heads(d_concatenated, seq_len, num_heads, head_dim)
+    []float d_concatenated = wo_grads.d_input
+    []float d_wo = wo_grads.d_weights
+    []float d_reshaped = reshape_for_heads(d_concatenated, seq_len, num_heads, head_dim)
     scaled_dot_product_attention_backward_result attn_grads = scaled_dot_product_attention_backward(d_reshaped, cache)
-    float[] d_query_reshaped = attn_grads.d_query
-    float[] d_key_reshaped = attn_grads.d_key
-    float[] d_value_reshaped = attn_grads.d_value
-    float[] d_query = reshape_from_heads(d_query_reshaped, seq_len, num_heads, head_dim)
-    float[] d_key = reshape_from_heads(d_key_reshaped, seq_len, num_heads, head_dim)
-    float[] d_value = reshape_from_heads(d_value_reshaped, seq_len, num_heads, head_dim)
+    []float d_query_reshaped = attn_grads.d_query
+    []float d_key_reshaped = attn_grads.d_key
+    []float d_value_reshaped = attn_grads.d_value
+    []float d_query = reshape_from_heads(d_query_reshaped, seq_len, num_heads, head_dim)
+    []float d_key = reshape_from_heads(d_key_reshaped, seq_len, num_heads, head_dim)
+    []float d_value = reshape_from_heads(d_value_reshaped, seq_len, num_heads, head_dim)
     projection_backward_result q_grads = projection_backward(d_query, cache.hidden_states, wq, seq_len, hidden_dim, hidden_dim)
     projection_backward_result k_grads = projection_backward(d_key, cache.hidden_states, wk, seq_len, hidden_dim, hidden_dim)
     projection_backward_result v_grads = projection_backward(d_value, cache.hidden_states, wv, seq_len, hidden_dim, hidden_dim)
-    float[] d_hidden_q = q_grads.d_input
-    float[] d_wq = q_grads.d_weights
-    float[] d_hidden_k = k_grads.d_input
-    float[] d_wk = k_grads.d_weights
-    float[] d_hidden_v = v_grads.d_input
-    float[] d_wv = v_grads.d_weights
-    float[] d_hidden_states = allocate_vector(seq_len * hidden_dim, 0.0)
+    []float d_hidden_q = q_grads.d_input
+    []float d_wq = q_grads.d_weights
+    []float d_hidden_k = k_grads.d_input
+    []float d_wk = k_grads.d_weights
+    []float d_hidden_v = v_grads.d_input
+    []float d_wv = v_grads.d_weights
+    []float d_hidden_states = allocate_vector(seq_len * hidden_dim, 0.0)
     int i = 0
     for i < seq_len * hidden_dim {
         d_hidden_states[i] = d_hidden_q[i] + d_hidden_k[i] + d_hidden_v[i]
@@ -198,8 +198,8 @@ func attention_backward(
     return grads
 }
 
-func slice_row(float[] matrix, int row_start, int row_len) []float {
-    float[] row = allocate_vector(row_len, 0.0)
+func slice_row([]float matrix, int row_start, int row_len) []float {
+    []float row = allocate_vector(row_len, 0.0)
     int i = 0
     for i < row_len {
         row[i] = matrix[row_start + i]
@@ -208,8 +208,8 @@ func slice_row(float[] matrix, int row_start, int row_len) []float {
     return row
 }
 
-func matrix_multiply_transpose(float[] a, float[] b, int m, int k, int n) []float {
-    float[] result = allocate_vector(m * n, 0.0)
+func matrix_multiply_transpose([]float a, []float b, int m, int k, int n) []float {
+    []float result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -230,8 +230,8 @@ func matrix_multiply_transpose(float[] a, float[] b, int m, int k, int n) []floa
     return result
 }
 
-func matrix_multiply_transpose_lhs(float[] a, float[] b, int m, int k, int n) []float {
-    float[] result = allocate_vector(m * n, 0.0)
+func matrix_multiply_transpose_lhs([]float a, []float b, int m, int k, int n) []float {
+    []float result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -252,9 +252,9 @@ func matrix_multiply_transpose_lhs(float[] a, float[] b, int m, int k, int n) []
     return result
 }
 
-func reshape_for_heads(float[] x, int seq_len, int num_heads, int head_dim) []float {
+func reshape_for_heads([]float x, int seq_len, int num_heads, int head_dim) []float {
     int size = seq_len * num_heads * head_dim
-    float[] reshaped = allocate_vector(size, 0.0)
+    []float reshaped = allocate_vector(size, 0.0)
     int i = 0
     for i < size {
         reshaped[i] = x[i]
@@ -263,10 +263,10 @@ func reshape_for_heads(float[] x, int seq_len, int num_heads, int head_dim) []fl
     return reshaped
 }
 
-func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) []float {
+func reshape_from_heads([]float x, int seq_len, int num_heads, int head_dim) []float {
     int hidden_dim = num_heads * head_dim
     int size = seq_len * hidden_dim
-    float[] reshaped = allocate_vector(size, 0.0)
+    []float reshaped = allocate_vector(size, 0.0)
     int i = 0
     for i < size {
         reshaped[i] = x[i]
@@ -276,7 +276,7 @@ func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) []f
 }
 
 func allocate_vector(int size, float init_val) []float {
-    float[] v = make([]float, size)
+    []float v = make([]float, size)
     int i = 0
     for i < size {
         v = append(v, init_val)

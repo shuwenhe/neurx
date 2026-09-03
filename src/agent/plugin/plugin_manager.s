@@ -28,9 +28,9 @@ struct plugin_import_descriptor {
 
 struct plugin_compatibility_info {
 	string                  plugin_id
-	string[]             compatible_phases
+	[]string             compatible_phases
 	int32                   compatible_phase_count
-	string[]             required_interfaces
+	[]string             required_interfaces
 	int32                   interface_count
 	bool                    is_compatible
 	string                  compatibility_message
@@ -39,7 +39,7 @@ struct plugin_compatibility_info {
 struct phase_plugin_adapter {
 	string                  adapter_id
 	string                  phase_name
-	string[]             phase_endpoints
+	[]string             phase_endpoints
 	int32                   endpoint_count
 	map[string]interface{}  adapter_config
 	bool                    is_active
@@ -116,7 +116,7 @@ func (plugin_manager* m) perform_system_health_check() plugin_system_health {
 func (plugin_manager* m) get_compatible_plugins_for_phase(phase_name string) []string {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	compatible := make(string[], 0)
+	compatible := make([]string, 0)
 	for plugin_id, plugin := range m.plugin_cache {
 		for cap := range plugin.metadata.capabilities {
 			if cap == phase_name {
@@ -164,7 +164,7 @@ func create_phase_plugin_adapter(adapter_id string, phase_name string) phase_plu
 	return phase_plugin_adapter{
 		adapter_id:    adapter_id,
 		phase_name:    phase_name,
-		phase_endpoints: make(string[], 0),
+		phase_endpoints: make([]string, 0),
 		endpoint_count: 0,
 		adapter_config: make(map[string]interface{}),
 		is_active:     false,
@@ -186,34 +186,34 @@ func (phase_plugin_adapter* a) deactivate() {
 
 struct phase6_plugin_integration {
 	phase_plugin_adapter    adapter
-	string[]             sampling_method_plugins
+	[]string             sampling_method_plugins
 	int32                   sampling_plugins_count
-	string[]             penalty_function_plugins
+	[]string             penalty_function_plugins
 	int32                   penalty_plugins_count
 }
 
 struct phase9_plugin_integration {
 	phase_plugin_adapter    adapter
-	string[]             chat_endpoint_plugins
+	[]string             chat_endpoint_plugins
 	int32                   chat_plugins_count
-	string[]             embedding_plugins
+	[]string             embedding_plugins
 	int32                   embedding_plugins_count
 }
 
 struct phase12_plugin_integration {
 	phase_plugin_adapter    adapter
-	string[]             sse_handler_plugins
+	[]string             sse_handler_plugins
 	int32                   sse_plugins_count
-	string[]             compression_plugins
+	[]string             compression_plugins
 	int32                   compression_plugins_count
 }
 
 func create_phase6_plugin_integration() phase6_plugin_integration {
 	return phase6_plugin_integration{
 		adapter:                  create_phase_plugin_adapter("phase6_adapter", "phase6"),
-		sampling_method_plugins:  make(string[], 0),
+		sampling_method_plugins:  make([]string, 0),
 		sampling_plugins_count:   0,
-		penalty_function_plugins: make(string[], 0),
+		penalty_function_plugins: make([]string, 0),
 		penalty_plugins_count:    0,
 	}
 }
@@ -221,9 +221,9 @@ func create_phase6_plugin_integration() phase6_plugin_integration {
 func create_phase9_plugin_integration() phase9_plugin_integration {
 	return phase9_plugin_integration{
 		adapter:                 create_phase_plugin_adapter("phase9_adapter", "phase9"),
-		chat_endpoint_plugins:   make(string[], 0),
+		chat_endpoint_plugins:   make([]string, 0),
 		chat_plugins_count:      0,
-		embedding_plugins:       make(string[], 0),
+		embedding_plugins:       make([]string, 0),
 		embedding_plugins_count: 0,
 	}
 }
@@ -231,9 +231,9 @@ func create_phase9_plugin_integration() phase9_plugin_integration {
 func create_phase12_plugin_integration() phase12_plugin_integration {
 	return phase12_plugin_integration{
 		adapter:                create_phase_plugin_adapter("phase12_adapter", "phase12"),
-		sse_handler_plugins:    make(string[], 0),
+		sse_handler_plugins:    make([]string, 0),
 		sse_plugins_count:      0,
-		compression_plugins:    make(string[], 0),
+		compression_plugins:    make([]string, 0),
 		compression_plugins_count: 0,
 	}
 }

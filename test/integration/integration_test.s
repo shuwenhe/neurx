@@ -26,7 +26,7 @@ func test_moe_layer() {
     int batch_size = 4
     int seq_len = 128
     int hidden_dim = config.hidden_dim
-    float[] hidden_states = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    []float hidden_states = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int i = 0
     for i < batch_size * seq_len * hidden_dim {
         hidden_states[i] = 0.1 * (i % 100)
@@ -52,13 +52,13 @@ func test_flash_attention() {
     config.head_dim = 64
     attention.multi_head_attention attn = attention.new_multi_head_attention(config)
     int seq_len = 512
-    float[] hidden_states = allocate_vector(seq_len * 768, 0.0)
+    []float hidden_states = allocate_vector(seq_len * 768, 0.0)
     int i = 0
     for i < seq_len * 768 {
         hidden_states[i] = 0.1 * (i % 100)
         i = i + 1
     }
-    float[] output = attention.forward_flash_attention(attn, hidden_states, seq_len)
+    []float output = attention.forward_flash_attention(attn, hidden_states, seq_len)
     if len(output) != seq_len * 768 {
         print("FAIL: Flash Attention output dimension mismatch\n")
         return
@@ -74,7 +74,7 @@ func test_streaming_dataloader() {
     config.prefetch_size = 2
     streaming.streaming_dataloader loader = streaming.new_streaming_dataloader(config)
     func mock_tokenizer(string text) []int {
-        int[] tokens = make([]int, 512)
+        []int tokens = make([]int, 512)
         int i = 0
         for i < 512 {
             tokens = append(tokens, i % 1000)
@@ -131,7 +131,7 @@ func test_bpe_tokenizer() {
 }
 
 func allocate_vector(int size, float init_val) []float {
-    float[] v = make([]float, size)
+    []float v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val

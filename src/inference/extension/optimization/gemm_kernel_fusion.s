@@ -11,17 +11,17 @@ struct gemm_config {
 }
 
 struct gemm_operation {
-    a               float[]32
-    b               float[]32
-    c               float[]32
-    bias            float[]32
+    a               []float32
+    b               []float32
+    c               []float32
+    bias            []float32
     has_bias        bool
 }
 
 struct fused_gemm_kernel {
     config          gemm_config
     gemms           []gemm_operation
-    fused_output    float[]32
+    fused_output    []float32
 }
 
 func NewFusedGEMMKernel(config gemm_config) *fused_gemm_kernel {
@@ -31,7 +31,7 @@ func NewFusedGEMMKernel(config gemm_config) *fused_gemm_kernel {
     return *fused_gemm_kernel{
         config:      config,
         gemms:       make([]gemm_operation, 0),
-        fused_output: make(float[]32, 0),
+        fused_output: make([]float32, 0),
     }
 }
 
@@ -39,8 +39,8 @@ func (fused_gemm_kernel* fk) AddGEMM(gemm gemm_operation) {
     fk.gemms = append(fk.gemms, gemm)
 }
 
-func (fused_gemm_kernel* fk) ExecuteFused() float[][]32 {
-    results := make(float[][]32, 0)
+func (fused_gemm_kernel* fk) ExecuteFused() []float[]32 {
+    results := make([]float[]32, 0)
     if !fk.config.enable_fusion {
         for _, gemm := range fk.gemms {
             result := fk.executeBasicGEMM(gemm)
@@ -58,11 +58,11 @@ func (fused_gemm_kernel* fk) ExecuteFused() float[][]32 {
     return results
 }
 
-func (fused_gemm_kernel* fk) executeBasicGEMM(gemm gemm_operation) float[]32 {
+func (fused_gemm_kernel* fk) executeBasicGEMM(gemm gemm_operation) []float32 {
     m := fk.config.m
     n := fk.config.n
     k := fk.config.k
-    c := make(float[]32, int(m*n))
+    c := make([]float32, int(m*n))
     for i := int32(0); i < m; i++ {
         for j := int32(0); j < n; j++ {
             sum := 0.0
@@ -80,12 +80,12 @@ func (fused_gemm_kernel* fk) executeBasicGEMM(gemm gemm_operation) float[]32 {
     return c
 }
 
-func (fused_gemm_kernel* fk) executeOptimizedGEMM(gemm gemm_operation) float[]32 {
+func (fused_gemm_kernel* fk) executeOptimizedGEMM(gemm gemm_operation) []float32 {
     m := fk.config.m
     n := fk.config.n
     k := fk.config.k
     tile := fk.config.tile_size
-    c := make(float[]32, int(m*n))
+    c := make([]float32, int(m*n))
     for i_start := int32(0); i_start < m; i_start += tile {
         i_end := i_start + tile
         if i_end > m {
@@ -126,7 +126,7 @@ func (fused_gemm_kernel* fk) executeOptimizedGEMM(gemm gemm_operation) float[]32
 func (fused_gemm_kernel* fk) FuseGEMMAndActivation(
     gemm gemm_operation,
     activation_type string,
-) float[]32 {
+) []float32 {
     m := fk.config.m
     n := fk.config.n
     k := fk.config.k
@@ -140,7 +140,7 @@ func (fused_gemm_kernel* fk) FuseGEMMAndActivation(
 func (fused_gemm_kernel* fk) FuseGEMMAndNormalization(
     gemm gemm_operation,
     eps float32,
-) float[]32 {
+) []float32 {
     m := fk.config.m
     n := fk.config.n
     c := fk.executeOptimizedGEMM(gemm)
@@ -167,7 +167,7 @@ func (fused_gemm_kernel* fk) FuseGEMMAndNormalization(
 func (fused_gemm_kernel* fk) FuseMultipleGEMMs(
     gemm1 gemm_operation,
     gemm2 gemm_operation,
-) float[]32 {
+) []float32 {
     intermediate := fk.executeOptimizedGEMM(gemm1)
     gemm2_fused := gemm2
     gemm2_fused.a = intermediate

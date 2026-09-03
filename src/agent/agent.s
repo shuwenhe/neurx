@@ -244,7 +244,7 @@ func agent_restore_memory(agent_runtime_state state, string path) agent_runtime_
     }
 }
 
-func run_agent_batch(agent_runtime_state state, string[] inputs, int max_steps_per_input) agent_runtime_state {
+func run_agent_batch(agent_runtime_state state, []string inputs, int max_steps_per_input) agent_runtime_state {
     run_agent_steps_batch(state, inputs, max_steps_per_input)
 }
 
@@ -433,7 +433,7 @@ func agent_task_queue_peek(agent_runtime_state state) string {
 
 func agent_task_queue_peek_all(agent_runtime_state state) []string {
     int size = len(state.plan.task_queue)
-    string[] out = make([]string, size)
+    []string out = make([]string, size)
     int i = 0
     for i < size {
         out[i] = state.plan.task_queue[i]
@@ -494,11 +494,11 @@ func agent_promoted_skill_names(agent_runtime_state state) []string {
 }
 
 func agent_memory_keys(agent_runtime_state state) []string {
-    string[] short_k = agent_memory_short_keys(state.memory)
-    string[] long_k = agent_memory_long_keys(state.memory)
+    []string short_k = agent_memory_short_keys(state.memory)
+    []string long_k = agent_memory_long_keys(state.memory)
     int s = len(short_k)
     int l = len(long_k)
-    string[] out = make([]string, s + l)
+    []string out = make([]string, s + l)
     int i = 0
     for i < s {
         out[i] = short_k[i]

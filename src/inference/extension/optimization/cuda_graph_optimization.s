@@ -4,7 +4,7 @@ import "tensor"
 struct cuda_graph_node {
     id              int32
     kernel_name     string
-    dependencies    int[]32
+    dependencies    []int32
     params          map[string]int32
     status          string
 }
@@ -19,9 +19,9 @@ struct cuda_graph_config {
 struct cuda_graph {
     config          cuda_graph_config
     nodes           []cuda_graph_node
-    node_outputs    map[int32]float[]32
-    execution_order int[]32
-    ready_queue     int[]32
+    node_outputs    map[int32][]float32
+    execution_order []int32
+    ready_queue     []int32
 }
 
 func NewCUDAGraph(config cuda_graph_config) *cuda_graph {
@@ -31,15 +31,15 @@ func NewCUDAGraph(config cuda_graph_config) *cuda_graph {
     return *cuda_graph{
         config:          config,
         nodes:           make([]cuda_graph_node, 0),
-        node_outputs:    make(map[int32]float[]32),
-        execution_order: make(int[]32, 0),
-        ready_queue:     make(int[]32, 0),
+        node_outputs:    make(map[int32][]float32),
+        execution_order: make([]int32, 0),
+        ready_queue:     make([]int32, 0),
     }
 }
 
 func (cuda_graph* g) AddNode(
     kernel_name string,
-    dependencies int[]32,
+    dependencies []int32,
     params map[string]int32,
 ) int32 {
     node_id := int32(len(g.nodes))
@@ -54,20 +54,20 @@ func (cuda_graph* g) AddNode(
     return node_id
 }
 
-func (cuda_graph* g) BuildExecutionPlan() int[]32 {
-    in_degree := make(int[]32, len(g.nodes))
+func (cuda_graph* g) BuildExecutionPlan() []int32 {
+    in_degree := make([]int32, len(g.nodes))
     for _, node := range g.nodes {
         for _, dep := range node.dependencies {
             in_degree[dep] = in_degree[dep] + 1
         }
     }
-    g.ready_queue = make(int[]32, 0)
+    g.ready_queue = make([]int32, 0)
     for i := int32(0); i < int32(len(g.nodes)); i++ {
         if in_degree[i] == 0 {
             g.ready_queue = append(g.ready_queue, i)
         }
     }
-    order := make(int[]32, 0)
+    order := make([]int32, 0)
     for len(g.ready_queue) > 0 {
         node_id := g.ready_queue[0]
         g.ready_queue = g.ready_queue[1:]
@@ -87,11 +87,11 @@ func (cuda_graph* g) BuildExecutionPlan() int[]32 {
     return order
 }
 
-func (cuda_graph* g) ExecuteGraph() map[int32]float[]32 {
+func (cuda_graph* g) ExecuteGraph() map[int32][]float32 {
     if len(g.execution_order) == 0 {
         g.BuildExecutionPlan()
     }
-    results := make(map[int32]float[]32)
+    results := make(map[int32][]float32)
     for _, node_id := range g.execution_order {
         node := g.nodes[node_id]
         for _, dep_id := range node.dependencies {
@@ -105,7 +105,7 @@ func (cuda_graph* g) ExecuteGraph() map[int32]float[]32 {
     return results
 }
 
-func (cuda_graph* g) executeKernel(cuda_graph_node* node) float[]32 {
+func (cuda_graph* g) executeKernel(cuda_graph_node* node) []float32 {
     switch node.kernel_name {
     case "matmul":
         return g.kernelMatmul(node)
@@ -116,25 +116,25 @@ func (cuda_graph* g) executeKernel(cuda_graph_node* node) float[]32 {
     case "attention":
         return g.kernelAttention(node)
     default:
-        return make(float[]32, 0)
+        return make([]float32, 0)
     }
 }
 
-func (cuda_graph* g) kernelMatmul(cuda_graph_node* node) float[]32 {
+func (cuda_graph* g) kernelMatmul(cuda_graph_node* node) []float32 {
     m := node.params["m"]
     n := node.params["n"]
     k := node.params["k"]
-    output := make(float[]32, int(m*n))
+    output := make([]float32, int(m*n))
     for i := int32(0); i < m*n; i++ {
         output[i] = 0.1 * float32(i)
     }
     return output
 }
 
-func (cuda_graph* g) kernelActivation(cuda_graph_node* node) float[]32 {
+func (cuda_graph* g) kernelActivation(cuda_graph_node* node) []float32 {
     output_size := node.params["size"]
     act_type := node.params["type"]
-    output := make(float[]32, int(output_size))
+    output := make([]float32, int(output_size))
     for i := int32(0); i < output_size; i++ {
         x := 0.1 * float32(i)
         switch act_type {
@@ -154,10 +154,10 @@ func (cuda_graph* g) kernelActivation(cuda_graph_node* node) float[]32 {
     return output
 }
 
-func (cuda_graph* g) kernelLayernorm(cuda_graph_node* node) float[]32 {
+func (cuda_graph* g) kernelLayernorm(cuda_graph_node* node) []float32 {
     batch := node.params["batch"]
     size := node.params["size"]
-    output := make(float[]32, int(batch*size))
+    output := make([]float32, int(batch*size))
     for b := int32(0); b < batch; b++ {
         mean := 0.0
         for i := int32(0); i < size; i++ {
@@ -179,11 +179,11 @@ func (cuda_graph* g) kernelLayernorm(cuda_graph_node* node) float[]32 {
     return output
 }
 
-func (cuda_graph* g) kernelAttention(cuda_graph_node* node) float[]32 {
+func (cuda_graph* g) kernelAttention(cuda_graph_node* node) []float32 {
     seq_len := node.params["seq_len"]
     heads := node.params["heads"]
     dim := node.params["dim"]
-    output := make(float[]32, int(seq_len*heads*dim))
+    output := make([]float32, int(seq_len*heads*dim))
     for i := int32(0); i < seq_len*heads*dim; i++ {
         output[i] = 0.1 * float32(i)
     }
@@ -214,7 +214,7 @@ func (cuda_graph* g) FuseNodes(node_id1 int32, node_id2 int32) int32 {
         fused_params["fused_"+k] = v
     }
     fused_kernel := node1.kernel_name + "_" + node2.kernel_name
-    fused_deps := make(int[]32, 0)
+    fused_deps := make([]int32, 0)
     for _, dep := range node1.dependencies {
         if dep != node_id2 {
             fused_deps = append(fused_deps, dep)
@@ -284,9 +284,9 @@ func main() {
         enable_coarsening: true,
     }
     g := NewCUDAGraph(config)
-    m1 := g.AddNode("matmul", int[]32{}, map[string]int32{"m": 512, "n": 512, "k": 512})
-    a1 := g.AddNode("activation", int[]32{m1}, map[string]int32{"size": 262144, "type": 1})
-    ln := g.AddNode("layernorm", int[]32{a1}, map[string]int32{"batch": 1, "size": 262144})
+    m1 := g.AddNode("matmul", []int32{}, map[string]int32{"m": 512, "n": 512, "k": 512})
+    a1 := g.AddNode("activation", []int32{m1}, map[string]int32{"size": 262144, "type": 1})
+    ln := g.AddNode("layernorm", []int32{a1}, map[string]int32{"batch": 1, "size": 262144})
     core.Println("CUDA Graph initialized")
     core.Println("Nodes:", len(g.nodes))
     g.PrintExecutionPlan()

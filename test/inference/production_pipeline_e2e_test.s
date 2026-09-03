@@ -145,7 +145,7 @@ func test_tokenization_correctness() test_result {
         execution_time_ms: 0.0,
     }
     
-    string[] test_inputs = [
+    []string test_inputs = [
         "Hello world",
         "The quick brown fox",
         "123 456",
@@ -181,7 +181,7 @@ func test_kv_cache_prefill() test_result {
         execution_time_ms: 0.0,
     }
     
-    int[] test_tokens = [101, 102, 103, 104, 105]
+    []int test_tokens = [101, 102, 103, 104, 105]
     
     if prefill_kv_cache(test_tokens, "CUDA") {
         result.passed = true
@@ -205,7 +205,7 @@ func test_generation_quality() test_result {
         execution_time_ms: 0.0,
     }
     
-    float[] temperatures = [0.1, 0.7, 1.5]
+    []float temperatures = [0.1, 0.7, 1.5]
     
     int i = 0
     for i < len(temperatures) {
@@ -236,7 +236,7 @@ func test_detokenization() test_result {
         execution_time_ms: 0.0,
     }
     
-    int[] tokens = [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]
+    []int tokens = [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]
     output := detokenize_output(tokens)
     
     if len(output) > 0 {

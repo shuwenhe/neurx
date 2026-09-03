@@ -27,10 +27,10 @@ struct rollout_buffer {
 }
 
 struct rollout_sample {
-    int[] prompt_ids
-    int[] response_ids
-    float[] log_probs
-    float[] rewards
+    []int prompt_ids
+    []int response_ids
+    []float log_probs
+    []float rewards
     int policy_version
     float priority
 }
@@ -78,10 +78,10 @@ func async_rollout_worker(async_policy_state state, int worker_id) {
 
 func generate_sample(async_policy_state state, int worker_id) rollout_sample {
     rollout_sample {
-        prompt_ids: make(int[], 64),
-        response_ids: make(int[], 128),
-        log_probs: make(float[], 128),
-        rewards: make(float[], 128),
+        prompt_ids: make([]int, 64),
+        response_ids: make([]int, 128),
+        log_probs: make([]float, 128),
+        rewards: make([]float, 128),
         policy_version: state.current_policy_version,
         priority: 1.0,
     }

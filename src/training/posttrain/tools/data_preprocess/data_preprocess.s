@@ -9,13 +9,13 @@ struct conversation {
 struct message {
     string role
     string content
-    string[] tool_calls
+    []string tool_calls
 }
 
 struct rl_sample {
     string prompt
-    string[] completions
-    float[] rewards
+    []string completions
+    []float rewards
     int group_id
     string task_type
 }
@@ -45,9 +45,9 @@ func convert_conversation_to_prompt(conversation conv) string {
 }
 
 func create_grpo_groups(
-    string[] prompts,
-    string[][] completions,
-    float[][] rewards,
+    []string prompts,
+    []string[] completions,
+    []float[] rewards,
     int group_size
 ) []rl_sample {
     []rl_sample samples = []rl_sample{}
@@ -69,11 +69,11 @@ func create_grpo_groups(
 
 func create_preference_pairs_from_rankings(
     string prompt,
-    string[] completions,
-    float[] scores
+    []string completions,
+    []float scores
 ) []preference_pair {
     []preference_pair pairs = []preference_pair{}
-    int[] indices = argsort_descending(scores)
+    []int indices = argsort_descending(scores)
     int i = 0
     for i < completions.len {
         int j = i + 1
@@ -96,7 +96,7 @@ func create_preference_pairs_from_rankings(
 
 func format_prompt_with_examples(
     string instruction,
-    string[] examples,
+    []string examples,
     string query
 ) string {
     string prompt = instruction + "\n\n"
@@ -128,16 +128,16 @@ func extract_code_from_response(string response) string {
 }
 
 func tokenize_with_padding(
-    string[] texts,
+    []string texts,
     int max_length,
     int pad_token_id
-) int[][] {
-    int[][] tokenized = intmake([][], texts.len)
+) []int[] {
+    []int[] tokenized = intmake([][], texts.len)
     int i = 0
     for i < texts.len {
-        int[] tokens = tokenize_text(texts[i])
+        []int tokens = tokenize_text(texts[i])
         if tokens.len > max_length {
-            int[] truncated = make([]int, max_length)
+            []int truncated = make([]int, max_length)
             int j = 0
             for j < max_length {
                 truncated[j] = tokens[j]
@@ -155,13 +155,13 @@ func tokenize_with_padding(
 }
 
 func create_attention_masks(
-    int[][] token_ids,
+    []int[] token_ids,
     int pad_token_id
-) int[][] {
-    int[][] masks = intmake([][], token_ids.len)
+) []int[] {
+    []int[] masks = intmake([][], token_ids.len)
     int i = 0
     for i < token_ids.len {
-        int[] mask = make([]int, token_ids[i].len)
+        []int mask = make([]int, token_ids[i].len)
         int j = 0
         for j < token_ids[i].len {
             if token_ids[i][j] == pad_token_id {
@@ -202,7 +202,7 @@ func batch_samples(
     batches
 }
 
-func argsort_descending(float[] arr) []int { []int{} }
+func argsort_descending([]float arr) []int { []int{} }
 
 func int_to_string(int n) string { "" }
 

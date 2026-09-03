@@ -2,7 +2,7 @@ package neurx.experimental.compiler.ir.value
 
 struct value_type {
     string kind
-    int[] shape
+    []int shape
     string dtype
 }
 
@@ -23,7 +23,7 @@ struct attr_value {
     string value_str
 }
 
-func value_type_float32(int[] shape) value_type {
+func value_type_float32([]int shape) value_type {
     value_type {
         kind: "tensor",
         shape: shape,
@@ -31,7 +31,7 @@ func value_type_float32(int[] shape) value_type {
     }
 }
 
-func value_type_int32(int[] shape) value_type {
+func value_type_int32([]int shape) value_type {
     value_type {
         kind: "tensor",
         shape: shape,
@@ -39,7 +39,7 @@ func value_type_int32(int[] shape) value_type {
     }
 }
 
-func value_type_int64(int[] shape) value_type {
+func value_type_int64([]int shape) value_type {
     value_type {
         kind: "tensor",
         shape: shape,
@@ -47,7 +47,7 @@ func value_type_int64(int[] shape) value_type {
     }
 }
 
-func value_type_bool(int[] shape) value_type {
+func value_type_bool([]int shape) value_type {
     value_type {
         kind: "tensor",
         shape: shape,
@@ -71,7 +71,7 @@ func value_type_scalar_int32() value_type {
     }
 }
 
-func new_tensor_value(int id, int[] shape, string dtype, string name) tensor_value {
+func new_tensor_value(int id, []int shape, string dtype, string name) tensor_value {
     tensor_value {
         id: id,
         tensor_type: value_type {

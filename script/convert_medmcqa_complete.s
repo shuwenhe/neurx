@@ -6,7 +6,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_tex
 struct question_data {
     string qid
     string question
-    string[] options
+    []string options
     int correct_answer
     string category
     string explanation
@@ -66,10 +66,10 @@ func parse_jsonl_question(string line) question_data {
 }
 
 func extract_options_from_json(string line) []string {
-    string[] opts = []string{}
+    []string opts = []string{}
     int opt_start = find_substring(line, "\"options\":[")
     if opt_start < 0 {
-        opts = string[]{"Option A", "Option B", "Option C", "Option D"}
+        opts = []string{"Option A", "Option B", "Option C", "Option D"}
         return opts
     }
     opt_start = opt_start + 11
@@ -209,7 +209,7 @@ func parse_int(string s) int {
 func question_to_sft(question_data q) sft_record {
     string instruction = "Answer the following medical multiple-choice question accurately."
     string input = q.question + "\n\nOptions:\n"
-    string[] labels = string[]{"A", "B", "C", "D"}
+    []string labels = []string{"A", "B", "C", "D"}
     for i in 0..len(q.options)-1 {
         input = input + labels[i] + ") " + q.options[i] + "\n"
     }
@@ -294,7 +294,7 @@ func main() {
     }
     println("✓ Read " + len(file_content) + " bytes")
     println("Parsing questions...")
-    string[] lines = []string{}
+    []string lines = []string{}
     string current_line = ""
     for i in 0..len(file_content)-1 {
         if file_content[i] == 10 {

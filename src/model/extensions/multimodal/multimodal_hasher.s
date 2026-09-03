@@ -19,7 +19,7 @@ struct hash_matcher {
     float32 similarity_threshold
     int32 hash_cache_size
     map[string]content_hash* hash_cache
-    map[string]string[]*] similar_content
+    map[string][]string*] similar_content
 }
 
 struct multimodal_hasher {
@@ -38,7 +38,7 @@ func create_multimodal_hasher() multimodal_hasher* {
             similarity_threshold: 0.95,
             hash_cache_size: 10000,
             hash_cache: make(map[string]content_hash*),
-            similar_content: make(map[string]string[]*]),
+            similar_content: make(map[string][]string*]),
         },
         total_hashes_computed: 0,
         duplicates_found: 0,
@@ -95,7 +95,7 @@ func (multimodal_hasher* hasher) add_content(string content_id, uint8[] data, mo
 }
 
 func (multimodal_hasher* hasher) find_duplicates(string content_id) []string {
-    duplicates := make(string[])
+    duplicates := make([]string)
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
         for other_id, other_hash := range hasher.matcher.hash_cache {
             if other_id != content_id && other_hash.hash_value == hash_obj.hash_value {
@@ -127,7 +127,7 @@ func (multimodal_hasher* hasher) compute_similarity(string hash1, string hash2) 
 }
 
 func (multimodal_hasher* hasher) find_similar(string content_id) []string {
-    similar := make(string[])
+    similar := make([]string)
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
         for other_id, other_hash := range hasher.matcher.hash_cache {
             if other_id != content_id {

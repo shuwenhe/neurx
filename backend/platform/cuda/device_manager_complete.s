@@ -181,7 +181,7 @@ func cuda_device_synchronize() error {
     return nil
 }
 
-func cuda_runtime_call(string api_name, int[] args, int flags) (any, error) {
+func cuda_runtime_call(string api_name, []int args, int flags) (any, error) {
     return any{}, nil
 }
 

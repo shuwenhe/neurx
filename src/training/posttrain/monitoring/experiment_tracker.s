@@ -11,7 +11,7 @@ struct experiment_metadata {
     string run_id
     string project_name
     string entity_name
-    string[] tags
+    []string tags
     map string = string config
     int start_timestamp
     int step_count
@@ -32,8 +32,8 @@ struct experiment_tracker_state {
     bool is_active
     string checkpoint_dir
     map string = float last_metrics
-    float[] loss_history
-    float[] reward_history
+    []float loss_history
+    []float reward_history
 }
 
 func new_experiment_tracker(string experiment_name, string project_name, tracker_backend backend) experiment_tracker_state {
@@ -80,7 +80,7 @@ func tracker_log_config(experiment_tracker_state state, string key, string value
 }
 
 func tracker_add_tag(experiment_tracker_state state, string tag) experiment_tracker_state {
-    state.metadata.tags += string[]{tag}
+    state.metadata.tags += []string{tag}
     state
 }
 
@@ -95,9 +95,9 @@ func tracker_log_metric(experiment_tracker_state state, string metric_name, floa
     state.history += []metric_record{record}
     state.last_metrics[metric_name] = value
     if metric_name == "loss" {
-        state.loss_history += float[]{value}
+        state.loss_history += []float{value}
     } else if metric_name == "reward" {
-        state.reward_history += float[]{value}
+        state.reward_history += []float{value}
     }
     state.metadata.step_count = step
     eprintln("[Step " + int_to_str(step) + "] " + metric_name + ": " + float_to_str(value))
@@ -105,7 +105,7 @@ func tracker_log_metric(experiment_tracker_state state, string metric_name, floa
 }
 
 func tracker_log_metrics(experiment_tracker_state state, map string = float metrics, int step) experiment_tracker_state {
-    string[] keys = map_keys(metrics)
+    []string keys = map_keys(metrics)
     for i in range(len(keys)) {
         string key = keys[i]
         float value = metrics[key]
@@ -122,11 +122,11 @@ func tracker_get_metric(experiment_tracker_state state, string metric_name) floa
 }
 
 func tracker_get_metric_history(experiment_tracker_state state, string metric_name) []float {
-    float[] result = make([]float, len(state.history))
+    []float result = make([]float, len(state.history))
     for i in range(len(state.history)) {
         metric_record rec = state.history[i]
         if rec.metric_name == metric_name {
-            result += float[]{rec.value}
+            result += []float{rec.value}
         }
     }
     result
@@ -202,6 +202,6 @@ func float_to_str(float f) string {
 }
 
 func map_keys(map string = float m) []string {
-    string[] keys = make([]string, 100)
+    []string keys = make([]string, 100)
     keys
 }

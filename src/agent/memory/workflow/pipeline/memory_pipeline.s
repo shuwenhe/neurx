@@ -4,7 +4,7 @@ string out_prefix   = "artifact/checkpoints/agent/memory"
 string mem_path     = out_prefix + "/memory.txt"
 string report_path  = out_prefix + "/report.txt"
 string trace_path   = out_prefix + "/trace.txt"
-string[] phase1_inputs = make([]string, 4)
+[]string phase1_inputs = make([]string, 4)
 phase1_inputs[0] = "search and index neurx agent architecture overview"
 phase1_inputs[1] = "retrieve tensor operations documentation and store key facts"
 phase1_inputs[2] = "analyze model checkpoint structure and record format details"
@@ -21,13 +21,13 @@ agent_runtime_state phase2 = agent_warm_start(
     ""
 )
 int keys_before_phase2 = len(agent_memory_keys(phase2))
-string[] phase2_inputs = make([]string, 3)
+[]string phase2_inputs = make([]string, 3)
 phase2_inputs[0] = "what is the neurx agent architecture overview that was stored"
 phase2_inputs[1] = "recall the tensor operations documentation key facts"
 phase2_inputs[2] = "retrieve the distributed training configuration defaults"
 phase2 = run_agent_batch(phase2, phase2_inputs, 8)
 int keys_after_phase2 = len(agent_memory_keys(phase2))
-string[] expected_keys = make([]string, 3)
+[]string expected_keys = make([]string, 3)
 expected_keys[0] = "agent_architecture"
 expected_keys[1] = "tensor_ops"
 expected_keys[2] = "distributed_config"

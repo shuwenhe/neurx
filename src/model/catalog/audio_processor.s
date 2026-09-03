@@ -38,7 +38,7 @@ struct audio_metadata {
 
 struct audio_data {
 	sync.Mutex mu
-	float[]32 samples
+	[]float32 samples
 	*audio_metadata metadata
 	string audio_id
 	int64 loaded_timestamp
@@ -48,16 +48,16 @@ struct audio_data {
 }
 
 struct audio_frame {
-	float[]32 frame_samples
+	[]float32 frame_samples
 	int32 frame_index
 	float64 timestamp
 	float32 energy
 	float32 zero_crossing_rate
-	float[]32 spectrum
+	[]float32 spectrum
 }
 
 struct spectrogram_data {
-	float[][]32 spectrogram
+	[]float[]32 spectrogram
 	int32 num_frames
 	int32 freq_bins
 	float64 hop_length
@@ -68,7 +68,7 @@ struct spectrogram_data {
 }
 
 struct mfcc_features {
-	float[][]32 coefficients
+	[]float[]32 coefficients
 	int32 num_frames
 	int32 num_coefficients
 	int32 num_filters
@@ -120,7 +120,7 @@ func create_audio_processor() *audio_processor {
 	return ap
 }
 
-func (audio_processor* ap) load_audio(audio_id string, samples float[]32, metadata *audio_metadata) error {
+func (audio_processor* ap) load_audio(audio_id string, samples []float32, metadata *audio_metadata) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 	if len(samples) == 0 {
@@ -198,7 +198,7 @@ func (audio_processor* ap) resample_audio(audio_id string, target_rate int32) er
 	}
 	ratio := float64(target_rate) / float64(audio.metadata.sample_rate)
 	new_length := int32(float64(len(audio.samples)) * ratio)
-	new_samples := make(float[]32, new_length)
+	new_samples := make([]float32, new_length)
 	for i := int32(0); i < new_length; i++ {
 		src_pos := float64(i) / ratio
 		src_idx := int32(src_pos)
@@ -228,9 +228,9 @@ func (audio_processor* ap) compute_spectrogram(audio_id string) (*spectrogram_da
 		num_frames = 1
 	}
 	freq_bins := ap.fft_size / 2
-	spectrogram := make(float[][]32, num_frames)
+	spectrogram := make([]float[]32, num_frames)
 	for i := 0; i < len(spectrogram); i++ {
-		spectrogram[i] = make(float[]32, freq_bins)
+		spectrogram[i] = make([]float32, freq_bins)
 	}
 	for frame := 0; frame < num_frames; frame++ {
 		start := frame * hop_length
@@ -262,9 +262,9 @@ func (audio_processor* ap) compute_mfcc(audio_id string) (*mfcc_features, error)
 		return nil, err
 	}
 	num_filters := ap.num_mfcc_coefficients
-	coefficients := make(float[][]32, spectrogram.num_frames)
+	coefficients := make([]float[]32, spectrogram.num_frames)
 	for i := 0; i < len(coefficients); i++ {
-		coefficients[i] = make(float[]32, num_filters)
+		coefficients[i] = make([]float32, num_filters)
 	}
 	for frame := 0; frame < len(spectrogram.spectrogram); frame++ {
 		spectrum := spectrogram.spectrogram[frame]
@@ -384,7 +384,7 @@ func (audio_processor* ap) get_audio(audio_id string) (*audio_data, error) {
 func (audio_processor* ap) list_loaded_audios() []string {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
-	ids := make(string[], 0, len(ap.loaded_audios))
+	ids := make([]string, 0, len(ap.loaded_audios))
 	for id := range ap.loaded_audios {
 		ids = append(ids, id)
 	}

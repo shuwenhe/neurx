@@ -1,9 +1,9 @@
 package neurx.multimodal
 use neurx.tensor.tensor
 use neurx.tensor.new
-func copy_float(float[] data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -12,9 +12,9 @@ func copy_float(float[] data) []float {
     out
 }
 
-func copy_int(int[] data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -30,17 +30,17 @@ func copy_tensor(tensor value) tensor {
 struct multimodal_batch {
     int batch_size
     int seq_len
-    int[] token_ids
-    float[] image_features
-    float[] audio_features
+    []int token_ids
+    []float image_features
+    []float audio_features
 }
 
 func new_batch(
     int batch_size,
     int seq_len,
-    int[] token_ids,
-    float[] image_features,
-    float[] audio_features
+    []int token_ids,
+    []float image_features,
+    []float audio_features
 ) multimodal_batch {
     multimodal_batch {
         batch_size: batch_size,

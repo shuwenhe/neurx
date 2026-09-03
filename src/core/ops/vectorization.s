@@ -11,7 +11,7 @@ struct matmul_config {
 }
 
 struct batch_matmul_result {
-    output: float[][]
+    output: []float[]
     shape: [3]int
 }
 
@@ -22,9 +22,9 @@ struct vectorization_stats {
     float compute_efficiency
 }
 
-func batch_matmul(float[][] A, float[][] B, int batch_size, int M, int K, int N) batch_matmul_result {
+func batch_matmul([]float[] A, []float[] B, int batch_size, int M, int K, int N) batch_matmul_result {
     result := batch_matmul_result
-    output := float[][](batch_size * M * N)
+    output := []float[](batch_size * M * N)
     idx := 0
     b := 0
     for b < batch_size {
@@ -55,9 +55,9 @@ func batch_matmul(float[][] A, float[][] B, int batch_size, int M, int K, int N)
     return result
 }
 
-func batch_matmul_blocked(float[][] A, float[][] B, int batch_size, int M, int K, int N, int block_size) batch_matmul_result {
+func batch_matmul_blocked([]float[] A, []float[] B, int batch_size, int M, int K, int N, int block_size) batch_matmul_result {
     result := batch_matmul_result
-    output := float[][](batch_size * M * N)
+    output := []float[](batch_size * M * N)
     idx := 0
     for idx < batch_size * M * N {
         output[idx] = 0.0
@@ -115,8 +115,8 @@ func batch_matmul_blocked(float[][] A, float[][] B, int batch_size, int M, int K
     return result
 }
 
-func element_wise_add(float[] A, float[] B) []float {
-    var float[] result = float[](len(A))
+func element_wise_add([]float A, []float B) []float {
+    var []float result = []float(len(A))
     i := 0
     for i < len(A) {
         result[i] = A[i] + B[i]
@@ -125,8 +125,8 @@ func element_wise_add(float[] A, float[] B) []float {
     return result
 }
 
-func element_wise_mul(float[] A, float[] B) []float {
-    var float[] result = float[](len(A))
+func element_wise_mul([]float A, []float B) []float {
+    var []float result = []float(len(A))
     i := 0
     for i < len(A) {
         result[i] = A[i] * B[i]
@@ -135,8 +135,8 @@ func element_wise_mul(float[] A, float[] B) []float {
     return result
 }
 
-func element_wise_div(float[] A, float[] B, float epsilon) []float {
-    var float[] result = float[](len(A))
+func element_wise_div([]float A, []float B, float epsilon) []float {
+    var []float result = []float(len(A))
     i := 0
     for i < len(A) {
         if B[i] < 0.0 {
@@ -154,8 +154,8 @@ func element_wise_div(float[] A, float[] B, float epsilon) []float {
     return result
 }
 
-func element_wise_apply(float[] A, func(float) float func_ptr) []float {
-    var float[] result = float[](len(A))
+func element_wise_apply([]float A, func(float) float func_ptr) []float {
+    var []float result = []float(len(A))
     i := 0
     for i < len(A) {
         result[i] = func_ptr(A[i])
@@ -164,8 +164,8 @@ func element_wise_apply(float[] A, func(float) float func_ptr) []float {
     return result
 }
 
-func batch_element_wise_add(float[][] A, float[][] B, int batch_size, int size_per_batch) float[][] {
-    result := float[][](len(A))
+func batch_element_wise_add([]float[] A, []float[] B, int batch_size, int size_per_batch) []float[] {
+    result := []float[](len(A))
     idx := 0
     b := 0
     for b < batch_size {
@@ -180,8 +180,8 @@ func batch_element_wise_add(float[][] A, float[][] B, int batch_size, int size_p
     return result
 }
 
-func batch_element_wise_mul(float[][] A, float[][] B, int batch_size, int size_per_batch) float[][] {
-    result := float[][](len(A))
+func batch_element_wise_mul([]float[] A, []float[] B, int batch_size, int size_per_batch) []float[] {
+    result := []float[](len(A))
     idx := 0
     b := 0
     for b < batch_size {
@@ -196,7 +196,7 @@ func batch_element_wise_mul(float[][] A, float[][] B, int batch_size, int size_p
     return result
 }
 
-func reduce_sum(float[] A) float {
+func reduce_sum([]float A) float {
     sum := 0.0
     i := 0
     for i < len(A) {
@@ -206,14 +206,14 @@ func reduce_sum(float[] A) float {
     return sum
 }
 
-func reduce_mean(float[] A) float {
+func reduce_mean([]float A) float {
     if len(A) == 0 {
         return 0.0
     }
     return reduce_sum(A) / float(len(A))
 }
 
-func reduce_max(float[] A) float {
+func reduce_max([]float A) float {
     if len(A) == 0 {
         return 0.0
     }
@@ -228,8 +228,8 @@ func reduce_max(float[] A) float {
     return max_val
 }
 
-func reduce_sum_batch(float[][] A, int batch_size, int size_per_batch) []float {
-    var float[] result = float[](batch_size)
+func reduce_sum_batch([]float[] A, int batch_size, int size_per_batch) []float {
+    var []float result = []float(batch_size)
     b := 0
     for b < batch_size {
         sum := 0.0
@@ -244,8 +244,8 @@ func reduce_sum_batch(float[][] A, int batch_size, int size_per_batch) []float {
     return result
 }
 
-func broadcast_add(float[][] A, float[] b, int rows, int cols) float[][] {
-    result := float[][](len(A))
+func broadcast_add([]float[] A, []float b, int rows, int cols) []float[] {
+    result := []float[](len(A))
     idx := 0
     r := 0
     for r < rows {
@@ -260,8 +260,8 @@ func broadcast_add(float[][] A, float[] b, int rows, int cols) float[][] {
     return result
 }
 
-func broadcast_mul(float[][] A, float[] b, int rows, int cols) float[][] {
-    result := float[][](len(A))
+func broadcast_mul([]float[] A, []float b, int rows, int cols) []float[] {
+    result := []float[](len(A))
     idx := 0
     r := 0
     for r < rows {
@@ -307,8 +307,8 @@ func new_vectorization_stats() vectorization_stats {
     return stats
 }
 
-func gemm_blocked(float[][] A, float[][] B, int M, int K, int N, int block_size) float[][] {
-    C := float[][](M * N)
+func gemm_blocked([]float[] A, []float[] B, int M, int K, int N, int block_size) []float[] {
+    C := []float[](M * N)
     i := 0
     for i < M * N {
         C[i] = 0.0
@@ -356,7 +356,7 @@ func gemm_blocked(float[][] A, float[][] B, int M, int K, int N, int block_size)
     return C
 }
 
-func transpose_in_place(float[][] A, int N) float[][] {
+func transpose_in_place([]float[] A, int N) []float[] {
     i := 0
     for i < N {
         j := i + 1
@@ -371,8 +371,8 @@ func transpose_in_place(float[][] A, int N) float[][] {
     return A
 }
 
-func scale_vector(float[] A, float scalar) []float {
-    var float[] result = float[](len(A))
+func scale_vector([]float A, float scalar) []float {
+    var []float result = []float(len(A))
     i := 0
     for i < len(A) {
         result[i] = A[i] * scalar
@@ -381,7 +381,7 @@ func scale_vector(float[] A, float scalar) []float {
     return result
 }
 
-func dot_product(float[] A, float[] B) float {
+func dot_product([]float A, []float B) float {
     result := 0.0
     i := 0
     for i < len(A) {
@@ -391,7 +391,7 @@ func dot_product(float[] A, float[] B) float {
     return result
 }
 
-func vector_norm(float[] A) float {
+func vector_norm([]float A) float {
     sum := 0.0
     i := 0
     for i < len(A) {

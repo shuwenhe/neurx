@@ -9,7 +9,7 @@ import "sync"
 
 struct plugin_loader {
 	string                  plugin_search_path
-	string[]             loaded_plugin_paths
+	[]string             loaded_plugin_paths
 	int32                   max_plugins
 	int32                   current_plugins_loaded
 	loader_status           status
@@ -27,7 +27,7 @@ struct plugin_package {
 	string                  package_path
 	string                  checksum
 	plugin_metadata         metadata
-	string[]             files
+	[]string             files
 	int32                   file_count
 	map[string]string]      file_content_map
 	int64                   package_created_at
@@ -40,8 +40,8 @@ struct plugin_descriptor {
 	string                  plugin_name
 	string                  plugin_main_file
 	string                  plugin_version
-	string[]             required_modules
-	string[]             exported_functions
+	[]string             required_modules
+	[]string             exported_functions
 	bool                    requires_config
 	bool                    requires_init
 	bool                    auto_start
@@ -51,7 +51,7 @@ struct plugin_descriptor {
 
 struct load_validation_result {
 	bool                    is_valid
-	string[]             validation_errors
+	[]string             validation_errors
 	int32                   error_count
 	string                  validation_message
 	int64                   validation_time
@@ -60,7 +60,7 @@ struct load_validation_result {
 func create_plugin_loader(search_path string, max_plugins int32) plugin_loader {
 	return plugin_loader{
 		plugin_search_path:    search_path,
-		loaded_plugin_paths:   make(string[], 0),
+		loaded_plugin_paths:   make([]string, 0),
 		max_plugins:           max_plugins,
 		current_plugins_loaded: 0,
 		status:                LOADER_READY,
@@ -80,7 +80,7 @@ func create_plugin_package(id string, name string, path string) plugin_package {
 		package_path:        path,
 		checksum:            "",
 		metadata:            plugin_metadata{},
-		files:               make(string[], 0),
+		files:               make([]string, 0),
 		file_count:          0,
 		file_content_map:    make(map[string]string),
 		package_created_at:  time.Now().UnixNano(),
@@ -95,8 +95,8 @@ func create_plugin_descriptor(plugin_id string, name string) plugin_descriptor {
 		plugin_name:           name,
 		plugin_main_file:      "",
 		plugin_version:        "1.0.0",
-		required_modules:      make(string[], 0),
-		exported_functions:    make(string[], 0),
+		required_modules:      make([]string, 0),
+		exported_functions:    make([]string, 0),
 		requires_config:       false,
 		requires_init:         true,
 		auto_start:            false,
@@ -134,7 +134,7 @@ func (plugin_loader* l) unload_plugin(plugin_id string) bool {
 	}
 	delete(l.plugin_path_map, plugin_id)
 	l.current_plugins_loaded--
-	result_list := make(string[], 0)
+	result_list := make([]string, 0)
 	for p := range l.loaded_plugin_paths {
 		if p != path {
 			result_list = append(result_list, p)
@@ -147,7 +147,7 @@ func (plugin_loader* l) unload_plugin(plugin_id string) bool {
 func (plugin_loader* l) validate_plugin_package(pkg plugin_package) load_validation_result {
 	result := load_validation_result{
 		is_valid:            true,
-		validation_errors:   make(string[], 0),
+		validation_errors:   make([]string, 0),
 		error_count:         0,
 		validation_message:  "",
 		validation_time:     time.Now().UnixNano(),
@@ -178,7 +178,7 @@ func (plugin_loader* l) validate_plugin_package(pkg plugin_package) load_validat
 func (plugin_loader* l) get_loaded_plugins() []string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	result := make(string[], 0)
+	result := make([]string, 0)
 	for plugin_id, _ := range l.plugin_path_map {
 		result = append(result, plugin_id)
 	}

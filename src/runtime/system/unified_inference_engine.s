@@ -56,7 +56,7 @@ func new_unified_inference_engine(
 func submit_inference_request(
     unified_inference_engine engine,
     int request_id,
-    int[] input_ids,
+    []int input_ids,
     int max_tokens,
     float temperature,
     float top_p,

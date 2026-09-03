@@ -56,9 +56,9 @@ func new_distillation_state(distillation_config config) distillation_state {
     }
 }
 
-func distillation_softmax(float[] logits, float temperature) []float {
+func distillation_softmax([]float logits, float temperature) []float {
     int n = len(logits)
-    float[] probs = make([]float, n)
+    []float probs = make([]float, n)
     if n == 0 {
         return probs
     }
@@ -96,9 +96,9 @@ func distillation_softmax(float[] logits, float temperature) []float {
     probs
 }
 
-func distillation_kl_divergence(float[] student_logits, float[] teacher_logits, float temperature) float {
-    float[] student_probs = distillation_softmax(student_logits, temperature)
-    float[] teacher_probs = distillation_softmax(teacher_logits, temperature)
+func distillation_kl_divergence([]float student_logits, []float teacher_logits, float temperature) float {
+    []float student_probs = distillation_softmax(student_logits, temperature)
+    []float teacher_probs = distillation_softmax(teacher_logits, temperature)
     int n = len(student_probs)
     if len(teacher_probs) < n {
         n = len(teacher_probs)
@@ -116,11 +116,11 @@ func distillation_kl_divergence(float[] student_logits, float[] teacher_logits, 
     kl * temperature * temperature
 }
 
-func distillation_cross_entropy(float[] logits, int[] target_ids) float {
+func distillation_cross_entropy([]float logits, []int target_ids) float {
     if len(logits) == 0 || len(target_ids) == 0 {
         return 0.0
     }
-    float[] probs = distillation_softmax(logits, 1.0)
+    []float probs = distillation_softmax(logits, 1.0)
     float loss = 0.0
     int i = 0
     for i < len(target_ids) {
@@ -137,9 +137,9 @@ func distillation_cross_entropy(float[] logits, int[] target_ids) float {
 }
 
 func distillation_train_step(
-    float[] student_logits,
-    float[] teacher_logits,
-    int[] target_ids,
+    []float student_logits,
+    []float teacher_logits,
+    []int target_ids,
     distillation_config config
 ) distillation_metrics {
     float student_loss = distillation_cross_entropy(student_logits, target_ids)

@@ -88,8 +88,8 @@ func math_exp(float x) float {
     result
 }
 
-func apply_temperature(float[] logits, float temp, int vocab_size) []float {
-    float[] out = make(float[], vocab_size)
+func apply_temperature([]float logits, float temp, int vocab_size) []float {
+    []float out = make([]float, vocab_size)
     float inv = 1.0 / temp
     int i = 0
     for i < vocab_size {
@@ -99,8 +99,8 @@ func apply_temperature(float[] logits, float temp, int vocab_size) []float {
     out
 }
 
-func softmax(float[] logits, int size) []float {
-    float[] probs = make(float[], size)
+func softmax([]float logits, int size) []float {
+    []float probs = make([]float, size)
     if size == 0 {
         return probs
     }
@@ -130,7 +130,7 @@ func softmax(float[] logits, int size) []float {
     probs
 }
 
-func argmax(float[] arr, int size) int {
+func argmax([]float arr, int size) int {
     if size == 0 {
         return 0
     }
@@ -152,7 +152,7 @@ struct index_score {
     float score
 }
 
-func argsort_desc(float[] arr, int size) []index_score {
+func argsort_desc([]float arr, int size) []index_score {
     []index_score items = []index_score{}
     int i = 0
     for i < size {
@@ -176,12 +176,12 @@ func argsort_desc(float[] arr, int size) []index_score {
     items
 }
 
-func top_k_filter(float[] logits, int vocab_size, int k) []float {
+func top_k_filter([]float logits, int vocab_size, int k) []float {
     if k <= 0 || k >= vocab_size {
         return logits
     }
     []index_score sorted = argsort_desc(logits, vocab_size)
-    float[] filtered = make(float[], vocab_size)
+    []float filtered = make([]float, vocab_size)
     int i = 0
     for i < vocab_size {
         filtered[i] = -1.0e30
@@ -195,14 +195,14 @@ func top_k_filter(float[] logits, int vocab_size, int k) []float {
     filtered
 }
 
-func top_p_filter(float[] logits, int vocab_size, float p) []float {
+func top_p_filter([]float logits, int vocab_size, float p) []float {
     if p >= 1.0 {
         return logits
     }
     []index_score sorted = argsort_desc(logits, vocab_size)
-    float[] probs = softmax(logits, vocab_size)
+    []float probs = softmax(logits, vocab_size)
     float cum = 0.0
-    bool[] keep = make(bool[], vocab_size)
+    []bool keep = make([]bool, vocab_size)
     int i = 0
     for i < len(sorted) {
         cum = cum + probs[sorted[i].idx]
@@ -212,7 +212,7 @@ func top_p_filter(float[] logits, int vocab_size, float p) []float {
         }
         i = i + 1
     }
-    float[] filtered = make(float[], vocab_size)
+    []float filtered = make([]float, vocab_size)
     i = 0
     for i < vocab_size {
         if keep[i] {
@@ -225,7 +225,7 @@ func top_p_filter(float[] logits, int vocab_size, float p) []float {
     filtered
 }
 
-func sample_from_probs(float[] probs, int size, rng_state rng) (int, rng_state) {
+func sample_from_probs([]float probs, int size, rng_state rng) (int, rng_state) {
     (float r, rng_state r2) = next_float(rng)
     float cum = 0.0
     int i = 0
@@ -239,22 +239,22 @@ func sample_from_probs(float[] probs, int size, rng_state rng) (int, rng_state) 
     (size - 1, r2)
 }
 
-func sample(float[] logits, int vocab_size, sampling_params params, rng_state rng) (int, rng_state) {
+func sample([]float logits, int vocab_size, sampling_params params, rng_state rng) (int, rng_state) {
     if params.greedy || params.temperature == 0.0 {
         return (argmax(logits, vocab_size), rng)
     }
-    float[] scaled = apply_temperature(logits, params.temperature, vocab_size)
+    []float scaled = apply_temperature(logits, params.temperature, vocab_size)
     if params.top_k > 0 && params.top_k < vocab_size {
         scaled = top_k_filter(scaled, vocab_size, params.top_k)
     }
     if params.top_p < 1.0 {
         scaled = top_p_filter(scaled, vocab_size, params.top_p)
     }
-    float[] probs = softmax(scaled, vocab_size)
+    []float probs = softmax(scaled, vocab_size)
     (int tok, rng_state r) = sample_from_probs(probs, vocab_size, rng)
     (tok, r)
 }
 
-func greedy_sample(float[] logits, int vocab_size) int {
+func greedy_sample([]float logits, int vocab_size) int {
     argmax(logits, vocab_size)
 }

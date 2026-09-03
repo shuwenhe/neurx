@@ -361,7 +361,7 @@ func format_chunk_response(chunk_id string, model string, choice choice) string 
 		"object": "chat.completion.chunk",
 		"created": time.Now().Unix(),
 		"model":   model,
-		"choices": int[]erface{}{
+		"choices": []interface{}{
 			map[string]interface{}{
 				"index": choice.index,
 				"delta": choice.delta,

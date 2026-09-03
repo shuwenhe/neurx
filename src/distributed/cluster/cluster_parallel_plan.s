@@ -229,7 +229,7 @@ func cluster_parallel_plan_ready(cluster_parallel_plan plan) bool {
     plan.valid && len(plan.stages) > 0 && len(plan.ranks) > 0
 }
 
-func cluster_parallel_assign_to_nodes(cluster_parallel_plan plan, int[] node_ids, string[] node_names, string[] node_hosts) cluster_parallel_assignment_plan {
+func cluster_parallel_assign_to_nodes(cluster_parallel_plan plan, []int node_ids, []string node_names, []string node_hosts) cluster_parallel_assignment_plan {
     cluster_parallel_assignment_plan result
     if !cluster_parallel_plan_ready(plan) {
         result.assignments = []cluster_parallel_node_assignment{}
@@ -445,7 +445,7 @@ func cluster_parallel_build_execution_script(cluster_parallel_execution_batch ba
     result
 }
 
-func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[] failed_ranks) cluster_parallel_rank_filter_result {
+func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, []int failed_ranks) cluster_parallel_rank_filter_result {
     cluster_parallel_rank_filter_result meta
     if !plan.valid {
         meta.plan.commands = []cluster_parallel_launch_command{}

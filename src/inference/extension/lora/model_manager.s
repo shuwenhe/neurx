@@ -120,7 +120,7 @@ func (model_manager* mgr) get_adapter(string adapter_name) lora_model* {
 }
 
 func (model_manager* mgr) list_adapters() []string {
-    adapters := make(string[])
+    adapters := make([]string)
     for name := range mgr.adapters {
         adapters = append(adapters, name)
     }
@@ -128,7 +128,7 @@ func (model_manager* mgr) list_adapters() []string {
 }
 
 func (model_manager* mgr) list_loaded_adapters() []string {
-    loaded := make(string[])
+    loaded := make([]string)
     for name := range mgr.adapters {
         registry := mgr.adapters[name]
         if registry.model.is_loaded() {
@@ -150,7 +150,7 @@ func (model_manager* mgr) get_adapter_status(string adapter_name) adapter_load_s
     return load_status_failed
 }
 
-func (model_manager* mgr) merge_adapters(string[] adapter_names) lora_model* {
+func (model_manager* mgr) merge_adapters([]string adapter_names) lora_model* {
     merged := create_lora_model("merged", lora_config{
         rank: 16,
         lora_alpha: 32,

@@ -23,10 +23,10 @@ struct sse_session {
     int tokens_sent
     bool closed
 struct generation_callback_state {
-    string[] tokens
+    []string tokens
     int cursor
     bool done
-    string[] tokens
+    []string tokens
     int cursor
     bool done
 }
@@ -68,7 +68,7 @@ func new_sse_session(string request_id, string model, bool stream, int max_token
         closed: false,
     }
 
-func new_generation_callback_state(string[] tokens) generation_callback_state {
+func new_generation_callback_state([]string tokens) generation_callback_state {
     generation_callback_state{
         tokens: tokens,
         cursor: 0,
@@ -261,7 +261,7 @@ func route_request(http_request req, sse_server_config config) http_response {
         if model == "" {
             model = config.default_model
         }
-        string[] dummy_tokens = split_to_tokens(oreq.prompt)
+        []string dummy_tokens = split_to_tokens(oreq.prompt)
         generation_callback_state gen = new_generation_callback_state(dummy_tokens)
         sse_session session = new_sse_session(oreq.request_id, model, oreq.stream, oreq.max_tokens)
         if oreq.stream {
@@ -281,7 +281,7 @@ func route_request(http_request req, sse_server_config config) http_response {
     }
     error_response(404, "path not found: " + req.path, "invalid_request_error", "not_found")
 func split_to_tokens(string text) []string {
-    string[] toks = []string{}
+    []string toks = []string{}
     if len(text) == 0 {
         toks = append(toks, "")
         return toks

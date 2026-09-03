@@ -315,7 +315,7 @@ func agent_skill_registry_load_state_dict(agent_skill_registry_state state, agen
 }
 
 func agent_skill_registry_names(agent_skill_registry_state state) []string {
-    string[] names = make([]string, len(state.records))
+    []string names = make([]string, len(state.records))
     int i = 0
     for i < len(state.records) {
         names[i] = state.records[i].spec.name
@@ -346,7 +346,7 @@ func agent_skill_registry_promoted_names(agent_skill_registry_state state) []str
         }
         i = i + 1
     }
-    string[] names = make([]string, count)
+    []string names = make([]string, count)
     i = 0
     int out_i = 0
     for i < len(state.records) {

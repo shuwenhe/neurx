@@ -47,8 +47,8 @@ func new_gpu_linear_layer(gpu_gemm_engine* engine,
 }
 
 func gpu_linear_forward(gpu_linear_layer* layer,
-                       float[] input,
-                       float[] output) (bool, string) {
+                       []float input,
+                       []float output) (bool, string) {
     
     if len(input) % layer.in_features != 0 {
         return false, "input size mismatch"

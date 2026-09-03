@@ -22,15 +22,15 @@ func default_reinforce_pp_baseline_config() reinforce_pp_baseline_config {
 func compute_reinforce_pp_baseline_advantages(
     tensor token_level_rewards,
     tensor response_mask,
-    int[] index,
+    []int index,
     reinforce_pp_baseline_config config
 ) (tensor, tensor) {
     int batch_size = size(token_level_rewards, 0)
     int seq_len = size(token_level_rewards, 1)
     tensor scores = sum_dim(mul(token_level_rewards, response_mask), 1)
-    float[] id_scores = make(float[], 1024)
-    int[] id_counts = make(int[], 1024)
-    float[] id_means = make(float[], 1024)
+    []float id_scores = make([]float, 1024)
+    []int id_counts = make([]int, 1024)
+    []float id_means = make([]float, 1024)
     for int i = 0; i < batch_size; i = i + 1 {
         int idx = index[i]
         float score = item(select(scores, 0, i))
@@ -44,15 +44,15 @@ func compute_reinforce_pp_baseline_advantages(
             id_means[idx] = id_scores[idx] / float_from_int(id_counts[idx])
         }
     }
-    float[] centered_scores = make(float[], batch_size)
+    []float centered_scores = make([]float, batch_size)
     for int i = 0; i < batch_size; i = i + 1 {
         int idx = index[i]
         float score = item(select(scores, 0, i))
         centered_scores[i] = score - id_means[idx]
     }
-    tensor advantages = from_float_array(centered_scores, int[]{batch_size})
+    tensor advantages = from_float_array(centered_scores, []int{batch_size})
     advantages = unsqueeze(advantages, 1)
-    advantages = tile(advantages, int[]{1, seq_len})
+    advantages = tile(advantages, []int{1, seq_len})
     advantages = mul(advantages, response_mask)
     if config.use_whitening {
         advantages = masked_whiten(advantages, response_mask)

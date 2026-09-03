@@ -24,8 +24,8 @@ struct native_tokenizer_handle {
     bool initialized
 }
 external func __tokenizer_init(string vocab_file) int
-external func __tokenizer_encode(int handle, string text) int[]
-external func __tokenizer_decode(int handle, int[] tokens) string
+external func __tokenizer_encode(int handle, string text) []int
+external func __tokenizer_decode(int handle, []int tokens) string
 external func __tokenizer_free(int handle) void
 func new_tokenizer(string vocab_file) native_tokenizer_handle {
     handle_id := __tokenizer_init(vocab_file)
@@ -37,12 +37,12 @@ func new_tokenizer(string vocab_file) native_tokenizer_handle {
 
 func (native_tokenizer_handle* t) encode(string text) []int {
     if !t.initialized {
-        return int[]()
+        return []int()
     }
     __tokenizer_encode(t.handle_id, text)
 }
 
-func (native_tokenizer_handle* t) decode(int[] tokens) string {    if !t.initialized {
+func (native_tokenizer_handle* t) decode([]int tokens) string {    if !t.initialized {
         return ""
     }
     __tokenizer_decode(t.handle_id, tokens)
@@ -57,28 +57,28 @@ func (native_tokenizer_handle* t) cleanup() {
 
 struct compilation_strategy {
     string name
-    string[] pure_s_modules     
-    string[] native_modules      
-    string[] external_modules    
+    []string pure_s_modules     
+    []string native_modules      
+    []string external_modules    
     int estimated_compile_time_sec
 }
 
 func get_current_compilation_strategy() compilation_strategy {
     return compilation_strategy {
         name: "hybrid_modular",
-        pure_s_modules: string[]{
+        pure_s_modules: []string{
             "inference/api",           
             "inference/cache",         
             "inference/scheduler",     
             "serving/web_ui_server",   
             "inference/logits_processors",  
         },
-        native_modules: string[]{
+        native_modules: []string{
             "backend/platform/cuda/kernels_gemm",      
             "backend/platform/cuda/device_manager",    
             "runtime/native/tensor_runtime",           
         },
-        external_modules: string[]{
+        external_modules: []string{
             "runtime/model/bpe_tokenizer",    
             "runtime/model/hf_model",         
         },
@@ -112,7 +112,7 @@ struct evolution_roadmap {
     float pure_s_percentage_start
     float pure_s_percentage_end
     int months_duration
-    string[] migration_targets
+    []string migration_targets
 }
 
 func get_pure_s_evolution_roadmap() {

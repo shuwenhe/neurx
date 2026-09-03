@@ -22,7 +22,7 @@ struct cluster_heartbeat_scan_result {
     int total_ranks
     int live_ranks
     int failed_ranks
-    int[] failed_rank_ids
+    []int failed_rank_ids
     bool healthy
 }
 

@@ -10,7 +10,7 @@ struct physical_block {
 
 struct block_table {
     int seq_id
-    int[] physical_blocks
+    []int physical_blocks
     int num_tokens
     int num_blocks
 }
@@ -76,10 +76,10 @@ func allocate_blocks(
     paged_kv_cache_manager mgr,
     int seq_id,
     int num_tokens
-) (paged_kv_cache_manager, int[]) {
+) (paged_kv_cache_manager, []int) {
     int blocks_needed
     blocks_needed = (num_tokens + mgr.block_size - 1) / mgr.block_size
-    int[] allocated_block_ids = []
+    []int allocated_block_ids = []
     int i
     i = 0
     for i < len(mgr.blocks) {
@@ -122,8 +122,8 @@ func free_sequence_blocks(
 
 func copy_blocks(
     paged_kv_cache_manager mgr,
-    int[] src_blocks,
-    int[] dst_blocks
+    []int src_blocks,
+    []int dst_blocks
 ) paged_kv_cache_manager {
     min_len := len(src_blocks)
     if len(dst_blocks) < min_len {

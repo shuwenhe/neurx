@@ -21,8 +21,8 @@ package ops
 struct operation_metadata {
     string op_name
     operation_type op_type
-    string[] input_types
-    string[] output_types
+    []string input_types
+    []string output_types
     bool supports_fused_ops
     compute_capability[] supported_hardware
     int estimated_flops
@@ -40,7 +40,7 @@ struct operation_kernel {
 
 struct fused_operation {
     string fused_op_id
-    string[] component_ops
+    []string component_ops
     string fusion_name
     int estimated_flops_saved
     int estimated_memory_saved
@@ -171,7 +171,7 @@ func (operation_registry* reg) get_operation(string op_id) custom_operation {
     new_custom_operation("", "", operation_type_custom)
 }
 
-func (operation_registry* reg) register_fused_operation(string fused_id, string[] component_ops, string fusion_name) bool {
+func (operation_registry* reg) register_fused_operation(string fused_id, []string component_ops, string fusion_name) bool {
     if fused_id in reg.fused_ops {
         false
     }

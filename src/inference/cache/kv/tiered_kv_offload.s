@@ -29,11 +29,11 @@ struct tiered_kv_offload_config {
 
 struct tiered_kv_offload_state {
     tiered_kv_offload_config config
-    int[] block_hashes
-    int[] group_indices
-    int[] statuses
-    int[] pinned
-    int[] last_access
+    []int block_hashes
+    []int group_indices
+    []int statuses
+    []int pinned
+    []int last_access
     int logical_clock
     int used_blocks
     int stored_blocks
@@ -58,7 +58,7 @@ struct offload_lookup_result {
 }
 
 func offload_zero_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

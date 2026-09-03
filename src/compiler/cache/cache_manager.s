@@ -4,7 +4,7 @@ use neurx.compile.ir.{ir_graph, ir_node}
 struct cache_entry {
     string cache_key
     ir_graph optimized_graph
-    string[] backend_kernels
+    []string backend_kernels
     int entry_size_bytes
     int created_at_timestamp
     int last_accessed_at_timestamp
@@ -62,7 +62,7 @@ func cache_lookup(cache_manager mgr, ir_graph graph) cache_entry {
     }
 }
 
-func cache_store(cache_manager mgr, ir_graph graph, string[] kernels) cache_manager {
+func cache_store(cache_manager mgr, ir_graph graph, []string kernels) cache_manager {
     cache_entry entry = cache_entry {
         cache_key: generate_cache_key(graph),
         optimized_graph: graph,

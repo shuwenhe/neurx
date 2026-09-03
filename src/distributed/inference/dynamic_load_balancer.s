@@ -23,14 +23,14 @@ struct dynamic_load_balancer {
     int num_gpus
     gpu_resource[] resources
     gpu_score[] scores
-    float[] score_weights
-    int[] gpu_assignment_history
+    []float score_weights
+    []int gpu_assignment_history
     int64 last_rebalance_time_ns
     int rebalance_interval_ms
 }
 
 func new_dynamic_load_balancer(int num_gpus) dynamic_load_balancer {
-    weights := make(float[], 4)
+    weights := make([]float, 4)
     weights[0] = 0.4
     weights[1] = 0.3
     weights[2] = 0.2
@@ -251,7 +251,7 @@ func (dynamic_load_balancer* balancer) get_imbalance_ratio() float {
     return imbalance
 }
 
-func (dynamic_load_balancer* balancer) suggest_rebalance_actions() (int[], int[], int[]) {
+func (dynamic_load_balancer* balancer) suggest_rebalance_actions() ([]int, []int, []int) {
     overloaded := balancer.detect_overloaded_gpus(85.0)
     idle := balancer.detect_idle_gpus(20.0)
     migrate_from := make([]int, len(overloaded))
@@ -275,7 +275,7 @@ func (dynamic_load_balancer* balancer) get_all_scores() []gpu_score {
     return balancer.scores
 }
 
-func (dynamic_load_balancer* balancer) set_score_weights(float[] weights) {
+func (dynamic_load_balancer* balancer) set_score_weights([]float weights) {
     if len(weights) == 4 {
         balancer.score_weights = weights
     }

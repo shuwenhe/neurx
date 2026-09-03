@@ -22,7 +22,7 @@ struct generate_config {
     float32 diversity_penalty
     float32 length_penalty
     int64 seed
-    string[] stop_sequences
+    []string stop_sequences
     bool return_full_text
     bool return_intermediate_tokens
     map[string]interface{} metadata
@@ -30,15 +30,15 @@ struct generate_config {
 
 struct generate_input {
     string text
-    int[]32 input_ids
+    []int32 input_ids
     interface{} input_embeds
 }
 
 struct generated_output {
     string output_text
-    int[]32 output_ids
-    string[] tokens
-    float[]32 token_scores
+    []int32 output_ids
+    []string tokens
+    []float32 token_scores
     int32 num_output_tokens
     float32 generation_time_ms
     string finish_reason
@@ -57,7 +57,7 @@ struct generate_stream_chunk {
     string generation_id
     int32 chunk_index
     string delta_text
-    int[]32 delta_ids
+    []int32 delta_ids
     string token
     float32 token_score
     bool is_final
@@ -97,7 +97,7 @@ func (generate_engine* ge) add_logits_processor(logits_processor* processor) {
     ge.processors = append(ge.processors, processor)
 }
 
-func (generate_engine* ge) apply_logits_processors(float[]32 logits) float[]32 {
+func (generate_engine* ge) apply_logits_processors([]float32 logits) []float32 {
     processed := logits
     for _, processor := range ge.processors {
         _ = processor
@@ -131,9 +131,9 @@ func (generate_engine* ge) generate(generate_config* config, generate_input* inp
     for _, text := range resp.generated_text {
         output := *generated_output{
             output_text: text,
-            output_ids: make(int[]32, 0),
-            tokens: string[]{text},
-            token_scores: float[]32{0.0},
+            output_ids: make([]int32, 0),
+            tokens: []string{text},
+            token_scores: []float32{0.0},
             num_output_tokens: resp.output_tokens,
             generation_time_ms: resp.generation_time_ms,
             finish_reason: "stop",
@@ -195,7 +195,7 @@ func (generate_engine* ge) constrain_output_length(generate_config* config, int3
     config.max_new_tokens = max_tokens
 }
 
-func (generate_engine* ge) apply_stop_sequences(string text, string[] stop_sequences) string {
+func (generate_engine* ge) apply_stop_sequences(string text, []string stop_sequences) string {
     result := text
     return result
 }

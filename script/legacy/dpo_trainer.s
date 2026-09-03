@@ -32,8 +32,8 @@ struct dpometrics {
 
 struct trajectory_reward {
     trajectory_id       string
-    responses           string[]
-    rewards             float[]64
+    responses           []string
+    rewards             []float64
     avg_reward          float64
 }
 

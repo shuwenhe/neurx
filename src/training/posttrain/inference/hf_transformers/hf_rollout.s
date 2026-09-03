@@ -77,8 +77,8 @@ func new_hf_transformers_rollout(hf_transformers_config config) . hf_transformer
 }
 
 func (hf_transformers_rollout* rollout) generate_batch(
-    string[] prompts
-) . (string[], [][]f32) {
+    []string prompts
+) . ([]string, [][]f32) {
     start_time := get_time_ms()
     rollout.total_prompts += i64(len(prompts))
     input_ids, attention_mask  := rollout.tokenize_batch(prompts)
@@ -201,7 +201,7 @@ func (hf_transformers_rollout* rollout) sample_next_tokens(
 }
 
 func (hf_transformers_rollout* rollout) tokenize_batch(
-    string[] prompts
+    []string prompts
 ) . (tensor, tensor) {
     all_input_ids := []
     max_length := 0

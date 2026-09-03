@@ -160,18 +160,18 @@ func perf_generate_report(training_performance_state state) string {
 }
 
 func perf_get_metric_history(training_performance_state state, string metric_name) []float {
-    float[] history = make([]float, len(state.metrics))
+    []float history = make([]float, len(state.metrics))
     for i in range(len(state.metrics)) {
         performance_metric m = state.metrics[i]
         if m.metric_name == metric_name {
-            history += float[]{m.value}
+            history += []float{m.value}
         }
     }
     history
 }
 
 func perf_get_metric_stats(training_performance_state state, string metric_name) (float, float, float) {
-    float[] values = perf_get_metric_history(state, metric_name)
+    []float values = perf_get_metric_history(state, metric_name)
     if len(values) == 0 {
         return 0.0, 0.0, 0.0
     }

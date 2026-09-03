@@ -20,21 +20,21 @@ struct fact_verification_result {
 
 func extract_medical_facts(string response) []medical_fact {
     []medical_fact facts = []
-    string[] dosage_patterns = [
+    []string dosage_patterns = [
         "给medicine.*mg",
         "剂量.*单position",
         "use量.*",
         "dose.*mg",
         "每次.*毫克"
     ]
-    string[] contra_patterns = [
+    []string contra_patterns = [
         "禁忌.*",
         "禁use.*",
         "Not能use于.*",
         "contraindicated",
         "avoid.*"
     ]
-    string[] mechanism_patterns = [
+    []string mechanism_patterns = [
         "Functionmechanism",
         "mechanismis",
         "through.*cause",
@@ -92,7 +92,7 @@ func cds_fact_consistency_reward(
     string prompt,
     string response,
     string mcp_context,
-    string[] tool_results
+    []string tool_results
 ) float {
     []medical_fact facts = extract_medical_facts(response)
     fact_verification_result verification = verify_facts_against_mcp(facts, mcp_context)
@@ -125,7 +125,7 @@ struct clarification_analysis {
 }
 
 func detect_underspecified_medical_question(string prompt) bool {
-    string[] missing_indicators = [
+    []string missing_indicators = [
         "Patient",
         "year龄",
         "propertycategory",
@@ -146,7 +146,7 @@ func detect_underspecified_medical_question(string prompt) bool {
 
 func count_clarification_questions(string response) int {
     int count = 0
-    string[] clarification_patterns = [
+    []string clarification_patterns = [
         "请问",
         "能no",
         "need知道",
@@ -184,7 +184,7 @@ func cds_clarification_bonus_reward(
 struct reward_model_output {
     float score
     float confidence
-    float[] logits
+    []float logits
 }
 
 func cds_external_reward_model(
@@ -206,7 +206,7 @@ func compute_cds_reward(
     string prompt,
     string response,
     string mcp_context,
-    string[] tool_results,
+    []string tool_results,
     int approx_token_count
 ) cds_reward_breakdown {
     float r_fact = cds_fact_consistency_reward(prompt, response, mcp_context, tool_results)

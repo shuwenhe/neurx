@@ -312,7 +312,7 @@ func (c openai_api_client*) text_complete(
 
 func (c openai_api_client*) embed_text(
 	model string,
-	input string[],
+	input []string,
 ) (embedding_response, error) {
 	req := embedding_request{
 		model: model,

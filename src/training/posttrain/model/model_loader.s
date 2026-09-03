@@ -3,9 +3,9 @@ use neurx.runtime.io.{runtime_file_exists, runtime_read_binary_file}
 
 struct model_weights {
     string name
-    float[] embedding_weight
-    float[] lm_head_weight
-    float[][] layer_weights
+    []float embedding_weight
+    []float lm_head_weight
+    []float[] layer_weights
     int num_layers
     int hidden_size
     int vocab_size
@@ -13,17 +13,17 @@ struct model_weights {
 }
 
 struct layer_weights {
-    float[] q_weight
-    float[] k_weight
-    float[] v_weight
-    float[] o_weight
-    float[] gate_weight
-    float[] up_weight
-    float[] down_weight
-    float[] norm1_weight
-    float[] norm1_bias
-    float[] norm2_weight
-    float[] norm2_bias
+    []float q_weight
+    []float k_weight
+    []float v_weight
+    []float o_weight
+    []float gate_weight
+    []float up_weight
+    []float down_weight
+    []float norm1_weight
+    []float norm1_bias
+    []float norm2_weight
+    []float norm2_bias
     int hidden_size
     int num_heads
     int intermediate_size
@@ -34,12 +34,12 @@ func load_safetensors_metadata(string path) []string {
         println("Error: safetensors file not found: " + path)
         return []string{}
     }
-    string[] metadata = []string{}
+    []string metadata = []string{}
     return metadata
 }
 
 func load_embedding_from_safetensors(string model_path, int vocab_size, int hidden_size) []float {
-    float[] embedding = fill_model_tensor(vocab_size * hidden_size, 0.0)
+    []float embedding = fill_model_tensor(vocab_size * hidden_size, 0.0)
     string embedding_file = model_path + "/embedding.safetensors"
     if runtime_file_exists(embedding_file) {
         []byte data = runtime_read_binary_file(embedding_file)
@@ -84,7 +84,7 @@ func load_model_from_safetensors(string model_path, int num_layers, int hidden_s
     weights.intermediate_size = intermediate_size
     weights.embedding_weight = load_embedding_from_safetensors(model_path, vocab_size, hidden_size)
     weights.lm_head_weight = fill_model_tensor(vocab_size * hidden_size, 0.01)
-    weights.layer_weights = float[][]{}
+    weights.layer_weights = []float[]{}
     int layer_idx = 0
     for layer_idx < num_layers {
         layer_weights layer_w = load_layer_weights_from_safetensors(model_path, layer_idx, hidden_size, intermediate_size)
@@ -95,7 +95,7 @@ func load_model_from_safetensors(string model_path, int num_layers, int hidden_s
 }
 
 func fill_model_tensor(int size, float init_val) []float {
-    float[] tensor = make([]float, size)
+    []float tensor = make([]float, size)
     int i = 0
     for i < size {
         tensor = append(tensor, init_val)
@@ -113,7 +113,7 @@ func bytes_to_f32([]byte data, int offset) float {
 }
 
 func serialize_layer_weights(layer_weights w) []float {
-    float[] serialized = []float{}
+    []float serialized = []float{}
     int i = 0
     for i < len(w.q_weight) {
         serialized = append(serialized, w.q_weight[i])
@@ -137,7 +137,7 @@ func serialize_layer_weights(layer_weights w) []float {
     return serialized
 }
 
-func get_layer_weights(float[][] serialized_weights, int layer_idx, int hidden_size) layer_weights {
+func get_layer_weights([]float[] serialized_weights, int layer_idx, int hidden_size) layer_weights {
     layer_weights w
     w.hidden_size = hidden_size
     w.q_weight = fill_model_tensor(hidden_size * hidden_size, 0.0)

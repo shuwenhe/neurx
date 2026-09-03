@@ -10,7 +10,7 @@ func tool_choice_named() int { 4 }
 struct tool_definition {
     string name
     string description
-    string[] required_arguments
+    []string required_arguments
 }
 
 struct tool_choice {
@@ -29,7 +29,7 @@ struct parsed_tool_call {
 }
 
 struct tool_parser_registry {
-    string[] parser_names
+    []string parser_names
     []tool_definition tools
 }
 

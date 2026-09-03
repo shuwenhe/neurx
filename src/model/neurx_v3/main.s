@@ -46,18 +46,18 @@ func new_neurx_v3_config() neurx_v3_config {
 
 struct neurx_transformer_block {
     mla.mla_weights mla_weights
-    float[] mla_norm
+    []float mla_norm
     moe.neurx_moe_weights moe_weights
-    float[] moe_norm
+    []float moe_norm
 }
 
 struct neurx_v3_model {
     neurx_v3_config config
-    float[] token_embedding
-    float[] position_embedding
+    []float token_embedding
+    []float position_embedding
     []neurx_transformer_block blocks
-    float[] final_norm
-    float[] lm_head
+    []float final_norm
+    []float lm_head
     mtp.mtp_weights mtp_weights
 }
 
@@ -121,7 +121,7 @@ func demonstrate_moe() {
     println("  Routed experts: " + int_to_string(len(w.routed_w1)))
     println("")
     int n_tokens = 4
-    float[] h = moe.zeros(n_tokens * cfg.hidden_dim)
+    []float h = moe.zeros(n_tokens * cfg.hidden_dim)
     int i = 0
     for i < n_tokens * cfg.hidden_dim {
         h[i] = 0.1
@@ -160,13 +160,13 @@ func demonstrate_mtp() {
     println("MTP weights initialized, modules: " + int_to_string(len(w.modules)))
     int seq_len = 4
     int d = cfg.hidden_dim
-    float[] main_hidden = mla.zeros(seq_len * d)
+    []float main_hidden = mla.zeros(seq_len * d)
     int i = 0
     for i < seq_len * d {
         main_hidden[i] = 0.1
         i = i + 1
     }
-    int[] targets = make([]int, 4)
+    []int targets = make([]int, 4)
     targets[0] = 42
     targets[1] = 100
     targets[2] = 5000
@@ -203,13 +203,13 @@ func demonstrate_grpo() {
     int i = 0
     for i < G {
         float quality = (i as float + 1.0) / G as float * 2.0
-        float[] log_probs = make([]float, 10)
+        []float log_probs = make([]float, 10)
         int j = 0
         for j < 10 {
             log_probs[j] = -0.1 * quality + (j as float - 5.0) * 0.05
             j = j + 1
         }
-        int[] token_ids = make([]int, 10)
+        []int token_ids = make([]int, 10)
         j = 0
         for j < 10 {
             token_ids[j] = j * 10 + i
@@ -225,7 +225,7 @@ func demonstrate_grpo() {
         }
         i = i + 1
     }
-    (float[] advantages, float mean_r, float std_r) = neurx_r1_grpo.compute_group_advantages(outputs, G)
+    ([]float advantages, float mean_r, float std_r) = neurx_r1_grpo.compute_group_advantages(outputs, G)
     println("Group rewards & advantages (G=" + int_to_string(G) + "):")
     println("  mean = " + float_to_string(mean_r) + ", std = " + float_to_string(std_r))
     println("")

@@ -32,7 +32,7 @@ struct sampling_params {
 
 struct request_output {
     string request_id
-    string[] output_texts
+    []string output_texts
     int32[] output_token_ids
     int32 finish_reason
     bool is_finished
@@ -52,7 +52,7 @@ struct v1_request {
     float32 timeout_seconds
     bool stream
     bool echo_prompt
-    string[] output_texts
+    []string output_texts
     int32[] output_token_ids
     int32 num_completed_tokens
     int32 num_total_tokens
@@ -86,7 +86,7 @@ func create_v1_request(string request_id, string prompt) v1_request* {
         timeout_seconds: 60.0,
         stream: false,
         echo_prompt: false,
-        output_texts: make(string[]),
+        output_texts: make([]string),
         output_token_ids: make(int32[]),
         num_completed_tokens: 0,
         num_total_tokens: 0,

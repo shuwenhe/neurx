@@ -5,7 +5,7 @@ struct plugin_registry {
 	map[string]plugin_interface]  registered_plugins
 	int32                         plugin_count
 	map[string]int32]             plugin_priority_map
-	string[]                   plugin_load_order
+	[]string                   plugin_load_order
 	int32                         max_registry_size
 	int32                         total_plugins_registered
 	int32                         total_plugins_unregistered
@@ -29,15 +29,15 @@ struct plugin_query {
 	string                  query_id
 	plugin_type             filter_type
 	plugin_state            filter_state
-	string[]             required_capabilities
-	string[]             exclude_plugins
+	[]string             required_capabilities
+	[]string             exclude_plugins
 	int32                   priority_min
 	int32                   priority_max
 	bool                    active_only
 }
 
 struct plugin_query_result {
-	string[]             matched_plugin_ids
+	[]string             matched_plugin_ids
 	int32                   match_count
 	int64                   query_time
 	string                  query_id
@@ -48,7 +48,7 @@ func create_plugin_registry(max_size int32) plugin_registry {
 		registered_plugins:       make(map[string]plugin_interface),
 		plugin_count:             0,
 		plugin_priority_map:      make(map[string]int32),
-		plugin_load_order:        make(string[], 0),
+		plugin_load_order:        make([]string, 0),
 		max_registry_size:        max_size,
 		total_plugins_registered: 0,
 		total_plugins_unregistered: 0,
@@ -99,7 +99,7 @@ func (plugin_registry* r) unregister_plugin(plugin_id string) bool {
 	r.plugin_count--
 	r.total_plugins_unregistered++
 	r.last_modification_time = time.Now().UnixNano()
-	new_load_order := make(string[], 0)
+	new_load_order := make([]string, 0)
 	for id := range r.plugin_load_order {
 		if id != plugin_id {
 			new_load_order = append(new_load_order, id)
@@ -133,7 +133,7 @@ func (plugin_registry* r) query_plugins(query plugin_query) plugin_query_result 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	result := plugin_query_result{
-		matched_plugin_ids: make(string[], 0),
+		matched_plugin_ids: make([]string, 0),
 		match_count:        0,
 		query_time:         time.Now().UnixNano(),
 		query_id:           query.query_id,
@@ -181,7 +181,7 @@ func (plugin_registry* r) get_all_plugins() []plugin_interface {
 func (plugin_registry* r) get_active_plugins() []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	result := make(string[], 0)
+	result := make([]string, 0)
 	for plugin_id, plugin := range r.registered_plugins {
 		if plugin.current_state == PLUGIN_ACTIVE {
 			result = append(result, plugin_id)
@@ -199,7 +199,7 @@ func (plugin_registry* r) get_plugin_count() int32 {
 func (plugin_registry* r) get_plugin_by_type(ptype plugin_type) []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	result := make(string[], 0)
+	result := make([]string, 0)
 	for plugin_id, plugin := range r.registered_plugins {
 		if plugin.metadata.plugin_category == ptype {
 			result = append(result, plugin_id)
@@ -211,7 +211,7 @@ func (plugin_registry* r) get_plugin_by_type(ptype plugin_type) []string {
 func (plugin_registry* r) sort_by_priority() []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	sorted := make(string[], 0)
+	sorted := make([]string, 0)
 	for _, plugin_id := range r.plugin_load_order {
 		sorted = append(sorted, plugin_id)
 	}
@@ -244,7 +244,7 @@ func (plugin_registry* r) get_plugin_dependencies(plugin_id string) []string {
 	defer r.mu.Unlock()
 	plugin, exists := r.registered_plugins[plugin_id]
 	if !exists {
-		return make(string[], 0)
+		return make([]string, 0)
 	}
 	return plugin.metadata.dependencies
 }
@@ -272,8 +272,8 @@ func create_plugin_query(query_id string) plugin_query {
 		query_id:                  query_id,
 		filter_type:               TYPE_CUSTOM,
 		filter_state:              PLUGIN_UNINITIALIZED,
-		required_capabilities:     make(string[], 0),
-		exclude_plugins:           make(string[], 0),
+		required_capabilities:     make([]string, 0),
+		exclude_plugins:           make([]string, 0),
 		priority_min:              0,
 		priority_max:              1000,
 		active_only:               false,

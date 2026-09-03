@@ -36,7 +36,7 @@ struct storage_state {
     io_ring  ring
     int      total_capacity_mb
     int      used_mb
-    string[] mount_points
+    []string mount_points
     bool     writeback_enabled
     int      writeback_dirty_mb
 }

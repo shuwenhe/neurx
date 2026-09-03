@@ -229,7 +229,7 @@ func agent_workspace_read_file(string path, int start_line, int line_count, int 
         return agent_workspace_result_fail(agent_workspace_observation("read_file", "failed", "reason=missing;path=" + resolved), resolved)
     }
     string content = runtime_read_text_file(resolved)
-    string[] lines = agent_workspace_split_lines(content)
+    []string lines = agent_workspace_split_lines(content)
     int start = start_line
     if start <= 0 {
         start = 1
@@ -465,7 +465,7 @@ func agent_workspace_split_lines(string text) []string {
     if count < 1 {
         count = 1
     }
-    string[] result = make([]string, count + 1)
+    []string result = make([]string, count + 1)
     string line = ""
     int i = 0
     for i < len(text) {
@@ -498,14 +498,14 @@ func agent_workspace_normalize_line(string line) string {
 }
 
 func agent_workspace_replace_fuzzy(string content, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
-    string[] cl = agent_workspace_split_lines(content)
-    string[] ol = agent_workspace_split_lines(old_text)
+    []string cl = agent_workspace_split_lines(content)
+    []string ol = agent_workspace_split_lines(old_text)
     int nc = len(cl)
     int no = len(ol)
     if no == 0 {
         return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "no_progress", "reason=empty_old_text"), "")
     }
-    string[] norm_ol = make([]string, no + 1)
+    []string norm_ol = make([]string, no + 1)
     int oi = 0
     for oi < no {
         norm_ol = append(norm_ol, agent_workspace_normalize_line(ol[oi]))

@@ -5,9 +5,9 @@ func blas_provider_available(string provider) bool {
 }
 
 func blas_sgemm(
-    float[] A, int M, int K,
-    float[] B, int K2, int N,
-    float[] C, int M2, int N2,
+    []float A, int M, int K,
+    []float B, int K2, int N,
+    []float C, int M2, int N2,
     float alpha,
     float beta
 ) []float {
@@ -15,13 +15,13 @@ func blas_sgemm(
 }
 
 func blas_sgemm_native_s(
-    float[] A, int M, int K,
-    float[] B, int K2, int N,
-    float[] C, int M2, int N2,
+    []float A, int M, int K,
+    []float B, int K2, int N,
+    []float C, int M2, int N2,
     float alpha, float beta
 ) []float {
     if K != K2 || M != M2 || N != N2 { return C }
-    float[] out = make([]float, M * N)
+    []float out = make([]float, M * N)
     int i = 0
     for i < M * N {
         out[i] = C[i] * beta
@@ -47,8 +47,8 @@ func blas_sgemm_native_s(
     out
 }
 
-func blas_sgemv(float[] A, int M, int N, float[] x, float alpha, float beta) []float {
-    float[] y = make([]float, M)
+func blas_sgemv([]float A, int M, int N, []float x, float alpha, float beta) []float {
+    []float y = make([]float, M)
     int i = 0
     for i < M {
         float sum = 0.0
@@ -63,7 +63,7 @@ func blas_sgemv(float[] A, int M, int N, float[] x, float alpha, float beta) []f
     y
 }
 
-func blas_sdot(float[] x, float[] y) float {
+func blas_sdot([]float x, []float y) float {
     float result = 0.0
     int i = 0
     for i < len(x) {
@@ -73,8 +73,8 @@ func blas_sdot(float[] x, float[] y) float {
     result
 }
 
-func blas_saxpy(float[] x, float[] y, float alpha) []float {
-    float[] out = make([]float, len(y))
+func blas_saxpy([]float x, []float y, float alpha) []float {
+    []float out = make([]float, len(y))
     int i = 0
     for i < len(y) {
         out[i] = alpha * x[i] + y[i]

@@ -10,29 +10,29 @@ struct gpu_input_batch_config {
 
 struct gpu_input_batch_state {
     gpu_input_batch_config config
-    int[] request_ids
-    int[] sequence_lengths
-    int[] computed_tokens
-    int[] scheduled_tokens
-    int[] block_counts
-    int[] block_ids
-    int[] active
+    []int request_ids
+    []int sequence_lengths
+    []int computed_tokens
+    []int scheduled_tokens
+    []int block_counts
+    []int block_ids
+    []int active
     int request_count
 }
 
 struct gpu_input_batch_view {
     gpu_input_batch_state state
-    int[] batch_request_ids
-    int[] query_start_locations
-    int[] positions
-    int[] slot_mappings
+    []int batch_request_ids
+    []int query_start_locations
+    []int positions
+    []int slot_mappings
     int request_count
     int token_count
     bool valid
 }
 
 func input_batch_int_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
@@ -92,10 +92,10 @@ func input_batch_block_id(gpu_input_batch_state state, int slot, int logical_blo
 }
 
 func input_batch_build(gpu_input_batch_state state) gpu_input_batch_view {
-    int[] batch_ids = input_batch_int_array(state.config.maximum_requests)
-    int[] query_starts = input_batch_int_array(state.config.maximum_requests + 1)
-    int[] positions = input_batch_int_array(state.config.maximum_tokens)
-    int[] mappings = input_batch_int_array(state.config.maximum_tokens)
+    []int batch_ids = input_batch_int_array(state.config.maximum_requests)
+    []int query_starts = input_batch_int_array(state.config.maximum_requests + 1)
+    []int positions = input_batch_int_array(state.config.maximum_tokens)
+    []int mappings = input_batch_int_array(state.config.maximum_tokens)
     int request_index = 0
     int token_index = 0
     bool valid = true

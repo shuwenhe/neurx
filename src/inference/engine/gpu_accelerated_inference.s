@@ -44,8 +44,8 @@ func new_gpu_accelerated_engine(string model_path, int device_id) (gpu_accelerat
 }
 
 func gpu_accelerated_forward(gpu_accelerated_engine* engine,
-                            float[] hidden_state,
-                            int layer_idx) (float[], bool, string) {
+                            []float hidden_state,
+                            int layer_idx) ([]float, bool, string) {
     
     if len(hidden_state) == 0 {
         return make([]float, 0), false, "empty hidden state"
@@ -62,9 +62,9 @@ func gpu_accelerated_forward(gpu_accelerated_engine* engine,
 }
 
 func gpu_linear_forward(gpu_accelerated_engine* engine,
-                       float[] input,
+                       []float input,
                        string weight_name,
-                       float[] bias) float[] {
+                       []float bias) []float {
     
     if len(input) == 0 {
         return make([]float, 0)
@@ -91,7 +91,7 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
         return "", 0, 0, false, "model not loaded"
     }
     
-    int[] prompt_tokens = tokenize_prompt(prompt)
+    []int prompt_tokens = tokenize_prompt(prompt)
     int prompt_len = len(prompt_tokens)
     
     if prompt_len <= 0 {
@@ -99,7 +99,7 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
         return result_text, 0, 0, true, ""
     }
     
-    float[] hidden = load_embedding_row(
+    []float hidden = load_embedding_row(
         engine.cpu_engine.model,
         "model.embed_tokens.weight",
         prompt_tokens[0],
@@ -114,7 +114,7 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
     
     int idx = 1
     for idx < prompt_len {
-        float[] embed = load_embedding_row(
+        []float embed = load_embedding_row(
             engine.cpu_engine.model,
             "model.embed_tokens.weight",
             prompt_tokens[idx],
@@ -139,7 +139,7 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
     
     for gen_count < max_tokens {
 
-        float[] logits = project_logits(&engine.cpu_engine, hidden)
+        []float logits = project_logits(&engine.cpu_engine, hidden)
         
         if len(logits) <= 0 {
             break
@@ -167,7 +167,7 @@ func gpu_accelerated_generate(gpu_accelerated_engine* engine,
             response = response + word
         }
         
-        float[] next_embed = load_embedding_row(
+        []float next_embed = load_embedding_row(
             engine.cpu_engine.model,
             "model.embed_tokens.weight",
             next_token,
@@ -213,13 +213,13 @@ func gpu_benchmark(gpu_accelerated_engine* engine) (float, bool, string) {
     return tokens_per_sec, true, ""
 }
 
-extern func tokenize_prompt(string prompt) int[]
+extern func tokenize_prompt(string prompt) []int
 extern func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) []float
 extern func safe_hidden_size(real_text_engine_state* state) int
 extern func safe_vocab_size(real_text_engine_state* state) int
 extern func safe_eos_token_id(real_text_engine_state* state) int
-extern func project_logits(real_text_engine_state* state, float[] hidden) []float
-extern func sample_token_from_logits(float[] logits, int[] history, int seed) int
+extern func project_logits(real_text_engine_state* state, []float hidden) []float
+extern func sample_token_from_logits([]float logits, []int history, int seed) int
 extern func token_to_word(int token_id) string
 extern func prompt_fallback(string prompt, string reason) string
 extern func get_current_time_ms() int64

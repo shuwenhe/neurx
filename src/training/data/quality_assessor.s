@@ -18,7 +18,7 @@ struct quality_metrics {
     language_detected: map<string, i64>
     length_distribution: map<string, i64>
     quality_distribution: map<string, i64>
-    issues: string[]
+    issues: []string
 }
 
 struct quality_assessor {

@@ -31,7 +31,7 @@ struct api_request {
 
 struct api_chat_request {
 	string                      model
-	string[]                messages
+	[]string                messages
 	float32                     temperature
 	int32                       max_tokens
 	string                      trace_id
@@ -53,7 +53,7 @@ struct api_response_adapter {
 	string                      response_id
 	int32                       status_code
 	string                      status_message
-	string[]                 content_chunks
+	[]string                 content_chunks
 	int32                       chunk_count
 	int32                       prompt_tokens
 	int32                       completion_tokens
@@ -92,7 +92,7 @@ func (api_streaming_adapter* a) handle_streaming_chat_request(request api_chat_r
 			response_id:       "",
 			status_code:       429,
 			status_message:    "too_many_requests",
-			content_chunks:    make(string[], 0),
+			content_chunks:    make([]string, 0),
 			chunk_count:       0,
 			prompt_tokens:     0,
 			completion_tokens: 0,
@@ -123,7 +123,7 @@ func (api_streaming_adapter* a) handle_streaming_chat_request(request api_chat_r
 		response_id:       request.request_id,
 		status_code:       200,
 		status_message:    "ok",
-		content_chunks:    make(string[], 0),
+		content_chunks:    make([]string, 0),
 		chunk_count:       0,
 		prompt_tokens:     int32(len(request.messages)) * 10,
 		completion_tokens: 0,
@@ -159,7 +159,7 @@ func (api_streaming_adapter* a) handle_streaming_completion_request(request api_
 		response_id:       request.request_id,
 		status_code:       200,
 		status_message:    "ok",
-		content_chunks:    make(string[], 0),
+		content_chunks:    make([]string, 0),
 		prompt_tokens:     int32(len(request.prompt)) / 4,
 		completion_tokens: 0,
 		created_timestamp: time.Now().UnixNano(),
@@ -209,7 +209,7 @@ func (api_streaming_adapter* a) finalize_completion(request_id string, finish_re
 		response_id:       request_id,
 		status_code:       200,
 		status_message:    "ok",
-		content_chunks:    make(string[], 0),
+		content_chunks:    make([]string, 0),
 		prompt_tokens:     api_req.prompt_tokens,
 		completion_tokens: api_req.completion_tokens,
 		created_timestamp: time.Now().UnixNano(),

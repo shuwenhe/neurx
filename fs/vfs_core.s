@@ -12,7 +12,7 @@ struct inode {
     long accessed_time
     long modified_time
     int reference_count
-    int[] block_pointers
+    []int block_pointers
 }
 
 struct dentry {
@@ -61,7 +61,7 @@ func create_inode(int inode_num, int mode) *inode {
     inode.accessed_time = get_current_time()
     inode.modified_time = get_current_time()
     inode.reference_count = 1
-    inode.block_pointers = int[]()
+    inode.block_pointers = []int()
     inode
 }
 

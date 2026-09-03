@@ -260,7 +260,7 @@ func (dynamic_model_loader* dml) load_weights_eager(model_executor* executor) er
             weight_name := "layers." + string(i) + ".weights." + string(j)
             spec := *model_weight_spec{
                 name: weight_name,
-                shape: int[]32{config.hidden_size, config.hidden_size},
+                shape: []int32{config.hidden_size, config.hidden_size},
                 dtype: executor.load_config.dtype,
                 offset: 0,
                 size_bytes: int64(config.hidden_size * config.hidden_size * 2),

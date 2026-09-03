@@ -94,7 +94,7 @@ func generate_embedding_golden() {
     string output_dir = "test/golden/embedding"
     int vocab_size = 10
     int hidden_dim = 8
-    float[] embedding_weight = []
+    []float embedding_weight = []
     int total = vocab_size * hidden_dim
     int i = 0
     for i < total {
@@ -109,8 +109,8 @@ func generate_embedding_golden() {
     println("\n✅ Embedding golden tests generated in " + output_dir + "/\n")
 }
 
-func process_embedding_test(float[] embedding_weight, int[] input_ids, int test_id, int hidden_dim, string output_dir) {
-    float[] output = []
+func process_embedding_test([]float embedding_weight, []int input_ids, int test_id, int hidden_dim, string output_dir) {
+    []float output = []
     int j = 0
     for j < len(input_ids) {
         int token_id = input_ids[j]
@@ -156,11 +156,11 @@ func save_float_to_file(float value, string path) {
     println("✅ Saved: " + path + " (value=" + float_to_string(value) + ")")
 }
 
-func save_float_array_to_file(float[] data, string path) {
+func save_float_array_to_file([]float data, string path) {
     println("✅ Saved: " + path + " (len=" + int_to_string(len(data)) + ")")
 }
 
-func save_int_array_to_file(int[] data, string path) {
+func save_int_array_to_file([]int data, string path) {
     println("✅ Saved: " + path + " (len=" + int_to_string(len(data)) + ")")
 }
 

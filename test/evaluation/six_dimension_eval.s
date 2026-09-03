@@ -5,7 +5,7 @@ struct medical_question {
     string id
     string question
     string question_type
-    string[] answer_options
+    []string answer_options
     string correct_answer
     string domain
     string difficulty
@@ -17,7 +17,7 @@ struct evaluation_dimension {
     int score
     float normalized_score
     string justification
-    string[] evidence_snippets
+    []string evidence_snippets
 }
 
 struct medical_response_evaluation {
@@ -41,7 +41,7 @@ struct grounding_analysis {
 func evaluate_grounding(
     string response,
     string reference_answer,
-    string[] evidence_sources
+    []string evidence_sources
 ) grounding_analysis {
     grounding_analysis result = grounding_analysis{
         total_claims: 0,
@@ -76,7 +76,7 @@ struct coverage_analysis {
 
 func evaluate_coverage(
     string response,
-    string[] expected_concepts
+    []string expected_concepts
 ) coverage_analysis {
     coverage_analysis result = coverage_analysis{
         expected_concepts: len(expected_concepts),
@@ -119,7 +119,7 @@ func evaluate_depth(string response) depth_analysis {
         multi_step_present: false,
         depth_score: 0
     }
-    string[] reasoning_markers = [
+    []string reasoning_markers = [
         "because为",
         "so",
         "cause",
@@ -170,7 +170,7 @@ func evaluate_tool_use(string response) tool_use_analysis {
         tool_use_score: 0
     }
     result.citations_count = count_pattern_occurrences(response, "\\[\\d+\\]")
-    string[] evidence_patterns = [
+    []string evidence_patterns = [
         "based on",
         "research",
         "display",
@@ -215,7 +215,7 @@ func evaluate_clarity(string response) clarity_analysis {
         readability_score: 2,
         clarity_score: 0
     }
-    string[] structure_markers = [
+    []string structure_markers = [
         "**",
         "##",
         "- ",
@@ -260,7 +260,7 @@ func evaluate_safety(string response) safety_analysis {
         avoids_overconfidence: false,
         safety_score: 0
     }
-    string[] disclaimer_phrases = [
+    []string disclaimer_phrases = [
         "咨询Doctor",
         "Not构成医疗Recommendation",
         "仅供Reference",
@@ -272,7 +272,7 @@ func evaluate_safety(string response) safety_analysis {
             break
         }
     }
-    string[] uncertainty_phrases = [
+    []string uncertainty_phrases = [
         "possible",
         "Notsureset",
         "needenteronestep",
@@ -285,7 +285,7 @@ func evaluate_safety(string response) safety_analysis {
             break
         }
     }
-    string[] overconfident_phrases = [
+    []string overconfident_phrases = [
         "oneset",
         "肯set",
         "100%",

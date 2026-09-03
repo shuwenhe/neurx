@@ -116,14 +116,14 @@ func clean_raw_data(cleaning_config cfg) cleaning_stats {
     io_println("🔄 startdatacleanpipeline...\n")
     io_mkdir_recursive(cfg.cleaned_dir)
     cleaning_stats total_stats = new_cleaning_stats()
-    string[] seen_texts = make([]string, 10000)
+    []string seen_texts = make([]string, 10000)
     int seen_count = 0
-    string[] raw_files = io_list_files(cfg.raw_dir, "*.jsonl")
+    []string raw_files = io_list_files(cfg.raw_dir, "*.jsonl")
     io_println("📖 startEnglish text " + string(len(raw_files)) + " English textfile...\n")
     for i := 0; i < len(raw_files); i = i + 1 {
         string raw_file = raw_files[i]
         io_println("📄 English text: " + raw_file)
-        string[] lines = io_read_lines(raw_file)
+        []string lines = io_read_lines(raw_file)
         for j := 0; j < len(lines); j = j + 1 {
             string line = lines[j]
             cleaning_result cr = clean_record(line)
@@ -169,7 +169,7 @@ func clean_raw_data(cleaning_config cfg) cleaning_stats {
 
 func generate_dataset_splits(cleaning_config cfg) {
     io_println("\n📊 generatedataEnglish text...")
-    string[] all_lines = io_read_lines(cfg.output_file)
+    []string all_lines = io_read_lines(cfg.output_file)
     int total = len(all_lines)
     int train_size = (total * 80) / 100
     int val_size = (total * 10) / 100

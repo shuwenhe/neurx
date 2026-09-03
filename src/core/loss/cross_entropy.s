@@ -1,8 +1,8 @@
 package neurx.loss.cross_entropy
 use std.io.eprintln
 func cross_entropy_loss(
-    float[] logits,
-    int[] labels,
+    []float logits,
+    []int labels,
     int batch_size,
     int seq_len,
     int vocab_size,
@@ -76,14 +76,14 @@ func log_approx(float x) float {
 }
 
 func cross_entropy_gradient(
-    float[] logits,
-    int[] labels,
+    []float logits,
+    []int labels,
     int batch_size,
     int seq_len,
     int vocab_size,
     int ignore_index
 ) []float {
-    float[] grad = make([]float, batch_size * seq_len * vocab_size)
+    []float grad = make([]float, batch_size * seq_len * vocab_size)
     int i = 0
     for i < batch_size * seq_len {
         int label = labels[i]

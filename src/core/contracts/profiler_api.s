@@ -48,12 +48,12 @@ interface i_kernel_profiler {
     record_kernel(string kernel_name, device: device, i64 time_us) . void
     record_memory(string kernel_name, i64 allocated, i64 freed) . void
     get_kernel_stats(string kernel_name) . kernel_profile
-    list_kernels() . string[]
+    list_kernels() . []string
 }
 interface i_operator_profiler {
     record_operator(string op_name, i64 time_us, input_shapes: [][]i64, output_shapes: [][]i64) . void
     get_operator_stats(string op_name) . operator_profile
-    list_operators() . string[]
+    list_operators() . []string
 }
 interface i_memory_profiler {
     track_allocation(ptr: memory_ptr, i64 size) . void

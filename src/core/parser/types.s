@@ -32,7 +32,7 @@ struct ParsedValue {
     float number_value
     bool bool_value
     array_values: []ParsedValue
-    object_keys: string[]
+    object_keys: []string
     object_values: []ParsedValue
     string raw_text
 }
@@ -49,7 +49,7 @@ struct ParseResult {
     string recovery_method
     int parse_time_ms
     float confidence
-    warnings: string[]
+    warnings: []string
     map[string]string metadata
 }
 
@@ -83,10 +83,10 @@ struct ParserConfig {
 }
 
 struct TokenBuffer {
-    tokens: string[]
-    positions: int[]
-    types: int[]
-    confidence: float[]
+    tokens: []string
+    positions: []int
+    types: []int
+    confidence: []float
     int buffer_size
 }
 
@@ -98,16 +98,16 @@ struct ParseContext {
     ParseConfig config
     IncrementalParseState state
     TokenBuffer token_buffer
-    scope_stack: string[]
-    format_hints: string[]
-    errors: string[]
-    warnings: string[]
+    scope_stack: []string
+    format_hints: []string
+    errors: []string
+    warnings: []string
 }
 
 struct FormatDetectionResult {
     int detected_format
     float confidence
-    indicators: string[]
+    indicators: []string
     map[string]string metadata
 }
 
@@ -223,7 +223,7 @@ func create_array_value([]ParsedValue items) ParsedValue {
     }
 }
 
-func create_object_value(string[] keys, []ParsedValue values) ParsedValue {
+func create_object_value([]string keys, []ParsedValue values) ParsedValue {
     return ParsedValue{
         type: 5,
         string_value: "",

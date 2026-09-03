@@ -33,7 +33,7 @@ func check_cuda_binary(string bin) bool {
     return true
 }
 
-func check_required_files(string[] files) {
+func check_required_files([]string files) {
     for _, file := range files {
         stat, err := os.Stat(file)
         if err == nil && !stat.IsDir() {
@@ -88,7 +88,7 @@ func main() {
     }
     io.Println("")
     io.Println("📌 Step 3: Checking required files...")
-    check_required_files(string[]{
+    check_required_files([]string{
         curdir + "/data/corpus/vocab.json",
         curdir + "/data/corpus/merges.txt",
         curdir + "/artifact/build/run_large_pretrain/shard_list.txt",

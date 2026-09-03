@@ -19,7 +19,7 @@ struct system_health_check {
     i32 ready_components
     f64 health_score
     component_status[] components
-    recommendations: string[]
+    recommendations: []string
 }
 
 func verify_component(string name, string file_path, i32 expected_lines) component_status {

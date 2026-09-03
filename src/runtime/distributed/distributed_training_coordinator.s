@@ -16,10 +16,10 @@ struct distributed_training_config {
 
 struct distributed_training_state {
     distributed_training_config config
-    int[] tp_group
-    int[] pp_group
-    int[] dp_group
-    int[] sp_group
+    []int tp_group
+    []int pp_group
+    []int dp_group
+    []int sp_group
     int tp_rank
     int pp_rank
     int dp_rank

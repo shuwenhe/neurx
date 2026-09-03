@@ -3,7 +3,7 @@ package main
 struct inner_data {
     int value
     float score
-    float[] weights
+    []float weights
 }
 
 struct outer_data {

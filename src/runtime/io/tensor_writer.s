@@ -2,8 +2,8 @@ package neurx.runtime.io
 struct tensor {
     string name
     string dtype
-    int[] shape
-    float[] data
+    []int shape
+    []float data
     int shape_count
     int data_count
 }

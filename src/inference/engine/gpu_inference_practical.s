@@ -45,12 +45,12 @@ func gpu_generate_simple(gpu_inference_engine_practical* engine,
         return "", false, "engine not initialized"
     }
     
-    int[] prompt_tokens = tokenize_prompt(prompt)
+    []int prompt_tokens = tokenize_prompt(prompt)
     if len(prompt_tokens) == 0 {
         return "", false, "failed to tokenize"
     }
     
-    float[] hidden = load_embedding_row(
+    []float hidden = load_embedding_row(
         engine.cpu_engine.model,
         "model.embed_tokens.weight",
         prompt_tokens[0],
@@ -65,7 +65,7 @@ func gpu_generate_simple(gpu_inference_engine_practical* engine,
     int idx = 1
     for idx < len(prompt_tokens) {
 
-        float[] next_embed = load_embedding_row(
+        []float next_embed = load_embedding_row(
             engine.cpu_engine.model,
             "model.embed_tokens.weight",
             prompt_tokens[idx],
@@ -93,7 +93,7 @@ func gpu_generate_simple(gpu_inference_engine_practical* engine,
     
     for gen_idx < max_tokens {
 
-        float[] logits = project_logits(engine.cpu_engine, hidden)
+        []float logits = project_logits(engine.cpu_engine, hidden)
         
         if len(logits) == 0 {
             break
@@ -117,7 +117,7 @@ func gpu_generate_simple(gpu_inference_engine_practical* engine,
             response = response + word
         }
         
-        float[] next_embed = load_embedding_row(
+        []float next_embed = load_embedding_row(
             engine.cpu_engine.model,
             "model.embed_tokens.weight",
             next_token,
@@ -171,13 +171,13 @@ func gpu_benchmark_speed(gpu_inference_engine_practical* engine,
 }
 
 extern func load_real_text_engine(string model_path) real_text_engine_state
-extern func tokenize_prompt(string prompt) int[]
+extern func tokenize_prompt(string prompt) []int
 extern func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) []float
 extern func safe_hidden_size(real_text_engine_state* state) int
 extern func safe_vocab_size(real_text_engine_state* state) int
 extern func safe_eos_token_id(real_text_engine_state* state) int
-extern func project_logits(real_text_engine_state* state, float[] hidden) []float
-extern func sample_token_from_logits(float[] logits, int[] history, int seed) int
+extern func project_logits(real_text_engine_state* state, []float hidden) []float
+extern func sample_token_from_logits([]float logits, []int history, int seed) int
 extern func token_to_word(int token_id) string
 extern func prompt_fallback(string prompt, string reason) string
 extern func get_current_time_ms() int64

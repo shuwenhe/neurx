@@ -17,24 +17,24 @@ struct multi_head_attention {
     attention_config config
     int head_dim
     int kv_head_dim
-    float[] query_weight
-    float[] key_weight
-    float[] value_weight
-    float[] output_weight
-    float[] query_bias
-    float[] key_bias
-    float[] value_bias
-    float[] output_bias
+    []float query_weight
+    []float key_weight
+    []float value_weight
+    []float output_weight
+    []float query_bias
+    []float key_bias
+    []float value_bias
+    []float output_bias
 }
 
 struct project_qkv_result {
-    float[] query
-    float[] key
-    float[] value
+    []float query
+    []float key
+    []float value
 }
 
 func allocate_vector(int size, float init_val) []float {
-    float[] v = make([]float, size)
+    []float v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -43,8 +43,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector(float[] src) []float {
-    float[] out = allocate_vector(len(src), 0.0)
+func copy_vector([]float src) []float {
+    []float out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -99,7 +99,7 @@ func new_attention_config(int hidden_dim, int num_heads, int num_key_value_heads
 }
 
 func fill_ramp(int size, float scale) []float {
-    float[] values = allocate_vector(size, 0.0)
+    []float values = allocate_vector(size, 0.0)
     int i = 0
     for i < size {
         values[i] = scale * ((i + 1) * 1.0) / ((size + 1) * 1.0)
@@ -127,8 +127,8 @@ func new_multi_head_attention(attention_config cfg) multi_head_attention {
     }
 }
 
-func matmul_flat(float[] a, float[] b, int m, int k, int n) []float {
-    float[] result = allocate_vector(m * n, 0.0)
+func matmul_flat([]float a, []float b, int m, int k, int n) []float {
+    []float result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -147,11 +147,11 @@ func matmul_flat(float[] a, float[] b, int m, int k, int n) []float {
     result
 }
 
-func apply_bias(float[] values, float[] bias) []float {
+func apply_bias([]float values, []float bias) []float {
     if len(bias) == 0 {
         return copy_vector(values)
     }
-    float[] out = copy_vector(values)
+    []float out = copy_vector(values)
     int i = 0
     for i < len(out) {
         out[i] = out[i] + bias[i % len(bias)]
@@ -160,8 +160,8 @@ func apply_bias(float[] values, float[] bias) []float {
     out
 }
 
-func softmax_row(float[] row, int size) []float {
-    float[] out = allocate_vector(size, 0.0)
+func softmax_row([]float row, int size) []float {
+    []float out = allocate_vector(size, 0.0)
     float max_val = row[0]
     int i = 1
     for i < size {
@@ -190,13 +190,13 @@ func softmax_row(float[] row, int size) []float {
 
 func project_qkv(
     multi_head_attention attn,
-    float[] hidden_states,
+    []float hidden_states,
     int seq_len
 ) project_qkv_result {
     int hidden_dim = attn.config.hidden_dim
-    float[] query = apply_bias(matmul_flat(hidden_states, attn.query_weight, seq_len, hidden_dim, hidden_dim), attn.query_bias)
-    float[] key = apply_bias(matmul_flat(hidden_states, attn.key_weight, seq_len, hidden_dim, hidden_dim), attn.key_bias)
-    float[] value = apply_bias(matmul_flat(hidden_states, attn.value_weight, seq_len, hidden_dim, hidden_dim), attn.value_bias)
+    []float query = apply_bias(matmul_flat(hidden_states, attn.query_weight, seq_len, hidden_dim, hidden_dim), attn.query_bias)
+    []float key = apply_bias(matmul_flat(hidden_states, attn.key_weight, seq_len, hidden_dim, hidden_dim), attn.key_bias)
+    []float value = apply_bias(matmul_flat(hidden_states, attn.value_weight, seq_len, hidden_dim, hidden_dim), attn.value_bias)
     project_qkv_result {
         query: query,
         key: key,
@@ -206,9 +206,9 @@ func project_qkv(
 
 func attention_core(
     multi_head_attention attn,
-    float[] query,
-    float[] key,
-    float[] value,
+    []float query,
+    []float key,
+    []float value,
     int seq_len
 ) []float {
     int hidden_dim = attn.config.hidden_dim
@@ -216,7 +216,7 @@ func attention_core(
     int num_kv_heads = attn.config.num_key_value_heads
     int head_dim = attn.head_dim
     int q_block = seq_len * head_dim
-    float[] output = allocate_vector(seq_len * hidden_dim, 0.0)
+    []float output = allocate_vector(seq_len * hidden_dim, 0.0)
     float scale = 1.0 / sqrt_approx(head_dim * 1.0)
     int h = 0
     for h < num_heads {
@@ -228,7 +228,7 @@ func attention_core(
         int kv_offset = kv_head * q_block
         int i = 0
         for i < seq_len {
-            float[] scores = allocate_vector(seq_len, 0.0)
+            []float scores = allocate_vector(seq_len, 0.0)
             int j = 0
             for j < seq_len {
                 float score = 0.0
@@ -243,7 +243,7 @@ func attention_core(
                 }
                 j = j + 1
             }
-            float[] weights = softmax_row(scores, seq_len)
+            []float weights = softmax_row(scores, seq_len)
             int d = 0
             for d < head_dim {
                 float sum_val = 0.0
@@ -264,7 +264,7 @@ func attention_core(
 
 func forward_attention(
     multi_head_attention attn,
-    float[] hidden_states,
+    []float hidden_states,
     int seq_len
 ) []float {
     project_qkv_result projected = project_qkv(attn, hidden_states, seq_len)
@@ -273,21 +273,21 @@ func forward_attention(
 
 func forward_attention_projected(
     multi_head_attention attn,
-    float[] query,
-    float[] key,
-    float[] value,
+    []float query,
+    []float key,
+    []float value,
     int seq_len
 ) []float {
-    float[] attended = attention_core(attn, query, key, value, seq_len)
+    []float attended = attention_core(attn, query, key, value, seq_len)
     int hidden_dim = attn.config.hidden_dim
-    float[] output = matmul_flat(attended, attn.output_weight, seq_len, hidden_dim, hidden_dim)
+    []float output = matmul_flat(attended, attn.output_weight, seq_len, hidden_dim, hidden_dim)
     output = apply_bias(output, attn.output_bias)
     output
 }
 
 func forward_attention_with_rope(
     multi_head_attention attn,
-    float[] hidden_states,
+    []float hidden_states,
     int batch_size,
     int seq_len,
     rope_embedding rope
@@ -308,7 +308,7 @@ func forward_attention_with_rope(
 
 func forward_gqa(
     multi_head_attention attn,
-    float[] hidden_states,
+    []float hidden_states,
     int seq_len
 ) []float {
     forward_attention(attn, hidden_states, seq_len)
@@ -316,7 +316,7 @@ func forward_gqa(
 
 func forward_flash_attention(
     multi_head_attention attn,
-    float[] hidden_states,
+    []float hidden_states,
     int seq_len
 ) []float {
     int hidden_dim = attn.config.hidden_dim
@@ -329,7 +329,7 @@ func forward_flash_attention(
     flash_compute.flash_attention_state state = flash_compute.new_flash_attention_state(
         1, seq_len, num_heads, head_dim, config
     )
-    float[] causal_mask = allocate_vector(seq_len * seq_len, 1.0)
+    []float causal_mask = allocate_vector(seq_len * seq_len, 1.0)
     int i = 0
     for i < seq_len {
         int j = i + 1
@@ -339,21 +339,21 @@ func forward_flash_attention(
         }
         i = i + 1
     }
-    float[] q_reshaped = reshape_for_flash(projected.query, seq_len, num_heads, head_dim)
-    float[] k_reshaped = reshape_for_flash(projected.key, seq_len, num_heads, head_dim)
-    float[] v_reshaped = reshape_for_flash(projected.value, seq_len, num_heads, head_dim)
-    float[] attended = flash_compute.flash_attention_forward(
+    []float q_reshaped = reshape_for_flash(projected.query, seq_len, num_heads, head_dim)
+    []float k_reshaped = reshape_for_flash(projected.key, seq_len, num_heads, head_dim)
+    []float v_reshaped = reshape_for_flash(projected.value, seq_len, num_heads, head_dim)
+    []float attended = flash_compute.flash_attention_forward(
         q_reshaped, k_reshaped, v_reshaped, causal_mask, state
     )
-    float[] attended_flat = reshape_from_flash(attended, seq_len, num_heads, head_dim)
-    float[] output = matmul_flat(attended_flat, attn.output_weight, seq_len, hidden_dim, hidden_dim)
+    []float attended_flat = reshape_from_flash(attended, seq_len, num_heads, head_dim)
+    []float output = matmul_flat(attended_flat, attn.output_weight, seq_len, hidden_dim, hidden_dim)
     output = apply_bias(output, attn.output_bias)
     output
 }
 
-func reshape_for_flash(float[] input, int seq_len, int num_heads, int head_dim) []float {
+func reshape_for_flash([]float input, int seq_len, int num_heads, int head_dim) []float {
     int hidden_dim = num_heads * head_dim
-    float[] output = allocate_vector(seq_len * num_heads * head_dim, 0.0)
+    []float output = allocate_vector(seq_len * num_heads * head_dim, 0.0)
     int i = 0
     for i < seq_len {
         int h = 0
@@ -370,9 +370,9 @@ func reshape_for_flash(float[] input, int seq_len, int num_heads, int head_dim) 
     output
 }
 
-func reshape_from_flash(float[] input, int seq_len, int num_heads, int head_dim) []float {
+func reshape_from_flash([]float input, int seq_len, int num_heads, int head_dim) []float {
     int hidden_dim = num_heads * head_dim
-    float[] output = allocate_vector(seq_len * hidden_dim, 0.0)
+    []float output = allocate_vector(seq_len * hidden_dim, 0.0)
     int i = 0
     for i < seq_len {
         int h = 0
@@ -391,19 +391,19 @@ func reshape_from_flash(float[] input, int seq_len, int num_heads, int head_dim)
 
 func forward_with_cache(
     multi_head_attention attn,
-    float[] query_states,
-    float[] kv_cache_key,
-    float[] kv_cache_value,
+    []float query_states,
+    []float kv_cache_key,
+    []float kv_cache_value,
     int cache_position_id
 ) []float {
     forward_attention(attn, query_states, cache_position_id + 1)
 }
 
 func apply_causal_mask(
-    float[] attention_scores,
+    []float attention_scores,
     int seq_len
 ) []float {
-    float[] out = copy_vector(attention_scores)
+    []float out = copy_vector(attention_scores)
     int i = 0
     for i < seq_len {
         int j = i + 1
@@ -417,14 +417,14 @@ func apply_causal_mask(
 }
 
 func apply_attention_dropout(
-    float[] attention_weights,
+    []float attention_weights,
     float dropout_rate,
     int seed
 ) []float {
     if dropout_rate <= 0.0 {
         return copy_vector(attention_weights)
     }
-    float[] out = copy_vector(attention_weights)
+    []float out = copy_vector(attention_weights)
     float keep_scale = 1.0 / (1.0 - dropout_rate)
     int i = 0
     for i < len(out) {

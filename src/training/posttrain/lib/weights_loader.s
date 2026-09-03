@@ -14,13 +14,13 @@ func load_safetensors(string path) interface {
 }
 
 func extract_weight(interface file_data, string key) []float {
-    float[] result
+    []float result
     eprintln("Extracting weight: " + key)
     return result
 }
 
 func load_embedding_weights(string path, int vocab_size, int hidden_size) []float {
-    float[] embedding
+    []float embedding
     int total_size = vocab_size * hidden_size
     int i = 0
     for i < total_size {
@@ -32,7 +32,7 @@ func load_embedding_weights(string path, int vocab_size, int hidden_size) []floa
 }
 
 func load_projection_weights(string path, int out_dim, int in_dim) []float {
-    float[] weights
+    []float weights
     int total = out_dim * in_dim
     int i = 0
     for i < total {

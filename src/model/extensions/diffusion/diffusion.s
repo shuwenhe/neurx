@@ -43,8 +43,8 @@ func diffusion_pipeline_train_step(diffusion_pipeline_state state, float loss) d
     }
 }
 
-func diffusion_pipeline_ddpm_step(diffusion_pipeline_state state, float[] x_t) diffusion_pipeline_state {
-    float[] eps = denoiser_forward_stub(state.model, x_t, state.ddpm.current_t)
+func diffusion_pipeline_ddpm_step(diffusion_pipeline_state state, []float x_t) diffusion_pipeline_state {
+    []float eps = denoiser_forward_stub(state.model, x_t, state.ddpm.current_t)
     diffusion_pipeline_state {
         cfg: state.cfg,
         noise: state.noise,
@@ -56,8 +56,8 @@ func diffusion_pipeline_ddpm_step(diffusion_pipeline_state state, float[] x_t) d
     }
 }
 
-func diffusion_pipeline_ddim_step(diffusion_pipeline_state state, float[] x_t) diffusion_pipeline_state {
-    float[] eps = denoiser_forward_stub(state.model, x_t, state.ddim.current_t)
+func diffusion_pipeline_ddim_step(diffusion_pipeline_state state, []float x_t) diffusion_pipeline_state {
+    []float eps = denoiser_forward_stub(state.model, x_t, state.ddim.current_t)
     diffusion_pipeline_state {
         cfg: state.cfg,
         noise: state.noise,

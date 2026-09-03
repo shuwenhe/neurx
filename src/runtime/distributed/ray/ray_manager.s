@@ -70,7 +70,7 @@ func (manager ray_manager*) register_actor(actor_name string, actor interface{})
 func (manager ray_manager*) create_placement_group(
     name string,
     strategy string,
-    bundles map[stringfloat[]64],
+    bundles map[string[]float64],
 ) bool {
     if !manager.is_running {
         return false
@@ -104,7 +104,7 @@ func (manager ray_manager*) load_lazy_module(module_name string) bool {
 
 func (manager ray_manager*) register_lazy_resource(
     name string,
-    dependencies string[],
+    dependencies []string,
 ) bool {
     if !manager.is_running {
         return false
@@ -176,7 +176,7 @@ func (manager ray_manager*) get_component_state(name string) ray_component_state
 }
 
 func (manager ray_manager*) list_components() []string {
-    names := make(string[], 0)
+    names := make([]string, 0)
     for name := range manager.components {
         names = append(names, name)
     }

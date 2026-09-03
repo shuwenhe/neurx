@@ -24,10 +24,10 @@ struct dataset_config {
 }
 
 struct data_sample {
-    input_ids           int[]
-    attention_mask      int[]
-    token_type_ids      int[]
-    labels              int[]
+    input_ids           []int
+    attention_mask      []int
+    token_type_ids      []int
+    labels              []int
 }
 
 struct data_loader {
@@ -67,10 +67,10 @@ func (data_loader* loader) load_from_huggingface(source data_source) []data_samp
     samples := make([]data_sample, 0)
     for i := 0; i < source.size; i++ {
         sample := data_sample{
-            input_ids:      make(int[], 512),
-            attention_mask: make(int[], 512),
-            token_type_ids: make(int[], 512),
-            labels:         make(int[], 512),
+            input_ids:      make([]int, 512),
+            attention_mask: make([]int, 512),
+            token_type_ids: make([]int, 512),
+            labels:         make([]int, 512),
         }
         for j := 0; j < 512; j++ {
             val := (i*512 + j) % 128000
@@ -90,10 +90,10 @@ func (data_loader* loader) load_from_local(source data_source) []data_sample {
     samples := make([]data_sample, 0)
     for i := 0; i < source.size; i++ {
         sample := data_sample{
-            input_ids:      make(int[], 512),
-            attention_mask: make(int[], 512),
-            token_type_ids: make(int[], 512),
-            labels:         make(int[], 512),
+            input_ids:      make([]int, 512),
+            attention_mask: make([]int, 512),
+            token_type_ids: make([]int, 512),
+            labels:         make([]int, 512),
         }
         for j := 0; j < 512; j++ {
             sample.input_ids[j] = (i + j) % 128000
@@ -110,10 +110,10 @@ func (data_loader* loader) load_from_s3(source data_source) []data_sample {
     samples := make([]data_sample, 0)
     for i := 0; i < source.size; i++ {
         sample := data_sample{
-            input_ids:      make(int[], 512),
-            attention_mask: make(int[], 512),
-            token_type_ids: make(int[], 512),
-            labels:         make(int[], 512),
+            input_ids:      make([]int, 512),
+            attention_mask: make([]int, 512),
+            token_type_ids: make([]int, 512),
+            labels:         make([]int, 512),
         }
         for j := 0; j < 512; j++ {
             sample.input_ids[j] = (i*2 + j) % 128000

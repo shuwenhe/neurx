@@ -12,14 +12,14 @@ struct temperature_processor {
     float temperature
 }
 
-func (temperature_processor* tp) apply(*float[] logits) (float), processor_error[] {
+func (temperature_processor* tp) apply(*[]float logits) (float), processor_error[] {
     if tp.temperature <= 0.0 {
         return (processor_error {
             code: "INVALID_TEMPERATURE",
             message: "Temperature must be positive",
         })
     }
-    result_logits := float[]()
+    result_logits := []float()
     i := 0
     for i < len(logits) {
         scaled := logits[i] / tp.temperature
@@ -33,7 +33,7 @@ struct top_k_processor {
     int k
 }
 
-func find_kth_largest(*float[] logits, int k) float {
+func find_kth_largest(*[]float logits, int k) float {
     if k >= len(logits) {
         return logits[0]
     }
@@ -48,7 +48,7 @@ func find_kth_largest(*float[] logits, int k) float {
     max_val
 }
 
-func (top_k_processor* tp) apply(*float[] logits) (float), processor_error[] {
+func (top_k_processor* tp) apply(*[]float logits) (float), processor_error[] {
     if tp.k <= 0 {
         return (processor_error {
             code: "INVALID_K",
@@ -59,7 +59,7 @@ func (top_k_processor* tp) apply(*float[] logits) (float), processor_error[] {
         return logits, ""
     }
     threshold := find_kth_largest(logits, tp.k)
-    result_logits := float[]()
+    result_logits := []float()
     i := 0
     for i < len(logits) {
         if logits[i] >= threshold {
@@ -76,7 +76,7 @@ struct nucleus_processor {
     float top_p
 }
 
-func softmax(*float[] logits) []float {
+func softmax(*[]float logits) []float {
     max_logit := logits[0]
     i := 1
     for i < len(logits) {
@@ -85,7 +85,7 @@ func softmax(*float[] logits) []float {
         }
         i = i + 1
     }
-    exps := float[]()
+    exps := []float()
     sum_exp := 0.0
     i := 0
     for i < len(logits) {
@@ -94,7 +94,7 @@ func softmax(*float[] logits) []float {
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
-    probs := float[]()
+    probs := []float()
     i := 0
     for i < len(exps) {
         prob := exps[i] / sum_exp
@@ -104,7 +104,7 @@ func softmax(*float[] logits) []float {
     probs
 }
 
-func (nucleus_processor* np) apply(*float[] logits) (float), processor_error[] {
+func (nucleus_processor* np) apply(*[]float logits) (float), processor_error[] {
     if np.top_p <= 0.0 || np.top_p > 1.0 {
         return (processor_error {
             code: "INVALID_TOP_P",
@@ -112,7 +112,7 @@ func (nucleus_processor* np) apply(*float[] logits) (float), processor_error[] {
         })
     }
     probs := softmax(logits)
-    cumsum := float[]()
+    cumsum := []float()
     cum := 0.0
     i := 0
     for i < len(probs) {
@@ -129,7 +129,7 @@ func (nucleus_processor* np) apply(*float[] logits) (float), processor_error[] {
         }
         i = i + 1
     }
-    result_logits := float[]()
+    result_logits := []float()
     i := 0
     for i < len(logits) {
         if logits[i] >= threshold {
@@ -147,14 +147,14 @@ struct frequency_penalty_processor {
     token_counts: *map[int, int]
 }
 
-func (frequency_penalty_processor* fp) apply(*float[] logits) (float), processor_error[] {
+func (frequency_penalty_processor* fp) apply(*[]float logits) (float), processor_error[] {
     if fp.penalty < 0.0 {
         return (processor_error {
             code: "INVALID_PENALTY",
             message: "Penalty must be non-negative",
         })
     }
-    result_logits := float[]()
+    result_logits := []float()
     i := 0
     for i < len(logits) {
         count := 0
@@ -172,14 +172,14 @@ struct length_penalty_processor {
     float penalty
 }
 
-func (length_penalty_processor* lp) apply(*float[] logits) (float), processor_error[] {
+func (length_penalty_processor* lp) apply(*[]float logits) (float), processor_error[] {
     if lp.penalty < 0.0 {
         return (processor_error {
             code: "INVALID_PENALTY",
             message: "Penalty must be non-negative",
         })
     }
-    result_logits := float[]()
+    result_logits := []float()
     i := 0
     for i < len(logits) {
         adjusted := logits[i] / (1.0 + lp.penalty)
@@ -191,17 +191,17 @@ return     (result_logits, "")
 
 struct repetition_penalty_processor {
     float penalty
-    *int[] previous_tokens
+    *[]int previous_tokens
 }
 
-func (repetition_penalty_processor* rp) apply(*float[] logits) (float), processor_error[] {
+func (repetition_penalty_processor* rp) apply(*[]float logits) (float), processor_error[] {
     if rp.penalty < 1.0 {
         return (processor_error {
             code: "INVALID_PENALTY",
             message: "Penalty must be >= 1.0",
         })
     }
-    result_logits := float[]()
+    result_logits := []float()
     i := 0
     for i < len(logits) {
         is_repeated := false
@@ -296,7 +296,7 @@ func (logits_processor_pipeline* pipeline) with_nucleus(
 }
 
 func (logits_processor_pipeline* pipeline) process(
-    *float[] logits
+    *[]float logits
 ) (float), processor_error[] {
     result_logits := logits
     switch pipeline.temperature_proc {
@@ -321,7 +321,7 @@ return     (result_logits, "")
 }
 
 func main() {
-    logits := float[]()
+    logits := []float()
     logits = append(logits, 1.0)
     logits = append(logits, 2.0)
     logits = append(logits, 3.0)

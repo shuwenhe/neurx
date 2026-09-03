@@ -13,10 +13,10 @@ use neurx.model.transformer.norm.{rms_norm, rms_normalize}
 use neurx.model.transformer.ffn.{forward_swiglu_ffn, forward_standard_ffn}
 
 struct gpt_sdpa_cache {
-    float[] q
-    float[] k
-    float[] v
-    float[] weights
+    []float q
+    []float k
+    []float v
+    []float weights
     int seq_len
     int n_head
     int n_kv_head
@@ -24,69 +24,69 @@ struct gpt_sdpa_cache {
 }
 
 struct transformer_layer_cache {
-    float[] x_in
-    float[] normed1
-    float[] q_proj
-    float[] k_proj
-    float[] v_proj
-    float[] q_rope
-    float[] k_rope
-    float[] attn_out
-    float[] attn_proj
-    float[] h_attn
-    float[] normed2
-    float[] ffn_gate_pre
-    float[] ffn_val_pre
-    float[] ffn_out
+    []float x_in
+    []float normed1
+    []float q_proj
+    []float k_proj
+    []float v_proj
+    []float q_rope
+    []float k_rope
+    []float attn_out
+    []float attn_proj
+    []float h_attn
+    []float normed2
+    []float ffn_gate_pre
+    []float ffn_val_pre
+    []float ffn_out
     []gpt_sdpa_cache sdpa_per_batch
     int batch_size
     int seq_len
 }
 
 struct gpt_forward_cache {
-    float[] embedding
+    []float embedding
     []transformer_layer_cache layers
-    float[] final_normed
-    float[] logits
+    []float final_normed
+    []float logits
     int batch_size
     int seq_len
     int n_layer
 }
 
 struct transformer_layer_grads {
-    float[] d_norm1_gamma
-    float[] d_norm2_gamma
-    float[] d_wq
-    float[] d_wk
-    float[] d_wv
-    float[] d_wo
-    float[] d_wq_bias
-    float[] d_wk_bias
-    float[] d_wv_bias
-    float[] d_wo_bias
-    float[] d_ffn_gate_w
-    float[] d_ffn_val_w
-    float[] d_ffn_down_w
+    []float d_norm1_gamma
+    []float d_norm2_gamma
+    []float d_wq
+    []float d_wk
+    []float d_wv
+    []float d_wo
+    []float d_wq_bias
+    []float d_wk_bias
+    []float d_wv_bias
+    []float d_wo_bias
+    []float d_ffn_gate_w
+    []float d_ffn_val_w
+    []float d_ffn_down_w
 }
 
 struct gpt_param_grads {
-    float[] d_wte
-    float[] d_wpe
-    float[] d_final_gamma
-    float[] d_lm_head
+    []float d_wte
+    []float d_wpe
+    []float d_final_gamma
+    []float d_lm_head
     []transformer_layer_grads layers
     int n_layer
 }
 
 struct gpt_adamw_state {
-    float[] m_wte
-    float[] v_wte
-    float[] m_wpe
-    float[] v_wpe
-    float[] m_lm_head
-    float[] v_lm_head
-    float[] m_final_gamma
-    float[] v_final_gamma
+    []float m_wte
+    []float v_wte
+    []float m_wpe
+    []float v_wpe
+    []float m_lm_head
+    []float v_lm_head
+    []float m_final_gamma
+    []float v_final_gamma
     []transformer_layer_adamw layers
     int step
     float lr
@@ -97,46 +97,46 @@ struct gpt_adamw_state {
 }
 
 struct transformer_layer_adamw {
-    float[] m_norm1_gamma  float[] v_norm1_gamma
-    float[] m_norm2_gamma  float[] v_norm2_gamma
-    float[] m_wq           float[] v_wq
-    float[] m_wk           float[] v_wk
-    float[] m_wv           float[] v_wv
-    float[] m_wo           float[] v_wo
-    float[] m_ffn_gate_w   float[] v_ffn_gate_w
-    float[] m_ffn_val_w    float[] v_ffn_val_w
-    float[] m_ffn_down_w   float[] v_ffn_down_w
+    []float m_norm1_gamma  []float v_norm1_gamma
+    []float m_norm2_gamma  []float v_norm2_gamma
+    []float m_wq           []float v_wq
+    []float m_wk           []float v_wk
+    []float m_wv           []float v_wv
+    []float m_wo           []float v_wo
+    []float m_ffn_gate_w   []float v_ffn_gate_w
+    []float m_ffn_val_w    []float v_ffn_val_w
+    []float m_ffn_down_w   []float v_ffn_down_w
 }
 
 func bk_alloc(int n) []float {
-    float[] v = make([]float, n)
+    []float v = make([]float, n)
     int i = 0
     for i < n { v[i] = 0.0; i = i + 1 }
     v
 }
 
-func bk_copy(float[] src) []float {
-    float[] out = bk_alloc(len(src))
+func bk_copy([]float src) []float {
+    []float out = bk_alloc(len(src))
     int i = 0
     for i < len(src) { out[i] = src[i]; i = i + 1 }
     out
 }
 
-func bk_add_inplace(float[] a, float[] b) []float {
+func bk_add_inplace([]float a, []float b) []float {
     int i = 0
     for i < len(a) { a[i] = a[i] + b[i]; i = i + 1 }
     a
 }
 
-func bk_scale(float[] v, float s) []float {
-    float[] out = bk_alloc(len(v))
+func bk_scale([]float v, float s) []float {
+    []float out = bk_alloc(len(v))
     int i = 0
     for i < len(v) { out[i] = v[i] * s; i = i + 1 }
     out
 }
 
-func bk_matmul_da(float[] d_c, float[] b, int m, int k, int n) []float {
-    float[] d_a = bk_alloc(m * k)
+func bk_matmul_da([]float d_c, []float b, int m, int k, int n) []float {
+    []float d_a = bk_alloc(m * k)
     int i = 0
     for i < m {
         int l = 0
@@ -155,8 +155,8 @@ func bk_matmul_da(float[] d_c, float[] b, int m, int k, int n) []float {
     d_a
 }
 
-func bk_matmul_db(float[] a, float[] d_c, int m, int k, int n) []float {
-    float[] d_b = bk_alloc(k * n)
+func bk_matmul_db([]float a, []float d_c, int m, int k, int n) []float {
+    []float d_b = bk_alloc(k * n)
     int l = 0
     for l < k {
         int j = 0
@@ -175,8 +175,8 @@ func bk_matmul_db(float[] a, float[] d_c, int m, int k, int n) []float {
     d_b
 }
 
-func bk_matmul_t_da(float[] d_c, float[] b, int m, int k, int n) []float {
-    float[] d_a = bk_alloc(m * k)
+func bk_matmul_t_da([]float d_c, []float b, int m, int k, int n) []float {
+    []float d_a = bk_alloc(m * k)
     int i = 0
     for i < m {
         int l = 0
@@ -195,8 +195,8 @@ func bk_matmul_t_da(float[] d_c, float[] b, int m, int k, int n) []float {
     d_a
 }
 
-func bk_matmul_t_db(float[] a, float[] d_c, int m, int k, int n) []float {
-    float[] d_b = bk_alloc(n * k)
+func bk_matmul_t_db([]float a, []float d_c, int m, int k, int n) []float {
+    []float d_b = bk_alloc(n * k)
     int j = 0
     for j < n {
         int l = 0
@@ -215,8 +215,8 @@ func bk_matmul_t_db(float[] a, float[] d_c, int m, int k, int n) []float {
     d_b
 }
 
-func bk_matmul_kv_da(float[] d_c, float[] b, int m, int k, int n, int full_n) []float {
-    float[] d_a = bk_alloc(m * k)
+func bk_matmul_kv_da([]float d_c, []float b, int m, int k, int n, int full_n) []float {
+    []float d_a = bk_alloc(m * k)
     int i = 0
     for i < m {
         int l = 0
@@ -235,8 +235,8 @@ func bk_matmul_kv_da(float[] d_c, float[] b, int m, int k, int n, int full_n) []
     d_a
 }
 
-func bk_matmul_kv_db(float[] a, float[] d_c, int m, int k, int n, int full_n) []float {
-    float[] d_b = bk_alloc(k * full_n)
+func bk_matmul_kv_db([]float a, []float d_c, int m, int k, int n, int full_n) []float {
+    []float d_b = bk_alloc(k * full_n)
     int l = 0
     for l < k {
         int j = 0
@@ -255,11 +255,11 @@ func bk_matmul_kv_db(float[] a, float[] d_c, int m, int k, int n, int full_n) []
     d_b
 }
 
-func bk_softmax_row(float[] d_weights, float[] weights, int size) []float {
+func bk_softmax_row([]float d_weights, []float weights, int size) []float {
     float dot = 0.0
     int i = 0
     for i < size { dot = dot + d_weights[i] * weights[i]; i = i + 1 }
-    float[] d_scores = bk_alloc(size)
+    []float d_scores = bk_alloc(size)
     i = 0
     for i < size {
         d_scores[i] = weights[i] * (d_weights[i] - dot)
@@ -275,11 +275,11 @@ func bk_swish_grad(float z) float {
 
 func transformer_layer_forward_cached(
     transformer_layer layer,
-    float[] x,
+    []float x,
     int batch_size,
     int seq_len,
-    float[] rope_freqs
-) (float[], transformer_layer_cache) {
+    []float rope_freqs
+) ([]float, transformer_layer_cache) {
     int total = batch_size * seq_len
     int D = layer.hidden_dim
     int nh = layer.n_head
@@ -287,10 +287,10 @@ func transformer_layer_forward_cached(
     int hd = layer.head_dim
     int kv_d = nkv * hd
     int ffn_d = len(layer.ffn.glu_ffn.gate_weight) / D
-    float[] normed1 = rms_normalize(layer.norm1, x, batch_size, seq_len)
-    float[] q_proj = gpt_matmul(normed1, layer.attn.query_weight, total, D, D)
-    float[] k_proj = gpt_matmul_kv(normed1, layer.attn.key_weight,   total, D, kv_d, D)
-    float[] v_proj = gpt_matmul_kv(normed1, layer.attn.value_weight, total, D, kv_d, D)
+    []float normed1 = rms_normalize(layer.norm1, x, batch_size, seq_len)
+    []float q_proj = gpt_matmul(normed1, layer.attn.query_weight, total, D, D)
+    []float k_proj = gpt_matmul_kv(normed1, layer.attn.key_weight,   total, D, kv_d, D)
+    []float v_proj = gpt_matmul_kv(normed1, layer.attn.value_weight, total, D, kv_d, D)
     if layer.attn.config.use_qkv_bias {
         int i = 0
         for i < total {
@@ -305,8 +305,8 @@ func transformer_layer_forward_cached(
             i = i + 1
         }
     }
-    float[] q_rope = gpt_copy(q_proj)
-    float[] k_rope = gpt_copy(k_proj)
+    []float q_rope = gpt_copy(q_proj)
+    []float k_rope = gpt_copy(k_proj)
     int pair_dim = hd / 2
     int b = 0
     for b < batch_size {
@@ -350,20 +350,20 @@ func transformer_layer_forward_cached(
         b = b + 1
     }
     []gpt_sdpa_cache sdpa_caches = make([]gpt_sdpa_cache, batch_size)
-    float[] attn_out = bk_alloc(total * D)
+    []float attn_out = bk_alloc(total * D)
     b = 0
     for b < batch_size {
         int off_q = b * seq_len * D
         int off_k = b * seq_len * kv_d
-        float[] qb = bk_alloc(seq_len * D)
-        float[] kb = bk_alloc(seq_len * kv_d)
-        float[] vb = bk_alloc(seq_len * kv_d)
+        []float qb = bk_alloc(seq_len * D)
+        []float kb = bk_alloc(seq_len * kv_d)
+        []float vb = bk_alloc(seq_len * kv_d)
         int i = 0
         for i < seq_len * D    { qb[i] = q_rope[off_q + i]; i = i+1 }
         i = 0
         for i < seq_len * kv_d { kb[i] = k_rope[off_k + i]; vb[i] = v_proj[off_k + i]; i = i+1 }
-        float[] sdpa_out = gpt_causal_sdpa(qb, kb, vb, seq_len, nh, nkv, hd)
-        float[] weights = bk_compute_attn_weights(qb, kb, seq_len, nh, nkv, hd)
+        []float sdpa_out = gpt_causal_sdpa(qb, kb, vb, seq_len, nh, nkv, hd)
+        []float weights = bk_compute_attn_weights(qb, kb, seq_len, nh, nkv, hd)
         sdpa_caches[b] = gpt_sdpa_cache {
             q: qb, k: kb, v: vb, weights: weights,
             seq_len: seq_len, n_head: nh, n_kv_head: nkv, head_dim: hd
@@ -372,7 +372,7 @@ func transformer_layer_forward_cached(
         for o < seq_len * D { attn_out[b*seq_len*D + o] = sdpa_out[o]; o = o+1 }
         b = b + 1
     }
-    float[] attn_proj = gpt_matmul(attn_out, layer.attn.output_weight, total, D, D)
+    []float attn_proj = gpt_matmul(attn_out, layer.attn.output_weight, total, D, D)
     if layer.attn.config.use_qkv_bias {
         int i = 0
         for i < total {
@@ -381,29 +381,29 @@ func transformer_layer_forward_cached(
             i = i+1
         }
     }
-    float[] h_attn = gpt_add(x, attn_proj)
-    float[] normed2 = rms_normalize(layer.norm2, h_attn, batch_size, seq_len)
-    float[] ffn_gate_pre = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, D, ffn_d)
-    float[] ffn_val_pre  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, D, ffn_d)
+    []float h_attn = gpt_add(x, attn_proj)
+    []float normed2 = rms_normalize(layer.norm2, h_attn, batch_size, seq_len)
+    []float ffn_gate_pre = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, D, ffn_d)
+    []float ffn_val_pre  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, D, ffn_d)
     int idx = 0
     for idx < total * ffn_d {
         ffn_gate_pre[idx] = ffn_gate_pre[idx] + layer.ffn.glu_ffn.gate_bias[idx % ffn_d]
         ffn_val_pre[idx]  = ffn_val_pre[idx]  + layer.ffn.glu_ffn.value_bias[idx % ffn_d]
         idx = idx + 1
     }
-    float[] gv_out = bk_alloc(total * ffn_d)
+    []float gv_out = bk_alloc(total * ffn_d)
     idx = 0
     for idx < total * ffn_d {
         gv_out[idx] = gpt_swish(ffn_gate_pre[idx]) * ffn_val_pre[idx]
         idx = idx + 1
     }
-    float[] ffn_out_full = gpt_matmul(gv_out, layer.ffn.glu_ffn.down_weight, total, ffn_d, D)
+    []float ffn_out_full = gpt_matmul(gv_out, layer.ffn.glu_ffn.down_weight, total, ffn_d, D)
     idx = 0
     for idx < total * D {
         ffn_out_full[idx] = ffn_out_full[idx] + layer.ffn.glu_ffn.down_bias[idx % D]
         idx = idx + 1
     }
-    float[] y = gpt_add(h_attn, ffn_out_full)
+    []float y = gpt_add(h_attn, ffn_out_full)
     transformer_layer_cache cache = transformer_layer_cache {
         x_in: x, normed1: normed1,
         q_proj: q_proj, k_proj: k_proj, v_proj: v_proj,
@@ -418,10 +418,10 @@ func transformer_layer_forward_cached(
 }
 
 func bk_compute_attn_weights(
-    float[] q, float[] k,
+    []float q, []float k,
     int seq_len, int nh, int nkv, int hd
 ) []float {
-    float[] weights = bk_alloc(nh * seq_len * seq_len)
+    []float weights = bk_alloc(nh * seq_len * seq_len)
     float scale = 1.0 / gpt_sqrt(hd * 1.0)
     float NEG_INF = -1000000.0
     int h = 0
@@ -429,7 +429,7 @@ func bk_compute_attn_weights(
         int hk = h - (h / nkv) * nkv
         int i = 0
         for i < seq_len {
-            float[] scores = bk_alloc(seq_len)
+            []float scores = bk_alloc(seq_len)
             int j = 0
             for j < seq_len {
                 if j > i { scores[j] = NEG_INF } else {
@@ -443,7 +443,7 @@ func bk_compute_attn_weights(
                 }
                 j = j + 1
             }
-            float[] w = gpt_softmax_row(scores, seq_len)
+            []float w = gpt_softmax_row(scores, seq_len)
             int j2 = 0
             for j2 < seq_len {
                 weights[h*seq_len*seq_len + i*seq_len + j2] = w[j2]
@@ -458,28 +458,28 @@ func bk_compute_attn_weights(
 
 func gpt_forward_cached(
     language_model model,
-    int[] token_ids,
+    []int token_ids,
     int batch_size,
     int seq_len
-) (gpt_forward_cache, float[]) {
+) (gpt_forward_cache, []float) {
     int D = model.n_embd
     int V = model.vocab_size
     int total = batch_size * seq_len
-    float[] emb = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, D)
+    []float emb = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, D)
     []transformer_layer_cache layer_caches = make([]transformer_layer_cache, model.n_layer)
-    float[] hidden = gpt_copy(emb)
+    []float hidden = gpt_copy(emb)
     int l = 0
     for l < model.n_layer {
         transformer_layer layer = transformer_layer_at(model.layers, l)
-        float[] next_hidden
+        []float next_hidden
         transformer_layer_cache lc
         (next_hidden, lc) = transformer_layer_forward_cached(layer, hidden, batch_size, seq_len, model.rope.frequencies)
         layer_caches[l] = lc
         hidden = next_hidden
         l = l + 1
     }
-    float[] normed_final = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
-    float[] logits
+    []float normed_final = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
+    []float logits
     if model.config.tie_embeddings {
         logits = gpt_matmul_t(normed_final, model.lm_head, total, D, V)
     } else {
@@ -498,12 +498,12 @@ func gpt_forward_cached(
 }
 
 func gpt_ce_backward(
-    float[] logits,
-    int[] targets,
+    []float logits,
+    []int targets,
     int total_tokens,
     int vocab_size
 ) []float {
-    float[] d_logits = bk_alloc(total_tokens * vocab_size)
+    []float d_logits = bk_alloc(total_tokens * vocab_size)
     int count = 0
     int i = 0
     for i < total_tokens {
@@ -544,15 +544,15 @@ func gpt_ce_backward(
 
 func bk_rmsn(
     rms_norm rn,
-    float[] d_out,
-    float[] input,
+    []float d_out,
+    []float input,
     int batch_size,
     int seq_len
-) (float[], float[]) {
+) ([]float, []float) {
     int D = rn.hidden_dim
     float eps = rn.epsilon
-    float[] d_input = bk_alloc(batch_size * seq_len * D)
-    float[] d_gamma = bk_alloc(D)
+    []float d_input = bk_alloc(batch_size * seq_len * D)
+    []float d_gamma = bk_alloc(D)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -591,13 +591,13 @@ func bk_rmsn(
 }
 
 struct sdpa_bk_result {
-    float[] d_q
-    float[] d_k
-    float[] d_v
+    []float d_q
+    []float d_k
+    []float d_v
 }
 
 func bk_causal_sdpa(
-    float[] d_out,
+    []float d_out,
     gpt_sdpa_cache cache
 ) sdpa_bk_result {
     int S = cache.seq_len
@@ -607,15 +607,15 @@ func bk_causal_sdpa(
     int D  = nh * hd
     int kv_d = nkv * hd
     float scale = 1.0 / gpt_sqrt(hd * 1.0)
-    float[] d_q = bk_alloc(S * D)
-    float[] d_k = bk_alloc(S * kv_d)
-    float[] d_v = bk_alloc(S * kv_d)
+    []float d_q = bk_alloc(S * D)
+    []float d_k = bk_alloc(S * kv_d)
+    []float d_v = bk_alloc(S * kv_d)
     int h = 0
     for h < nh {
         int hk = h - (h / nkv) * nkv
         int i = 0
         for i < S {
-            float[] w_row = bk_alloc(S)
+            []float w_row = bk_alloc(S)
             int j = 0
             for j < S { w_row[j] = cache.weights[h*S*S + i*S + j]; j = j+1 }
             int d = 0
@@ -628,7 +628,7 @@ func bk_causal_sdpa(
                 }
                 d = d + 1
             }
-            float[] d_w_row = bk_alloc(S)
+            []float d_w_row = bk_alloc(S)
             d = 0
             for d < hd {
                 j = 0
@@ -638,7 +638,7 @@ func bk_causal_sdpa(
                 }
                 d = d + 1
             }
-            float[] d_scores = bk_softmax_row(d_w_row, w_row, S)
+            []float d_scores = bk_softmax_row(d_w_row, w_row, S)
             d = 0
             for d < hd {
                 float dq = 0.0
@@ -659,8 +659,8 @@ func bk_causal_sdpa(
     sdpa_bk_result { d_q: d_q, d_k: d_k, d_v: d_v }
 }
 
-func bk_rope_q(float[] d_q_rope, int batch_size, int seq_len, int nh, int hd, int D, float[] freqs) []float {
-    float[] d_q = gpt_copy(d_q_rope)
+func bk_rope_q([]float d_q_rope, int batch_size, int seq_len, int nh, int hd, int D, []float freqs) []float {
+    []float d_q = gpt_copy(d_q_rope)
     int pair_dim = hd / 2
     int b = 0
     for b < batch_size {
@@ -690,8 +690,8 @@ func bk_rope_q(float[] d_q_rope, int batch_size, int seq_len, int nh, int hd, in
     d_q
 }
 
-func bk_rope_k(float[] d_k_rope, int batch_size, int seq_len, int nkv, int hd, int kv_d, float[] freqs) []float {
-    float[] d_k = gpt_copy(d_k_rope)
+func bk_rope_k([]float d_k_rope, int batch_size, int seq_len, int nkv, int hd, int kv_d, []float freqs) []float {
+    []float d_k = gpt_copy(d_k_rope)
     int pair_dim = hd / 2
     int b = 0
     for b < batch_size {
@@ -724,9 +724,9 @@ func bk_rope_k(float[] d_k_rope, int batch_size, int seq_len, int nkv, int hd, i
 func transformer_layer_backward(
     transformer_layer layer,
     transformer_layer_cache cache,
-    float[] d_out,
-    float[] rope_freqs
-) (float[], transformer_layer_grads) {
+    []float d_out,
+    []float rope_freqs
+) ([]float, transformer_layer_grads) {
     int total = cache.batch_size * cache.seq_len
     int D = layer.hidden_dim
     int nh = layer.n_head
@@ -734,52 +734,52 @@ func transformer_layer_backward(
     int hd = layer.head_dim
     int kv_d = nkv * hd
     int ffn_d = len(layer.ffn.glu_ffn.gate_weight) / D
-    float[] d_ffn_out = bk_copy(d_out)
-    float[] d_h_attn  = bk_copy(d_out)
-    float[] d_gv = bk_matmul_da(d_ffn_out, layer.ffn.glu_ffn.down_weight, total, ffn_d, D)
-    float[] d_ffn_down_w = bk_matmul_db(cache.ffn_gate_pre, d_ffn_out, total, ffn_d, D)
-    float[] gv_out = bk_alloc(total * ffn_d)
+    []float d_ffn_out = bk_copy(d_out)
+    []float d_h_attn  = bk_copy(d_out)
+    []float d_gv = bk_matmul_da(d_ffn_out, layer.ffn.glu_ffn.down_weight, total, ffn_d, D)
+    []float d_ffn_down_w = bk_matmul_db(cache.ffn_gate_pre, d_ffn_out, total, ffn_d, D)
+    []float gv_out = bk_alloc(total * ffn_d)
     int idx = 0
     for idx < total * ffn_d {
         gv_out[idx] = gpt_swish(cache.ffn_gate_pre[idx]) * cache.ffn_val_pre[idx]
         idx = idx + 1
     }
     d_ffn_down_w = bk_matmul_db(gv_out, d_ffn_out, total, ffn_d, D)
-    float[] d_swish_gate = bk_alloc(total * ffn_d)
-    float[] d_val_pre    = bk_alloc(total * ffn_d)
+    []float d_swish_gate = bk_alloc(total * ffn_d)
+    []float d_val_pre    = bk_alloc(total * ffn_d)
     idx = 0
     for idx < total * ffn_d {
         d_swish_gate[idx] = d_gv[idx] * cache.ffn_val_pre[idx]
         d_val_pre[idx]    = d_gv[idx] * gpt_swish(cache.ffn_gate_pre[idx])
         idx = idx + 1
     }
-    float[] d_gate_pre = bk_alloc(total * ffn_d)
+    []float d_gate_pre = bk_alloc(total * ffn_d)
     idx = 0
     for idx < total * ffn_d {
         d_gate_pre[idx] = d_swish_gate[idx] * bk_swish_grad(cache.ffn_gate_pre[idx])
         idx = idx + 1
     }
-    float[] d_normed2_from_gate  = bk_matmul_da(d_gate_pre, layer.ffn.glu_ffn.gate_weight,  total, D, ffn_d)
-    float[] d_normed2_from_value = bk_matmul_da(d_val_pre,  layer.ffn.glu_ffn.value_weight, total, D, ffn_d)
-    float[] d_normed2 = gpt_add(d_normed2_from_gate, d_normed2_from_value)
-    float[] d_ffn_gate_w  = bk_matmul_db(cache.normed2, d_gate_pre, total, D, ffn_d)
-    float[] d_ffn_val_w   = bk_matmul_db(cache.normed2, d_val_pre,  total, D, ffn_d)
-    float[] d_h_attn2
-    float[] d_norm2_gamma
+    []float d_normed2_from_gate  = bk_matmul_da(d_gate_pre, layer.ffn.glu_ffn.gate_weight,  total, D, ffn_d)
+    []float d_normed2_from_value = bk_matmul_da(d_val_pre,  layer.ffn.glu_ffn.value_weight, total, D, ffn_d)
+    []float d_normed2 = gpt_add(d_normed2_from_gate, d_normed2_from_value)
+    []float d_ffn_gate_w  = bk_matmul_db(cache.normed2, d_gate_pre, total, D, ffn_d)
+    []float d_ffn_val_w   = bk_matmul_db(cache.normed2, d_val_pre,  total, D, ffn_d)
+    []float d_h_attn2
+    []float d_norm2_gamma
     (d_h_attn2, d_norm2_gamma) = bk_rmsn(layer.norm2, d_normed2, cache.h_attn, cache.batch_size, cache.seq_len)
     d_h_attn = bk_add_inplace(d_h_attn, d_h_attn2)
-    float[] d_attn_proj = bk_copy(d_h_attn)
-    float[] d_x_residual = bk_copy(d_h_attn)
-    float[] d_attn_out = bk_matmul_da(d_attn_proj, layer.attn.output_weight, total, D, D)
-    float[] d_wo       = bk_matmul_db(cache.attn_out, d_attn_proj, total, D, D)
-    float[] d_q_rope_all = bk_alloc(total * D)
-    float[] d_k_rope_all = bk_alloc(total * kv_d)
-    float[] d_v_all      = bk_alloc(total * kv_d)
+    []float d_attn_proj = bk_copy(d_h_attn)
+    []float d_x_residual = bk_copy(d_h_attn)
+    []float d_attn_out = bk_matmul_da(d_attn_proj, layer.attn.output_weight, total, D, D)
+    []float d_wo       = bk_matmul_db(cache.attn_out, d_attn_proj, total, D, D)
+    []float d_q_rope_all = bk_alloc(total * D)
+    []float d_k_rope_all = bk_alloc(total * kv_d)
+    []float d_v_all      = bk_alloc(total * kv_d)
     int b = 0
     for b < cache.batch_size {
         int off_q = b * cache.seq_len * D
         int off_k = b * cache.seq_len * kv_d
-        float[] d_out_b = bk_alloc(cache.seq_len * D)
+        []float d_out_b = bk_alloc(cache.seq_len * D)
         int i = 0
         for i < cache.seq_len * D { d_out_b[i] = d_attn_out[off_q + i]; i = i+1 }
         gpt_sdpa_cache sc = cache.sdpa_per_batch[b]
@@ -794,18 +794,18 @@ func transformer_layer_backward(
         }
         b = b + 1
     }
-    float[] d_q_proj = bk_rope_q(d_q_rope_all, cache.batch_size, cache.seq_len, nh, hd, D,    rope_freqs)
-    float[] d_k_proj = bk_rope_k(d_k_rope_all, cache.batch_size, cache.seq_len, nkv, hd, kv_d, rope_freqs)
-    float[] d_wq = bk_matmul_db(cache.normed1, d_q_proj, total, D, D)
-    float[] d_wk = bk_matmul_kv_db(cache.normed1, d_k_proj, total, D, kv_d, D)
-    float[] d_wv = bk_matmul_kv_db(cache.normed1, d_v_all,  total, D, kv_d, D)
-    float[] d_normed1 = bk_matmul_da(d_q_proj, layer.attn.query_weight, total, D, D)
+    []float d_q_proj = bk_rope_q(d_q_rope_all, cache.batch_size, cache.seq_len, nh, hd, D,    rope_freqs)
+    []float d_k_proj = bk_rope_k(d_k_rope_all, cache.batch_size, cache.seq_len, nkv, hd, kv_d, rope_freqs)
+    []float d_wq = bk_matmul_db(cache.normed1, d_q_proj, total, D, D)
+    []float d_wk = bk_matmul_kv_db(cache.normed1, d_k_proj, total, D, kv_d, D)
+    []float d_wv = bk_matmul_kv_db(cache.normed1, d_v_all,  total, D, kv_d, D)
+    []float d_normed1 = bk_matmul_da(d_q_proj, layer.attn.query_weight, total, D, D)
     d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_k_proj, layer.attn.key_weight,   total, D, kv_d, D))
     d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_v_all,  layer.attn.value_weight, total, D, kv_d, D))
-    float[] d_x_from_norm
-    float[] d_norm1_gamma
+    []float d_x_from_norm
+    []float d_norm1_gamma
     (d_x_from_norm, d_norm1_gamma) = bk_rmsn(layer.norm1, d_normed1, cache.x_in, cache.batch_size, cache.seq_len)
-    float[] d_input = bk_add_inplace(d_x_residual, d_x_from_norm)
+    []float d_input = bk_add_inplace(d_x_residual, d_x_from_norm)
     transformer_layer_grads grads = transformer_layer_grads {
         d_norm1_gamma: d_norm1_gamma,
         d_norm2_gamma: d_norm2_gamma,
@@ -822,15 +822,15 @@ func transformer_layer_backward(
 func model_backward
     language_model model,
     gpt_forward_cache fc,
-    int[] targets
+    []int targets
 ) gpt_param_grads {
     int total = fc.batch_size * fc.seq_len
     int D = model.n_embd
     int V = model.vocab_size
-    float[] d_logits = gpt_ce_backward(fc.logits, targets, total, V)
-    float[] d_final_normed
-    float[] d_lm_head
-    float[] d_final_gamma
+    []float d_logits = gpt_ce_backward(fc.logits, targets, total, V)
+    []float d_final_normed
+    []float d_lm_head
+    []float d_final_gamma
     if model.config.tie_embeddings {
         d_final_normed = bk_matmul_t_da(d_logits, model.lm_head, total, D, V)
         d_lm_head      = bk_matmul_t_db(fc.final_normed, d_logits, total, D, V)
@@ -839,23 +839,23 @@ func model_backward
         d_lm_head      = bk_matmul_db(fc.final_normed, d_logits, total, D, V)
     }
     transformer_layer_cache last_cache = fc.layers[model.n_layer - 1]
-    float[] hidden_before_norm = gpt_add(last_cache.h_attn, last_cache.ffn_out)
-    float[] d_hidden
+    []float hidden_before_norm = gpt_add(last_cache.h_attn, last_cache.ffn_out)
+    []float d_hidden
     (d_hidden, d_final_gamma) = bk_rmsn(model.final_norm, d_final_normed, hidden_before_norm, fc.batch_size, fc.seq_len)
     []transformer_layer_grads layer_grads = make([]transformer_layer_grads, model.n_layer)
     int l = model.n_layer - 1
     for l >= 0 {
         transformer_layer layer = transformer_layer_at(model.layers, l)
         transformer_layer_cache lc = fc.layers[l]
-        float[] d_layer_in
+        []float d_layer_in
         transformer_layer_grads lg
         (d_layer_in, lg) = transformer_layer_backward(layer, lc, d_hidden, model.rope.frequencies)
         layer_grads[l] = lg
         d_hidden = d_layer_in
         l = l - 1
     }
-    float[] d_wte = bk_alloc(V * D)
-    float[] d_wpe = bk_alloc(model.block_size * D)
+    []float d_wte = bk_alloc(V * D)
+    []float d_wpe = bk_alloc(model.block_size * D)
     int b2 = 0
     for b2 < fc.batch_size {
         int s = 0
@@ -915,11 +915,11 @@ func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta
     }
 }
 
-func adamw_update_vec(float[] param, float[] grad, float[] m, float[] v, int step, float lr, float b1, float b2, float eps, float wd) []float {
+func adamw_update_vec([]float param, []float grad, []float m, []float v, int step, float lr, float b1, float b2, float eps, float wd) []float {
     float bc1 = 1.0 - bk_pow(b1, step)
     float bc2 = 1.0 - bk_pow(b2, step)
     int n = len(param)
-    float[] p = bk_copy(param)
+    []float p = bk_copy(param)
     int i = 0
     for i < n {
         m[i] = b1 * m[i] + (1.0 - b1) * grad[i]
@@ -983,13 +983,13 @@ struct gpt_train_step_result {
 func train_step
     language_model model,
     gpt_adamw_state opt,
-    int[] token_ids,
+    []int token_ids,
     int batch_size,
     int seq_len,
     float grad_clip
 ) gpt_train_step_result {
     int total = batch_size * seq_len
-    int[] targets = gpt_alloc_int(total)
+    []int targets = gpt_alloc_int(total)
     int i = 0
     for i < total {
         int pos_in_seq = i - (i / seq_len) * seq_len
@@ -1001,7 +1001,7 @@ func train_step
         i = i + 1
     }
     gpt_forward_cache fc
-    float[] logits
+    []float logits
     (fc, logits) = gpt_forward_cached(model, token_ids, batch_size, seq_len)
     float loss = gpt_compute_ce_loss(logits, targets, total, model.vocab_size)
     gpt_param_grads grads = gpt_backward(model, fc, targets)
@@ -1035,7 +1035,7 @@ func train_step
     }
 }
 
-func gpt_compute_ce_loss(float[] logits, int[] targets, int total, int vocab) float {
+func gpt_compute_ce_loss([]float logits, []int targets, int total, int vocab) float {
     float loss = 0.0
     int count = 0
     int i = 0
@@ -1058,7 +1058,7 @@ func gpt_compute_ce_loss(float[] logits, int[] targets, int total, int vocab) fl
     loss / (count * 1.0)
 }
 
-func bk_vec_norm_sq(float[] v) float {
+func bk_vec_norm_sq([]float v) float {
     float s = 0.0
     int i = 0
     for i < len(v) { s = s + v[i] * v[i]; i = i + 1 }

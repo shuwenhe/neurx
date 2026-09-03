@@ -102,7 +102,7 @@ func backward_layer_norm_s(tensor_s grad_output, tensor_s input, float epsilon) 
 }
 
 func backward_relu_s(tensor_s grad_output, tensor_s input) tensor_s {
-    float[] grad_data = make(float[], 0)
+    []float grad_data = make([]float, 0)
     int i = 0
     for i < len(input.data) {
         if input.data[i] > 0.0 {
@@ -140,7 +140,7 @@ func chain_rule_s(tensor_s upstream_grad, string op_type, tensor_s input) tensor
 }
 
 func make_zeros_like_s(tensor_s t) tensor_s {
-    float[] zeros = make(float[], 0)
+    []float zeros = make([]float, 0)
     int i = 0
     for i < t.total_elements {
         zeros = append(zeros, 0.0)
@@ -158,7 +158,7 @@ func make_zeros_like_s(tensor_s t) tensor_s {
 }
 
 func copy_tensor_s(tensor_s t) tensor_s {
-    float[] copied = make(float[], 0)
+    []float copied = make([]float, 0)
     int i = 0
     for i < len(t.data) {
         copied = append(copied, t.data[i])
@@ -176,7 +176,7 @@ func copy_tensor_s(tensor_s t) tensor_s {
 }
 
 func mul_tensors_s(tensor_s a, tensor_s b) tensor_s {
-    float[] result = make(float[], 0)
+    []float result = make([]float, 0)
     int i = 0
     for i < len(a.data) {
         result = append(result, a.data[i] * b.data[i])
@@ -194,11 +194,11 @@ func mul_tensors_s(tensor_s a, tensor_s b) tensor_s {
 }
 
 func matmul_s(tensor_s a, tensor_s b) tensor_s {
-    float[] result = make(float[], 0)
+    []float result = make([]float, 0)
     tensor_s {
         data: result,
-        shape: make(int[], 0),
-        strides: make(int[], 0),
+        shape: make([]int, 0),
+        strides: make([]int, 0),
         rank: 2,
         total_elements: 0,
         dtype: "float32",

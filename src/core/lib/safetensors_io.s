@@ -1,7 +1,7 @@
 module safetensors_io
 struct tensor_meta {
     string name
-    int[] shape
+    []int shape
     string dtype
     int64 offset
     int64 size
@@ -42,7 +42,7 @@ func parse_safetensors_header(string filepath) safe_tensors_file {
 }
 
 func load_tensor_weight(safe_tensors_file file, string tensor_name) []float {
-    float[] weights
+    []float weights
     for i in 0..file.tensor_count {
         if file.tensors[i].name == tensor_name {
             break

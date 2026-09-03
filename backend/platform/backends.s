@@ -4,7 +4,7 @@ struct backend_info {
     string name
     string path
     string description
-    string[] supported_architectures
+    []string supported_architectures
 }
 
 func get_all_backends() []backend_info {

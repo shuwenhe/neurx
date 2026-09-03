@@ -30,7 +30,7 @@ func demo_gradient_clipping() {
     println("")
     println("=== Gradient Clipping Demo ===")
     println("")
-    float[] grads = float[]{1.0, 2.0, 3.0, 4.0, 5.0}
+    []float grads = []float{1.0, 2.0, 3.0, 4.0, 5.0}
     float norm_sq = 0.0
     int i = 0
     for i < len(grads) {

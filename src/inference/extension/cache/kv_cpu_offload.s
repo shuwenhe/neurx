@@ -38,8 +38,8 @@ struct cache_metadata {
 }
 
 struct kv_cache_entry {
-    float[] key
-    float[] value
+    []float key
+    []float value
     cache_metadata metadata
 }
 
@@ -69,7 +69,7 @@ func kv_cache_pool_new(cache_config config) kv_cache_pool {
     }
 }
 
-func calculate_entry_size(*float[] k, *float[] v) int {
+func calculate_entry_size(*[]float k, *[]float v) int {
     (len(k) + len(v)) * 4
 }
 
@@ -77,8 +77,8 @@ func (kv_cache_pool* pool) put_kv(
     sequence_id: int,
     layer_id: int,
     token_position: int,
-    key: *float[],
-    *float[] value
+    key: *[]float,
+    *[]float value
 ) ((), error) {
     cache_key := sequence_id * 1000000 + layer_id * 1000 + token_position
     entry_size := calculate_entry_size(key, value)
@@ -208,7 +208,7 @@ func (pool* pool) get_cache_hit_rate() float {
 }
 
 func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) ((), error) {
-    keys_to_remove := int[]()
+    keys_to_remove := []int()
     for key in pool.gpu_cache.keys() {
         key_seq_id := key / 1000000
         if key_seq_id == sequence_id {
@@ -254,8 +254,8 @@ func main() {
         enable_compression: false,
     }
     pool := kv_cache_pool_new(config)
-    key := float[]()
-    value := float[]()
+    key := []float()
+    value := []float()
     i := 0
     for i < 1024 {
         key = append(key, 0.1)

@@ -19,7 +19,7 @@ func init_advanced_kv_cache(string node_id) int {
     return 1
 }
 
-func advanced_cache_query_kv(int[] prompt_tokens) []int {
+func advanced_cache_query_kv([]int prompt_tokens) []int {
     if g_advanced_cache_enabled == 0 {
         return []int{}
     }
@@ -27,12 +27,12 @@ func advanced_cache_query_kv(int[] prompt_tokens) []int {
     return advanced_cache_query(g_advanced_cache_engine, prefix_hash)
 }
 
-func advanced_cache_store_kv(int[] prompt_tokens, float[] kv_data) int {
+func advanced_cache_store_kv([]int prompt_tokens, []float kv_data) int {
     if g_advanced_cache_enabled == 0 {
         return -1
     }
     string prefix_hash = compute_prefix_hash(prompt_tokens, 100)
-    int[] block_ids = make([]int, 24)
+    []int block_ids = make([]int, 24)
     int i = 0
     for i < 24 {
         block_ids[i] = i

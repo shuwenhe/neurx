@@ -12,11 +12,11 @@ struct module {
     string name
     bool training
     []parameter parameters
-    string[] parameter_names
+    []string parameter_names
     []tensor buffers
-    string[] buffer_names
+    []string buffer_names
     []module children
-    string[] child_names
+    []string child_names
 }
 
 struct parameter_list {
@@ -317,12 +317,12 @@ struct gru_cell_layer {
 }
 
 struct parameter_dict {
-    string[] keys
+    []string keys
     []parameter values
 }
 
 struct module_dict {
-    string[] keys
+    []string keys
     []module values
 }
 
@@ -545,8 +545,8 @@ func module_child_count(module m) int {
     return len(m.children)
 }
 
-func copy_strings(string[] values) []string {
-    string[] out = make([]string, len(values))
+func copy_strings([]string values) []string {
+    []string out = make([]string, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -578,17 +578,17 @@ func module_first_parameter(module m) tensor {
         }
         i = i + 1
     }
-    float[] empty_data = []float{}
-    int[] empty_shape = make([]int, 1)
+    []float empty_data = []float{}
+    []int empty_shape = make([]int, 1)
     empty_shape[0] = 0
     return neurx.tensor.new(empty_data, empty_shape, false)
 }
 
 func module_named_parameters(module m) []string {
-    string[] names = copy_strings(m.parameter_names)
+    []string names = copy_strings(m.parameter_names)
     int i = 0
     for i < len(m.children) {
-        string[] child_names = module_named_parameters(m.children[i])
+        []string child_names = module_named_parameters(m.children[i])
         int j = 0
         for j < len(child_names) {
             names = append(names, m.child_names[i] + "." + child_names[j])
@@ -600,10 +600,10 @@ func module_named_parameters(module m) []string {
 }
 
 func module_named_buffers(module m) []string {
-    string[] names = copy_strings(m.buffer_names)
+    []string names = copy_strings(m.buffer_names)
     int i = 0
     for i < len(m.children) {
-        string[] child_names = module_named_buffers(m.children[i])
+        []string child_names = module_named_buffers(m.children[i])
         int j = 0
         for j < len(child_names) {
             names = append(names, m.child_names[i] + "." + child_names[j])
@@ -666,8 +666,8 @@ func module_find_child_index(module m, string name) int {
 func module_get_parameter(module m, string name) tensor {
     int index = module_find_parameter_index(m, name)
     if index < 0 {
-        float[] empty_data = []float{}
-        int[] empty_shape = make([]int, 1)
+        []float empty_data = []float{}
+        []int empty_shape = make([]int, 1)
         empty_shape[0] = 0
         return neurx.tensor.new(empty_data, empty_shape, false)
     }
@@ -677,8 +677,8 @@ func module_get_parameter(module m, string name) tensor {
 func module_get_buffer(module m, string name) tensor {
     int index = module_find_buffer_index(m, name)
     if index < 0 {
-        float[] empty_data = []float{}
-        int[] empty_shape = make([]int, 1)
+        []float empty_data = []float{}
+        []int empty_shape = make([]int, 1)
         empty_shape[0] = 0
         return neurx.tensor.new(empty_data, empty_shape, false)
     }
@@ -756,7 +756,7 @@ func parameter_list_tensors(parameter_list plist) []tensor {
 }
 
 func parameter_list_names(parameter_list plist) []string {
-    string[] out = make([]string, len(plist.items))
+    []string out = make([]string, len(plist.items))
     int i = 0
     for i < len(plist.items) {
         out[i] = plist.items[i].name
@@ -790,7 +790,7 @@ func module_list_load_state_dict(module_list list, module_list other) module_lis
 }
 
 func module_list_names(module_list list) []string {
-    string[] out = make([]string, len(list.items))
+    []string out = make([]string, len(list.items))
     int i = 0
     for i < len(list.items) {
         out[i] = list.items[i].name
@@ -873,7 +873,7 @@ func flatten_module() module {
 
 func new_embedding_layer(int vocab_size, int embedding_dim, int padding_idx) embedding_layer {
     int total = vocab_size * embedding_dim
-    float[] weight_data = make([]float, total)
+    []float weight_data = make([]float, total)
     int i = 0
     for i < total {
         weight_data[i] = 0.0
@@ -922,7 +922,7 @@ func embedding_layer_eval(embedding_layer layer) embedding_layer {
 
 func new_embedding_bag_layer(int vocab_size, int embedding_dim, int padding_idx, bool mean) embedding_bag_layer {
     int total = vocab_size * embedding_dim
-    float[] weight_data = make([]float, total)
+    []float weight_data = make([]float, total)
     int i = 0
     for i < total {
         weight_data[i] = 0.0
@@ -968,8 +968,8 @@ func embedding_bag_layer_eval(embedding_bag_layer layer) embedding_bag_layer {
 }
 
 func new_layer_norm_layer(int normalized_dims, float eps, int hidden_size) layer_norm_layer {
-    float[] weight_data = make([]float, hidden_size)
-    float[] bias_data = make([]float, hidden_size)
+    []float weight_data = make([]float, hidden_size)
+    []float bias_data = make([]float, hidden_size)
     int i = 0
     for i < hidden_size {
         weight_data[i] = 1.0
@@ -1015,8 +1015,8 @@ func layer_norm_layer_eval(layer_norm_layer layer) layer_norm_layer {
 }
 
 func new_rms_norm_layer(int normalized_dims, float eps, int hidden_size) rms_norm_layer {
-    float[] weight_data = make([]float, hidden_size)
-    float[] bias_data = make([]float, hidden_size)
+    []float weight_data = make([]float, hidden_size)
+    []float bias_data = make([]float, hidden_size)
     int i = 0
     for i < hidden_size {
         weight_data[i] = 1.0
@@ -1062,10 +1062,10 @@ func rms_norm_layer_eval(rms_norm_layer layer) rms_norm_layer {
 }
 
 func new_batch_norm_layer(int num_features, float eps, float momentum, bool track_running_stats) batch_norm_layer {
-    float[] weight_data = make([]float, num_features)
-    float[] bias_data = make([]float, num_features)
-    float[] running_mean_data = make([]float, num_features)
-    float[] running_var_data = make([]float, num_features)
+    []float weight_data = make([]float, num_features)
+    []float bias_data = make([]float, num_features)
+    []float running_mean_data = make([]float, num_features)
+    []float running_var_data = make([]float, num_features)
     int i = 0
     for i < num_features {
         weight_data[i] = 1.0
@@ -1127,10 +1127,10 @@ func batch_norm_layer_eval(batch_norm_layer layer) batch_norm_layer {
 }
 
 func new_sync_batch_norm_layer(int num_features, float eps, float momentum, int world_size, int rank, bool track_running_stats) sync_batch_norm_layer {
-    float[] weight_data = make([]float, num_features)
-    float[] bias_data = make([]float, num_features)
-    float[] running_mean_data = make([]float, num_features)
-    float[] running_var_data = make([]float, num_features)
+    []float weight_data = make([]float, num_features)
+    []float bias_data = make([]float, num_features)
+    []float running_mean_data = make([]float, num_features)
+    []float running_var_data = make([]float, num_features)
     int i = 0
     for i < num_features {
         weight_data[i] = 1.0
@@ -1196,8 +1196,8 @@ func sync_batch_norm_layer_eval(sync_batch_norm_layer layer) sync_batch_norm_lay
 }
 
 func new_group_norm_layer(int num_groups, int num_channels, float eps) group_norm_layer {
-    float[] weight_data = make([]float, num_channels)
-    float[] bias_data = make([]float, num_channels)
+    []float weight_data = make([]float, num_channels)
+    []float bias_data = make([]float, num_channels)
     int i = 0
     for i < num_channels {
         weight_data[i] = 1.0
@@ -1237,10 +1237,10 @@ func group_norm_layer_module(group_norm_layer layer) module {
 }
 
 func new_instance_norm_layer(int num_features, float eps, float momentum, bool track_running_stats) instance_norm_layer {
-    float[] weight_data = make([]float, num_features)
-    float[] bias_data = make([]float, num_features)
-    float[] running_mean_data = make([]float, num_features)
-    float[] running_var_data = make([]float, num_features)
+    []float weight_data = make([]float, num_features)
+    []float bias_data = make([]float, num_features)
+    []float running_mean_data = make([]float, num_features)
+    []float running_var_data = make([]float, num_features)
     int i = 0
     for i < num_features {
         weight_data[i] = 1.0
@@ -1498,8 +1498,8 @@ func parameter_dict_set(parameter_dict dict, string key, tensor value) parameter
 func parameter_dict_get(parameter_dict dict, string key) tensor {
     int index = parameter_dict_find(dict, key)
     if index < 0 {
-        float[] empty_data = []float{}
-        int[] empty_shape = make([]int, 1)
+        []float empty_data = []float{}
+        []int empty_shape = make([]int, 1)
         empty_shape[0] = 0
         return neurx.tensor.new(empty_data, empty_shape, false)
     }
@@ -2365,7 +2365,7 @@ func new_rnn_cell_layer(int input_size, int hidden_size) rnn_cell_layer {
     }
 }
 
-func rnn_cell_layer_forward(rnn_cell_layer layer, float[] input, int seq_len, float[] h0) neurx.nn.rnn.rnn_output {
+func rnn_cell_layer_forward(rnn_cell_layer layer, []float input, int seq_len, []float h0) neurx.nn.rnn.rnn_output {
     return neurx.nn.rnn.rnn_forward(layer.state, input, seq_len, h0)
 }
 
@@ -2398,7 +2398,7 @@ func new_lstm_cell_layer(int input_size, int hidden_size) lstm_cell_layer {
     }
 }
 
-func lstm_cell_layer_forward(lstm_cell_layer layer, float[] input, int seq_len, float[] h0, float[] c0) neurx.nn.rnn.lstm_output {
+func lstm_cell_layer_forward(lstm_cell_layer layer, []float input, int seq_len, []float h0, []float c0) neurx.nn.rnn.lstm_output {
     return neurx.nn.rnn.lstm_forward(layer.state, input, seq_len, h0, c0)
 }
 
@@ -2434,7 +2434,7 @@ func new_gru_cell_layer(int input_size, int hidden_size) gru_cell_layer {
     }
 }
 
-func gru_cell_layer_forward(gru_cell_layer layer, float[] input, int seq_len, float[] h0) neurx.nn.rnn.gru_output {
+func gru_cell_layer_forward(gru_cell_layer layer, []float input, int seq_len, []float h0) neurx.nn.rnn.gru_output {
     return neurx.nn.rnn.gru_forward(layer.state, input, seq_len, h0)
 }
 

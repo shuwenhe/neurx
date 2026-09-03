@@ -1,12 +1,12 @@
 struct world_state {
     string                 snapshot_id
-    string[]               entity_ids
-    string[]               entity_types
-    string[]               entity_values
-    string[]               relation_ids
-    string[]               relation_types
-    string[]               relation_src
-    string[]               relation_dst
+    []string               entity_ids
+    []string               entity_types
+    []string               entity_values
+    []string               relation_ids
+    []string               relation_types
+    []string               relation_src
+    []string               relation_dst
     int                    step
     string                 last_action
     string                 last_observation

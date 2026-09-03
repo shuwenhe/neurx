@@ -1,7 +1,7 @@
 package main
 
 struct tensor {
-    float[] data
+    []float data
     int rows
     int cols
 }
@@ -11,13 +11,13 @@ func test_basic_attention_forward() {
     hidden_dim := 8
     num_heads := 2
     head_dim := 4
-    float[] input = []float{}
+    []float input = []float{}
     i := 0
     for i < seq_len * hidden_dim {
         input = append(input, 0.1)
         i = i + 1
     }
-    float[] wq = []float{}
+    []float wq = []float{}
     i = 0
     for i < hidden_dim * hidden_dim {
         if i % (hidden_dim + 1) == 0 {
@@ -34,7 +34,7 @@ func test_attention_causal_mask() {
     seq_len := 4
     hidden_dim := 8
     num_heads := 2
-    float[] attn_weights = []float{}
+    []float attn_weights = []float{}
     i := 0
     for i < seq_len {
         j := 0
@@ -66,7 +66,7 @@ func test_attention_output_shape() {
     batch_size := 2
     seq_len := 5
     hidden_dim := 16
-    float[] input = []float{}
+    []float input = []float{}
     i := 0
     for i < batch_size * seq_len * hidden_dim {
         input = append(input, 0.5)
@@ -88,7 +88,7 @@ func test_scaled_dot_product() {
 }
 
 func test_softmax_stability() {
-    float[] scores = float[]{1000.0, 1001.0, 1002.0}
+    []float scores = []float{1000.0, 1001.0, 1002.0}
     println("✓ Test 6: Softmax numerical stability (framework check)")
 }
 
@@ -104,7 +104,7 @@ func test_gqa_dimensions() {
 func test_attention_gradient_shape() {
     seq_len := 3
     hidden_dim := 8
-    float[] d_output = []float{}
+    []float d_output = []float{}
     i := 0
     for i < seq_len * hidden_dim {
         d_output = append(d_output, 0.01)

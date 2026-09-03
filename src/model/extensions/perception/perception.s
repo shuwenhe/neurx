@@ -4,8 +4,8 @@ struct agent_perception_result {
     string content
     string source
     bool structured
-    string[] keys
-    string[] values
+    []string keys
+    []string values
     int field_count
 }
 
@@ -81,8 +81,8 @@ func agent_perception_detect_kind(string raw) string {
 
 func agent_perception_parse_kv(string raw) agent_perception_result {
     string text = trim(raw)
-    string[] keys = []
-    string[] values = []
+    []string keys = []
+    []string values = []
     int i = 0
     string item = ""
     for i <= len(text) {

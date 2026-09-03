@@ -15,7 +15,7 @@ struct oom_killer {
     bool oom_kill_enabled
     int last_kill_time_ms
     []process_info processes
-    int[] kill_history
+    []int kill_history
 }
 
 func new_oom_killer() oom_killer {

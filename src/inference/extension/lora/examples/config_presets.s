@@ -8,7 +8,7 @@ func preset_lightweight() lora_config {
     config.lora_alpha = 8.0
     config.lora_dropout = 0.01
     config.bias = "none"
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "v_proj")
     config.target_modules = targets
@@ -21,7 +21,7 @@ func preset_balanced() lora_config {
     config.lora_alpha = 32.0
     config.lora_dropout = 0.05
     config.bias = "lora_only"
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
     targets = append(targets, "v_proj")
@@ -36,7 +36,7 @@ func preset_high_quality() lora_config {
     config.lora_alpha = 128.0
     config.lora_dropout = 0.1
     config.bias = "all"
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
     targets = append(targets, "v_proj")
@@ -50,7 +50,7 @@ func preset_text_classification() lora_config {
     config := preset_balanced()
     config.task_type = "SEQUENCE_CLASSIFICATION"
     config.lora_rank = 8
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "v_proj")
     config.target_modules = targets
@@ -61,7 +61,7 @@ func preset_question_answering() lora_config {
     config := preset_balanced()
     config.task_type = "QUESTION_ANSWERING"
     config.lora_rank = 16
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
     targets = append(targets, "v_proj")
@@ -75,7 +75,7 @@ func preset_machine_translation() lora_config {
     config.task_type = "TRANSLATION"
     config.lora_rank = 32
     config.lora_alpha = 64.0
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
     targets = append(targets, "v_proj")
@@ -90,7 +90,7 @@ func preset_code_generation() lora_config {
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 64
     config.lora_alpha = 128.0
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "v_proj")
     targets = append(targets, "dense")
@@ -103,7 +103,7 @@ func preset_instruction_following() lora_config {
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 16
     config.lora_alpha = 32.0
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "v_proj")
     config.target_modules = targets
@@ -115,7 +115,7 @@ func preset_conversational() lora_config {
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 32
     config.lora_alpha = 64.0
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "q_proj")
     targets = append(targets, "k_proj")
     targets = append(targets, "v_proj")
@@ -164,7 +164,7 @@ func load_preset_by_name(string name) option[lora_config] {
 }
 
 func get_available_presets() []string {
-    presets := string[]()
+    presets := []string()
     presets = append(presets, "lightweight")
     presets = append(presets, "balanced")
     presets = append(presets, "high_quality")

@@ -14,7 +14,7 @@ func create_inference_pipeline(string model_path, string tokenizer_path) inferen
 }
 
 func tokenize_text(string text) []int {
-    int[] tokens = []int{}
+    []int tokens = []int{}
     append(tokens, 151644)
     int i = 0
     for i < len(text) {
@@ -25,8 +25,8 @@ func tokenize_text(string text) []int {
     return tokens
 }
 
-func get_embeddings(int[] token_ids) []float {
-    float[] embeddings = make([]float, 896)
+func get_embeddings([]int token_ids) []float {
+    []float embeddings = make([]float, 896)
     int j = 0
     for j < 896 {
         embeddings[j] = 0.5
@@ -35,12 +35,12 @@ func get_embeddings(int[] token_ids) []float {
     return embeddings
 }
 
-func transformer_forward(float[] embeddings) []float {
+func transformer_forward([]float embeddings) []float {
     return embeddings
 }
 
-func lm_head_forward(float[] hidden_states) []float {
-    float[] logits = make([]float, 4)
+func lm_head_forward([]float hidden_states) []float {
+    []float logits = make([]float, 4)
     logits[0] = 1.0
     logits[1] = 0.2
     logits[2] = 0.1
@@ -48,7 +48,7 @@ func lm_head_forward(float[] hidden_states) []float {
     return logits
 }
 
-func sample_token(float[] logits) int {
+func sample_token([]float logits) int {
     int max_idx = 0
     float max_val = logits[0]
     int i = 1
@@ -76,10 +76,10 @@ func decode_token_to_text(int token_id) string {
 }
 
 func generate_response(string prompt, int max_tokens) string {
-    int[] prompt_tokens = tokenize_text(prompt)
-    float[] embeddings = get_embeddings(prompt_tokens)
-    float[] hidden_states = transformer_forward(embeddings)
-    float[] logits = lm_head_forward(hidden_states)
+    []int prompt_tokens = tokenize_text(prompt)
+    []float embeddings = get_embeddings(prompt_tokens)
+    []float hidden_states = transformer_forward(embeddings)
+    []float logits = lm_head_forward(hidden_states)
     string generated_text = ""
     int tokens_generated = 0
     for tokens_generated < max_tokens && len(logits) > 0 {

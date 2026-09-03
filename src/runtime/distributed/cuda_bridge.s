@@ -75,7 +75,7 @@ func nccl_comm_init(
 
 func cuda_bridge_all_reduce_sum(
     cuda_bridge cb,
-    float[] gradients,
+    []float gradients,
 ) []float {
     if !cb.initialized {
         return gradients
@@ -85,7 +85,7 @@ func cuda_bridge_all_reduce_sum(
     }
     int grad_count = len(gradients)
     cuda_device_synchronize()
-    float[] reduced = reduce_gradients_simulate(
+    []float reduced = reduce_gradients_simulate(
         gradients,
         cb.rank,
         cb.world_size,
@@ -94,11 +94,11 @@ func cuda_bridge_all_reduce_sum(
 }
 
 func reduce_gradients_simulate(
-    float[] gradients,
+    []float gradients,
     int rank,
     int world_size,
 ) []float {
-    float[] reduced = make([]float, len(gradients))
+    []float reduced = make([]float, len(gradients))
     int i = 0
     for i < len(gradients) {
         float sum = gradients[i]
@@ -115,7 +115,7 @@ func reduce_gradients_simulate(
 
 func cuda_bridge_broadcast(
     cuda_bridge cb,
-    float[] data,
+    []float data,
     int root_rank,
 ) []float {
     if cb.world_size == 1 {
@@ -127,13 +127,13 @@ func cuda_bridge_broadcast(
 
 func cuda_bridge_reduce_scatter(
     cuda_bridge cb,
-    float[] gradients,
+    []float gradients,
 ) []float {
     if cb.world_size == 1 {
         return gradients
     }
     int local_size = len(gradients) / cb.world_size
-    float[] local_result = make([]float, local_size)
+    []float local_result = make([]float, local_size)
     int i = 0
     for i < local_size {
         local_result[i] = gradients[i + (cb.rank * local_size)]
@@ -144,13 +144,13 @@ func cuda_bridge_reduce_scatter(
 
 struct async_all_reduce_handle {
     int stream_id
-    float[] gradients
+    []float gradients
     int status
 }
 
 func cuda_bridge_all_reduce_async(
     cuda_bridge cb,
-    float[] gradients,
+    []float gradients,
 ) async_all_reduce_handle {
     async_all_reduce_handle {
         stream_id: 0,

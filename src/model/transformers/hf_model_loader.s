@@ -152,7 +152,7 @@ func generate_text(
     print("Temperature: " + float_to_string(config.temperature) + "\n")
     print("Top-p: " + float_to_string(config.top_p) + "\n")
     print("Top-k: " + int_to_string(config.top_k) + "\n\n")
-    string[] tokens = hf_tokenizer.tokenize_text(prompt, model.tokenizer)
+    []string tokens = hf_tokenizer.tokenize_text(prompt, model.tokenizer)
     print("✓ Tokenized to " + int_to_string(len(tokens)) + " tokens\n")
     string generated = prompt
     for i = 0; i < config.max_new_tokens; i = i + 1 {

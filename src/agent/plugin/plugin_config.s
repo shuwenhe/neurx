@@ -187,18 +187,18 @@ func (config_manager* m) register_schema(schema config_schema) bool {
 	return true
 }
 
-func (config_manager* m) validate_config(config_id string, schema_id string) (bool, string[]) {
+func (config_manager* m) validate_config(config_id string, schema_id string) (bool, []string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	config, config_exists := m.configs[config_id]
 	if !config_exists {
-		return false, make(string[], 0)
+		return false, make([]string, 0)
 	}
 	schema, schema_exists := m.schemas[schema_id]
 	if !schema_exists {
-		return false, make(string[], 0)
+		return false, make([]string, 0)
 	}
-	errors := make(string[], 0)
+	errors := make([]string, 0)
 	for rule := range schema.rules {
 		value, exists := config.config_data[rule.field_name]
 		if rule.is_required && !exists {

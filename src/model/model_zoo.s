@@ -16,7 +16,7 @@ struct model_spec {
     bool use_cache
     bool tie_word_embeddings
     f32 initializer_range
-    architectures: string[]
+    architectures: []string
 }
 
 func create_llama_7b() model_spec {

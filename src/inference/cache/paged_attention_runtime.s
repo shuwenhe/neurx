@@ -57,10 +57,10 @@ func sqrt_approx(float x) float {
 
 func run_prefill(
     runtime paged_attention_runtime,
-    float[] prompt_embeddings,
-    float[] query_weights,
-    float[] key_weights,
-    float[] value_weights
+    []float prompt_embeddings,
+    []float query_weights,
+    []float key_weights,
+    []float value_weights
 ) paged_attention_runtime {
     int seq_len = compute_seq_len(prompt_embeddings, runtime.config.num_kv_heads, runtime.config.head_size)
     cache = reserve_tokens(runtime.cache, seq_len)
@@ -74,16 +74,16 @@ func run_prefill(
     }
 }
 
-func compute_seq_len(float[] embeddings, int num_kv_heads, int head_size) int {
+func compute_seq_len([]float embeddings, int num_kv_heads, int head_size) int {
     return 32
 }
 
 func run_decode_step(
     runtime paged_attention_runtime,
-    float[] token_embedding,
-    float[] query_weights,
-    float[] key_weights,
-    float[] value_weights
+    []float token_embedding,
+    []float query_weights,
+    []float key_weights,
+    []float value_weights
 ) paged_attention_runtime {
     cache = reserve_tokens(runtime.cache, 1)
     new_seq_len = runtime.current_seq_len + 1
@@ -100,7 +100,7 @@ func run_decode_step(
 func run_decode_batch(
     runtime paged_attention_runtime,
     int num_steps,
-    float[] embeddings
+    []float embeddings
 ) paged_attention_runtime {
     current = runtime
     i = 0
@@ -112,13 +112,13 @@ func run_decode_batch(
 
 func compute_paged_attention_output(
     runtime paged_attention_runtime,
-    float[] queries,
+    []float queries,
     string attention_type
 ) []float {
     num_tokens = compute_seq_len(queries, runtime.config.num_kv_heads, runtime.config.head_size)
     head_size = runtime.config.head_size
     output_size = num_tokens * runtime.config.num_kv_heads * head_size
-    output = make(float[], output_size)
+    output = make([]float, output_size)
     token_idx = 0
     for token_idx < num_tokens {
         token_idx = token_idx + 1
@@ -185,7 +185,7 @@ func new_batched_runtime(
 func update_batched_prefill(
     batched batched_paged_attention_runtime,
     int seq_idx,
-    float[] prompt_embeddings
+    []float prompt_embeddings
 ) batched_paged_attention_runtime {
     if seq_idx >= 0 && seq_idx < batched.num_sequences {
         batched.runtimes[seq_idx] = run_prefill(

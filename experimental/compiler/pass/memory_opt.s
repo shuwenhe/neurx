@@ -5,7 +5,7 @@ use neurx.experimental.compiler.ir.graph.computation_graph
 struct memory_usage {
     int peak_memory
     int total_memory
-    int[] memory_per_value
+    []int memory_per_value
 }
 
 struct memory_opt_result {
@@ -36,8 +36,8 @@ func compute_memory_usage(*computation_graph g) memory_usage {
     }
 }
 
-func find_reusable_values(*computation_graph g, *int[] lifetime) []int {
-    reusable = int[]()
+func find_reusable_values(*computation_graph g, *[]int lifetime) []int {
+    reusable = []int()
 
     for i in range(len(g.values)) {
         for j in range(i + 1, len(g.values)) {

@@ -5,7 +5,7 @@ struct semaphore {
     int value
     int owner_pid
     int wait_count
-    int[] waiters  
+    []int waiters  
 }
 
 struct semaphore_set {

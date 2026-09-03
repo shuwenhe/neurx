@@ -164,7 +164,7 @@ func (BaseExecutor* e) execute_decode_phase(sequences []string) ExecutionResult 
 }
 
 func (BaseExecutor* e) select_prefill_sequences() []string {
-    result := make(string[], 0)
+    result := make([]string, 0)
     count := i32(0)
     for seq_id, status := range e.sequences {
         if status.phase == PHASE_PREFILL && count < e.config.max_batch_size {
@@ -176,7 +176,7 @@ func (BaseExecutor* e) select_prefill_sequences() []string {
 }
 
 func (BaseExecutor* e) select_decode_sequences() []string {
-    result := make(string[], 0)
+    result := make([]string, 0)
     count := i32(0)
     for seq_id, status := range e.sequences {
         if status.phase == PHASE_DECODE && count < e.config.max_batch_size {

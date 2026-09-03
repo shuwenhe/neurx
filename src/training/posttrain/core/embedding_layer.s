@@ -14,8 +14,8 @@ struct rope_encoding_state_s {
 }
 
 struct embedding_output_s {
-    float[][] embeddings
-    float[][] pos_encoded
+    []float[] embeddings
+    []float[] pos_encoded
     int batch_size
     int seq_len
     int hidden_dim
@@ -39,7 +39,7 @@ func new_rope_encoding_state_s(int dim) rope_encoding_state_s {
 }
 
 func compute_rope_freqs(rope_encoding_state_s state, int position) []float {
-    float[] freqs
+    []float freqs
     int i = 0
     for i < state.dim {
         float inv_freq = 1.0
@@ -50,9 +50,9 @@ func compute_rope_freqs(rope_encoding_state_s state, int position) []float {
     freqs
 }
 
-func apply_rope_s(float[] token_emb, int position, rope_encoding_state_s rope_state) []float {
-    float[] rotated
-    float[] freqs = compute_rope_freqs(rope_state, position)
+func apply_rope_s([]float token_emb, int position, rope_encoding_state_s rope_state) []float {
+    []float rotated
+    []float freqs = compute_rope_freqs(rope_state, position)
     int dim = len(token_emb)
     int i = 0
     for i < dim {
@@ -75,8 +75,8 @@ func apply_rope_s(float[] token_emb, int position, rope_encoding_state_s rope_st
     rotated
 }
 
-func embedding_lookup_s(int[] token_ids, float[][] embedding_matrix) float[][] {
-    float[][] result
+func embedding_lookup_s([]int token_ids, []float[] embedding_matrix) []float[] {
+    []float[] result
     int i = 0
     for i < len(token_ids) {
         int token_id = token_ids[i]
@@ -88,12 +88,12 @@ func embedding_lookup_s(int[] token_ids, float[][] embedding_matrix) float[][] {
     result
 }
 
-func apply_embedding_scale_s(float[][] embeddings, float scale) float[][] {
-    float[][] scaled
+func apply_embedding_scale_s([]float[] embeddings, float scale) []float[] {
+    []float[] scaled
     int i = 0
     for i < len(embeddings) {
-        float[] token_emb = embeddings[i]
-        float[] scaled_token = make(float[], 0)
+        []float token_emb = embeddings[i]
+        []float scaled_token = make([]float, 0)
         int j = 0
         for j < len(token_emb) {
             scaled_token = append(scaled_token, token_emb[j] * scale)

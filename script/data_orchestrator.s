@@ -134,7 +134,7 @@ func (data_orchestrator* d) split(train_ratio float32, val_ratio float32) error 
     train_dir := filepath.Join(filepath.Dir(d.config.outputPath), "train")
     val_dir := filepath.Join(filepath.Dir(d.config.outputPath), "val")
     test_dir := filepath.Join(filepath.Dir(d.config.outputPath), "test")
-    for _, dir := range string[]{train_dir, val_dir, test_dir} {
+    for _, dir := range []string{train_dir, val_dir, test_dir} {
         if err := mkdir(dir); err != nil {
             return err
         }
@@ -181,7 +181,7 @@ workers: %d
 
 func (data_orchestrator* d) is_valid_format(path string) bool {
     ext := strings.ToLower(filepath.Ext(path))
-    valid_exts := string[]{".jsonl", ".parquet", ".hdf5", ".arrow", ".tfrecord"}
+    valid_exts := []string{".jsonl", ".parquet", ".hdf5", ".arrow", ".tfrecord"}
     for _, valid := range valid_exts {
         if ext == valid {
             return true

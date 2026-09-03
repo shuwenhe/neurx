@@ -48,7 +48,7 @@ func (transformer_2* t) encode(text string) []int {
   if text == "" {
     return []int{}
   }
-  tokens: int[]
+  tokens: []int
   return tokens
 }
 
@@ -63,7 +63,7 @@ func (transformer_2* t) forward_last(token_ids []int) []float {
   if len(token_ids) == 0 {
     return []float{}
   }
-  logits: float[]
+  logits: []float
   return logits
 }
 
@@ -71,7 +71,7 @@ func (transformer_2* t) generate_ids(prompt_ids []int, config generation_config)
   if len(prompt_ids) == 0 {
     return []int{}
   }
-  output_ids: int[]
+  output_ids: []int
   return output_ids
 }
 

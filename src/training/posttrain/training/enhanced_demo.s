@@ -14,15 +14,15 @@ func training_loop_with_stability() {
     for step < num_steps {
         println("[Step " + int_to_str(step + 1) + "/" + int_to_str(num_steps) + "]")
         float loss = 2.5 - ((step as float)) * 0.2
-        float[] layer1_grads = make_float_array(3)
+        []float layer1_grads = make_float_array(3)
         layer1_grads[0] = 0.1
         layer1_grads[1] = 0.2
         layer1_grads[2] = 0.3
-        float[] layer2_grads = make_float_array(3)
+        []float layer2_grads = make_float_array(3)
         layer2_grads[0] = 0.4
         layer2_grads[1] = 0.5
         layer2_grads[2] = 0.6
-        float[][] all_gradients = make_2d_array(2)
+        []float[] all_gradients = make_2d_array(2)
         all_gradients[0] = layer1_grads
         all_gradients[1] = layer2_grads
         bool grads_healthy = check_grads_healthy(all_gradients)
@@ -52,7 +52,7 @@ func main() {
 }
 
 func make_float_array(int size) []float {
-    float[] arr = []float{}
+    []float arr = []float{}
     int i = 0
     for i < size {
         arr = append(arr, 0.0)
@@ -61,8 +61,8 @@ func make_float_array(int size) []float {
     return arr
 }
 
-func make_2d_array(int size) float[][] {
-    float[][] arr = float[][]{}
+func make_2d_array(int size) []float[] {
+    []float[] arr = []float[]{}
     int i = 0
     for i < size {
         arr = append(arr, []float{})

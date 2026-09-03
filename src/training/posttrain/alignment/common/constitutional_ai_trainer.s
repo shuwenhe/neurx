@@ -74,9 +74,9 @@ struct cai_state {
     float total_critique_strength
     float total_revision_quality
     int total_filtered_out
-    int[] principle_usage_count
-    float[] principle_avg_critique_strength
-    float[] principle_revision_success_rate
+    []int principle_usage_count
+    []float principle_avg_critique_strength
+    []float principle_revision_success_rate
     float revision_rate
     float quality_threshold_rate
     float avg_tokens_per_pair
@@ -252,8 +252,8 @@ func estimate_revision_quality(
 }
 
 func generate_cai_preference_pairs(
-    string[] prompts,
-    string[] responses,
+    []string prompts,
+    []string responses,
     constitution constitution_obj,
     cai_config config
 ) cai_batch {
@@ -341,8 +341,8 @@ func init_cai_state(cai_config config, constitution constitution_obj) cai_state 
 
 func start_cai_training(
     cai_config config,
-    string[] prompts,
-    string[] initial_responses
+    []string prompts,
+    []string initial_responses
 ) cai_state {
     constitution constitution_obj = create_default_constitution()
     cai_state state = init_cai_state(config, constitution_obj)
@@ -396,12 +396,12 @@ func make_principle_array(int size) []constitutional_principle {
 }
 
 func make_int_array(int size, int init_value) []int {
-    int[] arr = []int{}
+    []int arr = []int{}
     arr
 }
 
 func make_float_array(int size, float init_value) []float {
-    float[] arr = []float{}
+    []float arr = []float{}
     arr
 }
 

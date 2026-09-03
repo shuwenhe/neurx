@@ -5,9 +5,9 @@ struct grad_fn {
 
 struct grad_record {
     int id
-    int[] shape
+    []int shape
     bool requires_grad
-    float[] grad
+    []float grad
 }
 
 struct autograd_state {
@@ -20,18 +20,18 @@ func new_state() autograd_state {
     }
 }
 
-func zeros_like(float[] data) []float {
+func zeros_like([]float data) []float {
     int n = len(data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     for i in 0..n {
         out[i] = 0.0
     }
     out
 }
 
-func ones_like(float[] data) []float {
+func ones_like([]float data) []float {
     int n = len(data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     for i in 0..n {
         out[i] = 1.0
     }
@@ -40,7 +40,7 @@ func ones_like(float[] data) []float {
 
 func register_tensor(autograd_state state, int id, tensor value) autograd_state {
     []grad_record records = state.records
-    float[] grad_data = zeros_like(value.data)
+    []float grad_data = zeros_like(value.data)
     records.push(
         grad_record {
             id: id,
@@ -54,7 +54,7 @@ func register_tensor(autograd_state state, int id, tensor value) autograd_state 
     }
 }
 
-func set_grad(autograd_state state, int id, float[] grad) autograd_state {
+func set_grad(autograd_state state, int id, []float grad) autograd_state {
     []grad_record records = state.records
     for i in 0..len(records) {
         if records[i].id == id {
@@ -67,7 +67,7 @@ func set_grad(autograd_state state, int id, float[] grad) autograd_state {
     }
 }
 
-func accumulate_grad(autograd_state state, int id, float[] grad) autograd_state {
+func accumulate_grad(autograd_state state, int id, []float grad) autograd_state {
     []grad_record records = state.records
     for i in 0..len(records) {
         if records[i].id == id {

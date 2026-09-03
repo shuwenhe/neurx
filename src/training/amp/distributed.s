@@ -49,14 +49,14 @@ func get_dtype_info(int dtype_id) dtype_info {
 
 struct mp_tensor {
     []double data
-    int[] shape
+    []int shape
     int storage_dtype
     int compute_dtype
     int numel
     bool requires_grad
 }
 
-func make_mp_tensor([]double data, int[] shape, int storage_dtype) mp_tensor {
+func make_mp_tensor([]double data, []int shape, int storage_dtype) mp_tensor {
     mp_tensor t
     t.data = data
     t.shape = shape

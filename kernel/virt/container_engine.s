@@ -33,12 +33,12 @@ struct nsproxy {
 struct container_config {
     string container_id
     string image_name
-    string[] entrypoint
-    string[] cmd
+    []string entrypoint
+    []string cmd
     int memory_limit_mb
     int cpu_shares
-    string[] mounts
-    string[] env_vars
+    []string mounts
+    []string env_vars
     namespace[] namespaces
 }
 
@@ -104,12 +104,12 @@ func container_config_create(string container_id, string image_name) container_c
     config := container_config {
         container_id: container_id,
         image_name: image_name,
-        entrypoint: string[](),
-        cmd: string[](),
+        entrypoint: []string(),
+        cmd: []string(),
         memory_limit_mb: 512,
         cpu_shares: 1024,
-        mounts: string[](),
-        env_vars: string[](),
+        mounts: []string(),
+        env_vars: []string(),
         namespaces: namespace[]()
     }
     return config

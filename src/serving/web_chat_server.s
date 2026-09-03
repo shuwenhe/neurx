@@ -24,14 +24,14 @@ struct model_config {
 
 struct chat_request {
     string model
-    string[][] messages
+    []string[] messages
     int32 max_tokens
     float32 temperature
     float32 top_p
 }
 
 struct chat_response {
-    string[][] choices
+    []string[] choices
     int32 usage_prompt_tokens
     int32 usage_completion_tokens
 }
@@ -240,7 +240,7 @@ func (s: &web_chat_server) parse_and_handle_request(request: string) string {
 func parse_chat_request(json_body: string) chat_request {
     req := chat_request{
         model: "qwen-0.5b",
-        messages: make(string[][], 0, 10),
+        messages: make([]string[], 0, 10),
         max_tokens: 256,
         temperature: 0.7,
         top_p: 0.9,
@@ -269,8 +269,8 @@ func parse_chat_request(json_body: string) chat_request {
         }
     }
     
-    messages := make(string[][], 0, 5)
-    msg := make(string[], 0, 2)
+    messages := make([]string[], 0, 5)
+    msg := make([]string, 0, 2)
     msg = append(msg, "user")
     msg = append(msg, "Hello")
     messages = append(messages, msg)
@@ -384,7 +384,7 @@ func char_at(s: string, index: int) string {
 }
 
 func string_from_byte(b: int) string {
-    cs := make(int[], 1)
+    cs := make([]int, 1)
     cs[0] = b
     return string(cs)
 }

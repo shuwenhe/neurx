@@ -22,8 +22,8 @@ struct elastic_ep_state {
     int target_world_size
     int generation
     int phase
-    int[] active_ranks
-    int[] staged_ranks
+    []int active_ranks
+    []int staged_ranks
     bool initialized
     string error_message
 }
@@ -43,7 +43,7 @@ func elastic_ep_config_valid(elastic_ep_config config) bool {
 }
 
 func elastic_rank_range(int count) []int {
-    int[] ranks = make([]int, count)
+    []int ranks = make([]int, count)
     int i = 0
     for i < count {
         ranks[i] = i
@@ -52,8 +52,8 @@ func elastic_rank_range(int count) []int {
     ranks
 }
 
-func elastic_copy_ranks(int[] ranks) []int {
-    int[] copied = make([]int, len(ranks))
+func elastic_copy_ranks([]int ranks) []int {
+    []int copied = make([]int, len(ranks))
     int i = 0
     for i < len(ranks) {
         copied[i] = ranks[i]

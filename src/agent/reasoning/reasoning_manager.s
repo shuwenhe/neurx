@@ -203,7 +203,7 @@ func (reasoning_manager* mgr) get_statistics() map[string]string {
     stats
 }
 
-func (reasoning_manager* mgr) batch_start_reasoning(string[] prompts, cot_config config) []reasoning_chain {
+func (reasoning_manager* mgr) batch_start_reasoning([]string prompts, cot_config config) []reasoning_chain {
     chains := []reasoning_chain{}
     i := 0
     for i < len(prompts) {

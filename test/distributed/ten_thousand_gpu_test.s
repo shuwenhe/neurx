@@ -47,7 +47,7 @@ func test_elastic_scaling() {
     
     coordinator := ten_thousand_gpu_coordinator.new_ten_thousand_gpu_coordinator(0, 0, config)
     
-    gpu_memory := make(float[], 8)
+    gpu_memory := make([]float, 8)
     int i = 0
     for i < 8 {
         gpu_memory[i] = 40.0
@@ -112,7 +112,7 @@ func test_ring_allreduce() {
     
     coordinator := ten_thousand_gpu_coordinator.new_ten_thousand_gpu_coordinator(0, 0, config)
     
-    data := make(float[], 1024)
+    data := make([]float, 1024)
     int i = 0
     for i < 1024 {
         data[i] = 1.0
@@ -183,9 +183,9 @@ func test_checkpoint_recovery() {
     
     coordinator := ten_thousand_gpu_coordinator.new_ten_thousand_gpu_coordinator(0, 0, config)
     
-    model_params := make(float[], 1000)
-    optimizer_state := make(float[], 100)
-    grad_accum := make(int[], 10)
+    model_params := make([]float, 1000)
+    optimizer_state := make([]float, 100)
+    grad_accum := make([]int, 10)
     
     coordinator.recovery_manager.save_checkpoint(
         100,

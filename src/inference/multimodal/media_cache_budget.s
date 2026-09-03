@@ -18,10 +18,10 @@ struct media_cache_config {
 
 struct media_cache_state {
     media_cache_config config
-    int[] hashes
-    int[] modalities
-    int[] token_counts
-    int[] last_access
+    []int hashes
+    []int modalities
+    []int token_counts
+    []int last_access
     int item_count
     int logical_clock
     int hits
@@ -47,13 +47,13 @@ struct media_budget_result {
 }
 
 func media_zero_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
-func media_hash_bytes(int[] bytes, int modality, int metadata_hash) int {
+func media_hash_bytes([]int bytes, int modality, int metadata_hash) int {
     int hash = 216613
     hash = hash * 167 + modality
     hash = hash * 167 + metadata_hash

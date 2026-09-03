@@ -12,14 +12,14 @@ func example_weight_fusion() ((), string) {
     config := default()
     config.lora_rank = 8
     config.lora_alpha = 16.0
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "attention")
     config.target_modules = targets
     adapter := new("fusion_adapter", *config)
-    lora_a := float[][]]()
+    lora_a := []float[]]()
     i := 0
     for i < 128 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 8 {
             row = append(row, 0.01)
@@ -28,10 +28,10 @@ func example_weight_fusion() ((), string) {
         lora_a = append(lora_a, row)
         i = i + 1
     }
-    lora_b := float[][]]()
+    lora_b := []float[]]()
     i := 0
     for i < 8 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 128 {
             row = append(row, 0.01)
@@ -41,11 +41,11 @@ func example_weight_fusion() ((), string) {
         i = i + 1
     }
     adapter.add_module_weights("attention", lora_a, lora_b)
-    original_weights := map[string, *float[][]]]()
-    orig_weight := float[][]]()
+    original_weights := map[string, *[]float[]]]()
+    orig_weight := []float[]]()
     i := 0
     for i < 128 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 128 {
             row = append(row, 1.0)
@@ -68,14 +68,14 @@ func example_weight_fusion() ((), string) {
 func example_lora_state_management() ((), string) {
     println("\nexample 2: 请求statusmanagement")
     state_manager := new(4)
-    req_ids := string[]()
+    req_ids := []string()
     req_ids = append(req_ids, "req_001")
     req_ids = append(req_ids, "req_002")
     req_ids = append(req_ids, "req_003")
     for req_id in req_ids.iter() {
-        adapter_names := string[]()
+        adapter_names := []string()
         adapter_names = append(adapter_names, "lora_a")
-        scales := float[]()
+        scales := []float()
         scales = append(scales, 1.0)
         state_manager.create_request_state(req_id, adapter_names, scales)
     }
@@ -95,17 +95,17 @@ func example_lora_state_management() ((), string) {
 func example_multi_adapter_caching() ((), string) {
     println("\nexample 3: more适配器缓存management")
     state_manager := new(8)
-    adapter_names := string[]()
+    adapter_names := []string()
     adapter_names = append(adapter_names, "adapter_1")
     adapter_names = append(adapter_names, "adapter_2")
-    scales := float[]()
+    scales := []float()
     scales = append(scales, 1.0)
     scales = append(scales, 0.5)
     state_manager.create_request_state("multi_req", adapter_names, scales)
-    cached_weight := float[][]]()
+    cached_weight := []float[]]()
     i := 0
     for i < 64 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 64 {
             row = append(row, 1.5)
@@ -129,9 +129,9 @@ func example_multi_adapter_caching() ((), string) {
 func example_dynamic_adapter_switch() ((), string) {
     println("\nexample 4: 动态适配器切换")
     state_manager := new(4)
-    init_adapters := string[]()
+    init_adapters := []string()
     init_adapters = append(init_adapters, "task_a")
-    init_scales := float[]()
+    init_scales := []float()
     init_scales = append(init_scales, 1.0)
     state_manager.create_request_state("dynamic_req", init_adapters, init_scales)
     switch state_manager.get_request_state("dynamic_req") {
@@ -141,10 +141,10 @@ func example_dynamic_adapter_switch() ((), string) {
         },
         nil : {},
     }
-    new_adapters := string[]()
+    new_adapters := []string()
     new_adapters = append(new_adapters, "task_b")
     new_adapters = append(new_adapters, "task_c")
-    new_scales := float[]()
+    new_scales := []float()
     new_scales = append(new_scales, 0.8)
     new_scales = append(new_scales, 0.2)
     state_manager.switch_adapters("dynamic_req", new_adapters, new_scales)
@@ -156,7 +156,7 @@ func example_dynamic_adapter_switch() ((), string) {
         },
         nil : {},
     }
-    updated_scales := float[]()
+    updated_scales := []float()
     updated_scales = append(updated_scales, 0.5)
     updated_scales = append(updated_scales, 0.5)
     state_manager.update_adapter_scales("dynamic_req", updated_scales)
@@ -171,10 +171,10 @@ func example_weight_computation_perf() ((), string) {
     println("    rank: 8")
     println("    alpha: 16.0")
     println("    缩放because子: " + engine.scaling_factor.to_string())
-    lora_a := float[][]]()
+    lora_a := []float[]]()
     i := 0
     for i < 256 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 8 {
             row = append(row, 0.01)
@@ -183,10 +183,10 @@ func example_weight_computation_perf() ((), string) {
         lora_a = append(lora_a, row)
         i = i + 1
     }
-    lora_b := float[][]]()
+    lora_b := []float[]]()
     i := 0
     for i < 8 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 256 {
             row = append(row, 0.01)

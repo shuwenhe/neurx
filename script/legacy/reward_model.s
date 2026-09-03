@@ -93,7 +93,7 @@ func (reward_model_trainer* trainer) load_preference_data(data_path string) {
     fmt.Printf("  Loaded %d preference pairs\n", len(trainer.train_dataset.examples))
 }
 
-func (reward_model_trainer* trainer) preprocess_example(example preference_data) (float[]64, int) {
+func (reward_model_trainer* trainer) preprocess_example(example preference_data) ([]float64, int) {
     tokens_a := trainer.tokenize(example.response_a)
     tokens_b := trainer.tokenize(example.response_b)
     features_a := trainer.embed_tokens(tokens_a)
@@ -112,8 +112,8 @@ func (reward_model_trainer* trainer) tokenize(text string) []int {
     return tokens
 }
 
-func (reward_model_trainer* trainer) embed_tokens(tokens []int) float[]64 {
-    embeddings := float[]64{}
+func (reward_model_trainer* trainer) embed_tokens(tokens []int) []float64 {
+    embeddings := []float64{}
     for i, token := range tokens {
         emb := math.Sin(float64(token) / 1000.0) * math.Cos(float64(i) / 100.0)
         embeddings = append(embeddings, emb)
@@ -180,7 +180,7 @@ func (reward_model_trainer* trainer) evaluate(dataset preference_dataset) traini
     fmt.Printf("[Reward model] Evaluating on %d examples\n", len(dataset.examples))
     total_loss := 0.0
     correct := 0
-    logits := float[]64{}
+    logits := []float64{}
     labels := []int{}
     for _, example := range dataset.examples {
         reward_a := trainer.predict_reward(example.response_a)
@@ -210,7 +210,7 @@ func (reward_model_trainer* trainer) evaluate(dataset preference_dataset) traini
     return metric
 }
 
-func (reward_model_trainer* trainer) calculate_calibration_error(logits float[]64, int[] labels) float64 {
+func (reward_model_trainer* trainer) calculate_calibration_error(logits []float64, []int labels) float64 {
     ece := 0.0
     num_bins := 10
     bin_size := 1.0 / float64(num_bins)
@@ -239,7 +239,7 @@ func (reward_model_trainer* trainer) calculate_calibration_error(logits float[]6
     return ece
 }
 
-func (reward_model_trainer* trainer) calculate_auc(logits float[]64, int[] labels) float64 {
+func (reward_model_trainer* trainer) calculate_auc(logits []float64, []int labels) float64 {
     pairs := 0
     correct := 0
     for i := range logits {

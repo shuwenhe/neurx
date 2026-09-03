@@ -29,7 +29,7 @@ struct optimization_strategy {
 }
 
 struct resource_allocation {
-    gpu_ids             string[]
+    gpu_ids             []string
     batch_size          int
     sequence_length     int
     gradient_accumulation int
@@ -70,7 +70,7 @@ func (cost_optimizer* co) set_resource_allocation(
     fmt.Printf("  batch_2 Size: %d\n", batch_size)
     fmt.Printf("  Sequence Length: %d\n", sequence_length)
     fmt.Printf("  Precision: %s\n", precision)
-    gpu_ids := make(string[], 0)
+    gpu_ids := make([]string, 0)
     for i := 0; i < gpu_count; i++ {
         gpu_ids = append(gpu_ids, fmt.Sprintf("gpu_%d", i))
     }

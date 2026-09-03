@@ -108,7 +108,7 @@ func (h embeddings_handler*) compute_similarity(
 struct embedding_cache {
 	map[string]float32[]     text_to_embedding
 	float32[][]]           embeddings
-	string[]                 texts
+	[]string                 texts
 	int32                       max_cache_size
 	sync.Mutex                  mu
 }
@@ -117,7 +117,7 @@ func create_embedding_cache(max_size int32) embedding_cache {
 	return embedding_cache{
 		text_to_embedding: make(map[string]float32[]),
 		embeddings:        make(float32[][]], 0, max_size),
-		texts:             make(string[], 0, max_size),
+		texts:             make([]string, 0, max_size),
 		max_cache_size:    max_size,
 		mu:                sync.Mutex{},
 	}
@@ -149,7 +149,7 @@ func (c embedding_cache*) clear_cache() {
 	defer c.mu.Unlock()
 	c.text_to_embedding = make(map[string]float32[])
 	c.embeddings = make(float32[][]], 0, c.max_cache_size)
-	c.texts = make(string[], 0, c.max_cache_size)
+	c.texts = make([]string, 0, c.max_cache_size)
 }
 
 func (c embedding_cache*) get_cache_size() int32 {
@@ -225,7 +225,7 @@ func (bp batch_embeddings_processor*) process_batch_with_cache() int32 {
 	processed := int32(0)
 	for req := range reqs {
 		cached_embeddings := make(float32[][]], 0, len(req.input))
-		uncached_texts := make(string[], 0)
+		uncached_texts := make([]string, 0)
 		text_indices := make(int32[], 0)
 		for i := int32(0); i < int32(len(req.input)); i++ {
 			text := req.input[i]

@@ -175,8 +175,8 @@ func model_forward(
     bool record_for_backward
 ) forward_result {
     float start_time = current_time_ms()
-    int[] token_ids = input_batch.token_ids
-    int[] attention_mask = input_batch.mask
+    []int token_ids = input_batch.token_ids
+    []int attention_mask = input_batch.mask
     int batch_size = input_batch.batch_size
     int seq_len = input_batch.seq_length
     tensor x = embedding_lookup(model.token_embedding, token_ids)
@@ -429,7 +429,7 @@ func run_training(training_config cfg) {
                     write_scalar(tb_writer, "Train/LearningRate", current_lr, state.global_step)
                     write_scalar(tb_writer, "Train/GradNorm", bw_info.grad_norm, state.global_step)
                     if state.global_step % (cfg.log_every_n_steps * 10) == 0:
-                        float[] grad_values = extract_flat_grad_values(bw_info.parameter_gradients)
+                        []float grad_values = extract_flat_grad_values(bw_info.parameter_gradients)
                         log_histogram(*state.lg, "train/gradient_distribution",
                                       grad_values, state.global_step, {})
                         write_histogram(tb_writer, "Gradients/distribution",
@@ -527,7 +527,7 @@ func generate_validation_samples(
     Tests: Greedy decoding, Top-P sampling, Beam Search
     """
     println("\n🎯 Generating validation samples (step " + str(current_step) + ")...")
-    string[] prompts = [
+    []string prompts = [
         "The future of artificial intelligence is",
         "Once upon a time,",
         "In a world where machines can",
@@ -536,7 +536,7 @@ func generate_validation_samples(
     gen_cfg.max_new_tokens = 64
     gen_cfg.return_scores = false
     gen_cfg.return_full_text = true
-    func int[] forward_fn(int[] token_ids):
+    func []int forward_fn([]int token_ids):
         batch dummy_batch {
             token_ids: [token_ids],
             mask: create_attention_mask(len(token_ids)),
@@ -554,7 +554,7 @@ func generate_validation_samples(
         println("\n  Strategy: " + strategy.to_upper())
         println("  " + "-" * 40)
         for i, prompt in enumerate(prompts[:min(2, len(prompts)))]:
-            int[] prompt_ids = simple_tokenize(prompt)
+            []int prompt_ids = simple_tokenize(prompt)
             generation_result result = generate(prompt_ids, forward_fn, gen_cfg)
             generated_text = simple_decode(result.sequences[0])
             println("  Prompt: " + prompt)
@@ -599,13 +599,13 @@ func clip_gradients([]tensor grads, float max_norm) []tensor:
         for i in range(len(grads)):
             grads[i] = grads[i] * clip_coef
     return grads
-func simple_tokenize(string text) int[]:
+func simple_tokenize(string text) []int:
     """Mock tokenization: convert characters to ASCII codes"""
-    int[] tokens = [1]
+    []int tokens = [1]
     for char in text:
         tokens = append(tokens, int(char) % 50257)
     return tokens
-func simple_decode(int[] token_ids) string:
+func simple_decode([]int token_ids) string:
     """Mock decode: convert token IDs to characters"""
     string result = ""
     for tid in token_ids:
@@ -642,29 +642,29 @@ func main():
     run_training(cfg)
 if is_main_module():
     main()
-func make_tensor(float[] data, int[] shape, bool requires_grad) tensor:
+func make_tensor([]float data, []int shape, bool requires_grad) tensor:
     tensor {
         data: data,
         shape: shape,
         requires_grad: requires_grad,
         grad: none,
     }
-func copy_int_shape(int[] shape) int[]:
-    int[] out = make([]int, len(shape))
+func copy_int_shape([]int shape) []int:
+    []int out = make([]int, len(shape))
     int i = 0
     for i < len(shape) {
         out[i] = shape[i]
         i = i + 1
     }
     out
-func embedding_lookup(tensor emb, int[] ids) tensor:
+func embedding_lookup(tensor emb, []int ids) tensor:
     """Look up embeddings for given token IDs"""
     if len(emb.shape) < 2 {
         return emb
     }
     int vocab_size = emb.shape[0]
     int emb_dim = emb.shape[1]
-    float[] out_data = make([]float, len(ids) * emb_dim)
+    []float out_data = make([]float, len(ids) * emb_dim)
     int row = 0
     for row < len(ids) {
         int token_id = ids[row]
@@ -681,11 +681,11 @@ func embedding_lookup(tensor emb, int[] ids) tensor:
         }
         row = row + 1
     }
-    make_tensor(out_data, int[]{len(ids), emb_dim}, emb.requires_grad)
+    make_tensor(out_data, []int{len(ids), emb_dim}, emb.requires_grad)
 func add_tensors(tensor a, tensor b) tensor:
     """Element-wise addition"""
     if len(a.data) == len(b.data) {
-        float[] out_data = make([]float, len(a.data))
+        []float out_data = make([]float, len(a.data))
         int i = 0
         for i < len(a.data) {
             out_data[i] = a.data[i] + b.data[i]
@@ -696,7 +696,7 @@ func add_tensors(tensor a, tensor b) tensor:
     if len(a.shape) == 3 && len(b.shape) == 1 && a.shape[2] == b.shape[0] {
         int total = len(a.data)
         int d = b.shape[0]
-        float[] out_data = make([]float, total)
+        []float out_data = make([]float, total)
         int i = 0
         for i < total {
             out_data[i] = a.data[i] + b.data[i - (i / d) * d]
@@ -714,7 +714,7 @@ func apply_dropout(tensor x, float p) tensor:
     if keep_prob <= 0.0 {
         keep_prob = 0.000001
     }
-    float[] out_data = make([]float, len(x.data))
+    []float out_data = make([]float, len(x.data))
     int i = 0
     for i < len(x.data) {
         if (i - (i / 7) * 7) == 0 {
@@ -735,7 +735,7 @@ func layer_norm(tensor x, tensor params) tensor:
         return x
     }
     int outer = len(x.data) / hidden
-    float[] out_data = make([]float, len(x.data))
+    []float out_data = make([]float, len(x.data))
     float eps = 0.00001
     int row = 0
     for row < outer {
@@ -780,7 +780,7 @@ func matmul(tensor a, tensor b) tensor:
         return a
     }
     int outer = len(a.data) / a_inner
-    float[] out_data = make([]float, outer * out_cols)
+    []float out_data = make([]float, outer * out_cols)
     int row = 0
     for row < outer {
         int col = 0
@@ -796,7 +796,7 @@ func matmul(tensor a, tensor b) tensor:
         }
         row = row + 1
     }
-    int[] out_shape = make([]int, len(a.shape))
+    []int out_shape = make([]int, len(a.shape))
     int i = 0
     for i < len(a.shape) - 1 {
         out_shape[i] = a.shape[i]
@@ -804,7 +804,7 @@ func matmul(tensor a, tensor b) tensor:
     }
     out_shape[i] = out_cols
     make_tensor(out_data, out_shape, a.requires_grad || b.requires_grad)
-func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, int[] mask) tensor:
+func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, []int mask) tensor:
     """Multi-head self-attention mechanism"""
     if len(q.shape) < 3 {
         return q
@@ -812,13 +812,13 @@ func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, int[] mask)
     int batch = q.shape[0]
     int seq_len = q.shape[1]
     int hidden = q.shape[2]
-    float[] out_data = make([]float, len(q.data))
+    []float out_data = make([]float, len(q.data))
     float inv_scale = 1.0 / sqrt(hidden * 1.0)
     int b = 0
     for b < batch {
         int i = 0
         for i < seq_len {
-            float[] scores = make([]float, seq_len)
+            []float scores = make([]float, seq_len)
             float max_score = -1000000000.0
             int j = 0
             for j < seq_len {
@@ -873,7 +873,7 @@ func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, int[] mask)
     make_tensor(out_data, copy_int_shape(q.shape), q.requires_grad || k.requires_grad || v.requires_grad)
 func swiglu(tensor gate, tensor up) tensor:
     """SwiGLU activation: gate * SiLU(up)"""
-    float[] out_data = make([]float, len(gate.data))
+    []float out_data = make([]float, len(gate.data))
     int i = 0
     for i < len(gate.data) {
         float x = up.data[i]
@@ -882,7 +882,7 @@ func swiglu(tensor gate, tensor up) tensor:
         i = i + 1
     }
     make_tensor(out_data, copy_int_shape(gate.shape), gate.requires_grad || up.requires_grad)
-func cross_entropy_loss(tensor logits, tensor labels, int[] mask) tensor:
+func cross_entropy_loss(tensor logits, tensor labels, []int mask) tensor:
     """Cross-entropy loss for next-token prediction"""
     if len(logits.shape) < 2 {
         return logits
@@ -932,7 +932,7 @@ func cross_entropy_loss(tensor logits, tensor labels, int[] mask) tensor:
         count = 1
     }
     make_tensor([loss / count], [1], logits.requires_grad)
-func slice_tensor(tensor t, int[] start, int[] end) tensor:
+func slice_tensor(tensor t, []int start, []int end) tensor:
     """Slice tensor along dimensions"""
     if len(t.shape) == 1 {
         int begin = start[0]
@@ -941,7 +941,7 @@ func slice_tensor(tensor t, int[] start, int[] end) tensor:
             finish = begin
         }
         int n = finish - begin
-        float[] out_data = make([]float, n)
+        []float out_data = make([]float, n)
         int i = 0
         for i < n {
             out_data[i] = t.data[begin + i]
@@ -962,7 +962,7 @@ func slice_tensor(tensor t, int[] start, int[] end) tensor:
         int out_b = b1 - b0
         int out_t = t1 - t0
         int out_v = v1 - v0
-        float[] out_data = make([]float, out_b * out_t * out_v)
+        []float out_data = make([]float, out_b * out_t * out_v)
         int bb = 0
         for bb < out_b {
             int tt = 0
@@ -981,9 +981,9 @@ func slice_tensor(tensor t, int[] start, int[] end) tensor:
         return make_tensor(out_data, [out_b, out_t, out_v], t.requires_grad)
     }
     t
-func create_labels_from_tokens(int[] tokens, int offset) tensor:
+func create_labels_from_tokens([]int tokens, int offset) tensor:
     """Create label tensor shifted by offset positions"""
-    float[] label_data = make([]float, len(tokens))
+    []float label_data = make([]float, len(tokens))
     int i = 0
     for i < len(tokens) {
         if i + offset < len(tokens) {
@@ -996,16 +996,16 @@ func create_labels_from_tokens(int[] tokens, int offset) tensor:
     make_tensor(label_data, [len(tokens)], false)
 func create_position_indices(int length) tensor:
     """Create position index tensor [0, 1, 2, ..., length-1]"""
-    float[] pos_data = make([]float, length)
+    []float pos_data = make([]float, length)
     int i = 0
     for i < length {
         pos_data[i] = float(i)
         i = i + 1
     }
     make_tensor(pos_data, [length], false)
-func create_attention_mask(int length) int[]:
+func create_attention_mask(int length) []int:
     """Create causal attention mask (lower triangular)"""
-    int[] mask = []
+    []int mask = []
     for i in 0..length {
         for j in 0..length {
             mask = append(mask, 1 if j <= i else 0)
@@ -1031,7 +1031,7 @@ func compute_global_gradient_norm([]tensor grads) float:
 func extract_scalar_value(tensor t) float:
     """Extract single float value from scalar tensor"""
     t.data[0]
-func extract_last_token_logits(tensor logits) float[]:
+func extract_last_token_logits(tensor logits) []float:
     """Get logits for last token position"""
     if len(logits.shape) < 3 {
         return logits.data
@@ -1039,16 +1039,16 @@ func extract_last_token_logits(tensor logits) float[]:
     int seq_len = logits.shape[1]
     int vocab_size = logits.shape[2]
     int start = (seq_len - 1) * vocab_size
-    float[] out = make([]float, vocab_size)
+    []float out = make([]float, vocab_size)
     int i = 0
     for i < vocab_size {
         out[i] = logits.data[start + i]
         i = i + 1
     }
     out
-func flatten_gradients([]tensor grads) float[]:
+func flatten_gradients([]tensor grads) []float:
     """Convert list of gradient tensors to flat array"""
-    float[] flat = []
+    []float flat = []
     for g in grads {
         int i = 0
         for i < len(g.data) {
@@ -1057,7 +1057,7 @@ func flatten_gradients([]tensor grads) float[]:
         }
     }
     flat
-func get_flat_gradients([]tensor grads) float[]:
+func get_flat_gradients([]tensor grads) []float:
     """Get flattened gradients"""
     flatten_gradients(grads)
 func compute_throughput(int batch_size, int seq_len, float time_ms) float:

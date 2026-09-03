@@ -1,6 +1,6 @@
 package neurx.strings
-func copy_strings(string[] values) []string {
-    string[] out = make([]string, len(values))
+func copy_strings([]string values) []string {
+    []string out = make([]string, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -24,7 +24,7 @@ func strings_eq(string a, string b) bool {
     eq
 }
 
-func string_at(string[] arr, int idx) string {
+func string_at([]string arr, int idx) string {
     if idx < 0 || idx >= len(arr) {
         return ""
     }

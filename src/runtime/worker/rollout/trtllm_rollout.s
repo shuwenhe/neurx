@@ -19,14 +19,14 @@ struct trtllm_rollout_state {
 }
 
 struct trtllm_request {
-    int[] input_ids
+    []int input_ids
     int max_new_tokens
     int request_id
 }
 
 struct trtllm_response {
-    int[] output_ids
-    float[] output_log_probs
+    []int output_ids
+    []float output_log_probs
     int request_id
     bool success
 }
@@ -60,8 +60,8 @@ func trtllm_generate_batch(
     []trtllm_response responses = make([]trtllm_response, len(requests))
     for int i = 0; i < len(requests); i = i + 1 {
         trtllm_request req = requests[i]
-        int[] output_ids = make(int[], req.max_new_tokens)
-        float[] log_probs = make(float[], req.max_new_tokens)
+        []int output_ids = make([]int, req.max_new_tokens)
+        []float log_probs = make([]float, req.max_new_tokens)
         for int j = 0; j < req.max_new_tokens; j = j + 1 {
             output_ids[j] = 2000 + j
             log_probs[j] = -0.05 * float(j)

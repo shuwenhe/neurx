@@ -56,7 +56,7 @@ struct plugin_communication_channel {
 struct message_router {
 	plugin_communication_channel    channel
 	map[string]string]              plugin_address_map
-	map[string]string[]]         plugin_subscription_map
+	map[string][]string]         plugin_subscription_map
 	int32                           total_routes
 	int32                           total_subscriptions
 	sync.Mutex                      mu
@@ -120,7 +120,7 @@ func create_message_router() message_router {
 	return message_router{
 		channel:                 create_plugin_communication_channel(),
 		plugin_address_map:      make(map[string]string),
-		plugin_subscription_map: make(map[string]string[]),
+		plugin_subscription_map: make(map[string][]string),
 		total_routes:            0,
 		total_subscriptions:     0,
 		mu:                      sync.Mutex{},
@@ -230,7 +230,7 @@ func (message_router* r) subscribe_to_event(plugin_id string, event_topic string
 	defer r.mu.Unlock()
 	subscribers, exists := r.plugin_subscription_map[event_topic]
 	if !exists {
-		subscribers = make(string[], 0)
+		subscribers = make([]string, 0)
 	}
 	for sub := range subscribers {
 		if sub == plugin_id {

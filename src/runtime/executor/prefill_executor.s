@@ -3,10 +3,10 @@ import "executor_base.s"
 struct PrefillExecutor {
     base                BaseExecutor
     prefill_config      PrefillConfig
-    input_sequences     string[]
+    input_sequences     []string
     batch_size          i32
     max_tokens          i32
-    current_batch       string[]
+    current_batch       []string
     batch_count         i32
 }
 
@@ -119,7 +119,7 @@ func (PrefillExecutor* pe) compute_logits(sequences []string) ExecutionResult {
 }
 
 func (PrefillExecutor* pe) CreateBatch(num_sequences i32) []string {
-    batch := make(string[], 0)
+    batch := make([]string, 0)
     for seq_id, _ := range pe.base.sequences {
         if i32(len(batch)) < num_sequences {
             batch = append(batch, seq_id)

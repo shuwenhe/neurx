@@ -3,7 +3,7 @@ import "sync"
 import "time"
 struct model_registry {
 	map[string]model_info           models
-	string[]                     available_models
+	[]string                     available_models
 	string                          default_model
 	sync.Mutex                      mu
 }
@@ -11,7 +11,7 @@ struct model_registry {
 func create_model_registry() model_registry {
 	return model_registry{
 		models:           make(map[string]model_info),
-		available_models: make(string[], 0, 50),
+		available_models: make([]string, 0, 50),
 		default_model:    "",
 		mu:               sync.Mutex{},
 	}
@@ -76,7 +76,7 @@ func (r model_registry*) list_models() []model_info {
 func (r model_registry*) get_available_model_ids() []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	ids := make(string[], 0, len(r.available_models))
+	ids := make([]string, 0, len(r.available_models))
 	for id := range r.available_models {
 		ids = append(ids, id)
 	}

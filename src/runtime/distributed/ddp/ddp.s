@@ -10,16 +10,16 @@ struct ddp_state {
     int bucket_cap
     bool find_unused
     int step
-    string[] params
-    int[] param_sizes
-    string[] ready_params
+    []string params
+    []int param_sizes
+    []string ready_params
     int reduced_bucket_count
     bool gradient_synchronized
     float last_sync_scale
 }
 
-func copy_ints(int[] values) []int {
-    int[] out = make([]int, len(values))
+func copy_ints([]int values) []int {
+    []int out = make([]int, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -35,7 +35,7 @@ func clamp_positive(int value, int fallback) int {
     fallback
 }
 
-func has_string(string[] values, string value) bool {
+func has_string([]string values, string value) bool {
     int i = 0
     for i < len(values) {
         if values[i] == value {
@@ -170,8 +170,8 @@ func ddp_add_param(ddp_state state, string param_name, int size) ddp_state {
     if has_string(state.params, param_name) {
         return ddp_state_dict(state)
     }
-    string[] params = copy_strings(state.params)
-    int[] param_sizes = copy_ints(state.param_sizes)
+    []string params = copy_strings(state.params)
+    []int param_sizes = copy_ints(state.param_sizes)
     params = append(params, param_name)
     param_sizes = append(param_sizes, clamp_positive(size, 1))
     ddp_state {
@@ -199,7 +199,7 @@ func ddp_mark_grad_ready(ddp_state state, string param_name) ddp_state {
     if has_string(state.ready_params, param_name) {
         return ddp_state_dict(state)
     }
-    string[] ready = copy_strings(state.ready_params)
+    []string ready = copy_strings(state.ready_params)
     ready = append(ready, param_name)
     ddp_state {
         name: state.name,
@@ -282,14 +282,14 @@ func ddp_attach_process_group(ddp_state state, process_group_state pg) ddp_state
     }
 }
 
-func ddp_all_reduce_grad(ddp_state state, process_group_state pg, float[] grads) []float {
+func ddp_all_reduce_grad(ddp_state state, process_group_state pg, []float grads) []float {
     if !ddp_is_distributed(ddp_state_dict(state)) {
         return copy_float(grads)
     }
     all_reduce_sum(pg, grads)
 }
 
-func ddp_broadcast_params(ddp_state state, process_group_state pg, float[] params) []float {
+func ddp_broadcast_params(ddp_state state, process_group_state pg, []float params) []float {
     if !ddp_is_distributed(ddp_state_dict(state)) {
         return copy_float(params)
     }

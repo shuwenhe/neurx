@@ -7,8 +7,8 @@ import (
 )
 
 func test_vectorization_basic() bool {
-    var float[] A = float[](4)
-    var float[] B = float[](4)
+    var []float A = []float(4)
+    var []float B = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
     B[0] = 2.0; B[1] = 2.0; B[2] = 2.0; B[3] = 2.0
     C := vectorization.element_wise_add(A, B)
@@ -17,8 +17,8 @@ func test_vectorization_basic() bool {
 }
 
 func test_vectorization_dot_product() bool {
-    var float[] A = float[](3)
-    var float[] B = float[](3)
+    var []float A = []float(3)
+    var []float B = []float(3)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0
     B[0] = 4.0; B[1] = 5.0; B[2] = 6.0
     result := vectorization.dot_product(A, B)
@@ -26,14 +26,14 @@ func test_vectorization_dot_product() bool {
 }
 
 func test_vectorization_vector_norm() bool {
-    var float[] A = float[](3)
+    var []float A = []float(3)
     A[0] = 3.0; A[1] = 4.0; A[2] = 0.0
     norm := vectorization.vector_norm(A)
     return norm >= 4.9 && norm <= 5.1
 }
 
 func test_vectorization_reduce_sum() bool {
-    var float[] A = float[](4)
+    var []float A = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
     sum := vectorization.reduce_sum(A)
     return sum == 10.0
@@ -63,7 +63,7 @@ func test_loss_scale_scheduler() bool {
 }
 
 func test_overflow_detection() bool {
-    gradients := float[][](5)
+    gradients := []float[](5)
     gradients[0] = 0.1
     gradients[1] = 0.2
     gradients[2] = 0.3
@@ -74,7 +74,7 @@ func test_overflow_detection() bool {
 }
 
 func test_gradient_scaling() bool {
-    gradients := float[][](2)
+    gradients := []float[](2)
     gradients[0] = 0.1
     gradients[1] = 0.2
     scaled := mixed_precision.scale_gradients(gradients, 1000.0)
@@ -90,7 +90,7 @@ func test_accumulation_basic() bool {
 
 func test_accumulate_gradients() bool {
     accum := gradient_accumulation.new_accumulated_gradients(3)
-    step_grad := float[][](3)
+    step_grad := []float[](3)
     step_grad[0] = 0.1; step_grad[1] = 0.2; step_grad[2] = 0.3
     accum = gradient_accumulation.accumulate_gradients(accum, step_grad, 0.5, 0.5)
     return accum.steps_accumulated == 1 &&
@@ -100,7 +100,7 @@ func test_accumulate_gradients() bool {
 
 func test_accumulation_complete() bool {
     accum := gradient_accumulation.new_accumulated_gradients(5)
-    step_grad := float[][](5)
+    step_grad := []float[](5)
     i := 0
     for i < 5 { step_grad[i] = 0.1; i = i + 1 }
     i = 0
@@ -122,7 +122,7 @@ func test_effective_batch_size() bool {
 
 func test_accumulation_reset() bool {
     accum := gradient_accumulation.new_accumulated_gradients(3)
-    step_grad := float[][](3)
+    step_grad := []float[](3)
     step_grad[0] = 0.1; step_grad[1] = 0.2; step_grad[2] = 0.3
     accum = gradient_accumulation.accumulate_gradients(accum, step_grad, 0.5, 1.0)
     accum = gradient_accumulation.reset_accumulation(accum)
@@ -180,10 +180,10 @@ func test_mixed_training_config() bool {
 }
 
 func test_vectorization_with_mixed_precision() bool {
-    var float[] A = float[](4)
+    var []float A = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
     sum := vectorization.reduce_sum(A)
-    gradients := float[][](4)
+    gradients := []float[](4)
     gradients[0] = 0.01; gradients[1] = 0.02; gradients[2] = 0.03; gradients[3] = 0.04
     scaled := mixed_precision.scale_gradients(gradients, 1000.0)
     return sum == 10.0 && scaled[0] == 0.00001

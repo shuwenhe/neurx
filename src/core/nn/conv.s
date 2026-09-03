@@ -1,8 +1,8 @@
 package neurx.nn.conv
 use neurx.tensor.tensor
-func copy_float(float[] data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -11,9 +11,9 @@ func copy_float(float[] data) []float {
     out
 }
 
-func copy_int(int[] data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -23,14 +23,14 @@ func copy_int(int[] data) []int {
 }
 
 func shape2(int a, int b) []int {
-    int[] s = make([]int, 2)
+    []int s = make([]int, 2)
     s[0] = a
     s[1] = b
     s
 }
 
 func shape3(int a, int b, int c) []int {
-    int[] s = make([]int, 3)
+    []int s = make([]int, 3)
     s[0] = a
     s[1] = b
     s[2] = c
@@ -38,7 +38,7 @@ func shape3(int a, int b, int c) []int {
 }
 
 func shape4(int a, int b, int c, int d) []int {
-    int[] s = make([]int, 4)
+    []int s = make([]int, 4)
     s[0] = a
     s[1] = b
     s[2] = c
@@ -57,20 +57,20 @@ struct conv1d_state {
     int stride
     int padding
     int dilation
-    float[] weight
-    float[] bias
+    []float weight
+    []float bias
     bool use_bias
 }
 
 func new_conv1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int dilation, bool use_bias) conv1d_state {
     int w_size = out_channels * in_channels * kernel_size
-    float[] weight = make([]float, w_size)
+    []float weight = make([]float, w_size)
     int i = 0
     for i < w_size {
         weight[i] = 0.0
         i = i + 1
     }
-    float[] bias = make([]float, out_channels)
+    []float bias = make([]float, out_channels)
     i = 0
     for i < out_channels {
         bias[i] = 0.0
@@ -99,7 +99,7 @@ func conv1d_forward(conv1d_state layer, tensor input) tensor {
     int pad = layer.padding
     int dil = layer.dilation
     int out_len = out_size(length, ks, stride, pad, dil)
-    float[] out = make([]float, batch * out_ch * out_len)
+    []float out = make([]float, batch * out_ch * out_len)
     int b = 0
     for b < batch {
         int oc = 0
@@ -145,20 +145,20 @@ struct conv2d_state {
     int pad_w
     int dil_h
     int dil_w
-    float[] weight
-    float[] bias
+    []float weight
+    []float bias
     bool use_bias
 }
 
 func new_conv2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int dil_h, int dil_w, bool use_bias) conv2d_state {
     int w_size = out_channels * in_channels * kernel_h * kernel_w
-    float[] weight = make([]float, w_size)
+    []float weight = make([]float, w_size)
     int i = 0
     for i < w_size {
         weight[i] = 0.0
         i = i + 1
     }
-    float[] bias = make([]float, out_channels)
+    []float bias = make([]float, out_channels)
     i = 0
     for i < out_channels {
         bias[i] = 0.0
@@ -191,7 +191,7 @@ func conv2d_forward(conv2d_state layer, tensor input) tensor {
     int kw = layer.kernel_w
     int out_h = out_size(in_h, kh, layer.stride_h, layer.pad_h, layer.dil_h)
     int out_w = out_size(in_w, kw, layer.stride_w, layer.pad_w, layer.dil_w)
-    float[] out = make([]float, batch * out_ch * out_h * out_w)
+    []float out = make([]float, batch * out_ch * out_h * out_w)
     int b = 0
     for b < batch {
         int oc = 0
@@ -243,20 +243,20 @@ struct convtranspose1d_state {
     int padding
     int output_padding
     int dilation
-    float[] weight
-    float[] bias
+    []float weight
+    []float bias
     bool use_bias
 }
 
 func new_convtranspose1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int output_padding, int dilation, bool use_bias) convtranspose1d_state {
     int w_size = in_channels * out_channels * kernel_size
-    float[] weight = make([]float, w_size)
+    []float weight = make([]float, w_size)
     int i = 0
     for i < w_size {
         weight[i] = 0.0
         i = i + 1
     }
-    float[] bias = make([]float, out_channels)
+    []float bias = make([]float, out_channels)
     i = 0
     for i < out_channels {
         bias[i] = 0.0
@@ -286,7 +286,7 @@ func convtranspose1d_forward(convtranspose1d_state layer, tensor input) tensor {
     if out_len <= 0 {
         out_len = 1
     }
-    float[] out = make([]float, batch * out_ch * out_len)
+    []float out = make([]float, batch * out_ch * out_len)
     int b = 0
     for b < batch {
         int ic = 0
@@ -340,20 +340,20 @@ struct convtranspose2d_state {
     int output_pad_w
     int dil_h
     int dil_w
-    float[] weight
-    float[] bias
+    []float weight
+    []float bias
     bool use_bias
 }
 
 func new_convtranspose2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int output_pad_h, int output_pad_w, int dil_h, int dil_w, bool use_bias) convtranspose2d_state {
     int w_size = in_channels * out_channels * kernel_h * kernel_w
-    float[] weight = make([]float, w_size)
+    []float weight = make([]float, w_size)
     int i = 0
     for i < w_size {
         weight[i] = 0.0
         i = i + 1
     }
-    float[] bias = make([]float, out_channels)
+    []float bias = make([]float, out_channels)
     i = 0
     for i < out_channels {
         bias[i] = 0.0
@@ -394,7 +394,7 @@ func convtranspose2d_forward(convtranspose2d_state layer, tensor input) tensor {
     if out_w <= 0 {
         out_w = 1
     }
-    float[] out = make([]float, batch * out_ch * out_h * out_w)
+    []float out = make([]float, batch * out_ch * out_h * out_w)
     int b = 0
     for b < batch {
         int ic = 0

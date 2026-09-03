@@ -8,7 +8,7 @@ struct syscall_entry {
     string name
 }
 syscall_entry[] syscall_table
-map[int]int[] fd_table
+map[int][]int fd_table
 int next_fd
 const enosys = -38
 func init_syscall_table() int {
@@ -92,7 +92,7 @@ func sys_exit(int code) int {
     code
 }
 
-func syscall_dispatch(int num, int[] args) int {
+func syscall_dispatch(int num, []int args) int {
     eprintln("syscall_dispatch: " + int_to_string(num))
     if num == 0 {
         if len(args) >= 3 {

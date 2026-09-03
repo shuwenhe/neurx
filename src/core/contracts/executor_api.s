@@ -48,7 +48,7 @@ interface iaot_executor {
 interface i_executor_memory_management {
     allocate_for_plan(plan: execution_plan) . i64
     deallocate_plan(i64 base_addr) . void
-    get_memory_reuse_map(plan: execution_plan) . map[string]string[]
+    get_memory_reuse_map(plan: execution_plan) . map[string][]string
 }
 interface i_executor_stream_management {
     execute_on_stream(string op_name, inputs: []tensor, stream: stream) . tensor

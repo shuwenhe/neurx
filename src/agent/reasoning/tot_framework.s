@@ -23,7 +23,7 @@ struct tree_node {
 	int32[]      children_indices
 	int64           created_at
 	int64           evaluated_at
-	string[]     metadata
+	[]string     metadata
 }
 
 struct tot_branch {
@@ -87,7 +87,7 @@ func (tot_framework* t) add_root_node(content string) string {
 		parent_index:    -1,
 		children_indices: make(int32[], 0, t.branching_factor),
 		created_at:      time.Now().UnixNano(),
-		metadata:        make(string[], 0),
+		metadata:        make([]string, 0),
 	}
 	t.all_nodes = append(t.all_nodes, node)
 	t.node_scores[node_id] = 0.0
@@ -97,7 +97,7 @@ func (tot_framework* t) add_root_node(content string) string {
 
 func (tot_framework* t) expand_node(
 	parent_id string,
-	child_contents string[],
+	child_contents []string,
 ) []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -109,13 +109,13 @@ func (tot_framework* t) expand_node(
 		}
 	}
 	if parent_index < 0 {
-		return make(string[], 0)
+		return make([]string, 0)
 	}
 	parent := t.all_nodes[parent_index]
 	if parent.depth >= t.max_depth {
-		return make(string[], 0)
+		return make([]string, 0)
 	}
-	child_ids := make(string[], 0, len(child_contents))
+	child_ids := make([]string, 0, len(child_contents))
 	for content := range child_contents {
 		if int32(len(t.all_nodes)) >= 1000 {
 			break
@@ -130,7 +130,7 @@ func (tot_framework* t) expand_node(
 			parent_index:     parent_index,
 			children_indices: make(int32[], 0, t.branching_factor),
 			created_at:       time.Now().UnixNano(),
-			metadata:         make(string[], 0),
+			metadata:         make([]string, 0),
 		}
 		child_index := int32(len(t.all_nodes))
 		t.all_nodes = append(t.all_nodes, child)
@@ -196,7 +196,7 @@ func (tot_framework* t) prune_descendants(parent_index int32) bool {
 func (tot_framework* t) breadth_first_traversal() []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	traversal := make(string[], 0, len(t.all_nodes))
+	traversal := make([]string, 0, len(t.all_nodes))
 	if int32(len(t.all_nodes)) == 0 {
 		return traversal
 	}
@@ -224,7 +224,7 @@ func (tot_framework* t) breadth_first_traversal() []string {
 func (tot_framework* t) depth_first_traversal() []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	traversal := make(string[], 0, len(t.all_nodes))
+	traversal := make([]string, 0, len(t.all_nodes))
 	if int32(len(t.all_nodes)) == 0 {
 		return traversal
 	}
@@ -253,7 +253,7 @@ func (tot_framework* t) depth_first_traversal() []string {
 func (tot_framework* t) best_first_traversal() []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	traversal := make(string[], 0, len(t.all_nodes))
+	traversal := make([]string, 0, len(t.all_nodes))
 	if int32(len(t.all_nodes)) == 0 {
 		return traversal
 	}
@@ -284,7 +284,7 @@ func (tot_framework* t) best_first_traversal() []string {
 func (tot_framework* t) beam_search_traversal(beam_width int32) []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	traversal := make(string[], 0, beam_width*t.max_depth)
+	traversal := make([]string, 0, beam_width*t.max_depth)
 	if int32(len(t.all_nodes)) == 0 {
 		return traversal
 	}
@@ -338,7 +338,7 @@ func (tot_framework* t) sort_by_score(indices []int32) []int32 {
 func (tot_framework* t) get_best_path() []string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	path := make(string[], 0, t.max_depth)
+	path := make([]string, 0, t.max_depth)
 	if len(t.best_solution_id) == 0 {
 		return path
 	}
@@ -357,7 +357,7 @@ func (tot_framework* t) get_best_path() []string {
 		path = append(path, t.all_nodes[current_index].id)
 		current_index = t.all_nodes[current_index].parent_index
 	}
-	reversed := make(string[], 0, len(path))
+	reversed := make([]string, 0, len(path))
 	for i := int32(len(path)) - 1; i >= 0; i-- {
 		reversed = append(reversed, path[i])
 	}

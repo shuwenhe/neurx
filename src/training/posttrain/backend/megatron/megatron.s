@@ -20,14 +20,14 @@ struct megatron_config {
 struct tensor_parallel_state {
     int tp_rank
     int tp_world_size
-    int[] tp_group_ranks
+    []int tp_group_ranks
     distributed_context tp_ctx
 }
 
 struct pipeline_parallel_state {
     int pp_rank
     int pp_world_size
-    int[] pp_group_ranks
+    []int pp_group_ranks
     distributed_context pp_ctx
     int num_microbatches
 }

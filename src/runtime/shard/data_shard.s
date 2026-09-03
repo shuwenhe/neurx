@@ -53,11 +53,11 @@ struct shard_manifest {
 
 func new_shard_config_from_env() shard_config {
     neurx_home := get_env("NEURX_HOME", ".")
-    dataset_root := get_env("DATASET_ROOT", path_join(string[]{neurx_home, "dataset", "pretrain"}))
+    dataset_root := get_env("DATASET_ROOT", path_join([]string{neurx_home, "dataset", "pretrain"}))
     shard_config{
-        input_file: get_env("INPUT_FILE", path_join(string[]{dataset_root, "cleaned", "train.jsonl"})),
-        shard_dir: get_env("SHARD_DIR", path_join(string[]{dataset_root, "shard"})),
-        manifest_file: get_env("MANIFEST_FILE", path_join(string[]{dataset_root, "manifest.json"})),
+        input_file: get_env("INPUT_FILE", path_join([]string{dataset_root, "cleaned", "train.jsonl"})),
+        shard_dir: get_env("SHARD_DIR", path_join([]string{dataset_root, "shard"})),
+        manifest_file: get_env("MANIFEST_FILE", path_join([]string{dataset_root, "manifest.json"})),
         max_shards: get_env_int("MAX_SHARDS", 128),
         min_lines_per_shard: get_env_int("MIN_LINES_PER_SHARD", 100),
     }
@@ -157,7 +157,7 @@ func generate_shards(shard_config config) bool {
 }
 
 func format_shard_filename(string shard_dir, int index) string {
-    path_join(string[]{shard_dir, format_shard_id(index) + ".jsonl"})
+    path_join([]string{shard_dir, format_shard_id(index) + ".jsonl"})
 }
 
 func format_shard_id(int index) string {

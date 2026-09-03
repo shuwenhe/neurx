@@ -12,7 +12,7 @@ struct multi_node_config_2 {
     shared_id string
     output string
     resume_enabled bool
-    hosts string[]
+    hosts []string
 }
 
 func parse_host_file(string hostfile) []string {

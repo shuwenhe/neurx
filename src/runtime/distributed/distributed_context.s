@@ -80,7 +80,7 @@ func (distributed_context* ctx) is_master() bool {
     ctx.rank == 0
 }
 
-func (distributed_context* ctx) create_subgroup(int[] ranks, string name) int {
+func (distributed_context* ctx) create_subgroup([]int ranks, string name) int {
     backend := comm_backend_nccl
     switch ctx.backend_name {
         "nccl" : backend = comm_backend_nccl,

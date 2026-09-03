@@ -89,7 +89,7 @@ func main() {
 
     print("=== Code Structure ===\n")
     print("package neurx.examples.heap_sort\n\n")
-    print("func heapify(int[] arr, int n, int i) {\n")
+    print("func heapify([]int arr, int n, int i) {\n")
     print("    int largest = i\n")
     print("    int left = 2 * i + 1\n")
     print("    int right = 2 * i + 2\n\n")
@@ -105,7 +105,7 @@ func main() {
     print("    }\n")
     print("}\n\n")
 
-    print("func heap_sort(int[] arr) {\n")
+    print("func heap_sort([]int arr) {\n")
     print("    int n = len(arr)\n")
     print("    int i = n / 2 - 1\n")
     print("    for i >= 0 {\n")

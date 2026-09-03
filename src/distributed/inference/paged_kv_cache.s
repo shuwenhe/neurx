@@ -15,7 +15,7 @@ struct block_manager {
     int block_size_tokens
     int total_memory_mb
     kv_block[] blocks
-    int[] free_block_list
+    []int free_block_list
     int64 current_time_ns
 }
 
@@ -25,7 +25,7 @@ struct paged_kv_cache {
     int max_seq_length
     int num_gpus
     int device_mem_per_gpu_mb
-    int[][] block_tables
+    []int[] block_tables
     int64 total_hits
     int64 total_misses
 }
@@ -44,7 +44,7 @@ struct prefix_cache_entry {
 struct prefix_cache_manager {
     int cache_capacity
     prefix_cache_entry[] entries
-    string[] prefix_hashes
+    []string prefix_hashes
     int total_prefixes_cached
 }
 
@@ -169,9 +169,9 @@ func new_paged_kv_cache(
 func (paged_kv_cache* cache) allocate_kv_cache(
     int request_id,
     int seq_length
-) (int[], bool) {
+) ([]int, bool) {
     int num_blocks_needed = (seq_length + cache.block_mgr.block_size_tokens - 1) / cache.block_mgr.block_size_tokens
-    int[] blocks = make([]int, num_blocks_needed)
+    []int blocks = make([]int, num_blocks_needed)
     int block_idx = 0
     for block_idx < num_blocks_needed {
         block_id, success := cache.block_mgr.allocate_block(block_idx * cache.block_mgr.block_size_tokens)
@@ -198,7 +198,7 @@ func (paged_kv_cache* cache) free_kv_cache(int request_id) {
     if request_id < 0 || request_id >= len(cache.block_tables) {
         return
     }
-    int[] blocks = cache.block_tables[request_id]
+    []int blocks = cache.block_tables[request_id]
     int i = 0
     for i < len(blocks) {
         cache.block_mgr.free_block(blocks[i])

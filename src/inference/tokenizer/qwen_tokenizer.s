@@ -41,7 +41,7 @@ func find_token_id(tokenizer tok, string word) int {
 }
 
 func tokenize(tokenizer tok, string text) []int {
-    int[] tokens = make([]int, len(text) + 10)
+    []int tokens = make([]int, len(text) + 10)
     int token_count = 0
     string current_word = ""
     int i = 0
@@ -72,7 +72,7 @@ func tokenize(tokenizer tok, string text) []int {
         tokens[token_count] = token_id
         token_count = token_count + 1
     }
-    int[] result = make([]int, token_count)
+    []int result = make([]int, token_count)
     int j = 0
     for j < token_count {
         result[j] = tokens[j]
@@ -81,7 +81,7 @@ func tokenize(tokenizer tok, string text) []int {
     return result
 }
 
-func decode_tokens(tokenizer tok, int[] token_ids) string {
+func decode_tokens(tokenizer tok, []int token_ids) string {
     string result = ""
     int i = 0
     for i < len(token_ids) {

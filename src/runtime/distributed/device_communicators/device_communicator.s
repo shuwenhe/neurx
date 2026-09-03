@@ -20,7 +20,7 @@ func reduce_minimum() int { 3 }
 struct device_communicator {
     string name
     string backend
-    int[] ranks
+    []int ranks
     int global_rank
     int rank_in_group
     int world_size

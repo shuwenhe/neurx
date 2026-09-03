@@ -1,14 +1,14 @@
 package neurx.nn.containers
 struct sequential_module {
-    string[] layer_names
-    string[] layer_types
+    []string layer_names
+    []string layer_types
     int num_layers
 }
 
 func new_sequential() sequential_module {
     sequential_module {
-        layer_names: make(string[], 0),
-        layer_types: make(string[], 0),
+        layer_names: make([]string, 0),
+        layer_types: make([]string, 0),
         num_layers: 0,
     }
 }
@@ -32,15 +32,15 @@ func sequential_get_layer_index(sequential_module seq, string name) int {
 }
 
 struct module_list {
-    string[] module_names
-    string[] module_types
+    []string module_names
+    []string module_types
     int num_modules
 }
 
 func new_module_list() module_list {
     module_list {
-        module_names: make(string[], 0),
-        module_types: make(string[], 0),
+        module_names: make([]string, 0),
+        module_types: make([]string, 0),
         num_modules: 0,
     }
 }
@@ -63,15 +63,15 @@ func module_list_get_module(module_list ml, int index) string {
 }
 
 struct module_dict {
-    string[] module_keys
-    string[] module_types
+    []string module_keys
+    []string module_types
     int num_modules
 }
 
 func new_module_dict() module_dict {
     module_dict {
-        module_keys: make(string[], 0),
-        module_types: make(string[], 0),
+        module_keys: make([]string, 0),
+        module_types: make([]string, 0),
         num_modules: 0,
     }
 }

@@ -46,8 +46,8 @@ func main() {
             step = step + 1
             loss = loss - 0.08
             if loss < 0.5 { loss = 0.5 }
-            float[] layer1_grad
-            float[] layer2_grad
+            []float layer1_grad
+            []float layer2_grad
             int i
             i = 0
             for i < 10 {
@@ -60,7 +60,7 @@ func main() {
                 layer2_grad = append(layer2_grad, grad_val * 0.8)
                 i = i + 1
             }
-            float[][] gradients
+            []float[] gradients
             gradients = append(gradients, layer1_grad)
             gradients = append(gradients, layer2_grad)
             bool grads_healthy

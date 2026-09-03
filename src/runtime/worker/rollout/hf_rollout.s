@@ -20,16 +20,16 @@ struct hf_rollout_state {
 }
 
 struct hf_generation_request {
-    int[] input_ids
+    []int input_ids
     int max_new_tokens
     float temperature
     int request_id
 }
 
 struct hf_generation_response {
-    int[] generated_ids
-    float[] log_probs
-    float[] scores
+    []int generated_ids
+    []float log_probs
+    []float scores
     int request_id
     bool finished
 }
@@ -64,9 +64,9 @@ func hf_generate_batch(
     []hf_generation_response responses = make([]hf_generation_response, len(requests))
     for int i = 0; i < len(requests); i = i + 1 {
         hf_generation_request req = requests[i]
-        int[] gen_ids = make(int[], req.max_new_tokens)
-        float[] log_probs = make(float[], req.max_new_tokens)
-        float[] scores = make(float[], req.max_new_tokens)
+        []int gen_ids = make([]int, req.max_new_tokens)
+        []float log_probs = make([]float, req.max_new_tokens)
+        []float scores = make([]float, req.max_new_tokens)
         for int j = 0; j < req.max_new_tokens; j = j + 1 {
             gen_ids[j] = 100 + j
             log_probs[j] = -0.2 * float(j)
@@ -87,17 +87,17 @@ func hf_generate_batch(
 func hf_generate_with_constraints(
     hf_rollout_state state,
     []hf_generation_request requests,
-    int[][] allowed_token_ids
+    []int[] allowed_token_ids
 ) []hf_generation_response {
     return hf_generate_batch(state, requests)
 }
 
 func hf_compute_log_probs(
     hf_rollout_state state,
-    int[] input_ids,
-    int[] target_ids
+    []int input_ids,
+    []int target_ids
 ) []float {
-    float[] log_probs = make(float[], len(target_ids))
+    []float log_probs = make([]float, len(target_ids))
     for int i = 0; i < len(target_ids); i = i + 1 {
         log_probs[i] = -0.15
     }
@@ -106,9 +106,9 @@ func hf_compute_log_probs(
 
 func hf_model_forward(
     hf_rollout_state state,
-    int[] input_ids
+    []int input_ids
 ) tensor {
-    return zeros(int[]{len(input_ids), 32000})
+    return zeros([]int{len(input_ids), 32000})
 }
 
 func hf_update_generation_config(

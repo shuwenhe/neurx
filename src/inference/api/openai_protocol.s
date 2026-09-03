@@ -354,7 +354,7 @@ func openai_error_body(string message, string error_type, string code) string {
     "{\"error\":{\"message\":\"" + openai_json_escape(message) + "\",\"type\":\"" + openai_json_escape(error_type) + "\",\"code\":\"" + openai_json_escape(code) + "\"}}"
 }
 
-func openai_embedding_body(string model, float[] embedding, int prompt_tokens) string {
+func openai_embedding_body(string model, []float embedding, int prompt_tokens) string {
     string values = ""
     int i = 0
     for i < len(embedding) {

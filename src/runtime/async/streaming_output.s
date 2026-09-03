@@ -33,7 +33,7 @@ struct stream_output {
 	session_id              string
 	generated_text          string
 	generated_tokens        int32[]
-	token_texts             string[]
+	token_texts             []string
 	total_tokens_generated  int32
 	completion_tokens_total int32
 	prompt_tokens_total     int32
@@ -97,7 +97,7 @@ func create_stream_state(request_id string, mode int32) stream_state {
 			output_mode:         mode,
 			created_timestamp:   time.Now().UnixNano(),
 			generated_tokens:    make(int32[], 0, 1024),
-			token_texts:         make(string[], 0, 1024),
+			token_texts:         make([]string, 0, 1024),
 			metadata:            make(map[string]string),
 		},
 		buffer: stream_buffer{
@@ -149,7 +149,7 @@ func (s stream_state*) add_token(token_id int32, token_text string) bool {
 	return true
 }
 
-func (s stream_state*) add_tokens_batch(token_ids []int32, token_texts string[]) bool {
+func (s stream_state*) add_tokens_batch(token_ids []int32, token_texts []string) bool {
 	for i := int32(0); i < int32(len(token_ids)); i++ {
 		s.add_token(token_ids[i], token_texts[i])
 	}

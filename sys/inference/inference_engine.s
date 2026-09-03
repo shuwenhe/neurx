@@ -6,8 +6,8 @@ struct model_config {
     string model_id
     int version
     int batch_size
-    int[] input_shapes
-    int[] output_shapes
+    []int input_shapes
+    []int output_shapes
 }
 
 struct inference_request {

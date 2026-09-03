@@ -1,6 +1,6 @@
 package neurx.trainer.simple
 struct simple_tensor {
-    float[] data
+    []float data
     int rows
     int cols
 }
@@ -17,15 +17,15 @@ struct simple_config {
 }
 
 struct simple_model {
-    float[] embeddings
-    float[] output_weights
+    []float embeddings
+    []float output_weights
     int vocab_size
     int hidden_dim
 }
 
 struct simple_optimizer {
-    float[] momentum
-    float[] variance
+    []float momentum
+    []float variance
     int step
     float lr
 }
@@ -54,14 +54,14 @@ func new_simple_config() simple_config {
 func initialize_simple_model(simple_config cfg) simple_model {
     int emb_size = cfg.vocab_size * cfg.hidden_dim
     int out_size = cfg.vocab_size * cfg.hidden_dim
-    float[] embeddings = []
+    []float embeddings = []
     int i = 0
     for i < emb_size {
         float val = simple_randn(i) * 0.02
         embeddings = append(embeddings, val)
         i = i + 1
     }
-    float[] output_weights = []
+    []float output_weights = []
     i = 0
     for i < out_size {
         float val = simple_randn(i + emb_size) * 0.02
@@ -78,8 +78,8 @@ func initialize_simple_model(simple_config cfg) simple_model {
 
 func initialize_simple_optimizer(simple_model model, simple_config cfg) simple_optimizer {
     int total_params = len(model.embeddings) + len(model.output_weights)
-    float[] momentum = []
-    float[] variance = []
+    []float momentum = []
+    []float variance = []
     int i = 0
     for i < total_params {
         momentum = append(momentum, 0.0)
@@ -94,7 +94,7 @@ func initialize_simple_optimizer(simple_model model, simple_config cfg) simple_o
     return opt
 }
 
-func simple_forward(simple_model model, int[] input_ids, simple_config cfg) float {
+func simple_forward(simple_model model, []int input_ids, simple_config cfg) float {
     int batch_size = cfg.batch_size
     int seq_len = cfg.max_seq_len
     int hidden_dim = cfg.hidden_dim
@@ -139,7 +139,7 @@ func simple_forward(simple_model model, int[] input_ids, simple_config cfg) floa
 
 func simple_backward(simple_model model, float loss) []float {
     int total_params = len(model.embeddings) + len(model.output_weights)
-    float[] gradients = []
+    []float gradients = []
     int i = 0
     for i < total_params {
         float grad = 0.0
@@ -157,7 +157,7 @@ func simple_backward(simple_model model, float loss) []float {
     return gradients
 }
 
-func simple_optimizer_step(simple_optimizer opt, float[] gradients, simple_model model) simple_optimizer {
+func simple_optimizer_step(simple_optimizer opt, []float gradients, simple_model model) simple_optimizer {
     opt.step = opt.step + 1
     float beta1 = 0.9
     float beta2 = 0.999
@@ -198,7 +198,7 @@ func simple_training_loop(simple_config cfg) {
     println("")
     int step = 0
     for step < cfg.max_steps {
-        int[] dummy_input = []
+        []int dummy_input = []
         int i = 0
         for i < cfg.batch_size * cfg.max_seq_len {
             int token = simple_rand(step * 1000 + i) / (cfg.vocab_size + 1)
@@ -212,7 +212,7 @@ func simple_training_loop(simple_config cfg) {
             i = i + 1
         }
         float loss = simple_forward(model, dummy_input, cfg)
-        float[] grads = simple_backward(model, loss)
+        []float grads = simple_backward(model, loss)
         opt = simple_optimizer_step(opt, grads, model)
         if is_multiple_of(step, cfg.log_interval) {
             print_log(step, loss, opt.lr)

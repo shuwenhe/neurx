@@ -33,8 +33,8 @@ struct operation {
     int id
     op_type op_kind
     string name
-    int[] input_ids
-    int[] output_ids
+    []int input_ids
+    []int output_ids
     attr_value[] attributes
 }
 
@@ -163,7 +163,7 @@ func get_op_definition(op_type op_kind) operation_def {
     }
 }
 
-func new_operation(int id, op_type op_kind, string name, int[] input_ids, int[] output_ids) operation {
+func new_operation(int id, op_type op_kind, string name, []int input_ids, []int output_ids) operation {
     operation {
         id: id,
         op_kind: op_kind,

@@ -18,7 +18,7 @@ struct inference_config {
 
 struct inference_sequence {
     int seq_id
-    int[] token_ids
+    []int token_ids
     int prompt_len
     int output_len
     int max_tokens
@@ -30,21 +30,21 @@ struct inference_sequence {
 
 struct cache_block {
     int block_id
-    int[] token_ids
+    []int token_ids
     int ref_count
     bool is_gpu
 }
 
 struct block_cache_table {
-    int[][] seq_block_tables
+    []int[] seq_block_tables
     []cache_block blocks
     int num_free_gpu_blocks
     int num_free_cpu_blocks
 }
 
 struct scheduler_output {
-    int[] scheduled_seq_ids
-    int[] num_tokens_per_seq
+    []int scheduled_seq_ids
+    []int num_tokens_per_seq
     int total_tokens
     bool is_prompt_phase
 }
@@ -114,8 +114,8 @@ func free_block(block_cache_table table, int block_id) {
 func schedule_sequences(
     inference_engine engine
 ) scheduler_output {
-    int[] scheduled = make([]int, engine.config.max_num_seqs)
-    int[] num_tokens = make([]int, engine.config.max_num_seqs)
+    []int scheduled = make([]int, engine.config.max_num_seqs)
+    []int num_tokens = make([]int, engine.config.max_num_seqs)
     int total_tokens = 0
     bool is_prompt = false
     int i = 0
@@ -152,8 +152,8 @@ func paged_attention(
     tensor query,
     tensor key_cache,
     tensor value_cache,
-    int[][] block_tables,
-    int[] context_lens,
+    []int[] block_tables,
+    []int context_lens,
     int block_size
 ) tensor {
     int batch_size = query.shape[0]
@@ -162,7 +162,7 @@ func paged_attention(
     tensor output = tensor_ops.zeros([batch_size, num_heads, head_dim])
     int b = 0
     for b < batch_size {
-        int[] blocks = block_tables[b]
+        []int blocks = block_tables[b]
         int context_len = context_lens[b]
         int num_blocks = (context_len + block_size - 1) / block_size
         []tensor attn_scores = make([]tensor, num_blocks)
@@ -220,11 +220,11 @@ func paged_attention(
 
 func generate(
     inference_engine engine,
-    int[][] prompts,
+    []int[] prompts,
     int max_tokens,
     float temperature,
     float top_p
-) int[][] {
+) []int[] {
     int i = 0
     for i < prompts.len {
         inference_sequence seq = inference_sequence {
@@ -258,7 +258,7 @@ func generate(
             j = j + 1
         }
     }
-    int[][] outputs = intmake([][], prompts.len)
+    []int[] outputs = intmake([][], prompts.len)
     i = 0
     for i < engine.sequences.len {
         outputs[i] = engine.sequences[i].token_ids
@@ -289,7 +289,7 @@ func new_inference_engine(module model, inference_config config) inference_engin
         i = i + 1
     }
     block_cache_table table = block_cache_table {
-        seq_block_tables: int[][]{},
+        seq_block_tables: []int[]{},
         blocks: blocks,
         num_free_gpu_blocks: config.num_gpu_blocks,
         num_free_cpu_blocks: config.num_cpu_blocks,

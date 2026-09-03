@@ -13,7 +13,7 @@ struct device_info {
 struct execution_context {
     device_info* device
     kernel_registry* kernels
-    int[]erface{} tensor_cache
+    []interface{} tensor_cache
     map[string]interface{} metadata
 }
 
@@ -34,8 +34,8 @@ struct kernel_scheduler {
 
 struct graph_executor {
     interface{} computation_graph
-    int[]erface{} graph_nodes
-    int[][]32 node_dependencies
+    []interface{} graph_nodes
+    []int[]32 node_dependencies
     bool is_optimized
 }
 
@@ -48,7 +48,7 @@ struct distributed_executor {
 }
 
 struct pipeline_parallel_executor {
-    int[]erface{} stage_models
+    []interface{} stage_models
     int32 num_stages
     int32 micro_batch_size
     bool enable_async_grad
@@ -57,13 +57,13 @@ struct pipeline_parallel_executor {
 struct tensor_parallel_executor {
     int32 tensor_parallel_degree
     string sharding_strategy
-    map[string]int[]32 tensor_sharding_map
+    map[string][]int32 tensor_sharding_map
 }
 
 struct memory_optimizer {
     int64 peak_memory_usage
     int64 current_memory_usage
-    int[]erface{} activation_checkpoints
+    []interface{} activation_checkpoints
     bool enable_recompute
 }
 
@@ -82,7 +82,7 @@ func create_hw_agnostic_executor(device_info* device, kernel_registry* kr) hw_ag
     ctx := *execution_context{
         device: device,
         kernels: kr,
-        tensor_cache: make(int[]erface{}, 0),
+        tensor_cache: make([]interface{}, 0),
         metadata: make(map[string]interface{}),
     }
     return *hw_agnostic_executor{
@@ -109,8 +109,8 @@ func (hw_agnostic_executor* exe) optimize_for_device() error {
 func (hw_agnostic_executor* exe) compile_graph(interface{} graph) (graph_executor*, error) {
     return *graph_executor{
         computation_graph: graph,
-        graph_nodes: make(int[]erface{}, 0),
-        node_dependencies: make(int[][]32, 0),
+        graph_nodes: make([]interface{}, 0),
+        node_dependencies: make([]int[]32, 0),
         is_optimized: false,
     }, nil
 }
@@ -174,8 +174,8 @@ func (kernel_scheduler* ks) wait_for_completion() error {
 func create_graph_executor() graph_executor* {
     return *graph_executor{
         computation_graph: nil,
-        graph_nodes: make(int[]erface{}, 0),
-        node_dependencies: make(int[][]32, 0),
+        graph_nodes: make([]interface{}, 0),
+        node_dependencies: make([]int[]32, 0),
         is_optimized: false,
     }
 }
@@ -189,7 +189,7 @@ func (graph_executor* ge) optimize() error {
     return nil
 }
 
-func (graph_executor* ge) execute(int[]erface{} inputs) (int[]erface{}, error) {
+func (graph_executor* ge) execute([]interface{} inputs) ([]interface{}, error) {
     return inputs, nil
 }
 
@@ -213,7 +213,7 @@ func (distributed_executor* de) all_reduce(interface{} data) error {
 
 func create_pipeline_parallel_executor(int32 num_stages, int32 micro_batch_size) pipeline_parallel_executor* {
     return *pipeline_parallel_executor{
-        stage_models: make(int[]erface{}, num_stages),
+        stage_models: make([]interface{}, num_stages),
         num_stages: num_stages,
         micro_batch_size: micro_batch_size,
         enable_async_grad: true,
@@ -228,7 +228,7 @@ func create_tensor_parallel_executor(int32 degree) tensor_parallel_executor* {
     return *tensor_parallel_executor{
         tensor_parallel_degree: degree,
         sharding_strategy: "megatron",
-        tensor_sharding_map: make(map[string]int[]32),
+        tensor_sharding_map: make(map[string][]int32),
     }
 }
 
@@ -244,7 +244,7 @@ func create_memory_optimizer() memory_optimizer* {
     return *memory_optimizer{
         peak_memory_usage: 0,
         current_memory_usage: 0,
-        activation_checkpoints: make(int[]erface{}, 0),
+        activation_checkpoints: make([]interface{}, 0),
         enable_recompute: true,
     }
 }

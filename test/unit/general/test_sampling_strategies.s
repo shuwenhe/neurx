@@ -18,10 +18,10 @@ func assert_close(float actual, float expected, string name) {
 }
 
 func test_temperature_and_penalty() {
-    float[] logits = [2.0, 4.0, 0.0]
+    []float logits = [2.0, 4.0, 0.0]
     logits[2] = -2.0
-    float[] scaled = neurx.inference.sampling_strategies.apply_temperature(logits, 2.0)
-    float[] penalized = neurx.inference.sampling_strategies.apply_repetition_penalty(logits, [0, 2], 2.0)
+    []float scaled = neurx.inference.sampling_strategies.apply_temperature(logits, 2.0)
+    []float penalized = neurx.inference.sampling_strategies.apply_repetition_penalty(logits, [0, 2], 2.0)
     assert_close(scaled[0], 1.0, "temperature 0")
     assert_close(scaled[1], 2.0, "temperature 1")
     assert_close(penalized[0], 1.0, "penalty 0")
@@ -30,9 +30,9 @@ func test_temperature_and_penalty() {
 }
 
 func test_presence_and_frequency() {
-    float[] logits = [5.0, 1.0, 0.0]
-    int[] past = [0, 0, 2]
-    float[] adjusted = neurx.inference.sampling_strategies.apply_presence_frequency_penalties(
+    []float logits = [5.0, 1.0, 0.0]
+    []int past = [0, 0, 2]
+    []float adjusted = neurx.inference.sampling_strategies.apply_presence_frequency_penalties(
         logits,
         past,
         1.0,
@@ -44,10 +44,10 @@ func test_presence_and_frequency() {
 }
 
 func test_ngram_blocking() {
-    float[] logits = [5.0, 4.0, 3.0, 2.0]
-    int[] past = [0, 1, 0]
-    int[] blocked = neurx.inference.sampling_strategies.get_blocked_tokens(past, 2, 4)
-    float[] adjusted = neurx.inference.sampling_strategies.apply_ngram_blocking(logits, past, 2)
+    []float logits = [5.0, 4.0, 3.0, 2.0]
+    []int past = [0, 1, 0]
+    []int blocked = neurx.inference.sampling_strategies.get_blocked_tokens(past, 2, 4)
+    []float adjusted = neurx.inference.sampling_strategies.apply_ngram_blocking(logits, past, 2)
     assert_true(len(blocked) == 1, "ngram blocked count")
     assert_true(blocked[0] == 1, "ngram blocked token")
     assert_close(adjusted[0], 5.0, "ngram keep 0")
@@ -55,7 +55,7 @@ func test_ngram_blocking() {
 }
 
 func test_greedy_and_distribution() {
-    float[] logits = [1.0, 3.0, 2.0]
+    []float logits = [1.0, 3.0, 2.0]
     int greedy = neurx.inference.sampling_strategies.greedy_sample(logits)
     int sampled = neurx.inference.sampling_strategies.sample_next_token_index(
         logits,
@@ -70,15 +70,15 @@ func test_greedy_and_distribution() {
 }
 
 func test_topk_and_topp() {
-    float[] logits = [10.0, 1.0, 0.5, 0.0]
+    []float logits = [10.0, 1.0, 0.5, 0.0]
     logits[3] = -2.0
     neurx.inference.sampling_strategies.sampling_config cfg = neurx.inference.sampling_strategies.new_sampling_config()
     cfg.temperature = 1.0
     cfg.top_k = 1
     cfg.top_p = 0.9
     cfg.do_sample = true
-    float[] topk_logits = neurx.inference.sampling_strategies.apply_top_k(logits, 1)
-    float[] topp_logits = neurx.inference.sampling_strategies.apply_top_p(logits, 0.5)
+    []float topk_logits = neurx.inference.sampling_strategies.apply_top_k(logits, 1)
+    []float topp_logits = neurx.inference.sampling_strategies.apply_top_p(logits, 0.5)
     int next_token = neurx.inference.sampling_strategies.sample_next_token_index(logits, [], cfg, 99)
     int alias_token = neurx.inference.sampling_strategies.sample_token(logits, [], cfg, 99)
     assert_close(topk_logits[0], 10.0, "topk keep")
@@ -92,7 +92,7 @@ func test_topk_and_topp() {
 }
 
 func test_typical_sampling() {
-    float[] logits = [3.0, 2.0, 0.0, 0.0]
+    []float logits = [3.0, 2.0, 0.0, 0.0]
     logits[3] = -2.0
     neurx.inference.sampling_strategies.sampling_config cfg = neurx.inference.sampling_strategies.new_sampling_config()
     cfg.temperature = 1.0
@@ -100,7 +100,7 @@ func test_typical_sampling() {
     cfg.top_p = 0.0
     cfg.typical_p = 0.5
     cfg.do_sample = true
-    float[] typical_logits = neurx.inference.sampling_strategies.apply_typical_p(logits, 0.5)
+    []float typical_logits = neurx.inference.sampling_strategies.apply_typical_p(logits, 0.5)
     int next_token = neurx.inference.sampling_strategies.sample_next_token_index(logits, [], cfg, 99)
     assert_close(typical_logits[0], 3.0, "typical keep 0")
     assert_true(typical_logits[1] < -1000000000.0, "typical mask 1")
@@ -110,8 +110,8 @@ func test_typical_sampling() {
 }
 
 func test_contrastive_search() {
-    float[] logits = [4.0, 3.9, 1.0, 0.5]
-    int[] past = [0, 0, 2]
+    []float logits = [4.0, 3.9, 1.0, 0.5]
+    []int past = [0, 0, 2]
     neurx.inference.sampling_strategies.sampling_config cfg = neurx.inference.sampling_strategies.new_sampling_config()
     cfg.strategy = "contrastive"
     cfg.do_sample = true
@@ -125,8 +125,8 @@ func test_contrastive_search() {
 }
 
 func test_beam_search() {
-    float[] step0 = [1.0, 3.0, 2.0]
-    float[] step1 = [0.5, 4.0, 1.0]
+    []float step0 = [1.0, 3.0, 2.0]
+    []float step1 = [0.5, 4.0, 1.0]
     neurx.inference.sampling_strategies.sampling_config cfg = neurx.inference.sampling_strategies.new_sampling_config()
     cfg.strategy = "beam_search"
     cfg.do_sample = false
@@ -134,7 +134,7 @@ func test_beam_search() {
     cfg.max_length = 2
     cfg.min_length = 0
     cfg.early_stopping = true
-    int[] beam = neurx.inference.sampling_strategies.beam_search_decode_two_steps(step0, step1, cfg, 2)
+    []int beam = neurx.inference.sampling_strategies.beam_search_decode_two_steps(step0, step1, cfg, 2)
     assert_true(len(beam) == 2, "beam length")
     assert_true(beam[0] == 1, "beam token 0")
     assert_true(beam[1] == 1, "beam token 1")

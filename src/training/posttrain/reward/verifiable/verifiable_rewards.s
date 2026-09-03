@@ -18,7 +18,7 @@ struct verification_result {
     bool correct
     float reward
     string error_message
-    string[] intermediate_steps
+    []string intermediate_steps
 }
 
 func verify_math_solution(
@@ -35,7 +35,7 @@ func verify_math_solution(
     if is_correct {
         reward = 1.0
     }
-    string[] steps = extract_reasoning_steps(cleaned_solution)
+    []string steps = extract_reasoning_steps(cleaned_solution)
     float step_reward = evaluate_reasoning_steps(steps, problem)
     float total_reward = 0.5 * reward + 0.5 * step_reward
     verification_result {
@@ -129,8 +129,8 @@ func normalize_math_expression(string expr) string {
 }
 
 func extract_reasoning_steps(string solution) []string {
-    string[] steps = []string{}
-    string[] lines = split(solution, "\n")
+    []string steps = []string{}
+    []string lines = split(solution, "\n")
     int i = 0
     for i < lines.len {
         string line = trim_whitespace(lines[i])
@@ -143,7 +143,7 @@ func extract_reasoning_steps(string solution) []string {
 }
 
 func evaluate_reasoning_steps(
-    string[] steps,
+    []string steps,
     math_problem problem
 ) float {
     if steps.len == 0 {

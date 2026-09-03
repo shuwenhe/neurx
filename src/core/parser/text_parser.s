@@ -329,7 +329,7 @@ func split_string(string text, string delimiter) []string {
     return parts
 }
 
-func join_strings(string[] strings, string separator) string {
+func join_strings([]string strings, string separator) string {
     result := ""
     i := 0
     for i < len(strings) {

@@ -124,7 +124,7 @@ func max_float(float a, float b) float {
 
 func compute_rope_frequencies(int seq_len, int dim, float base) []float {
     int half_dim = dim / 2
-    float[] freqs = make([]float, half_dim)
+    []float freqs = make([]float, half_dim)
     int i = 0
     for i < half_dim {
         float exponent = float_of_int(i * 2) / float_of_int(dim)
@@ -141,8 +141,8 @@ func rope_linear_scaling(
     int half_dim = cfg.dim / 2
     float scale = float_of_int(cfg.original_max_seq_len) / float_of_int(cfg.target_max_seq_len)
     float scaled_pos = float_of_int(position) * scale
-    float[] freqs = compute_rope_frequencies(cfg.original_max_seq_len, cfg.dim, cfg.base)
-    float[] angles = make([]float, half_dim)
+    []float freqs = compute_rope_frequencies(cfg.original_max_seq_len, cfg.dim, cfg.base)
+    []float angles = make([]float, half_dim)
     int i = 0
     for i < half_dim {
         angles[i] = scaled_pos * freqs[i]
@@ -167,14 +167,14 @@ func rope_ntk_scaling(
         float scale_factor = pow_float(ratio, float_of_int(cfg.dim) / (2.0 * float_of_int(cfg.dim - 2)))
         new_base = cfg.base * scale_factor
     }
-    float[] freqs = make([]float, half_dim)
+    []float freqs = make([]float, half_dim)
     int i = 0
     for i < half_dim {
         float exponent = float_of_int(i * 2) / float_of_int(cfg.dim)
         freqs[i] = 1.0 / pow_float(new_base, exponent)
         i = i + 1
     }
-    float[] angles = make([]float, half_dim)
+    []float angles = make([]float, half_dim)
     i = 0
     for i < half_dim {
         angles[i] = float_of_int(position) * freqs[i]
@@ -188,8 +188,8 @@ func rope_yarn_scaling(
     int position
 ) []float {
     int half_dim = cfg.dim / 2
-    float[] freqs = compute_rope_frequencies(cfg.original_max_seq_len, cfg.dim, cfg.base)
-    float[] lambdas = make([]float, half_dim)
+    []float freqs = compute_rope_frequencies(cfg.original_max_seq_len, cfg.dim, cfg.base)
+    []float lambdas = make([]float, half_dim)
     float inv_beta_fast = 1.0 / cfg.yarn_beta_fast
     float inv_beta_slow = 1.0 / cfg.yarn_beta_slow
     int i = 0
@@ -201,7 +201,7 @@ func rope_yarn_scaling(
         lambdas[i] = decay
         i = i + 1
     }
-    float[] angles = make([]float, half_dim)
+    []float angles = make([]float, half_dim)
     i = 0
     for i < half_dim {
         float scaled_freq = freqs[i] * (1.0 - lambdas[i]) +
@@ -220,8 +220,8 @@ func tanh_approx(float x) float {
 }
 
 struct rope_result {
-    float[] cos_values
-    float[] sin_values
+    []float cos_values
+    []float sin_values
     float attention_scale
 }
 
@@ -230,7 +230,7 @@ func get_rope_angles(
     int position
 ) rope_result {
     int half_dim = cfg.dim / 2
-    float[] angles
+    []float angles
     if cfg.method == ROPE_SCALING_LINEAR {
         angles = rope_linear_scaling(cfg, position)
     } else if cfg.method == ROPE_SCALING_NTK {
@@ -238,8 +238,8 @@ func get_rope_angles(
     } else {
         angles = rope_yarn_scaling(cfg, position)
     }
-    float[] cos_vals = make([]float, half_dim)
-    float[] sin_vals = make([]float, half_dim)
+    []float cos_vals = make([]float, half_dim)
+    []float sin_vals = make([]float, half_dim)
     int i = 0
     for i < half_dim {
         cos_vals[i] = cos_approx(angles[i])
@@ -258,16 +258,16 @@ func get_rope_angles(
 }
 
 struct rope_cache {
-    float[][] all_cos
-    float[][] all_sin
+    []float[] all_cos
+    []float[] all_sin
     float attention_scale
     int cached_seq_len
 }
 
 func build_rope_cache(rope_scaling_config cfg, int seq_len) rope_cache {
     int half_dim = cfg.dim / 2
-    float[][] cos_table = floatmake([][], seq_len)
-    float[][] sin_table = floatmake([][], seq_len)
+    []float[] cos_table = floatmake([][], seq_len)
+    []float[] sin_table = floatmake([][], seq_len)
     float attn_scale = 1.0
     int pos = 0
     for pos < seq_len {
@@ -286,12 +286,12 @@ func build_rope_cache(rope_scaling_config cfg, int seq_len) rope_cache {
 }
 
 func apply_rope_single(
-    float[] x,
+    []float x,
     rope_result angles
 ) []float {
     int d = len(x)
     int half_d = d / 2
-    float[] out = make([]float, d)
+    []float out = make([]float, d)
     int i = 0
     for i < half_d {
         float x0 = x[2 * i]
@@ -306,16 +306,16 @@ func apply_rope_single(
 }
 
 func apply_rope_batch(
-    float[][][] x,
+    []float[][] x,
     rope_cache cache
-) float[][][] {
+) []float[][] {
     int seq_len = len(x)
     if seq_len == 0 { return x }
     int num_heads = len(x[0])
     if num_heads == 0 { return x }
     int head_dim = len(x[0][0])
     int half_d = head_dim / 2
-    float[][][] out = floatmake([][][], seq_len)
+    []float[][] out = floatmake([][][], seq_len)
     int s = 0
     for s < seq_len {
         out[s] = floatmake([][][], num_heads)

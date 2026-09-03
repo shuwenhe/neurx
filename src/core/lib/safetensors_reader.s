@@ -1,7 +1,7 @@
 module safetensors_reader
 struct tensor_metadata {
     string name
-    int[] shape
+    []int shape
     string dtype
     int64 data_offset
     int64 data_length
@@ -57,8 +57,8 @@ func extract_number_value(string json, int start_pos) (int64, int) {
     return result * sign, i
 }
 
-func extract_array_values(string json, int start_pos) (int[], int) {
-    int[] result = []
+func extract_array_values(string json, int start_pos) ([]int, int) {
+    []int result = []
     int i = start_pos
     for i < json.length && json[i] != '[' {
         i = i + 1

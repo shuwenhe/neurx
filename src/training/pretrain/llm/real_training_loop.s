@@ -17,8 +17,8 @@ struct real_training_state {
     tensor weights_out
     tensor embedding
     tensor lm_head
-    float[] adam_m
-    float[] adam_v
+    []float adam_m
+    []float adam_v
     float learning_rate
     int total_steps
     int step
@@ -27,18 +27,18 @@ struct real_training_state {
 }
 
 func shape1(int n) []int {
-    int[] s = make([]int, 1)
+    []int s = make([]int, 1)
     s[0] = n
     s
 }
 
 func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr) real_training_state {
-    float[] embed_data = make([]float, vocab_size * hidden_dim)
-    float[] q_data = make([]float, hidden_dim * hidden_dim)
-    float[] k_data = make([]float, hidden_dim * hidden_dim)
-    float[] v_data = make([]float, hidden_dim * hidden_dim)
-    float[] out_data = make([]float, hidden_dim * hidden_dim)
-    float[] head_data = make([]float, hidden_dim * vocab_size)
+    []float embed_data = make([]float, vocab_size * hidden_dim)
+    []float q_data = make([]float, hidden_dim * hidden_dim)
+    []float k_data = make([]float, hidden_dim * hidden_dim)
+    []float v_data = make([]float, hidden_dim * hidden_dim)
+    []float out_data = make([]float, hidden_dim * hidden_dim)
+    []float head_data = make([]float, hidden_dim * vocab_size)
     int i = 0
     float scale = 2.0 / (hidden_dim as float)
     for i < len(embed_data) {
@@ -71,8 +71,8 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
         i = i + 1
     }
     int param_count = len(embed_data) + len(q_data) + len(k_data) + len(v_data) + len(out_data) + len(head_data)
-    float[] m_state = make([]float, param_count)
-    float[] v_state = make([]float, param_count)
+    []float m_state = make([]float, param_count)
+    []float v_state = make([]float, param_count)
     real_training_state {
         weights_q: new(q_data, [hidden_dim, hidden_dim], true),
         weights_k: new(k_data, [hidden_dim, hidden_dim], true),
@@ -108,7 +108,7 @@ func update_parameters(real_training_state state, tensor hidden, tensor grad) re
     tensor grad_lm_head = matmul(hidden_t, grad)
     int i = 0
     int n = len(state.lm_head.data)
-    float[] next_head = make([]float, n)
+    []float next_head = make([]float, n)
     for i < n {
         float g = 0.0
         if i < len(grad_lm_head.data) {
@@ -164,7 +164,7 @@ func run_training_loop(
     println("")
     real_training_state state = init_real_training(vocab_size, hidden_dim, 12, learning_rate)
     state.total_steps = num_steps
-    string[] data_paths = gpt_large_pretrain_manifest_refs(manifest_path)
+    []string data_paths = gpt_large_pretrain_manifest_refs(manifest_path)
     corpus_state corpus = new_corpus_state_from_paths(data_paths, batch_size, seq_len, true)
     int step = 0
     for step < num_steps {
@@ -187,12 +187,12 @@ func run_training_loop(
     state
 }
 
-func one_hot_from_ints(int[] values, int vocab_size) tensor {
+func one_hot_from_ints([]int values, int vocab_size) tensor {
     if vocab_size <= 0 {
         return new([]float{}, shape1(0), true)
     }
     int n = len(values)
-    float[] data = make([]float, n * vocab_size)
+    []float data = make([]float, n * vocab_size)
     int i = 0
     for i < n {
         int id = values[i]
@@ -208,8 +208,8 @@ func one_hot_from_ints(int[] values, int vocab_size) tensor {
     new(data, [n, vocab_size], true)
 }
 
-func new_from_ints(int[] values, int[] shape) tensor {
-    float[] data = make([]float, len(values))
+func new_from_ints([]int values, []int shape) tensor {
+    []float data = make([]float, len(values))
     int i = 0
     for i < len(values) {
         data[i] = values[i] as float

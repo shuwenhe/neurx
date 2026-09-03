@@ -1,7 +1,7 @@
 package neurx.observability.logging
 struct training_metrics {
     float current_loss
-    float[] recent_losses
+    []float recent_losses
     float avg_loss
     float samples_per_second
     float tokens_per_second

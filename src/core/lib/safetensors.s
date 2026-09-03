@@ -1,7 +1,7 @@
 module safetensors
 struct tensor_info {
     string name
-    int[] shape
+    []int shape
     string dtype
     int64 offset
     int64 length
@@ -93,7 +93,7 @@ func parse_json_string(string json, int start, int length) string {
 }
 
 func parse_json_array(string json, int start, int length) []int {
-    int[] result = []
+    []int result = []
     string array_str = json.substring(start, start + length)
     int i = 0
     for i < array_str.length {

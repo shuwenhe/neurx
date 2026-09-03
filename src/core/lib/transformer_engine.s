@@ -17,8 +17,8 @@ struct transformer_state {
 }
 
 struct attention_output {
-    float[] hidden_state
-    float[] attention_weights
+    []float hidden_state
+    []float attention_weights
 }
 
 func init_transformer(string model_path) transformer_state {
@@ -42,10 +42,10 @@ func load_weights(ref transformer_state state) bool {
     return true
 }
 
-func embedding_forward(int[] token_ids, int hidden_size) float[][] {
-    float[][] embeddings
+func embedding_forward([]int token_ids, int hidden_size) []float[] {
+    []float[] embeddings
     for i in 0..len(token_ids) {
-        float[] emb
+        []float emb
         for j in 0..hidden_size {
             float val = 0.1 * float(token_ids[i] % 10) + 0.01 * float(j % 10)
             emb = append(emb, val)
@@ -55,9 +55,9 @@ func embedding_forward(int[] token_ids, int hidden_size) float[][] {
     return embeddings
 }
 
-func attention_forward(float[] query, float[] key, float[] value,
+func attention_forward([]float query, []float key, []float value,
                       int num_heads, int head_dim) []float {
-    float[] output
+    []float output
     float scale = 1.0 / sqrt(float(head_dim))
     for i in 0..len(query) {
         float score = 0.0
@@ -69,8 +69,8 @@ func attention_forward(float[] query, float[] key, float[] value,
     return output
 }
 
-func mlp_forward(float[] hidden, int intermediate_size) []float {
-    float[] output
+func mlp_forward([]float hidden, int intermediate_size) []float {
+    []float output
     for i in 0..len(hidden) {
         float gate_val = hidden[i] * 0.5
         float up_val = hidden[i] * 2.0
@@ -80,8 +80,8 @@ func mlp_forward(float[] hidden, int intermediate_size) []float {
     return output
 }
 
-func rms_norm_forward(float[] hidden, float eps) []float {
-    float[] output
+func rms_norm_forward([]float hidden, float eps) []float {
+    []float output
     float sum_sq = 0.0
     for i in 0..len(hidden) {
         sum_sq = sum_sq + (hidden[i] * hidden[i])
@@ -93,19 +93,19 @@ func rms_norm_forward(float[] hidden, float eps) []float {
     return output
 }
 
-func transformer_block_forward(float[] hidden,
+func transformer_block_forward([]float hidden,
                               transformer_config config) []float {
-    float[] normed = rms_norm_forward(hidden, config.rms_norm_eps)
+    []float normed = rms_norm_forward(hidden, config.rms_norm_eps)
     int head_dim = config.hidden_size / config.num_heads
-    float[] attn_out = attention_forward(normed, normed, normed,
+    []float attn_out = attention_forward(normed, normed, normed,
                                          config.num_heads, head_dim)
-    float[] residual
+    []float residual
     for i in 0..len(hidden) {
         float val = hidden[i] + attn_out[i]
         residual = append(residual, val)
     }
-    float[] mlp_out = mlp_forward(residual, config.intermediate_size)
-    float[] output
+    []float mlp_out = mlp_forward(residual, config.intermediate_size)
+    []float output
     for i in 0..len(residual) {
         float val = residual[i] + mlp_out[i]
         output = append(output, val)
@@ -113,14 +113,14 @@ func transformer_block_forward(float[] hidden,
     return output
 }
 
-func forward_pass(transformer_state state, int[] token_ids) []float {
-    float[][] embeddings = embedding_forward(token_ids, state.config.hidden_size)
-    float[] hidden = embeddings[len(embeddings) - 1]
+func forward_pass(transformer_state state, []int token_ids) []float {
+    []float[] embeddings = embedding_forward(token_ids, state.config.hidden_size)
+    []float hidden = embeddings[len(embeddings) - 1]
     for layer in 0..state.config.num_layers {
         hidden = transformer_block_forward(hidden, state.config)
     }
     hidden = rms_norm_forward(hidden, state.config.rms_norm_eps)
-    float[] logits
+    []float logits
     for i in 0..state.config.vocab_size {
         float logit = -2.0 + (float(i % 100) * 0.02)
         logits = append(logits, logit)
@@ -128,8 +128,8 @@ func forward_pass(transformer_state state, int[] token_ids) []float {
     return logits
 }
 
-func sample_next_token(float[] logits, float temperature) int {
-    float[] probs
+func sample_next_token([]float logits, float temperature) int {
+    []float probs
     for i in 0..len(logits) {
         float scaled = logits[i] / temperature
         probs = append(probs, exp(scaled))

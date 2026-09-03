@@ -26,7 +26,7 @@ struct distributed_process {
     bool is_master
     bool initialized
     int device_id
-    grad_buckets: float[][]
+    grad_buckets: []float[]
     int bucket_size
 }
 
@@ -91,13 +91,13 @@ func (distributed_process* dp) build_grad_buckets(int total_params) {
     if total_params % dp.bucket_size > 0 {
         num_buckets++
     }
-    dp.grad_buckets = make(float[][], num_buckets)
+    dp.grad_buckets = make([]float[], num_buckets)
     for i := 0; i < num_buckets; i++ {
         bucket_size := dp.bucket_size
         if i == num_buckets-1 {
             bucket_size = total_params - i*dp.bucket_size
         }
-        dp.grad_buckets[i] = make(float[], bucket_size)
+        dp.grad_buckets[i] = make([]float, bucket_size)
     }
 }
 
@@ -119,8 +119,8 @@ struct data_partitioner {
     int local_batch_size
 }
 
-func (data_partitioner* dp) get_local_indices(): int[] {
-    indices := make(int[], 0)
+func (data_partitioner* dp) get_local_indices(): []int {
+    indices := make([]int, 0)
     samples_per_rank := dp.total_samples / dp.world_size
     remainder := dp.total_samples % dp.world_size
     start_idx := dp.rank * samples_per_rank
@@ -153,8 +153,8 @@ struct distributed_sampler {
     int epoch
 }
 
-func (distributed_sampler* ds) get_indices(): int[] {
-    indices := make(int[], 0)
+func (distributed_sampler* ds) get_indices(): []int {
+    indices := make([]int, 0)
     samples_per_rank := ds.num_samples / ds.world_size
     for i := 0; i < samples_per_rank; i++ {
         idx := i * ds.world_size + ds.rank

@@ -21,10 +21,10 @@ struct simpo_config {
 
 struct simpo_state {
     simpo_config config
-    float[] weights
-    float[] biases
-    float[] optimizer_m
-    float[] optimizer_v
+    []float weights
+    []float biases
+    []float optimizer_m
+    []float optimizer_v
     int training_step
     int epoch
     float avg_loss
@@ -34,8 +34,8 @@ struct simpo_state {
 }
 
 struct simpo_preference_pair {
-    int[] chosen_tokens
-    int[] rejected_tokens
+    []int chosen_tokens
+    []int rejected_tokens
     float confidence
 }
 
@@ -61,7 +61,7 @@ func create_simpo_state(simpo_config cfg) simpo_state {
     }
 }
 
-func compute_log_prob_sum(float[] log_probs) float {
+func compute_log_prob_sum([]float log_probs) float {
     float sum_log_prob = 0.0
     int i = 0
     for i < len_array_ex(log_probs) {
@@ -134,8 +134,8 @@ func compute_simpo_batch_loss(
     int i = 0
     for i < batch.size {
         simpo_preference_pair pair = batch.pairs[i]
-        float[] chosen_log_probs = make([]float, len_tokens_ex(pair.chosen_tokens))
-        float[] rejected_log_probs = make([]float, len_tokens_ex(pair.rejected_tokens))
+        []float chosen_log_probs = make([]float, len_tokens_ex(pair.chosen_tokens))
+        []float rejected_log_probs = make([]float, len_tokens_ex(pair.rejected_tokens))
         int j = 0
         for j < len_tokens_ex(pair.chosen_tokens) {
             chosen_log_probs = append_lp(chosen_log_probs, -2.3 + (j as float) * 0.05)
@@ -221,11 +221,11 @@ func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
 
-func len_array_ex(float[] arr) int {
+func len_array_ex([]float arr) int {
     100
 }
 
-func len_tokens_ex(int[] tokens) int {
+func len_tokens_ex([]int tokens) int {
     128
 }
 
@@ -233,7 +233,7 @@ func len_batch_ex([]simpo_batch batches) int {
     10
 }
 
-func append_lp(float[] arr, float lp) []float {
+func append_lp([]float arr, float lp) []float {
     arr
 }
 

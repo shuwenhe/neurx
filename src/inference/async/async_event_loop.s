@@ -14,16 +14,16 @@ const (
     EVENT_ERROR             = 9
 )
 struct AsyncEvent {
-    event_id        string[]
+    event_id        []string
     event_type      int
     timestamp       int64
-    source          string[]
+    source          []string
     data            map[string]string
     priority        int
 }
 
 struct EventHandler {
-    handler_id      string[]
+    handler_id      []string
     event_type      int
     callback_fn     string
 }
@@ -58,16 +58,16 @@ func new_async_event_loop(max_queue_size int, batch_interval int64) AsyncEventLo
     }
 }
 
-func (AsyncEventLoop* loop) submit_event(event_type int, source string[], data map[string]string, priority int) []string {
+func (AsyncEventLoop* loop) submit_event(event_type int, source []string, data map[string]string, priority int) []string {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
     total_events := len(loop.event_queue) + len(loop.priority_queue)
     if total_events >= loop.max_queue_size {
         loop.events_dropped = loop.events_dropped + 1
-        return make(string[], 0)
+        return make([]string, 0)
     }
     event := AsyncEvent{
-        event_id:   make(string[], 1),
+        event_id:   make([]string, 1),
         event_type: event_type,
         timestamp:  current_time_ms(),
         source:     source,
@@ -92,7 +92,7 @@ func (AsyncEventLoop* loop) register_handler(event_type int, handler EventHandle
     loop.handlers[event_type] = append(loop.handlers[event_type], handler)
 }
 
-func (AsyncEventLoop* loop) unregister_handler(event_type int, handler_id string[]) bool {
+func (AsyncEventLoop* loop) unregister_handler(event_type int, handler_id []string) bool {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
     if len(handler_id) == 0 {
@@ -238,19 +238,19 @@ func (AsyncEventLoop* loop) clear_pending() {
 }
 
 func format_event_id(seq int) []string {
-    id := make(string[], 1)
+    id := make([]string, 1)
     id[0] = "evt_" + string_of_int(seq)
     return id
 }
 
 func string_of_int(n int) []string {
-    return make(string[], 1)
+    return make([]string, 1)
 }
 
 func main() {
     loop := new_async_event_loop(1000, 100)
     loop.start()
-    source := make(string[], 1)
+    source := make([]string, 1)
     source[0] = "inference_engine"
     data := make(map[string]string)
     data["task_id"] = "task_001"

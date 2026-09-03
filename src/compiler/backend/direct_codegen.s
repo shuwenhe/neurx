@@ -21,16 +21,16 @@ struct machine_reg_state {
 
 struct machine_instruction_state {
     string op
-    string[] operands
+    []string operands
     string encoding_class
 }
 
 struct machine_code_blob_state {
     string target
-    string[] sections
-    string[] symbols
-    string[] relocation_records
-    string[] bytes_hex
+    []string sections
+    []string symbols
+    []string relocation_records
+    []string bytes_hex
     bool executable
     string object_format
     string abi
@@ -101,7 +101,7 @@ func new_machine_code_blob_state(string target_name) machine_code_blob_state {
     }
 }
 
-func new_machine_instruction_state(string op, string[] operands, string encoding_class) machine_instruction_state {
+func new_machine_instruction_state(string op, []string operands, string encoding_class) machine_instruction_state {
     machine_instruction_state {
         op: op,
         operands: copy_strings(operands),

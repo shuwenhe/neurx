@@ -134,7 +134,7 @@ func (large_model_config* config) estimate_memory(int batch_size): memory_estima
 struct gradient_accumulator {
     int accumulation_steps
     int current_step
-    map[string]float[] accumulated_grads
+    map[string][]float accumulated_grads
     bool should_sync
     int step_counter
 }
@@ -142,14 +142,14 @@ struct gradient_accumulator {
 func (gradient_accumulator* ga) init(int accumulation_steps) {
     ga.accumulation_steps = accumulation_steps
     ga.current_step = 0
-    ga.accumulated_grads = make(map[string]float[])
+    ga.accumulated_grads = make(map[string][]float)
     ga.should_sync = false
     ga.step_counter = 0
 }
 
-func (gradient_accumulator* ga) accumulate(string grad_name, float[] grad) {
+func (gradient_accumulator* ga) accumulate(string grad_name, []float grad) {
     if _, exists := ga.accumulated_grads[grad_name]; !exists {
-        ga.accumulated_grads[grad_name] = make(float[], len(grad))
+        ga.accumulated_grads[grad_name] = make([]float, len(grad))
     }
     for i := 0; i < len(grad); i++ {
         ga.accumulated_grads[grad_name][i] += grad[i]
@@ -162,7 +162,7 @@ func (gradient_accumulator* ga) should_sync_gradients(): bool {
     return ga.current_step >= ga.accumulation_steps
 }
 
-func (gradient_accumulator* ga) get_accumulated_grads(): map[string]float[] {
+func (gradient_accumulator* ga) get_accumulated_grads(): map[string][]float {
     return ga.accumulated_grads
 }
 

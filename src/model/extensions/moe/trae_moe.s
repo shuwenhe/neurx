@@ -22,36 +22,36 @@ struct trae_moe_config {
 }
 
 struct trae_router_state {
-    float[] router_weights
-    float[] router_biases
-    float[] expert_load
-    float[] expert_usage
+    []float router_weights
+    []float router_biases
+    []float expert_load
+    []float expert_usage
     int total_routed_tokens
     int routing_step
 }
 
 struct attention_gate {
-    float[] gate_weights
-    float[] gate_biases
-    float[] alignment_scores
+    []float gate_weights
+    []float gate_biases
+    []float alignment_scores
 }
 
 struct trae_moe_layer {
     trae_moe_config config
     trae_router_state router_state
     attention_gate gate
-    float[][] expert_weights
-    float[][] expert_biases
-    float[] output_weights
-    float[] output_biases
+    []float[] expert_weights
+    []float[] expert_biases
+    []float output_weights
+    []float output_biases
 }
 
 struct trae_forward_result {
-    float[] output
+    []float output
     float aux_loss
     float load_balance_metric
     float entropy
-    float[] expert_activations
+    []float expert_activations
 }
 
 func new_trae_moe_config() trae_moe_config {
@@ -110,18 +110,18 @@ func new_trae_moe_layer(trae_moe_config config) trae_moe_layer {
     layer
 }
 
-func trae_routing(trae_moe_layer layer, float[] hidden_states, int batch_size, int seq_len) (int[], float[], float[]) {
+func trae_routing(trae_moe_layer layer, []float hidden_states, int batch_size, int seq_len) ([]int, []float, []float) {
     int total_tokens = batch_size * seq_len
     int hidden_dim = layer.config.hidden_dim
     int num_experts = layer.config.num_experts
     int top_k = layer.config.top_k
-    float[] router_logits = math.allocate_float(total_tokens * num_experts, 0.0)
-    float[] routing_probs = math.allocate_float(total_tokens * num_experts, 0.0)
-    int[] expert_indices = math.allocate_int(total_tokens * top_k, -1)
-    float[] routing_weights = math.allocate_float(total_tokens * top_k, 0.0)
+    []float router_logits = math.allocate_float(total_tokens * num_experts, 0.0)
+    []float routing_probs = math.allocate_float(total_tokens * num_experts, 0.0)
+    []int expert_indices = math.allocate_int(total_tokens * top_k, -1)
+    []float routing_weights = math.allocate_float(total_tokens * top_k, 0.0)
     int token_idx = 0
     for token_idx < total_tokens {
-        float[] token_hidden = hidden_states[token_idx * hidden_dim..(token_idx+1) * hidden_dim]
+        []float token_hidden = hidden_states[token_idx * hidden_dim..(token_idx+1) * hidden_dim]
         int expert_idx = 0
         for expert_idx < num_experts {
             float logit = layer.router_state.router_biases[expert_idx]
@@ -155,10 +155,10 @@ func trae_routing(trae_moe_layer layer, float[] hidden_states, int batch_size, i
                 expert_idx = expert_idx + 1
             }
         }
-        float[] logit_slice = router_logits[token_idx * num_experts..(token_idx+1) * num_experts]
+        []float logit_slice = router_logits[token_idx * num_experts..(token_idx+1) * num_experts]
         routing_probs[token_idx * num_experts..(token_idx+1) * num_experts] = math.softmax_1d(logit_slice)
-        float[] prob_slice = routing_probs[token_idx * num_experts..(token_idx+1) * num_experts]
-        (int[] top_indices, float[] top_probs) = math.top_k_select(prob_slice, num_experts, top_k)
+        []float prob_slice = routing_probs[token_idx * num_experts..(token_idx+1) * num_experts]
+        ([]int top_indices, []float top_probs) = math.top_k_select(prob_slice, num_experts, top_k)
         int k = 0
         for k < top_k {
             expert_indices[token_idx * top_k + k] = top_indices[k]
@@ -194,7 +194,7 @@ func adaptive_routing_update(trae_moe_layer layer) trae_moe_layer {
     layer
 }
 
-func compute_load_balance_metric(float[] expert_load, int num_experts) float {
+func compute_load_balance_metric([]float expert_load, int num_experts) float {
     float mean_load = math.mean_float(expert_load)
     float variance = 0.0
     int i = 0
@@ -208,16 +208,16 @@ func compute_load_balance_metric(float[] expert_load, int num_experts) float {
     1.0 - cv
 }
 
-func trae_moe_forward(trae_moe_layer layer, float[] hidden_states, int batch_size, int seq_len) trae_forward_result {
+func trae_moe_forward(trae_moe_layer layer, []float hidden_states, int batch_size, int seq_len) trae_forward_result {
     int total_tokens = batch_size * seq_len
     int hidden_dim = layer.config.hidden_dim
     int expert_dim = layer.config.expert_dim
     int num_experts = layer.config.num_experts
     int top_k = layer.config.top_k
-    (int[] expert_indices, float[] routing_weights, float[] routing_probs) = trae_routing(layer, hidden_states, batch_size, seq_len)
-    float[] expert_inputs = math.allocate_float(num_experts * expert_dim, 0.0)
-    float[] expert_outputs = math.allocate_float(num_experts * expert_dim, 0.0)
-    float[] expert_scales = math.allocate_float(num_experts, 0.0)
+    ([]int expert_indices, []float routing_weights, []float routing_probs) = trae_routing(layer, hidden_states, batch_size, seq_len)
+    []float expert_inputs = math.allocate_float(num_experts * expert_dim, 0.0)
+    []float expert_outputs = math.allocate_float(num_experts * expert_dim, 0.0)
+    []float expert_scales = math.allocate_float(num_experts, 0.0)
     int token_idx = 0
     for token_idx < total_tokens {
         int k = 0
@@ -246,7 +246,7 @@ func trae_moe_forward(trae_moe_layer layer, float[] hidden_states, int batch_siz
                 expert_inputs[expert_idx * expert_dim + d] = expert_inputs[expert_idx * expert_dim + d] / expert_scales[expert_idx]
                 d = d + 1
             }
-            float[] input_slice = expert_inputs[expert_idx * expert_dim..(expert_idx+1) * expert_dim]
+            []float input_slice = expert_inputs[expert_idx * expert_dim..(expert_idx+1) * expert_dim]
             expert_outputs[expert_idx * expert_dim..(expert_idx+1) * expert_dim] = expert_forward(
                 layer.expert_weights[expert_idx],
                 layer.expert_biases[expert_idx],
@@ -257,7 +257,7 @@ func trae_moe_forward(trae_moe_layer layer, float[] hidden_states, int batch_siz
         }
         expert_idx = expert_idx + 1
     }
-    float[] output = math.allocate_float(total_tokens * hidden_dim, 0.0)
+    []float output = math.allocate_float(total_tokens * hidden_dim, 0.0)
     token_idx = 0
     for token_idx < total_tokens {
         int k = 0
@@ -282,7 +282,7 @@ func trae_moe_forward(trae_moe_layer layer, float[] hidden_states, int batch_siz
     float avg_entropy = 0.0
     token_idx = 0
     for token_idx < total_tokens {
-        float[] prob_slice = routing_probs[token_idx * num_experts..(token_idx+1) * num_experts]
+        []float prob_slice = routing_probs[token_idx * num_experts..(token_idx+1) * num_experts]
         avg_entropy = avg_entropy + math.compute_entropy(prob_slice, num_experts)
         token_idx = token_idx + 1
     }
@@ -299,8 +299,8 @@ func trae_moe_forward(trae_moe_layer layer, float[] hidden_states, int batch_siz
     }
 }
 
-func expert_forward(float[] weights, float[] biases, float[] input, int in_dim, int out_dim) []float {
-    float[] hidden = math.allocate_float(out_dim, 0.0)
+func expert_forward([]float weights, []float biases, []float input, int in_dim, int out_dim) []float {
+    []float hidden = math.allocate_float(out_dim, 0.0)
     int i = 0
     for i < out_dim {
         hidden[i] = biases[i]
@@ -315,11 +315,11 @@ func expert_forward(float[] weights, float[] biases, float[] input, int in_dim, 
     hidden
 }
 
-func trae_moe_backward(trae_moe_layer layer, float[] grad_output, float[] hidden_states,
+func trae_moe_backward(trae_moe_layer layer, []float grad_output, []float hidden_states,
                        int batch_size, int seq_len) []float {
     int total_tokens = batch_size * seq_len
     int hidden_dim = layer.config.hidden_dim
-    float[] grad_input = math.allocate_float(total_tokens * hidden_dim, 0.0)
+    []float grad_input = math.allocate_float(total_tokens * hidden_dim, 0.0)
     grad_input
 }
 

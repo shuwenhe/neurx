@@ -5,14 +5,14 @@ struct dataloader_config {
 }
 
 struct dataloader_state {
-    int[] token_ids
+    []int token_ids
     int cursor
     dataloader_config config
 }
 
 struct dataloader_batch {
-    int[] input_ids
-    int[] target_ids
+    []int input_ids
+    []int target_ids
     int valid_tokens
 }
 
@@ -28,7 +28,7 @@ func new_config(int batch_size, int seq_len) dataloader_config {
     }
 }
 
-func new_state(int[] token_ids, int batch_size, int seq_len) dataloader_state {
+func new_state([]int token_ids, int batch_size, int seq_len) dataloader_state {
     dataloader_state {
         token_ids: token_ids,
         cursor: 0,

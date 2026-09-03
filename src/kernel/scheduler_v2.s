@@ -10,15 +10,15 @@ struct sched_entity {
 }
 
 struct cfs_rq {
-    int[] entities
+    []int entities
     int min_vruntime
     int total_weight
     int nr_running
 }
 
 struct rt_rq {
-    int[] rt_tasks
-    int[] rt_priority_array
+    []int rt_tasks
+    []int rt_priority_array
     int nr_running
 }
 

@@ -1,13 +1,13 @@
 package neurx.amp.gradient_accumulation
 struct gradient_accumulator {
-    float[][] accumulated_grads
+    []float[] accumulated_grads
     int accumulation_steps
     int current_step
     int num_params
 }
 
 func new_gradient_accumulator(int num_params, int accumulation_steps) gradient_accumulator {
-    float[][] grads = make(float[][], 0)
+    []float[] grads = make([]float[], 0)
     int i = 0
     for i < num_params {
         grads = append(grads, make_zero_array(1))
@@ -23,7 +23,7 @@ func new_gradient_accumulator(int num_params, int accumulation_steps) gradient_a
 
 func accumulate_gradients(
     gradient_accumulator acc,
-    float[] batch_grads
+    []float batch_grads
 ) gradient_accumulator {
     int i = 0
     for i < len(batch_grads) {
@@ -41,7 +41,7 @@ func should_update_params(gradient_accumulator acc) bool {
 }
 
 func get_accumulated_grads(gradient_accumulator acc) []float {
-    float[] grads = make([]float, len(acc.accumulated_grads))
+    []float grads = make([]float, len(acc.accumulated_grads))
     int i = 0
     for i < len(acc.accumulated_grads) {
         grads[i] = acc.accumulated_grads[i][0]
@@ -51,7 +51,7 @@ func get_accumulated_grads(gradient_accumulator acc) []float {
 }
 
 func average_accumulated_grads(gradient_accumulator acc) []float {
-    float[] grads = make([]float, len(acc.accumulated_grads))
+    []float grads = make([]float, len(acc.accumulated_grads))
     float denom = float(acc.accumulation_steps)
     if denom < 1.0 {
         denom = 1.0
@@ -75,7 +75,7 @@ func reset_accumulator(gradient_accumulator acc) gradient_accumulator {
 }
 
 func make_zero_array(int n) []float {
-    float[] arr = make([]float, n)
+    []float arr = make([]float, n)
     int i = 0
     for i < n {
         arr[i] = 0.0

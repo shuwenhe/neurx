@@ -355,7 +355,7 @@ func load_model_architecture(string model_name) (model_architecture, model_loade
 }
 
 func main() {
-    model_names := string[]()
+    model_names := []string()
     model_names = append(model_names, "llama")
     model_names = append(model_names, "qwen")
     model_names = append(model_names, "deepseek")

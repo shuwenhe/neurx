@@ -10,7 +10,7 @@ struct fusion_error {
 
 struct weight_update {
     string module_name
-    *float[][] delta
+    *[]float[] delta
     float scale
 }
 
@@ -18,7 +18,7 @@ struct weight_fusion_engine {
     int lora_rank
     float lora_alpha
     float scaling_factor
-    map[string, *float[][]] fused
+    map[string, *[]float[]] fused
 }
 
 func new(int lora_rank, float lora_alpha) weight_fusion_engine {
@@ -26,15 +26,15 @@ func new(int lora_rank, float lora_alpha) weight_fusion_engine {
         lora_rank: lora_rank,
         lora_alpha: lora_alpha,
         scaling_factor: lora_alpha / lora_rank as float,
-        fused: map[string, *float[][]]](),
+        fused: map[string, *[]float[]]](),
     }
 }
 
 func compute_lora_delta(
-    *float[][] lora_a,
-    *float[][] lora_b,
+    *[]float[] lora_a,
+    *[]float[] lora_b,
     float scaling
-) (*float[][], fusion_error) {
+) (*[]float[], fusion_error) {
     if len(lora_a) == 0 || len(lora_b) == 0 {
         return (fusion_error {
             code: "INVALID_MATRIX",
@@ -55,11 +55,11 @@ func compute_lora_delta(
                      rank.to_string() + " vs " + len(lora_b).to_string(),
         })
     }
-    delta := float[][]]()
+    delta := []float[]]()
     i := 0
     for i < len(lora_a) {
         row_a := lora_a[i]
-        delta_row := float[]()
+        delta_row := []float()
         j := 0
         for j < lora_b[0].len() {
             sum := 0.0
@@ -79,8 +79,8 @@ return     (delta, "")
 
 func (weight_fusion_engine* engine) fuse_weights(
     module_name: string,
-    original_weights: *float[][]],
-    *float[][]] lora_delta
+    original_weights: *[]float[]],
+    *[]float[]] lora_delta
 ) ((), fusion_error) {
     if len(original_weights) != len(lora_delta) {
         return (fusion_error {
@@ -94,12 +94,12 @@ func (weight_fusion_engine* engine) fuse_weights(
             message: "Original and LoRA delta width mismatch",
         })
     }
-    fused := float[][]]()
+    fused := []float[]]()
     i := 0
     for i < len(original_weights) {
         orig_row := original_weights[i]
         delta_row := lora_delta[i]
-        fused_row := float[]()
+        fused_row := []float()
         j := 0
         for j < len(orig_row) {
             fused_row = append(fused_row, orig_row[j] + delta_row[j])
@@ -114,21 +114,21 @@ func (weight_fusion_engine* engine) fuse_weights(
 
 func (weight_fusion_engine* engine) unfuse_weights(
     module_name: string,
-    fused_weights: *float[][],
-    *float[][] lora_delta
-) (*float[][], fusion_error) {
+    fused_weights: *[]float[],
+    *[]float[] lora_delta
+) (*[]float[], fusion_error) {
     if len(fused_weights) != len(lora_delta) {
         return (fusion_error {
             code: "SHAPE_MISMATCH",
             message: "Fused and LoRA delta shape mismatch",
         })
     }
-    original := float[][]]()
+    original := []float[]]()
     i := 0
     for i < len(fused_weights) {
         fused_row := fused_weights[i]
         delta_row := lora_delta[i]
-        orig_row := float[]()
+        orig_row := []float()
         j := 0
         for j < len(fused_row) {
             orig_row = append(orig_row, fused_row[j] - delta_row[j])
@@ -143,7 +143,7 @@ return     (original, "")
 
 func (weight_fusion_engine* engine) get_fused_weights(
     string module_name
-) option[*float[][]]] {
+) option[*[]float[]]] {
     engine.fused.get(module_name)
 }
 
@@ -151,8 +151,8 @@ func (weight_fusion_engine* engine) is_fused(string module_name) bool {
     engine.fused.contains(module_name)
 }
 
-func (weight_fusion_engine* engine) get_fused_modules() *string[] {
-    modules := string[]()
+func (weight_fusion_engine* engine) get_fused_modules() *[]string {
+    modules := []string()
     for name in engine.fused.keys() {
         modules = append(modules, name)
     }
@@ -179,24 +179,24 @@ func (weight_fusion_engine* engine) get_fused_weights_size_mb() int {
 }
 
 func fuse_multiple_adapters(
-    original_weights: *map[string, *float[][]]],
+    original_weights: *map[string, *[]float[]]],
     lora_deltas: **map[string, *float[[][]]]],
-    *float[] adapter_scales
-) (*map[string, *float[][]], fusion_error) {
+    *[]float adapter_scales
+) (*map[string, *[]float[]], fusion_error) {
     if len(lora_deltas) != len(adapter_scales) {
         return (fusion_error {
             code: "LENGTH_MISMATCH",
             message: "LoRA deltas and scales length mismatch",
         })
     }
-    result_weights := map[string, *float[][]]]()
+    result_weights := map[string, *[]float[]]]()
     for module_name in original_weights.keys() {
         switch original_weights.get(module_name) {
             some(orig) : {
-                combined_delta := float[][]]()
+                combined_delta := []float[]]()
                 i := 0
                 for i < len(orig) {
-                    row := float[]()
+                    row := []float()
                     j := 0
                     for j < orig[0].len() {
                         row = append(row, 0.0)
@@ -225,10 +225,10 @@ func fuse_multiple_adapters(
                     }
                     adapter_idx = adapter_idx + 1
                 }
-                fused := float[][]]()
+                fused := []float[]]()
                 i := 0
                 for i < len(orig) {
-                    row := float[]()
+                    row := []float()
                     j := 0
                     for j < orig[0].len() {
                         row = append(row, orig[i][j] + combined_delta[i][j])

@@ -235,7 +235,7 @@ func normalize_unicode(string s) string {
 }
 
 func split_by_space(string s) []string {
-    parts := make(string[], 0)
+    parts := make([]string, 0)
     current := ""
     for i := 0; i < len(s); i += 1 {
         if is_whitespace(string(s[i])) {

@@ -9,24 +9,24 @@ struct position_encoding_config {
 struct absolute_position_encoding {
     int hidden_dim
     int max_seq_len
-    float[] sin_encoding
-    float[] cos_encoding
+    []float sin_encoding
+    []float cos_encoding
 }
 
 struct learned_position_encoding {
     int hidden_dim
     int max_seq_len
-    float[] embeddings
+    []float embeddings
 }
 
 struct rope_position_encoding {
     int hidden_dim
     float rope_base
-    float[] frequencies
+    []float frequencies
 }
 
 func allocate_vector(int size, float init_val) []float {
-    float[] v = make([]float, size)
+    []float v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -35,8 +35,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector(float[] src) []float {
-    float[] out = allocate_vector(len(src), 0.0)
+func copy_vector([]float src) []float {
+    []float out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -144,8 +144,8 @@ func log_approx(float x) float {
 func new_absolute_position_encoding(position_encoding_config cfg) absolute_position_encoding {
     int hidden_dim = cfg.hidden_dim
     int max_seq_len = cfg.max_seq_len
-    float[] sin_encoding = allocate_vector(max_seq_len * hidden_dim, 0.0)
-    float[] cos_encoding = allocate_vector(max_seq_len * hidden_dim, 0.0)
+    []float sin_encoding = allocate_vector(max_seq_len * hidden_dim, 0.0)
+    []float cos_encoding = allocate_vector(max_seq_len * hidden_dim, 0.0)
     float pi = 3.141592653589793
     float log_10000 = log_approx(10000.0)
     int pos = 0
@@ -179,7 +179,7 @@ func get_position_encoding(
     int seq_len
 ) []float {
     int hidden_dim = enc.hidden_dim
-    float[] output = allocate_vector(seq_len * hidden_dim, 0.0)
+    []float output = allocate_vector(seq_len * hidden_dim, 0.0)
     int pos = 0
     for pos < seq_len {
         int actual_pos = position + pos
@@ -205,7 +205,7 @@ func get_position_encoding(
 func new_learned_position_encoding(position_encoding_config cfg) learned_position_encoding {
     int hidden_dim = cfg.hidden_dim
     int max_seq_len = cfg.max_seq_len
-    float[] embeddings = allocate_vector(max_seq_len * hidden_dim, 0.1)
+    []float embeddings = allocate_vector(max_seq_len * hidden_dim, 0.1)
     learned_position_encoding {
         hidden_dim: hidden_dim,
         max_seq_len: max_seq_len,
@@ -219,7 +219,7 @@ func get_learned_position_encoding(
     int seq_len
 ) []float {
     int hidden_dim = enc.hidden_dim
-    float[] output = allocate_vector(seq_len * hidden_dim, 0.0)
+    []float output = allocate_vector(seq_len * hidden_dim, 0.0)
     int pos = 0
     for pos < seq_len {
         int actual_pos = position + pos
@@ -241,7 +241,7 @@ func get_learned_position_encoding(
 func new_rope_position_encoding(position_encoding_config cfg) rope_position_encoding {
     int hidden_dim = cfg.hidden_dim
     float rope_base = cfg.rope_base
-    float[] frequencies = allocate_vector(hidden_dim / 2, 0.0)
+    []float frequencies = allocate_vector(hidden_dim / 2, 0.0)
     int i = 0
     for i < hidden_dim / 2 {
         float inv_freq = 1.0 / exp_approx(2.0 * log_approx(rope_base) * (i * 1.0) / (hidden_dim * 1.0))
@@ -257,14 +257,14 @@ func new_rope_position_encoding(position_encoding_config cfg) rope_position_enco
 
 func apply_rope_position(
     rope_position_encoding enc,
-    float[] query,
-    float[] key,
+    []float query,
+    []float key,
     int seq_len,
     int position
-) float[][] {
+) []float[] {
     int hidden_dim = enc.hidden_dim
-    float[] q_out = copy_vector(query)
-    float[] k_out = copy_vector(key)
+    []float q_out = copy_vector(query)
+    []float k_out = copy_vector(key)
     int pos = 0
     for pos < seq_len {
         int actual_pos = position + pos
@@ -290,20 +290,20 @@ func apply_rope_position(
         }
         pos = pos + 1
     }
-    float[][] result = floatmake([][], 2)
+    []float[] result = floatmake([][], 2)
     result[0] = q_out
     result[1] = k_out
     result
 }
 
 func add_position_encoding_to_hidden(
-    float[] hidden_states,
-    float[] position_encoding,
+    []float hidden_states,
+    []float position_encoding,
     int batch_size,
     int seq_len,
     int hidden_dim
 ) []float {
-    float[] output = copy_vector(hidden_states)
+    []float output = copy_vector(hidden_states)
     int b = 0
     for b < batch_size {
         int s = 0

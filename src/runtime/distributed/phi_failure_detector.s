@@ -144,7 +144,7 @@ func abs(float x) float {
 
 func (phi_failure_detector* detector) check_and_detect_failures(int64 now_ns) []int {
     detector.now_ns = now_ns
-    int[] suspected_ranks = make([]int, detector.world_size)
+    []int suspected_ranks = make([]int, detector.world_size)
     int rank = 0
     for rank < detector.world_size {
         if rank == detector.my_rank {
@@ -284,7 +284,7 @@ func exp(float x) float {
 
 func (phi_failure_detector* detector) confirm_failure_with_quorum(
     int suspected_rank,
-    int[] other_ranks,
+    []int other_ranks,
     int64 confirmation_timeout_ms
 ) bool {
     int votes = 0

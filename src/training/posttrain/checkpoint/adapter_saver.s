@@ -10,7 +10,7 @@ struct safetensors_header {
 struct safetensors_tensor_info {
     string name
     string dtype
-    int[] shape
+    []int shape
     int offset
     int size
 }
@@ -33,7 +33,7 @@ func float_to_bytes_le(float f) []byte {
     return bytes
 }
 
-func save_tensor_to_safetensors(float[] tensor_data, string tensor_name) []byte {
+func save_tensor_to_safetensors([]float tensor_data, string tensor_name) []byte {
     []byte result = []byte{}
     int i = 0
     for i < len(tensor_data) {
@@ -48,7 +48,7 @@ func save_tensor_to_safetensors(float[] tensor_data, string tensor_name) []byte 
     return result
 }
 
-func save_adapter_model_safetensors(string output_path, float[][] lora_a_weights, float[][] lora_b_weights, string[] module_names) bool {
+func save_adapter_model_safetensors(string output_path, []float[] lora_a_weights, []float[] lora_b_weights, []string module_names) bool {
     if !runtime_file_exists(output_path) {
         if !runtime_make_dirs(output_path) {
             println("Error: failed to create output directory: " + output_path)
@@ -94,7 +94,7 @@ func save_adapter_model_safetensors(string output_path, float[][] lora_a_weights
     return true
 }
 
-func create_adapter_config_json(int rank, float alpha, float dropout, string[] target_modules) string {
+func create_adapter_config_json(int rank, float alpha, float dropout, []string target_modules) string {
     string json = "{\n"
     json = concat2(json, "  \"base_model_name_or_path\": \"model\",\n")
     json = concat2(json, "  \"peft_type\": \"LORA\",\n")
@@ -121,7 +121,7 @@ func create_adapter_config_json(int rank, float alpha, float dropout, string[] t
     return json
 }
 
-func save_training_artifacts(string output_path, float[] loss_history, float[] eval_loss_history, int final_step) bool {
+func save_training_artifacts(string output_path, []float loss_history, []float eval_loss_history, int final_step) bool {
     if !runtime_file_exists(output_path) {
         if !runtime_make_dirs(output_path) {
             return false
@@ -154,8 +154,8 @@ func load_adapter_config_json(string config_file) string {
     return ""
 }
 
-func load_adapter_model(string adapter_path, int expected_rank, int hidden_size) float[][] {
-    float[][] loaded_adapters = floatmake([][], 7)
+func load_adapter_model(string adapter_path, int expected_rank, int hidden_size) []float[] {
+    []float[] loaded_adapters = floatmake([][], 7)
     if !runtime_file_exists(adapter_path) {
         println("Error: adapter model file not found: " + adapter_path)
         return loaded_adapters
@@ -164,7 +164,7 @@ func load_adapter_model(string adapter_path, int expected_rank, int hidden_size)
     int expected_size = hidden_size * expected_rank
     int i = 0
     for i < 7 {
-        float[] adapter_lora = make([]float, expected_size)
+        []float adapter_lora = make([]float, expected_size)
         int j = 0
         for j < expected_size {
             adapter_lora[j] = 0.01
@@ -179,12 +179,12 @@ func load_adapter_model(string adapter_path, int expected_rank, int hidden_size)
 
 func save_checkpoint(
     string checkpoint_dir,
-    float[][] lora_a_matrices,
-    float[][] lora_b_matrices,
-    float[] loss_history,
-    float[] eval_loss_history,
+    []float[] lora_a_matrices,
+    []float[] lora_b_matrices,
+    []float loss_history,
+    []float eval_loss_history,
     int step,
-    string[] target_modules
+    []string target_modules
 ) bool {
     if !runtime_make_dirs(checkpoint_dir) {
         println("Error: failed to create checkpoint directory")
@@ -202,18 +202,18 @@ func save_checkpoint(
     return true
 }
 
-func load_checkpoint(string checkpoint_dir, int expected_rank, int hidden_size) float[][] {
+func load_checkpoint(string checkpoint_dir, int expected_rank, int hidden_size) []float[] {
     string adapter_file = checkpoint_dir + "/adapter_model.safetensors"
     string config_file = checkpoint_dir + "/adapter_config.json"
     if !runtime_file_exists(adapter_file) {
         println("Error: adapter model file not found in checkpoint: " + checkpoint_dir)
-        return float[][]{}
+        return []float[]{}
     }
     if !runtime_file_exists(config_file) {
         println("Warning: adapter config file not found in checkpoint: " + checkpoint_dir)
     }
     println("Loading checkpoint from: " + checkpoint_dir)
-    float[][] loaded_adapters = load_adapter_model(adapter_file, expected_rank, hidden_size)
+    []float[] loaded_adapters = load_adapter_model(adapter_file, expected_rank, hidden_size)
     println("Checkpoint loaded successfully")
     return loaded_adapters
 }

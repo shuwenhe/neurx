@@ -32,7 +32,7 @@ struct deployment_spec {
     replica_count       int
     resource_request    map[string]string
     env_vars            map[string]string
-    volumes             string[]
+    volumes             []string
 }
 
 struct cluster_manager {
@@ -47,15 +47,15 @@ struct cluster_manager {
 struct cluster_monitor {
     manager             *cluster_manager
     metrics             map[string]float64
-    alerts              string[]
+    alerts              []string
     health_status       string
 }
 
 struct job_scheduler {
-    pending_jobs        string[]
-    running_jobs        string[]
-    completed_jobs      string[]
-    failed_jobs         string[]
+    pending_jobs        []string
+    running_jobs        []string
+    completed_jobs      []string
+    failed_jobs         []string
     job_queue           []map[string]string
 }
 

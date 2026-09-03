@@ -90,9 +90,9 @@ func default_fsdp_config_2t(int dp_degree, int dp_rank) fsdp_config {
 func init_fsdp(
     fsdp_config cfg,
     []double initial_model_params,
-    string[] param_names,
-    int[] param_sizes,
-    bool[] param_requires_grad) fsdp_unit_state {
+    []string param_names,
+    []int param_sizes,
+    []bool param_requires_grad) fsdp_unit_state {
     fsdp_unit_state state
     state.config = cfg
     state.pg_world_size = cfg.dp_degree
@@ -170,7 +170,7 @@ func init_fsdp(
 
 func pre_forward_allgather(
     ref fsdp_unit_state state,
-    string[] param_names_needed) {
+    []string param_names_needed) {
     if state.config.sharding_policy != SHARDING_FULL_SHARD { return }
     double t_start = 0.0
     int idx = 0
@@ -192,7 +192,7 @@ func pre_forward_allgather(
 
 func post_forward_unshard(
     ref fsdp_unit_state state,
-    string[] param_names_released) {
+    []string param_names_released) {
     if state.config.sharding_policy != SHARDING_FULL_SHARD { return }
     int idx = 0
     for idx < len(param_names_released) {
@@ -236,7 +236,7 @@ func get_full_param(fsdp_unit_state state, string param_name) []double {
 
 func post_backward_reducescatter(
     ref fsdp_unit_state state,
-    string[] param_names_with_grads,
+    []string param_names_with_grads,
     [][]double full_grad_tensors) {
     if state.config.sharding_policy == SHARDING_NO_SHARD { return }
     double t_start = 0.0

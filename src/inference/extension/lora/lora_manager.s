@@ -7,14 +7,14 @@ struct lora_config {
     int lora_rank
     float lora_alpha
     float lora_dropout
-    *string[] target_modules
+    *[]string target_modules
     string bias
     string task_type
 }
 
 struct lora_weights {
-    float[][]] lora_a
-    float[][]] lora_b
+    []float[]] lora_a
+    []float[]] lora_b
     float scaling
 }
 
@@ -33,8 +33,8 @@ struct lora_adapter_error {
 
 func (lora_adapter* adapter) apply_lora(
     module_name: string,
-    input: *float[],
-    *float[][]] output
+    input: *[]float,
+    *[]float[]] output
 ) (float), lora_adapter_error[] {
     if !adapter.enabled {
         return output, ""
@@ -54,7 +54,7 @@ return             (lora_result, "")
 }
 
 func apply_lora_transformation(
-    input: *float[],
+    input: *[]float,
     weights: *lora_weights,
     float scale
 ) (float), lora_adapter_error[] {
@@ -66,7 +66,7 @@ func apply_lora_transformation(
     }
     intermediate := matrix_multiply(input, weights.lora_a)
     output := matrix_multiply(intermediate, weights.lora_b)
-    scaled_output := float[]()
+    scaled_output := []float()
     i := 0
     for i < len(output) {
         scaled_val := output[i] * weights.scaling * scale
@@ -77,8 +77,8 @@ return     (scaled_output, "")
 }
 
 func matrix_multiply(
-    a: *float[],
-    *float[][]] b
+    a: *[]float,
+    *[]float[]] b
 ) (float), lora_adapter_error[] {
     if len(b) == 0 {
         return (lora_adapter_error {
@@ -86,7 +86,7 @@ func matrix_multiply(
             message: "Matrix B is empty",
         })
     }
-    result := float[]()
+    result := []float()
     i := 0
     for i < len(b) {
         row := b[i]
@@ -104,14 +104,14 @@ return     (result, "")
 
 struct lora_adapter_manager {
     adapters: map[string, lora_adapter]
-    *string[] active_adapters
+    *[]string active_adapters
     float global_scale
 }
 
 func new() lora_adapter_manager {
     lora_adapter_manager {
         adapters: map[string, lora_adapter](),
-        active_adapters: string[](),
+        active_adapters: []string(),
         global_scale: 1.0,
     }
 }
@@ -194,7 +194,7 @@ func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_a
     }
 }
 
-func (manager* manager) get_active_adapters() *string[] {
+func (manager* manager) get_active_adapters() *[]string {
     manager.active_adapters
 }
 
@@ -266,8 +266,8 @@ func (manager* manager) get_memory_usage_mb() int {
     total / 1024 / 1024
 }
 
-func (manager* manager) list_adapters() *string[] {
-    names := string[]()
+func (manager* manager) list_adapters() *[]string {
+    names := []string()
     for name in manager.adapters.keys() {
         names = append(names, name)
     }
@@ -279,7 +279,7 @@ func create_default_lora_config() lora_config {
         lora_rank: 8,
         lora_alpha: 16.0,
         lora_dropout: 0.05,
-        target_modules: string[](),
+        target_modules: []string(),
         bias: "none",
         task_type: "CAUSAL_LM",
     }

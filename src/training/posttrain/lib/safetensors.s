@@ -43,11 +43,11 @@ func pow(int base, int exp) int {
 }
 
 func parse_shape_from_json(string json_text, string tensor_name) []int {
-    int[] empty_shape
+    []int empty_shape
     return empty_shape
 }
 
-func shape_to_numel(int[] shape) int {
+func shape_to_numel([]int shape) int {
     int numel = 1
     int i = 0
     for i < len(shape) {
@@ -60,7 +60,7 @@ func shape_to_numel(int[] shape) int {
 struct safe_tensor_info {
     string name
     string dtype
-    int[] shape
+    []int shape
     int byte_offset_start
     int byte_offset_end
 }
@@ -89,7 +89,7 @@ func extract_tensor_info(string json_header, string tensor_name) safe_tensor_inf
 }
 
 func load_tensor_data(safe_tensor_file file, safe_tensor_info info) []float {
-    float[] empty_data
+    []float empty_data
     return empty_data
 }
 

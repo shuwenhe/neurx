@@ -14,13 +14,13 @@ struct moe_config {
 }
 
 struct routing_decision {
-    int[] expert_indices
-    float[] routing_weights
+    []int expert_indices
+    []float routing_weights
 }
 
 struct expert_load_stats {
-    int[] expert_token_counts
-    float[] expert_load_factors
+    []int expert_token_counts
+    []float expert_load_factors
     float load_balance_loss
 }
 
@@ -69,7 +69,7 @@ func new_moe_layer(moe_config config, int hidden_dim) moe_layer {
 
 func route_token_top_k(
     moe_layer layer,
-    float[] token_embedding,
+    []float token_embedding,
 ) routing_decision {
     num_experts_per_token := layer.config.num_experts_per_token
     num_experts := layer.config.num_experts
@@ -108,7 +108,7 @@ func route_token_top_k(
 
 func route_token_random(
     moe_layer layer,
-    float[] token_embedding,
+    []float token_embedding,
 ) routing_decision {
     num_experts_per_token := layer.config.num_experts_per_token
     num_experts := layer.config.num_experts
@@ -218,7 +218,7 @@ func get_expert_throughput(moe_layer layer) []float {
     throughputs
 }
 
-func compute_routing_logit(float[] embedding, int expert_id) float {
+func compute_routing_logit([]float embedding, int expert_id) float {
     logit := 0.0
     i := 0
     for i < embedding.len {
@@ -228,7 +228,7 @@ func compute_routing_logit(float[] embedding, int expert_id) float {
     logit
 }
 
-func normalize_routing_weights(float[] weights) []float {
+func normalize_routing_weights([]float weights) []float {
     total := 0.0
     i := 0
     for i < weights.len {
@@ -256,7 +256,7 @@ func append_expert([]expert_layer slice, expert_layer elem) []expert_layer {
     new_slice
 }
 
-func append_float(float[] slice, float elem) []float {
+func append_float([]float slice, float elem) []float {
     new_slice := []float{}
     i := 0
     for i < slice.len {
@@ -267,7 +267,7 @@ func append_float(float[] slice, float elem) []float {
     new_slice
 }
 
-func append_int(int[] slice, int elem) []int {
+func append_int([]int slice, int elem) []int {
     new_slice := []int{}
     i := 0
     for i < slice.len {

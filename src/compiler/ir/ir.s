@@ -3,16 +3,16 @@ use neurx.strings
 struct ir_node_state {
     string name
     string op
-    string[] inputs
-    string[] outputs
+    []string inputs
+    []string outputs
 }
 
 struct ir_graph_state {
     string name
     []ir_node_state nodes
-    string[] edges
-    string[] inputs
-    string[] outputs
+    []string edges
+    []string inputs
+    []string outputs
     bool valid
 }
 
@@ -43,7 +43,7 @@ func new_ir_graph_state(string name) ir_graph_state {
     }
 }
 
-func make_ir_node_state(string name, string op, string[] inputs, string[] outputs) ir_node_state {
+func make_ir_node_state(string name, string op, []string inputs, []string outputs) ir_node_state {
     ir_node_state {
         name: name,
         op: op,
@@ -66,7 +66,7 @@ func ir_add_node(ir_graph_state graph, ir_node_state node) ir_graph_state {
 }
 
 func ir_add_edge(ir_graph_state graph, string edge) ir_graph_state {
-    string[] edges = copy_strings(graph.edges)
+    []string edges = copy_strings(graph.edges)
     edges = append(edges, edge)
     ir_graph_state {
         name: graph.name,
@@ -79,7 +79,7 @@ func ir_add_edge(ir_graph_state graph, string edge) ir_graph_state {
 }
 
 func ir_add_input(ir_graph_state graph, string input_name) ir_graph_state {
-    string[] inputs = copy_strings(graph.inputs)
+    []string inputs = copy_strings(graph.inputs)
     inputs = append(inputs, input_name)
     ir_graph_state {
         name: graph.name,
@@ -92,7 +92,7 @@ func ir_add_input(ir_graph_state graph, string input_name) ir_graph_state {
 }
 
 func ir_add_output(ir_graph_state graph, string output_name) ir_graph_state {
-    string[] outputs = copy_strings(graph.outputs)
+    []string outputs = copy_strings(graph.outputs)
     outputs = append(outputs, output_name)
     ir_graph_state {
         name: graph.name,

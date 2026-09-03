@@ -28,7 +28,7 @@ func expect(bool cond, string name) int {
 }
 
 func test_split_to_tokens() int {
-    string[] toks = split_to_tokens("hi there")
+    []string toks = split_to_tokens("hi there")
     int fail = 0
     fail = fail + expect(len(toks) == 3, "split returns 3 tokens for 'hi there'")
     fail = fail + expect(toks[0] == "hi", "first token is hi")
@@ -38,7 +38,7 @@ func test_split_to_tokens() int {
 }
 
 func test_generation_callback_cursor() int {
-    string[] toks = string[]{"hello", " ", "world"}
+    []string toks = []string{"hello", " ", "world"}
     generation_callback_state gen = new_generation_callback_state(toks)
     int fail = 0
     gen = next_token(gen)
@@ -54,7 +54,7 @@ func test_generation_callback_cursor() int {
 
 func test_non_stream_response_shape() int {
     sse_session session = new_sse_session("req-1", "neurx-glm", false, 16)
-    string[] toks = string[]{"x", "y"}
+    []string toks = []string{"x", "y"}
     generation_callback_state gen = new_generation_callback_state(toks)
     session.tokens_sent = 2
     string body = non_stream_response(session, gen)

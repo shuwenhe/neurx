@@ -19,8 +19,8 @@ use std.io.println
 
 struct functional_safety_monitor {
     safety_level target_level
-    int[] fault_count
-    int[] fault_history
+    []int fault_count
+    []int fault_history
     int fmea_coverage_percent
     bool diagnostics_enabled
 }

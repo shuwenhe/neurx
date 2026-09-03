@@ -16,20 +16,20 @@ struct gptq_config {
 }
 
 struct awq_quantized_weight {
-    int[] qweight
-    int[] qzeros
-    float[] scales
+    []int qweight
+    []int qzeros
+    []float scales
     int bits
     int group_size
 }
 
 struct gptq_quantized_weight {
-    int[] qweight
-    int[] qzeros
-    float[] scales
+    []int qweight
+    []int qzeros
+    []float scales
     int bits
     int group_size
-    float[] h
+    []float h
 }
 
 func new_awq_config(int bits, int group_size) awq_config {
@@ -53,7 +53,7 @@ func new_gptq_config(int bits, int group_size) gptq_config {
 }
 
 func quantize_with_awq(
-    float[] weights,
+    []float weights,
     awq_config config,
 ) awq_quantized_weight {
     group_size := config.group_size
@@ -119,7 +119,7 @@ func quantize_with_awq(
 }
 
 func quantize_with_gptq(
-    float[] weights,
+    []float weights,
     gptq_config config,
 ) gptq_quantized_weight {
     group_size := config.group_size
@@ -228,7 +228,7 @@ func get_gptq_compression_ratio(gptq_quantized_weight quant) float {
     original_bits / quantized_bits
 }
 
-func append_float(float[] slice, float elem) []float {
+func append_float([]float slice, float elem) []float {
     new_slice := []float{}
     i := 0
     for i < slice.len {
@@ -239,7 +239,7 @@ func append_float(float[] slice, float elem) []float {
     new_slice
 }
 
-func append_int(int[] slice, int elem) []int {
+func append_int([]int slice, int elem) []int {
     new_slice := []int{}
     i := 0
     for i < slice.len {

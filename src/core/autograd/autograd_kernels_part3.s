@@ -11,10 +11,10 @@ func backward_layer_norm(node n, tensor grad_output) backward_result {
     tensor rstd = get_context_safe_tensor(n, "rstd", input)
     float eps = get_context_safe_float(n, "eps", 1e-5)
     int normalized_shape_size = get_context_safe_int(n, "normalized_size", len(input.data))
-    int[] shape = input.shape
-    float[] grad_input_data = make([]float, len(input.data))
-    float[] grad_gamma_data = zeros_like_array(len(gamma.data))
-    float[] grad_beta_data = zeros_like_array(len(beta_param.data))
+    []int shape = input.shape
+    []float grad_input_data = make([]float, len(input.data))
+    []float grad_gamma_data = zeros_like_array(len(gamma.data))
+    []float grad_beta_data = zeros_like_array(len(beta_param.data))
     int batch_size = 1
     int feature_size = normalized_shape_size
     if len(shape) >= 1 {
@@ -67,11 +67,11 @@ func backward_rms_norm(node n, tensor grad_output) backward_result {
     tensor rrms = get_context_safe_tensor(n, "rrms", input)
     float eps = get_context_safe_float(n, "eps", 1e-6)
     int norm_size = get_context_safe_int(n, "norm_size", len(input.data))
-    int[] shape = input.shape
+    []int shape = input.shape
     int feature_size = shape[len(shape)-1] if len(shape) >= 1 else norm_size
     int batch_size = len(input.data) / feature_size
-    float[] grad_input_data = make([]float, len(input.data))
-    float[] grad_gamma_data = zeros_like_array(len(gamma.data))
+    []float grad_input_data = make([]float, len(input.data))
+    []float grad_gamma_data = zeros_like_array(len(gamma.data))
     for b in 0..batch_size {
         int offset = b * feature_size
         float rms_inv = rrms.data[b] if len(rrms.data) > b else 1.0
@@ -109,7 +109,7 @@ func backward_embedding(node n, tensor grad_output) backward_result {
     int vocab_size = embedding_weight.shape[0]
     int embed_dim = embedding_weight.shape[1] if len(embedding_weight) > 1 else len(embedding_weight.data) / vocab_size
     int num_tokens = len(token_ids.data)
-    float[] grad_weight_data = zeros_like_array(len(embedding_weight.data))
+    []float grad_weight_data = zeros_like_array(len(embedding_weight.data))
     for t in 0..num_tokens {
         int token_id = int(token_ids.data[t])
         if token_id >= 0  token_id < vocab_size {

@@ -16,7 +16,7 @@ func download_model_from_huggingface(
     print("Repo URL: " + repo_url + "\n\n")
     print("📋 Files to Download\n")
     print("─────────────────────────────────────────────\n")
-    string[] files = [
+    []string files = [
         "model.safetensors",
         "config.json",
         "tokenizer.json",
@@ -50,7 +50,7 @@ func download_model_from_huggingface(
 func verify_model_files(string model_dir) bool {
     print("\n🔐 VERIFYING MODEL FILES\n")
     print("═════════════════════════════════════════════\n\n")
-    string[] required_files = [
+    []string required_files = [
         "model.safetensors",
         "config.json",
         "tokenizer.json",
@@ -81,7 +81,7 @@ func verify_model_files(string model_dir) bool {
 func get_model_file_sizes(string model_dir) {
     print("\n📊 MODEL FILE SIZES\n")
     print("═════════════════════════════════════════════\n\n")
-    string[] files = [
+    []string files = [
         "model.safetensors",
         "config.json",
         "tokenizer.json",

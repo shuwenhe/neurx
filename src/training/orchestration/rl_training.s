@@ -35,22 +35,22 @@ struct rl_config {
 }
 
 struct rollout_data {
-    float[] observations
-    float[] actions
-    float[] log_probs
-    float[] values
-    float[] rewards
-    float[] advantages
-    float[] returns
-    bool[] masks
+    []float observations
+    []float actions
+    []float log_probs
+    []float values
+    []float rewards
+    []float advantages
+    []float returns
+    []bool masks
 }
 
 struct rl_state {
     rl_config config
     rl_stage stage
     rollout_data buffer
-    float[] policy_params
-    float[] value_params
+    []float policy_params
+    []float value_params
     float current_step
     float current_epoch
     float total_steps
@@ -134,7 +134,7 @@ func new_rl_state(rl_config config) rl_state {
     }
 }
 
-func collect_rollout(rl_state state, float[] model_output, float[] rewards, int steps) rl_state {
+func collect_rollout(rl_state state, []float model_output, []float rewards, int steps) rl_state {
     int obs_dim = state.config.seq_len
     int action_dim = state.config.seq_len
     int start_idx = int(state.current_step)
@@ -163,8 +163,8 @@ func collect_rollout(rl_state state, float[] model_output, float[] rewards, int 
     state
 }
 
-func compute_log_prob(float[] logits, int dim) float {
-    float[] probs = math.softmax_1d(logits)
+func compute_log_prob([]float logits, int dim) float {
+    []float probs = math.softmax_1d(logits)
     float log_prob = 0.0
     int i = 0
     for i < dim {
@@ -176,7 +176,7 @@ func compute_log_prob(float[] logits, int dim) float {
     -log_prob
 }
 
-func compute_value_estimate(float[] hidden_states) float {
+func compute_value_estimate([]float hidden_states) float {
     float value = 0.0
     int n = len(hidden_states)
     int i = 0
@@ -236,16 +236,16 @@ func ppo_update(rl_state state) rl_state {
         for mb_idx < config.num_mini_batches {
             int start = mb_idx * mini_batch_size
             int end = start + mini_batch_size
-            float[] old_log_probs = buffer.log_probs[start..end]
-            float[] old_values = buffer.values[start..end]
-            float[] advantages = buffer.advantages[start..end]
-            float[] returns = buffer.returns[start..end]
-            float[] new_log_probs = math.allocate_float(end - start, 0.0)
-            float[] new_values = math.allocate_float(end - start, 0.0)
+            []float old_log_probs = buffer.log_probs[start..end]
+            []float old_values = buffer.values[start..end]
+            []float advantages = buffer.advantages[start..end]
+            []float returns = buffer.returns[start..end]
+            []float new_log_probs = math.allocate_float(end - start, 0.0)
+            []float new_values = math.allocate_float(end - start, 0.0)
             int i = 0
             for i < end - start {
                 int global_idx = start + i
-                float[] obs_slice = buffer.observations[global_idx * config.seq_len..(global_idx+1) * config.seq_len]
+                []float obs_slice = buffer.observations[global_idx * config.seq_len..(global_idx+1) * config.seq_len]
                 new_log_probs[i] = compute_log_prob(obs_slice, config.seq_len)
                 new_values[i] = compute_value_estimate(obs_slice)
                 i = i + 1
@@ -275,7 +275,7 @@ func ppo_update(rl_state state) rl_state {
             }
             policy_loss = policy_loss / float(end - start)
             value_loss = value_loss / float(end - start)
-            float[] log_probs = new_log_probs
+            []float log_probs = new_log_probs
             float ent = 0.0
             i = 0
             for i < end - start {
@@ -320,7 +320,7 @@ func vapo_update(rl_state state) rl_state {
     }
     value_advantage = value_advantage / float(horizon)
     float adjusted_advantage = beta * buffer.avg_advantage + alpha * value_advantage
-    float[] vapo_advantages = math.copy_float(buffer.advantages)
+    []float vapo_advantages = math.copy_float(buffer.advantages)
     i = 0
     for i < horizon {
         vapo_advantages[i] = buffer.advantages[i] + adjusted_advantage
@@ -335,7 +335,7 @@ func dapo_update(rl_state state) rl_state {
     rl_config config = state.config
     rollout_data buffer = state.buffer
     int horizon = config.horizon
-    float[] distributed_advantages = math.allocate_float(horizon, 0.0)
+    []float distributed_advantages = math.allocate_float(horizon, 0.0)
     int num_workers = 4
     int chunk_size = horizon / num_workers
     int worker = 0
@@ -361,14 +361,14 @@ func dapo_update(rl_state state) rl_state {
     ppo_update(state)
 }
 
-func rlaif_collect_feedback(rl_state state, float[] responses, float[] reference_responses) (float[], float[]) {
+func rlaif_collect_feedback(rl_state state, []float responses, []float reference_responses) ([]float, []float) {
     int num_responses = len(responses) / state.config.seq_len
-    float[] rewards = math.allocate_float(num_responses, 0.0)
-    float[] preferences = math.allocate_float(num_responses, 0.0)
+    []float rewards = math.allocate_float(num_responses, 0.0)
+    []float preferences = math.allocate_float(num_responses, 0.0)
     int i = 0
     for i < num_responses {
-        float[] response = responses[i * state.config.seq_len..(i+1) * state.config.seq_len]
-        float[] reference = reference_responses[i * state.config.seq_len..(i+1) * state.config.seq_len]
+        []float response = responses[i * state.config.seq_len..(i+1) * state.config.seq_len]
+        []float reference = reference_responses[i * state.config.seq_len..(i+1) * state.config.seq_len]
         float similarity = compute_cosine_similarity(response, reference, state.config.seq_len)
         float quality = compute_response_quality(response, state.config.seq_len)
         rewards[i] = 0.7 * similarity + 0.3 * quality
@@ -382,7 +382,7 @@ func rlaif_collect_feedback(rl_state state, float[] responses, float[] reference
     (rewards, preferences)
 }
 
-func compute_cosine_similarity(float[] a, float[] b, int dim) float {
+func compute_cosine_similarity([]float a, []float b, int dim) float {
     float dot = 0.0
     float norm_a = 0.0
     float norm_b = 0.0
@@ -401,7 +401,7 @@ func compute_cosine_similarity(float[] a, float[] b, int dim) float {
     dot / (norm_a * norm_b)
 }
 
-func compute_response_quality(float[] response, int dim) float {
+func compute_response_quality([]float response, int dim) float {
     float quality = 0.0
     int count = 0
     int i = 0
@@ -418,7 +418,7 @@ func compute_response_quality(float[] response, int dim) float {
     quality / float(count)
 }
 
-func rl_train_step(rl_state state, float[] model_output, float[] rewards) rl_state {
+func rl_train_step(rl_state state, []float model_output, []float rewards) rl_state {
     if state.stage == COLLECTING {
         state = collect_rollout(state, model_output, rewards, state.config.rollout_steps)
     }
@@ -431,8 +431,8 @@ func rl_train_step(rl_state state, float[] model_output, float[] rewards) rl_sta
             case DAPO:
                 state = dapo_update(state)
             case RLAIF:
-                float[] feedback_rewards = rewards
-                float[] preferences = math.allocate_float(0, 0.0)
+                []float feedback_rewards = rewards
+                []float preferences = math.allocate_float(0, 0.0)
                 (feedback_rewards, preferences) = rlaif_collect_feedback(state, model_output, model_output)
                 state.buffer.rewards = feedback_rewards
                 state = ppo_update(state)

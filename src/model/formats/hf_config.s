@@ -23,12 +23,8 @@ struct hf_model_config {
 func hf_json_find(string text, string pattern) int {
     int i = 0
     for i + len(pattern) <= len(text) {
-        int j = 0
-        bool match = true
-        for j < len(pattern) {
-            if text[i + j] != pattern[j] { match = false; j = len(pattern) } else { j = j + 1 }
-        }
-        if match { return i }
+        string substr = __host_slice(text, i, i + len(pattern))
+        if substr == pattern { return i }
         i = i + 1
     }
     -1
@@ -38,9 +34,15 @@ func hf_json_number_start(string text, string key) int {
     int position = hf_json_find(text, "\"" + key + "\"")
     if position < 0 { return -1 }
     position = position + len(key) + 2
-    for position < len(text) && text[position] != 58 { position = position + 1 }
+    for position < len(text) {
+        string ch = __host_slice(text, position, position + 1)
+        if ch != ":" { position = position + 1 } else { break }
+    }
     position = position + 1
-    for position < len(text) && (text[position] == 32 || text[position] == 9 || text[position] == 10 || text[position] == 13) { position = position + 1 }
+    for position < len(text) {
+        string ch = __host_slice(text, position, position + 1)
+        if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" { position = position + 1 } else { break }
+    }
     position
 }
 
@@ -50,8 +52,23 @@ func hf_json_int(string text, string key, int fallback) int {
     int value = 0
     bool found = false
     for position < len(text) {
-        int ch = text[position]
-        if ch < 48 || ch > 57 { position = len(text) } else { found = true; value = value * 10 + ch - 48; position = position + 1 }
+        string ch = __host_slice(text, position, position + 1)
+        if ch >= "0" && ch <= "9" {
+            found = true
+            int digit = 0
+            if ch == "0" { digit = 0 }
+            else if ch == "1" { digit = 1 }
+            else if ch == "2" { digit = 2 }
+            else if ch == "3" { digit = 3 }
+            else if ch == "4" { digit = 4 }
+            else if ch == "5" { digit = 5 }
+            else if ch == "6" { digit = 6 }
+            else if ch == "7" { digit = 7 }
+            else if ch == "8" { digit = 8 }
+            else if ch == "9" { digit = 9 }
+            value = value * 10 + digit
+            position = position + 1
+        } else { position = len(text) }
     }
     if !found { return fallback }
     value
@@ -63,11 +80,22 @@ func hf_json_float(string text, string key, float fallback) float {
     float value = 0.0
     float scale = 0.0
     for position < len(text) {
-        int ch = text[position]
-        if ch >= 48 && ch <= 57 {
-            if scale == 0.0 { value = value * 10.0 + (ch - 48) * 1.0 } else { scale = scale * 10.0; value = value + (ch - 48) * 1.0 / scale }
+        string ch = __host_slice(text, position, position + 1)
+        if ch >= "0" && ch <= "9" {
+            int digit = 0
+            if ch == "0" { digit = 0 }
+            else if ch == "1" { digit = 1 }
+            else if ch == "2" { digit = 2 }
+            else if ch == "3" { digit = 3 }
+            else if ch == "4" { digit = 4 }
+            else if ch == "5" { digit = 5 }
+            else if ch == "6" { digit = 6 }
+            else if ch == "7" { digit = 7 }
+            else if ch == "8" { digit = 8 }
+            else if ch == "9" { digit = 9 }
+            if scale == 0.0 { value = value * 10.0 + (digit * 1.0) } else { scale = scale * 10.0; value = value + (digit * 1.0) / scale }
             position = position + 1
-        } else if ch == 46 && scale == 0.0 {
+        } else if ch == "." && scale == 0.0 {
             scale = 1.0
             position = position + 1
         } else { position = len(text) }
@@ -80,9 +108,17 @@ func hf_json_number_text(string text, string key, string fallback) string {
     if position < 0 || position >= len(text) { return fallback }
     string value = ""
     for position < len(text) {
-        int ch = text[position]
-        bool numeric = (ch >= 48 && ch <= 57) || ch == 46 || ch == 43 || ch == 45 || ch == 69 || ch == 101
-        if numeric { value = value + string(ch); position = position + 1 } else { position = len(text) }
+        string ch = __host_slice(text, position, position + 1)
+        bool is_valid = (ch >= "0" && ch <= "9")
+        if !is_valid { is_valid = ch == "." }
+        if !is_valid { is_valid = ch == "+" }
+        if !is_valid { is_valid = ch == "-" }
+        if !is_valid { is_valid = ch == "E" }
+        if !is_valid { is_valid = ch == "e" }
+        if is_valid {
+            value = value + ch
+            position = position + 1
+        } else { position = len(text) }
     }
     if value == "" { return fallback }
     value
@@ -91,8 +127,14 @@ func hf_json_number_text(string text, string key, string fallback) string {
 func hf_json_bool(string text, string key, bool fallback) bool {
     int position = hf_json_number_start(text, key)
     if position < 0 || position >= len(text) { return fallback }
-    if position + 4 <= len(text) && text[position] == 116 && text[position + 1] == 114 && text[position + 2] == 117 && text[position + 3] == 101 { return true }
-    if position + 5 <= len(text) && text[position] == 102 && text[position + 1] == 97 && text[position + 2] == 108 && text[position + 3] == 115 && text[position + 4] == 101 { return false }
+    if position + 4 <= len(text) {
+        string substr = __host_slice(text, position, position + 4)
+        if substr == "true" { return true }
+    }
+    if position + 5 <= len(text) {
+        string substr = __host_slice(text, position, position + 5)
+        if substr == "false" { return false }
+    }
     fallback
 }
 

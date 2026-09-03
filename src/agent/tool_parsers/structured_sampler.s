@@ -6,12 +6,12 @@ use std.slices
 struct structured_sampler {
     json_schema schema
     string mode
-    allowed_next: int[]
+    allowed_next: []int
     string current_output
     parse_context: schema_types.parse_context
     int state
     int violations
-    warnings: string[]
+    warnings: []string
 }
 
 func create_structured_sampler(*json_schema schema, string mode) structured_sampler {
@@ -30,7 +30,7 @@ func create_structured_sampler(*json_schema schema, string mode) structured_samp
     return sampler
 }
 
-func filter_logits(*structured_sampler sampler, float[] logits) []float {
+func filter_logits(*structured_sampler sampler, []float logits) []float {
     result := logits
     i := 0
     for i < len(result) {
@@ -170,7 +170,7 @@ func is_valid_json_number(string s) bool {
     return i == len(s)
 }
 
-func process_batch(*[]structured_sampler samplers, float[][] logits_batch) float[][] {
+func process_batch(*[]structured_sampler samplers, []float[] logits_batch) []float[] {
     result := vec_new()
     i := 0
     for i < len(logits_batch) {
@@ -204,7 +204,7 @@ func print_sampler_debug(*structured_sampler sampler) {
     }
 }
 
-func is_token_allowed(int token_id, *int[] allowed) bool {
+func is_token_allowed(int token_id, *[]int allowed) bool {
     i := 0
     for i < len(*allowed) {
         if (*allowed)[i] == token_id {

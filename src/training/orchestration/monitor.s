@@ -50,7 +50,7 @@ struct training_monitor {
     training_metrics current_metrics
     int total_steps
     float start_time
-    step_times: float[]
+    step_times: []float
 }
 
 func new_monitor_config() monitor_config {

@@ -12,7 +12,7 @@ func init_lora_weights_kaiming(
     int in_features,
     int out_features,
     int rank
-) ((float[][], float[][]]), lora_utils_error) {
+) (([]float[], []float[]]), lora_utils_error) {
     if in_features <= 0 || out_features <= 0 || rank <= 0 {
         return (lora_utils_error {
             code: "INVALID_DIMS",
@@ -28,10 +28,10 @@ func init_lora_weights_kaiming(
     fan_in := in_features
     fan_out := out_features
     std := (2.0 / (fan_in as float + fan_out as float)).sqrt()
-    lora_a := float[][]]()
+    lora_a := []float[]]()
     i := 0
     for i < in_features {
-        row := float[]()
+        row := []float()
         j := 0
         for j < rank {
             val := gaussian_random(std)
@@ -41,10 +41,10 @@ func init_lora_weights_kaiming(
         lora_a = append(lora_a, row)
         i = i + 1
     }
-    lora_b := float[][]]()
+    lora_b := []float[]]()
     i := 0
     for i < rank {
-        row := float[]()
+        row := []float()
         j := 0
         for j < out_features {
             row = append(row, 0.0)
@@ -65,9 +65,9 @@ func gaussian_random(float std) float {
 }
 
 func load_lora_weights_from_dict(
-    *map[string, *float[][]] weights_dict
-) (*map[string, (float[][], float[][])]], lora_utils_error) {
-    result_weights := map[string, (float[][]], float[][]])]()
+    *map[string, *[]float[]] weights_dict
+) (*map[string, ([]float[], []float[])]], lora_utils_error) {
+    result_weights := map[string, ([]float[]], []float[]])]()
     for name in weights_dict.keys() {
         switch weights_dict.get(name) {
             some(weight) : {
@@ -81,7 +81,7 @@ return     (result_weights, "")
 
 func save_lora_weights_to_file(
     string output_path,
-    *map[string, (float[][], float[][])] weights
+    *map[string, ([]float[], []float[])] weights
 ) ((), lora_utils_error) {
     if len(output_path) == 0 {
         return (lora_utils_error {
@@ -94,19 +94,19 @@ func save_lora_weights_to_file(
 
 func load_lora_weights_from_file(
     string file_path
-) (*map[string, (float[][], float[][])], lora_utils_error) {
+) (*map[string, ([]float[], []float[])], lora_utils_error) {
     if len(file_path) == 0 {
         return (lora_utils_error {
             code: "INVALID_PATH",
             message: "File path cannot be empty",
         })
     }
-    weights := map[string, (float[][], float[][])]()
+    weights := map[string, ([]float[], []float[])]()
 return     (weights, "")
 }
 
 func estimate_lora_rank(
-    delta_weights: *float[][]],
+    delta_weights: *[]float[]],
     float threshold
 ) (int, lora_utils_error) {
     if len(delta_weights) == 0 {
@@ -141,7 +141,7 @@ return         (estimated_rank, "")
 }
 
 func merge_lora_configs(
-    configs: **map[string, string[]]
+    configs: **map[string, []string]
 ) (*map[string, string), lora_utils_error] {
     if len(configs) == 0 {
         return (lora_utils_error {
@@ -163,8 +163,8 @@ return     (merged, "")
 }
 
 func validate_lora_weight_shapes(
-    lora_a: *float[][]],
-    lora_b: *float[][]],
+    lora_a: *[]float[]],
+    lora_b: *[]float[]],
     expected_in_features: int,
     expected_out_features: int,
     int expected_rank
@@ -201,8 +201,8 @@ func validate_lora_weight_shapes(
 }
 
 func calculate_lora_memory_mb(
-    lora_a: *float[][]],
-    *float[][]] lora_b
+    lora_a: *[]float[]],
+    *[]float[]] lora_b
 ) int {
     a_size := len(lora_a) * (if len(lora_a) > 0 { lora_a[0].len() } else { 0 })
     b_size := len(lora_b) * (if len(lora_b) > 0 { lora_b[0].len() } else { 0 })
@@ -210,9 +210,9 @@ func calculate_lora_memory_mb(
 }
 
 func normalize_lora_weights(
-    lora_a: *float[][],
-    *float[][] lora_b
-) ((float[][], float[][])), lora_utils_error) {
+    lora_a: *[]float[],
+    *[]float[] lora_b
+) (([]float[], []float[])), lora_utils_error) {
     if len(lora_a) == 0 || len(lora_b) == 0 {
         return (lora_utils_error {
             code: "EMPTY_WEIGHTS",
@@ -236,10 +236,10 @@ func normalize_lora_weights(
     mean_a := sum_a / count_a as float
     var_a := (sum_sq_a / count_a as float) - mean_a * mean_a
     std_a := var_a.sqrt()
-    normalized_a := float[][]]()
+    normalized_a := []float[]]()
     i := 0
     for i < len(lora_a) {
-        row := float[]()
+        row := []float()
         j := 0
         for j < lora_a[0].len() {
             normalized := (lora_a[i][j] - mean_a) / (std_a + 1e-8)
@@ -266,10 +266,10 @@ func normalize_lora_weights(
     mean_b := sum_b / count_b as float
     var_b := (sum_sq_b / count_b as float) - mean_b * mean_b
     std_b := var_b.sqrt()
-    normalized_b := float[][]]()
+    normalized_b := []float[]]()
     i := 0
     for i < len(lora_b) {
-        row := float[]()
+        row := []float()
         j := 0
         for j < lora_b[0].len() {
             normalized := (lora_b[i][j] - mean_b) / (std_b + 1e-8)
@@ -283,8 +283,8 @@ func normalize_lora_weights(
 }
 
 func check_lora_weights_validity(
-    lora_a: *float[][]],
-    *float[][]] lora_b
+    lora_a: *[]float[]],
+    *[]float[]] lora_b
 ) ((), lora_utils_error) {
     i := 0
     for i < len(lora_a) {

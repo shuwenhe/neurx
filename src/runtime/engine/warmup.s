@@ -43,7 +43,7 @@ struct warmup_profile {
 struct model_warmup_engine {
     warmup_config* config
     warmup_profile* profile
-    int[]erface{} profiling_data
+    []interface{} profiling_data
     bool is_warmed_up
 }
 
@@ -56,7 +56,7 @@ func create_model_warmup_engine(warmup_config* config) model_warmup_engine* {
             overall_stats: warmup_stats{},
             metadata: make(map[string]interface{}),
         },
-        profiling_data: make(int[]erface{}, 0),
+        profiling_data: make([]interface{}, 0),
         is_warmed_up: false,
     }
 }
@@ -147,11 +147,11 @@ func (model_warmup_engine* mwe) estimate_throughput(int32 batch_size) float32 {
 }
 
 func (model_warmup_engine* mwe) identify_bottlenecks() []string {
-    return make(string[], 0)
+    return make([]string, 0)
 }
 
 func (model_warmup_engine* mwe) recommend_optimizations() []string {
-    return make(string[], 0)
+    return make([]string, 0)
 }
 
 func (model_warmup_engine* mwe) reset() {

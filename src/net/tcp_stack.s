@@ -52,7 +52,7 @@ struct tcp_manager {
 }
 
 struct udp_manager {
-    udp_endpoint[] endpoints
+    udp_endpo[]int endpoints
     int endpoint_counter
     int total_packets_sent
     int total_packets_recv

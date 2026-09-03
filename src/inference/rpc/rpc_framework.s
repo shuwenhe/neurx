@@ -45,7 +45,7 @@ struct rpc_request {
     request_id      string
     method          int32
     endpoint        string
-    payload         float[]32
+    payload         []float32
     metadata        map[string]string
     timestamp_ms    int64
     timeout_ms      int64
@@ -56,7 +56,7 @@ struct rpc_response {
     request_id      string
     method          int32
     status          int32
-    payload         float[]32
+    payload         []float32
     error_message   string
     latency_ms      int64
     timestamp_ms    int64
@@ -76,13 +76,13 @@ struct rpc_retry_policy {
     initial_delay   int64
     max_delay       int64
     backoff_factor  float32
-    retry_on_codes  int[]32
+    retry_on_codes  []int32
 }
 
 struct rpc_server_handler {
     name            string
     handler_fn      func(rpc_request) rpc_response
-    methods         int[]32
+    methods         []int32
     max_concurrency int32
 }
 
@@ -105,7 +105,7 @@ func NewRpcClient(server_address string, port int32) *rpc_client {
             initial_delay:  100,
             max_delay:      5000,
             backoff_factor: 2.0,
-            retry_on_codes: int[]32{500, 502, 503, 504},
+            retry_on_codes: []int32{500, 502, 503, 504},
         },
         connection_id: "client_" + core.ToString(port),
         healthy:      true,
@@ -157,7 +157,7 @@ func NewRpcServer(listen_address string, port int32) *rpc_server {
 func (rpc_server* server) RegisterHandler(
     name string,
     handler func(rpc_request) rpc_response,
-    methods int[]32,
+    methods []int32,
 ) {
     h := rpc_server_handler{
         name:            name,
@@ -252,14 +252,14 @@ func main() {
             status:     0,
             payload:    req.payload,
         }
-    }, int[]32{RpcMethodTypeValues().FORWARD})
+    }, []int32{RpcMethodTypeValues().FORWARD})
     server.Start()
     client := NewRpcClient("127.0.0.1", 8000)
     request := rpc_request{
         request_id:   "test_001",
         method:       RpcMethodTypeValues().FORWARD,
         endpoint:     "inference",
-        payload:      make(float[]32, 100),
+        payload:      make([]float32, 100),
         timestamp_ms: core.Now().UnixMilli(),
     }
     response, success := client.SendRequest(request)

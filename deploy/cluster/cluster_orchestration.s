@@ -130,7 +130,7 @@ func cluster_trim(string s) string {
 }
 
 func cluster_split_lines(string text) []string {
-    string[] lines = []string{}
+    []string lines = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -225,7 +225,7 @@ func cluster_parse_float(string text, float fallback) float {
 }
 
 func cluster_parse_node_record(string line) cluster_node_spec {
-    string[] parts = make([]string, 8)
+    []string parts = make([]string, 8)
     string current = ""
     int i = 0
     for i < len(line) {
@@ -274,7 +274,7 @@ func cluster_parse_node_record(string line) cluster_node_spec {
 }
 
 func cluster_split_csv(string text) []string {
-    string[] items = []string{}
+    []string items = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -458,7 +458,7 @@ func cluster_discover_nodes_from_network() []cluster_node_spec {
     int port = cluster_parse_int(runtime_env_get("NEURX_DISCOVERY_PORT", runtime_env_get("NEURX_NODE_PORT", "8888")), 8888)
     []cluster_node_spec nodes = make([]cluster_node_spec, 0)
     if host_list != "" {
-        string[] hosts = cluster_split_csv(host_list)
+        []string hosts = cluster_split_csv(host_list)
         int i = 0
         for i < len(hosts) {
             string host = cluster_trim(hosts[i])
@@ -476,7 +476,7 @@ func cluster_discover_nodes_from_network() []cluster_node_spec {
     if prefix_list == "" {
         return nodes
     }
-    string[] prefixes = cluster_split_csv(prefix_list)
+    []string prefixes = cluster_split_csv(prefix_list)
     int p = 0
     for p < len(prefixes) {
         string prefix = cluster_trim(prefixes[p])
@@ -507,7 +507,7 @@ func cluster_discover_nodes_from_manifest() []cluster_node_spec {
         return make([]cluster_node_spec, 0)
     }
     string text = runtime_read_text_file(manifest_path)
-    string[] lines = cluster_split_lines(text)
+    []string lines = cluster_split_lines(text)
     []cluster_node_spec nodes = make([]cluster_node_spec, len(lines))
     int i = 0
     for i < len(lines) {
@@ -631,7 +631,7 @@ func cluster_recommended_backend(cluster_orchestration_state state) string {
     "gloo"
 }
 
-func cluster_join_lines(string[] lines) string {
+func cluster_join_lines([]string lines) string {
     string out = ""
     int i = 0
     for i < len(lines) {
@@ -667,7 +667,7 @@ func cluster_int_to_string(int value) string {
 }
 
 func cluster_generate_env_lines(cluster_deployment_spec spec) []string {
-    string[] lines = make([]string, 12)
+    []string lines = make([]string, 12)
     lines = append(lines, "export CLUSTER_NAME=" + spec.cluster_name)
     lines = append(lines, "export MASTER_ADDR=" + spec.master_addr)
     lines = append(lines, "export MASTER_PORT=" + cluster_int_to_string(spec.master_port))
@@ -696,7 +696,7 @@ func cluster_default_pretrain_tokenizer_manifest_path(cluster_deployment_spec sp
 }
 
 func cluster_generate_training_startup_lines(cluster_orchestration_state state, cluster_deployment_spec spec) []string {
-    string[] lines = make([]string, 32)
+    []string lines = make([]string, 32)
     string pretrain_output_dir = cluster_default_pretrain_output_dir(spec)
     string pretrain_manifest = cluster_default_pretrain_manifest_path(spec)
     string tokenizer_manifest = cluster_default_pretrain_tokenizer_manifest_path(spec)
@@ -740,7 +740,7 @@ func cluster_generate_training_startup_lines(cluster_orchestration_state state, 
 
 func cluster_generate_training_startup_env(cluster_orchestration_state state, cluster_deployment_spec spec) string {
     string out = ""
-    string[] lines = cluster_generate_training_startup_lines(state, spec)
+    []string lines = cluster_generate_training_startup_lines(state, spec)
     int i = 0
     for i < len(lines) {
         out = out + lines[i]
@@ -753,7 +753,7 @@ func cluster_generate_training_startup_env(cluster_orchestration_state state, cl
 }
 
 func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
-    string[] lines = make([]string, 32)
+    []string lines = make([]string, 32)
     lines = append(lines, "#!/bin/bash")
     lines = append(lines, "")
     lines = append(lines, "# NeurX cluster deployment script")
@@ -789,7 +789,7 @@ func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
 }
 
 func cluster_generate_kubernetes_yaml(cluster_deployment_spec spec) string {
-    string[] lines = make([]string, 40)
+    []string lines = make([]string, 40)
     lines = append(lines, "apiVersion: app/v1")
     lines = append(lines, "kind: StatefulSet")
     lines = append(lines, "metadata:")

@@ -18,7 +18,7 @@ func detect_format(string text) FormatDetectionResult {
             return FormatDetectionResult{
                 detected_format: 1,
                 confidence: 0.95,
-                indicators: string[]{"starts_with_brace", "valid_json_structure"},
+                indicators: []string{"starts_with_brace", "valid_json_structure"},
                 metadata: map[string]string{},
             }
         }
@@ -28,7 +28,7 @@ func detect_format(string text) FormatDetectionResult {
             return FormatDetectionResult{
                 detected_format: 2,
                 confidence: 0.95,
-                indicators: string[]{"starts_with_tag", "valid_xml_structure"},
+                indicators: []string{"starts_with_tag", "valid_xml_structure"},
                 metadata: map[string]string{},
             }
         }
@@ -37,7 +37,7 @@ func detect_format(string text) FormatDetectionResult {
         return FormatDetectionResult{
             detected_format: 3,
             confidence: 0.8,
-            indicators: string[]{"has_markdown_markers"},
+            indicators: []string{"has_markdown_markers"},
             metadata: map[string]string{},
         }
     }
@@ -45,7 +45,7 @@ func detect_format(string text) FormatDetectionResult {
         return FormatDetectionResult{
             detected_format: 4,
             confidence: 0.7,
-            indicators: string[]{"yaml_like_structure"},
+            indicators: []string{"yaml_like_structure"},
             metadata: map[string]string{},
         }
     }
@@ -53,7 +53,7 @@ func detect_format(string text) FormatDetectionResult {
         return FormatDetectionResult{
             detected_format: 5,
             confidence: 0.7,
-            indicators: string[]{"csv_like_structure"},
+            indicators: []string{"csv_like_structure"},
             metadata: map[string]string{},
         }
     }
@@ -61,14 +61,14 @@ func detect_format(string text) FormatDetectionResult {
         return FormatDetectionResult{
             detected_format: 6,
             confidence: 0.75,
-            indicators: string[]{"has_html_tags"},
+            indicators: []string{"has_html_tags"},
             metadata: map[string]string{},
         }
     }
     return FormatDetectionResult{
         detected_format: 0,
         confidence: 1.0,
-        indicators: string[]{"no_format_markers"},
+        indicators: []string{"no_format_markers"},
         metadata: map[string]string{},
     }
 }
@@ -192,7 +192,7 @@ func is_csv_like(string text) bool {
 }
 
 func has_html_tags(string text) bool {
-    html_tags := string[]{"<html", "<div", "<span", "<p>", "<h1", "<h2", "<table", "<body"}
+    html_tags := []string{"<html", "<div", "<span", "<p>", "<h1", "<h2", "<table", "<body"}
     i := 0
     for i < len(html_tags) {
         if find_substring(to_lowercase(text), html_tags[i], 0) >= 0 {
@@ -238,7 +238,7 @@ func parse_xml_output(string text) ParseResult {
     trimmed := trim_string(text)
     root_name := extract_tag_name(trimmed)
     if len(root_name) > 0 {
-        result.value = create_object_value(string[]{root_name}, []ParsedValue{})
+        result.value = create_object_value([]string{root_name}, []ParsedValue{})
         result.status = 0
         result.confidence = 0.8
     } else {

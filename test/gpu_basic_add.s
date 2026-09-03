@@ -8,7 +8,7 @@ struct cuda_device {
 }
 
 struct vector_data {
-    int[] values
+    []int values
     int size
 }
 
@@ -76,7 +76,7 @@ func verify_result(vector_data actual, vector_data expected) bool {
 func main() int {
     
     A := vector_data {
-        values: int[](),
+        values: []int(),
         size: 4
     }
     A.values = append(A.values, 1)
@@ -85,7 +85,7 @@ func main() int {
     A.values = append(A.values, 4)
     
     B := vector_data {
-        values: int[](),
+        values: []int(),
         size: 4
     }
     B.values = append(B.values, 5)
@@ -94,7 +94,7 @@ func main() int {
     B.values = append(B.values, 8)
     
     expected := vector_data {
-        values: int[](),
+        values: []int(),
         size: 4
     }
     expected.values = append(expected.values, 6)
@@ -118,7 +118,7 @@ func main() int {
     synchronize_device(device)
     
     C := vector_data {
-        values: int[](),
+        values: []int(),
         size: 4
     }
     C = copy_device_to_host(device, gpu_C_addr, C)

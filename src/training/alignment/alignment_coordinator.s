@@ -70,7 +70,7 @@ func new_alignment_trainer(alignment_config cfg) alignment_trainer {
     }
 }
 
-func run_sft_stage(alignment_trainer trainer, string[] sft_data) alignment_trainer {
+func run_sft_stage(alignment_trainer trainer, []string sft_data) alignment_trainer {
     int epoch = 0
     for epoch < trainer.config.num_sft_epochs {
         epoch = epoch + 1
@@ -79,7 +79,7 @@ func run_sft_stage(alignment_trainer trainer, string[] sft_data) alignment_train
     trainer
 }
 
-func run_rlhf_stage(alignment_trainer trainer, string[] preference_data) alignment_trainer {
+func run_rlhf_stage(alignment_trainer trainer, []string preference_data) alignment_trainer {
     int iteration = 0
     for iteration < trainer.config.num_rlhf_iterations {
         iteration = iteration + 1
@@ -88,7 +88,7 @@ func run_rlhf_stage(alignment_trainer trainer, string[] preference_data) alignme
     trainer
 }
 
-func evaluate_alignment(string model_path, string[] test_prompts) [float string {
+func evaluate_alignment(string model_path, []string test_prompts) [float string {
     [string:float metrics = [string:float{}
     metrics["instruction_following"] = 0.0
     metrics["coherence"] = 0.0
@@ -138,7 +138,7 @@ func create_model_version(alignment_trainer trainer, string version_tag) string 
     version_tag
 }
 
-func compare_model_versions(string[] version_ids) [float string {
+func compare_model_versions([]string version_ids) [float string {
     [string:float comparison = [string:float{}
     comparison
 }

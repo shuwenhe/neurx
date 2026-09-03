@@ -9,15 +9,15 @@ struct layer_norm_config {
 struct layer_norm {
     int hidden_dim
     float epsilon
-    float[] gamma
-    float[] beta
+    []float gamma
+    []float beta
     bool use_bias
 }
 
 struct rms_norm {
     int hidden_dim
     float epsilon
-    float[] gamma
+    []float gamma
 }
 
 struct position_embedding_config {
@@ -31,34 +31,34 @@ struct position_embedding_config {
 struct learned_position_embedding {
     int hidden_dim
     int max_seq_len
-    float[] weight
+    []float weight
 }
 
 struct rope_embedding {
     int hidden_dim
     float rope_base
-    float[] frequencies
-    float[] cached_cos
-    float[] cached_sin
+    []float frequencies
+    []float cached_cos
+    []float cached_sin
     int max_seq_len
 }
 
 struct alibi_embedding {
     int num_heads
-    float[] head_slopes
+    []float head_slopes
 }
 
 struct rope_apply_result {
-    float[] query
-    float[] key
+    []float query
+    []float key
 }
 
 struct alibi_apply_result {
-    float[] scores
+    []float scores
 }
 
 func allocate_vector(int size, float init_val) []float {
-    float[] v = make([]float, size)
+    []float v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -67,8 +67,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector(float[] src) []float {
-    float[] out = allocate_vector(len(src), 0.0)
+func copy_vector([]float src) []float {
+    []float out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -172,12 +172,12 @@ func new_rms_norm(layer_norm_config cfg) rms_norm {
 
 func layer_normalize(
     layer_norm ln,
-    float[] input,
+    []float input,
     int batch_size,
     int seq_len
 ) []float {
     int hidden_dim = ln.hidden_dim
-    float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -218,12 +218,12 @@ func layer_normalize(
 
 func rms_normalize(
     rms_norm rn,
-    float[] input,
+    []float input,
     int batch_size,
     int seq_len
 ) []float {
     int hidden_dim = rn.hidden_dim
-    float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -252,7 +252,7 @@ func rms_normalize(
 
 func new_absolute_position_embedding(position_embedding_config cfg) []float {
     int total = cfg.max_seq_len * cfg.hidden_dim
-    float[] embedding = allocate_vector(total, 0.0)
+    []float embedding = allocate_vector(total, 0.0)
     int pos = 0
     for pos < cfg.max_seq_len {
         int d = 0
@@ -275,7 +275,7 @@ func new_absolute_position_embedding(position_embedding_config cfg) []float {
 
 func new_learned_position_embedding(position_embedding_config cfg) learned_position_embedding {
     int total = cfg.max_seq_len * cfg.hidden_dim
-    float[] weight = allocate_vector(total, 0.0)
+    []float weight = allocate_vector(total, 0.0)
     int pos = 0
     for pos < cfg.max_seq_len {
         int d = 0
@@ -294,12 +294,12 @@ func new_learned_position_embedding(position_embedding_config cfg) learned_posit
 }
 
 func get_position_embedding(
-    float[] embedding,
+    []float embedding,
     int hidden_dim,
     int seq_len
 ) []float {
     int total = seq_len * hidden_dim
-    float[] out = allocate_vector(total, 0.0)
+    []float out = allocate_vector(total, 0.0)
     int i = 0
     for i < total {
         out[i] = embedding[i]
@@ -313,7 +313,7 @@ func get_learned_position_embedding(
     int seq_len
 ) []float {
     int total = seq_len * embedding.hidden_dim
-    float[] out = allocate_vector(total, 0.0)
+    []float out = allocate_vector(total, 0.0)
     int i = 0
     for i < total && i < len(embedding.weight) {
         out[i] = embedding.weight[i]
@@ -324,7 +324,7 @@ func get_learned_position_embedding(
 
 func new_rope_embedding(position_embedding_config cfg) rope_embedding {
     int half_dim = cfg.hidden_dim / 2
-    float[] frequencies = allocate_vector(half_dim, 0.0)
+    []float frequencies = allocate_vector(half_dim, 0.0)
     int i = 0
     for i < half_dim {
         float ratio = (2 * i * 1.0) / (cfg.hidden_dim * 1.0)
@@ -344,15 +344,15 @@ func new_rope_embedding(position_embedding_config cfg) rope_embedding {
 
 func apply_rope(
     rope_embedding rope,
-    float[] query,
-    float[] key,
+    []float query,
+    []float key,
     int batch_size,
     int num_heads,
     int seq_len,
     int head_dim
 ) rope_apply_result {
-    float[] rotated_query = copy_vector(query)
-    float[] rotated_key = copy_vector(key)
+    []float rotated_query = copy_vector(query)
+    []float rotated_key = copy_vector(key)
     int pair_dim = head_dim / 2
     int b = 0
     for b < batch_size {
@@ -393,7 +393,7 @@ func apply_rope(
 }
 
 func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_embedding {
-    float[] slopes = allocate_vector(num_heads, 0.0)
+    []float slopes = allocate_vector(num_heads, 0.0)
     int h = 0
     for h < num_heads {
         slopes[h] = exp_approx(-(h + 1) * 0.5 * 0.6931471805599453)
@@ -407,12 +407,12 @@ func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_emb
 
 func apply_alibi_bias(
     alibi_embedding alibi,
-    float[] attention_scores,
+    []float attention_scores,
     int batch_size,
     int num_heads,
     int seq_len
 ) alibi_apply_result {
-    float[] out = copy_vector(attention_scores)
+    []float out = copy_vector(attention_scores)
     int b = 0
     for b < batch_size {
         int h = 0

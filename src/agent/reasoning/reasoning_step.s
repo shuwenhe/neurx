@@ -25,7 +25,7 @@ struct reasoning_step {
     string error_message
     int retry_count
     int parent_step_id
-    int[] child_step_ids
+    []int child_step_ids
     bool is_valid
     string validation_message
 }

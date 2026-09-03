@@ -1,17 +1,17 @@
 package main
 
 struct tensor_desc {
-    int[] shape
-    int[] strides
+    []int shape
+    []int strides
     int numel
 }
 
 struct tensor {
-    float[] storage
+    []float storage
     tensor_desc desc
 }
 
-func shape_numel(int[] shape) int {
+func shape_numel([]int shape) int {
     int n = 1
     int i = 0
     for i < len(shape) {
@@ -21,9 +21,9 @@ func shape_numel(int[] shape) int {
     return n
 }
 
-func contiguous_strides(int[] shape) []int {
+func contiguous_strides([]int shape) []int {
     int ndim = len(shape)
-    int[] strides = make([]int, ndim)
+    []int strides = make([]int, ndim)
     int stride = 1
     int i = ndim - 1
     for i >= 0 {
@@ -35,7 +35,7 @@ func contiguous_strides(int[] shape) []int {
 }
 
 func zeros_float(int n) []float {
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -44,9 +44,9 @@ func zeros_float(int n) []float {
     return out
 }
 
-func from_data(float[] data, int[] shape) tensor {
+func from_data([]float data, []int shape) tensor {
     int n = shape_numel(shape)
-    float[] storage = zeros_float(n)
+    []float storage = zeros_float(n)
     int i = 0
     for i < n {
         storage[i] = data[i]
@@ -64,9 +64,9 @@ func from_data(float[] data, int[] shape) tensor {
 
 func add(tensor a, tensor b) tensor {
     tensor_desc ad = a.desc
-    float[] adata = a.storage
-    float[] bdata = b.storage
-    float[] storage = zeros_float(ad.numel)
+    []float adata = a.storage
+    []float bdata = b.storage
+    []float storage = zeros_float(ad.numel)
     int i = 0
     for i < ad.numel {
         storage[i] = adata[i] + bdata[i]
@@ -81,17 +81,17 @@ func add(tensor a, tensor b) tensor {
 func matmul2d(tensor a, tensor b) tensor {
     tensor_desc ad = a.desc
     tensor_desc bd = b.desc
-    int[] ashape = ad.shape
-    int[] bshape = bd.shape
-    float[] adata = a.storage
-    float[] bdata = b.storage
+    []int ashape = ad.shape
+    []int bshape = bd.shape
+    []float adata = a.storage
+    []float bdata = b.storage
     int m = ashape[0]
     int k = ashape[1]
     int n = bshape[1]
-    int[] shape = make([]int, 2)
+    []int shape = make([]int, 2)
     shape[0] = m
     shape[1] = n
-    float[] storage = zeros_float(m * n)
+    []float storage = zeros_float(m * n)
     int row = 0
     for row < m {
         int col = 0
@@ -131,25 +131,25 @@ func assert_close(float actual, float expected, string name) {
 
 func main() {
     println("NeurX tensor core runtime smoke")
-    float[] adata = make([]float, 4)
+    []float adata = make([]float, 4)
     adata[0] = 1.0
     adata[1] = 2.0
     adata[2] = 3.0
     adata[3] = 4.0
-    float[] bdata = make([]float, 4)
+    []float bdata = make([]float, 4)
     bdata[0] = 5.0
     bdata[1] = 6.0
     bdata[2] = 7.0
     bdata[3] = 8.0
-    int[] shape = make([]int, 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 2
     tensor a = from_data(adata, shape)
     tensor b = from_data(bdata, shape)
     tensor c = add(a, b)
     tensor d = matmul2d(a, b)
-    float[] cdata = c.storage
-    float[] ddata = d.storage
+    []float cdata = c.storage
+    []float ddata = d.storage
     assert_close(cdata[0], 6.0, "add")
     assert_close(ddata[0], 19.0, "matmul 00")
     assert_close(ddata[3], 50.0, "matmul 11")

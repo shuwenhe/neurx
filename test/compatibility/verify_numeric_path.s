@@ -12,7 +12,7 @@ struct matrix_stats {
 func float_to_string(float val) string {
     return float_to_string_precision(val, 5)
 
-func compute_matrix_stats(float[][] mat) matrix_stats {
+func compute_matrix_stats([]float[] mat) matrix_stats {
     if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int R = len(mat)
     int C = 0
@@ -45,11 +45,11 @@ func compute_matrix_stats(float[][] mat) matrix_stats {
     return matrix_stats{mean: mean, sample: sample}
 }
 
-func create_test_matrix(int rows, int cols, float scale) float[][] {
-    float[][] mat = floatmake([][], rows)
+func create_test_matrix(int rows, int cols, float scale) []float[] {
+    []float[] mat = floatmake([][], rows)
     int r = 0
     for r < rows {
-        float[] row = make([]float, cols)
+        []float row = make([]float, cols)
         int c = 0
         for c < cols {
             float val = scale * float(r * cols + c) / 1000.0
@@ -67,9 +67,9 @@ func test_matmul_numeric() {
     int M = 4
     int N = 8
     int P = 4
-    float[][] A_mat = create_test_matrix(M, N, 1.0)
-    float[][] B_mat = create_test_matrix(N, P, 0.5)
-    float[] A = make([]float, M * N)
+    []float[] A_mat = create_test_matrix(M, N, 1.0)
+    []float[] B_mat = create_test_matrix(N, P, 0.5)
+    []float A = make([]float, M * N)
     int i = 0
     for i < M {
         int j = 0
@@ -79,7 +79,7 @@ func test_matmul_numeric() {
         }
         i = i + 1
     }
-    float[] B = make([]float, N * P)
+    []float B = make([]float, N * P)
     i = 0
     for i < N {
         int j = 0
@@ -89,7 +89,7 @@ func test_matmul_numeric() {
         }
         i = i + 1
     }
-    float[] C = fast_matmul_flat_opt(A, B, M, N, P)
+    []float C = fast_matmul_flat_opt(A, B, M, N, P)
     print("A (" + int_to_string(M) + "x" + int_to_string(N) + "): ")
     matrix_stats stats_a = compute_matrix_stats(A_mat)
     print("mean=" + float_to_string(stats_a.mean) + ", sample=" + float_to_string(stats_a.sample) + "\n")
@@ -110,7 +110,7 @@ func test_matmul_numeric() {
 func test_softmax_numeric() {
     print("\n=== SOFTMAX TEST ===\n")
     int len_x = 8
-    float[] logits = make([]float, len_x)
+    []float logits = make([]float, len_x)
     logits[0] = 1.0
     logits[1] = 2.0
     logits[2] = 0.5
@@ -119,7 +119,7 @@ func test_softmax_numeric() {
     logits[5] = -1.0
     logits[6] = 0.0
     logits[7] = 2.5
-    float[] probs = make([]float, len_x)
+    []float probs = make([]float, len_x)
     fast_softmax(logits, probs, len_x)
     print("logits: [")
     int i = 0
@@ -144,7 +144,7 @@ func test_softmax_numeric() {
 
 func test_gelu_numeric() {
     print("\n=== GELU TEST ===\n")
-    float[] test_vals = make([]float, 5)
+    []float test_vals = make([]float, 5)
     test_vals[0] = -2.0
     test_vals[1] = -0.5
     test_vals[2] = 0.0
@@ -163,10 +163,10 @@ func test_attention_numeric() {
     print("\n=== SCALED DOT-PRODUCT ATTENTION TEST ===\n")
     int seq_len = 4
     int head_dim = 8
-    float[][] Q_mat = create_test_matrix(seq_len, head_dim, 0.1)
-    float[][] K_mat = create_test_matrix(seq_len, head_dim, 0.1)
-    float[] Q = make([]float, seq_len * head_dim)
-    float[] K = make([]float, seq_len * head_dim)
+    []float[] Q_mat = create_test_matrix(seq_len, head_dim, 0.1)
+    []float[] K_mat = create_test_matrix(seq_len, head_dim, 0.1)
+    []float Q = make([]float, seq_len * head_dim)
+    []float K = make([]float, seq_len * head_dim)
     int i = 0
     for i < seq_len {
         int j = 0

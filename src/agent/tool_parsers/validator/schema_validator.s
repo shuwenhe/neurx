@@ -3,8 +3,8 @@ use neurx.tool_parsers.schema.schema_types
 use std.slices
 struct validation_result {
     bool is_valid
-    errors: string[]
-    warnings: string[]
+    errors: []string
+    warnings: []string
     field_errors: []field_error
 }
 
@@ -210,7 +210,7 @@ func count_array_items(string json_str) int {
     return count
 }
 
-func contains_string_in_array(string s, *string[] arr) bool {
+func contains_string_in_array(string s, *[]string arr) bool {
     i := 0
     for i < len(*arr) {
         if (*arr)[i] == s {

@@ -1,7 +1,7 @@
 package neurx.util.string_utils
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 func string_split(string text, string delimiter) []string {
-    string[] result = make([]string, 1000)
+    []string result = make([]string, 1000)
     int result_count = 0
     if len(text) == 0 || len(delimiter) == 0 {
         if len(text) > 0 {
@@ -190,7 +190,7 @@ func string_to_int(string text) int {
     return result
 }
 
-func string_join(string[] parts, string separator) string {
+func string_join([]string parts, string separator) string {
     string result = ""
     int i = 0
     for i < len(parts) {

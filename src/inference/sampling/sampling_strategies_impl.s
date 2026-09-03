@@ -19,17 +19,17 @@ struct sampling_config {
 }
 
 struct generation_state {
-    int[] input_ids
-    float[][] scores
-    float[][] probabilities
-    int[] generated_ids
+    []int input_ids
+    []float[] scores
+    []float[] probabilities
+    []int generated_ids
     int current_step
     bool is_finished
     []beam_state beams
 }
 
 struct beam_state {
-    int[] token_ids
+    []int token_ids
     float score
     bool is_finished
 }

@@ -84,7 +84,7 @@ func main() {
     println("")
     println("[3/5] Preparing synthetic data...")
     int data_len = cfg.max_steps * cfg.batch_size * cfg.seq_len * 2
-    int[] train_data = generate_data(data_len, cfg.vocab_size)
+    []int train_data = generate_data(data_len, cfg.vocab_size)
     println("[OK] Generated ", format_int(data_len), " training tokens")
     println("")
     println("[4/5] Starting training loop...")
@@ -95,10 +95,10 @@ func main() {
     string output_dir = "artifact/checkpoints"
     int step = 0
     for step < cfg.max_steps {
-        int[] input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)
-        int[] target_ids = get_batch(train_data, step + 1, cfg.batch_size * cfg.seq_len)
+        []int input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)
+        []int target_ids = get_batch(train_data, step + 1, cfg.batch_size * cfg.seq_len)
         AG.AGTensor logits = NN.forward(model, input_ids, cfg.batch_size, cfg.seq_len)
-        int[] targets = make_targets(target_ids, cfg.batch_size)
+        []int targets = make_targets(target_ids, cfg.batch_size)
         AG.AGTensor loss_tensor = AG.ag_cross_entropy(logits, targets)
         float loss_val = AG.item(loss_tensor)
         state.global_step = state.global_step + 1
@@ -169,8 +169,8 @@ func main() {
 }
 
 func generate_data(int n_tokens, int vocab_size) []int {
-    int[] data = new int[n_tokens]
-    int[] pattern = [1, 23, 45, 67, 89, 12, 34, 56]
+    []int data = new int[n_tokens]
+    []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
     int seed = 42
     int i = 0
@@ -186,8 +186,8 @@ func generate_data(int n_tokens, int vocab_size) []int {
     data
 }
 
-func get_batch(int[] data, int offset, int count) []int {
-    int[] batch = new int[count]
+func get_batch([]int data, int offset, int count) []int {
+    []int batch = new int[count]
     int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
     int i = 0
     for i < count {
@@ -197,8 +197,8 @@ func get_batch(int[] data, int offset, int count) []int {
     batch
 }
 
-func make_targets(int[] token_ids, int batch_size) []int {
-    int[] targets = new int[batch_size]
+func make_targets([]int token_ids, int batch_size) []int {
+    []int targets = new int[batch_size]
     int i = 0
     for i < batch_size {
         targets[i] = token_ids[i]

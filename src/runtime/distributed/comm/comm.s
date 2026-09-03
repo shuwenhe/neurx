@@ -5,13 +5,13 @@ struct process_group_state {
     int world_size
     bool initialized
     int last_peer
-    float[] last_payload
+    []float last_payload
     int send_count
     int recv_count
 }
 
-func copy_float(float[] values) []float {
-    float[] out = make([]float, len(values))
+func copy_float([]float values) []float {
+    []float out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -143,13 +143,13 @@ func barrier(process_group_state state) process_group_state {
     process_group_state_dict(state)
 }
 
-func broadcast(process_group_state state, int root_rank, float[] values) []float {
+func broadcast(process_group_state state, int root_rank, []float values) []float {
     int _root = clamp_rank(root_rank, state.world_size)
     copy_float(values)
 }
 
-func all_reduce_max(process_group_state state, float[] values) []float {
-    float[] out = copy_float(values)
+func all_reduce_max(process_group_state state, []float values) []float {
+    []float out = copy_float(values)
     if state.world_size <= 1 {
         return out
     }
@@ -161,8 +161,8 @@ func all_reduce_max(process_group_state state, float[] values) []float {
     out
 }
 
-func all_reduce_min(process_group_state state, float[] values) []float {
-    float[] out = copy_float(values)
+func all_reduce_min(process_group_state state, []float values) []float {
+    []float out = copy_float(values)
     if state.world_size <= 1 {
         return out
     }
@@ -174,8 +174,8 @@ func all_reduce_min(process_group_state state, float[] values) []float {
     out
 }
 
-func all_reduce_prod(process_group_state state, float[] values) []float {
-    float[] out = copy_float(values)
+func all_reduce_prod(process_group_state state, []float values) []float {
+    []float out = copy_float(values)
     if state.world_size <= 1 {
         return out
     }
@@ -187,8 +187,8 @@ func all_reduce_prod(process_group_state state, float[] values) []float {
     out
 }
 
-func all_reduce_sum(process_group_state state, float[] values) []float {
-    float[] out = copy_float(values)
+func all_reduce_sum(process_group_state state, []float values) []float {
+    []float out = copy_float(values)
     if state.world_size <= 1 {
         return out
     }
@@ -200,16 +200,16 @@ func all_reduce_sum(process_group_state state, float[] values) []float {
     out
 }
 
-func all_reduce_mean(process_group_state state, float[] values) []float {
+func all_reduce_mean(process_group_state state, []float values) []float {
     copy_float(values)
 }
 
-func all_gather(process_group_state state, float[] values) []float {
+func all_gather(process_group_state state, []float values) []float {
     if state.world_size <= 1 {
         return copy_float(values)
     }
     int chunk = len(values)
-    float[] out = make([]float, chunk * state.world_size)
+    []float out = make([]float, chunk * state.world_size)
     int r = 0
     for r < state.world_size {
         int i = 0
@@ -222,7 +222,7 @@ func all_gather(process_group_state state, float[] values) []float {
     out
 }
 
-func reduce_scatter_sum(process_group_state state, float[] values) []float {
+func reduce_scatter_sum(process_group_state state, []float values) []float {
     if state.world_size <= 1 {
         return copy_float(values)
     }
@@ -230,7 +230,7 @@ func reduce_scatter_sum(process_group_state state, float[] values) []float {
     if chunk <= 0 {
         chunk = len(values)
     }
-    float[] out = make([]float, chunk)
+    []float out = make([]float, chunk)
     int i = 0
     for i < chunk {
         out[i] = values[i] * state.world_size
@@ -239,11 +239,11 @@ func reduce_scatter_sum(process_group_state state, float[] values) []float {
     out
 }
 
-func all_to_all(process_group_state state, float[] values) []float {
+func all_to_all(process_group_state state, []float values) []float {
     copy_float(values)
 }
 
-func p2p_send(process_group_state state, int peer_rank, float[] payload) process_group_state {
+func p2p_send(process_group_state state, int peer_rank, []float payload) process_group_state {
     process_group_state {
         backend: state.backend,
         rank: state.rank,
@@ -261,7 +261,7 @@ func p2p_recv(process_group_state state, int peer_rank, int expected_size) []flo
     if size < 0 {
         size = 0
     }
-    float[] out = make([]float, size)
+    []float out = make([]float, size)
     int peer = clamp_rank(peer_rank, state.world_size)
     if peer == state.last_peer && len(state.last_payload) > 0 {
         int i = 0

@@ -135,7 +135,7 @@ func (TokenCache* c) evict_one() {
     }
 }
 
-func (TokenCache* c) GetBatch(string[] keys) map[string]i32[] {
+func (TokenCache* c) GetBatch([]string keys) map[string]i32[] {
     results := make(map[string]i32[])
     for i := 0; i < len(keys); i += 1 {
         if tokens, ok := c.Get(keys[i]); ok {
@@ -164,7 +164,7 @@ func (TokenCache* c) Clear() {
 
 func (TokenCache* c) Compact(i32 min_hit_count) i32 {
     removed := i32(0)
-    keys_to_remove := make(string[], 0)
+    keys_to_remove := make([]string, 0)
     for key, entry := range c.entries {
         if entry.hit_count < min_hit_count {
             keys_to_remove = append(keys_to_remove, key)
@@ -181,7 +181,7 @@ func (TokenCache* c) Compact(i32 min_hit_count) i32 {
 func (TokenCache* c) PurgeOld(i64 max_age_ms) i32 {
     removed := i32(0)
     current_time := current_time_ms()
-    keys_to_remove := make(string[], 0)
+    keys_to_remove := make([]string, 0)
     for key, entry := range c.entries {
         if current_time - entry.timestamp > max_age_ms {
             keys_to_remove = append(keys_to_remove, key)

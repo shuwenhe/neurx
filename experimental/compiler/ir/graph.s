@@ -9,15 +9,15 @@ struct computation_graph {
     int next_op_id
     value_type[] values
     operation[] operations
-    int[] input_ids
-    int[] output_ids
+    []int input_ids
+    []int output_ids
 }
 
 struct graph_node {
     int op_id
     operation op
-    int[] input_node_ids
-    int[] output_node_ids
+    []int input_node_ids
+    []int output_node_ids
 }
 
 func new_computation_graph(string name) computation_graph {
@@ -39,7 +39,7 @@ func (computation_graph* g) add_value(value_type vt) int {
     value_id
 }
 
-func (computation_graph* g) add_operation(op_type op_kind, string op_name, int[] input_ids, int[] output_ids) int {
+func (computation_graph* g) add_operation(op_type op_kind, string op_name, []int input_ids, []int output_ids) int {
     int op_id = g.next_op_id
     g.next_op_id = g.next_op_id + 1
     op = operation {
@@ -55,13 +55,13 @@ func (computation_graph* g) add_operation(op_type op_kind, string op_name, int[]
 }
 
 func (computation_graph* g) add_input(int value_id) int {
-    input_op_id = g.add_operation(op_type_input, "input_" + value_id as string, new int[0], new int[]{value_id})
+    input_op_id = g.add_operation(op_type_input, "input_" + value_id as string, new int[0], new []int{value_id})
     g.input_ids = append(g.input_ids, value_id)
     input_op_id
 }
 
 func (computation_graph* g) add_output(int value_id) int {
-    output_op_id = g.add_operation(op_type_output, "output_" + value_id as string, new int[]{value_id}, new int[0])
+    output_op_id = g.add_operation(op_type_output, "output_" + value_id as string, new []int{value_id}, new int[0])
     g.output_ids = append(g.output_ids, value_id)
     output_op_id
 }
@@ -156,7 +156,7 @@ func (computation_graph* g) find_consumers(int value_id) []operation {
 }
 
 func (computation_graph* g) topological_sort() []int {
-    sorted_ops = int[]()
+    sorted_ops = []int()
     in_degree = new int[len(g.operations)]
     for i in range(len(g.operations)) {
         in_degree[i] = 0
@@ -171,7 +171,7 @@ func (computation_graph* g) topological_sort() []int {
         }
     }
 
-    queue = int[]()
+    queue = []int()
     for i in range(len(g.operations)) {
         if in_degree[i] == 0 {
             queue = append(queue, i)

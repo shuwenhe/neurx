@@ -102,7 +102,7 @@ func (BaseTokenizer* t) EncodeWithOptions(string text, types.EncodingOptions opt
     }
 }
 
-func (BaseTokenizer* t) EncodeBatch(string[] texts) types.TokenizerResult[] {
+func (BaseTokenizer* t) EncodeBatch([]string texts) types.TokenizerResult[] {
     results := make(types.TokenizerResult[], len(texts))
     for i := 0; i < len(texts); i += 1 {
         results[i] = t.Encode(texts[i])
@@ -119,7 +119,7 @@ func (BaseTokenizer* t) Decode(i32[] token_ids) types.TokenizerResult {
 
 func (BaseTokenizer* t) DecodeWithOptions(i32[] token_ids, types.DecodingOptions opts) types.TokenizerResult {
     t.stats.total_decodings += 1
-    text_parts := make(string[], len(token_ids))
+    text_parts := make([]string, len(token_ids))
     for i := 0; i < len(token_ids); i += 1 {
         token_id := token_ids[i]
         if opts.skip_special_tokens && t.is_special_token(token_id) {
@@ -233,7 +233,7 @@ func (BaseTokenizer* t) is_special_token(i32 token_id) bool {
            token_id == t.special_tokens.mask_token_id
 }
 
-func (BaseTokenizer* t) join_tokens(string[] tokens, bool clean_spaces) string {
+func (BaseTokenizer* t) join_tokens([]string tokens, bool clean_spaces) string {
     if len(tokens) == 0 {
         return ""
     }
@@ -291,7 +291,7 @@ func current_time_ms() i64 {
 }
 
 func split_string(string s, string sep) []string {
-    parts := make(string[], 0)
+    parts := make([]string, 0)
     current := ""
     for i := 0; i < len(s); i += 1 {
         if string(s[i]) == sep {

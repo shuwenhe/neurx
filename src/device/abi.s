@@ -57,7 +57,7 @@ func device_get_dtype_size(int dtype) int {
     return 0
 }
 
-func compute_element_count(int[] shape) int {
+func compute_element_count([]int shape) int {
     int count = 1
     int i = 0
     for i < len(shape) {
@@ -67,9 +67,9 @@ func compute_element_count(int[] shape) int {
     return count
 }
 
-func compute_strides(int[] shape) []int {
+func compute_strides([]int shape) []int {
     int rank = len(shape)
-    int[] strides = new int[rank]
+    []int strides = new int[rank]
     int stride = 1
     int i = rank - 1
     for i >= 0 {
@@ -157,7 +157,7 @@ func device_free(device_ptr ptr) (bool, string) {
     return false, "backend not implemented"
 }
 
-func device_alloc_tensor(int device_id, int[] shape, int dtype) (device_tensor, bool, string) {
+func device_alloc_tensor(int device_id, []int shape, int dtype) (device_tensor, bool, string) {
     element_count := compute_element_count(shape)
     dtype_size := device_get_dtype_size(dtype)
     num_bytes := element_count * dtype_size
@@ -256,8 +256,8 @@ func device_copy_tensor_d2d(
 
 func device_launch_kernel(
     int64 kernel_func,
-    int[] grid_dim,
-    int[] block_dim,
+    []int grid_dim,
+    []int block_dim,
     int64 shared_memory_bytes,
     stream_handle stream,
     int64[] args

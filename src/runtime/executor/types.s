@@ -62,7 +62,7 @@ struct ExecutionIteration {
     start_time      i64
     end_time        i64
     duration_ms     i32
-    sequence_ids    string[]
+    sequence_ids    []string
     sequence_count  i32
     total_tokens    i32
     output_tokens   i32
@@ -155,11 +155,11 @@ struct DistributedConfig {
 
 struct IterationSchedule {
     iteration_id    i64
-    prefill_batch   string[]
+    prefill_batch   []string
     prefill_count   i32
-    decode_batch    string[]
+    decode_batch    []string
     decode_count    i32
-    mixed_batch     string[]
+    mixed_batch     []string
     mixed_count     i32
     priority_order  []i32
 }

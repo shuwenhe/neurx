@@ -22,7 +22,7 @@ func create_json_object([]json_field fields) string {
     return result
 }
 
-func create_json_array(string[] items) string {
+func create_json_array([]string items) string {
     result := "["
     i := 0
     for i < len(items) {

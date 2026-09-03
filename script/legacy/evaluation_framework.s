@@ -7,7 +7,7 @@ import (
 )
 
 struct evaluation_config {
-    benchmark_suites    string[]
+    benchmark_suites    []string
     num_samples         int
     batch_size          int
     max_seq_length      int
@@ -65,7 +65,7 @@ func (evaluation_framework* framework) load_mmlu() benchmark_dataset {
         examples: []evaluation_example{},
         categories: make(map[string]int),
     }
-    categories := string[]{
+    categories := []string{
         "abstract_algebra", "anatomy", "astronomy", "business_ethics",
         "clinical_knowledge", "college_biology", "college_chemistry",
         "college_computer_science", "college_mathematics", "college_medicine",
@@ -96,7 +96,7 @@ func (evaluation_framework* framework) load_truthful_qa() benchmark_dataset {
         examples: []evaluation_example{},
         categories: make(map[string]int),
     }
-    categories := string[]{"health", "law", "finance", "politics", "science"}
+    categories := []string{"health", "law", "finance", "politics", "science"}
     for _, cat := range categories {
         for i := 0; i < 50; i++ {
             example := evaluation_example{
@@ -120,7 +120,7 @@ func (evaluation_framework* framework) load_gsm8k() benchmark_dataset {
         examples: []evaluation_example{},
         categories: make(map[string]int),
     }
-    categories := string[]{"arithmetic", "algebra", "geometry", "word_problem"}
+    categories := []string{"arithmetic", "algebra", "geometry", "word_problem"}
     for _, cat := range categories {
         for i := 0; i < 250; i++ {
             example := evaluation_example{
@@ -144,7 +144,7 @@ func (evaluation_framework* framework) load_hellaswag() benchmark_dataset {
         examples: []evaluation_example{},
         categories: make(map[string]int),
     }
-    categories := string[]{"activity", "event", "hobby", "relationship"}
+    categories := []string{"activity", "event", "hobby", "relationship"}
     for _, cat := range categories {
         for i := 0; i < 250; i++ {
             example := evaluation_example{
@@ -161,7 +161,7 @@ func (evaluation_framework* framework) load_hellaswag() benchmark_dataset {
     return dataset
 }
 
-func (evaluation_framework* framework) evaluate_accuracy(predictions []string, string[] references) float64 {
+func (evaluation_framework* framework) evaluate_accuracy(predictions []string, []string references) float64 {
     correct := 0
     for i, pred := range predictions {
         if pred == references[i] {
@@ -171,7 +171,7 @@ func (evaluation_framework* framework) evaluate_accuracy(predictions []string, s
     return float64(correct) / float64(len(predictions))
 }
 
-func (evaluation_framework* framework) evaluate_f1(predictions []string, string[] references) float64 {
+func (evaluation_framework* framework) evaluate_f1(predictions []string, []string references) float64 {
     tp := 0.0
     fp := 0.0
     false_negatives := 0.0
@@ -216,7 +216,7 @@ func (evaluation_framework* framework) evaluate_semantic_similarity(prediction s
     return float64(common) / float64(max_len)
 }
 
-func (evaluation_framework* framework) evaluate_perplexity(logits float[]64, int[] labels) float64 {
+func (evaluation_framework* framework) evaluate_perplexity(logits []float64, []int labels) float64 {
     loss := 0.0
     count := 0
     for i, label := range labels {

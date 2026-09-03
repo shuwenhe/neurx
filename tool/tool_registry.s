@@ -1,11 +1,11 @@
 package neurx.agent.tool_registry
 
 struct agent_tool_registry_state {
-    string[] tool_names
-    bool[] enabled
-    int[] timeout_ms
-    int[] retries
-    string[] capabilities
+    []string tool_names
+    []bool enabled
+    []int timeout_ms
+    []int retries
+    []string capabilities
 }
 
 func new_agent_tool_registry_state() agent_tool_registry_state {
@@ -28,11 +28,11 @@ func agent_tool_registry_add(agent_tool_registry_state state, string tool_name, 
 
 func agent_tool_registry_add_with_capability(agent_tool_registry_state state, string tool_name, bool is_enabled, int timeout_ms, int retries, string capability) agent_tool_registry_state {
     int size = len(state.tool_names)
-    string[] names = make([]string, size + 1)
-    bool[] enabled = make([]bool, size + 1)
-    int[] timeouts = make([]int, size + 1)
-    int[] retry_values = make([]int, size + 1)
-    string[] caps = make([]string, size + 1)
+    []string names = make([]string, size + 1)
+    []bool enabled = make([]bool, size + 1)
+    []int timeouts = make([]int, size + 1)
+    []int retry_values = make([]int, size + 1)
+    []string caps = make([]string, size + 1)
     int i = 0
     for i < size {
         names[i] = state.tool_names[i]
@@ -133,7 +133,7 @@ func agent_tool_registry_set_enabled(agent_tool_registry_state state, string too
     if index < 0 {
         return state
     }
-    bool[] enabled = make([]bool, size)
+    []bool enabled = make([]bool, size)
     i = 0
     for i < size {
         enabled[i] = state.enabled[i]
@@ -174,7 +174,7 @@ func agent_tool_registry_enabled_names(agent_tool_registry_state state) []string
         }
         i = i + 1
     }
-    string[] out = make([]string, count)
+    []string out = make([]string, count)
     int wi = 0
     i = 0
     for i < len(state.tool_names) {
@@ -219,7 +219,7 @@ func agent_tool_registry_set_retries(agent_tool_registry_state state, string too
     if val < 0 {
         val = 0
     }
-    int[] retry_values = make([]int, size)
+    []int retry_values = make([]int, size)
     i = 0
     for i < size {
         retry_values[i] = state.retries[i]
@@ -253,7 +253,7 @@ func agent_tool_registry_set_timeout(agent_tool_registry_state state, string too
     if val < 0 {
         val = 0
     }
-    int[] timeouts = make([]int, size)
+    []int timeouts = make([]int, size)
     i = 0
     for i < size {
         timeouts[i] = state.timeout_ms[i]

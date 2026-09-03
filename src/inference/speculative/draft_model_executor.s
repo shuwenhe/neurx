@@ -10,20 +10,20 @@ struct draft_model_config {
 
 struct draft_model_executor {
     draft_model_config config
-    embeddings: float[][]
-    layer_weights: float[][]
-    output_projection: float[][]
-    layer_cache: float[][]
+    embeddings: []float[]
+    layer_weights: []float[]
+    output_projection: []float[]
+    layer_cache: []float[]
     int64 inference_count
     float64 total_time_ms
 }
 
 struct draft_prediction_batch {
     int batch_id
-    input_ids: int[][]
-    attention_mask: bool[][]
+    input_ids: []int[]
+    attention_mask: []bool[]
     batch_predictions: [][]draft_token
-    batch_embeddings: float[][]
+    batch_embeddings: []float[]
     float batch_time_ms
 }
 
@@ -43,10 +43,10 @@ func new_draft_model_config(string size, int num_layers, int hidden, int vocab) 
 func new_draft_model_executor(draft_model_config config) draft_model_executor {
     executor := draft_model_executor{
         config: config,
-        embeddings: float[][]{},
-        layer_weights: float[][]{},
-        output_projection: float[][]{},
-        layer_cache: float[][]{},
+        embeddings: []float[]{},
+        layer_weights: []float[]{},
+        output_projection: []float[]{},
+        layer_cache: []float[]{},
         inference_count: 0,
         total_time_ms: 0.0,
     }
@@ -93,7 +93,7 @@ func draft_embedding_lookup(draft_model_executor executor, int token_id) []float
     }
 }
 
-func draft_layer_forward(float[] input, float[] layer_weight, int hidden_dim) []float {
+func draft_layer_forward([]float input, []float layer_weight, int hidden_dim) []float {
     output := []float{}
     i := 0
     for i < hidden_dim {
@@ -112,7 +112,7 @@ func draft_layer_forward(float[] input, float[] layer_weight, int hidden_dim) []
     output
 }
 
-func draft_apply_activation(float[] hidden_states) []float {
+func draft_apply_activation([]float hidden_states) []float {
     activated := []float{}
     i := 0
     for i < hidden_states.len {
@@ -127,7 +127,7 @@ func draft_apply_activation(float[] hidden_states) []float {
     activated
 }
 
-func draft_normalize(float[] hidden_states) []float {
+func draft_normalize([]float hidden_states) []float {
     mean := 0.0
     i := 0
     for i < hidden_states.len {
@@ -171,7 +171,7 @@ func draft_forward_single(draft_model_executor executor, int token_id) []float {
     hidden
 }
 
-func draft_output_logits(draft_model_executor executor, float[] hidden_states) []float {
+func draft_output_logits(draft_model_executor executor, []float hidden_states) []float {
     logits := []float{}
     i := 0
     for i < executor.config.vocab_size {
@@ -199,7 +199,7 @@ func draft_predict_next_token(draft_model_executor executor, int token_id, specu
     dt
 }
 
-func draft_predict_batch(draft_model_executor executor, int[] input_ids, speculative_decode_config config) []draft_token {
+func draft_predict_batch(draft_model_executor executor, []int input_ids, speculative_decode_config config) []draft_token {
     predictions := []draft_token{}
     i := 0
     for i < input_ids.len {
@@ -237,6 +237,6 @@ func get_draft_model_stats(draft_model_executor executor) string {
 
 func clear_draft_cache(draft_model_executor executor) draft_model_executor {
     updated := executor
-    updated.layer_cache = float[][]{}
+    updated.layer_cache = []float[]{}
     updated
 }

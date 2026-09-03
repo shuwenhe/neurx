@@ -1,16 +1,16 @@
 package async_inference
 import "sync"
 struct StreamingResponse {
-    request_id      string[]
-    response_id     string[]
-    token_buffer    int[]
-    text_buffer     string[]
+    request_id      []string
+    response_id     []string
+    token_buffer    []int
+    text_buffer     []string
     buffer_size     int
     max_buffer_size int
     started         bool
     completed       bool
     error_occurred  bool
-    error_msg       string[]
+    error_msg       []string
     tokens_sent     int64
     chunks_sent     int64
     latency_ms      int64
@@ -19,7 +19,7 @@ struct StreamingResponse {
 
 struct AsyncStreamingResponseManager {
     active_streams  map[string]StreamingResponse
-    completed_streams string[]
+    completed_streams []string
     buffer_size     int
     flush_interval  int64
     max_concurrent  int
@@ -35,7 +35,7 @@ struct AsyncStreamingResponseManager {
 func new_async_streaming_response_manager(buffer_size int, flush_interval int64, max_concurrent int) AsyncStreamingResponseManager {
     return AsyncStreamingResponseManager{
         active_streams:   make(map[string]StreamingResponse),
-        completed_streams: make(string[], 0),
+        completed_streams: make([]string, 0),
         buffer_size:      buffer_size,
         flush_interval:   flush_interval,
         max_concurrent:   max_concurrent,
@@ -49,7 +49,7 @@ func new_async_streaming_response_manager(buffer_size int, flush_interval int64,
     }
 }
 
-func (AsyncStreamingResponseManager* manager) start_stream(request_id []string, response_id string[]) bool {
+func (AsyncStreamingResponseManager* manager) start_stream(request_id []string, response_id []string) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) == 0 || len(response_id) == 0 {
@@ -61,8 +61,8 @@ func (AsyncStreamingResponseManager* manager) start_stream(request_id []string, 
     response := StreamingResponse{
         request_id:     request_id,
         response_id:    response_id,
-        token_buffer:   make(int[], 0, manager.buffer_size),
-        text_buffer:    make(string[], 0, manager.buffer_size),
+        token_buffer:   make([]int, 0, manager.buffer_size),
+        text_buffer:    make([]string, 0, manager.buffer_size),
         buffer_size:    0,
         max_buffer_size: manager.buffer_size,
         started:        true,
@@ -77,7 +77,7 @@ func (AsyncStreamingResponseManager* manager) start_stream(request_id []string, 
     return true
 }
 
-func (AsyncStreamingResponseManager* manager) add_token_to_stream(request_id []string, token int, text string[]) bool {
+func (AsyncStreamingResponseManager* manager) add_token_to_stream(request_id []string, token int, text []string) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) == 0 {
@@ -118,8 +118,8 @@ func (AsyncStreamingResponseManager* manager) flush_stream_internal(request_id [
     }
     response.tokens_sent = response.tokens_sent + int64(response.buffer_size)
     response.chunks_sent = response.chunks_sent + 1
-    response.token_buffer = make(int[], 0, manager.buffer_size)
-    response.text_buffer = make(string[], 0, manager.buffer_size)
+    response.token_buffer = make([]int, 0, manager.buffer_size)
+    response.text_buffer = make([]string, 0, manager.buffer_size)
     response.buffer_size = 0
     manager.active_streams[request_id[0]] = response
     manager.total_tokens = manager.total_tokens + int64(response.tokens_sent)
@@ -149,7 +149,7 @@ func (AsyncStreamingResponseManager* manager) complete_stream(request_id []strin
     return true
 }
 
-func (AsyncStreamingResponseManager* manager) report_stream_error(request_id []string, error_msg string[]) bool {
+func (AsyncStreamingResponseManager* manager) report_stream_error(request_id []string, error_msg []string) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) == 0 {
@@ -183,7 +183,7 @@ func (AsyncStreamingResponseManager* manager) get_stream_status(request_id []str
     return status
 }
 
-func (AsyncStreamingResponseManager* manager) on_token_ready_callback(request_id []string, callback string[]) {
+func (AsyncStreamingResponseManager* manager) on_token_ready_callback(request_id []string, callback []string) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) > 0 && len(callback) > 0 {
@@ -191,7 +191,7 @@ func (AsyncStreamingResponseManager* manager) on_token_ready_callback(request_id
     }
 }
 
-func (AsyncStreamingResponseManager* manager) on_stream_end_callback(request_id []string, callback string[]) {
+func (AsyncStreamingResponseManager* manager) on_stream_end_callback(request_id []string, callback []string) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) > 0 && len(callback) > 0 {
@@ -199,7 +199,7 @@ func (AsyncStreamingResponseManager* manager) on_stream_end_callback(request_id 
     }
 }
 
-func (AsyncStreamingResponseManager* manager) on_error_callback(request_id []string, callback string[]) {
+func (AsyncStreamingResponseManager* manager) on_error_callback(request_id []string, callback []string) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(request_id) > 0 && len(callback) > 0 {
@@ -240,7 +240,7 @@ func (AsyncStreamingResponseManager* manager) clear_all_streams() {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     manager.active_streams = make(map[string]StreamingResponse)
-    manager.completed_streams = make(string[], 0)
+    manager.completed_streams = make([]string, 0)
     manager.on_token_ready = make(map[string]string)
     manager.on_stream_end = make(map[string]string)
     manager.on_error = make(map[string]string)
@@ -248,14 +248,14 @@ func (AsyncStreamingResponseManager* manager) clear_all_streams() {
 
 func main() {
     manager := new_async_streaming_response_manager(32, 1000, 100)
-    request_id := make(string[], 1)
+    request_id := make([]string, 1)
     request_id[0] = "req_001"
-    response_id := make(string[], 1)
+    response_id := make([]string, 1)
     response_id[0] = "resp_001"
     started := manager.start_stream(request_id, response_id)
     if started {
         for i := 0; i < 10; i++ {
-            text := make(string[], 1)
+            text := make([]string, 1)
             text[0] = "token"
             manager.add_token_to_stream(request_id, 1000+i, text)
         }

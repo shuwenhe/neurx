@@ -34,13 +34,13 @@ func main() {
             cmd.Run()
             return
         }
-        cmd := exec.command(append(string[]{real_s, "ir"}, args...)...)
+        cmd := exec.command(append([]string{real_s, "ir"}, args...)...)
         cmd.Stdout = os.Stdout
         cmd.Stderr = os.Stderr
         cmd.Run()
         return
     }
-    cmd := exec.command(append(string[]{real_s}, args...)...)
+    cmd := exec.command(append([]string{real_s}, args...)...)
     cmd.Stdout = os.Stdout
     cmd.Stderr = os.Stderr
     cmd.Run()

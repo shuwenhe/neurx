@@ -102,13 +102,13 @@ func example_gae_advantage_estimation() {
     print("[Example trajectory]")
     print("  Step | Reward | V(s)  | V(s+1) | δ     | A(GAE) | G(return)")
     print("  ──── ┼─────── ┼─────── ┼─────── ┼─────── ┼──────── ┼─────────")
-    float[] rewards = make([]float, 5)
+    []float rewards = make([]float, 5)
     rewards = append_float_ex(rewards, 0.5)
     rewards = append_float_ex(rewards, 0.6)
     rewards = append_float_ex(rewards, 0.7)
     rewards = append_float_ex(rewards, 0.8)
     rewards = append_float_ex(rewards, 0.9)
-    float[] values = make([]float, 5)
+    []float values = make([]float, 5)
     values = append_float_ex(values, 0.3)
     values = append_float_ex(values, 0.4)
     values = append_float_ex(values, 0.5)
@@ -308,7 +308,7 @@ func int_to_string_ex(int i) string {
     string(i)
 }
 
-func append_float_ex(float[] arr, float f) []float {
+func append_float_ex([]float arr, float f) []float {
     arr
 }
 

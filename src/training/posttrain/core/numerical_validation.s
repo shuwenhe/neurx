@@ -162,7 +162,7 @@ func compute_analytical_gradient_s(string op, tensor_s input) tensor_s {
 }
 
 func compute_numerical_gradient_s(string op, tensor_s input, float epsilon) tensor_s {
-    float[] grad = make(float[], 0)
+    []float grad = make([]float, 0)
     int i = 0
     for i < len(input.data) {
         tensor_s input_plus = copy_tensor_s(input)
@@ -191,7 +191,7 @@ func matmul_forward_s(tensor_s a, tensor_s b) tensor_s {
 }
 
 func add_forward_s(tensor_s a, tensor_s b) tensor_s {
-    float[] result = make(float[], 0)
+    []float result = make([]float, 0)
     int i = 0
     for i < len(a.data) {
         result = append(result, a.data[i] + b.data[i])
@@ -209,7 +209,7 @@ func add_forward_s(tensor_s a, tensor_s b) tensor_s {
 }
 
 func mul_forward_s(tensor_s a, tensor_s b) tensor_s {
-    float[] result = make(float[], 0)
+    []float result = make([]float, 0)
     int i = 0
     for i < len(a.data) {
         result = append(result, a.data[i] * b.data[i])
@@ -231,7 +231,7 @@ func softmax_forward_s(tensor_s a) tensor_s {
 }
 
 func make_zeros_like_s(tensor_s t) tensor_s {
-    float[] zeros = make(float[], 0)
+    []float zeros = make([]float, 0)
     int i = 0
     for i < t.total_elements {
         zeros = append(zeros, 0.0)
@@ -249,7 +249,7 @@ func make_zeros_like_s(tensor_s t) tensor_s {
 }
 
 func copy_tensor_s(tensor_s t) tensor_s {
-    float[] copied = make(float[], 0)
+    []float copied = make([]float, 0)
     int i = 0
     for i < len(t.data) {
         copied = append(copied, t.data[i])

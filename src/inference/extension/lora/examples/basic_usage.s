@@ -11,16 +11,16 @@ func example_create_basic_adapter() ((), string) {
     config.lora_rank = 8
     config.lora_alpha = 16.0
     config.lora_dropout = 0.05
-    target_modules := string[]()
+    target_modules := []string()
     target_modules = append(target_modules, "q_proj")
     target_modules = append(target_modules, "v_proj")
     config.target_modules = target_modules
     config.validate().map_err(|e| e.message)
     adapter := new("lora_basic", *config)
-    lora_a := float[][]]()
+    lora_a := []float[]]()
     i := 0
     for i < 768 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 8 {
             row = append(row, 0.01)
@@ -29,10 +29,10 @@ func example_create_basic_adapter() ((), string) {
         lora_a = append(lora_a, row)
         i = i + 1
     }
-    lora_b := float[][]]()
+    lora_b := []float[]]()
     i := 0
     for i < 8 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 768 {
             row = append(row, 0.0)
@@ -53,14 +53,14 @@ func example_apply_lora() ((), string) {
     config := default()
     config.lora_rank = 4
     config.lora_alpha = 8.0
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "dense")
     config.target_modules = targets
     adapter := new("lora_apply", *config)
-    lora_a := float[][]]()
+    lora_a := []float[]]()
     i := 0
     for i < 64 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 4 {
             row = append(row, 0.01 * j as float)
@@ -69,10 +69,10 @@ func example_apply_lora() ((), string) {
         lora_a = append(lora_a, row)
         i = i + 1
     }
-    lora_b := float[][]]()
+    lora_b := []float[]]()
     i := 0
     for i < 4 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 32 {
             row = append(row, 0.02)
@@ -82,7 +82,7 @@ func example_apply_lora() ((), string) {
         i = i + 1
     }
     adapter.add_module_weights("dense", lora_a, lora_b)
-    input := float[]()
+    input := []float()
     i := 0
     for i < 64 {
         input = append(input, 1.0)
@@ -99,14 +99,14 @@ func example_adapter_manager() ((), string) {
     manager := new()
     config1 := default()
     config1.lora_rank = 8
-    targets1 := string[]()
+    targets1 := []string()
     targets1 = append(targets1, "q_proj")
     config1.target_modules = targets1
     adapter1 := new("adapter_1", *config1)
     manager.add_adapter("adapter_1", *adapter1)
     config2 := default()
     config2.lora_rank = 16
-    targets2 := string[]()
+    targets2 := []string()
     targets2 = append(targets2, "v_proj")
     config2.target_modules = targets2
     adapter2 := new("adapter_2", *config2)
@@ -126,14 +126,14 @@ func example_adapter_manager() ((), string) {
 func example_batch_apply_lora() ((), string) {
     config := default()
     config.lora_rank = 4
-    targets := string[]()
+    targets := []string()
     targets = append(targets, "linear")
     config.target_modules = targets
     adapter := new("lora_batch", *config)
-    lora_a := float[][]]()
+    lora_a := []float[]]()
     i := 0
     for i < 32 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 4 {
             row = append(row, 0.01)
@@ -142,10 +142,10 @@ func example_batch_apply_lora() ((), string) {
         lora_a = append(lora_a, row)
         i = i + 1
     }
-    lora_b := float[][]]()
+    lora_b := []float[]]()
     i := 0
     for i < 4 {
-        row := float[]()
+        row := []float()
         j := 0
         for j < 16 {
             row = append(row, 0.02)
@@ -160,7 +160,7 @@ func example_batch_apply_lora() ((), string) {
     seq_len := 32
     b := 0
     for b < batch_size {
-        input := float[]()
+        input := []float()
         s := 0
         for s < seq_len {
             input = append(input, 1.0)

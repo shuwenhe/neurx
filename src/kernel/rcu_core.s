@@ -4,14 +4,14 @@ use std.io.eprintln
 struct rcu_data {
     int cpu_id
     int gp_seq
-    int[] pending_callbacks
+    []int pending_callbacks
     int qs_passed
     int nesting_level
 }
 
 struct rcu_state {
     int gp_seq
-    int[] rcu_data_array
+    []int rcu_data_array
     bool gp_in_progress
     int gp_start_time
 }

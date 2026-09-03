@@ -14,7 +14,7 @@ struct gdpo_config {
 }
 
 struct rubric {
-    reward_names: string[]
+    reward_names: []string
     reward_values: []f32
     weights: []f32
 }

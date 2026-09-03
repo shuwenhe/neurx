@@ -35,24 +35,24 @@ func default_2t_packing_config() packing_config:
     cfg.prefetch_queue_size = 3
     return cfg
 struct packed_batch:
-    int[] input_ids
-    int[] attention_masks
-    int[] position_ids
-    int[] sample_boundaries
-    float[] loss_weights
+    []int input_ids
+    []int attention_masks
+    []int position_ids
+    []int sample_boundaries
+    []float loss_weights
     int num_sequences
     int total_tokens
     int total_slots
     float utilization_ratio
     int max_sequence_in_batch
-    int[] original_lengths
-    int[] sequence_indices
+    []int original_lengths
+    []int sequence_indices
     float avg_quality_score
     int batch_id
     bool is_final_in_epoch
 struct sequence_buffer:
     int sequence_id
-    int[] token_ids
+    []int token_ids
     int original_length
     float quality_score
     bool should_truncate
@@ -163,13 +163,13 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
         if max_len > packer.config.max_seq_len:
             max_len = packer.config.max_seq_len
     int total_slots = num_seqs * max_len
-    int[] input_ids = make([]int, total_slots)
-    int[] attention_masks = make([]int, total_slots)
-    int[] position_ids = make([]int, total_slots)
-    int[] sample_boundaries = make([]int, num_seqs + 1)
-    float[] loss_weights = make([]float, num_seqs)
-    int[] original_lengths = make([]int, num_seqs)
-    int[] sequence_indices = make([]int, num_seqs)
+    []int input_ids = make([]int, total_slots)
+    []int attention_masks = make([]int, total_slots)
+    []int position_ids = make([]int, total_slots)
+    []int sample_boundaries = make([]int, num_seqs + 1)
+    []float loss_weights = make([]float, num_seqs)
+    []int original_lengths = make([]int, num_seqs)
+    []int sequence_indices = make([]int, num_seqs)
     int boundary_pos = 0
     sample_boundaries[0] = boundary_pos
     float total_quality = 0.0
@@ -245,11 +245,11 @@ func calculate_current_utilization(bin_packer_state packer) float:
         return 0.0
     return float(packer.current_bin_used_tokens) / float(estimated_total_slots)
 struct cross_packed_batch:
-    int[] input_ids
-    int[] attention_masks
-    int[] segment_ids
-    int[] sample_boundaries
-    float[] loss_weights
+    []int input_ids
+    []int attention_masks
+    []int segment_ids
+    []int sample_boundaries
+    []float loss_weights
     int num_original_samples
     int total_tokens
     int total_allocated

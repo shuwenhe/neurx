@@ -66,13 +66,13 @@ func main() {
             int line_idx = 0
             int accum_step = 0
             for line_idx < 1024 {
-                float[] batch_data = load_batch(shard_path, line_idx)
+                []float batch_data = load_batch(shard_path, line_idx)
                 float loss = forward_pass(batch_data)
-                float[] gradients = backward_pass(loss)
+                []float gradients = backward_pass(loss)
                 global_step = global_step + 1
                 accum_step = accum_step + 1
                 if accum_step >= config.gradient_accum_steps {
-                    float[] synced_gradients = launcher.sync_gradients_nccl(gradients)
+                    []float synced_gradients = launcher.sync_gradients_nccl(gradients)
                     launcher.optimizer_step(
                         optimizer_step,
                         config.learning_rate,
@@ -129,7 +129,7 @@ func parse_config() training_config {
 }
 
 func load_batch(string shard_path, int line_idx) []float {
-    float[] batch = make([]float, 8 * 2048)
+    []float batch = make([]float, 8 * 2048)
     int i = 0
     for i < len(batch) {
         batch[i] = float(i % 256) / 256.0
@@ -138,7 +138,7 @@ func load_batch(string shard_path, int line_idx) []float {
     batch
 }
 
-func forward_pass(float[] batch_data) float {
+func forward_pass([]float batch_data) float {
     float loss = 0.0
     int i = 0
     for i < len(batch_data) {
@@ -149,7 +149,7 @@ func forward_pass(float[] batch_data) float {
 }
 
 func backward_pass(float loss) []float {
-    float[] gradients = make([]float, 1024)
+    []float gradients = make([]float, 1024)
     int i = 0
     for i < len(gradients) {
         gradients[i] = loss * 0.01

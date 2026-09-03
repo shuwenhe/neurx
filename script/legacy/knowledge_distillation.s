@@ -31,8 +31,8 @@ struct distillation_framework {
     best_loss               float64
 }
 
-func (distillation_framework* framework) apply_temperature(logits float[]64, temperature float64) float[]64 {
-    scaled := make(float[]64, len(logits))
+func (distillation_framework* framework) apply_temperature(logits []float64, temperature float64) []float64 {
+    scaled := make([]float64, len(logits))
     for i, logit := range logits {
         scaled[i] = logit / temperature
     }
@@ -43,7 +43,7 @@ func (distillation_framework* framework) apply_temperature(logits float[]64, tem
         }
     }
     exp_sum := 0.0
-    probs := make(float[]64, len(scaled))
+    probs := make([]float64, len(scaled))
     for i, l := range scaled {
         exp_l := math.Exp(l - max_logit)
         probs[i] = exp_l
@@ -56,8 +56,8 @@ func (distillation_framework* framework) apply_temperature(logits float[]64, tem
 }
 
 func (distillation_framework* framework) compute_distillation_loss(
-    student_logits float[]64,
-    teacher_logits float[]64,
+    student_logits []float64,
+    teacher_logits []float64,
     temperature float64) float64 {
     student_probs := framework.apply_temperature(student_logits, temperature)
     teacher_probs := framework.apply_temperature(teacher_logits, temperature)
@@ -71,8 +71,8 @@ func (distillation_framework* framework) compute_distillation_loss(
 }
 
 func (distillation_framework* framework) compute_student_loss(
-    student_logits float[]64,
-    target_indices int[]) float64 {
+    student_logits []float64,
+    target_indices []int) float64 {
     loss := 0.0
     max_logit := student_logits[0]
     for _, l := range student_logits {
@@ -96,9 +96,9 @@ func (distillation_framework* framework) compute_student_loss(
 }
 
 func (distillation_framework* framework) compute_total_loss(
-    student_logits float[]64,
-    teacher_logits float[]64,
-    target_indices int[],
+    student_logits []float64,
+    teacher_logits []float64,
+    target_indices []int,
     temperature float64) distillation_metrics {
     student_loss := framework.compute_student_loss(student_logits, target_indices)
     distill_loss := framework.compute_distillation_loss(student_logits, teacher_logits, temperature)
@@ -118,9 +118,9 @@ func (distillation_framework* framework) compute_total_loss(
 }
 
 func (distillation_framework* framework) train_step(
-    batch_logits float[][]64,
-    teacher_logits float[][]64,
-    targets int[][]) float64 {
+    batch_logits []float[]64,
+    teacher_logits []float[]64,
+    targets []int[]) float64 {
     total_loss := 0.0
     for i := 0; i < len(batch_logits); i++ {
         if i < len(teacher_logits) && i < len(targets) {
@@ -149,13 +149,13 @@ func (distillation_framework* framework) train(num_steps int) {
     fmt.Printf("  Target Compression: %.1fx\n\n", framework.config.compression_ratio)
     framework.best_loss = 1e10
     for step := 0; step < num_steps; step++ {
-        batch_logits := make(float[][]64, framework.config.batch_size)
-        teacher_logits := make(float[][]64, framework.config.batch_size)
-        targets := make(int[][], framework.config.batch_size)
+        batch_logits := make([]float[]64, framework.config.batch_size)
+        teacher_logits := make([]float[]64, framework.config.batch_size)
+        targets := make([]int[], framework.config.batch_size)
         for i := 0; i < framework.config.batch_size; i++ {
-            batch_logits[i] = make(float[]64, 1000)
-            teacher_logits[i] = make(float[]64, 1000)
-            targets[i] = make(int[], 5)
+            batch_logits[i] = make([]float64, 1000)
+            teacher_logits[i] = make([]float64, 1000)
+            targets[i] = make([]int, 5)
             for j := range batch_logits[i] {
                 batch_logits[i][j] = math.Sin(float64(i+j+step) / 100.0)
                 teacher_logits[i][j] = math.Sin(float64(i+j+step)/100.0 + 0.1)

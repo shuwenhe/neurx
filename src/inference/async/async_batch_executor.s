@@ -1,15 +1,15 @@
 package async_inference
 import "sync"
 struct ExecutionResult {
-    request_id      string[]
-    output_ids      int[]
-    output_text     string[]
+    request_id      []string
+    output_ids      []int
+    output_text     []string
     tokens_per_sec  float64
     latency_ms      int64
     prefill_ms      int64
     decode_ms       int64
     success         bool
-    error_msg       string[]
+    error_msg       []string
 }
 
 struct AsyncBatchExecutor {
@@ -22,7 +22,7 @@ struct AsyncBatchExecutor {
     batches_executed int64
     total_tokens    int64
     avg_latency_ms  float64
-    stream_buffers  map[string]string[][]
+    stream_buffers  map[string][]string[]
     stream_enabled  bool
     mutex           sync.Mutex
 }
@@ -37,7 +37,7 @@ func new_async_batch_executor(max_batch_size int, prefill_threads int, decode_th
         batches_executed: 0,
         total_tokens:    0,
         avg_latency_ms:  0.0,
-        stream_buffers: make(map[string]string[][]),
+        stream_buffers: make(map[string][]string[]),
         stream_enabled: false,
         mutex:          sync.Mutex{},
     }
@@ -51,7 +51,7 @@ func (AsyncBatchExecutor* executor) load_batch(batch RequestBatch) {
     for i := 0; i < len(batch.requests); i++ {
         req := batch.requests[i]
         if len(req.request_id) > 0 {
-            executor.stream_buffers[req.request_id[0]] = make(string[][], 0)
+            executor.stream_buffers[req.request_id[0]] = make([]string[], 0)
         }
     }
 }
@@ -117,7 +117,7 @@ func (AsyncBatchExecutor* executor) execute_batch() []ExecutionResult {
 }
 
 func (AsyncBatchExecutor* executor) execute_prefill_phase(req InferenceRequest) []int {
-    output := make(int[], len(req.input_ids))
+    output := make([]int, len(req.input_ids))
     for i := 0; i < len(req.input_ids); i++ {
         output[i] = req.input_ids[i]
     }
@@ -135,19 +135,19 @@ func (AsyncBatchExecutor* executor) stream_token(request_id []string, token int)
     if len(request_id) == 0 {
         return
     }
-    token_str := make(string[], 1)
+    token_str := make([]string, 1)
     token_str[0] = "token"
     if executor.stream_buffers[request_id[0]] == nil {
-        executor.stream_buffers[request_id[0]] = make(string[][], 0)
+        executor.stream_buffers[request_id[0]] = make([]string[], 0)
     }
     executor.stream_buffers[request_id[0]] = append(executor.stream_buffers[request_id[0]], token_str)
 }
 
-func (AsyncBatchExecutor* executor) get_streamed_tokens(request_id []string) string[][] {
+func (AsyncBatchExecutor* executor) get_streamed_tokens(request_id []string) []string[] {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
     if len(request_id) == 0 {
-        return make(string[][], 0)
+        return make([]string[], 0)
     }
     return executor.stream_buffers[request_id[0]]
 }
@@ -218,18 +218,18 @@ func main() {
     executor := new_async_batch_executor(32, 4, 8)
     executor.set_streaming_enabled(true)
     batch := RequestBatch{
-        batch_id:    make(string[], 1),
+        batch_id:    make([]string, 1),
         requests:    make([]InferenceRequest, 0),
         batch_size:  2,
         created_at:  current_time_ms(),
     }
     for i := 0; i < 2; i++ {
-        input := make(int[], 4)
+        input := make([]int, 4)
         for j := 0; j < 4; j++ {
             input[j] = 100 + j
         }
         req := InferenceRequest{
-            request_id:  make(string[], 1),
+            request_id:  make([]string, 1),
             input_ids:   input,
             max_tokens:  100,
             temperature: 0.7,

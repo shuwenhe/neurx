@@ -43,15 +43,15 @@ struct generation_engine {
     []slot_mapping slots
     int hidden_size
     int num_layers
-    float[] embedding_table
-    float[] lm_head
+    []float embedding_table
+    []float lm_head
     sampling_params sampling
     rng_state rng
 }
 
 struct generation_result {
-    int[] token_ids
-    string[] token_strings
+    []int token_ids
+    []string token_strings
     int num_generated
 }
 
@@ -69,13 +69,13 @@ func new_generation_engine(int num_layers) generation_engine {
     paged_kv_cache cache = new_paged_kv_cache(pacfg)
     int hidden = cfg.hidden_size
     int vocab = tok.vocab_size
-    float[] emb = make(float[], vocab * hidden)
+    []float emb = make([]float, vocab * hidden)
     int i = 0
     for i < vocab && i < hidden {
         emb[i * hidden + i] = 1.0
         i = i + 1
     }
-    float[] head = make(float[], hidden * vocab)
+    []float head = make([]float, hidden * vocab)
     int j = 0
     for j < hidden && j < vocab {
         head[j * vocab + j] = 1.0
@@ -97,7 +97,7 @@ func new_generation_engine(int num_layers) generation_engine {
 }
 
 func embed_token(generation_engine engine, int token_id) []float {
-    float[] hidden = make(float[], engine.hidden_size)
+    []float hidden = make([]float, engine.hidden_size)
     if token_id < 0 || token_id >= engine.tokenizer.vocab_size {
         return hidden
     }
@@ -112,7 +112,7 @@ func embed_token(generation_engine engine, int token_id) []float {
     hidden
 }
 
-func argmax_logits(float[] logits, int vocab_size) int {
+func argmax_logits([]float logits, int vocab_size) int {
     if vocab_size == 0 {
         return 0
     }
@@ -129,8 +129,8 @@ func argmax_logits(float[] logits, int vocab_size) int {
     best_idx
 }
 
-func compute_logits(float[] hidden, float[] lm_head, int hidden_size, int vocab_size) []float {
-    float[] logits = make(float[], vocab_size)
+func compute_logits([]float hidden, []float lm_head, int hidden_size, int vocab_size) []float {
+    []float logits = make([]float, vocab_size)
     int v = 0
     for v < vocab_size {
         float acc = 0.0
@@ -145,12 +145,12 @@ func compute_logits(float[] hidden, float[] lm_head, int hidden_size, int vocab_
     logits
 }
 
-func run_layer_stack(generation_engine engine, float[] hidden, int position) (float[], paged_kv_cache) {
+func run_layer_stack(generation_engine engine, []float hidden, int position) ([]float, paged_kv_cache) {
     paged_kv_cache cache = engine.cache
-    float[] current = hidden
+    []float current = hidden
     int layer = 0
     for layer < engine.num_layers {
-        (float[] out, paged_kv_cache c) = transformer_layer_forward(current, engine.weights, engine.layer_config, cache, engine.slots, position)
+        ([]float out, paged_kv_cache c) = transformer_layer_forward(current, engine.weights, engine.layer_config, cache, engine.slots, position)
         current = out
         cache = c
         layer = layer + 1
@@ -160,7 +160,7 @@ func run_layer_stack(generation_engine engine, float[] hidden, int position) (fl
 }
 
 func generate(generation_engine engine, string prompt, int max_new_tokens) generation_result {
-    int[] prompt_ids = encode(engine.tokenizer, prompt)
+    []int prompt_ids = encode(engine.tokenizer, prompt)
     engine.cache = reserve_tokens(engine.cache, len(prompt_ids) + max_new_tokens)
     []slot_mapping slots = []slot_mapping{}
     int t = 0
@@ -171,22 +171,22 @@ func generate(generation_engine engine, string prompt, int max_new_tokens) gener
         t = t + 1
     }
     engine.slots = slots
-    float[] hidden
+    []float hidden
     int position = 0
     for position < len(prompt_ids) {
         hidden = embed_token(engine, prompt_ids[position])
         hidden = run_layer_stack(engine, hidden, position)
         position = position + 1
     }
-    int[] generated = []int{}
-    string[] token_strings = []string{}
+    []int generated = []int{}
+    []string token_strings = []string{}
     rng_state rng = engine.rng
     int step = 0
     for step < max_new_tokens {
         if len(hidden) == 0 {
             hidden = embed_token(engine, engine.tokenizer.eos_id)
         }
-        float[] logits = compute_logits(hidden, engine.lm_head, engine.hidden_size, engine.tokenizer.vocab_size)
+        []float logits = compute_logits(hidden, engine.lm_head, engine.hidden_size, engine.tokenizer.vocab_size)
         int next_id
         (next_id, rng) = sample(logits, engine.tokenizer.vocab_size, engine.sampling, rng)
         generated = append(generated, next_id)
@@ -213,7 +213,7 @@ func map_has_int(map[int]string m, int key) bool {
 }
 
 func engine_to_callback_state(generation_result result) generation_callback_state {
-    string[] toks = result.token_strings
+    []string toks = result.token_strings
     generation_callback_state state
     state.tokens = toks
     state.cursor = 0
@@ -226,7 +226,7 @@ func generate_stream(generation_engine engine, string prompt, int max_new_tokens
     engine_to_callback_state(result)
 }
 
-func decode_ids(generation_engine engine, int[] ids) string {
+func decode_ids(generation_engine engine, []int ids) string {
     decode(engine.tokenizer, ids)
 }
 

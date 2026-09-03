@@ -6,11 +6,11 @@ struct global_gradient_stats {
     int total_params
 }
 
-func compute_global_grad_norm(float[][] all_layer_grads) float {
+func compute_global_grad_norm([]float[] all_layer_grads) float {
     float total_norm_squared = 0.0
     int layer_idx = 0
     for layer_idx < len(all_layer_grads) {
-        float[] layer_grad = all_layer_grads[layer_idx]
+        []float layer_grad = all_layer_grads[layer_idx]
         int i = 0
         for i < len(layer_grad) {
             float g = layer_grad[i]
@@ -22,7 +22,7 @@ func compute_global_grad_norm(float[][] all_layer_grads) float {
     return sqrt(total_norm_squared)
 }
 
-func clip_gradients_global(float[][] all_layer_grads, float max_norm) global_gradient_stats {
+func clip_gradients_global([]float[] all_layer_grads, float max_norm) global_gradient_stats {
     float global_norm = compute_global_grad_norm(all_layer_grads)
     float clip_coef = max_norm / (global_norm + 1e-6)
     bool was_clipped = false
@@ -30,7 +30,7 @@ func clip_gradients_global(float[][] all_layer_grads, float max_norm) global_gra
         was_clipped = true
         int layer_idx = 0
         for layer_idx < len(all_layer_grads) {
-            float[] layer_grad = all_layer_grads[layer_idx]
+            []float layer_grad = all_layer_grads[layer_idx]
             int i = 0
             for i < len(layer_grad) {
                 layer_grad[i] = layer_grad[i] * clip_coef
@@ -74,7 +74,7 @@ func is_inf(float x) bool {
     return false
 }
 
-func check_gradients_nan_inf(float[][] all_layer_grads, string[] layer_names) na_n_inf_stats {
+func check_gradients_nan_inf([]float[] all_layer_grads, []string layer_names) na_n_inf_stats {
     na_n_inf_stats stats
     stats.has_nan = false
     stats.has_inf = false
@@ -85,7 +85,7 @@ func check_gradients_nan_inf(float[][] all_layer_grads, string[] layer_names) na
     stats.first_inf_layer = ""
     int layer_idx = 0
     for layer_idx < len(all_layer_grads) {
-        float[] layer_grad = all_layer_grads[layer_idx]
+        []float layer_grad = all_layer_grads[layer_idx]
         string layer_name = ""
         if layer_idx < len(layer_names) {
             layer_name = layer_names[layer_idx]
@@ -115,7 +115,7 @@ func check_gradients_nan_inf(float[][] all_layer_grads, string[] layer_names) na
     return stats
 }
 
-func check_parameters_nan_inf(float[][] all_layer_params, string[] layer_names) na_n_inf_stats {
+func check_parameters_nan_inf([]float[] all_layer_params, []string layer_names) na_n_inf_stats {
     return check_gradients_nan_inf(all_layer_params, layer_names)
 }
 
@@ -129,7 +129,7 @@ struct gradient_statistics {
     float sparsity
 }
 
-func compute_gradient_statistics(float[] gradients) gradient_statistics {
+func compute_gradient_statistics([]float gradients) gradient_statistics {
     gradient_statistics stats
     int n = len(gradients)
     if n == 0 {

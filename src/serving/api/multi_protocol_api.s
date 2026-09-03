@@ -13,7 +13,7 @@ struct anthropic_request {
     temperature       float32
     top_p              float32
     top_k              int32
-    stop_sequences     string[]
+    stop_sequences     []string
     system_prompt      string
     stream            bool
 }
@@ -37,7 +37,7 @@ struct cohere_request {
     p                 float32
     frequency_penalty  float32
     presence_penalty   float32
-    stop_sequences     string[]
+    stop_sequences     []string
     return_likelihoods string
     stream            bool
 }
@@ -202,7 +202,7 @@ func (cohere_api* ca) generate_stream(req cohere_request) (chan *cohere_response
     return resp_chan, nil
 }
 
-func convert_openai_to_anthropic(messages int[]erface{}, model string) anthropic_request {
+func convert_openai_to_anthropic(messages []interface{}, model string) anthropic_request {
     anthropic_messages := make([]anthropic_message, 0)
     for _, msg := range messages {
         msg_map := msg.(map[string]interface{})

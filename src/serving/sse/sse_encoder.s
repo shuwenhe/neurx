@@ -14,7 +14,7 @@ struct sse_encoder {
 struct encoded_event {
 	string                  raw_text
 	int32                   size_bytes
-	string[]             lines
+	[]string             lines
 	int32                   line_count
 	bool                    compressed
 	string                  compression_method
@@ -42,7 +42,7 @@ func (sse_encoder* e) encode_event(event sse_event) encoded_event {
 	encoded := encoded_event{
 		raw_text:            "",
 		size_bytes:          0,
-		lines:               make(string[], 0),
+		lines:               make([]string, 0),
 		line_count:          0,
 		compressed:          false,
 		compression_method:  "none",
@@ -64,7 +64,7 @@ func (sse_encoder* e) encode_event(event sse_event) encoded_event {
 	if event.event_data != "" {
 		data := event.event_data
 		if e.enable_multiline {
-			lines := make(string[], 0)
+			lines := make([]string, 0)
 			current_line := ""
 			for i := int32(0); i < int32(len(data)); i++ {
 				if int32(len(current_line)) >= e.max_line_length {
@@ -143,7 +143,7 @@ func (sse_encoder* e) escape_data(data string) string {
 }
 
 func (sse_encoder* e) split_multiline(data string) []string {
-	lines := make(string[], 0)
+	lines := make([]string, 0)
 	current_line := ""
 	for i := int32(0); i < int32(len(data)); i++ {
 		if data[i] == '\n' {

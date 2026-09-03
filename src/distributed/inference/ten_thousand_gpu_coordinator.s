@@ -78,7 +78,7 @@ func (ten_thousand_gpu_coordinator* coordinator) initialize_distributed_system()
 }
 
 func (ten_thousand_gpu_coordinator* coordinator) synchronize_initial_parameters() (bool, string) {
-    float[] init_params = make(float[], coordinator.config.model_hidden_dim * 100)
+    []float init_params = make([]float, coordinator.config.model_hidden_dim * 100)
     int i = 0
     for i < len(init_params) {
         init_params[i] = 0.1
@@ -101,9 +101,9 @@ func (ten_thousand_gpu_coordinator* coordinator) start_failure_detector() (bool,
 }
 
 func (ten_thousand_gpu_coordinator* coordinator) training_loop_iteration(
-    float[] batch_input,
-    float[][] layer_weights,
-    float[] targets
+    []float batch_input,
+    []float[] layer_weights,
+    []float targets
 ) (float, bool) {
     if coordinator.recovery_manager.is_recovering() {
         success, msg := coordinator.recovery_manager.execute_recovery_steps(batch_input, []float{}, coordinator.config.tp_size, coordinator.config.pp_size, coordinator.config.dp_size)
@@ -116,7 +116,7 @@ func (ten_thousand_gpu_coordinator* coordinator) training_loop_iteration(
     }
     loss, weight_grads := coordinator.training_loop.training_step(batch_input, layer_weights, targets, 2048)
     coordinator.current_loss = loss
-    reduced_loss, success := coordinator.allreduce_engine.ring_allreduce(make(float[], 1), 0)
+    reduced_loss, success := coordinator.allreduce_engine.ring_allreduce(make([]float, 1), 0)
     if !success {
         return loss, false
     }
@@ -161,7 +161,7 @@ func (ten_thousand_gpu_coordinator* coordinator) handle_dynamic_node_join(
     string ip_address,
     int port,
     int num_gpus,
-    float[] gpu_memory_gb
+    []float gpu_memory_gb
 ) (bool, string) {
     req := dynamic_node_management.node_registration_request {
         new_rank: new_rank,
@@ -249,9 +249,9 @@ func (ten_thousand_gpu_coordinator* coordinator) run_inference_iteration() (bool
     if !failure_success {
         return false, "Failure handling failed: " + failure_msg
     }
-    batch_input := make(float[], coordinator.config.model_hidden_dim * 32)
-    layer_weights := make(float[][], coordinator.config.model_num_layers)
-    targets := make(float[], coordinator.config.model_hidden_dim * 32)
+    batch_input := make([]float, coordinator.config.model_hidden_dim * 32)
+    layer_weights := make([]float[], coordinator.config.model_num_layers)
+    targets := make([]float, coordinator.config.model_hidden_dim * 32)
     loss, success := coordinator.training_loop_iteration(batch_input, layer_weights, targets)
     if !success {
         return false, "Training iteration failed"
@@ -268,7 +268,7 @@ func (ten_thousand_gpu_coordinator* coordinator) get_current_loss() float {
     return coordinator.current_loss
 }
 
-func (ten_thousand_gpu_coordinator* coordinator) broadcast_parameters(float[] params) bool {
+func (ten_thousand_gpu_coordinator* coordinator) broadcast_parameters([]float params) bool {
     return true
 }
 

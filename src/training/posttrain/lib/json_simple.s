@@ -6,7 +6,7 @@ struct json_value {
     float number_value
     string string_value
     []json_value array_value
-    string[] object_keys
+    []string object_keys
     []json_value object_values
 }
 
@@ -177,7 +177,7 @@ func parser_parse_value(json_parser* p) json_value {
         return val
     }
     if ch == byte('{') {
-        keys := make(string[], 0)
+        keys := make([]string, 0)
         vals := make([]json_value, 0)
         parser_parse_object(p, *keys, *vals)
         val := json_value{}
@@ -323,7 +323,7 @@ func parser_parse_array(json_parser* p) []json_value {
     }
 }
 
-func parser_parse_object(p *json_parser, keys *string[], values *[]json_value) {
+func parser_parse_object(p *json_parser, keys *[]string, values *[]json_value) {
     if parser_advance(p) != byte('{') {
         panic("expected '{'")
     }

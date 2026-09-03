@@ -22,7 +22,7 @@ struct metric_point {
 struct metric_series {
 	string              metric_name
 	metric_type         metric_category
-	metric_point[]   points
+	metric_po[]int   points
 	int32               point_count
 	map[string]string   common_labels
 	int32               retention_hours
@@ -32,7 +32,7 @@ struct metric_series {
 struct metrics_registry {
 	map[string]metric_series] metrics
 	int32                   metric_count
-	string[]             component_metrics
+	[]string             component_metrics
 	map[string]int32        component_metric_counts
 	int64                   last_collection_time
 	int32                   collection_interval_ms
@@ -43,7 +43,7 @@ func create_metric_series(name string, category metric_type) metric_series {
 	return metric_series{
 		metric_name:     name,
 		metric_category: category,
-		points:          make(metric_point[], 0, 1000),
+		points:          make(metric_po[]int, 0, 1000),
 		point_count:     0,
 		common_labels:   make(map[string]string),
 		retention_hours: 24,
@@ -55,7 +55,7 @@ func create_metrics_registry() metrics_registry {
 	return metrics_registry{
 		metrics:                   make(map[string]metric_series),
 		metric_count:              0,
-		component_metrics:         make(string[], 0, 50),
+		component_metrics:         make([]string, 0, 50),
 		component_metric_counts:   make(map[string]int32),
 		last_collection_time:      time.Now().UnixNano(),
 		collection_interval_ms:    5000,
@@ -172,7 +172,7 @@ func (metrics_registry* r) clear_old_points(retention_hours int32) {
 	defer r.mu.Unlock()
 	cutoff_time := time.Now().UnixNano() - int64(retention_hours)*3600*1000000000
 	for name, series := range r.metrics {
-		valid_points := make(metric_point[], 0)
+		valid_points := make(metric_po[]int, 0)
 		for point := range series.points {
 			if point.timestamp > cutoff_time {
 				valid_points = append(valid_points, point)

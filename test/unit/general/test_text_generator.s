@@ -9,9 +9,9 @@ func assert_true(bool value, string name) {
     }
 }
 
-func dummy_forward(int[] token_ids) []float {
+func dummy_forward([]int token_ids) []float {
     int n = 8
-    float[] logits = make([]float, n)
+    []float logits = make([]float, n)
     int i = 0
     for i < n {
         logits[i] = -5.0
@@ -26,9 +26,9 @@ func dummy_forward(int[] token_ids) []float {
     logits
 }
 
-func contrastive_forward(int[] token_ids) []float {
+func contrastive_forward([]int token_ids) []float {
     int n = 6
-    float[] logits = make([]float, n)
+    []float logits = make([]float, n)
     int i = 0
     for i < n {
         logits[i] = -6.0
@@ -44,9 +44,9 @@ func contrastive_forward(int[] token_ids) []float {
     logits
 }
 
-func ngram_forward(int[] token_ids) []float {
+func ngram_forward([]int token_ids) []float {
     int n = 6
-    float[] logits = make([]float, n)
+    []float logits = make([]float, n)
     int i = 0
     for i < n {
         logits[i] = -6.0

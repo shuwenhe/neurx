@@ -185,7 +185,7 @@ func (model_system* system) register_model_path_with_type(path string, model_typ
 func (model_system* system) list_active_models() []string {
 	system.mu.Lock()
 	defer system.mu.Unlock()
-	models := make(string[], 0, len(system.active_models))
+	models := make([]string, 0, len(system.active_models))
 	for model_id := range system.active_models {
 		models = append(models, model_id)
 	}

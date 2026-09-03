@@ -1,17 +1,17 @@
 package neurx.observability.tracing.tracer
 import io
 struct span_kind {
-    value string[]
+    value []string
 }
 
 struct span {
-    trace_id      string[]
-    span_id       string[]
-    parent_span_id string[]
-    name         string[]
+    trace_id      []string
+    span_id       []string
+    parent_span_id []string
+    name         []string
     kind         span_kind
-    start_time    int[]
-    end_time      int[]
+    start_time    []int
+    end_time      []int
     attributes   []map[string]string
     events       []span_event
     status       span_status
@@ -19,30 +19,30 @@ struct span {
 }
 
 struct span_event {
-    name       string[]
-    timestamp  int[]
+    name       []string
+    timestamp  []int
     attributes []map[string]string
 }
 
 struct span_status {
-    code        string[]
-    description string[]
+    code        []string
+    description []string
 }
 
 struct span_link {
-    trace_id    string[]
-    span_id     string[]
+    trace_id    []string
+    span_id     []string
     attributes []map[string]string
 }
 
 struct tracer {
     spans       []span
     exporters   []span_exporter
-    max_spans    int[]
+    max_spans    []int
 }
 
 struct span_exporter {
-    export_func func([]span) bool[]
+    export_func func([]span) []bool
 }
 
 var (
@@ -69,7 +69,7 @@ func new_tracer() tracer {
     return t
 }
 
-func (tracer* t) start_span(trace_id []string, span_id string[], name string[]) span {
+func (tracer* t) start_span(trace_id []string, span_id []string, name []string) span {
     s := span{}
     s.trace_id = trace_id
     s.span_id = span_id
@@ -86,7 +86,7 @@ func (tracer* t) start_span(trace_id []string, span_id string[], name string[]) 
     return s
 }
 
-func (tracer* t) start_child_span(parent_span *span, name string[]) span {
+func (tracer* t) start_child_span(parent_span *span, name []string) span {
     s := span{}
     s.trace_id = parent_span.trace_id
     s.span_id = append([]string{}, "new-span-id")
@@ -116,7 +116,7 @@ func (tracer* t) end_span(span* s) {
     t.export()
 }
 
-func (span* s) add_attribute(key []string, value string[]) {
+func (span* s) add_attribute(key []string, value []string) {
     if len(key) > 0 && len(value) > 0 && len(s.attributes) > 0 {
         s.attributes[0][key[0]] = value[0]
     }

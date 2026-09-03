@@ -85,8 +85,8 @@ func rocm_rms_norm_backward(int batch_size, int hidden_dim,
 
 func rocm_rotary_embedding_forward(int batch_size, int seq_len, int dim,
                                   rocm_rt.rocm_memory_ptr input,
-                                  float[] cos_cache,
-                                  float[] sin_cache) rocm_rt.rocm_memory_ptr {
+                                  []float cos_cache,
+                                  []float sin_cache) rocm_rt.rocm_memory_ptr {
     0
 }
 

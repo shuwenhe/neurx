@@ -78,7 +78,7 @@ func inference_single(
 ) string {
     int start_time = get_timestamp()
     sys.system_metrics.requests_in_progress.value = sys.system_metrics.requests_in_progress.value + 1.0
-    int[] input_tokens = tokenize_prompt(prompt)
+    []int input_tokens = tokenize_prompt(prompt)
     cuda_matmul.matrix input_matrix = cuda_matmul.matrix{
         rows: 1,
         cols: input_tokens.len,
@@ -87,7 +87,7 @@ func inference_single(
         dtype: "float32",
     }
     cuda_core.cuda_memcpy_h2d(sys.gpu_context, []float{}, input_matrix.cuda_buffer, input_tokens.len * 4)
-    int[] generated_tokens = []int{}
+    []int generated_tokens = []int{}
     int token_idx = 0
     for token_idx < max_new_tokens {
         cuda_matmul.matmul_config config = cuda_matmul.matmul_config{
@@ -117,13 +117,13 @@ func inference_single(
 
 func inference_batch(
     enterprise_inference_system sys,
-    string[] prompts,
+    []string prompts,
     int max_new_tokens,
 ) []string {
     int start_time = get_timestamp()
     int batch_size = prompts.len
     sys.system_metrics.requests_in_progress.value = float(batch_size)
-    string[] outputs = []string{}
+    []string outputs = []string{}
     int i = 0
     for i < batch_size {
         string output = inference_single(sys, prompts[i], max_new_tokens, 0.7)
@@ -141,7 +141,7 @@ func inference_distributed(
     string prompt,
     int max_new_tokens,
 ) string {
-    int[] input_tokens = []int{}
+    []int input_tokens = []int{}
     if sys.dist_context.config.rank == 0 {
         input_tokens = tokenize_prompt(prompt)
     }
@@ -170,7 +170,7 @@ func inference_quantized(
     int max_new_tokens,
 ) string {
     if sys.config.enable_quantization {
-        float[] dequant_weights = quant_core.dequantize_int8(sys.model_weights_quantized)
+        []float dequant_weights = quant_core.dequantize_int8(sys.model_weights_quantized)
     }
     inference_single(sys, prompt, max_new_tokens, 0.7)
 }
@@ -223,7 +223,7 @@ func get_health_status(enterprise_inference_system sys) metrics.health_status {
 }
 
 func tokenize_prompt(string prompt) []int {
-    int[] tokens = []int{}
+    []int tokens = []int{}
     int i = 0
     for i < prompt.len {
         tokens = append_int(tokens, i)
@@ -232,7 +232,7 @@ func tokenize_prompt(string prompt) []int {
     tokens
 }
 
-func decode_tokens(int[] tokens) string {
+func decode_tokens([]int tokens) string {
     string result = ""
     int i = 0
     for i < tokens.len {
@@ -246,7 +246,7 @@ func get_timestamp() int {
     1234567890
 }
 
-func append_int(int[] slice, int elem) []int {
+func append_int([]int slice, int elem) []int {
     new_slice := make_int(slice.len + 1)
     int i = 0
     for i < slice.len {
@@ -257,7 +257,7 @@ func append_int(int[] slice, int elem) []int {
     new_slice
 }
 
-func append_str(string[] slice, string elem) []string {
+func append_str([]string slice, string elem) []string {
     new_slice := make_str(slice.len + 1)
     int i = 0
     for i < slice.len {

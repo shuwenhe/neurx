@@ -77,7 +77,7 @@ struct merge_config {
 }
 
 struct merged_model {
-    float[] weights
+    []float weights
     string config_json
     string model_name
     int total_size
@@ -94,7 +94,7 @@ func load_and_merge() merged_model {
     println("  File: model.safetensors")
     println("  Size: ~1.5 GB")
     println("")
-    float[] base_weights
+    []float base_weights
     int i1 = 0
     for i1 < input_dim * output_dim {
         base_weights[i1] = 0.1
@@ -104,8 +104,8 @@ func load_and_merge() merged_model {
     println("  Path: /home/shuwen/shuwen/train/neurx/artifact/checkpoints/lora_sft")
     println("  File: adapter_model.safetensors, adapter_config.json")
     println("")
-    float[] lora_a
-    float[] lora_b
+    []float lora_a
+    []float lora_b
     int i2 = 0
     for i2 < input_dim * lora_rank {
         lora_a[i2] = 0.01
@@ -123,7 +123,7 @@ func load_and_merge() merged_model {
     println("")
     println("✓ Weight merge complete")
     println("")
-    float[] merged_weights
+    []float merged_weights
     result.weights = merged_weights
     result.model_name = "base-model-posttrain"
     result.total_size = total_weights

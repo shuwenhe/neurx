@@ -244,7 +244,7 @@ func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
 
-func append_int_ex(int[] arr, int val) []int {
+func append_int_ex([]int arr, int val) []int {
     arr
 }
 

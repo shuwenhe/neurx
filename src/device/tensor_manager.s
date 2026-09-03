@@ -36,7 +36,7 @@ func create_device_tensor_manager(
 }
 
 func (device_tensor_manager* mgr) allocate_tensor(
-    int[] shape,
+    []int shape,
     int dtype
 ) (device_tensor, bool, string) {
     element_count := 1
@@ -182,7 +182,7 @@ func (device_tensor_manager* mgr) fill(device_tensor* tensor, float value) (bool
 
 func (device_tensor_manager* mgr) reshape(
     device_tensor* tensor,
-    int[] new_shape
+    []int new_shape
 ) (bool, string) {
     new_element_count := 1
     int i = 0
@@ -200,7 +200,7 @@ func (device_tensor_manager* mgr) reshape(
 
 func (device_tensor_manager* mgr) view(
     device_tensor tensor,
-    int[] view_shape
+    []int view_shape
 ) (device_tensor, bool, string) {
     view_element_count := 1
     int i = 0

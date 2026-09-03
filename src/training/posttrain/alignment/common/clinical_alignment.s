@@ -4,7 +4,7 @@ use neurx.posttrain.data
 use neurx.eval.six_dimension
 struct test_set_info {
     string dataset_name
-    string[] test_question_ids
+    []string test_question_ids
     int sample_seed
     int sample_size
 }
@@ -12,7 +12,7 @@ struct test_set_info {
 struct contamination_check_result {
     bool is_clean
     int contaminated_samples
-    string[] contaminated_ids
+    []string contaminated_ids
     float contamination_ratio
 }
 
@@ -31,7 +31,7 @@ func create_test_set_info() test_set_info {
 }
 
 func check_training_data_contamination(
-    string[] training_sample_ids,
+    []string training_sample_ids,
     test_set_info test_info
 ) contamination_check_result {
     contamination_check_result result = contamination_check_result{
@@ -57,7 +57,7 @@ func check_training_data_contamination(
 
 struct medical_sft_objective {
     string system_prompt
-    string[] medical_quality_signals
+    []string medical_quality_signals
     float max_token_length
     int epochs
     float learning_rate
@@ -73,8 +73,8 @@ struct medical_dpo_objective {
 }
 
 struct medical_grpo_objective {
-    string[] reward_functions
-    float[] reward_weights
+    []string reward_functions
+    []float reward_weights
     int num_generations
     float learning_rate
     float beta
@@ -129,7 +129,7 @@ func create_medical_grpo_objective() medical_grpo_objective {
 struct medical_safety_constraint {
     string constraint_name
     string description
-    string[] violation_patterns
+    []string violation_patterns
     float penalty_weight
 }
 
@@ -138,7 +138,7 @@ func get_medical_safety_constraints() []medical_safety_constraint {
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "avoid_overconfidence",
         description: "Don't use absolute language in medical claims",
-        violation_patterns: string[]{ "肯set", "oneset", "100%" },
+        violation_patterns: []string{ "肯set", "oneset", "100%" },
         penalty_weight: 0.1
     })
     constraints = append_constraint(constraints, medical_safety_constraint{
@@ -150,7 +150,7 @@ func get_medical_safety_constraints() []medical_safety_constraint {
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "no_unapproved_drugs",
         description: "Don't recommend unapproved or experimental drugs",
-        violation_patterns: string[]{ "实验property", "未经批准", "not正式" },
+        violation_patterns: []string{ "实验property", "未经批准", "not正式" },
         penalty_weight: 0.15
     })
     constraints = append_constraint(constraints, medical_safety_constraint{
@@ -251,7 +251,7 @@ struct clinical_alignment_coordinator {
     medical_grpo_objective grpo_obj
     []quality_checkpoint checkpoints
     string current_stage
-    string[] stage_history
+    []string stage_history
 }
 
 func new_clinical_alignment_coordinator() clinical_alignment_coordinator {
@@ -295,7 +295,7 @@ struct pre_training_validation_result {
 
 func validate_before_training(
     clinical_alignment_coordinator coord,
-    string[] training_sample_ids
+    []string training_sample_ids
 ) pre_training_validation_result {
     pre_training_validation_result result = pre_training_validation_result{
         data_clean: false,
@@ -334,7 +334,7 @@ func string_contains(string text, string pattern) bool {
     return false
 }
 
-func append_string_list(string[] arr, string elem) []string {
+func append_string_list([]string arr, string elem) []string {
     if arr == nil {
         arr = []string{}
     }

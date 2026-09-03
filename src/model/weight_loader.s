@@ -2,25 +2,25 @@ package neurx.model.weight_loader
 use neurx.runtime.io.{runtime_read_binary_file, runtime_file_exists}
 use std.io.eprintln
 struct model_weights {
-    float[] embed_tokens
+    []float embed_tokens
     []layer_weights layers
-    float[] norm_weight
+    []float norm_weight
     bool weights_loaded
 }
 
 struct layer_weights {
-    float[] q_proj
-    float[] k_proj
-    float[] v_proj
-    float[] o_proj
-    float[] gate_proj
-    float[] up_proj
-    float[] down_proj
-    float[] input_layernorm
-    float[] post_attention_layernorm
+    []float q_proj
+    []float k_proj
+    []float v_proj
+    []float o_proj
+    []float gate_proj
+    []float up_proj
+    []float down_proj
+    []float input_layernorm
+    []float post_attention_layernorm
 }
 
-func parse_u64_le(int[] bytes, int offset) int {
+func parse_u64_le([]int bytes, int offset) int {
     int b0 = bytes[offset]
     int b1 = bytes[offset + 1]
     int b2 = bytes[offset + 2]
@@ -33,7 +33,7 @@ func parse_u64_le(int[] bytes, int offset) int {
     result
 }
 
-func parse_f32_le(int[] bytes, int offset) float {
+func parse_f32_le([]int bytes, int offset) float {
     int b0 = bytes[offset]
     int b1 = bytes[offset + 1]
     int b2 = bytes[offset + 2]
@@ -47,8 +47,8 @@ func parse_f32_le(int[] bytes, int offset) float {
     val * (sign as float)
 }
 
-func load_tensor_simple(int[] file_bytes, int tensor_offset, int num_elements) []float {
-    float[] data = make([]float, num_elements)
+func load_tensor_simple([]int file_bytes, int tensor_offset, int num_elements) []float {
+    []float data = make([]float, num_elements)
     int i = 0
     for i < num_elements {
         float val = parse_f32_le(file_bytes, tensor_offset + i * 4)
@@ -116,9 +116,9 @@ func load_model_weights_real(string model_dir) model_weights {
         i = i + 1
     }
     eprintln("[Weight Loader] Initializing embedding layer...")
-    float[] embed_tokens = init_gaussian(vocab_size * hidden_size, 0.02)
+    []float embed_tokens = init_gaussian(vocab_size * hidden_size, 0.02)
     eprintln("[Weight Loader] Initializing output normalization...")
-    float[] norm_weight = ones_array(hidden_size)
+    []float norm_weight = ones_array(hidden_size)
     eprintln("[Weight Loader] ✓ Real model weights loaded successfully")
     model_weights{
         embed_tokens: embed_tokens,
@@ -129,7 +129,7 @@ func load_model_weights_real(string model_dir) model_weights {
 }
 
 func init_gaussian(int size, float std) []float {
-    float[] arr = make([]float, size)
+    []float arr = make([]float, size)
     int i = 0
     for i < size {
         float val = ((i * 12345 + 67890) - ((i * 12345 + 67890) / 100000) * 100000) as float
@@ -141,7 +141,7 @@ func init_gaussian(int size, float std) []float {
 }
 
 func ones_array(int size) []float {
-    float[] arr = make([]float, size)
+    []float arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = 1.0

@@ -27,8 +27,8 @@ func new_grpo_config() grpo_config {
 
 struct generation_output {
     string text
-    int[] token_ids
-    float[] log_probs
+    []int token_ids
+    []float log_probs
     float reward
     float format_reward
     float accuracy_reward
@@ -36,11 +36,11 @@ struct generation_output {
 
 struct generation_group {
     string prompt
-    int[] prompt_token_ids
+    []int prompt_token_ids
     []generation_output outputs
     float group_mean_reward
     float group_std_reward
-    float[] advantages
+    []float advantages
 }
 
 struct grpo_training_state {
@@ -49,12 +49,12 @@ struct grpo_training_state {
     int total_prompts_processed
     float running_mean_reward
     float running_std_reward
-    float[] policy_loss_history
-    float[] kl_divergence_history
-    float[] total_loss_history
-    float[] reward_history
-    float[] format_reward_history
-    float[] accuracy_reward_history
+    []float policy_loss_history
+    []float kl_divergence_history
+    []float total_loss_history
+    []float reward_history
+    []float format_reward_history
+    []float accuracy_reward_history
 }
 
 func compute_format_reward(string text) float {
@@ -90,7 +90,7 @@ func compute_math_reward(string output, string ground_truth) float {
     format_r + accuracy_r
 }
 
-func compute_code_reward(string output, string[] test_cases, string[] expected_outputs) float {
+func compute_code_reward(string output, []string test_cases, []string expected_outputs) float {
     float format_r = compute_format_reward(output)
     string code = extract_code_block(output)
     if len(code) == 0 {
@@ -229,7 +229,7 @@ func exp_approx(float x) float {
     result
 }
 
-func compute_group_advantages([]generation_output outputs, int G) (float[], float, float) {
+func compute_group_advantages([]generation_output outputs, int G) ([]float, float, float) {
     float sum_r = 0.0
     int i = 0
     for i < G {
@@ -245,7 +245,7 @@ func compute_group_advantages([]generation_output outputs, int G) (float[], floa
         i = i + 1
     }
     float std_r = sqrt_approx(sum_sq / G as float)
-    float[] advantages = make([]float, G)
+    []float advantages = make([]float, G)
     if std_r > 1e-8 {
         i = 0
         for i < G {
@@ -263,8 +263,8 @@ func compute_group_advantages([]generation_output outputs, int G) (float[], floa
 }
 
 func compute_grpo_loss(
-    float[] advantages, float[] new_log_probs, float[] old_log_probs,
-    float[] ref_log_probs, int G, float clip_eps, float beta
+    []float advantages, []float new_log_probs, []float old_log_probs,
+    []float ref_log_probs, int G, float clip_eps, float beta
 ) (float, float, float) {
     float policy_loss = 0.0
     float total_kl = 0.0
@@ -310,10 +310,10 @@ func grpo_training_step(
 ) grpo_step_result {
     grpo_config cfg = state.config
     int G = cfg.group_size
-    (float[] advantages, float mean_r, float std_r) = compute_group_advantages(group.outputs, G)
-    float[] new_log_probs = make([]float, G)
-    float[] old_log_probs = make([]float, G)
-    float[] ref_log_probs = make([]float, G)
+    ([]float advantages, float mean_r, float std_r) = compute_group_advantages(group.outputs, G)
+    []float new_log_probs = make([]float, G)
+    []float old_log_probs = make([]float, G)
+    []float ref_log_probs = make([]float, G)
     int i = 0
     for i < G {
         new_log_probs[i] = sum_float(group.outputs[i].log_probs)
@@ -354,7 +354,7 @@ func grpo_training_step(
     }
 }
 
-func sum_float(float[] arr) float {
+func sum_float([]float arr) float {
     float s = 0.0
     int i = 0
     for i < len(arr) {

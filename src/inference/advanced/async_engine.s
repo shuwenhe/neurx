@@ -25,7 +25,7 @@ struct sampling_params {
     frequency_penalty float
     presence_penalty float
     repetition_penalty float
-    stop_sequences string[]
+    stop_sequences []string
 }
 
 struct inference_request {
@@ -152,7 +152,7 @@ func (async_inference_engine* engine) EngineStep() []completion_output {
         return make([]completion_output, 0)
     }
     outputs := engine.ProcessBatch(batch)
-    to_remove := make(string[], 0)
+    to_remove := make([]string, 0)
     for request_id, req := range engine.queue.active {
         if req.status == FINISHED {
             engine.queue.completed[request_id] = req

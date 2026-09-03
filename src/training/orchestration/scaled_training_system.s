@@ -4,9 +4,9 @@ use std.math
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
 
 struct data_bundle {
-    input_ids: int[][]
-    labels: int[][]
-    attention_mask: int[][]
+    input_ids: []int[]
+    labels: []int[]
+    attention_mask: []int[]
     int batch_size
     int seq_len
     int num_tokens
@@ -14,13 +14,13 @@ struct data_bundle {
 }
 
 func create_synthetic_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
-    input_ids := make(int[][], batch_size)
-    labels := make(int[][], batch_size)
-    attention_mask := make(int[][], batch_size)
+    input_ids := make([]int[], batch_size)
+    labels := make([]int[], batch_size)
+    attention_mask := make([]int[], batch_size)
     for b := 0; b < batch_size; b += 1 {
-        input_ids[b] = make(int[], seq_len)
-        labels[b] = make(int[], seq_len)
-        attention_mask[b] = make(int[], seq_len)
+        input_ids[b] = make([]int, seq_len)
+        labels[b] = make([]int, seq_len)
+        attention_mask[b] = make([]int, seq_len)
         for t := 0; t < seq_len; t += 1 {
             token := (b * seq_len + t) % vocab_size
             input_ids[b][t] = token
@@ -61,7 +61,7 @@ func scaled_hash_token(string token, int vocab_size) int {
 }
 
 func scaled_split_lines(string text) []string {
-    string[] lines = []string{}
+    []string lines = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -90,18 +90,18 @@ func scaled_bundle_from_text(
     if batch_size <= 0 || seq_len <= 0 {
         return create_synthetic_data_bundle(1, 1, vocab_size)
     }
-    string[] lines = scaled_split_lines(raw_text)
+    []string lines = scaled_split_lines(raw_text)
     if len(lines) == 0 {
         return create_synthetic_data_bundle(batch_size, seq_len, vocab_size)
     }
-    input_ids := make(int[][], batch_size)
-    labels := make(int[][], batch_size)
-    attention_mask := make(int[][], batch_size)
+    input_ids := make([]int[], batch_size)
+    labels := make([]int[], batch_size)
+    attention_mask := make([]int[], batch_size)
     int b = 0
     for b < batch_size {
-        input_ids[b] = make(int[], seq_len)
-        labels[b] = make(int[], seq_len)
-        attention_mask[b] = make(int[], seq_len)
+        input_ids[b] = make([]int, seq_len)
+        labels[b] = make([]int, seq_len)
+        attention_mask[b] = make([]int, seq_len)
         string line = lines[b % len(lines)]
         int token_index = 0
         string current = ""
@@ -168,31 +168,31 @@ func load_c4_batch(string dataset_path, int batch_size, int seq_len) data_bundle
 }
 
 struct tensor {
-    data: float[]64
-    grad: float[]64
-    shape: int[]
+    data: []float64
+    grad: []float64
+    shape: []int
     bool requires_grad
 }
 
-func tensor_zeros(int[] shape) tensor {
+func tensor_zeros([]int shape) tensor {
     size := 1
     for i := 0; i < len(shape); i += 1 {
         size *= shape[i]
     }
     tensor{
-        data: make(float[]64, size),
-        grad: make(float[]64, size),
+        data: make([]float64, size),
+        grad: make([]float64, size),
         shape: shape,
         requires_grad: true,
     }
 }
 
-func tensor_randn(int[] shape, float64 mean, float64 std) tensor {
+func tensor_randn([]int shape, float64 mean, float64 std) tensor {
     size := 1
     for i := 0; i < len(shape); i += 1 {
         size *= shape[i]
     }
-    data := make(float[]64, size)
+    data := make([]float64, size)
     for i := 0; i < size; i += 1 {
         u1 := math.random()
         u2 := math.random()
@@ -201,7 +201,7 @@ func tensor_randn(int[] shape, float64 mean, float64 std) tensor {
     }
     tensor{
         data: data,
-        grad: make(float[]64, size),
+        grad: make([]float64, size),
         shape: shape,
         requires_grad: true,
     }
@@ -239,17 +239,17 @@ func create_scaled_transformer(int vocab_size, int hidden_dim, int num_layers) s
         num_layers: num_layers,
         num_heads: num_heads,
         max_seq_len: max_seq_len,
-        embedding_weight: tensor_randn(int[]{vocab_size, hidden_dim}, 0.0, init_scale),
-        pos_embedding: tensor_randn(int[]{max_seq_len, hidden_dim}, 0.0, init_scale),
-        q_proj: tensor_randn(int[]{hidden_dim, hidden_dim}, 0.0, init_scale),
-        k_proj: tensor_randn(int[]{hidden_dim, hidden_dim}, 0.0, init_scale),
-        v_proj: tensor_randn(int[]{hidden_dim, hidden_dim}, 0.0, init_scale),
-        out_proj: tensor_randn(int[]{hidden_dim, hidden_dim}, 0.0, init_scale),
-        fc1: tensor_randn(int[]{hidden_dim, ff_dim}, 0.0, init_scale),
-        fc2: tensor_randn(int[]{ff_dim, hidden_dim}, 0.0, init_scale),
-        ln_gamma: tensor_randn(int[]{hidden_dim}, 1.0, 0.01),
-        ln_beta: tensor_randn(int[]{hidden_dim}, 0.0, 0.01),
-        lm_head: tensor_randn(int[]{hidden_dim, vocab_size}, 0.0, init_scale),
+        embedding_weight: tensor_randn([]int{vocab_size, hidden_dim}, 0.0, init_scale),
+        pos_embedding: tensor_randn([]int{max_seq_len, hidden_dim}, 0.0, init_scale),
+        q_proj: tensor_randn([]int{hidden_dim, hidden_dim}, 0.0, init_scale),
+        k_proj: tensor_randn([]int{hidden_dim, hidden_dim}, 0.0, init_scale),
+        v_proj: tensor_randn([]int{hidden_dim, hidden_dim}, 0.0, init_scale),
+        out_proj: tensor_randn([]int{hidden_dim, hidden_dim}, 0.0, init_scale),
+        fc1: tensor_randn([]int{hidden_dim, ff_dim}, 0.0, init_scale),
+        fc2: tensor_randn([]int{ff_dim, hidden_dim}, 0.0, init_scale),
+        ln_gamma: tensor_randn([]int{hidden_dim}, 1.0, 0.01),
+        ln_beta: tensor_randn([]int{hidden_dim}, 0.0, 0.01),
+        lm_head: tensor_randn([]int{hidden_dim, vocab_size}, 0.0, init_scale),
     }
 }
 
@@ -286,8 +286,8 @@ func layer_norm(tensor x, tensor gamma, tensor beta, float64 eps) tensor {
     x
 }
 
-func scaled_transformer_forward(scaled_transformer model, int[][] input_ids, int batch_size, int seq_len) tensor {
-    embeddings := tensor_zeros(int[]{batch_size, seq_len, model.hidden_dim})
+func scaled_transformer_forward(scaled_transformer model, []int[] input_ids, int batch_size, int seq_len) tensor {
+    embeddings := tensor_zeros([]int{batch_size, seq_len, model.hidden_dim})
     for b := 0; b < batch_size; b += 1 {
         for t := 0; t < seq_len; t += 1 {
             token_id := input_ids[b][t]
@@ -314,7 +314,7 @@ func scaled_transformer_forward(scaled_transformer model, int[][] input_ids, int
         hidden = feed_forward(hidden, model.fc1, model.fc2)
         hidden = layer_norm(hidden, model.ln_gamma, model.ln_beta, 1e-6)
     }
-    output := tensor_zeros(int[]{batch_size, seq_len, model.vocab_size})
+    output := tensor_zeros([]int{batch_size, seq_len, model.vocab_size})
     for i := 0; i < len(hidden.data); i += 1 {
         out_idx := i % model.vocab_size
         output.data[i] = hidden.data[i] * model.lm_head.data[out_idx]
@@ -322,7 +322,7 @@ func scaled_transformer_forward(scaled_transformer model, int[][] input_ids, int
     output
 }
 
-func cross_entropy_loss_with_mask(tensor logits, int[][] labels, int[][] mask) float64 {
+func cross_entropy_loss_with_mask(tensor logits, []int[] labels, []int[] mask) float64 {
     loss := 0.0
     count := 0
     batch_size := len(labels)
@@ -356,8 +356,8 @@ struct adamw_optimizer_extended {
     float64 beta2
     float64 epsilon
     float64 weight_decay
-    first_moment: float[]64
-    second_moment: float[]64
+    first_moment: []float64
+    second_moment: []float64
     int step_count
 }
 
@@ -368,13 +368,13 @@ func create_adamw_optimizer_extended(int param_count, float64 lr) adamw_optimize
         beta2: 0.999,
         epsilon: 1e-8,
         weight_decay: 0.0001,
-        first_moment: make(float[]64, param_count),
-        second_moment: make(float[]64, param_count),
+        first_moment: make([]float64, param_count),
+        second_moment: make([]float64, param_count),
         step_count: 0,
     }
 }
 
-func adamw_step_extended(adamw_optimizer_extended* opt, float[]64* params, float[]64 grads) {
+func adamw_step_extended(adamw_optimizer_extended* opt, []float64* params, []float64 grads) {
     opt.step_count += 1
     for i := 0; i < len(params); i += 1 {
         if i >= len(grads) {
@@ -410,11 +410,11 @@ func cuda_malloc(int64 size) int64 {
     size
 }
 
-func cuda_memcpy_h2d(int64 device_ptr, float[]64 host_data) {
+func cuda_memcpy_h2d(int64 device_ptr, []float64 host_data) {
     fmt.printfln("Copying %d bytes to GPU device", len(host_data) * 8)
 }
 
-func cuda_memcpy_d2h(int64 device_ptr, float[]64* host_data) {
+func cuda_memcpy_d2h(int64 device_ptr, []float64* host_data) {
     fmt.printfln("Copying %d bytes from GPU device", len(*host_data) * 8)
 }
 
@@ -435,7 +435,7 @@ func init_ddp_backend(int rank, int world_size, string backend) ddp_process_grou
     }
 }
 
-func all_reduce_gradients(float[]64 gradients, ddp_process_group group) {
+func all_reduce_gradients([]float64 gradients, ddp_process_group group) {
     fmt.printfln("Reducing gradients across %d processes", group.world_size)
     for i := 0; i < len(gradients); i += 1 {
         gradients[i] /= float64(group.world_size)

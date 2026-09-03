@@ -1,8 +1,8 @@
 package neurx.compile.cache
 use neurx.strings
 struct compile_cache_state {
-    string[] keys
-    string[] entries
+    []string keys
+    []string entries
     int hit_count
     int miss_count
 }
@@ -57,8 +57,8 @@ func cache_has_key(compile_cache_state cache, string key) bool {
 
 func cache_put(compile_cache_state cache, string key, string entry) compile_cache_state {
     int idx = cache_find_index(cache, key)
-    string[] keys = copy_strings(cache.keys)
-    string[] entries = copy_strings(cache.entries)
+    []string keys = copy_strings(cache.keys)
+    []string entries = copy_strings(cache.entries)
     if idx >= 0 {
         entries[idx] = entry
         return compile_cache_state {

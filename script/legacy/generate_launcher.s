@@ -100,19 +100,19 @@ func parse_env_float(string key, float default_val) float {
 }
 
 func parse_hostfile(string hostfile_path) []string {
-    string[] hosts = []string{}
+    []string hosts = []string{}
     if !fs_exists(hostfile_path) {
         io_eprintln("hostfile not found: " + hostfile_path)
         return hosts
     }
     string content = fs_read_file(hostfile_path)
-    string[] lines = strings_split(content, "\n")
+    []string lines = strings_split(content, "\n")
     for i := 0; i < len(lines); i++ {
         string line = strings_trim(lines[i])
         if line == "" || strings_has_prefix(line, "#") {
             continue
         }
-        string[] parts = strings_split(line, " ")
+        []string parts = strings_split(line, " ")
         if len(parts) >= 1 {
             hosts = append(hosts, line)
         }
@@ -120,7 +120,7 @@ func parse_hostfile(string hostfile_path) []string {
     return hosts
 }
 
-func generate_launcher_script(training_config cfg, string[] hosts) string {
+func generate_launcher_script(training_config cfg, []string hosts) string {
     string script = ""
     script = script + "#!/usr/bin/env bash\n"
     script = script + "set -Eeuo pipefail\n"
@@ -214,7 +214,7 @@ func generate_launcher_script(training_config cfg, string[] hosts) string {
     return script
 }
 
-func generate_hosts_array(string[] hosts) string {
+func generate_hosts_array([]string hosts) string {
     string result = ""
     for i := 0; i < len(hosts); i++ {
         if i > 0 {
@@ -227,7 +227,7 @@ func generate_hosts_array(string[] hosts) string {
 
 func main() {
     training_config cfg = load_config_from_env()
-    string[] hosts = parse_hostfile(cfg.hostfile)
+    []string hosts = parse_hostfile(cfg.hostfile)
     if len(hosts) == 0 {
         io_eprintln("ERROR: no valid hosts in hostfile")
         os_exit(2)

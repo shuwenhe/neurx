@@ -30,9 +30,9 @@ struct robotics_trajectory_train_state {
     bool finished
 }
 
-func robotics_trajectory_copy_float(float[] values) []float {
+func robotics_trajectory_copy_float([]float values) []float {
     int n = len(values)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -41,9 +41,9 @@ func robotics_trajectory_copy_float(float[] values) []float {
     out
 }
 
-func robotics_trajectory_copy_int(int[] values) []int {
+func robotics_trajectory_copy_int([]int values) []int {
     int n = len(values)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -117,7 +117,7 @@ func robotics_trajectory_train_load_state_dict(robotics_trajectory_train_state s
 }
 
 func robotics_trajectory_observation(int sample_index, int obs_dim) []float {
-    float[] obs = make([]float, obs_dim)
+    []float obs = make([]float, obs_dim)
     int i = 0
     for i < obs_dim {
         int basis = sample_index + (i + 1)
@@ -128,8 +128,8 @@ func robotics_trajectory_observation(int sample_index, int obs_dim) []float {
     obs
 }
 
-func robotics_trajectory_target_action(float[] observation, int act_dim) []float {
-    float[] target = make([]float, act_dim)
+func robotics_trajectory_target_action([]float observation, int act_dim) []float {
+    []float target = make([]float, act_dim)
     int a = 0
     for a < act_dim {
         float acc = 0.0
@@ -150,7 +150,7 @@ func robotics_trajectory_target_action(float[] observation, int act_dim) []float
     target
 }
 
-func robotics_trajectory_mse(float[] prediction, float[] target) float {
+func robotics_trajectory_mse([]float prediction, []float target) float {
     int n = len(prediction)
     if n <= 0 {
         return 0.0
@@ -185,17 +185,17 @@ func robotics_trajectory_train_step(robotics_trajectory_train_state state) robot
         int remainder = sample_index - (sample_index / sample_count) * sample_count
         sample_index = remainder
     }
-    float[] observation = robotics_trajectory_observation(sample_index, state.config.obs_dim)
-    float[] target_action = robotics_trajectory_target_action(observation, state.config.act_dim)
-    float[] latent = robotics_perception_encode(state.perception, observation)
-    float[] prediction = robotics_policy_forward(state.policy, latent)
+    []float observation = robotics_trajectory_observation(sample_index, state.config.obs_dim)
+    []float target_action = robotics_trajectory_target_action(observation, state.config.act_dim)
+    []float latent = robotics_perception_encode(state.perception, observation)
+    []float prediction = robotics_policy_forward(state.policy, latent)
     float loss = robotics_trajectory_mse(prediction, target_action)
     float action_error = 0.0
     int act_dim = state.config.act_dim
     if act_dim <= 0 {
         act_dim = 1
     }
-    float[] grad_action = make([]float, state.config.act_dim)
+    []float grad_action = make([]float, state.config.act_dim)
     int a = 0
     for a < state.config.act_dim {
         float diff = prediction[a] - target_action[a]
@@ -205,9 +205,9 @@ func robotics_trajectory_train_step(robotics_trajectory_train_state state) robot
     }
     float lr = state.config.learning_rate
     robotics_policy_state next_policy = state.policy
-    float[] next_policy_weight = robotics_trajectory_copy_float(next_policy.weight)
-    float[] next_policy_bias = robotics_trajectory_copy_float(next_policy.bias)
-    float[] grad_latent = make([]float, state.config.latent_dim)
+    []float next_policy_weight = robotics_trajectory_copy_float(next_policy.weight)
+    []float next_policy_bias = robotics_trajectory_copy_float(next_policy.bias)
+    []float grad_latent = make([]float, state.config.latent_dim)
     a = 0
     for a < state.config.act_dim {
         int i = 0
@@ -221,8 +221,8 @@ func robotics_trajectory_train_step(robotics_trajectory_train_state state) robot
         a = a + 1
     }
     robotics_perception_state next_perception = state.perception
-    float[] next_perception_weight = robotics_trajectory_copy_float(next_perception.weight)
-    float[] next_perception_bias = robotics_trajectory_copy_float(next_perception.bias)
+    []float next_perception_weight = robotics_trajectory_copy_float(next_perception.weight)
+    []float next_perception_bias = robotics_trajectory_copy_float(next_perception.bias)
     int latent_index = 0
     for latent_index < state.config.latent_dim {
         int obs_index = 0

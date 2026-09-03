@@ -34,8 +34,8 @@ struct plugin_metadata {
 	string                  author
 	string                  description
 	plugin_type             plugin_category
-	string[]             dependencies
-	string[]             capabilities
+	[]string             dependencies
+	[]string             capabilities
 	int32                   priority
 	bool                    required
 	string                  config_schema
@@ -77,8 +77,8 @@ struct plugin_error {
 struct plugin_capability {
 	string                  capability_name
 	string                  capability_version
-	string[]             provided_methods
-	string[]             required_interfaces
+	[]string             provided_methods
+	[]string             required_interfaces
 	map[string]interface{}  capability_config
 }
 
@@ -98,8 +98,8 @@ func create_plugin_metadata(id string, name string, category plugin_type) plugin
 		author:          "",
 		description:     "",
 		plugin_category: category,
-		dependencies:    make(string[], 0),
-		capabilities:    make(string[], 0),
+		dependencies:    make([]string, 0),
+		capabilities:    make([]string, 0),
 		priority:        100,
 		required:        false,
 		config_schema:   "",

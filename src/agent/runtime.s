@@ -645,7 +645,7 @@ func new_agent_runtime_state(string goal, string initial_task, int step_budget) 
     new_agent_runtime_state_with_model(goal, initial_task, step_budget, "")
 }
 
-func agent_runtime_append_task(string[] queue, string task) []string {
+func agent_runtime_append_task([]string queue, string task) []string {
     if trim(task) == "" {
         return queue
     }
@@ -654,7 +654,7 @@ func agent_runtime_append_task(string[] queue, string task) []string {
 }
 
 func agent_runtime_code_agent_task_queue(agent_tool_registry_state tools) []string {
-    string[] queue = make([]string, 12)
+    []string queue = make([]string, 12)
     if agent_tool_registry_has_enabled(tools, "git_status") {
         queue = agent_runtime_append_task(queue, "git_status")
     }
@@ -684,7 +684,7 @@ func agent_runtime_code_agent_task_queue(agent_tool_registry_state tools) []stri
     queue
 }
 
-func agent_runtime_plan_with_task_queue(agent_plan_state plan, string[] tasks) agent_plan_state {
+func agent_runtime_plan_with_task_queue(agent_plan_state plan, []string tasks) agent_plan_state {
     agent_plan_state next = plan
     int i = 0
     for i < len(tasks) {
@@ -1274,7 +1274,7 @@ func run_agent_steps(agent_runtime_state state, string input, int max_steps) age
     current
 }
 
-func run_agent_steps_batch(agent_runtime_state state, string[] inputs, int max_steps_per_input) agent_runtime_state {
+func run_agent_steps_batch(agent_runtime_state state, []string inputs, int max_steps_per_input) agent_runtime_state {
     agent_runtime_state current = state
     int ni = 0
     for ni < len(inputs) {

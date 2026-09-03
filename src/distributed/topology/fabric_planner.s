@@ -1,17 +1,17 @@
 package neurx.distributed.topology.fabric_planner
 
 struct fabric_topology {
-    int[] node_ids
-    string[] zones
-    string[] racks
-    string[] hosts
-    string[] vendors
-    string[] chip_types
-    string[] collective_backends
-    int[] device_counts
-    int[] device_memory_gb
-    int[] fabric_bandwidth_gbps
-    bool[] healthy
+    []int node_ids
+    []string zones
+    []string racks
+    []string hosts
+    []string vendors
+    []string chip_types
+    []string collective_backends
+    []int device_counts
+    []int device_memory_gb
+    []int fabric_bandwidth_gbps
+    []bool healthy
     int total_devices
     int healthy_devices
 }
@@ -28,16 +28,16 @@ struct fabric_request {
 }
 
 struct fabric_placement_plan {
-    int[] global_ranks
-    int[] tensor_ranks
-    int[] pipeline_ranks
-    int[] data_ranks
-    int[] node_ids
-    int[] local_devices
-    string[] zones
-    string[] racks
-    string[] hosts
-    string[] collective_backends
+    []int global_ranks
+    []int tensor_ranks
+    []int pipeline_ranks
+    []int data_ranks
+    []int node_ids
+    []int local_devices
+    []string zones
+    []string racks
+    []string hosts
+    []string collective_backends
     int world_size
     int selected_nodes
     int selected_zones
@@ -46,9 +46,9 @@ struct fabric_placement_plan {
 }
 
 func fabric_topology_new() fabric_topology {
-    int[] empty_ints = []int{}
-    string[] empty_strings = []string{}
-    bool[] empty_bools = []bool{}
+    []int empty_ints = []int{}
+    []string empty_strings = []string{}
+    []bool empty_bools = []bool{}
     fabric_topology {
         node_ids: empty_ints, zones: empty_strings, racks: empty_strings,
         hosts: empty_strings, vendors: empty_strings, chip_types: empty_strings,
@@ -98,7 +98,7 @@ func fabric_count_eligible_devices(fabric_topology topology, fabric_request requ
     count
 }
 
-func fabric_zone_seen(string[] zones, string zone) bool {
+func fabric_zone_seen([]string zones, string zone) bool {
     int i = 0
     for i < len(zones) {
         if zones[i] == zone { return true }
@@ -108,8 +108,8 @@ func fabric_zone_seen(string[] zones, string zone) bool {
 }
 
 func fabric_empty_plan(int world_size, string reason) fabric_placement_plan {
-    int[] empty_ints = []int{}
-    string[] empty_strings = []string{}
+    []int empty_ints = []int{}
+    []string empty_strings = []string{}
     fabric_placement_plan {
         global_ranks: empty_ints, tensor_ranks: empty_ints,
         pipeline_ranks: empty_ints, data_ranks: empty_ints,
@@ -132,7 +132,7 @@ func fabric_plan(fabric_topology topology, fabric_request request) fabric_placem
         return fabric_empty_plan(world_size, "insufficient compatible healthy devices")
     }
     plan := fabric_empty_plan(world_size, "")
-    string[] selected_zones = []string{}
+    []string selected_zones = []string{}
     int global_rank = 0
     int node_cursor = 0
     int local_device = 0

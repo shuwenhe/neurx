@@ -23,7 +23,7 @@ struct kv_transfer_state {
 
 struct kv_transfer_request {
     int request_id
-    int[] block_ids
+    []int block_ids
     int source_rank
     int destination_rank
     int token_count
@@ -41,8 +41,8 @@ struct kv_transfer_begin_result {
     string error_message
 }
 
-func copy_kv_block_ids(int[] block_ids) []int {
-    int[] copied = make([]int, len(block_ids))
+func copy_kv_block_ids([]int block_ids) []int {
+    []int copied = make([]int, len(block_ids))
     int i = 0
     for i < len(block_ids) {
         copied[i] = block_ids[i]
@@ -118,7 +118,7 @@ func empty_kv_transfer_request() kv_transfer_request {
     }
 }
 
-func new_kv_transfer_request(int request_id, int[] block_ids, int source_rank, int destination_rank, int token_count, int byte_count, bool is_sender) kv_transfer_request {
+func new_kv_transfer_request(int request_id, []int block_ids, int source_rank, int destination_rank, int token_count, int byte_count, bool is_sender) kv_transfer_request {
     kv_transfer_request {
         request_id: request_id,
         block_ids: copy_kv_block_ids(block_ids),
@@ -133,7 +133,7 @@ func new_kv_transfer_request(int request_id, int[] block_ids, int source_rank, i
     }
 }
 
-func begin_kv_transfer(kv_transfer_state state, int[] block_ids, int peer_rank, int token_count, int byte_count) kv_transfer_begin_result {
+func begin_kv_transfer(kv_transfer_state state, []int block_ids, int peer_rank, int token_count, int byte_count) kv_transfer_begin_result {
     bool is_sender = state.config.role == "producer"
     if !has_kv_transfer_group(state) {
         return kv_transfer_begin_result {

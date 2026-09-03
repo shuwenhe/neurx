@@ -169,7 +169,7 @@ func (helion_accelerator* accel) dequantize(int32[] data, int32 bits) []float32 
     return dequantized
 }
 
-func (helion_accelerator* accel) fuse_kernels(string[] kernel_names) string {
+func (helion_accelerator* accel) fuse_kernels([]string kernel_names) string {
     fused_name := "fused_"
     for i := 0; i < len(kernel_names); i = i + 1 {
         fused_name = fused_name + kernel_names[i] + "_"

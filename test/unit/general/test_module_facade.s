@@ -22,7 +22,7 @@ func test_module_facade_basic() bool {
     if neurx.module.module_child_count(root) != 1 {
         return false
     }
-    string[] names = neurx.module.module_named_parameters(root)
+    []string names = neurx.module.module_named_parameters(root)
     if len(names) != 2 {
         return false
     }

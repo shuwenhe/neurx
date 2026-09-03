@@ -5,7 +5,7 @@ struct gradient_node {
     int id
     tensor value
     string operation
-    int[] inputs
+    []int inputs
     tensor grad
 }
 
@@ -23,7 +23,7 @@ func create_tape() gradient_tape {
     }
 }
 
-func add_node(gradient_tape tape, tensor value, string op, int[] inputs) (gradient_tape, int) {
+func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradient_tape, int) {
     if !tape.recording {
         return tape, -1
     }

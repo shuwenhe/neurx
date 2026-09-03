@@ -30,7 +30,7 @@ struct validation_report {
     bool is_valid
     validation_error[] errors
     validation_error[] warnings
-    string[] suggestions
+    []string suggestions
     int64 validation_time_ms
 }
 

@@ -80,8 +80,8 @@ struct histogram_metric {
     string name
     int step
     int64 timestamp_ms
-    float[] bins
-    int[] counts
+    []float bins
+    []int counts
     float min_val
     float max_val
     float mean
@@ -196,7 +196,7 @@ struct monitoring_manager {
 }
 
 struct moving_window {
-    float[] values
+    []float values
     int window_size
     int current_index
     bool is_filled_once
@@ -288,7 +288,7 @@ func log_scalar(
 func log_histogram(
     ref monitoring_manager mgr,
     string name,
-    float[] values,
+    []float values,
     int step
 ) {
     if !mgr.is_running || !should_log_at_step(step, mgr.config.histogram_log_interval) {
@@ -704,7 +704,7 @@ func detect_divergence(moving_window win) bool {
     return recent_avg > early_avg * 2.0 && early_avg > 0.01
 }
 
-func compute_histogram_statistics(float[] values, ref histogram_metric hist) {
+func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     int n = len(values)
     if n == 0 { return }
     float sum = 0.0
@@ -757,7 +757,7 @@ func compute_histogram_statistics(float[] values, ref histogram_metric hist) {
     hist.p99 = values[n * 99 / 100]
 }
 
-func sort_float_array(ref float[] arr) {
+func sort_float_array(ref []float arr) {
     int n = len(arr)
     int i = 0
     for i < n - 1 {

@@ -17,8 +17,8 @@ struct dynamic_scheduler_state {
     int current_rollout_workers
     int current_training_workers
     int total_steps
-    float[] buffer_utilization_history
-    float[] throughput_history
+    []float buffer_utilization_history
+    []float throughput_history
 }
 
 struct resource_allocation {
@@ -47,8 +47,8 @@ func init_dynamic_scheduler(dynamic_scheduler_config config) dynamic_scheduler_s
         current_rollout_workers: config.min_rollout_workers,
         current_training_workers: config.min_training_workers,
         total_steps: 0,
-        buffer_utilization_history: make(float[], 0),
-        throughput_history: make(float[], 0),
+        buffer_utilization_history: make([]float, 0),
+        throughput_history: make([]float, 0),
     }
 }
 

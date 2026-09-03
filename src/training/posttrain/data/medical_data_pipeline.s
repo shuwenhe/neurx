@@ -15,7 +15,7 @@ struct medical_article {
     string title
     string subtitle
     string plain_content
-    string[] keywords
+    []string keywords
 }
 
 func clean_medical_content(string raw_content) string {
@@ -46,16 +46,16 @@ func normalize_whitespace(string text) string {
 }
 
 func extract_disease_terms(string title, string subtitle) []string {
-    string[] disease_terms = []
+    []string disease_terms = []
     string combined = title + " " + subtitle
-    string[] non_disease_terms = [
+    []string non_disease_terms = [
         "筛查", "diagnosis", "Treatment", "Evaluation", "management",
         "随访", "guide", "standard", "策略", "概述",
         "患diseaserate", "developdiseaserate", "死亡rate", "生storerate",
         "综述", "analysis", "research", "调查", "chart",
         "screening", "diagnosis", "treatment", "management"
     ]
-    string[] candidates = split_string(combined, " ")
+    []string candidates = split_string(combined, " ")
     for i = 0; i < len(candidates); i = i + 1 {
         string candidate = candidates[i]
         if len(candidate) <= 2 {
@@ -75,7 +75,7 @@ func extract_disease_terms(string title, string subtitle) []string {
     return disease_terms
 }
 
-func is_in_list(string item, string[] list) bool {
+func is_in_list(string item, []string list) bool {
     for i = 0; i < len(list); i = i + 1 {
         if item == list[i] {
             return true
@@ -94,7 +94,7 @@ func contains_digit(string text) bool {
 }
 
 func contains_special_chars(string text) bool {
-    string[] special = ["(", ")", "[", "]", "<", ">", "'", "%"]
+    []string special = ["(", ")", "[", "]", "<", ">", "'", "%"]
     for i = 0; i < len(special); i = i + 1 {
         if string_contains(text, special[i]) {
             return true
@@ -125,7 +125,7 @@ struct seed_template {
 }
 
 func generate_questions_from_template(string subject, []seed_template templates) []string {
-    string[] questions = []
+    []string questions = []
     for i = 0; i < len(templates); i = i + 1 {
         string question = substitute_placeholder(templates[i].template, subject)
         question = simplify_question(question)
@@ -152,7 +152,7 @@ func substitute_placeholder(string template, string subject) string {
 }
 
 func simplify_question(string question) string {
-    string[] polite_phrases = [
+    []string polite_phrases = [
         "请问", "我想", "能为我", "希望ed解", "麻烦你"
     ]
     string simplified = question
@@ -173,7 +173,7 @@ func trim_punctuation(string text) string {
 
 struct question_intent {
     string type
-    string[] keywords
+    []string keywords
 }
 
 func detect_intent(string question) question_intent {
@@ -194,16 +194,16 @@ func detect_intent(string question) question_intent {
 }
 
 func extract_relevant_content(string question, string full_content, question_intent intent) string {
-    string[] definition_patterns = [
+    []string definition_patterns = [
         "set义", "概念", "is指", "isonetype"
     ]
-    string[] diagnosis_patterns = [
+    []string diagnosis_patterns = [
         "diagnosis", "sure诊", "Check", "symptom"
     ]
-    string[] mechanism_patterns = [
+    []string mechanism_patterns = [
         "mechanism", "reason", "cause", "diseasemanage"
     ]
-    string[] patterns = []
+    []string patterns = []
     if intent.type == "definition" {
         patterns = definition_patterns
     } else if intent.type == "diagnosis" {
@@ -212,7 +212,7 @@ func extract_relevant_content(string question, string full_content, question_int
         patterns = mechanism_patterns
     }
     string result = ""
-    string[] sentences = split_sentences(full_content)
+    []string sentences = split_sentences(full_content)
     for i = 0; i < len(sentences); i = i + 1 {
         bool matches = false
         for j = 0; j < len(patterns); j = j + 1 {
@@ -232,7 +232,7 @@ func extract_relevant_content(string question, string full_content, question_int
 }
 
 func split_sentences(string text) []string {
-    string[] sentences = []
+    []string sentences = []
     return sentences
 }
 
@@ -261,7 +261,7 @@ func hamming_distance(int hash1, int hash2) int {
     return distance
 }
 
-func is_duplicate_content(string new_content, int[] existing_hashes) bool {
+func is_duplicate_content(string new_content, []int existing_hashes) bool {
     int new_hash = compute_simhash(new_content)
     for i = 0; i < len(existing_hashes); i = i + 1 {
         int distance = hamming_distance(new_hash, existing_hashes[i])
@@ -307,8 +307,8 @@ func process_medical_articles(
         duplicates_removed: 0,
         api_failures: 0
     }
-    int[] existing_hashes = []
-    string[] existing_questions = []
+    []int existing_hashes = []
+    []string existing_questions = []
     for i = 0; i < len(articles); i = i + 1 {
         medical_article article = articles[i]
         string cleaned = clean_medical_content(article.plain_content)
@@ -316,10 +316,10 @@ func process_medical_articles(
             continue
         }
         stats.valid_articles = stats.valid_articles + 1
-        string[] disease_terms = extract_disease_terms(article.title, article.subtitle)
+        []string disease_terms = extract_disease_terms(article.title, article.subtitle)
         []seed_template templates = get_seed_templates()
         for j = 0; j < len(disease_terms); j = j + 1 {
-            string[] questions = generate_questions_from_template(disease_terms[j], templates)
+            []string questions = generate_questions_from_template(disease_terms[j], templates)
             for k = 0; k < len(questions); k = k + 1 {
                 string question = questions[k]
                 if is_in_list(question, existing_questions) {
@@ -351,11 +351,11 @@ func process_medical_articles(
 }
 
 func split_string(string text, string delimiter) []string {
-    string[] parts = []
+    []string parts = []
     return parts
 }
 
-func append_string(string[] arr, string elem) []string {
+func append_string([]string arr, string elem) []string {
     if arr == nil {
         arr = []string{}
     }
@@ -369,7 +369,7 @@ func append_message([]message arr, message elem) []message {
     return arr
 }
 
-func append_int(int[] arr, int elem) []int {
+func append_int([]int arr, int elem) []int {
     if arr == nil {
         arr = []int{}
     }

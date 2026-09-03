@@ -184,8 +184,8 @@ func lora_unload(lora_router_state state, string adapter_id) lora_route_result {
     new_lora_route_result(state, adapter, true, "")
 }
 
-func apply_lora_linear(float[] input, float[] base_output, float[] lora_a, float[] lora_b, int input_dim, int output_dim, int rank, float alpha) []float {
-    float[] output = make([]float, output_dim)
+func apply_lora_linear([]float input, []float base_output, []float lora_a, []float lora_b, int input_dim, int output_dim, int rank, float alpha) []float {
+    []float output = make([]float, output_dim)
     int i = 0
     for i < output_dim {
         if i < len(base_output) {
@@ -198,7 +198,7 @@ func apply_lora_linear(float[] input, float[] base_output, float[] lora_a, float
     if input_dim <= 0 || output_dim <= 0 || rank <= 0 || len(input) < input_dim || len(lora_a) < rank * input_dim || len(lora_b) < output_dim * rank {
         return output
     }
-    float[] low_rank = make([]float, rank)
+    []float low_rank = make([]float, rank)
     int r = 0
     for r < rank {
         float sum = 0.0

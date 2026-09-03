@@ -13,15 +13,15 @@ struct security_context {
     string agent_name
     string agent_label
     int    capabilities
-    string[] allowed_tools
-    string[] allowed_paths
+    []string allowed_tools
+    []string allowed_paths
     bool   network_allowed
 }
 
 struct lsm_state {
     []security_context contexts
     bool               enforcing
-    string[]           audit_log
+    []string           audit_log
 }
 
 func new_lsm_state(bool enforcing) lsm_state {

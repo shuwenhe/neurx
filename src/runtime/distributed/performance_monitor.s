@@ -91,7 +91,7 @@ func get_performance_report(performance_monitor monitor) string {
 }
 
 func identify_optimization_opportunities(performance_monitor monitor) []string {
-    string[] suggestions = make([]string, 10)
+    []string suggestions = make([]string, 10)
     float bottleneck = analyze_communication_bottleneck(monitor)
     if bottleneck > 30.0 {
     }

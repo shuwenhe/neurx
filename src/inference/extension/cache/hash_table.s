@@ -1,6 +1,6 @@
 struct hash_entry {
     string key
-    int[] block_ids
+    []int block_ids
     int64 timestamp
     int access_count
     int next_idx
@@ -53,7 +53,7 @@ func create_hash_table(int bucket_count, int max_entries_val) hash_table {
     return ht
 }
 
-func hash_table_insert(hash_table ht, string key, int[] block_ids) int {
+func hash_table_insert(hash_table ht, string key, []int block_ids) int {
     if ht.num_entries >= ht.max_entries {
         print("[HashTable] Table full, cannot insert key " + key + "\n")
         return 0

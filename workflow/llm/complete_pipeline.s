@@ -16,8 +16,8 @@ struct ir_module {
     string name
     string version
     i32 optimization_level
-    instructions: string[]
-    data_section: string[]
+    instructions: []string
+    data_section: []string
 }
 
 func compile_neurx_code(compile_config config) (bool, ir_module) {

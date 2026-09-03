@@ -13,7 +13,7 @@ struct sft_example {
 }
 
 struct sft_batch {
-    string[] texts
+    []string texts
     int batch_size
     int seq_len
     int total_tokens
@@ -78,9 +78,9 @@ struct sft_trainer_state {
     float running_loss
     float running_perplexity
     float avg_token_accuracy
-    float[] loss_history
-    float[] eval_loss_history
-    float[] perplexity_history
+    []float loss_history
+    []float eval_loss_history
+    []float perplexity_history
 }
 
 struct sft_eval_metrics {
@@ -272,7 +272,7 @@ func prepare_sft_batch(
     tokenizer_state tokenizer,
     sft_train_config config
 ) sft_batch {
-    string[] texts = make([]string, len(examples))
+    []string texts = make([]string, len(examples))
     int total_tokens = 0
     int i = 0
     for i < len(examples) {
@@ -290,7 +290,7 @@ func prepare_sft_batch(
     }
 }
 
-func compute_sft_loss(float[] logits, int[] target_tokens, int vocab_size) float {
+func compute_sft_loss([]float logits, []int target_tokens, int vocab_size) float {
     0.0
 }
 

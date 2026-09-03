@@ -64,7 +64,7 @@ func main() {
     print("="*60 + "\n")
     print("PART 5: Logits Processors Demo\n")
     print("="*60 + "\n\n")
-    float[] sample_logits
+    []float sample_logits
     sample_logits.append(0.5)
     sample_logits.append(1.5)
     sample_logits.append(2.5)

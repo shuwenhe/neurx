@@ -79,7 +79,7 @@ func rocm_generate_token(rocm_inference_engine engine,
 
 func rocm_batch_prefill(rocm_inference_engine engine,
                        []rocm_rt.rocm_memory_ptr batch_inputs,
-                       int[] seq_lengths) []rocm_rt.rocm_memory_ptr {
+                       []int seq_lengths) []rocm_rt.rocm_memory_ptr {
     []
 }
 

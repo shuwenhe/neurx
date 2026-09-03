@@ -81,9 +81,9 @@ struct two_t_runtime_state {
     int valid_tokens_seen
 }
 
-func copy_float(float[] values) []float {
+func copy_float([]float values) []float {
     int n = len(values)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -92,9 +92,9 @@ func copy_float(float[] values) []float {
     out
 }
 
-func copy_int(int[] values) []int {
+func copy_int([]int values) []int {
     int n = len(values)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -162,7 +162,7 @@ func two_t_backbone_optimizer_text([]transformer_layer_optimizer_state states) s
     out
 }
 
-func two_t_layer_optimizer_from_text(string[] lines, string prefix, transformer_layer_optimizer_state fallback) transformer_layer_optimizer_state {
+func two_t_layer_optimizer_from_text([]string lines, string prefix, transformer_layer_optimizer_state fallback) transformer_layer_optimizer_state {
     transformer_layer_optimizer_state {
         w_q: two_t_adamw_optimizer_from_text(lines, prefix + "w_q.", fallback.w_q),
         w_k: two_t_adamw_optimizer_from_text(lines, prefix + "w_k.", fallback.w_k),
@@ -177,7 +177,7 @@ func two_t_layer_optimizer_from_text(string[] lines, string prefix, transformer_
     }
 }
 
-func two_t_backbone_optimizer_from_text(string[] lines, []transformer_layer_optimizer_state fallback) []transformer_layer_optimizer_state {
+func two_t_backbone_optimizer_from_text([]string lines, []transformer_layer_optimizer_state fallback) []transformer_layer_optimizer_state {
     []transformer_layer_optimizer_state out = make([]transformer_layer_optimizer_state, len(fallback))
     int i = 0
     for i < len(fallback) {
@@ -187,7 +187,7 @@ func two_t_backbone_optimizer_from_text(string[] lines, []transformer_layer_opti
     out
 }
 
-func copy_float_slice(float[] values, int start, int end) []float {
+func copy_float_slice([]float values, int start, int end) []float {
     int safe_start = start
     int safe_end = end
     if safe_start < 0 {
@@ -203,7 +203,7 @@ func copy_float_slice(float[] values, int start, int end) []float {
     if safe_end > n {
         safe_end = n
     }
-    float[] out = make([]float, safe_end - safe_start)
+    []float out = make([]float, safe_end - safe_start)
     int i = safe_start
     int j = 0
     for i < safe_end {
@@ -214,7 +214,7 @@ func copy_float_slice(float[] values, int start, int end) []float {
     out
 }
 
-func copy_int_slice(int[] values, int start, int end) []int {
+func copy_int_slice([]int values, int start, int end) []int {
     int safe_start = start
     int safe_end = end
     if safe_start < 0 {
@@ -230,7 +230,7 @@ func copy_int_slice(int[] values, int start, int end) []int {
     if safe_end > n {
         safe_end = n
     }
-    int[] out = make([]int, safe_end - safe_start)
+    []int out = make([]int, safe_end - safe_start)
     int i = safe_start
     int j = 0
     for i < safe_end {
@@ -241,7 +241,7 @@ func copy_int_slice(int[] values, int start, int end) []int {
     out
 }
 
-func tensor_numel_from_shape(int[] shape) int {
+func tensor_numel_from_shape([]int shape) int {
     int total = 1
     int i = 0
     for i < len(shape) {
@@ -258,7 +258,7 @@ func tensor_from_flat_slice(tensor value, int start, int end) tensor {
 func tensor_1d_concat(tensor left, tensor right) tensor {
     int left_n = len(left.data)
     int right_n = len(right.data)
-    float[] out = make([]float, left_n + right_n)
+    []float out = make([]float, left_n + right_n)
     int i = 0
     for i < left_n {
         out[i] = left.data[i]
@@ -290,7 +290,7 @@ func tensor_2d_row_slice(tensor value, int row_start, int row_end) tensor {
         safe_end = safe_start
     }
     int total = (safe_end - safe_start) * cols
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int r = safe_start
     int idx = 0
     for r < safe_end {
@@ -323,7 +323,7 @@ func tensor_2d_col_slice(tensor value, int col_start, int col_end) tensor {
         safe_end = safe_start
     }
     int local_cols = safe_end - safe_start
-    float[] out = make([]float, rows * local_cols)
+    []float out = make([]float, rows * local_cols)
     int r = 0
     int idx = 0
     for r < rows {
@@ -348,7 +348,7 @@ func tensor_2d_col_update(tensor base, tensor shard, int col_start, int col_end)
     if local_cols <= 0 {
         return copy_tensor(base)
     }
-    float[] out = copy_float(base.data)
+    []float out = copy_float(base.data)
     int r = 0
     for r < rows {
         int c = 0
@@ -382,7 +382,7 @@ func tensor_2d_row_update(tensor base, tensor shard, int row_start, int row_end)
     if safe_end < safe_start {
         safe_end = safe_start
     }
-    float[] out = copy_float(base.data)
+    []float out = copy_float(base.data)
     int local_rows = safe_end - safe_start
     int r = 0
     for r < local_rows {
@@ -405,7 +405,7 @@ func tensor_1d_update(tensor base, tensor shard, int start, int end) tensor {
     if local <= 0 {
         return copy_tensor(base)
     }
-    float[] out = copy_float(base.data)
+    []float out = copy_float(base.data)
     int i = 0
     for i < local {
         int dst = start + i
@@ -429,20 +429,20 @@ func tensor_scalar_value(tensor value) float {
 }
 
 func make_int_array_1(int v) []int {
-    int[] out = make([]int, 1)
+    []int out = make([]int, 1)
     out[0] = v
     out
 }
 
 func make_int_array_2(int a, int b) []int {
-    int[] out = make([]int, 2)
+    []int out = make([]int, 2)
     out[0] = a
     out[1] = b
     out
 }
 
 func make_int_sequence(int count, int start, int modulo) []int {
-    int[] values = make([]int, count)
+    []int values = make([]int, count)
     int i = 0
     for i < count {
         int next = start + i
@@ -455,7 +455,7 @@ func make_int_sequence(int count, int start, int modulo) []int {
     values
 }
 
-func two_t_slice_tokens(int[] tokens, int start, int end) []int {
+func two_t_slice_tokens([]int tokens, int start, int end) []int {
     copy_int_slice(tokens, start, end)
 }
 
@@ -470,8 +470,8 @@ func two_t_build_data_state(string train_path, int batch_size, int seq_len, int 
     string raw = corpus.raw_text
     if raw == "" {
         raw = two_t_default_corpus_text()
-        string[] vocab = build_vocab(raw)
-        int[] token_ids = encode_text(raw, vocab)
+        []string vocab = build_vocab(raw)
+        []int token_ids = encode_text(raw, vocab)
         corpus = text_corpus_state {
             path: train_path,
             raw_text: raw,
@@ -495,8 +495,8 @@ func two_t_build_data_state(string train_path, int batch_size, int seq_len, int 
     if train_count < seq_len + 1 {
         train_count = seq_len + 1
     }
-    int[] train_tokens = two_t_slice_tokens(corpus.token_ids, 0, train_count)
-    int[] valid_tokens = two_t_slice_tokens(corpus.token_ids, train_count, total_tokens)
+    []int train_tokens = two_t_slice_tokens(corpus.token_ids, 0, train_count)
+    []int valid_tokens = two_t_slice_tokens(corpus.token_ids, train_count, total_tokens)
     dataloader_state train_loader = new_state(train_tokens, batch_size, seq_len)
     dataloader_state valid_loader = new_state(valid_tokens, batch_size, seq_len)
     two_t_data_state {
@@ -568,19 +568,19 @@ func two_t_tp_vocab_range(two_t_runtime_state state) []int {
 }
 
 func two_t_tp_gather_logits(two_t_runtime_state state, tensor local_logits) tensor {
-    float[] gathered = all_gather(state.process_group, local_logits.data)
+    []float gathered = all_gather(state.process_group, local_logits.data)
     _ = gathered
     copy_tensor(local_logits)
 }
 
 func two_t_tp_sync_hidden(two_t_runtime_state state, tensor hidden) tensor {
-    float[] payload = all_gather(state.process_group, hidden.data)
+    []float payload = all_gather(state.process_group, hidden.data)
     _ = payload
     copy_tensor(hidden)
 }
 
 func two_t_zero_reduce_scatter(two_t_runtime_state state, tensor grad) tensor {
-    float[] payload = reduce_scatter_sum(state.process_group, grad.data)
+    []float payload = reduce_scatter_sum(state.process_group, grad.data)
     _ = payload
     copy_tensor(grad)
 }
@@ -598,7 +598,7 @@ func two_t_pipeline_exchange(two_t_runtime_state state, tensor value, bool send_
         if send_forward {
             pg = p2p_send(pg, target_rank, value.data)
         } else {
-            float[] payload = p2p_recv(pg, target_rank, len(value.data))
+            []float payload = p2p_recv(pg, target_rank, len(value.data))
             pg = process_group_state_dict(pg)
             _ = payload
         }
@@ -704,7 +704,7 @@ func two_t_runtime_backward(two_t_runtime_state state, two_t_training_batch batc
         token_scale = 1.0 / float(forward.valid_tokens)
     }
     grad_logits = scale_tensor(grad_logits, token_scale * two_t_tp_scale(state) * two_t_zero_scale(state) * ddp_sync_scale(state.ddp))
-    int[] shard_range = two_t_tp_col_range(state)
+    []int shard_range = two_t_tp_col_range(state)
     tensor local_grad_logits = tensor_2d_col_slice(grad_logits, shard_range[0], shard_range[1])
     tensor hidden_t = transpose(forward.backbone_output, 0, 1)
     tensor grad_head_weight = matmul(hidden_t, local_grad_logits)
@@ -768,8 +768,8 @@ func two_t_runtime_backward(two_t_runtime_state state, two_t_training_batch batc
 }
 
 func two_t_new_training_batch(int token_count, int vocab_size, int offset) two_t_training_batch {
-    int[] input_values = make_int_sequence(token_count, offset, vocab_size)
-    int[] target_values = make_int_sequence(token_count, offset + 1, vocab_size)
+    []int input_values = make_int_sequence(token_count, offset, vocab_size)
+    []int target_values = make_int_sequence(token_count, offset + 1, vocab_size)
     two_t_training_batch {
         input_ids: tensor_from_ints(input_values, make_int_array_1(token_count)),
         target_ids: tensor_from_ints(target_values, make_int_array_1(token_count)),
@@ -933,9 +933,9 @@ func two_t_runtime_load_state_dict(two_t_runtime_state state, two_t_runtime_stat
 
 func two_t_collect_tp_shard_params(two_t_runtime_state state) []tensor {
     []tensor params = make([]tensor, 0)
-    int[] vocab_range = two_t_tp_vocab_range(state)
-    int[] col_range = two_t_tp_col_range(state)
-    int[] row_range = two_t_tp_row_range(state)
+    []int vocab_range = two_t_tp_vocab_range(state)
+    []int col_range = two_t_tp_col_range(state)
+    []int row_range = two_t_tp_row_range(state)
     params = append(params, tensor_2d_row_slice(state.token_embedding, vocab_range[0], vocab_range[1]))
     params = append(params, tensor_2d_col_slice(state.lm_head_weight, col_range[0], col_range[1]))
     params = append(params, tensor_from_flat_slice(state.lm_head_bias, vocab_range[0], vocab_range[1]))
@@ -962,23 +962,23 @@ func two_t_apply_tp_shard_params(two_t_runtime_state state, []tensor params) two
     tensor next_lm_head_weight = state.lm_head_weight
     tensor next_lm_head_bias = state.lm_head_bias
     if idx < len(params) {
-        int[] vocab_range = two_t_tp_vocab_range(state)
+        []int vocab_range = two_t_tp_vocab_range(state)
         next_token_embedding = tensor_2d_row_update(state.token_embedding, params[idx], vocab_range[0], vocab_range[1])
     }
     idx = idx + 1
     if idx < len(params) {
-        int[] col_range = two_t_tp_col_range(state)
+        []int col_range = two_t_tp_col_range(state)
         next_lm_head_weight = tensor_2d_col_update(state.lm_head_weight, params[idx], col_range[0], col_range[1])
     }
     idx = idx + 1
     if idx < len(params) {
-        int[] vocab_range = two_t_tp_vocab_range(state)
+        []int vocab_range = two_t_tp_vocab_range(state)
         next_lm_head_bias = tensor_1d_update(state.lm_head_bias, params[idx], vocab_range[0], vocab_range[1])
     }
     idx = idx + 1
     transformer next_backbone = state.backbone
-    int[] col_range = two_t_tp_col_range(state)
-    int[] row_range = two_t_tp_row_range(state)
+    []int col_range = two_t_tp_col_range(state)
+    []int row_range = two_t_tp_row_range(state)
     int layer_index = 0
     for layer_index < len(next_backbone.layers) {
         if idx < len(params) {
@@ -1023,8 +1023,8 @@ func two_t_apply_tp_shard_params(two_t_runtime_state state, []tensor params) two
         idx = idx + 1
         layer_index = layer_index + 1
     }
-    int[] vocab_range2 = two_t_tp_vocab_range(state)
-    int[] col_range2 = two_t_tp_col_range(state)
+    []int vocab_range2 = two_t_tp_vocab_range(state)
+    []int col_range2 = two_t_tp_col_range(state)
     tensor next_token_embedding_shard = tensor_2d_row_slice(next_token_embedding, vocab_range2[0], vocab_range2[1])
     tensor next_lm_head_weight_shard = tensor_2d_col_slice(next_lm_head_weight, col_range2[0], col_range2[1])
     tensor next_lm_head_bias_shard = tensor_from_flat_slice(next_lm_head_bias, vocab_range2[0], vocab_range2[1])
@@ -1063,8 +1063,8 @@ func two_t_apply_tp_shard_params(two_t_runtime_state state, []tensor params) two
 
 func two_t_collect_backbone_layer_shard_params(two_t_runtime_state state, int layer_index) []tensor {
     []tensor params = make([]tensor, 0)
-    int[] col_range = two_t_tp_col_range(state)
-    int[] row_range = two_t_tp_row_range(state)
+    []int col_range = two_t_tp_col_range(state)
+    []int row_range = two_t_tp_row_range(state)
     transformer_layer layer = transformer_layer_at(state.backbone.layers, layer_index)
     params = append(params, tensor_2d_col_slice(layer.w_q, col_range[0], col_range[1]))
     params = append(params, tensor_2d_col_slice(layer.w_k, col_range[0], col_range[1]))
@@ -1080,8 +1080,8 @@ func two_t_collect_backbone_layer_shard_params(two_t_runtime_state state, int la
 }
 
 func two_t_apply_backbone_layer_shard_params(two_t_runtime_state state, int layer_index, []tensor params) two_t_runtime_state {
-    int[] col_range = two_t_tp_col_range(state)
-    int[] row_range = two_t_tp_row_range(state)
+    []int col_range = two_t_tp_col_range(state)
+    []int row_range = two_t_tp_row_range(state)
     transformer next_backbone = state.backbone
     transformer_layer layer = transformer_layer_at(next_backbone.layers, layer_index)
     int idx = 0
@@ -1158,7 +1158,7 @@ func two_t_apply_backbone_layer_shard_params(two_t_runtime_state state, int laye
     }
 }
 
-func two_t_join_ints(int[] values) string {
+func two_t_join_ints([]int values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -1171,7 +1171,7 @@ func two_t_join_ints(int[] values) string {
     out
 }
 
-func two_t_join_floats(float[] values) string {
+func two_t_join_floats([]float values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -1185,7 +1185,7 @@ func two_t_join_floats(float[] values) string {
 }
 
 func two_t_parse_int_list(string text) []int {
-    int[] out = []int{}
+    []int out = []int{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -1208,7 +1208,7 @@ func two_t_parse_int_list(string text) []int {
 }
 
 func two_t_parse_float_list(string text) []float {
-    float[] out = []float{}
+    []float out = []float{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -1231,7 +1231,7 @@ func two_t_parse_float_list(string text) []float {
 }
 
 func two_t_split_lines(string text) []string {
-    string[] lines = []string{}
+    []string lines = []string{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -1356,7 +1356,7 @@ func two_t_checkpoint_head_bias_optimizer_path(two_t_runtime_state state) string
 }
 
 func two_t_checkpoint_payload_paths(two_t_runtime_state state) []string {
-    string[] paths = []string{}
+    []string paths = []string{}
     paths = append(paths, two_t_checkpoint_embedding_params_path(state))
     paths = append(paths, two_t_checkpoint_embedding_optimizer_path(state))
     paths = append(paths, two_t_checkpoint_head_weight_params_path(state))
@@ -1373,8 +1373,8 @@ func two_t_checkpoint_payload_paths(two_t_runtime_state state) []string {
 }
 
 func two_t_checkpoint_missing_paths(two_t_runtime_state state) []string {
-    string[] missing = []string{}
-    string[] paths = two_t_checkpoint_payload_paths(state)
+    []string missing = []string{}
+    []string paths = two_t_checkpoint_payload_paths(state)
     int i = 0
     for i < len(paths) {
         string path = paths[i]
@@ -1394,7 +1394,7 @@ func two_t_checkpoint_resume_ready(two_t_runtime_state state) bool {
     if manifest == "" || !runtime_file_exists(manifest) {
         return false
     }
-    string[] missing = two_t_checkpoint_missing_paths(state)
+    []string missing = two_t_checkpoint_missing_paths(state)
     len(missing) == 0
 }
 
@@ -1407,7 +1407,7 @@ func two_t_checkpoint_manifest_text(two_t_runtime_state state) string {
     out = out + "zero_stage=" + string(state.plan.zero_stage) + "\n"
     out = out + "layer_count=" + string(len(state.backbone.layers)) + "\n"
     out = out + "payload_count=" + string(len(two_t_checkpoint_payload_paths(state))) + "\n"
-    string[] paths = two_t_checkpoint_payload_paths(state)
+    []string paths = two_t_checkpoint_payload_paths(state)
     int i = 0
     for i < len(paths) {
         out = out + "file=" + paths[i] + "\n"
@@ -1432,7 +1432,7 @@ func two_t_checkpoint_resume_status_text(two_t_runtime_state state) string {
     if manifest == "" || !runtime_file_exists(manifest) {
         return "missing_manifest\n"
     }
-    string[] missing = two_t_checkpoint_missing_paths(state)
+    []string missing = two_t_checkpoint_missing_paths(state)
     if len(missing) == 0 {
         return "ok\n"
     }
@@ -1484,7 +1484,7 @@ func two_t_adamw_optimizer_text(string prefix, adamw_optimizer optimizer) string
     out
 }
 
-func two_t_adamw_optimizer_from_text(string[] lines, string prefix, adamw_optimizer fallback) adamw_optimizer {
+func two_t_adamw_optimizer_from_text([]string lines, string prefix, adamw_optimizer fallback) adamw_optimizer {
     string lr_text = two_t_line_value(lines, prefix + "lr=", string(fallback.lr))
     string beta1_text = two_t_line_value(lines, prefix + "beta1=", string(fallback.beta1))
     string beta2_text = two_t_line_value(lines, prefix + "beta2=", string(fallback.beta2))
@@ -1510,7 +1510,7 @@ func two_t_adamw_optimizer_from_text(string[] lines, string prefix, adamw_optimi
 }
 
 func two_t_runtime_restore_optimizer_state(two_t_runtime_state state, string content) two_t_runtime_state {
-    string[] lines = two_t_split_lines(content)
+    []string lines = two_t_split_lines(content)
     two_t_runtime_state {
         model: state.model,
         plan: state.plan,
@@ -1666,11 +1666,11 @@ func two_t_write_checkpoint(two_t_runtime_state state) two_t_runtime_state {
     }
 }
 
-func two_t_restore_optimizer_from_meta(two_t_runtime_state state, string[] lines) two_t_runtime_state {
+func two_t_restore_optimizer_from_meta(two_t_runtime_state state, []string lines) two_t_runtime_state {
     state
 }
 
-func two_t_line_value(string[] lines, string key, string fallback) string {
+func two_t_line_value([]string lines, string key, string fallback) string {
     int i = 0
     for i < len(lines) {
         string line = lines[i]
@@ -1754,7 +1754,7 @@ func two_t_runtime_load_checkpoint(two_t_runtime_state state) two_t_runtime_stat
         last_saved_step: state.checkpoint.last_saved_step,
         rng_seed: state.checkpoint.rng_seed,
     }, state)
-    string[] meta_lines = []string{}
+    []string meta_lines = []string{}
     if meta_path != ""  runtime_file_exists(meta_path) {
         meta_lines = two_t_split_lines(runtime_read_text_file(meta_path))
     }

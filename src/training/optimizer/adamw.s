@@ -9,9 +9,9 @@ struct adamw_config {
 }
 
 struct adamw_param_state {
-    float[] momentum
-    float[] variance
-    float[] param
+    []float momentum
+    []float variance
+    []float param
     int    step
 }
 
@@ -33,7 +33,7 @@ func new_adamw(adamw_config cfg) adamw_optimizer {
 
 func adamw_register_param(
     adamw_optimizer opt,
-    float[] param,
+    []float param,
     int param_size
 ) adamw_optimizer {
     adamw_param_state state
@@ -63,7 +63,7 @@ func adamw_set_learning_rate(adamw_optimizer opt, float new_lr) adamw_optimizer 
 
 func adamw_update_param(
     adamw_param_state state,
-    float[] gradients,
+    []float gradients,
     float learning_rate,
     float beta1,
     float beta2,
@@ -95,8 +95,8 @@ func adamw_update_param(
 
 func adamw_step(
     adamw_optimizer opt,
-    float[][] gradients,
-    int[] param_sizes
+    []float[] gradients,
+    []int param_sizes
 ) adamw_optimizer {
     opt.current_lr = adamw_compute_lr(opt)
     opt.global_step = opt.global_step + 1
@@ -156,7 +156,7 @@ func adamw_load_state_dict(
 }
 
 func allocate_float_vector(int size, float init_val) []float {
-    float[] v = make([]float, size)
+    []float v = make([]float, size)
     i := 0
     for i < size {
         v = append(v, init_val)

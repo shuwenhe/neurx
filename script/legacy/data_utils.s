@@ -85,7 +85,7 @@ func json_object_to_string(map fields[string]string, int indent) string {
     result
 }
 
-func path_join(string[] parts) string {
+func path_join([]string parts) string {
     string_join(parts, "/")
 }
 
@@ -153,7 +153,7 @@ func file_count_lines(string path) (i64, bool) {
     (i64(len(lines)), true)
 }
 
-func dir_list_files(string path, string[] suffixes) []string {
+func dir_list_files(string path, []string suffixes) []string {
     if !path_is_dir(path) {
         return []string{}
     }
@@ -163,7 +163,7 @@ func dir_list_files(string path, string[] suffixes) []string {
         fname := path_basename(file)
         for _, suffix in suffixes {
             if string_has_suffix(string_to_lower(fname), suffix) {
-                result = append(result, path_join(string[]{path, fname}))
+                result = append(result, path_join([]string{path, fname}))
                 break
             }
         }

@@ -9,7 +9,7 @@ struct grpc_request {
     temperature     float32
     top_p           float32
     top_k           int32
-    stop_sequences  string[]
+    stop_sequences  []string
     stream          bool
     priority        int32
 }

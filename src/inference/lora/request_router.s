@@ -3,7 +3,7 @@ use neurx.inference.lora.adapter_manager
 struct lora_request {
     string request_id
     string adapter_id
-    float[] input_hidden
+    []float input_hidden
     int batch_size
     int seq_len
     int hidden_dim
@@ -13,7 +13,7 @@ struct lora_request {
 
 struct lora_inference_result {
     string request_id
-    float[] output
+    []float output
     string adapter_id
     long inference_time_ms
     bool success
@@ -243,7 +243,7 @@ struct load_balance_strategy {
 }
 
 func (lora_request_router* router) get_best_adapter_for_loading(
-    string[] candidate_adapters
+    []string candidate_adapters
 ) string {
     if len(candidate_adapters) == 0 {
         return ""

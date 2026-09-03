@@ -4,7 +4,7 @@ struct node_registration_request {
     string ip_address
     int port
     int num_gpus
-    float[] gpu_memory_gb
+    []float gpu_memory_gb
 }
 
 struct rank_mapping {
@@ -20,7 +20,7 @@ struct rank_mapping {
 
 struct elastic_scaling_manager {
     int current_world_size
-    int[] active_ranks
+    []int active_ranks
     map[int]int rank_to_node
     rank_mapping[] pending_remappings
     bool rebalancing
@@ -69,7 +69,7 @@ func (elastic_scaling_manager* manager) handle_node_removal(removed_rank int) (b
     }
     manager.rebalancing = true
     int new_idx = 0
-    int[] new_active_ranks = make([]int, len(manager.active_ranks))
+    []int new_active_ranks = make([]int, len(manager.active_ranks))
     int i = 0
     for i < len(manager.active_ranks) {
         if manager.active_ranks[i] != removed_rank {
@@ -169,11 +169,11 @@ func (elastic_scaling_manager* manager) generate_parameter_remapping(
 }
 
 func (elastic_scaling_manager* manager) apply_parameter_remapping(
-    float[] model_params,
+    []float model_params,
     rank_mapping[] remappings
 ) []float {
     int param_size = len(model_params)
-    float[] remapped_params = make(float[], param_size)
+    []float remapped_params = make([]float, param_size)
     int i = 0
     for i < len(remappings) {
         mapping := remappings[i]
@@ -191,8 +191,8 @@ func (elastic_scaling_manager* manager) apply_parameter_remapping(
 }
 
 func (elastic_scaling_manager* manager) synchronize_new_node(
-    float[] model_params,
-    float[] optimizer_state,
+    []float model_params,
+    []float optimizer_state,
     int new_rank,
     string target_ip,
     int target_port
@@ -209,7 +209,7 @@ func (elastic_scaling_manager* manager) synchronize_new_node(
         if end_idx > len(model_params) {
             end_idx = len(model_params)
         }
-        float[] packet_data = make(float[], end_idx - start_idx)
+        []float packet_data = make([]float, end_idx - start_idx)
         int i = 0
         for i < len(packet_data) && start_idx + i < len(model_params) {
             packet_data[i] = model_params[start_idx + i]

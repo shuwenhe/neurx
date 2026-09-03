@@ -4,7 +4,7 @@ string out_prefix = "artifact/checkpoints/agent/skills"
 string snapshot_path = out_prefix + "/snapshot.txt"
 string report_path   = out_prefix + "/report.txt"
 string trace_path    = out_prefix + "/trace.txt"
-string[] bench_inputs = make([]string, 5)
+[]string bench_inputs = make([]string, 5)
 bench_inputs[0] = "search for neurx framework agent documentation"
 bench_inputs[1] = "retrieve code examples for tensor add operations"
 bench_inputs[2] = "analyze the inference pipeline design and output shape"
@@ -23,7 +23,7 @@ for gen < max_gen {
     }
     gen = gen + 1
 }
-string[] promoted = agent_promoted_skill_names(evolved)
+[]string promoted = agent_promoted_skill_names(evolved)
 string eval_report = neurx.strings.concat2("promoted_count=", string(len(promoted)))
 int ei = 0
 for ei < len(promoted) {
@@ -32,7 +32,7 @@ for ei < len(promoted) {
     eval_report = neurx.strings.concat6(eval_report, "\n  skill=", neurx.strings.string_at(promoted, ei), " success_rate=", string(sr_pct), "%")
     ei = ei + 1
 }
-string[] all_names = agent_skill_names(evolved)
+[]string all_names = agent_skill_names(evolved)
 string candidate_report = neurx.strings.concat2("total_skills=", string(len(all_names)))
 int ci = 0
 for ci < len(all_names) {

@@ -20,7 +20,7 @@ struct multimodal_cache {
     int32 max_cache_size
     int32 current_cache_size
     map[string]cache_entry* cache_data
-    string[] access_order
+    []string access_order
     int32 hit_count
     int32 miss_count
     bool enable_compression
@@ -32,7 +32,7 @@ func create_multimodal_cache(int32 max_size) multimodal_cache* {
         max_cache_size: max_size,
         current_cache_size: 0,
         cache_data: make(map[string]cache_entry*),
-        access_order: make(string[]),
+        access_order: make([]string),
         hit_count: 0,
         miss_count: 0,
         enable_compression: true,
@@ -150,7 +150,7 @@ func (multimodal_cache* cache) delete(string key) bool {
 
 func (multimodal_cache* cache) clear() {
     cache.cache_data = make(map[string]cache_entry*)
-    cache.access_order = make(string[])
+    cache.access_order = make([]string)
     cache.current_cache_size = 0
 }
 

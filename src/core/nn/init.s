@@ -19,7 +19,7 @@ func new_init_config(string method) init_config {
     }
 }
 
-func uniform_(float[] tensor, float a, float b) []float {
+func uniform_([]float tensor, float a, float b) []float {
     int i = 0
     for i < len(tensor) {
         float u = uniform_random()
@@ -29,7 +29,7 @@ func uniform_(float[] tensor, float a, float b) []float {
     return tensor
 }
 
-func normal_(float[] tensor, float mean, float std) []float {
+func normal_([]float tensor, float mean, float std) []float {
     int i = 0
     for i < len(tensor) {
         float z = box_muller_random()
@@ -39,7 +39,7 @@ func normal_(float[] tensor, float mean, float std) []float {
     return tensor
 }
 
-func constant_(float[] tensor, float val) []float {
+func constant_([]float tensor, float val) []float {
     int i = 0
     for i < len(tensor) {
         tensor[i] = val
@@ -48,15 +48,15 @@ func constant_(float[] tensor, float val) []float {
     return tensor
 }
 
-func ones_(float[] tensor) []float {
+func ones_([]float tensor) []float {
     return constant_(tensor, 1.0)
 }
 
-func zeros_(float[] tensor) []float {
+func zeros_([]float tensor) []float {
     return constant_(tensor, 0.0)
 }
 
-func eye_(float[] tensor, int size) []float {
+func eye_([]float tensor, int size) []float {
     int i = 0
     for i < size {
         int j = 0
@@ -72,34 +72,34 @@ func eye_(float[] tensor, int size) []float {
     return tensor
 }
 
-func xavier_uniform_(float[] tensor, int fan_in, int fan_out) []float {
+func xavier_uniform_([]float tensor, int fan_in, int fan_out) []float {
     float limit = calculate_gain_xavier() * sqrt_approx(6.0 / float(fan_in + fan_out))
     return uniform_(tensor, 0.0 - limit, limit)
 }
 
-func xavier_normal_(float[] tensor, int fan_in, int fan_out) []float {
+func xavier_normal_([]float tensor, int fan_in, int fan_out) []float {
     float std = calculate_gain_xavier() * sqrt_approx(2.0 / float(fan_in + fan_out))
     return normal_(tensor, 0.0, std)
 }
 
-func kaiming_uniform_(float[] tensor, int fan_in, int fan_out, float a) []float {
+func kaiming_uniform_([]float tensor, int fan_in, int fan_out, float a) []float {
     float gain = sqrt_approx(2.0 / (1.0 + a * a))
     float std = gain / sqrt_approx(float(fan_in))
     float bound = sqrt_approx(3.0) * std
     return uniform_(tensor, 0.0 - bound, bound)
 }
 
-func kaiming_normal_(float[] tensor, int fan_in, int fan_out, float a) []float {
+func kaiming_normal_([]float tensor, int fan_in, int fan_out, float a) []float {
     float gain = sqrt_approx(2.0 / (1.0 + a * a))
     float std = gain / sqrt_approx(float(fan_in))
     return normal_(tensor, 0.0, std)
 }
 
-func orthogonal_(float[] tensor, int rows, int cols, float gain) []float {
+func orthogonal_([]float tensor, int rows, int cols, float gain) []float {
     if rows < cols {
         rows = cols
     }
-    float[] gaussian = make([]float, rows * cols)
+    []float gaussian = make([]float, rows * cols)
     int i = 0
     for i < rows * cols {
         gaussian[i] = box_muller_random()
@@ -133,7 +133,7 @@ func orthogonal_(float[] tensor, int rows, int cols, float gain) []float {
     return tensor
 }
 
-func dirac_(float[] tensor, int size) []float {
+func dirac_([]float tensor, int size) []float {
     int i = 0
     for i < len(tensor) {
         tensor[i] = 0.0
@@ -148,7 +148,7 @@ func dirac_(float[] tensor, int size) []float {
     return tensor
 }
 
-func sparse_(float[] tensor, int size, float sparsity) []float {
+func sparse_([]float tensor, int size, float sparsity) []float {
     int count = 0
     int i = 0
     for i < len(tensor) {

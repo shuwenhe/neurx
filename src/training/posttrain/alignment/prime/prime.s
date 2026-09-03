@@ -96,7 +96,7 @@ func prime_step(
     []tensor actions,
     []tensor old_log_probs,
     []tensor old_values,
-    bool[] dones,
+    []bool dones,
     prime_config cfg
 ) prime_state {
     []tensor step_rewards = []tensor{}

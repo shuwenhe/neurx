@@ -295,7 +295,7 @@ func (dispatcher ray_dispatcher*) get_actor_load(actor_name string) actor_load* 
 }
 
 func (dispatcher ray_dispatcher*) list_actors() []string {
-    actors := make(string[], 0)
+    actors := make([]string, 0)
     for name := range dispatcher.actor_loads {
         actors = append(actors, name)
     }

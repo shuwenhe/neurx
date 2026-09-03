@@ -3,15 +3,15 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 
 struct named_lora_module {
     string name
-    float[] base_weight
+    []float base_weight
     int out_dim
     int in_dim
-    float[] lora_a
-    float[] lora_b
+    []float lora_a
+    []float lora_b
     int rank
     float scaling
-    float[] initial_a
-    float[] initial_b
+    []float initial_a
+    []float initial_b
 }
 
 struct adapter_stats {
@@ -44,11 +44,11 @@ func run_posttrain_lora_sft() int {
         return 1
     }
     println("Loading materialized prompt data")
-    float[] prompt_data = posttrain_materialized_prompt()
+    []float prompt_data = posttrain_materialized_prompt()
     println("Loading materialized target q data")
-    float[] target_q_data = posttrain_materialized_target_q()
+    []float target_q_data = posttrain_materialized_target_q()
     println("Loading materialized target v data")
-    float[] target_v_data = posttrain_materialized_target_v()
+    []float target_v_data = posttrain_materialized_target_v()
     int sample_count = 1
     if sample_count < 1 {
         println("error: no materialized samples available")
@@ -86,7 +86,7 @@ func run_posttrain_lora_sft() int {
     println("Vectorizing target q")
     println("Vectorizing target v")
     println("Training loop start")
-    float[] loss_history = make([]float, epochs)
+    []float loss_history = make([]float, epochs)
     float best_loss = 0.0
     int epoch = 0
     for epoch < epochs {
@@ -96,13 +96,13 @@ func run_posttrain_lora_sft() int {
         for sample_idx < sample_count {
             int prompt_offset = sample_idx * hidden_size
             int target_v_offset = sample_idx * v_out
-            float[] prompt = extract_vector(prompt_data, prompt_offset, hidden_size)
-            float[] target_q = extract_vector(target_q_data, prompt_offset, hidden_size)
-            float[] target_v = extract_vector(target_v_data, target_v_offset, v_out)
+            []float prompt = extract_vector(prompt_data, prompt_offset, hidden_size)
+            []float target_q = extract_vector(target_q_data, prompt_offset, hidden_size)
+            []float target_v = extract_vector(target_v_data, target_v_offset, v_out)
             int m = 0
             for m < len(modules) {
                 named_lora_module module = modules[m]
-                float[] target = target_q
+                []float target = target_q
                 if module.out_dim == v_out {
                     target = target_v
                 }
@@ -177,9 +177,9 @@ func init_lora_module(string name, int in_dim, int out_dim, int rank, float alph
     return module
 }
 
-func runtime_forward_named_module(named_lora_module module, float[] input_vec) []float {
-    float[] output = fill_vec(module.out_dim, 0.0)
-    float[] hidden = fill_vec(module.rank, 0.0)
+func runtime_forward_named_module(named_lora_module module, []float input_vec) []float {
+    []float output = fill_vec(module.out_dim, 0.0)
+    []float hidden = fill_vec(module.rank, 0.0)
     int r = 0
     for r < module.rank {
         int in_idx = 0
@@ -217,8 +217,8 @@ func runtime_forward_named_module(named_lora_module module, float[] input_vec) [
     return output
 }
 
-func train_named_module(named_lora_module module, float[] input_vec, float[] target_vec, float lr) named_lora_module {
-    float[] hidden = fill_vec(module.rank, 0.0)
+func train_named_module(named_lora_module module, []float input_vec, []float target_vec, float lr) named_lora_module {
+    []float hidden = fill_vec(module.rank, 0.0)
     int r = 0
     for r < module.rank {
         int in_idx = 0
@@ -231,9 +231,9 @@ func train_named_module(named_lora_module module, float[] input_vec, float[] tar
         }
         r = r + 1
     }
-    float[] output = runtime_forward_named_module(module, input_vec)
-    float[] grad_out = mse_gradient(output, target_vec)
-    float[] b_snapshot = copy_float_array(module.lora_B)
+    []float output = runtime_forward_named_module(module, input_vec)
+    []float grad_out = mse_gradient(output, target_vec)
+    []float b_snapshot = copy_float_array(module.lora_B)
     float step_scale = lr * module.scaling
     int out_idx = 0
     for out_idx < module.out_dim {
@@ -376,7 +376,7 @@ func write_adapter_checkpoint(
     string output_dir,
     string model_path,
     []named_lora_module modules,
-    float[] loss_history,
+    []float loss_history,
     adapter_stats stats,
     delta_stats deltas,
     int rank,
@@ -393,19 +393,19 @@ func write_adapter_checkpoint(
         named_lora_module module = modules[module_idx]
         int a_len = module.rank * module.in_dim
         int b_len = module.out_dim * module.rank
-        float[] a_data = make([]float, a_len)
+        []float a_data = make([]float, a_len)
         int i = 0
         for i < a_len {
             a_data[i] = module.lora_A[i]
             i = i + 1
         }
-        float[] b_data = make([]float, b_len)
+        []float b_data = make([]float, b_len)
         i = 0
         for i < b_len {
             b_data[i] = module.lora_B[i]
             i = i + 1
         }
-        int[] a_shape = make([]int, 2)
+        []int a_shape = make([]int, 2)
         a_shape[0] = module.rank
         a_shape[1] = module.in_dim
         tensor a_tensor = tensor {
@@ -416,7 +416,7 @@ func write_adapter_checkpoint(
             shape_count: 2,
             data_count: a_len,
         }
-        int[] b_shape = make([]int, 2)
+        []int b_shape = make([]int, 2)
         b_shape[0] = module.out_dim
         b_shape[1] = module.rank
         tensor b_tensor = tensor {
@@ -458,7 +458,7 @@ func build_adapter_config_json(string model_path, int rank, float alpha, float l
     return json
 }
 
-func build_training_state_json(string model_path, float[] loss_history, adapter_stats stats, delta_stats deltas, int rank, float alpha, float learning_rate, int sample_count, int epochs, int module_count) string {
+func build_training_state_json(string model_path, []float loss_history, adapter_stats stats, delta_stats deltas, int rank, float alpha, float learning_rate, int sample_count, int epochs, int module_count) string {
     string json = "{\n"
     json = json + "  \"model_path\": \"" + model_path + "\",\n"
     json = json + "  \"completed_steps\": " + int_to_str(sample_count * epochs) + ",\n"
@@ -495,7 +495,7 @@ func build_training_state_json(string model_path, float[] loss_history, adapter_
 }
 
 func fill_vec(int n, float value) []float {
-    float[] v = make([]float, n)
+    []float v = make([]float, n)
     int i = 0
     for i < n {
         v[i] = value
@@ -504,8 +504,8 @@ func fill_vec(int n, float value) []float {
     return v
 }
 
-func extract_vector(float[] source, int start, int n) []float {
-    float[] v = make([]float, n)
+func extract_vector([]float source, int start, int n) []float {
+    []float v = make([]float, n)
     int i = 0
     for i < n {
         int src_idx = start + i
@@ -536,7 +536,7 @@ func parse_float_list_fixed(string text) []float {
         }
         i = i + 1
     }
-    float[] values = make([]float, count)
+    []float values = make([]float, count)
     string token = ""
     int out_idx = 0
     i = 0
@@ -638,7 +638,7 @@ func is_number_token_char(int ch) bool {
 }
 
 func init_pattern(int n, float scale) []float {
-    float[] v = make([]float, n)
+    []float v = make([]float, n)
     int i = 0
     for i < n {
         float x = ((i + 1) as float) * scale * 0.001
@@ -651,11 +651,11 @@ func init_pattern(int n, float scale) []float {
     return v
 }
 
-func runtime_forward_named_module_dummy(named_lora_module module, float[] input_vec) []float {
+func runtime_forward_named_module_dummy(named_lora_module module, []float input_vec) []float {
     return runtime_forward_named_module(module, input_vec)
 }
 
-func mse_loss(float[] predictions, float[] targets) float {
+func mse_loss([]float predictions, []float targets) float {
     float loss = 0.0
     int limit = len(predictions)
     if len(targets) < limit {
@@ -673,12 +673,12 @@ func mse_loss(float[] predictions, float[] targets) float {
     return loss
 }
 
-func mse_gradient(float[] predictions, float[] targets) []float {
+func mse_gradient([]float predictions, []float targets) []float {
     int limit = len(predictions)
     if len(targets) < limit {
         limit = len(targets)
     }
-    float[] grad = fill_vec(len(predictions), 0.0)
+    []float grad = fill_vec(len(predictions), 0.0)
     int i = 0
     for i < limit {
         grad[i] = 2.0 * (predictions[i] - targets[i]) / (limit as float)
@@ -694,8 +694,8 @@ func abs_float(float value) float {
     return value
 }
 
-func copy_float_array(float[] source) []float {
-    float[] result = make([]float, len(source))
+func copy_float_array([]float source) []float {
+    []float result = make([]float, len(source))
     int i = 0
     for i < len(source) {
         result[i] = source[i]
@@ -787,7 +787,7 @@ func float_to_str(float value, int decimals) string {
     return out
 }
 
-func build_simple_training_state_json(string model_path, float[] loss_history, float learning_rate, int sample_count, int epochs) string {
+func build_simple_training_state_json(string model_path, []float loss_history, float learning_rate, int sample_count, int epochs) string {
     string json = "{\n"
     json = json + "  \"model_path\": \"" + model_path + "\",\n"
     json = json + "  \"completed_steps\": " + int_to_str(sample_count * epochs) + ",\n"
@@ -824,9 +824,9 @@ func run_posttrain_lora_sft_flat() int {
         println("error: model path not found: " + model_path)
         return 1
     }
-    float[] prompt_data = posttrain_materialized_prompt()
-    float[] target_q_data = posttrain_materialized_target_q()
-    float[] target_v_data = posttrain_materialized_target_v()
+    []float prompt_data = posttrain_materialized_prompt()
+    []float target_q_data = posttrain_materialized_target_q()
+    []float target_v_data = posttrain_materialized_target_v()
     int sample_count = 1
     println("====================================================")
     println("[PostTrain] LoRA Supervised Fine-Tuning")
@@ -844,29 +844,29 @@ func run_posttrain_lora_sft_flat() int {
     println("Module build complete: 2")
     string q_name = "base_model.model.model.layers.0.self_attn.q_proj"
     string v_name = "base_model.model.model.layers.0.self_attn.v_proj"
-    float[] q_base_weight = init_pattern(hidden_size * hidden_size, 0.01)
-    float[] q_lora_a = init_pattern(rank * hidden_size, 0.02)
-    float[] q_lora_b = fill_vec(hidden_size * rank, 0.0)
-    float[] q_initial_a = copy_float_array(q_lora_a)
-    float[] q_initial_b = copy_float_array(q_lora_b)
-    float[] v_base_weight = init_pattern(hidden_size * v_out, 0.01)
-    float[] v_lora_a = init_pattern(rank * hidden_size, 0.02)
-    float[] v_lora_b = fill_vec(v_out * rank, 0.0)
-    float[] v_initial_a = copy_float_array(v_lora_a)
-    float[] v_initial_b = copy_float_array(v_lora_b)
+    []float q_base_weight = init_pattern(hidden_size * hidden_size, 0.01)
+    []float q_lora_a = init_pattern(rank * hidden_size, 0.02)
+    []float q_lora_b = fill_vec(hidden_size * rank, 0.0)
+    []float q_initial_a = copy_float_array(q_lora_a)
+    []float q_initial_b = copy_float_array(q_lora_b)
+    []float v_base_weight = init_pattern(hidden_size * v_out, 0.01)
+    []float v_lora_a = init_pattern(rank * hidden_size, 0.02)
+    []float v_lora_b = fill_vec(v_out * rank, 0.0)
+    []float v_initial_a = copy_float_array(v_lora_a)
+    []float v_initial_b = copy_float_array(v_lora_b)
     float scaling = alpha / (rank as float)
     println("Vectorizing question")
     println("Vectorizing target q")
     println("Vectorizing target v")
     println("Training loop start")
-    float[] loss_history = make([]float, epochs)
+    []float loss_history = make([]float, epochs)
     float best_loss = 0.0
     int epoch = 0
     for epoch < epochs {
-        float[] prompt = extract_vector(prompt_data, 0, hidden_size)
-        float[] target_q = extract_vector(target_q_data, 0, hidden_size)
-        float[] target_v = extract_vector(target_v_data, 0, v_out)
-        float[] q_hidden = fill_vec(rank, 0.0)
+        []float prompt = extract_vector(prompt_data, 0, hidden_size)
+        []float target_q = extract_vector(target_q_data, 0, hidden_size)
+        []float target_v = extract_vector(target_v_data, 0, v_out)
+        []float q_hidden = fill_vec(rank, 0.0)
         int r = 0
         for r < rank {
             int in_idx = 0
@@ -877,7 +877,7 @@ func run_posttrain_lora_sft_flat() int {
             }
             r = r + 1
         }
-        float[] q_output = fill_vec(hidden_size, 0.0)
+        []float q_output = fill_vec(hidden_size, 0.0)
         int out_idx = 0
         for out_idx < hidden_size {
             float sum = 0.0
@@ -897,8 +897,8 @@ func run_posttrain_lora_sft_flat() int {
             out_idx = out_idx + 1
         }
         float q_loss = mse_loss(q_output, target_q)
-        float[] q_grad = mse_gradient(q_output, target_q)
-        float[] q_b_snapshot = copy_float_array(q_lora_b)
+        []float q_grad = mse_gradient(q_output, target_q)
+        []float q_b_snapshot = copy_float_array(q_lora_b)
         out_idx = 0
         for out_idx < hidden_size {
             r = 0
@@ -926,7 +926,7 @@ func run_posttrain_lora_sft_flat() int {
             }
             r = r + 1
         }
-        float[] v_hidden = fill_vec(rank, 0.0)
+        []float v_hidden = fill_vec(rank, 0.0)
         r = 0
         for r < rank {
             int in_idx = 0
@@ -937,7 +937,7 @@ func run_posttrain_lora_sft_flat() int {
             }
             r = r + 1
         }
-        float[] v_output = fill_vec(v_out, 0.0)
+        []float v_output = fill_vec(v_out, 0.0)
         out_idx = 0
         for out_idx < v_out {
             float sum = 0.0
@@ -957,8 +957,8 @@ func run_posttrain_lora_sft_flat() int {
             out_idx = out_idx + 1
         }
         float v_loss = mse_loss(v_output, target_v)
-        float[] v_grad = mse_gradient(v_output, target_v)
-        float[] v_b_snapshot = copy_float_array(v_lora_b)
+        []float v_grad = mse_gradient(v_output, target_v)
+        []float v_b_snapshot = copy_float_array(v_lora_b)
         out_idx = 0
         for out_idx < v_out {
             r = 0
@@ -996,7 +996,7 @@ func run_posttrain_lora_sft_flat() int {
     }
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
-    int[] q_a_shape = make([]int, 2)
+    []int q_a_shape = make([]int, 2)
     q_a_shape[0] = rank
     q_a_shape[1] = hidden_size
     tensor q_a_tensor = tensor {
@@ -1007,7 +1007,7 @@ func run_posttrain_lora_sft_flat() int {
         shape_count: 2,
         data_count: len(q_lora_a),
     }
-    int[] q_b_shape = make([]int, 2)
+    []int q_b_shape = make([]int, 2)
     q_b_shape[0] = hidden_size
     q_b_shape[1] = rank
     tensor q_b_tensor = tensor {
@@ -1018,7 +1018,7 @@ func run_posttrain_lora_sft_flat() int {
         shape_count: 2,
         data_count: len(q_lora_b),
     }
-    int[] v_a_shape = make([]int, 2)
+    []int v_a_shape = make([]int, 2)
     v_a_shape[0] = rank
     v_a_shape[1] = hidden_size
     tensor v_a_tensor = tensor {
@@ -1029,7 +1029,7 @@ func run_posttrain_lora_sft_flat() int {
         shape_count: 2,
         data_count: len(v_lora_a),
     }
-    int[] v_b_shape = make([]int, 2)
+    []int v_b_shape = make([]int, 2)
     v_b_shape[0] = v_out
     v_b_shape[1] = rank
     tensor v_b_tensor = tensor {

@@ -6,7 +6,7 @@ struct embedding_layer {
     int hidden_size
 }
 
-float[][] GLOBAL_EMBEDDING
+[]float[] GLOBAL_EMBEDDING
 
 func create_embedding_layer() embedding_layer {
     return embedding_layer{
@@ -26,7 +26,7 @@ func ensure_embeddings_loaded() {
 func lookup_embedding(int token_id) []float {
     ensure_embeddings_loaded()
     if token_id < 0 || token_id >= len(GLOBAL_EMBEDDING) {
-        float[] zeros = make([]float, 896)
+        []float zeros = make([]float, 896)
         int i = 0
         for i < 896 { zeros[i] = 0.0; i = i + 1 }
         return zeros
@@ -34,8 +34,8 @@ func lookup_embedding(int token_id) []float {
     GLOBAL_EMBEDDING[token_id]
 }
 
-func embed_tokens(int[] token_ids) float[][] {
-    float[][] result = floatmake([][], len(token_ids))
+func embed_tokens([]int token_ids) []float[] {
+    []float[] result = floatmake([][], len(token_ids))
     int i = 0
     for i < len(token_ids) {
         result = append(result, lookup_embedding(token_ids[i]))

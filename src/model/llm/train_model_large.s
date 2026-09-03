@@ -197,7 +197,7 @@ func split_lines(string s) []string {
         }
         j = j + 1
     }
-    string[] out = make([]string, capacity)
+    []string out = make([]string, capacity)
     string line = ""
     int idx = 0
     int i = 0
@@ -220,7 +220,7 @@ func split_lines(string s) []string {
     out
 }
 
-func line_value(string[] lines, string key, string fallback) string {
+func line_value([]string lines, string key, string fallback) string {
     int i = 0
     for i < len(lines) {
         if starts_with(lines[i], key) {
@@ -231,15 +231,15 @@ func line_value(string[] lines, string key, string fallback) string {
     fallback
 }
 
-func line_value_int(string[] lines, string key, int fallback) int {
+func line_value_int([]string lines, string key, int fallback) int {
     str_to_int(line_value(lines, key, int_to_str(fallback, 0)), fallback)
 }
 
-func line_value_float(string[] lines, string key, float fallback) float {
+func line_value_float([]string lines, string key, float fallback) float {
     str_to_float(line_value(lines, key, fmt_float(fallback, 6)))
 }
 
-func join_documents(string[] docs) string {
+func join_documents([]string docs) string {
     string out = ""
     int i = 0
     for i < len(docs) {
@@ -324,7 +324,7 @@ struct gpt_large_state {
 }
 
 func default_documents() []string {
-    string[] docs = make([]string, 3)
+    []string docs = make([]string, 3)
     docs[0] = "neurx trains a decoder-only transformer for language modeling."
     docs[1] = "pretraining updates attention and feed-forward blocks over token batches."
     docs[2] = "checkpointing and validation need to stay visible and resumable."
@@ -476,7 +476,7 @@ func gpt_large_load_checkpoint_if_available(gpt_large_state fallback, gpt_large_
     if checkpoint_path == "" || !runtime_file_exists(checkpoint_path) {
         return fallback
     }
-    string[] lines = split_lines(runtime_read_text_file(checkpoint_path))
+    []string lines = split_lines(runtime_read_text_file(checkpoint_path))
     gpt_large_state {
         name: line_value(lines, "name=", fallback.name),
         family: line_value(lines, "family=", fallback.family),

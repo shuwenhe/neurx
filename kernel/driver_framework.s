@@ -28,7 +28,7 @@ struct registered_driver {
     driver_ops ops
     
     int priority
-    string[] supported_devices
+    []string supported_devices
     bool auto_probe
     
     int device_count
@@ -295,7 +295,7 @@ func driver_get(string driver_name) registered_driver {
 }
 
 func driver_list_all() []string {
-    string[] result = make([]string, 64)
+    []string result = make([]string, 64)
     int i = 0
     for i < global_driver_registry.driver_count {
         result[i] = global_driver_registry.drivers[i].driver_name

@@ -4,7 +4,7 @@ use neurx.nn.{module}
 
 struct merge_config {
     string merge_method
-    float[] weights
+    []float weights
     float lambda
     int top_k_percent
     float drop_rate
@@ -13,7 +13,7 @@ struct merge_config {
 
 struct model_delta {
     []tensor param_deltas
-    string[] param_names
+    []string param_names
 }
 
 func new_merge_config() merge_config {
@@ -34,7 +34,7 @@ func compute_model_delta(
     []tensor ft_params = finetuned.parameters()
     []tensor base_params = base.parameters()
     []tensor deltas = make([]tensor, ft_params.len)
-    string[] names = make([]string, ft_params.len)
+    []string names = make([]string, ft_params.len)
     int i = 0
     for i < ft_params.len {
         tensor delta = tensor_ops.sub(ft_params[i], base_params[i])
@@ -50,7 +50,7 @@ func compute_model_delta(
 
 func merge_models_average(
     []module models,
-    float[] weights
+    []float weights
 ) module {
     if models.len == 0 {
         return module{}
@@ -61,7 +61,7 @@ func merge_models_average(
         weight_sum = weight_sum + weights[i]
         i = i + 1
     }
-    float[] norm_weights = make([]float, weights.len)
+    []float norm_weights = make([]float, weights.len)
     i = 0
     for i < weights.len {
         norm_weights[i] = weights[i] / weight_sum
@@ -92,7 +92,7 @@ func merge_models_average(
 func merge_task_arithmetic(
     module base,
     []model_delta deltas,
-    float[] weights,
+    []float weights,
     float lambda
 ) module {
     module result = base.clone()
@@ -123,7 +123,7 @@ func merge_task_arithmetic(
 func merge_ties(
     module base,
     []model_delta deltas,
-    float[] weights,
+    []float weights,
     int top_k_percent
 ) module {
     module result = base.clone()
@@ -152,7 +152,7 @@ func merge_ties(
 func merge_dare(
     module base,
     []model_delta deltas,
-    float[] weights,
+    []float weights,
     float drop_rate
 ) module {
     module result = base.clone()
@@ -201,7 +201,7 @@ func elect_sign(tensor trimmed) tensor {
     signed
 }
 
-func weighted_average(tensor values, float[] weights) tensor {
+func weighted_average(tensor values, []float weights) tensor {
     tensor result = tensor_ops.zeros_like(values)
     int i = 0
     for i < weights.len {

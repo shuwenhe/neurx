@@ -35,7 +35,7 @@ struct encoder_config {
 }
 
 struct encoded_features {
-	float[]32 feature_vector
+	[]float32 feature_vector
 	int32 feature_dim
 	float64 encoding_time_ms
 	string modality
@@ -48,7 +48,7 @@ struct text_encoder {
 	string model_id
 	int32 max_seq_length
 	int32 vocab_size
-	map[string]float[]32 token_embeddings
+	map[string][]float32 token_embeddings
 	time.Time created_at
 }
 
@@ -76,7 +76,7 @@ struct audio_encoder_config {
 struct audio_encoder {
 	string model_id
 	*audio_encoder_config config
-	float[]32 mel_filterbank
+	[]float32 mel_filterbank
 	time.Time created_at
 }
 
@@ -169,7 +169,7 @@ func (multimodal_encoder* mme) register_text_encoder(tokenizer *tokenizer_interf
 		model_id:        model_id,
 		max_seq_length:  max_seq,
 		vocab_size:      50257,
-		token_embeddings: make(map[string]float[]32),
+		token_embeddings: make(map[string][]float32),
 		created_at:      time.Now(),
 	}
 	return nil
@@ -216,7 +216,7 @@ func (multimodal_encoder* mme) register_audio_encoder(model_id string, sample_ra
 	mme.audio_enc = *audio_encoder{
 		model_id:       model_id,
 		config:         config,
-		mel_filterbank: make(float[]32, n_mels),
+		mel_filterbank: make([]float32, n_mels),
 		created_at:     time.Now(),
 	}
 	return nil
@@ -250,11 +250,11 @@ func (multimodal_encoder* mme) encode_text(text string, max_length int32) (*enco
 	}
 	text_enc := mme.text_enc
 	mme.mu.Unlock()
-	tokens := make(int[]32, 0)
+	tokens := make([]int32, 0)
 	for i := 0; i < len(text) && int32(len(tokens)) < max_length; i++ {
 		tokens = append(tokens, int32(text[i]))
 	}
-	feature_vector := make(float[]32, 768)
+	feature_vector := make([]float32, 768)
 	sum := float32(0)
 	for i := 0; i < len(tokens) && i < len(feature_vector); i++ {
 		val := float32(tokens[i]) / 100000.0
@@ -288,7 +288,7 @@ func (multimodal_encoder* mme) encode_image(image_data* image_data) (*encoded_fe
 	}
 	vision_enc := mme.vision_enc
 	mme.mu.Unlock()
-	feature_vector := make(float[]32, vision_enc.embedding_dim)
+	feature_vector := make([]float32, vision_enc.embedding_dim)
 	for i := 0; i < len(feature_vector); i++ {
 		feature_vector[i] = 0.1
 	}
@@ -314,7 +314,7 @@ func (multimodal_encoder* mme) encode_audio(audio_data* audio_data) (*encoded_fe
 	}
 	audio_enc := mme.audio_enc
 	mme.mu.Unlock()
-	feature_vector := make(float[]32, audio_enc.config.output_dim)
+	feature_vector := make([]float32, audio_enc.config.output_dim)
 	for i := 0; i < len(feature_vector); i++ {
 		if i < len(audio_data.samples) {
 			feature_vector[i] = audio_data.samples[i] / 10.0
@@ -348,7 +348,7 @@ func (multimodal_encoder* mme) encode_video(video_data* video_data) (*encoded_fe
 	if num_frames_to_encode > video_enc.num_frames {
 		num_frames_to_encode = video_enc.num_frames
 	}
-	feature_vector := make(float[]32, video_enc.frame_embedding_dim)
+	feature_vector := make([]float32, video_enc.frame_embedding_dim)
 	for i := 0; i < len(feature_vector); i++ {
 		if i < int(num_frames_to_encode) {
 			feature_vector[i] = float32(i) / float32(num_frames_to_encode)
@@ -390,7 +390,7 @@ func (multimodal_encoder* mme) update_encoder_config(encoder_name string, config
 func (multimodal_encoder* mme) list_registered_encoders() []string {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
-	encoders := make(string[], 0)
+	encoders := make([]string, 0)
 	if mme.text_enc != nil {
 		encoders = append(encoders, "text")
 	}

@@ -41,7 +41,7 @@ struct speculative_backend_state {
 
 struct speculative_verification_result {
     speculative_backend_state state
-    int[] output_tokens
+    []int output_tokens
     int accepted_count
     bool used_fallback
 }
@@ -100,11 +100,11 @@ func init_speculative_backend(speculative_backend_config config) speculative_bac
     }
 }
 
-func speculative_copy_prefix(int[] values, int count) []int {
+func speculative_copy_prefix([]int values, int count) []int {
     int output_count = count
     if output_count < 0 { output_count = 0 }
     if output_count > len(values) { output_count = len(values) }
-    int[] output = make([]int, output_count)
+    []int output = make([]int, output_count)
     int i = 0
     for i < output_count {
         output[i] = values[i]
@@ -126,11 +126,11 @@ func speculative_adapt_width(speculative_backend_state state, int proposed, int 
     width
 }
 
-func verify_speculative_tokens(speculative_backend_state state, int[] proposed, int[] target, int fallback_token) speculative_verification_result {
+func verify_speculative_tokens(speculative_backend_state state, []int proposed, []int target, int fallback_token) speculative_verification_result {
     if !state.initialized || !state.config.enabled {
         return speculative_verification_result {
             state: state,
-            output_tokens: int[]{fallback_token},
+            output_tokens: []int{fallback_token},
             accepted_count: 0,
             used_fallback: true,
         }
@@ -143,7 +143,7 @@ func verify_speculative_tokens(speculative_backend_state state, int[] proposed, 
         accepted = accepted + 1
     }
     int output_count = accepted + 1
-    int[] output = make([]int, output_count)
+    []int output = make([]int, output_count)
     int i = 0
     for i < accepted {
         output[i] = proposed[i]

@@ -93,7 +93,7 @@ struct DecodingOptions {
 
 struct TokenSequence {
     tokens: i32[],
-    text_tokens: string[],
+    text_tokens: []string,
     attention_mask: i32[],
     token_type_ids: i32[],
     special_tokens_mask: i32[],

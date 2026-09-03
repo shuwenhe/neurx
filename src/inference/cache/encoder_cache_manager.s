@@ -6,11 +6,11 @@ struct encoder_cache_config {
 
 struct encoder_cache_state {
     encoder_cache_config config
-    int[] media_hashes
-    int[] embedding_counts
-    int[] reference_counts
-    int[] last_used_steps
-    int[] active
+    []int media_hashes
+    []int embedding_counts
+    []int reference_counts
+    []int last_used_steps
+    []int active
     int entry_count
     int free_embeddings
     int logical_step
@@ -28,7 +28,7 @@ struct encoder_cache_result {
 }
 
 func encoder_cache_int_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

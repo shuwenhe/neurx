@@ -13,16 +13,16 @@ struct session_kv_binding_config {
 
 struct session_kv_binding_state {
     session_kv_binding_config config
-    int[] session_ids
-    int[] request_ids
-    int[] request_pool_indices
-    int[] committed_tokens
-    int[] allocated_tokens
-    int[] page_counts
-    int[] first_page_ids
-    int[] page_ids
-    int[] ownership
-    int[] active
+    []int session_ids
+    []int request_ids
+    []int request_pool_indices
+    []int committed_tokens
+    []int allocated_tokens
+    []int page_counts
+    []int first_page_ids
+    []int page_ids
+    []int ownership
+    []int active
     int binding_count
     int saved_count
     int restored_count
@@ -40,7 +40,7 @@ struct session_kv_result {
 }
 
 func session_kv_int_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

@@ -46,7 +46,7 @@ struct experiment_result {
 }
 
 struct experiment_comparison {
-    experiment_ids      string[]
+    experiment_ids      []string
     metric_name         string
     results             map[string]float64
     winner              string
@@ -351,7 +351,7 @@ func (experiment_manager* manager) run_complete_experiment_cycle() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Comparing Experiments                 │")
     fmt.Println("└────────────────────────────────────────┘")
-    exp_ids := string[]{"exp-001", "exp-002", "exp-003"}
+    exp_ids := []string{"exp-001", "exp-002", "exp-003"}
     comparison := manager.compare_experiments(exp_ids, "perplexity")
     manager.comparison_history = append(manager.comparison_history, comparison)
     manager.get_experiment_history()

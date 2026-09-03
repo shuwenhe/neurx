@@ -2,12 +2,12 @@ package neurx.scheduler.pytorch_schedulers
 struct multistep_lr_state {
     float base_lr
     float gamma
-    int[] milestones
+    []int milestones
     int current_step
     float current_lr
 }
 
-func new_multistep_lr(float base_lr, float gamma, int[] milestones) multistep_lr_state {
+func new_multistep_lr(float base_lr, float gamma, []int milestones) multistep_lr_state {
     multistep_lr_state {
         base_lr: base_lr,
         gamma: gamma,
@@ -17,7 +17,7 @@ func new_multistep_lr(float base_lr, float gamma, int[] milestones) multistep_lr
     }
 }
 
-func multistep_lr_compute(float base_lr, float gamma, int[] milestones, int step) float {
+func multistep_lr_compute(float base_lr, float gamma, []int milestones, int step) float {
     int num_passed = 0
     int i = 0
     for i < len(milestones) {

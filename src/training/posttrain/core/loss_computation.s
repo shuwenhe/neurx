@@ -12,7 +12,7 @@ struct loss_result_s {
     float ce_loss
     float kl_loss
     float total_loss
-    float[][] grad_logits
+    []float[] grad_logits
 }
 
 func new_loss_state_s(int num_classes) loss_state_s {
@@ -25,8 +25,8 @@ func new_loss_state_s(int num_classes) loss_state_s {
     }
 }
 
-func softmax_s(float[] logits) []float {
-    float[] probs
+func softmax_s([]float logits) []float {
+    []float probs
     float max_logit = -1000000.0
     int i = 0
     for i < len(logits) {
@@ -43,7 +43,7 @@ func softmax_s(float[] logits) []float {
         sum_exp = sum_exp + exp_logit
         i = i + 1
     }
-    float[] normalized
+    []float normalized
     i = 0
     for i < len(probs) {
         normalized = append(normalized, probs[i] / sum_exp)
@@ -52,9 +52,9 @@ func softmax_s(float[] logits) []float {
     normalized
 }
 
-func log_softmax_s(float[] logits) []float {
-    float[] log_probs
-    float[] probs = softmax_s(logits)
+func log_softmax_s([]float logits) []float {
+    []float log_probs
+    []float probs = softmax_s(logits)
     int i = 0
     for i < len(probs) {
         float log_prob = 0.0
@@ -67,14 +67,14 @@ func log_softmax_s(float[] logits) []float {
     log_probs
 }
 
-func cross_entropy_loss_s(float[][] logits, int[][] labels) float {
+func cross_entropy_loss_s([]float[] logits, []int[] labels) float {
     float total_loss = 0.0
     int count = 0
     int batch_idx = 0
     for batch_idx < len(logits) {
-        float[] batch_logits = logits[batch_idx]
-        int[] batch_labels = labels[batch_idx]
-        float[] log_probs = log_softmax_s(batch_logits)
+        []float batch_logits = logits[batch_idx]
+        []int batch_labels = labels[batch_idx]
+        []float log_probs = log_softmax_s(batch_logits)
         int seq_idx = 0
         for seq_idx < len(batch_labels) {
             int label = batch_labels[seq_idx]
@@ -93,13 +93,13 @@ func cross_entropy_loss_s(float[][] logits, int[][] labels) float {
     total_loss
 }
 
-func kl_divergence_loss_s(float[][] pred_logits, float[][] ref_logits) float {
+func kl_divergence_loss_s([]float[] pred_logits, []float[] ref_logits) float {
     float kl_loss = 0.0
     int count = 0
     int batch_idx = 0
     for batch_idx < len(pred_logits) {
-        float[] pred_probs = softmax_s(pred_logits[batch_idx])
-        float[] ref_probs = softmax_s(ref_logits[batch_idx])
+        []float pred_probs = softmax_s(pred_logits[batch_idx])
+        []float ref_probs = softmax_s(ref_logits[batch_idx])
         int i = 0
         for i < len(pred_probs) {
             if pred_probs[i] > 0.0 && ref_probs[i] > 0.0 {
@@ -117,14 +117,14 @@ func kl_divergence_loss_s(float[][] pred_logits, float[][] ref_logits) float {
     kl_loss
 }
 
-func cross_entropy_backward_s(float[][] logits, int[][] labels) float[][] {
-    float[][] gradients
+func cross_entropy_backward_s([]float[] logits, []int[] labels) []float[] {
+    []float[] gradients
     int batch_idx = 0
     for batch_idx < len(logits) {
-        float[] batch_logits = logits[batch_idx]
-        int[] batch_labels = labels[batch_idx]
-        float[] probs = softmax_s(batch_logits)
-        float[] grad = probs
+        []float batch_logits = logits[batch_idx]
+        []int batch_labels = labels[batch_idx]
+        []float probs = softmax_s(batch_logits)
+        []float grad = probs
         int seq_idx = 0
         for seq_idx < len(batch_labels) {
             int label = batch_labels[seq_idx]
@@ -140,13 +140,13 @@ func cross_entropy_backward_s(float[][] logits, int[][] labels) float[][] {
 }
 
 func compute_loss_s(
-    float[][] logits,
-    int[][] labels,
+    []float[] logits,
+    []int[] labels,
     loss_state_s state
 ) loss_result_s {
     float ce_loss = cross_entropy_loss_s(logits, labels)
     float kl_loss = 0.0
-    float[][] grad_logits = cross_entropy_backward_s(logits, labels)
+    []float[] grad_logits = cross_entropy_backward_s(logits, labels)
     loss_result_s {
         ce_loss: ce_loss,
         kl_loss: kl_loss,

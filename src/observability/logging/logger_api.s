@@ -36,7 +36,7 @@ func log_scalar(
 func log_histogram(
     logger *lg,
     string name,
-    float[] values,
+    []float values,
     int step,
     map[string]string tags
 ) {

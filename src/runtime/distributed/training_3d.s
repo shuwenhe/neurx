@@ -88,11 +88,11 @@ struct pipeline_stage_state {
     int stage_id
     int first_layer_idx
     int last_layer_idx
-    int[] layer_indices
-    float[][] input_buffer
-    float[][] output_buffer
-    bool[] needs_gradient_checkpoint
-    float[][][] activation_cache
+    []int layer_indices
+    []float[] input_buffer
+    []float[] output_buffer
+    []bool needs_gradient_checkpoint
+    []float[][] activation_cache
     float forward_time_ms
     float backward_time_ms
     float comm_time_ms
@@ -188,7 +188,7 @@ func init_orchestrator(
         int start_layer = s * layers_per_stage + min_int(s, remaining_layers)
         int end_layer = start_layer + layers_per_stage - 1
         if s < remaining_layers { end_layer = end_layer + 1 }
-        int[] layer_ids = make([]int, end_layer - start_layer + 1)
+        []int layer_ids = make([]int, end_layer - start_layer + 1)
         int l = start_layer
         for l <= end_layer {
             layer_ids = append(layer_ids, l)
@@ -231,9 +231,9 @@ func init_orchestrator(
     }
 }
 
-func append(int[] arr, int val) []int {
+func append([]int arr, int val) []int {
     int n = len(arr)
-    float[] new_arr = make([]int, n + 1)
+    []float new_arr = make([]int, n + 1)
     int i = 0
     for i < n { new_arr[i] = arr[i]; i = i + 1 }
     new_arr[n] = val
@@ -387,7 +387,7 @@ func execute_pipeline_forward(
     } else {
         orch.pp_stages[my_stage].input_buffer = data.input_tokens
     }
-    float[][] output = run_stage_forward(
+    []float[] output = run_stage_forward(
         orch,
         orch.pp_stages[my_stage],
         orch.pp_stages[my_stage].input_buffer,
@@ -403,11 +403,11 @@ func execute_pipeline_forward(
 func run_stage_forward(
     ref orchestrator_state orch,
     pipeline_stage_state stage,
-    float[][] input,
+    []float[] input,
     int micro_batch_id
-) float[][] {
+) []float[] {
     int num_layers_in_stage = len(stage.layer_indices)
-    float[][] current_hidden = input
+    []float[] current_hidden = input
     int idx = 0
     for idx < num_layers_in_stage {
         int layer_idx = stage.layer_indices[idx]
@@ -425,9 +425,9 @@ func run_stage_forward(
 func transformer_layer_forward(
     model_parallel_config cfg,
     int layer_idx,
-    float[][] hidden_states,
+    []float[] hidden_states,
     int micro_batch_id
-) float[][] {
+) []float[] {
     hidden_states = apply_rmsnorm(hidden_states, layer_idx, cfg)
     hidden_states = multi_head_attention_forward(cfg, layer_idx, hidden_states)
     hidden_states = residual_add(hidden_states,  hidden_states)
@@ -441,15 +441,15 @@ func transformer_layer_forward(
     return hidden_states
 }
 
-func apply_rmsnorm(float[][] x, int norm_idx, model_parallel_config cfg) float[][] { x }
+func apply_rmsnorm([]float[] x, int norm_idx, model_parallel_config cfg) []float[] { x }
 
-func multi_head_attention_forward(model_parallel_config cfg, int layer, float[][] x) float[][] { x }
+func multi_head_attention_forward(model_parallel_config cfg, int layer, []float[] x) []float[] { x }
 
-func swiglu_ffn_forward(model_parallel_config cfg, int layer, float[][] x) float[][] { x }
+func swiglu_ffn_forward(model_parallel_config cfg, int layer, []float[] x) []float[] { x }
 
-func moe_ffn_forward(model_parallel_config cfg, int layer, float[][] x) float[][] { x }
+func moe_ffn_forward(model_parallel_config cfg, int layer, []float[] x) []float[] { x }
 
-func residual_add(float[][] a, float[][] b) float[][] { a }
+func residual_add([]float[] a, []float[] b) []float[] { a }
 
 func execute_pipeline_backward(ref orchestrator_state orch, int micro_batch_id) {
 }
@@ -458,7 +458,7 @@ func synchronize_gradients_across_dp(ref orchestrator_state orch) {
     parallel dims = orch.model_cfg.dims
     int p = 0
     for p < get_num_parameters(orch) {
-        float[] grad = get_parameter_grad(orch, p)
+        []float grad = get_parameter_grad(orch, p)
         if is_fsdp_enabled(orch) {
             grad = reduce_scatter_across_dp(grad, dims.dp_group_id, dims.dp_degree)
         } else {
@@ -473,7 +473,7 @@ func clip_gradients(ref orchestrator_state orch, float max_norm) {
     float total_norm = 0.0
     int p = 0
     for p < get_num_parameters(orch) {
-        float[] grad = get_parameter_grad(orch, p)
+        []float grad = get_parameter_grad(orch, p)
         float norm = vector_l2_norm(grad)
         total_norm = total_norm + norm * norm
         p = p + 1
@@ -494,10 +494,10 @@ func optimizer_step(ref orchestrator_state orch) {
     int t = orch.current_step + 1
     int p = 0
     for p < get_num_parameters(orch) {
-        float[] param = get_parameter(orch, p)
-        float[] grad = get_parameter_grad(orch, p)
-        float[] exp_avg = get_exp_avg(orch, p)
-        float[] exp_avg_sq = get_exp_avg_sq(orch, p)
+        []float param = get_parameter(orch, p)
+        []float grad = get_parameter_grad(orch, p)
+        []float exp_avg = get_exp_avg(orch, p)
+        []float exp_avg_sq = get_exp_avg_sq(orch, p)
         float bias_corr1 = 1.0 - pow_float(tc.adam_beta1, float_of_int(t))
         float bias_corr2 = 1.0 - pow_float(tc.adam_beta2, float_of_int(t))
         float step_size = tc.learning_rate / bias_corr1
@@ -520,7 +520,7 @@ func optimizer_step(ref orchestrator_state orch) {
 func zero_grads(ref orchestrator_state orch) {
     int p = 0
     for p < get_num_parameters(orch) {
-        float[] grad = get_parameter_grad(orch, p)
+        []float grad = get_parameter_grad(orch, p)
         int i = 0
         for i < len(grad) {
             grad[i] = 0.0
@@ -632,28 +632,28 @@ func cos_approx(float x) float {
     return result
 }
 
-func vector_l2_norm(float[] v) float {
+func vector_l2_norm([]float v) float {
     float sum_sq = 0.0
     int i = 0
     for i < len(v) { sum_sq = sum_sq + v[i] * v[i]; i = i + 1 }
     return sqrt_approx(sum_sq)
 }
 
-func scale_vector(ref float[] v, float s) {
+func scale_vector(ref []float v, float s) {
     int i = 0
     for i < len(v) { v[i] = v[i] * s; i = i + 1 }
 }
 
-func recv_activation_from_previous_stage(int from_stage, int mb_id) float[][] { return allocate_2d(128, 8192) }
+func recv_activation_from_previous_stage(int from_stage, int mb_id) []float[] { return allocate_2d(128, 8192) }
 
-func send_activation_to_next_stage(int to_stage, float[][] act, int mb_id) {}
+func send_activation_to_next_stage(int to_stage, []float[] act, int mb_id) {}
 
-func reduce_scatter_across_dp(float[] g, int group, int degree) []float { return g }
+func reduce_scatter_across_dp([]float g, int group, int degree) []float { return g }
 
-func all_reduce_sum_across_dp(float[] g, int group, int degree) []float { return g }
+func all_reduce_sum_across_dp([]float g, int group, int degree) []float { return g }
 
-func allocate_2d(int r, int c) float[][] {
-    float[][] t = floatmake([][], r)
+func allocate_2d(int r, int c) []float[] {
+    []float[] t = floatmake([][], r)
     int i = 0
     for i < r { t[i] = make([]float, c); i = i + 1 }
     return t
@@ -667,21 +667,21 @@ func get_parameter_grad(orchestrator o, int idx) []float { return []float{} }
 
 func get_parameter_grad_ref(ref orchestrator o, int idx) []float { return []float{} }
 
-func set_parameter(ref orchestrator o, int idx, float[] v) {}
+func set_parameter(ref orchestrator o, int idx, []float v) {}
 
-func set_parameter_grad(ref orchestrator o, int idx, float[] v) {}
+func set_parameter_grad(ref orchestrator o, int idx, []float v) {}
 
 func get_exp_avg(orchestrator o, int idx) []float { return []float{} }
 
 func get_exp_avg_sq(orchestrator o, int idx) []float { return []float{} }
 
-func set_exp_avg(ref orchestrator o, int idx, float[] v) {}
+func set_exp_avg(ref orchestrator o, int idx, []float v) {}
 
-func set_exp_avg_sq(ref orchestrator o, int idx, float[] v) {}
+func set_exp_avg_sq(ref orchestrator o, int idx, []float v) {}
 
 func compute_loss(orchestrator o) float { return 0.5 }
 
-struct micro_batch_data { float[][] input_tokens }
+struct micro_batch_data { []float[] input_tokens }
 
 func get_micro_batch(batch_data b, int id) micro_batch_data { return micro_batch_data{} }
 

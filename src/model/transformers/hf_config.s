@@ -21,7 +21,7 @@ struct hf_model_config {
     bool use_cache
     string torch_dtype
     string quantization_config
-    string[] supported_prompt_formats
+    []string supported_prompt_formats
 }
 
 func create_llama_config() hf_model_config {

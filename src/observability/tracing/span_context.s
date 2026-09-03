@@ -43,7 +43,7 @@ func new_span_id() span_id {
 
 func (trace_id* t) to_hex() []string {
     hex := ""
-    hex_chars := string[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
+    hex_chars := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
     for i := 0; i < len(t.value); i++ {
         b := t.value[i]
         hex = hex + hex_chars[b / 16]
@@ -54,7 +54,7 @@ func (trace_id* t) to_hex() []string {
 
 func (span_id* s) to_hex() []string {
     hex := ""
-    hex_chars := string[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
+    hex_chars := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
     for i := 0; i < len(s.value); i++ {
         b := s.value[i]
         hex = hex + hex_chars[b / 16]
@@ -126,7 +126,7 @@ func new_baggage() baggage {
     return b
 }
 
-func (baggage* b) set(key []string, value string[]) {
+func (baggage* b) set(key []string, value []string) {
     if len(key) > 0 && len(value) > 0 && len(b.items) > 0 {
         b.items[0][key[0]] = value[0]
     }

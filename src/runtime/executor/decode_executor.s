@@ -3,7 +3,7 @@ import "executor_base.s"
 struct DecodeExecutor {
     base                BaseExecutor
     decode_config       DecodeConfig
-    active_sequences    string[]
+    active_sequences    []string
     beam_search_state   map[string]BeamSearchData
 }
 

@@ -40,7 +40,7 @@ func agent_search_count_lines(string text) int {
 }
 
 func agent_search_candidate_paths(string route) []string {
-    string[] paths = make([]string, 12)
+    []string paths = make([]string, 12)
     paths = append(paths, "src/agent/runtime.s")
     paths = append(paths, "src/runtime/executor/executor.s")
     paths = append(paths, "src/runtime/task/planner.s")

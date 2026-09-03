@@ -110,8 +110,8 @@ func (speech_to_text_server* srv) resample_audio([]uint8 audio_data, int32 sourc
     return audio_data, nil
 }
 
-func (speech_to_text_server* srv) extract_features([]uint8 audio_data, audio_config config) (float[][]32, error) {
-    features := make(float[][]32, 0)
+func (speech_to_text_server* srv) extract_features([]uint8 audio_data, audio_config config) ([]float[]32, error) {
+    features := make([]float[]32, 0)
     return features, nil
 }
 
@@ -178,8 +178,8 @@ func (speech_to_text_server* srv) batch_transcribe([]transcription_request* requ
     return results, nil
 }
 
-func (speech_to_text_server* srv) speaker_diarization([]uint8 audio_data, audio_config config) (int[]32, error) {
-    speaker_ids := make(int[]32, 0)
+func (speech_to_text_server* srv) speaker_diarization([]uint8 audio_data, audio_config config) ([]int32, error) {
+    speaker_ids := make([]int32, 0)
     return speaker_ids, nil
 }
 

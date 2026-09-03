@@ -1,8 +1,8 @@
 package neurx.tensor.reduce
 use neurx.tensor.core
-func copy_int(int[] data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -11,7 +11,7 @@ func copy_int(int[] data) []int {
     return out
 }
 
-func shape_prod(int[] shape) int {
+func shape_prod([]int shape) int {
     int n = 1
     int i = 0
     for i < len(shape) {
@@ -30,7 +30,7 @@ func normalize_dim_local(int dim, int ndim) int {
 }
 
 func make_scalar_from_like(float value, tensor like) tensor {
-    int[] shape = make([]int, 1)
+    []int shape = make([]int, 1)
     shape[0] = 1
     tensor out = neurx.tensor.core.empty(shape, like.desc.dtype, like.desc.device, like.desc.requires_grad)
     if out.desc.numel > 0 {
@@ -176,22 +176,22 @@ func argmin(tensor a) tensor {
     return reduce_argmin(a)
 }
 
-func reduce_output_shape(int[] shape, int dim, bool keepdim) []int {
+func reduce_output_shape([]int shape, int dim, bool keepdim) []int {
     int ndim = len(shape)
     int axis = normalize_dim_local(dim, ndim)
     if keepdim {
-        int[] out = copy_int(shape)
+        []int out = copy_int(shape)
         if axis >= 0 && axis < len(out) {
             out[axis] = 1
         }
         return out
     }
     if ndim <= 1 {
-        int[] out = make([]int, 1)
+        []int out = make([]int, 1)
         out[0] = 1
         return out
     }
-    int[] out = make([]int, ndim - 1)
+    []int out = make([]int, ndim - 1)
     int i = 0
     int j = 0
     for i < ndim {
@@ -214,14 +214,14 @@ func reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
         return neurx.tensor.core.tensor_clone_storage(a)
     }
     tensor input = neurx.tensor.core.contiguous(a)
-    int[] out_shape = reduce_output_shape(input.desc.shape, dim, keepdim)
+    []int out_shape = reduce_output_shape(input.desc.shape, dim, keepdim)
     int total = shape_prod(out_shape)
     tensor out = neurx.tensor.core.empty(out_shape, input.desc.dtype, input.desc.device, input.desc.requires_grad)
     int axis_size = input.desc.shape[axis]
     int flat = 0
     for flat < total {
-        int[] coords = neurx.tensor.core.unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = neurx.tensor.core.unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -307,14 +307,14 @@ func reduce_arg_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
         return neurx.tensor.core.tensor_clone_storage(a)
     }
     tensor input = neurx.tensor.core.contiguous(a)
-    int[] out_shape = reduce_output_shape(input.desc.shape, dim, keepdim)
+    []int out_shape = reduce_output_shape(input.desc.shape, dim, keepdim)
     int total = shape_prod(out_shape)
     tensor out = neurx.tensor.core.empty(out_shape, input.desc.dtype, input.desc.device, input.desc.requires_grad)
     int axis_size = input.desc.shape[axis]
     int flat = 0
     for flat < total {
-        int[] coords = neurx.tensor.core.unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = neurx.tensor.core.unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {

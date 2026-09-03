@@ -64,7 +64,7 @@ func kv_cache_engine_get_block(kv_cache_engine engine, int block_id) kv_cache_bl
     return block
 }
 
-func kv_cache_engine_store_kv(kv_cache_engine engine, int[] prompt_tokens, float[] kv_data, int layer_id) int {
+func kv_cache_engine_store_kv(kv_cache_engine engine, []int prompt_tokens, []float kv_data, int layer_id) int {
     string prefix_hash = compute_prefix_hash(prompt_tokens, 100)
     int cached_block_id = kv_cache_engine_allocate_block(engine, layer_id, len(prompt_tokens))
     if cached_block_id < 0 {
@@ -74,16 +74,16 @@ func kv_cache_engine_store_kv(kv_cache_engine engine, int[] prompt_tokens, float
     kv_cache_block block = engine.memory_pool.blocks[cached_block_id]
     block.kv_data = kv_data
     engine.memory_pool.blocks[cached_block_id] = block
-    int[] block_ids = make([]int, 1)
+    []int block_ids = make([]int, 1)
     block_ids[0] = cached_block_id
     cache_index_store_blocks(engine.index, prefix_hash, block_ids)
     print("[KVCacheEngine] Stored KV for prefix " + prefix_hash + " in block " + int_to_string(cached_block_id) + "\n")
     return cached_block_id
 }
 
-func kv_cache_engine_query_kv(kv_cache_engine engine, int[] prompt_tokens) []int {
+func kv_cache_engine_query_kv(kv_cache_engine engine, []int prompt_tokens) []int {
     string prefix_hash = compute_prefix_hash(prompt_tokens, 100)
-    int[] cached_blocks = cache_index_get_blocks(engine.index, prefix_hash)
+    []int cached_blocks = cache_index_get_blocks(engine.index, prefix_hash)
     if len(cached_blocks) == 0 {
         engine.total_misses = engine.total_misses + 1
         print("[KVCacheEngine] Cache miss for prefix " + prefix_hash + "\n")

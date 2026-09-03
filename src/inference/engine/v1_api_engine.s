@@ -6,7 +6,7 @@ use neurx.inference.reasoning.reasoning_parser_registry.{reasoning_parser_none, 
 struct v1_request {
     request_id         string
     model             string
-    messages          int[]erface{}
+    messages          []interface{}
     max_tokens         int32
     temperature       float32
     top_p              float32
@@ -14,8 +14,8 @@ struct v1_request {
     frequency_penalty  float32
     presence_penalty   float32
     stream            bool
-    stop              string[]
-    tools             int[]erface{}
+    stop              []string
+    tools             []interface{}
     tool_choice        interface{}
 }
 

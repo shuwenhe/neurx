@@ -37,7 +37,7 @@ func create_directory(string dirpath) bool {
 
 func list_directory(string dirpath) []string {
     println("[FileIO] Listing directory: " + dirpath)
-    string[] files
+    []string files
     return files
 }
 

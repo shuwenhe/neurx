@@ -14,8 +14,8 @@ struct safety_monitor {
     float joint_limits_margin
     float collision_distance_threshold
     bool emergency_stop_triggered
-    float[] joint_positions
-    float[] joint_velocities
+    []float joint_positions
+    []float joint_velocities
     int monitoring_hz
 }
 
@@ -25,13 +25,13 @@ func new_safety_monitor(int hz) safety_monitor {
         joint_limits_margin: 0.1,
         collision_distance_threshold: 0.05,
         emergency_stop_triggered: false,
-        joint_positions: float[](),
-        joint_velocities: float[](),
+        joint_positions: []float(),
+        joint_velocities: []float(),
         monitoring_hz: hz,
     }
 }
 
-func (safety_monitor* monitor) check_joint_limits(float[] positions, float[] limits_min, float[] limits_max) bool {    if len(positions) != len(limits_min) || len(positions) != len(limits_max) {
+func (safety_monitor* monitor) check_joint_limits([]float positions, []float limits_min, []float limits_max) bool {    if len(positions) != len(limits_min) || len(positions) != len(limits_max) {
         return false
     }
     
@@ -46,7 +46,7 @@ func (safety_monitor* monitor) check_joint_limits(float[] positions, float[] lim
     true
 }
 
-func (safety_monitor* monitor) check_joint_velocities(float[] velocities, float max_velocity) bool {    for i in len(0..velocities) {
+func (safety_monitor* monitor) check_joint_velocities([]float velocities, float max_velocity) bool {    for i in len(0..velocities) {
         if velocities[i] > max_velocity {
             monitor.state = safety_state_critical
             return false

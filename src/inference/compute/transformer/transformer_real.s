@@ -1,15 +1,15 @@
 package neurx.inference.transformer_real
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 struct attention_state {
-    float[] query
-    float[] key
-    float[] value
-    float[] output
+    []float query
+    []float key
+    []float value
+    []float output
 }
 
 struct rope_cache {
-    float[] cos_cache
-    float[] sin_cache
+    []float cos_cache
+    []float sin_cache
     int max_pos
     int dim
 }
@@ -17,8 +17,8 @@ struct rope_cache {
 func rope_init(int max_seq_len, int hidden_dim) rope_cache {
     int num_heads = 12
     int head_dim = hidden_dim / num_heads
-    float[] cos_cache = make([]float, max_seq_len * head_dim)
-    float[] sin_cache = make([]float, max_seq_len * head_dim)
+    []float cos_cache = make([]float, max_seq_len * head_dim)
+    []float sin_cache = make([]float, max_seq_len * head_dim)
     int pos = 0
     for pos < max_seq_len {
         int dim = 0
@@ -78,13 +78,13 @@ func exp_approx(float x) float {
     return 1.0 + x + x2 / 2.0 + x3 / 6.0 + x4 / 24.0
 }
 
-func apply_rope(float[] q, float[] k, rope_cache rope, int position) (float[], float[]) {
+func apply_rope([]float q, []float k, rope_cache rope, int position) ([]float, []float) {
     int head_dim = rope.dim
     if position >= rope.max_pos {
         return q, k
     }
-    float[] q_rot = make([]float, len(q))
-    float[] k_rot = make([]float, len(k))
+    []float q_rot = make([]float, len(q))
+    []float k_rot = make([]float, len(k))
     int i = 0
     for i < len(q) {
         int head_idx = i / head_dim
@@ -109,21 +109,21 @@ func apply_rope(float[] q, float[] k, rope_cache rope, int position) (float[], f
     return q_rot, k_rot
 }
 
-func multi_head_attention(float[] input, float[] weights_qkv, float[] weights_out, int num_heads, int hidden_dim) []float {
+func multi_head_attention([]float input, []float weights_qkv, []float weights_out, int num_heads, int hidden_dim) []float {
     int head_dim = hidden_dim / num_heads
-    float[] output = make([]float, len(input))
-    float[] query = project_linear(input, weights_qkv, hidden_dim)
-    float[] key = project_linear(input, weights_qkv, hidden_dim)
-    float[] value = project_linear(input, weights_qkv, hidden_dim)
-    float[] scores = compute_attention_scores(query, key, head_dim, num_heads)
-    float[] weights = softmax(scores)
+    []float output = make([]float, len(input))
+    []float query = project_linear(input, weights_qkv, hidden_dim)
+    []float key = project_linear(input, weights_qkv, hidden_dim)
+    []float value = project_linear(input, weights_qkv, hidden_dim)
+    []float scores = compute_attention_scores(query, key, head_dim, num_heads)
+    []float weights = softmax(scores)
     output = matrix_mult_weighted(value, weights, hidden_dim)
     output = project_linear(output, weights_out, hidden_dim)
     return output
 }
 
-func project_linear(float[] input, float[] weights, int output_dim) []float {
-    float[] output = make([]float, output_dim)
+func project_linear([]float input, []float weights, int output_dim) []float {
+    []float output = make([]float, output_dim)
     int i = 0
     for i < output_dim {
         float sum = 0.0
@@ -138,8 +138,8 @@ func project_linear(float[] input, float[] weights, int output_dim) []float {
     return output
 }
 
-func compute_attention_scores(float[] query, float[] key, int head_dim, int num_heads) []float {
-    float[] scores = make([]float, len(query) * len(key))
+func compute_attention_scores([]float query, []float key, int head_dim, int num_heads) []float {
+    []float scores = make([]float, len(query) * len(key))
     int i = 0
     for i < len(query) {
         int j = 0
@@ -172,8 +172,8 @@ func sqrt_approx(float x) float {
     return guess
 }
 
-func matrix_mult_weighted(float[] values, float[] weights, int output_dim) []float {
-    float[] output = make([]float, output_dim)
+func matrix_mult_weighted([]float values, []float weights, int output_dim) []float {
+    []float output = make([]float, output_dim)
     int i = 0
     for i < output_dim {
         float sum = 0.0
@@ -188,12 +188,12 @@ func matrix_mult_weighted(float[] values, float[] weights, int output_dim) []flo
     return output
 }
 
-func softmax(float[] logits) []float {
+func softmax([]float logits) []float {
     int n = len(logits)
     if n == 0 {
         return []float{}
     }
-    float[] probs = make([]float, n)
+    []float probs = make([]float, n)
     float maxv = logits[0]
     int i = 1
     for i < n {
@@ -221,8 +221,8 @@ func softmax(float[] logits) []float {
     return probs
 }
 
-func feed_forward(float[] input, float[] weights_up, float[] weights_down, int intermediate_size, int hidden_dim) []float {
-    float[] hidden = project_linear(input, weights_up, intermediate_size)
+func feed_forward([]float input, []float weights_up, []float weights_down, int intermediate_size, int hidden_dim) []float {
+    []float hidden = project_linear(input, weights_up, intermediate_size)
     int i = 0
     for i < len(hidden) {
         float x = hidden[i]
@@ -230,12 +230,12 @@ func feed_forward(float[] input, float[] weights_up, float[] weights_down, int i
         hidden[i] = x * sig
         i = i + 1
     }
-    float[] output = project_linear(hidden, weights_down, hidden_dim)
+    []float output = project_linear(hidden, weights_down, hidden_dim)
     return output
 }
 
-func rms_norm(float[] input, float[] gamma, float eps) []float {
-    float[] output = make([]float, len(input))
+func rms_norm([]float input, []float gamma, float eps) []float {
+    []float output = make([]float, len(input))
     float sum_sq = 0.0
     int i = 0
     for i < len(input) {
@@ -253,18 +253,18 @@ func rms_norm(float[] input, float[] gamma, float eps) []float {
     return output
 }
 
-func transformer_layer(float[] input, float[] attn_weights, float[] ffn_weights, float[] ln_weights, int num_heads, int hidden_dim, int intermediate_size) []float {
-    float[] norm1 = rms_norm(input, ln_weights, 0.000001)
-    float[] attn_out = multi_head_attention(norm1, attn_weights, attn_weights, num_heads, hidden_dim)
-    float[] residual1 = add_vectors(input, attn_out)
-    float[] norm2 = rms_norm(residual1, ln_weights, 0.000001)
-    float[] ffn_out = feed_forward(norm2, ffn_weights, ffn_weights, intermediate_size, hidden_dim)
-    float[] output = add_vectors(residual1, ffn_out)
+func transformer_layer([]float input, []float attn_weights, []float ffn_weights, []float ln_weights, int num_heads, int hidden_dim, int intermediate_size) []float {
+    []float norm1 = rms_norm(input, ln_weights, 0.000001)
+    []float attn_out = multi_head_attention(norm1, attn_weights, attn_weights, num_heads, hidden_dim)
+    []float residual1 = add_vectors(input, attn_out)
+    []float norm2 = rms_norm(residual1, ln_weights, 0.000001)
+    []float ffn_out = feed_forward(norm2, ffn_weights, ffn_weights, intermediate_size, hidden_dim)
+    []float output = add_vectors(residual1, ffn_out)
     return output
 }
 
-func add_vectors(float[] a, float[] b) []float {
-    float[] result = make([]float, len(a))
+func add_vectors([]float a, []float b) []float {
+    []float result = make([]float, len(a))
     int i = 0
     for i < len(a) && i < len(b) {
         result[i] = a[i] + b[i]

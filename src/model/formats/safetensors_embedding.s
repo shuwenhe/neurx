@@ -1,5 +1,5 @@
 package neurx.models.formats.safetensors_embedding
-extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) int[]
+extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 struct safetensors_embedding {
     bool valid
     string path
@@ -14,14 +14,14 @@ struct safetensors_embedding {
 
 struct embedding_lookup_result {
     bool ok
-    float[] values
+    []float values
     string error_code
 }
 
 struct f32_tensor_result {
     bool ok
     safetensors_embedding tensor
-    float[] values
+    []float values
     string error_code
 }
 
@@ -52,14 +52,14 @@ func st_parse_uint(string text, int start) int {
     value
 }
 
-func st_bytes_to_string(int[] bytes) string {
+func st_bytes_to_string([]int bytes) string {
     string text = ""
     int i = 0
     for i < len(bytes) { text = text + string(bytes[i]); i = i + 1 }
     text
 }
 
-func st_u64_le(int[] bytes) int {
+func st_u64_le([]int bytes) int {
     if len(bytes) != 8 { return -1 }
     int value = 0
     int scale = 1
@@ -79,7 +79,7 @@ func st_pow2(int exponent) float {
     value
 }
 
-func st_f32_le(int[] bytes, int offset) float {
+func st_f32_le([]int bytes, int offset) float {
     int bits = bytes[offset] + bytes[offset + 1] * 256 + bytes[offset + 2] * 65536 + bytes[offset + 3] * 16777216
     int sign = 1
     if bits >= 2147483648 { sign = -1; bits = bits - 2147483648 }
@@ -89,9 +89,9 @@ func st_f32_le(int[] bytes, int offset) float {
     sign * (1.0 + mantissa * 1.0 / 8388608.0) * st_pow2(exponent - 127)
 }
 
-func st_bf16_le(int[] bytes, int offset) float {
+func st_bf16_le([]int bytes, int offset) float {
     int bits = bytes[offset] * 65536 + bytes[offset + 1] * 16777216
-    int[] expanded = make([]int, 4)
+    []int expanded = make([]int, 4)
     expanded[0] = 0
     expanded[1] = 0
     expanded[2] = bits / 65536 % 256
@@ -99,7 +99,7 @@ func st_bf16_le(int[] bytes, int offset) float {
     st_f32_le(expanded, 0)
 }
 
-func st_f16_le(int[] bytes, int offset) float {
+func st_f16_le([]int bytes, int offset) float {
     int bits = bytes[offset] + bytes[offset + 1] * 256
     int sign = 1
     if bits >= 32768 { sign = -1; bits = bits - 32768 }
@@ -110,7 +110,7 @@ func st_f16_le(int[] bytes, int offset) float {
     sign * (1.0 + mantissa * 1.0 / 1024.0) * st_pow2(exponent - 15)
 }
 
-func st_decode(int[] bytes, int offset, string dtype) float {
+func st_decode([]int bytes, int offset, string dtype) float {
     if dtype == "BF16" { return st_bf16_le(bytes, offset) }
     if dtype == "F16" { return st_f16_le(bytes, offset) }
     st_f32_le(bytes, offset)
@@ -121,10 +121,10 @@ func invalid_safetensors_embedding(string path, string code) safetensors_embeddi
 }
 
 func load_f32_tensor(string path, string tensor_name) safetensors_embedding {
-    int[] prefix = __host_read_binary_file_range(path, 0, 8)
+    []int prefix = __host_read_binary_file_range(path, 0, 8)
     int header_size = st_u64_le(prefix)
     if header_size <= 1 || header_size > 1048576 { return invalid_safetensors_embedding(path, "invalid_header_size") }
-    int[] header_bytes = __host_read_binary_file_range(path, 8, header_size)
+    []int header_bytes = __host_read_binary_file_range(path, 8, header_size)
     if len(header_bytes) != header_size { return invalid_safetensors_embedding(path, "truncated_header") }
     string header = st_bytes_to_string(header_bytes)
     int tensor = st_find(header, "\"" + tensor_name + "\"", 0)
@@ -163,9 +163,9 @@ func load_f32_embedding(string path, string tensor_name) safetensors_embedding {
 func lookup_f32_embedding(safetensors_embedding embedding, int token_id) embedding_lookup_result {
     if !embedding.valid { return embedding_lookup_result { ok: false, values: [], error_code: embedding.error_code } }
     if token_id < 0 || token_id >= embedding.rows { return embedding_lookup_result { ok: false, values: [], error_code: "token_out_of_range" } }
-    int[] bytes = __host_read_binary_file_range(embedding.path, embedding.data_offset + token_id * embedding.columns * embedding.element_bytes, embedding.columns * embedding.element_bytes)
+    []int bytes = __host_read_binary_file_range(embedding.path, embedding.data_offset + token_id * embedding.columns * embedding.element_bytes, embedding.columns * embedding.element_bytes)
     if len(bytes) != embedding.columns * embedding.element_bytes { return embedding_lookup_result { ok: false, values: [], error_code: "truncated_tensor" } }
-    float[] values = make([]float, embedding.columns)
+    []float values = make([]float, embedding.columns)
     int i = 0
     for i < embedding.columns { values[i] = st_decode(bytes, i * embedding.element_bytes, embedding.dtype); i = i + 1 }
     embedding_lookup_result { ok: true, values: values, error_code: "" }
@@ -173,10 +173,10 @@ func lookup_f32_embedding(safetensors_embedding embedding, int token_id) embeddi
 
 func read_f32_tensor(safetensors_embedding tensor) f32_tensor_result {
     if !tensor.valid { return f32_tensor_result { ok: false, tensor: tensor, values: [], error_code: tensor.error_code } }
-    int[] bytes = __host_read_binary_file_range(tensor.path, tensor.data_offset, tensor.data_bytes)
+    []int bytes = __host_read_binary_file_range(tensor.path, tensor.data_offset, tensor.data_bytes)
     if len(bytes) != tensor.data_bytes { return f32_tensor_result { ok: false, tensor: tensor, values: [], error_code: "truncated_tensor" } }
     int count = tensor.rows * tensor.columns
-    float[] values = make([]float, count)
+    []float values = make([]float, count)
     int i = 0
     for i < count { values[i] = st_decode(bytes, i * tensor.element_bytes, tensor.dtype); i = i + 1 }
     f32_tensor_result { ok: true, tensor: tensor, values: values, error_code: "" }

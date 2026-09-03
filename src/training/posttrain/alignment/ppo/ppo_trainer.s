@@ -1,8 +1,8 @@
 package neurx.posttrain.rlhf.ppo_trainer
 struct ppo_step {
     int step_id
-    float[] tokens
-    float[] logits
+    []float tokens
+    []float logits
     float log_prob_old
     float log_prob_new
     float value_estimate
@@ -51,10 +51,10 @@ struct ppo_config {
 
 struct ppo_state {
     ppo_config config
-    float[] policy_params
-    float[] policy_grads
-    float[] value_params
-    float[] value_grads
+    []float policy_params
+    []float policy_grads
+    []float value_params
+    []float value_grads
     int current_step
     int current_epoch
     int total_steps
@@ -68,7 +68,7 @@ struct ppo_state {
     float clip_fraction
     int global_rank
     int world_size
-    float[] global_avg_loss
+    []float global_avg_loss
 }
 
 struct ppo_training_result {
@@ -124,8 +124,8 @@ func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajecto
     if T == 0 {
         return traj
     }
-    float[] advantages = make_float_array(T, 0.0)
-    float[] returns = make_float_array(T, 0.0)
+    []float advantages = make_float_array(T, 0.0)
+    []float returns = make_float_array(T, 0.0)
     float gae = 0.0
     int t = T - 1
     for t >= 0 {
@@ -195,11 +195,11 @@ func compute_ppo_value_loss(
     0.5 * diff * diff
 }
 
-func compute_entropy(float[] logits) float {
+func compute_entropy([]float logits) float {
     if len(logits) == 0 {
         return 0.0
     }
-    float[] probs = softmax_approx(logits)
+    []float probs = softmax_approx(logits)
     float entropy = 0.0
     int i = 0
     for i < len(probs) {
@@ -421,7 +421,7 @@ func print_ppo_evaluation(ppo_state state, int step) {
 }
 
 func make_float_array(int size, float init_value) []float {
-    float[] arr = make([]float, size)
+    []float arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = init_value
@@ -435,7 +435,7 @@ func append_ppo_step([]ppo_step arr, ppo_step s) []ppo_step {
     arr
 }
 
-func compute_log_prob(float[] logits) float {
+func compute_log_prob([]float logits) float {
     if len(logits) == 0 {
         return 0.0
     }
@@ -448,7 +448,7 @@ func compute_log_prob(float[] logits) float {
     log_prob / float(len(logits))
 }
 
-func compute_value_estimate(float[] tokens, ppo_config config) float {
+func compute_value_estimate([]float tokens, ppo_config config) float {
     if len(tokens) == 0 {
         return 0.0
     }
@@ -497,9 +497,9 @@ func abs_float(float x) float {
     x
 }
 
-func softmax_approx(float[] logits) []float {
+func softmax_approx([]float logits) []float {
     int n = len(logits)
-    float[] probs = make([]float, n)
+    []float probs = make([]float, n)
     if n == 0 {
         return probs
     }

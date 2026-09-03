@@ -16,7 +16,7 @@ struct chat_config {
 
 struct chat_request {
     string user_input
-    conversation_history: string[]
+    conversation_history: []string
     i32 max_tokens
     f64 temperature
 }
@@ -61,7 +61,7 @@ func init_model(chat_config config) simple_transformer {
 
 func tokenize_input(string text) []i32 {
     tokens := []i32
-    var string[] words = strings.split(text, " ")
+    var []string words = strings.split(text, " ")
     i := 0
     for i < len(words) {
         var i32 word_id = i32(math.abs_i64(i64(i) * 73856093)) % 32000
@@ -226,7 +226,7 @@ func main() {
     io.println("   Layers: " + strings.from_i32(config.num_layers))
     io.println("   Total parameters: " + strings.from_i64(model.total_params))
     io.println("")
-    var string[] args = std.get_args()
+    var []string args = std.get_args()
     if len(args) > 1 {
         user_input := args[1]
         request := chat_request

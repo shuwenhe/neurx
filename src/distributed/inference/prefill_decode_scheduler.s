@@ -13,8 +13,8 @@ struct decode_state {
     int current_seq_length
     int output_tokens_generated
     int max_output_tokens
-    int[] kv_block_ids
-    float[] logits_buffer
+    []int kv_block_ids
+    []float logits_buffer
     int top_k
     float top_p
     bool is_finished
@@ -25,8 +25,8 @@ struct prefill_batch {
     prefill_request[] requests
     int total_prompt_tokens
     int max_prompt_length
-    float[] batched_input_ids
-    float[] batched_attention_mask
+    []float batched_input_ids
+    []float batched_attention_mask
     int batch_size
 }
 
@@ -68,8 +68,8 @@ func new_prefill_decode_scheduler(
             requests: make([]prefill_request, max_prefill_batch_size),
             total_prompt_tokens: 0,
             max_prompt_length: 0,
-            batched_input_ids: make(float[], max_prefill_batch_size * 4096),
-            batched_attention_mask: make(float[], max_prefill_batch_size * 4096),
+            batched_input_ids: make([]float, max_prefill_batch_size * 4096),
+            batched_attention_mask: make([]float, max_prefill_batch_size * 4096),
             batch_size: 0,
         },
         current_decode_batch: decode_batch {
@@ -112,8 +112,8 @@ func (prefill_decode_scheduler* sched) build_prefill_batch() (prefill_batch, boo
         requests: make([]prefill_request, sched.max_prefill_batch_size),
         total_prompt_tokens: 0,
         max_prompt_length: 0,
-        batched_input_ids: make(float[], sched.max_prefill_batch_size * 4096),
-        batched_attention_mask: make(float[], sched.max_prefill_batch_size * 4096),
+        batched_input_ids: make([]float, sched.max_prefill_batch_size * 4096),
+        batched_attention_mask: make([]float, sched.max_prefill_batch_size * 4096),
         batch_size: 0,
     }
     int batch_tokens = 0
@@ -150,7 +150,7 @@ func (prefill_decode_scheduler* sched) execute_prefill_batch(
             output_tokens_generated: 0,
             max_output_tokens: req.max_output_tokens,
             kv_block_ids: make([]int, (req.prompt_tokens + req.max_output_tokens + 15) / 16),
-            logits_buffer: make(float[], 32000),
+            logits_buffer: make([]float, 32000),
             top_k: 50,
             top_p: 0.9,
             is_finished: false,
@@ -198,8 +198,8 @@ func (prefill_decode_scheduler* sched) build_decode_batch(
 
 func (prefill_decode_scheduler* sched) decode_one_token_step(
     decode_batch* batch
-) (float[], bool) {
-    logits := make(float[], batch.batch_size * 32000)
+) ([]float, bool) {
+    logits := make([]float, batch.batch_size * 32000)
     int req_idx = 0
     active_count := 0
     for req_idx < len(batch.requests) {

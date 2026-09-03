@@ -6,7 +6,7 @@ struct kv_cache_block {
     int64 size_bytes
     int64 timestamp
     int hit_count
-    float[] kv_data
+    []float kv_data
 }
 int LOCATION_MEMORY = 0
 int LOCATION_DISK = 1

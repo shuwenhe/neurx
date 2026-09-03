@@ -22,7 +22,7 @@ struct inference_request {
     string prompt
     int max_tokens
     float temperature
-    float[] logits_bias
+    []float logits_bias
 }
 
 struct inference_response {
@@ -92,7 +92,7 @@ func phased_deployment_schedule() {
 
 struct shared_model_cache {
     string cache_dir
-    string[] cached_models
+    []string cached_models
     int total_size_gb
     int shared_replicas
 }
@@ -100,7 +100,7 @@ struct shared_model_cache {
 func new_shared_model_cache(string cache_dir, int replicas) shared_model_cache {
     shared_model_cache {
         cache_dir: cache_dir,
-        cached_models: string[](),
+        cached_models: []string(),
         total_size_gb: 0,
         shared_replicas: replicas,
     }

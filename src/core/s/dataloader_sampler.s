@@ -11,13 +11,13 @@ struct sampler_config {
 
 struct sampler {
     sampler_config config
-    int[] indices
+    []int indices
     int current_position
     int epoch
 }
 
 func new_sampler(sampler_config cfg) sampler {
-    int[] indices = make([]int, cfg.total_samples)
+    []int indices = make([]int, cfg.total_samples)
     for i in 0..cfg.total_samples {
         indices[i] = i
     }
@@ -34,7 +34,7 @@ func reset_sequential(sampler s) sampler {
     s
 }
 
-func next_batch_sequential(sampler s) (int[], bool) {
+func next_batch_sequential(sampler s) ([]int, bool) {
     if s.current_position >= len(s.indices) {
         ([], false)
     }
@@ -43,19 +43,19 @@ func next_batch_sequential(sampler s) (int[], bool) {
         if s.config.drop_last {
             ([], false)
         } else {
-            int[] batch = extract_indices(s.indices, s.current_position, remaining)
+            []int batch = extract_indices(s.indices, s.current_position, remaining)
             s.current_position = s.current_position + remaining
             (batch, true)
         }
     } else {
-        int[] batch = extract_indices(s.indices, s.current_position, s.config.batch_size)
+        []int batch = extract_indices(s.indices, s.current_position, s.config.batch_size)
         s.current_position = s.current_position + s.config.batch_size
         (batch, true)
     }
 }
 
-func extract_indices(int[] src, int start, int count) []int {
-    int[] result = make([]int, count)
+func extract_indices([]int src, int start, int count) []int {
+    []int result = make([]int, count)
     for i in 0..count {
         if start + i < len(src) {
             result[i] = src[start + i]
@@ -149,7 +149,7 @@ func generate_distributed_indices(
     int offset,
     int count
 ) []int {
-    int[] indices = make([]int, count)
+    []int indices = make([]int, count)
     for i in 0..count {
         indices[i] = offset + i
     }
@@ -166,22 +166,22 @@ func generate_distributed_indices(
     indices
 }
 
-func next_batch_distributed(distributed_sampler ds) (int[], bool) {
+func next_batch_distributed(distributed_sampler ds) ([]int, bool) {
     next_batch_sequential(ds.base)
 }
 
 struct weighted_sampler {
     sampler base
-    float[] sample_weights
-    float[] cumulative_weights
+    []float sample_weights
+    []float cumulative_weights
     int num_samples_to_yield
 }
 
 func create_weighted_sampler(
     sampler_config cfg,
-    float[] weights
+    []float weights
 ) weighted_sampler {
-    float[] cumsum = make([]float, len(weights))
+    []float cumsum = make([]float, len(weights))
     float running_sum = 0.0
     for i in 0..len(weights) {
         running_sum = running_sum + weights[i]
@@ -199,13 +199,13 @@ func create_weighted_sampler(
     }
 }
 
-func next_batch_weighted(weighted_sampler ws) (int[], bool) {
+func next_batch_weighted(weighted_sampler ws) ([]int, bool) {
     if ws.base.current_position >= ws.num_samples_to_yield {
         ([], false)
     }
     int batch_count = min(ws.base.config.batch_size,
                           ws.num_samples_to_yield - ws.base.current_position)
-    int[] batch = make([]int, batch_count)
+    []int batch = make([]int, batch_count)
     for i in 0..batch_count {
         batch[i] = draw_weighted_sample(ws)
         ws.base.current_position = ws.base.current_position + 1
@@ -218,7 +218,7 @@ func draw_weighted_sample(weighted_sampler ws) int {
     return binary_search_cumsum(ws.cumulative_weights, r)
 }
 
-func binary_search_cumsum(float[] cumsum, float target) int {
+func binary_search_cumsum([]float cumsum, float target) int {
     int lo = 0
     int hi = len(cumsum) - 1
     for lo < hi {

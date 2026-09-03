@@ -220,7 +220,7 @@ func (kernel_registry* kr) grouped_query_attention(attention_kernel_config* conf
     return nil, nil
 }
 
-func (kernel_registry* kr) paged_attention(attention_kernel_config* config, interface{} query, interface{} key_cache, interface{} value_cache, int[]32 slot_mapping) (interface{}, error) {
+func (kernel_registry* kr) paged_attention(attention_kernel_config* config, interface{} query, interface{} key_cache, interface{} value_cache, []int32 slot_mapping) (interface{}, error) {
     return nil, nil
 }
 
@@ -232,11 +232,11 @@ func (kernel_registry* kr) apply_rope(rope_config* config, interface{} x, int32 
     return x, nil
 }
 
-func (kernel_registry* kr) rope_forward(rope_config* config, interface{} x, int[]32 positions) (interface{}, error) {
+func (kernel_registry* kr) rope_forward(rope_config* config, interface{} x, []int32 positions) (interface{}, error) {
     return x, nil
 }
 
-func (kernel_registry* kr) rope_backward(rope_config* config, interface{} grad_output, int[]32 positions) (interface{}, error) {
+func (kernel_registry* kr) rope_backward(rope_config* config, interface{} grad_output, []int32 positions) (interface{}, error) {
     return grad_output, nil
 }
 

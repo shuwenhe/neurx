@@ -18,7 +18,7 @@ struct fusion_candidate {
 
 struct fusion_result {
     int fused_ops
-    int[] removed_ops
+    []int removed_ops
     bool success
 }
 
@@ -76,7 +76,7 @@ func find_fusion_candidates(*computation_graph g) []fusion_candidate {
 
 func apply_op_fusion(*computation_graph g) fusion_result {
     candidates = find_fusion_candidates(g)
-    removed = int[]()
+    removed = []int()
 
     for candidate in candidates {
         removed = append(removed, candidate.second_op_id)

@@ -1,6 +1,6 @@
 package neurx.inference.sampling
 func get_blocked_tokens(
-    int[] generated_ids,
+    []int generated_ids,
     int no_repeat_ngram_size,
     int vocab_size
 ) []int {
@@ -9,7 +9,7 @@ func get_blocked_tokens(
     }
     map<int]bool blocked = {}
     int start = len(generated_ids) - (no_repeat_ngram_size - 1)
-    int[] recent_prefix = []
+    []int recent_prefix = []
     for i in start .. len(generated_ids) {
         recent_prefix = append(recent_prefix, generated_ids[i])
     }
@@ -27,7 +27,7 @@ func get_blocked_tokens(
             blocked[blocked_token] = true
         }
     }
-    int[] blocked_tokens = []
+    []int blocked_tokens = []
     for id in blocked {
         if blocked[id] {
             blocked_tokens = append(blocked_tokens, id)
@@ -37,15 +37,15 @@ func get_blocked_tokens(
 }
 
 func apply_ngram_blocking(
-    float[] logits,
-    int[] generated_ids,
+    []float logits,
+    []int generated_ids,
     int ngram_size
 ) []float {
-    int[] blocked = get_blocked_tokens(generated_ids, ngram_size, len(logits))
+    []int blocked = get_blocked_tokens(generated_ids, ngram_size, len(logits))
     if len(blocked) == 0 {
         return logits
     }
-    float[] filtered = copy_float_array(logits)
+    []float filtered = copy_float_array(logits)
     float neg_inf = -1e10
     for t in blocked {
         if t >= 0  t < len(filtered) {

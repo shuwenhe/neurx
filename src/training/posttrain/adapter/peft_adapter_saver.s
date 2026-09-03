@@ -4,7 +4,7 @@ use std.io.file
 struct peft_adapter_config {
     int r
     float lora_alpha
-    string[] target_modules
+    []string target_modules
     float lora_dropout
     string fan_in_fan_out
     bool bias
@@ -23,7 +23,7 @@ func default_peft_config(string model_name, int rank, float alpha) peft_adapter_
     peft_adapter_config {
         r: rank,
         lora_alpha: alpha,
-        target_modules: string[]{"q_proj", "v_proj", "o_proj", "k_proj"},
+        target_modules: []string{"q_proj", "v_proj", "o_proj", "k_proj"},
         lora_dropout: 0.05,
         fan_in_fan_out: "false",
         bias: "none",
@@ -56,7 +56,7 @@ struct adapter_module_set {
 
 struct tensor_metadata {
     string dtype
-    int[] shape
+    []int shape
     int data_offset_start
     int data_offset_end
 }
@@ -82,7 +82,7 @@ func float_to_bytes(float val, int byte_order) []int {
         bits = bits | 0x80000000
         val = 0.0 - val
     }
-    int[] bytes = make([]int, 4)
+    []int bytes = make([]int, 4)
     bytes[0] = (bits >> 0) & 0x_ff
     bytes[1] = (bits >> 8) & 0x_ff
     bytes[2] = (bits >> 16) & 0x_ff
@@ -90,11 +90,11 @@ func float_to_bytes(float val, int byte_order) []int {
     bytes
 }
 
-func write_float_tensor_data(float[] data, int count) []int {
-    int[] binary = []int{}
+func write_float_tensor_data([]float data, int count) []int {
+    []int binary = []int{}
     int i = 0
     for i < count {
-        int[] bytes = float_to_bytes(data[i], 0)
+        []int bytes = float_to_bytes(data[i], 0)
         int j = 0
         for j < 4 {
             binary = append(binary, bytes[j])
@@ -129,15 +129,15 @@ func generate_adapter_config_json(peft_adapter_config cfg) string {
 }
 
 struct adapter_checkpoint {
-    map[string]float[] lora_a_matrices
-    map[string]float[] lora_b_matrices
+    map[string][]float lora_a_matrices
+    map[string][]float lora_b_matrices
     peft_adapter_config config
     string output_dir
 }
 
 func write_adapter_safetensors(adapter_checkpoint ckpt, string output_file) bool {
     println("[PEFT Saver] Writing adapter_model.safetensors to " + output_file)
-    int[] total_binary = []int{}
+    []int total_binary = []int{}
     string tensor_list = ""
     int offset = 0
     int tensor_index = 0
@@ -172,8 +172,8 @@ struct adapter_save_result {
 }
 
 func save_adapter_checkpoint(
-    map[string]float[] lora_a_dict,
-    map[string]float[] lora_b_dict,
+    map[string][]float lora_a_dict,
+    map[string][]float lora_b_dict,
     string model_name,
     string output_dir,
     int rank,

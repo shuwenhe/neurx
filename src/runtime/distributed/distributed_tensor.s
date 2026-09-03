@@ -15,7 +15,7 @@ struct distributed_tensor {
     string tensor_id
     tensor_metadata metadata
     tensor_handle local_shard
-    int[] shard_locations
+    []int shard_locations
     bool requires_sync
     int64 version
 }

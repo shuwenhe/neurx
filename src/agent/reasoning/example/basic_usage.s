@@ -57,7 +57,7 @@ func example_logical_reasoning() {
 func example_with_manager() {
     config := new_default_cot_config()
     manager := new_reasoning_manager(config)
-    prompts := string[]{
+    prompts := []string{
         "What is 2 + 2",
         "What is the capital of France",
         "How do photosynthesis work",
@@ -129,7 +129,7 @@ func example_prompt_engineering() {
     step_prompt := engineer.get_step_prompt(reasoning_so_far, intermediate, 2)
     summary := "Qubits enable parallel computation through superposition"
     final_prompt := engineer.get_final_answer_prompt(summary)
-    steps := string[]{
+    steps := []string{
         "Understanding qubits",
         "Understanding superposition",
         "Understanding entanglement",

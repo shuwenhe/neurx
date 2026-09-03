@@ -3,7 +3,7 @@ use std.strings.int_to_string
 struct page_struct {
     int page_num
     int flags
-    int[] mapping
+    []int mapping
     int count
     int lru_next
     int lru_prev
@@ -92,7 +92,7 @@ func free_page(int page_num) int {
     -1
 }
 
-func shrink_page_list(int[] page_list, int nr_pages) int {
+func shrink_page_list([]int page_list, int nr_pages) int {
     var reclaimed = 0
     var i = 0
     for i < nr_pages {

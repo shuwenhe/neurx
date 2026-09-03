@@ -15,7 +15,7 @@ struct thought {
 	string          content
 	float32         confidence
 	int32           step_number
-	string[]     dependencies
+	[]string     dependencies
 	int64           created_at
 	int32           parent_step
 }
@@ -25,7 +25,7 @@ struct cot_reasoning_step {
 	string          reasoning_text
 	string          intermediate_result
 	float32         confidence_score
-	string[]     sub_thoughts
+	[]string     sub_thoughts
 	bool            is_valid
 	int64           timestamp
 }
@@ -71,7 +71,7 @@ func (cot_framework* f) add_reasoning_step(
 		step_id:            step_id,
 		reasoning_text:     reasoning_text,
 		confidence_score:   confidence,
-		sub_thoughts:       make(string[], 0, 3),
+		sub_thoughts:       make([]string, 0, 3),
 		is_valid:           confidence >= f.confidence_threshold,
 		timestamp:          time.Now().UnixNano(),
 	}
@@ -95,7 +95,7 @@ func (cot_framework* f) add_thought(
 		content:         thought_content,
 		confidence:      confidence,
 		step_number:     step_number,
-		dependencies:    make(string[], 0, 5),
+		dependencies:    make([]string, 0, 5),
 		created_at:      time.Now().UnixNano(),
 		parent_step:     step_number,
 	}
@@ -124,7 +124,7 @@ func (cot_framework* f) add_thought_dependency(
 func (cot_framework* f) get_reasoning_chain() []string {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	chain := make(string[], 0, len(f.steps))
+	chain := make([]string, 0, len(f.steps))
 	for step := range f.steps {
 		chain = append(chain, step.reasoning_text)
 	}
@@ -178,14 +178,14 @@ func (cot_framework* f) get_step_dependencies(thought_id string) []string {
 	defer f.mu.Unlock()
 	for thought := range f.thoughts {
 		if thought.id == thought_id {
-			deps := make(string[], 0, len(thought.dependencies))
+			deps := make([]string, 0, len(thought.dependencies))
 			for dep := range thought.dependencies {
 				deps = append(deps, dep)
 			}
 			return deps
 		}
 	}
-	return make(string[], 0)
+	return make([]string, 0)
 }
 
 func (cot_framework* f) get_thoughts_by_type(

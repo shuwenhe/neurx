@@ -108,9 +108,9 @@ func main() {
             loss_value = loss_value - 0.08
             if loss_value < 0.5 { loss_value = 0.5 }
             total_tokens = total_tokens + 512
-            float[] layer1_grad
-            float[] layer2_grad
-            float[][] simulated_grads
+            []float layer1_grad
+            []float layer2_grad
+            []float[] simulated_grads
             int grad_idx
             grad_idx = 0
             for grad_idx < 10 {

@@ -8,8 +8,8 @@ use neurx.data.loader.dataloader.*
 use neurx.observability.training.training_observability.*
 struct generation_output {
     string text
-    int[] token_ids
-    float[] log_probs
+    []int token_ids
+    []float log_probs
     float total_log_prob
     float format_reward
     float accuracy_reward
@@ -21,15 +21,15 @@ struct grpo_generation_group {
     string prompt
     string reference_answer
     []generation_output outputs
-    float[] advantages
+    []float advantages
     float group_mean_reward
     float group_std_reward
     int accepted_outputs
 }
 
 struct grpo_dataset {
-    string[] prompts
-    string[] reference_answers
+    []string prompts
+    []string reference_answers
     int size
     string source_path
     int group_size
@@ -92,9 +92,9 @@ struct grpo_trainer_state {
     float running_clip_fraction
     float running_group_reward
     float running_advantage_magnitude
-    float[] loss_history
-    float[] reward_history
-    float[] kl_history
+    []float loss_history
+    []float reward_history
+    []float kl_history
     dataloader train_loader
     dataloader eval_loader
 }
@@ -157,7 +157,7 @@ func compute_generation_reward(
 func compute_group_advantages(
     []generation_output outputs,
     float advantage_eps
-) (float[], float, float) {
+) ([]float, float, float) {
     int G = len(outputs)
     float sum_rewards = 0.0
     int i = 0
@@ -178,7 +178,7 @@ func compute_group_advantages(
     if std_reward < advantage_eps {
         std_reward = advantage_eps
     }
-    float[] advantages = []float{}
+    []float advantages = []float{}
     i = 0
     for i < G {
         float adv = (outputs[i].total_reward - mean_reward) / std_reward
@@ -198,7 +198,7 @@ struct grpo_loss_result {
 
 func compute_grpo_loss(
     []generation_output outputs,
-    float[] advantages,
+    []float advantages,
     float new_log_probs_sum,
     float old_log_probs_sum,
     float ref_log_probs_sum,
@@ -283,7 +283,7 @@ func grpo_training_step(
     grpo_generation_group group
 ) grpo_step_result {
     grpo_train_config cfg = trainer.config
-    (float[] advantages, float mean_r, float std_r) = compute_group_advantages(
+    ([]float advantages, float mean_r, float std_r) = compute_group_advantages(
         group.outputs,
         1e-8
     )
@@ -420,7 +420,7 @@ func print_grpo_training_complete(grpo_trainer_state trainer) {
     print("")
 }
 
-func append_float(ref float[] arr, float value) {
+func append_float(ref []float arr, float value) {
 }
 
 func str_contains(string s, string substr) bool {

@@ -112,7 +112,7 @@ func BatchProcessingExample() {
         add_eos: true,
     }
     tokenizer_inst := tokenizer.NewBaseTokenizer(config)
-    texts := make(string[], 0)
+    texts := make([]string, 0)
     texts = append(texts, "first text")
     texts = append(texts, "second text")
     texts = append(texts, "third text")

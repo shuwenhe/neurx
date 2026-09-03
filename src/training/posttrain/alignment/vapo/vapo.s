@@ -76,7 +76,7 @@ func vapo_compute_value_augmented_advantages(
 func vapo_compute_advantages_with_gae(
     []tensor rewards,
     []tensor values,
-    bool[] dones,
+    []bool dones,
     float gamma,
     float gae_lambda
 ) ([]tensor, []tensor) {
@@ -125,7 +125,7 @@ func vapo_step(
     []tensor rewards,
     []tensor old_log_probs,
     []tensor old_values,
-    bool[] dones,
+    []bool dones,
     vapo_config cfg
 ) vapo_state {
     ([]tensor advantages, []tensor returns) = vapo_compute_advantages_with_gae(

@@ -208,7 +208,7 @@ func (c_binding_manager* mgr) get_kernel_wrapper_info(string kernel_name) map[st
 }
 
 func (c_binding_manager* mgr) list_available_kernels() []string {
-    kernels := make(string[])
+    kernels := make([]string)
 
     for name := range mgr.kernel_wrappers {
         kernels = append(kernels, name)

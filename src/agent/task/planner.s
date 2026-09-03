@@ -11,7 +11,7 @@ struct agent_plan_state {
     bool finished
     string status
     string replan_reason
-    string[] task_queue
+    []string task_queue
     int replan_count
     int code_attempts
 }
@@ -62,7 +62,7 @@ func agent_plan_set_task(agent_plan_state state, string current_task) agent_plan
 
 func agent_plan_enqueue_task(agent_plan_state state, string task) agent_plan_state {
     int size = len(state.task_queue)
-    string[] queue = make([]string, size + 1)
+    []string queue = make([]string, size + 1)
     int i = 0
     for i < size {
         queue[i] = state.task_queue[i]
@@ -84,10 +84,10 @@ func agent_plan_enqueue_task(agent_plan_state state, string task) agent_plan_sta
     }
 }
 
-func agent_plan_enqueue_tasks(agent_plan_state state, string[] tasks) agent_plan_state {
+func agent_plan_enqueue_tasks(agent_plan_state state, []string tasks) agent_plan_state {
     int old_size = len(state.task_queue)
     int add_size = len(tasks)
-    string[] queue = make([]string, old_size + add_size)
+    []string queue = make([]string, old_size + add_size)
     int i = 0
     for i < old_size {
         queue[i] = state.task_queue[i]
@@ -118,7 +118,7 @@ func agent_plan_dequeue_to_current(agent_plan_state state) agent_plan_state {
     }
     string first = state.task_queue[0]
     int rest_size = len(state.task_queue) - 1
-    string[] rest = make([]string, rest_size)
+    []string rest = make([]string, rest_size)
     int ri = 0
     for ri < rest_size {
         rest[ri] = state.task_queue[ri + 1]
@@ -161,7 +161,7 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
     string status = "running"
     string next_task = state.current_task
     string replan_reason = ""
-    string[] next_queue = state.task_queue
+    []string next_queue = state.task_queue
     string route = agent_plan_route(memory)
     bool has_retrieve = agent_tool_registry_has_enabled(tools, "retrieve")
     bool has_infer = agent_tool_registry_has_enabled(tools, "infer")
@@ -223,7 +223,7 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
         if len(next_queue) > 0 {
             next_task = next_queue[0]
             int q_size = len(next_queue) - 1
-            string[] trimmed = make([]string, q_size)
+            []string trimmed = make([]string, q_size)
             int qi = 0
             for qi < q_size {
                 trimmed[qi] = next_queue[qi + 1]

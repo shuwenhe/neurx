@@ -47,7 +47,7 @@ struct thought_evaluator {
 	float32                     novelty_weight
 	float32                     pruning_threshold
 	float32                     valid_threshold
-	string[]                 evaluated_thoughts
+	[]string                 evaluated_thoughts
 	map[string]int32            evaluation_counts
 	sync.Mutex                  mu
 }
@@ -64,7 +64,7 @@ func create_thought_evaluator() thought_evaluator {
 		novelty_weight:        0.05,
 		pruning_threshold:     0.3,
 		valid_threshold:       0.5,
-		evaluated_thoughts:    make(string[], 0, 1000),
+		evaluated_thoughts:    make([]string, 0, 1000),
 		evaluation_counts:     make(map[string]int32),
 		mu:                    sync.Mutex{},
 	}
@@ -74,7 +74,7 @@ func (thought_evaluator* e) evaluate_thought(
 	thought_id string,
 	thought_content string,
 	context_text string,
-	previous_thoughts string[],
+	previous_thoughts []string,
 ) thought_evaluation_result {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -210,7 +210,7 @@ func (thought_evaluator* e) calculate_completeness(thought string) float32 {
 
 func (thought_evaluator* e) calculate_consistency(
 	thought string,
-	previous_thoughts string[],
+	previous_thoughts []string,
 ) float32 {
 	if int32(len(previous_thoughts)) == 0 {
 		return 0.8
@@ -218,7 +218,7 @@ func (thought_evaluator* e) calculate_consistency(
 	score := float32(1.0)
 	penalties := float32(0)
 	thought_lower := e.to_lower(thought)
-	contradiction_keywords := string[]{
+	contradiction_keywords := []string{
 		"contradicts",
 		"conflicts",
 		"opposite",
@@ -290,7 +290,7 @@ func (thought_evaluator* e) calculate_confidence(thought string) float32 {
 
 func (thought_evaluator* e) calculate_novelty(
 	thought string,
-	previous_thoughts string[],
+	previous_thoughts []string,
 ) float32 {
 	if int32(len(previous_thoughts)) == 0 {
 		return 1.0
@@ -334,7 +334,7 @@ func (thought_evaluator* e) calculate_text_similarity(
 }
 
 func (thought_evaluator* e) tokenize(text string) []string {
-	tokens := make(string[], 0)
+	tokens := make([]string, 0)
 	current_token := ""
 	for i := int32(0); i < int32(len(text)); i++ {
 		if text[i] == ' ' || text[i] == '\n' || text[i] == '\t' {
@@ -464,6 +464,6 @@ func (thought_evaluator* e) clear_cache() {
 	defer e.mu.Unlock()
 	e.metrics_cache = make(map[string]thought_quality_metrics)
 	e.results_cache = make(map[string]thought_evaluation_result)
-	e.evaluated_thoughts = make(string[], 0, 1000)
+	e.evaluated_thoughts = make([]string, 0, 1000)
 	e.evaluation_counts = make(map[string]int32)
 }

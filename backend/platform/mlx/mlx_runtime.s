@@ -35,15 +35,15 @@ func mlx_load_model(string model_path) int {
     0
 }
 
-func mlx_create_array(int[] shape, string dtype) mlx_array {
+func mlx_create_array([]int shape, string dtype) mlx_array {
     0
 }
 
-func mlx_reshape(mlx_array arr, int[] new_shape) mlx_array {
+func mlx_reshape(mlx_array arr, []int new_shape) mlx_array {
     0
 }
 
-func mlx_transpose(mlx_array arr, int[] axes) mlx_array {
+func mlx_transpose(mlx_array arr, []int axes) mlx_array {
     0
 }
 

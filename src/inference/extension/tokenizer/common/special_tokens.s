@@ -4,7 +4,7 @@ import "std/vector"
 struct SpecialTokenManager {
     tokens: map[string]i32,
     token_to_name: map[i32]string,
-    special_tokens_list: string[],
+    special_tokens_list: []string,
     reserved_tokens: i32[],
     user_defined_special_tokens: map[string]i32,
 }
@@ -13,7 +13,7 @@ func NewSpecialTokenManager() *SpecialTokenManager {
     mgr := new(SpecialTokenManager)
     mgr.tokens = make(map[string]i32)
     mgr.token_to_name = make(map[i32]string)
-    mgr.special_tokens_list = make(string[], 0)
+    mgr.special_tokens_list = make([]string, 0)
     mgr.reserved_tokens = make(i32[], 0)
     mgr.user_defined_special_tokens = make(map[string]i32)
     mgr.register_standard_tokens()

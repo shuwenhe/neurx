@@ -1,8 +1,8 @@
 package neurx.nn.pooling
 use neurx.tensor.tensor
-func copy_float(float[] data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -11,9 +11,9 @@ func copy_float(float[] data) []float {
     out
 }
 
-func copy_int(int[] data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -23,7 +23,7 @@ func copy_int(int[] data) []int {
 }
 
 func shape3(int a, int b, int c) []int {
-    int[] s = make([]int, 3)
+    []int s = make([]int, 3)
     s[0] = a
     s[1] = b
     s[2] = c
@@ -31,7 +31,7 @@ func shape3(int a, int b, int c) []int {
 }
 
 func shape4(int a, int b, int c, int d) []int {
-    int[] s = make([]int, 4)
+    []int s = make([]int, 4)
     s[0] = a
     s[1] = b
     s[2] = c
@@ -48,7 +48,7 @@ func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     int channels = input.shape[1]
     int length = input.shape[2]
     int out_len = out_size(length, kernel_size, stride, padding)
-    float[] out = make([]float, batch * channels * out_len)
+    []float out = make([]float, batch * channels * out_len)
     int b = 0
     for b < batch {
         int ch = 0
@@ -83,7 +83,7 @@ func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     int channels = input.shape[1]
     int length = input.shape[2]
     int out_len = out_size(length, kernel_size, stride, padding)
-    float[] out = make([]float, batch * channels * out_len)
+    []float out = make([]float, batch * channels * out_len)
     int b = 0
     for b < batch {
         int ch = 0
@@ -120,7 +120,7 @@ func adaptive_avg_pool1d(tensor input, int out_len) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
     int in_len = input.shape[2]
-    float[] out = make([]float, batch * channels * out_len)
+    []float out = make([]float, batch * channels * out_len)
     int b = 0
     for b < batch {
         int ch = 0
@@ -158,7 +158,7 @@ func adaptive_max_pool1d(tensor input, int out_len) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
     int in_len = input.shape[2]
-    float[] out = make([]float, batch * channels * out_len)
+    []float out = make([]float, batch * channels * out_len)
     int b = 0
     for b < batch {
         int ch = 0
@@ -196,7 +196,7 @@ func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
     int in_w = input.shape[3]
     int out_h = out_size(in_h, kernel_h, stride_h, pad_h)
     int out_w = out_size(in_w, kernel_w, stride_w, pad_w)
-    float[] out = make([]float, batch * channels * out_h * out_w)
+    []float out = make([]float, batch * channels * out_h * out_w)
     int b = 0
     for b < batch {
         int ch = 0
@@ -243,7 +243,7 @@ func avg_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
     int in_w = input.shape[3]
     int out_h = out_size(in_h, kernel_h, stride_h, pad_h)
     int out_w = out_size(in_w, kernel_w, stride_w, pad_w)
-    float[] out = make([]float, batch * channels * out_h * out_w)
+    []float out = make([]float, batch * channels * out_h * out_w)
     int b = 0
     for b < batch {
         int ch = 0
@@ -291,7 +291,7 @@ func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
     int channels = input.shape[1]
     int in_h = input.shape[2]
     int in_w = input.shape[3]
-    float[] out = make([]float, batch * channels * out_h * out_w)
+    []float out = make([]float, batch * channels * out_h * out_w)
     int b = 0
     for b < batch {
         int ch = 0
@@ -343,7 +343,7 @@ func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
     int channels = input.shape[1]
     int in_h = input.shape[2]
     int in_w = input.shape[3]
-    float[] out = make([]float, batch * channels * out_h * out_w)
+    []float out = make([]float, batch * channels * out_h * out_w)
     int b = 0
     for b < batch {
         int ch = 0
@@ -394,7 +394,7 @@ func interpolate1d(tensor input, int out_len) tensor {
     if out_len <= 0 {
         return neurx.tensor.new([]float{}, shape3(batch, channels, 0), input.requires_grad)
     }
-    float[] out = make([]float, batch * channels * out_len)
+    []float out = make([]float, batch * channels * out_len)
     int b = 0
     for b < batch {
         int ch = 0
@@ -426,7 +426,7 @@ func interpolate2d(tensor input, int out_h, int out_w) tensor {
     if out_h <= 0 || out_w <= 0 {
         return neurx.tensor.new([]float{}, shape4(batch, channels, 0, 0), input.requires_grad)
     }
-    float[] out = make([]float, batch * channels * out_h * out_w)
+    []float out = make([]float, batch * channels * out_h * out_w)
     int b = 0
     for b < batch {
         int ch = 0

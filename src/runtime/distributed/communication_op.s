@@ -2,8 +2,8 @@ package neurx.distributed.communication_op
 use neurx.distributed.parallel_state.{group_coordinator}
 
 struct distributed_tensor {
-    float[] data
-    int[] shape
+    []float data
+    []int shape
     string dtype
 }
 
@@ -14,8 +14,8 @@ struct collective_result {
     string error_message
 }
 
-func copy_tensor_floats(float[] values) []float {
-    float[] copied = make([]float, len(values))
+func copy_tensor_floats([]float values) []float {
+    []float copied = make([]float, len(values))
     int i = 0
     for i < len(values) {
         copied[i] = values[i]
@@ -24,8 +24,8 @@ func copy_tensor_floats(float[] values) []float {
     copied
 }
 
-func copy_tensor_shape(int[] shape) []int {
-    int[] copied = make([]int, len(shape))
+func copy_tensor_shape([]int shape) []int {
+    []int copied = make([]int, len(shape))
     int i = 0
     for i < len(shape) {
         copied[i] = shape[i]
@@ -34,7 +34,7 @@ func copy_tensor_shape(int[] shape) []int {
     copied
 }
 
-func tensor_shape_numel(int[] shape) int {
+func tensor_shape_numel([]int shape) int {
     if len(shape) == 0 {
         return 0
     }
@@ -50,7 +50,7 @@ func tensor_shape_numel(int[] shape) int {
     count
 }
 
-func make_distributed_tensor(float[] data, int[] shape, string dtype) distributed_tensor {
+func make_distributed_tensor([]float data, []int shape, string dtype) distributed_tensor {
     distributed_tensor {
         data: copy_tensor_floats(data),
         shape: copy_tensor_shape(shape),
@@ -74,7 +74,7 @@ func normalize_tensor_dim(int dim, int dimensions) int {
     normalized
 }
 
-func tensor_outer_size(int[] shape, int dim) int {
+func tensor_outer_size([]int shape, int dim) int {
     int size = 1
     int i = 0
     for i < dim {
@@ -84,7 +84,7 @@ func tensor_outer_size(int[] shape, int dim) int {
     size
 }
 
-func tensor_inner_size(int[] shape, int dim) int {
+func tensor_inner_size([]int shape, int dim) int {
     int size = 1
     int i = dim + 1
     for i < len(shape) {
@@ -120,7 +120,7 @@ func tensor_model_parallel_all_reduce(group_coordinator group, distributed_tenso
     if !collective_input_valid(group, input) {
         return failed_collective(input, "all-reduce requires an initialized group and a valid tensor")
     }
-    float[] output = copy_tensor_floats(input.data)
+    []float output = copy_tensor_floats(input.data)
     int i = 0
     for i < len(output) {
         output[i] = output[i] * float(group.world_size)
@@ -140,9 +140,9 @@ func tensor_model_parallel_all_gather(group_coordinator group, distributed_tenso
     int outer = tensor_outer_size(input.shape, normalized_dim)
     int axis = input.shape[normalized_dim]
     int inner = tensor_inner_size(input.shape, normalized_dim)
-    int[] output_shape = copy_tensor_shape(input.shape)
+    []int output_shape = copy_tensor_shape(input.shape)
     output_shape[normalized_dim] = axis * group.world_size
-    float[] output = make([]float, len(input.data) * group.world_size)
+    []float output = make([]float, len(input.data) * group.world_size)
     int outer_index = 0
     for outer_index < outer {
         int member = 0
@@ -181,9 +181,9 @@ func tensor_model_parallel_reduce_scatter(group_coordinator group, distributed_t
     int outer = tensor_outer_size(input.shape, normalized_dim)
     int inner = tensor_inner_size(input.shape, normalized_dim)
     int local_axis = axis / group.world_size
-    int[] output_shape = copy_tensor_shape(input.shape)
+    []int output_shape = copy_tensor_shape(input.shape)
     output_shape[normalized_dim] = local_axis
-    float[] output = make([]float, len(input.data) / group.world_size)
+    []float output = make([]float, len(input.data) / group.world_size)
     int outer_index = 0
     for outer_index < outer {
         int local_axis_index = 0
@@ -237,7 +237,7 @@ func all_to_all_single(group_coordinator group, distributed_tensor input) collec
         return failed_collective(input, "all-to-all tensor size must be divisible by group size")
     }
     int chunk = len(input.data) / group.world_size
-    float[] output = make([]float, len(input.data))
+    []float output = make([]float, len(input.data))
     int source = 0
     for source < group.world_size {
         int i = 0

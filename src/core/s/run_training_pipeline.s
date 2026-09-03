@@ -101,7 +101,7 @@ func generate_checkpoints(config *training_config, metrics map[string]string) er
     os.Setenv("NEURX_S_PRETRAIN_STEPS", metrics["steps"])
     os.Setenv("NEURX_S_PRETRAIN_WARMUP_STEPS", fmt.Sprintf("%d", config.MaterializeWarmupSteps))
     os.Setenv("NEURX_CORPUS_PATH", config.MaterializeCorpusPath)
-    for _, filename := range string[]{"final_model.neurx", "best_model.neurx"} {
+    for _, filename := range []string{"final_model.neurx", "best_model.neurx"} {
         checkpoint_file := filepath.Join(config.CheckpointDir, filename)
         if err := os.WriteFile(checkpoint_file, []byte{}, 0644); err != nil {
             return fmt.Errorf("failed to create checkpoint: %v", err)

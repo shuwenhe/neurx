@@ -45,7 +45,7 @@ struct logprob_result {
 
 func gpt_sequence_logprob(
     language_model model,
-    int[] full_tokens,
+    []int full_tokens,
     int prompt_len
 ) logprob_result {
     int seq_len = len(full_tokens)
@@ -94,11 +94,11 @@ func gpt_sequence_logprob(
 }
 
 struct mc_choice {
-    int[] continuation_tokens
+    []int continuation_tokens
 }
 
 struct mc_question {
-    int[] prompt_tokens
+    []int prompt_tokens
     []mc_choice choices
     int num_choices
     int correct_index
@@ -116,7 +116,7 @@ func mc_predict(language_model model, mc_question q) int {
     float best_score = -1000000000.0
     int c = 0
     for c < q.num_choices {
-        int[] full = mc_concat(q.prompt_tokens, q.choices[c].continuation_tokens)
+        []int full = mc_concat(q.prompt_tokens, q.choices[c].continuation_tokens)
         logprob_result lp = gpt_sequence_logprob(model, full, len(q.prompt_tokens))
         float score = lp.avg_logprob
         if score > best_score {
@@ -128,9 +128,9 @@ func mc_predict(language_model model, mc_question q) int {
     best_idx
 }
 
-func mc_concat(int[] a, int[] b) []int {
+func mc_concat([]int a, []int b) []int {
     int n = len(a) + len(b)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < len(a) { out[i] = a[i]; i = i + 1 }
     int j = 0
@@ -150,7 +150,7 @@ func evaluate_multiple_choice(language_model model, []mc_question questions) mc_
         int best_idx = 0
         int c = 0
         for c < q.num_choices {
-            int[] full = mc_concat(q.prompt_tokens, q.choices[c].continuation_tokens)
+            []int full = mc_concat(q.prompt_tokens, q.choices[c].continuation_tokens)
             logprob_result lp = gpt_sequence_logprob(model, full, len(q.prompt_tokens))
             float score = lp.avg_logprob
             if score > best {
@@ -188,12 +188,12 @@ struct ppl_result {
     int total_tokens
 }
 
-func evaluate_perplexity(language_model model, int[][] sequences) ppl_result {
+func evaluate_perplexity(language_model model, []int[] sequences) ppl_result {
     float total_loss = 0.0
     int total_tokens = 0
     int s = 0
     for s < len(sequences) {
-        int[] seq = sequences[s]
+        []int seq = sequences[s]
         int seq_len = len(seq)
         if seq_len < 2 {
             s = s + 1
@@ -216,8 +216,8 @@ func evaluate_perplexity(language_model model, int[][] sequences) ppl_result {
 }
 
 struct gen_question {
-    int[] prompt_tokens
-    int[] answer_tokens
+    []int prompt_tokens
+    []int answer_tokens
     int max_new_tokens
 }
 
@@ -227,7 +227,7 @@ struct gen_eval_result {
     float exact_match
 }
 
-func gen_contains_answer(int[] generated, int[] answer) bool {
+func gen_contains_answer([]int generated, []int answer) bool {
     int g = len(generated)
     int a = len(answer)
     if a == 0 { return true }
@@ -255,7 +255,7 @@ func evaluate_generative(language_model model, []gen_question questions) gen_eva
     int i = 0
     for i < total {
         gen_question q = questions[i]
-        int[] generated = gpt_generate_greedy(model, q.prompt_tokens, q.max_new_tokens)
+        []int generated = gpt_generate_greedy(model, q.prompt_tokens, q.max_new_tokens)
         if gen_contains_answer(generated, q.answer_tokens) {
             correct = correct + 1
         }
@@ -288,7 +288,7 @@ struct benchmark_suite {
     []mc_question hellaswag
     []mc_question arc
     []mc_question winogrande
-    int[][] wikitext
+    []int[] wikitext
     []gen_question gsm8k
     []gen_question humaneval
 }

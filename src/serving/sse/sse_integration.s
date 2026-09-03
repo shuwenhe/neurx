@@ -33,7 +33,7 @@ struct sse_response_frame {
 	int32                       status_code
 	string                      stream_id
 	string                      client_id
-	string[]                 event_data_lines
+	[]string                 event_data_lines
 	int32                       line_count
 	int32                       content_length
 	map[string]string]          headers

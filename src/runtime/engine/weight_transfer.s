@@ -29,8 +29,8 @@ struct weight_transfer_config {
 
 struct weight_transfer_plan {
     int32 plan_id
-    string[] weight_ids
-    int[]32 chunk_ids
+    []string weight_ids
+    []int32 chunk_ids
     []weight_location src_locations
     []weight_location dst_locations
     int64 total_bytes
@@ -105,11 +105,11 @@ func (weight_manager* wm) transfer_weight(string weight_id, weight_location src_
     return nil
 }
 
-func (weight_manager* wm) create_transfer_plan(string[] weight_ids) weight_transfer_plan* {
+func (weight_manager* wm) create_transfer_plan([]string weight_ids) weight_transfer_plan* {
     return *weight_transfer_plan{
         plan_id: 0,
         weight_ids: weight_ids,
-        chunk_ids: make(int[]32, 0),
+        chunk_ids: make([]int32, 0),
         src_locations: make([]weight_location, 0),
         dst_locations: make([]weight_location, 0),
         total_bytes: 0,
@@ -130,7 +130,7 @@ func (weight_manager* wm) decompress_weight(interface{} weight) (interface{}, er
     return weight, nil
 }
 
-func (weight_manager* wm) replicate_weight(string weight_id, int[]32 target_ranks) error {
+func (weight_manager* wm) replicate_weight(string weight_id, []int32 target_ranks) error {
     return nil
 }
 

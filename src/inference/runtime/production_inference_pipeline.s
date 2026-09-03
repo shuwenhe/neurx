@@ -13,7 +13,7 @@ struct inference_request {
 struct inference_response {
     int request_id
     string text
-    int[] token_ids
+    []int token_ids
     int total_tokens
     float latency_ms
     string status
@@ -99,7 +99,7 @@ func tokenize_prompt(string prompt) []int {
     print("🔤 TOKENIZATION PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
     print("Input prompt: \"" + prompt + "\"\n")
-    int[] token_ids = []
+    []int token_ids = []
     int i = 0
     for i < len(prompt) {
         token_ids = append(token_ids, 97 + (i % 26))
@@ -122,7 +122,7 @@ func tokenize_prompt(string prompt) []int {
     return token_ids
 }
 
-func prefill_kv_cache(int[] prompt_tokens, string device) bool {
+func prefill_kv_cache([]int prompt_tokens, string device) bool {
     print("💾 PREFILL KV CACHE PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
     print("Prompt tokens: " + int_to_string(len(prompt_tokens)) + "\n")
@@ -145,7 +145,7 @@ func generate_tokens(int num_tokens, float temperature) []int {
     print("───────────────────────────────────────────────────────────\n")
     print("Target: " + int_to_string(num_tokens) + " tokens\n")
     print("Temperature: " + float_to_string(temperature) + "\n\n")
-    int[] generated = []
+    []int generated = []
     int i = 0
     for i < num_tokens {
         int token = 65 + (i % 26)
@@ -159,7 +159,7 @@ func generate_tokens(int num_tokens, float temperature) []int {
     return generated
 }
 
-func detokenize_output(int[] token_ids) string {
+func detokenize_output([]int token_ids) string {
     print("📄 DETOKENIZATION PHASE\n")
     print("───────────────────────────────────────────────────────────\n")
     print("Output tokens: " + int_to_string(len(token_ids)) + "\n")
@@ -176,7 +176,7 @@ func detokenize_output(int[] token_ids) string {
     return output
 }
 
-func create_inference_response(int request_id, string text, int[] tokens, float latency) inference_response {
+func create_inference_response(int request_id, string text, []int tokens, float latency) inference_response {
     return inference_response {
         request_id: request_id,
         text: text,
@@ -233,7 +233,7 @@ func execute_inference_pipeline(production_pipeline *pipeline, inference_request
         return err_resp
     }
     float start_time = 0.0
-    int[] prompt_tokens = tokenize_prompt(req.prompt)
+    []int prompt_tokens = tokenize_prompt(req.prompt)
     if !prefill_kv_cache(prompt_tokens, pipeline.device_type) {
         inference_response err_resp = create_inference_response(
             req.request_id,
@@ -245,7 +245,7 @@ func execute_inference_pipeline(production_pipeline *pipeline, inference_request
         update_pipeline_metrics(pipeline, err_resp, false)
         return err_resp
     }
-    int[] generated_tokens = generate_tokens(req.max_tokens, req.temperature)
+    []int generated_tokens = generate_tokens(req.max_tokens, req.temperature)
     string output_text = detokenize_output(generated_tokens)
     float latency = 100.0
     inference_response response = create_inference_response(

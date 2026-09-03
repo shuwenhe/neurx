@@ -9,17 +9,17 @@ struct verifier_config {
 
 struct verification_context {
     int draft_token_id
-    draft_logits: float[]
+    draft_logits: []float
     int verified_token_id
-    verified_logits: float[]
+    verified_logits: []float
     bool match_found
     int verification_depth
 }
 
 struct verifier_executor {
     verifier_config config
-    model_embeddings: float[][]
-    model_weights: float[][]
+    model_embeddings: []float[]
+    model_weights: []float[]
     int64 verification_count
     int64 acceptance_count
     int64 rejection_count
@@ -49,8 +49,8 @@ func new_verifier_config(int vocab, float threshold) verifier_config {
 func new_verifier_executor(verifier_config config) verifier_executor {
     executor := verifier_executor{
         config: config,
-        model_embeddings: float[][]{},
-        model_weights: float[][]{},
+        model_embeddings: []float[]{},
+        model_weights: []float[]{},
         verification_count: 0,
         acceptance_count: 0,
         rejection_count: 0,
@@ -83,7 +83,7 @@ func verifier_embedding_lookup(verifier_executor executor, int token_id) []float
     }
 }
 
-func verifier_layer_forward(float[] input, float[] layer_weight, int hidden_dim) []float {
+func verifier_layer_forward([]float input, []float layer_weight, int hidden_dim) []float {
     output := []float{}
     i := 0
     for i < hidden_dim {
@@ -102,7 +102,7 @@ func verifier_layer_forward(float[] input, float[] layer_weight, int hidden_dim)
     output
 }
 
-func verifier_apply_residual(float[] original, float[] transformed) []float {
+func verifier_apply_residual([]float original, []float transformed) []float {
     result := []float{}
     i := 0
     for i < original.len && i < transformed.len {
@@ -128,7 +128,7 @@ func verifier_forward_single(verifier_executor executor, int token_id, int hidde
     hidden
 }
 
-func verifier_output_logits(float[] hidden_states, int vocab_size) []float {
+func verifier_output_logits([]float hidden_states, int vocab_size) []float {
     logits := []float{}
     i := 0
     for i < vocab_size {

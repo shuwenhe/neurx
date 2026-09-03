@@ -47,7 +47,7 @@ func gpu_hybrid_generate(gpu_hybrid_engine* engine,
         return "", 0, 0, false, "model not loaded"
     }
     
-    int[] prompt_tokens = tokenize_prompt(prompt)
+    []int prompt_tokens = tokenize_prompt(prompt)
     
     int prompt_len = 0
     if len(prompt_tokens) > 0 {
@@ -72,7 +72,7 @@ func gpu_hybrid_generate(gpu_hybrid_engine* engine,
     
     paged_kv_cache[] caches = make_layer_caches(&engine.cpu_engine, total_tokens)
     
-    float[] hidden = make([]float, 0)
+    []float hidden = make([]float, 0)
     int position = 0
     
     for position < prompt_len {
@@ -83,7 +83,7 @@ func gpu_hybrid_generate(gpu_hybrid_engine* engine,
                                        token_id, safe_hidden_size(&engine.cpu_engine),
                                        safe_vocab_size(&engine.cpu_engine))
         } else {
-            float[] embed = load_embedding_row(engine.cpu_engine.model, "model.embed_tokens.weight",
+            []float embed = load_embedding_row(engine.cpu_engine.model, "model.embed_tokens.weight",
                                              token_id, safe_hidden_size(&engine.cpu_engine),
                                              safe_vocab_size(&engine.cpu_engine))
             if len(embed) == len(hidden) {
@@ -95,7 +95,7 @@ func gpu_hybrid_generate(gpu_hybrid_engine* engine,
             }
         }
         
-        (float[] updated_hidden, paged_kv_cache[] updated_caches) = run_transformer_stack_cached(&engine.cpu_engine, hidden, caches, position)
+        ([]float updated_hidden, paged_kv_cache[] updated_caches) = run_transformer_stack_cached(&engine.cpu_engine, hidden, caches, position)
         hidden = updated_hidden
         caches = updated_caches
         position = position + 1
@@ -109,12 +109,12 @@ func gpu_hybrid_generate(gpu_hybrid_engine* engine,
     }
     
     int generated_count = 0
-    int[] generated_history = make([]int, max_tokens)
+    []int generated_history = make([]int, max_tokens)
     string response_text = ""
     int vocab_size = safe_vocab_size(&engine.cpu_engine)
     
     for generated_count < max_tokens {
-        float[] logits = project_logits(&engine.cpu_engine, hidden)
+        []float logits = project_logits(&engine.cpu_engine, hidden)
         
         if len(logits) == 0 {
             break
@@ -139,7 +139,7 @@ func gpu_hybrid_generate(gpu_hybrid_engine* engine,
         }
         response_text = response_text + word
         
-        (float[] updated_hidden, paged_kv_cache[] updated_caches) = advance_hidden_state_cached(&engine.cpu_engine, hidden, next_token, caches, position)
+        ([]float updated_hidden, paged_kv_cache[] updated_caches) = advance_hidden_state_cached(&engine.cpu_engine, hidden, next_token, caches, position)
         hidden = updated_hidden
         caches = updated_caches
         position = position + 1
@@ -158,20 +158,20 @@ func gpu_hybrid_generate(gpu_hybrid_engine* engine,
     return result.text, result.prompt_tokens, result.generated_tokens, true, ""
 }
 
-extern func tokenize_prompt(string prompt) int[]
+extern func tokenize_prompt(string prompt) []int
 extern func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) []float
 extern func safe_hidden_size(real_text_engine_state* state) int
 extern func safe_vocab_size(real_text_engine_state* state) int
 extern func safe_bos_token_id(real_text_engine_state* state) int
 extern func safe_eos_token_id(real_text_engine_state* state) int
 extern func safe_num_layers(real_text_engine_state* state) int
-extern func project_logits(real_text_engine_state* state, float[] hidden) []float
-extern func sample_token_from_logits(float[] logits, int[] history, int seed) int
+extern func project_logits(real_text_engine_state* state, []float hidden) []float
+extern func sample_token_from_logits([]float logits, []int history, int seed) int
 extern func token_text_from_id(int token_id) string
 extern func prompt_fallback(string prompt, string reason) string
-extern func prompt_signature(int[] tokens) int
+extern func prompt_signature([]int tokens) int
 extern func make_layer_caches(real_text_engine_state* state, int total_tokens) paged_kv_cache[]
-extern func run_transformer_stack_cached(real_text_engine_state* state, float[] hidden, paged_kv_cache[] caches, int position) (float[], paged_kv_cache[])
-extern func advance_hidden_state_cached(real_text_engine_state* state, float[] hidden, int token_id, paged_kv_cache[] caches, int position) (float[], paged_kv_cache[])
+extern func run_transformer_stack_cached(real_text_engine_state* state, []float hidden, paged_kv_cache[] caches, int position) ([]float, paged_kv_cache[])
+extern func advance_hidden_state_cached(real_text_engine_state* state, []float hidden, int token_id, paged_kv_cache[] caches, int position) ([]float, paged_kv_cache[])
 extern func estimate_latency_ms(int prompt_tokens, int generated_tokens, int layers) float
 extern func paged_kv_cache() paged_kv_cache

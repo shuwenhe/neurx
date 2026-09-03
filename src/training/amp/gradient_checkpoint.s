@@ -1,19 +1,19 @@
 package neurx.amp.gradient_checkpoint
 struct checkpoint_context {
-    float[][] saved_activations
-    bool[] is_checkpoint_required
+    []float[] saved_activations
+    []bool is_checkpoint_required
 }
 
 func new_checkpoint_context() checkpoint_context {
     checkpoint_context {
-        saved_activations: make(float[][], 0),
-        is_checkpoint_required: make(bool[], 0),
+        saved_activations: make([]float[], 0),
+        is_checkpoint_required: make([]bool, 0),
     }
 }
 
 func checkpoint_save_activation(
     checkpoint_context ctx,
-    float[] activation
+    []float activation
 ) checkpoint_context {
     ctx.saved_activations = append(ctx.saved_activations, clone_activation(activation))
     ctx.is_checkpoint_required = append(ctx.is_checkpoint_required, true)
@@ -51,8 +51,8 @@ func checkpoint_get_memory_saved(checkpoint_context ctx) int {
     return total
 }
 
-func clone_activation(float[] act) []float {
-    float[] cloned = make([]float, len(act))
+func clone_activation([]float act) []float {
+    []float cloned = make([]float, len(act))
     int i = 0
     for i < len(act) {
         cloned[i] = act[i]

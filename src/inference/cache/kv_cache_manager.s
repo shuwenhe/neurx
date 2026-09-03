@@ -1,6 +1,6 @@
 package neurx.inference.kv_cache_manager
-func kv_cache_remove_int(int[] values, int expected) []int {
-    int[] result = []int{}
+func kv_cache_remove_int([]int values, int expected) []int {
+    []int result = []int{}
     int i = 0
     for i < len(values) {
         if values[i] != expected {
@@ -11,7 +11,7 @@ func kv_cache_remove_int(int[] values, int expected) []int {
     result
 }
 
-func kv_cache_contains_int(int[] values, int expected) bool {
+func kv_cache_contains_int([]int values, int expected) bool {
     int i = 0
     for i < len(values) {
         if values[i] == expected {
@@ -22,14 +22,14 @@ func kv_cache_contains_int(int[] values, int expected) bool {
     false
 }
 
-func kv_cache_append_unique(int[] values, int value) []int {
+func kv_cache_append_unique([]int values, int value) []int {
     if kv_cache_contains_int(values, value) {
         return values
     }
     append(values, value)
 }
 
-func kv_cache_find_oldest_page_from_list(paged_kv_cache cache, int[] page_ids) int {
+func kv_cache_find_oldest_page_from_list(paged_kv_cache cache, []int page_ids) int {
     if len(page_ids) == 0 {
         return -1
     }
@@ -61,14 +61,14 @@ struct cache_page {
     int capacity_tokens
     bool is_full
     int last_accessed_step
-    float[] k_data
-    float[] v_data
+    []float k_data
+    []float v_data
 }
 
 struct paged_kv_cache {
     []cache_page pages
-    int[] free_pages
-    int[] allocated_pages
+    []int free_pages
+    []int allocated_pages
     page_config config
     int total_allocated_tokens
 }
@@ -95,7 +95,7 @@ func new_paged_kv_cache(kv_cache_config cfg) paged_kv_cache {
         num_pages = 1
     }
     []cache_page pages = make([]cache_page, num_pages)
-    int[] free_pages = make([]int, num_pages)
+    []int free_pages = make([]int, num_pages)
     int i = 0
     for i < num_pages {
         pages[i] = cache_page {
@@ -129,9 +129,9 @@ func allocate_pages(paged_kv_cache cache, int num_tokens_needed) []int {
     if pages_needed <= 0 {
         return []int{}
     }
-    int[] allocated = []int{}
-    int[] free_pool = kv_cache_remove_int(cache.free_pages, -1)
-    int[] allocated_pool = kv_cache_remove_int(cache.allocated_pages, -1)
+    []int allocated = []int{}
+    []int free_pool = kv_cache_remove_int(cache.free_pages, -1)
+    []int allocated_pool = kv_cache_remove_int(cache.allocated_pages, -1)
     int i = 0
     for i < pages_needed {
         int page_id = -1
@@ -153,7 +153,7 @@ func allocate_pages(paged_kv_cache cache, int num_tokens_needed) []int {
     allocated
 }
 
-func free_pages(paged_kv_cache cache, int[] page_ids) paged_kv_cache {
+func free_pages(paged_kv_cache cache, []int page_ids) paged_kv_cache {
     int i = 0
     for i < len(page_ids) {
         int page_id = page_ids[i]
@@ -222,8 +222,8 @@ func get_cache_stats(paged_kv_cache cache) map[string]int {
 }
 
 func compress_kv_cache(paged_kv_cache cache) paged_kv_cache {
-    int[] rebuilt_free = []int{}
-    int[] rebuilt_allocated = []int{}
+    []int rebuilt_free = []int{}
+    []int rebuilt_allocated = []int{}
     int total_tokens = 0
     int i = 0
     for i < len(cache.pages) {
@@ -250,12 +250,12 @@ func compress_kv_cache(paged_kv_cache cache) paged_kv_cache {
     cache
 }
 
-func prefill_cache(paged_kv_cache cache, int[] prompt_tokens) paged_kv_cache {
+func prefill_cache(paged_kv_cache cache, []int prompt_tokens) paged_kv_cache {
     int tokens_remaining = len(prompt_tokens)
     if tokens_remaining <= 0 {
         return compress_kv_cache(cache)
     }
-    int[] page_ids = allocate_pages(cache, tokens_remaining)
+    []int page_ids = allocate_pages(cache, tokens_remaining)
     int i = 0
     for i < len(page_ids) && tokens_remaining > 0 {
         int page_id = page_ids[i]
@@ -281,7 +281,7 @@ func append_token_to_cache(paged_kv_cache cache, int token_id) paged_kv_cache {
         }
     }
     if target_page < 0 {
-        int[] page_ids = allocate_pages(cache, 1)
+        []int page_ids = allocate_pages(cache, 1)
         if len(page_ids) > 0 {
             target_page = page_ids[0]
         }

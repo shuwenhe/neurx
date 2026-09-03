@@ -29,23 +29,23 @@ struct transfer_adapter_config {
 
 struct transfer_adapter_state {
     transfer_adapter_config config
-    int[] transfer_ids
-    int[] room_ids
-    int[] backend_types
-    int[] source_ranks
-    int[] destination_ranks
-    int[] source_ptr_low
-    int[] destination_ptr_low
-    int[] byte_counts
-    int[] shard_counts
-    int[] ready_shards
-    int[] completed_shards
-    int[] checksums
-    int[] statuses
-    int[] retry_counts
-    int[] created_ms
-    int[] updated_ms
-    int[] error_codes
+    []int transfer_ids
+    []int room_ids
+    []int backend_types
+    []int source_ranks
+    []int destination_ranks
+    []int source_ptr_low
+    []int destination_ptr_low
+    []int byte_counts
+    []int shard_counts
+    []int ready_shards
+    []int completed_shards
+    []int checksums
+    []int statuses
+    []int retry_counts
+    []int created_ms
+    []int updated_ms
+    []int error_codes
     int transfer_count
     int completed_count
     int failed_count
@@ -61,7 +61,7 @@ struct transfer_adapter_result {
 }
 
 func transfer_int_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

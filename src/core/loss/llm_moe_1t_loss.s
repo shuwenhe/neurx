@@ -21,7 +21,7 @@ struct loss_state {
     float min_loss_scale
     float max_loss_scale
     int loss_scale_steps
-    float[] loss_history
+    []float loss_history
     int num_loss_steps
     float avg_loss
 }
@@ -48,7 +48,7 @@ func loss_state_new(
         min_loss_scale: 1.0,
         max_loss_scale: 65536.0,
         loss_scale_steps: 0,
-        loss_history: make(float[], 0),
+        loss_history: make([]float, 0),
         num_loss_steps: 0,
         avg_loss: 0.0,
     }
@@ -56,15 +56,15 @@ func loss_state_new(
 }
 
 func compute_ce_loss(
-    float[] logits,
-    int[] labels,
+    []float logits,
+    []int labels,
     int batch_size,
     int seq_len,
     int vocab_size,
     float label_smoothing
 ) []float {
     int num_tokens = batch_size * seq_len
-    float[] per_token_loss = make(float[], num_tokens)
+    []float per_token_loss = make([]float, num_tokens)
     int t = 0
     for t < num_tokens {
         int label = labels[t]
@@ -90,15 +90,15 @@ func compute_ce_loss(
 }
 
 func compute_moe_aux_loss(
-    int[] expert_indices,
-    float[] expert_weights,
+    []int expert_indices,
+    []float expert_weights,
     int num_tokens,
     int top_k,
     int num_experts,
     float aux_loss_weight
 ) float {
-    float[] expert_load = make(float[], num_experts)
-    float[] expert_importance = make(float[], num_experts)
+    []float expert_load = make([]float, num_experts)
+    []float expert_importance = make([]float, num_experts)
     int t = 0
     for t < num_tokens {
         int k = 0
@@ -125,19 +125,19 @@ func compute_moe_aux_loss(
 }
 
 func compute_kl_divergence(
-    float[] logits_target,
-    float[] logits_base,
+    []float logits_target,
+    []float logits_base,
     int batch_size,
     int seq_len,
     int vocab_size,
     float temperature
 ) []float {
     int num_tokens = batch_size * seq_len
-    float[] per_token_kl = make(float[], num_tokens)
+    []float per_token_kl = make([]float, num_tokens)
     int t = 0
     for t < num_tokens {
-        float[] probs_target = softmax(logits_target, t * vocab_size, (t+1) * vocab_size, temperature)
-        float[] probs_base = softmax(logits_base, t * vocab_size, (t+1) * vocab_size, temperature)
+        []float probs_target = softmax(logits_target, t * vocab_size, (t+1) * vocab_size, temperature)
+        []float probs_base = softmax(logits_base, t * vocab_size, (t+1) * vocab_size, temperature)
         float kl = 0.0
         int v = 0
         for v < vocab_size {
@@ -156,15 +156,15 @@ func compute_kl_divergence(
 
 func compute_total_loss(
     loss_state state,
-    float[] logits,
-    int[] labels,
-    int[] expert_indices,
-    float[] expert_weights,
+    []float logits,
+    []int labels,
+    []int expert_indices,
+    []float expert_weights,
     int batch_size,
     int seq_len,
     int top_k
 ) float {
-    float[] ce_per_token = compute_ce_loss(
+    []float ce_per_token = compute_ce_loss(
         logits, labels, batch_size, seq_len,
         state.config.vocab_size, state.config.label_smoothing
     )
@@ -193,17 +193,17 @@ func compute_total_loss(
 }
 
 func compute_ce_gradient(
-    float[] logits,
-    int[] labels,
+    []float logits,
+    []int labels,
     int batch_size,
     int seq_len,
     int vocab_size
 ) []float {
     int num_tokens = batch_size * seq_len
-    float[] grad_logits = make(float[], num_tokens * vocab_size)
+    []float grad_logits = make([]float, num_tokens * vocab_size)
     int t = 0
     for t < num_tokens {
-        float[] probs = softmax(logits, t * vocab_size, (t+1) * vocab_size, 1.0)
+        []float probs = softmax(logits, t * vocab_size, (t+1) * vocab_size, 1.0)
         int v = 0
         for v < vocab_size {
             grad_logits[t * vocab_size + v] = probs[v]
@@ -218,13 +218,13 @@ func compute_ce_gradient(
 }
 
 func compute_moe_aux_gradient(
-    int[] expert_indices,
-    float[] expert_weights,
+    []int expert_indices,
+    []float expert_weights,
     int num_tokens,
     int top_k,
     int num_experts
 ) []float {
-    float[] grad_router = make(float[], num_tokens * num_experts)
+    []float grad_router = make([]float, num_tokens * num_experts)
     grad_router
 }
 
@@ -250,7 +250,7 @@ func update_loss_scale(
 }
 
 func apply_loss_scale(
-    float[] gradients,
+    []float gradients,
     float loss_scale
 ) {
     int i = 0
@@ -261,13 +261,13 @@ func apply_loss_scale(
 }
 
 func softmax(
-    float[] logits,
+    []float logits,
     int start_idx,
     int end_idx,
     float temperature
 ) []float {
     int size = end_idx - start_idx
-    float[] result = make(float[], size)
+    []float result = make([]float, size)
     float max_val = find_max(logits, start_idx, end_idx)
     float sum_exp = 0.0
     int i = 0
@@ -288,7 +288,7 @@ func softmax(
     result
 }
 
-func find_max(float[] arr, int start_idx, int end_idx) float {
+func find_max([]float arr, int start_idx, int end_idx) float {
     float max_val = arr[start_idx]
     int i = start_idx + 1
     for i < end_idx {

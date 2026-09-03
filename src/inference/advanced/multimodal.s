@@ -19,7 +19,7 @@ struct image_data {
     height int
     channels int
     data []uint8
-    processed_tensor float[][]
+    processed_tensor []float[]
 }
 
 struct audio_data {
@@ -27,8 +27,8 @@ struct audio_data {
     sample_rate int
     duration_ms int
     num_channels int
-    samples float[]
-    mel_spectrogram float[][]
+    samples []float
+    mel_spectrogram []float[]
 }
 
 struct video_data {
@@ -37,7 +37,7 @@ struct video_data {
     width int
     height int
     frames []image_data
-    temporal_features float[][]
+    temporal_features []float[]
 }
 
 struct multimodal_input {
@@ -57,8 +57,8 @@ struct vision_encoder_config {
     patch_size int
     num_patches int
     image_size int
-    normalize_mean float[]
-    normalize_std float[]
+    normalize_mean []float
+    normalize_std []float
 }
 
 struct audio_encoder_config {
@@ -72,14 +72,14 @@ struct audio_encoder_config {
 
 struct vision_encoder {
     config vision_encoder_config
-    weights map[string]float[][]
+    weights map[string][]float[]
     is_loaded bool
 }
 
 func LoadVisionEncoder(config vision_encoder_config) vision_encoder {
     encoder := vision_encoder {
         config: config,
-        weights: make(map[string]float[][]),
+        weights: make(map[string][]float[]),
         is_loaded: false,
     }
     encoder.is_loaded = true
@@ -88,28 +88,28 @@ func LoadVisionEncoder(config vision_encoder_config) vision_encoder {
 
 func (encoder vision_encoder) EncodeImage(
     image image_data,
-) float[][] {
+) []float[] {
     if !encoder.is_loaded {
-        return make(float[][], 0)
+        return make([]float[], 0)
     }
     preprocessed := preprocess_image(image, encoder.config)
-    features := make(float[][], encoder.config.num_patches)
+    features := make([]float[], encoder.config.num_patches)
     for i := 0; i < encoder.config.num_patches; i++ {
-        features[i] = make(float[], encoder.config.hidden_size)
+        features[i] = make([]float, encoder.config.hidden_size)
     }
     return features
 }
 
 struct audio_encoder {
     config audio_encoder_config
-    weights map[string]float[][]
+    weights map[string][]float[]
     is_loaded bool
 }
 
 func LoadAudioEncoder(config audio_encoder_config) audio_encoder {
     encoder := audio_encoder {
         config: config,
-        weights: make(map[string]float[][]),
+        weights: make(map[string][]float[]),
         is_loaded: false,
     }
     encoder.is_loaded = true
@@ -118,14 +118,14 @@ func LoadAudioEncoder(config audio_encoder_config) audio_encoder {
 
 func (encoder audio_encoder) EncodeAudio(
     audio audio_data,
-) float[][] {
+) []float[] {
     if !encoder.is_loaded {
-        return make(float[][], 0)
+        return make([]float[], 0)
     }
     mel_spec := extract_mel_spectrogram(audio, encoder.config)
-    features := make(float[][], len(mel_spec))
+    features := make([]float[], len(mel_spec))
     for i := 0; i < len(mel_spec); i++ {
-        features[i] = make(float[], encoder.config.mel_bins)
+        features[i] = make([]float, encoder.config.mel_bins)
     }
     return features
 }
@@ -153,10 +153,10 @@ func NewMultimodalProcessor(
 
 func (processor multimodal_processor) ProcessInput(
     input multimodal_input,
-) (int[], float[][], string[]) {
+) ([]int, []float[], []string) {
     text_tokens := tokenize(input.text)
-    special_tokens := make(string[], 0)
-    image_features := make(float[][], 0)
+    special_tokens := make([]string, 0)
+    image_features := make([]float[], 0)
     image_tokens := 0
     for i := 0; i < len(input.images); i++ {
         features := processor.vision_encoder.EncodeImage(input.images[i])
@@ -169,7 +169,7 @@ func (processor multimodal_processor) ProcessInput(
         image_tokens += len(features)
         special_tokens = append(special_tokens, "<image>")
     }
-    audio_features := make(float[][], 0)
+    audio_features := make([]float[], 0)
     audio_tokens := 0
     for i := 0; i < len(input.audio); i++ {
         features := processor.audio_encoder.EncodeAudio(input.audio[i])
@@ -194,17 +194,17 @@ func (processor multimodal_processor) ProcessInput(
 
 struct image_preprocessor {
     target_size int
-    normalize_mean float[]
-    normalize_std float[]
+    normalize_mean []float
+    normalize_std []float
 }
 
 func preprocess_image(
     image image_data,
     config vision_encoder_config,
-) float[][] {
-    result := make(float[][], config.num_patches)
+) []float[] {
+    result := make([]float[], config.num_patches)
     for i := 0; i < config.num_patches; i++ {
-        result[i] = make(float[], config.hidden_size)
+        result[i] = make([]float, config.hidden_size)
     }
     return result
 }
@@ -212,18 +212,18 @@ func preprocess_image(
 func extract_mel_spectrogram(
     audio audio_data,
     config audio_encoder_config,
-) float[][] {
+) []float[] {
     num_frames := (len(audio.samples) - config.frame_length_ms) /
                   config.hop_length_ms
-    result := make(float[][], num_frames)
+    result := make([]float[], num_frames)
     for i := 0; i < num_frames; i++ {
-        result[i] = make(float[], config.mel_bins)
+        result[i] = make([]float, config.mel_bins)
     }
     return result
 }
 
 func tokenize(string text) []int {
-    tokens := make(int[], 0)
+    tokens := make([]int, 0)
     words := split_string(text, " ")
     for i := 0; i < len(words); i++ {
         tokens = append(tokens, hash_string(words[i]) % 32000)
@@ -232,7 +232,7 @@ func tokenize(string text) []int {
 }
 
 func split_string(string s, string sep) []string {
-    result := make(string[], 0)
+    result := make([]string, 0)
     current := ""
     for i := 0; i < len(s); i++ {
         if i+1 <= len(s) && substring(s, i, i+1) == sep {
@@ -263,14 +263,14 @@ func hash_string(string s) int {
 }
 
 func merge_multimodal_features(
-    image_features float[][],
-    audio_features float[][],
+    image_features []float[],
+    audio_features []float[],
     text_weight float,
     image_weight float,
     audio_weight float,
-) float[][] {
+) []float[] {
     total_features := len(image_features) + len(audio_features)
-    result := make(float[][], total_features)
+    result := make([]float[], total_features)
     idx := 0
     for i := 0; i < len(image_features); i++ {
         result[idx] = scale_vector(image_features[i], image_weight)
@@ -283,8 +283,8 @@ func merge_multimodal_features(
     return result
 }
 
-func scale_vector(float[] vec, float scale) []float {
-    result := make(float[], len(vec))
+func scale_vector([]float vec, float scale) []float {
+    result := make([]float, len(vec))
     for i := 0; i < len(vec); i++ {
         result[i] = i[] * scale
     }

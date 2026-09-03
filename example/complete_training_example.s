@@ -29,14 +29,14 @@ func initialize_model() model.transformer_state {
     model_state.intermediate_dim = 3072
     model_state.vocab_size = 50257
     model_state.max_sequence_length = 512
-    model_state.weight_matrices = float[][](
+    model_state.weight_matrices = []float[](
         model_state.num_layers *
         (model_state.hidden_dim * model_state.hidden_dim +
          model_state.intermediate_dim * model_state.hidden_dim)
     )
     i := 0
     for i < len(model_state.weight_matrices) {
-        model_state.weight_matrices[i] = float[](768)
+        model_state.weight_matrices[i] = []float(768)
         j := 0
         for j < 768 {
             model_state.weight_matrices[i][j] = 0.001
@@ -102,8 +102,8 @@ func run_complete_training() {
         step_loss := 0.0
         step_count := 0
         for step < 1000 {
-            var int[] batch_input_ids = create_dummy_batch(training_config.batch_size, 512)
-            var int[] batch_target_ids = create_dummy_batch(training_config.batch_size, 512)
+            var []int batch_input_ids = create_dummy_batch(training_config.batch_size, 512)
+            var []int batch_target_ids = create_dummy_batch(training_config.batch_size, 512)
             forward_result := 
                 training_pipeline.forward_pass(
                     model_state,
@@ -192,8 +192,8 @@ func evaluate_model(
     total_loss := 0.0
     batch := 0
     for batch < num_eval_batches {
-        var int[] input_ids = create_dummy_batch(eval_batch_size, 512)
-        var int[] target_ids = create_dummy_batch(eval_batch_size, 512)
+        var []int input_ids = create_dummy_batch(eval_batch_size, 512)
+        var []int target_ids = create_dummy_batch(eval_batch_size, 512)
         forward_result := 
             training_pipeline.forward_pass(
                 model_state,
@@ -208,7 +208,7 @@ func evaluate_model(
 }
 
 func create_dummy_batch(int batch_size, int seq_len) []int {
-    var int[] batch = int[](batch_size * seq_len)
+    var []int batch = []int(batch_size * seq_len)
     i := 0
     for i < batch_size * seq_len {
         batch[i] = 1000 + i % 50000

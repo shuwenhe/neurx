@@ -96,7 +96,7 @@ func main() {
     }
     println("\n4. Feature Fusion Strategies")
     println("-" * 40)
-    strategies := string[]{
+    strategies := []string{
         "concatenation",
         "addition",
         "attention",

@@ -233,7 +233,7 @@ func reward_get_report(verifiable_reward_manager_state state) string {
     report = report + "Verification Ratio: " + float_to_str_func(reward_get_verification_ratio(state)) + "\n"
     report = report + "Accuracy (Verifiable): " + float_to_str_func(reward_get_accuracy(state)) + "\n"
     report = report + "Function Calls:\n"
-    string[] keys = map_keys_func(state.function_call_count)
+    []string keys = map_keys_func(state.function_call_count)
     for i in range(len(keys)) {
         string key = keys[i]
         int count = state.function_call_count[key]
@@ -275,6 +275,6 @@ func float_to_str_func(float f) string {
 }
 
 func map_keys_func(map string = int m) []string {
-    string[] keys = make([]string, 100)
+    []string keys = make([]string, 100)
     keys
 }

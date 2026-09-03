@@ -215,10 +215,10 @@ struct runtime_lora_module {
     int rank
     float alpha
     float scaling
-    float[] lora_a
-    float[] lora_b
-    float[] initial_a
-    float[] initial_b
+    []float lora_a
+    []float lora_b
+    []float initial_a
+    []float initial_b
 }
 
 struct runtime_module_step_result {
@@ -227,7 +227,7 @@ struct runtime_module_step_result {
 }
 
 func runtime_fill_f32(int size, float value) []float {
-    float[] arr = make([]float, size)
+    []float arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = value
@@ -387,7 +387,7 @@ func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batc
 }
 
 func runtime_text_vector(string text, int size, float scale, int salt) []float {
-    float[] vec = runtime_fill_f32(size, 0.0)
+    []float vec = runtime_fill_f32(size, 0.0)
     if size <= 0 {
         return vec
     }
@@ -460,7 +460,7 @@ func runtime_init_lora_module(string name, int layer_index, int in_dim, int out_
     module
 }
 
-func runtime_mse_loss(float[] pred, float[] target) float {
+func runtime_mse_loss([]float pred, []float target) float {
     if len(pred) == 0 || len(pred) != len(target) {
         return 0.0
     }
@@ -474,11 +474,11 @@ func runtime_mse_loss(float[] pred, float[] target) float {
     loss / (len(pred) as float)
 }
 
-func runtime_lora_step(runtime_lora_module module, float[] input_vec, float[] target_vec, float lr, float max_grad_norm) runtime_module_step_result {
+func runtime_lora_step(runtime_lora_module module, []float input_vec, []float target_vec, float lr, float max_grad_norm) runtime_module_step_result {
     int in_dim = module.in_dim
     int out_dim = module.out_dim
     int rank = module.rank
-    float[] ax = runtime_fill_f32(rank, 0.0)
+    []float ax = runtime_fill_f32(rank, 0.0)
     int r = 0
     for r < rank {
         float sum = 0.0
@@ -490,7 +490,7 @@ func runtime_lora_step(runtime_lora_module module, float[] input_vec, float[] ta
         ax[r] = sum
         r = r + 1
     }
-    float[] output = runtime_fill_f32(out_dim, 0.0)
+    []float output = runtime_fill_f32(out_dim, 0.0)
     int o = 0
     for o < out_dim {
         float sum = 0.0
@@ -503,15 +503,15 @@ func runtime_lora_step(runtime_lora_module module, float[] input_vec, float[] ta
         o = o + 1
     }
     float loss = runtime_mse_loss(output, target_vec)
-    float[] grad_output = runtime_fill_f32(out_dim, 0.0)
+    []float grad_output = runtime_fill_f32(out_dim, 0.0)
     float out_scale = 2.0 / (out_dim as float)
     o = 0
     for o < out_dim {
         grad_output[o] = out_scale * (output[o] - target_o[])
         o = o + 1
     }
-    float[] grad_a = runtime_fill_f32(rank * in_dim, 0.0)
-    float[] grad_b = runtime_fill_f32(out_dim * rank, 0.0)
+    []float grad_a = runtime_fill_f32(rank * in_dim, 0.0)
+    []float grad_b = runtime_fill_f32(out_dim * rank, 0.0)
     float grad_norm_sq = 0.0
     o = 0
     for o < out_dim {
@@ -525,7 +525,7 @@ func runtime_lora_step(runtime_lora_module module, float[] input_vec, float[] ta
         }
         o = o + 1
     }
-    float[] grad_hidden = runtime_fill_f32(rank, 0.0)
+    []float grad_hidden = runtime_fill_f32(rank, 0.0)
     r = 0
     for r < rank {
         float sum = 0.0
@@ -669,7 +669,7 @@ func runtime_compute_delta_stats([]runtime_lora_module modules) weight_delta_sta
     stats
 }
 
-func runtime_float_array_json(float[] values) string {
+func runtime_float_array_json([]float values) string {
     string json = "["
     int i = 0
     for i < len(values) {
@@ -710,7 +710,7 @@ func runtime_build_training_state_json(
     float initial_loss,
     float final_loss,
     float best_loss,
-    float[] loss_history,
+    []float loss_history,
     adapter_stats adapter,
     weight_delta_stats delta
 ) string {
@@ -748,7 +748,7 @@ func runtime_build_training_state_json(
 func runtime_write_adapter_checkpoint(
     trainer_config config,
     []runtime_lora_module modules,
-    float[] loss_history,
+    []float loss_history,
     float initial_loss,
     float final_loss,
     float best_loss,
@@ -765,10 +765,10 @@ func runtime_write_adapter_checkpoint(
     int module_idx = 0
     for module_idx < len(modules) {
         runtime_lora_module module = modules[module_idx]
-        int[] a_shape = make([]int, 2)
+        []int a_shape = make([]int, 2)
         a_shape[0] = module.rank
         a_shape[1] = module.in_dim
-        float[] a_data = runtime_fill_f32(len(module.lora_A), 0.0)
+        []float a_data = runtime_fill_f32(len(module.lora_A), 0.0)
         int i = 0
         for i < len(module.lora_A) {
             a_data[i] = module.lora_A[i]
@@ -782,10 +782,10 @@ func runtime_write_adapter_checkpoint(
         a_tensor.shape_count = 2
         a_tensor.data_count = len(a_data)
         safetensors_writer_add_tensor(writer, a_tensor)
-        int[] b_shape = make([]int, 2)
+        []int b_shape = make([]int, 2)
         b_shape[0] = module.out_dim
         b_shape[1] = module.rank
-        float[] b_data = runtime_fill_f32(len(module.lora_B), 0.0)
+        []float b_data = runtime_fill_f32(len(module.lora_B), 0.0)
         i = 0
         for i < len(module.lora_B) {
             b_data[i] = module.lora_B[i]
@@ -870,7 +870,7 @@ func run_runtime_training(trainer_config config) int {
     println("Vectorizing prompt")
     println("Vectorizing target")
     println("Training loop start")
-    float[] loss_history = make([]float, config.total_steps)
+    []float loss_history = make([]float, config.total_steps)
     float initial_loss = 0.0
     float best_loss = 999999.0
     float final_loss = 0.0
@@ -884,8 +884,8 @@ func run_runtime_training(trainer_config config) int {
         int sample_idx = 0
         for sample_idx < batch.count && step < config.total_steps {
             runtime_training_sample sample = batch.samples[sample_idx]
-            float[] prompt_vec = runtime_text_vector(sample.prompt_text, config.hidden_size, 1.0, 17)
-            float[] target_vec = runtime_text_vector(sample.target_text, config.hidden_size, 1.0, 29)
+            []float prompt_vec = runtime_text_vector(sample.prompt_text, config.hidden_size, 1.0, 17)
+            []float target_vec = runtime_text_vector(sample.target_text, config.hidden_size, 1.0, 29)
             float step_loss = 0.0
             module_idx = 0
             for module_idx < len(modules) {
@@ -915,7 +915,7 @@ func run_runtime_training(trainer_config config) int {
         println("error: training loop produced no steps")
         return 1
     }
-    float[] trimmed_loss_history = make([]float, step)
+    []float trimmed_loss_history = make([]float, step)
     int loss_idx = 0
     for loss_idx < step {
         trimmed_loss_history[loss_idx] = loss_history[loss_idx]
@@ -1010,7 +1010,7 @@ func sqrt_lora(float x) float {
 }
 
 func reference_fill_f32(int size, float value) []float {
-    float[] arr = make([]float, size)
+    []float arr = make([]float, size)
     int i = 0
     for i < size {
         arr[i] = value
@@ -1029,7 +1029,7 @@ func int_to_str(int n) string {
         negative = true
         n = 0 - n
     }
-    string[] digits = string[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+    []string digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
     for n > 0 {
         int digit = n - (n / 10) * 10
         result = digits[digit] + result

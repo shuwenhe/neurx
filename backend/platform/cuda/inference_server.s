@@ -8,7 +8,7 @@ extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_setsockopt(int fd, int level, int option, int value) int
-extern "intrinsic" func __host_read_binary_file_range(string path, int offset, int size) []int
+extern "intrinsic" func __host_read_binary_file_range(string path, int offset, int size) int[]
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "libc:neurx_s_cuda_device_count" func neurx_s_cuda_device_count() int
 extern "libc:neurx_s_cuda_device_name" func neurx_s_cuda_device_name() string
@@ -29,7 +29,7 @@ extern "libc:neurx_s_cuda_session_error" func neurx_s_cuda_session_error(int ses
 extern func runtime_env_get(string key, string default_value) string
 
 struct kv_cache {
-    []float cache_data
+    float[] cache_data
     int layer_count
     int cache_size_per_layer
 }
@@ -105,8 +105,19 @@ func parse_int_or_default(string s, int default_val) int {
     int i = 0
     for i < len(s) {
         string ch = __host_slice(s, i, i + 1)
-        if ch[0] >= 48 && ch[0] <= 57 {
-            result = result * 10 + (ch[0] - 48)
+        if ch >= "0" && ch <= "9" {
+            int digit = 0
+            if ch == "0" { digit = 0 }
+            else if ch == "1" { digit = 1 }
+            else if ch == "2" { digit = 2 }
+            else if ch == "3" { digit = 3 }
+            else if ch == "4" { digit = 4 }
+            else if ch == "5" { digit = 5 }
+            else if ch == "6" { digit = 6 }
+            else if ch == "7" { digit = 7 }
+            else if ch == "8" { digit = 8 }
+            else if ch == "9" { digit = 9 }
+            result = result * 10 + digit
         } else {
             return result
         }
@@ -246,7 +257,7 @@ func normalize_byte(int value) int {
     return current
 }
 
-func u64_le_bytes([]int bytes, int offset) int {
+func u64_le_bytes(int[] bytes, int offset) int {
     if offset < 0 || offset + 8 > len(bytes) {
         return 0
     }
@@ -261,7 +272,7 @@ func u64_le_bytes([]int bytes, int offset) int {
     return value
 }
 
-func u16_le_bytes([]int bytes, int offset) int {
+func u16_le_bytes(int[] bytes, int offset) int {
     if offset < 0 || offset + 2 > len(bytes) {
         return 0
     }
@@ -301,7 +312,7 @@ func bf16_to_float(int raw) float {
     return value
 }
 
-func decode_bf16_at([]int data, int byte_offset) float {
+func decode_bf16_at(int[] data, int byte_offset) float {
     int raw_val = u16_le_bytes(data, byte_offset)
     return bf16_to_float(raw_val)
 }
@@ -359,8 +370,8 @@ func bind_backend_socket(int listener_fd, string host, int port) int {
     bind_result
 }
 
-func tokenize_text(string text) []int {
-    []int tokens = make([]int, 256)
+func tokenize_text(string text) int[256] {
+    int[256] tokens
     int i = 0
     int token_count = 0
     int word_start = 0
@@ -399,10 +410,10 @@ func safe_allocate_float_array(int requested_size) int {
     return requested_size
 }
 
-func streaming_matmul_bf16(string model_path, []int metadata_bytes, string tensor_name, []float input, int out_dim, int in_dim) []float {
+func streaming_matmul_bf16(string model_path, int[8192] metadata_bytes, string tensor_name, float[4096] input, int out_dim, int in_dim) float[4096] {
     print("[MatMul] Streaming matmul for " + tensor_name + " (out=" + int_to_string(out_dim) + ", in=" + int_to_string(in_dim) + ")\n")
     int actual_out = safe_allocate_float_array(out_dim)
-    []float output = make([]float, actual_out)
+    float[4096] output
     if actual_out == 0 {
         print("[MatMul] Allocation failed\n")
         return output
@@ -417,7 +428,7 @@ func streaming_matmul_bf16(string model_path, []int metadata_bytes, string tenso
         }
         int chunk_rows = chunk_end - out_idx
         int bytes_needed = chunk_rows * in_dim * 2
-        []int raw_weights = __host_read_binary_file_range(model_path, 0, bytes_needed)
+        int[] raw_weights = __host_read_binary_file_range(model_path, 0, bytes_needed)
         if len(raw_weights) < bytes_needed {
             print("[MatMul] Read failed at idx " + int_to_string(out_idx) + "\n")
             break
@@ -444,9 +455,10 @@ func streaming_matmul_bf16(string model_path, []int metadata_bytes, string tenso
     return output
 }
 
-func simple_transformer_layer([]float input, int hidden_dim, int layer_idx) []float {
+func simple_transformer_layer(float[4096] input, int hidden_dim, int layer_idx) float[4096] {
     print("[Layer " + int_to_string(layer_idx) + "] Processing input of size " + int_to_string(len(input)) + "\n")
-    []float output = make([]float, safe_allocate_float_array(hidden_dim))
+    int output_size = safe_allocate_float_array(hidden_dim)
+    float[4096] output
     int i = 0
     for i < len(output) && i < len(input) {
         output[i] = input[i] * 0.99 + 0.01
@@ -456,9 +468,9 @@ func simple_transformer_layer([]float input, int hidden_dim, int layer_idx) []fl
     return output
 }
 
-func run_transformer_forward([]float embeddings, int num_layers, int hidden_dim) []float {
+func run_transformer_forward(float[4096] embeddings, int num_layers, int hidden_dim) float[4096] {
     print("[Inference] Starting " + int_to_string(num_layers) + " transformer layers\n")
-    []float state = embeddings
+    float[4096] state = embeddings
     int layer = 0
     for layer < num_layers && len(state) > 0 {
         print("[Inference] Layer " + int_to_string(layer) + " / " + int_to_string(num_layers) + "\n")
@@ -482,9 +494,10 @@ func exp_approx(float x) float {
     return 1.0 + x + x2 / 2.0 + x3 / 6.0 + x4 / 24.0
 }
 
-func softmax([]float logits) []float {
+func softmax(float[4096] logits) float[4096] {
     int n = len(logits)
-    []float probs = make([]float, safe_allocate_float_array(n))
+    int output_size = safe_allocate_float_array(n)
+    float[4096] probs
     if n == 0 {
         return probs
     }
@@ -520,7 +533,7 @@ func softmax([]float logits) []float {
     return probs
 }
 
-func argmax([]float v) int {
+func argmax(float[4096] v) int {
     int n = len(v)
     if n == 0 {
         return -1
@@ -574,16 +587,17 @@ func token_id_to_string(int id) string {
     else { return "[" + int_to_string(id) + "]" }
 }
 
-func top_k_indices([]float logits, int k) []int {
+func top_k_indices(float[4096] logits, int k) int[512] {
     int n = len(logits)
     if k <= 0 || n == 0 {
-        return make([]int, 0)
+        int[512] empty
+        return empty
     }
     int kk = k
     if kk > n {
         kk = n
     }
-    []int idx = make([]int, n)
+    int[512] idx
     int i = 0
     for i < n {
         idx[i] = i
@@ -606,7 +620,7 @@ func top_k_indices([]float logits, int k) []int {
         idx[best] = tmp
         out = out + 1
     }
-    []int topk = make([]int, kk)
+    int[512] topk
     i = 0
     for i < kk {
         topk[i] = idx[i]
@@ -615,19 +629,19 @@ func top_k_indices([]float logits, int k) []int {
     return topk
 }
 
-func top_k_sample([]float logits, int k) int {
+func top_k_sample(float[4096] logits, int k) int {
     int n = len(logits)
     if n == 0 {
         return -1
     }
-    []int tk = top_k_indices(logits, k)
+    int[512] tk = top_k_indices(logits, k)
     if len(tk) == 0 {
         return argmax(logits)
     }
     return tk[0]
 }
 
-func decode_logits_greedy([]float logits) string {
+func decode_logits_greedy(float[4096] logits) string {
     int tid = argmax(logits)
     if tid < 0 {
         return ""
@@ -721,7 +735,7 @@ func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) 
     print("[GPU Inference] Stream completed: " + int_to_string(generated) + " tokens\n")
 }
 
-func greedy_decode_tokens([]float logits, int num_tokens_to_generate, int vocab_size) string {
+func greedy_decode_tokens(float[] logits, int num_tokens_to_generate, int vocab_size) string {
     string generated = ""
     int gen_step = 0
     for gen_step < num_tokens_to_generate {
@@ -745,9 +759,9 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     print("[RealInference] Prompt: '" + prompt + "'\n")
     print("[RealInference] Max tokens: " + int_to_string(max_tokens) + "\n")
 
-    []int input_tokens = tokenize_text(prompt)
+    int[] input_tokens = tokenize_text(prompt)
     if len(input_tokens) == 0 {
-        input_tokens = make([]int, 1)
+        input_tokens = new int[1]
         input_tokens[0] = 50256
     }
     print("[RealInference] Input tokenized: " + int_to_string(len(input_tokens)) + " tokens\n")
@@ -755,7 +769,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     int seq_len = len(input_tokens)
     if seq_len > 32 { seq_len = 32 }
 
-    []float input_hidden = make([]float, seq_len * hidden_dim)
+    float[] input_hidden = new float[seq_len * hidden_dim]
     int tok_idx = 0
     for tok_idx < seq_len {
         int token_id = input_tokens[tok_idx]
@@ -773,19 +787,20 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     }
     print("[RealInference] Input embeddings computed\n")
 
-    []float current_hidden = input_hidden
+    float[] current_hidden = input_hidden
     int layer_idx = 0
     int active_layers = num_layers
     if active_layers > 1 { active_layers = 1 }
 
     for layer_idx < active_layers {
 
-        []float attn_hidden = make([]float, len(current_hidden))
+        int attn_hidden_size = len(current_hidden)
+        float[] attn_hidden = new float[seq_len * hidden_dim]
         tok_idx = 0
         for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
 
-            []float attn_scores = make([]float, seq_len)
+            float[] attn_scores = new float[seq_len]
             int pos = 0
             for pos < seq_len {
                 float dot_product = 0.0
@@ -822,7 +837,8 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
             tok_idx = tok_idx + 1
         }
 
-        []float ffn_hidden = make([]float, len(current_hidden))
+        int ffn_hidden_size = len(current_hidden)
+        float[] ffn_hidden = new float[seq_len * hidden_dim]
         tok_idx = 0
         for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
@@ -857,7 +873,8 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     int prompt_hash = 0
     int p_idx = 0
     for p_idx < len(prompt) {
-        prompt_hash = (prompt_hash * 31 + (prompt[p_idx * 1] as int)) % 10000
+        string ch = __host_slice(prompt, p_idx, p_idx + 1)
+        prompt_hash = (prompt_hash * 31 + len(ch)) % 10000
         p_idx = p_idx + 1
     }
 
@@ -929,7 +946,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     return response
 }
 
-func nucleus_sample_real([]float logits, float top_p, float temperature) int {
+func nucleus_sample_real(float[] logits, float top_p, float temperature) int {
     if len(logits) == 0 { return 0 }
 
     int best_idx = 0
@@ -1148,11 +1165,11 @@ func main() {
     _ = __sys_close(listener_fd)
 }
 
-func load_embedding_weights(string model_path, int vocab_size, int hidden_size) []float {
-    []float embeddings = make([]float, vocab_size)
+func load_embedding_weights(string model_path, int vocab_size, int hidden_size) float[] {
+    float[] embeddings = new float[vocab_size]
     print("[Weights] Loading embeddings: " + int_to_string(vocab_size) + " × " + int_to_string(hidden_size) + "\n")
 
-    []int header_bytes = __host_read_binary_file_range(model_path, 0, 16)
+    int[] header_bytes = __host_read_binary_file_range(model_path, 0, 16)
     if len(header_bytes) < 8 {
         print("[Weights] ERROR: Cannot read header (got " + int_to_string(len(header_bytes)) + " bytes)\n")
         return embeddings
@@ -1176,8 +1193,8 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size) int {
     return 0
 }
 
-func tokenize_with_vocab(string text) []int {
-    []int tokens = make([]int, 512)
+func tokenize_with_vocab(string text) int[] {
+    int[] tokens = new int[512]
     int token_count = 0
 
     int i = 0
@@ -1201,8 +1218,8 @@ func tokenize_with_vocab(string text) []int {
             continue
         }
 
-        int ch = text[i]
-        int token_id = ch + 256
+        string ch = __host_slice(text, i, i + 1)
+        int token_id = hash_to_token(ch, 10000)
         tokens[token_count] = token_id
         token_count = token_count + 1
         i = i + 1
@@ -1215,13 +1232,17 @@ func hash_to_token(string word, int max_token) int {
     int hash = 0
     int i = 0
     for i < len(word) {
-        hash = (hash * 31 + word[i]) % max_token
+        string ch = __host_slice(word, i, i + 1)
+        if ch >= "0" && ch <= "9" { hash = (hash * 31 + 1) % max_token }
+        else if ch >= "a" && ch <= "z" { hash = (hash * 31 + 2) % max_token }
+        else if ch >= "A" && ch <= "Z" { hash = (hash * 31 + 3) % max_token }
+        else { hash = (hash * 31 + 4) % max_token }
         i = i + 1
     }
     return (hash % (max_token - 256)) + 256
 }
 
-func nucleus_sample([]float logits, float p, int seed) int {
+func nucleus_sample(float[] logits, float p, int seed) int {
     int n = len(logits)
     if n == 0 {
         return -1
@@ -1234,7 +1255,7 @@ func nucleus_sample([]float logits, float p, int seed) int {
         p_val = 1.0
     }
 
-    []int sorted_indices = make([]int, n)
+    int[] sorted_indices = new int[n]
     int i = 0
     for i < n {
         sorted_indices[i] = i
@@ -1286,8 +1307,9 @@ func nucleus_sample([]float logits, float p, int seed) int {
     return sorted_indices[selected]
 }
 
-func temperature_scale([]float logits, float temperature) []float {
-    []float scaled = make([]float, len(logits))
+func temperature_scale(float[] logits, float temperature) float[] {
+    int scaled_size = len(logits)
+    float[] scaled = new float[len(logits)]
 
     float temp_val = temperature
     if temp_val <= 0.0 {
@@ -1305,7 +1327,7 @@ func temperature_scale([]float logits, float temperature) []float {
 
 func init_kv_cache(int num_layers, int max_seq_len, int hidden_size) kv_cache {
     int cache_size = num_layers * max_seq_len * hidden_size
-    []float cache_data = make([]float, cache_size)
+    float[] cache_data = new float[cache_size]
 
     print("[Cache] Initializing KV cache: " + int_to_string(num_layers) + " layers, seq_len=" + int_to_string(max_seq_len) + "\n")
 
@@ -1324,7 +1346,7 @@ func init_kv_cache(int num_layers, int max_seq_len, int hidden_size) kv_cache {
     }
 }
 
-func update_kv_cache(kv_cache cache, int layer_idx, []float new_data) kv_cache {
+func update_kv_cache(kv_cache cache, int layer_idx, float[] new_data) kv_cache {
     if layer_idx < 0 || layer_idx >= cache.layer_count {
         return cache
     }

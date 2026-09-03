@@ -37,7 +37,7 @@ func ops_trim(string s) string {
 }
 
 func ops_split_lines(string text) []string {
-    string[] lines = []string{}
+    []string lines = []string{}
     string current := ""
     int i := 0
     for i < len(text) {
@@ -149,8 +149,8 @@ func ops_overlap_score(string left, string right) float64 {
     if ops_trim(left) == "" || ops_trim(right) == "" {
         return 0.0
     }
-    string[] left_words = ops_split_lines(left)
-    string[] right_words = ops_split_lines(right)
+    []string left_words = ops_split_lines(left)
+    []string right_words = ops_split_lines(right)
     int matches := 0
     int i := 0
     for i < len(left_words) {
@@ -248,7 +248,7 @@ func dpo_execute_from_jsonl(string preference_path, string output_dir) industria
         return industrial_run_summary{name: "dpo", input_path: preference_path, output_path: report_path}
     }
     string text := runtime_read_text_file(preference_path)
-    string[] lines := ops_split_lines(text)
+    []string lines := ops_split_lines(text)
     int total := 0
     int matched := 0
     float64 avg_loss := 0.0
@@ -291,8 +291,8 @@ func rag_execute_from_corpus(string corpus_path, string query, string output_dir
         return industrial_run_summary{name: "rag", input_path: corpus_path, output_path: report_path}
     }
     string corpus := runtime_read_text_file(corpus_path)
-    string[] lines := ops_split_lines(corpus)
-    string[] selected := make([]string, 8)
+    []string lines := ops_split_lines(corpus)
+    []string selected := make([]string, 8)
     int selected_count := 0
     float64 best_score := 0.0
     int i := 0
@@ -332,13 +332,13 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
         return industrial_run_summary{name: "governance", input_path: dataset_path, output_path: report_path}
     }
     string text := runtime_read_text_file(dataset_path)
-    string[] lines := ops_split_lines(text)
+    []string lines := ops_split_lines(text)
     int total := 0
     int valid := 0
     int duplicates := 0
     float64 total_chars := 0.0
     float64 seen_quality := 0.0
-    int[] seen_hashes := make([]int, 2048)
+    []int seen_hashes := make([]int, 2048)
     int seen_count := 0
     int i := 0
     for i < len(lines) {
@@ -414,7 +414,7 @@ func ops_get_arg(map[string]string options, string key, string fallback) string 
     fallback
 }
 
-func ops_parse_args(string[] args) command_args {
+func ops_parse_args([]string args) command_args {
     if len(args) < 2 {
         return command_args{
             command: "help",
@@ -470,7 +470,7 @@ func ops_print_help() {
     io_println("  --dataset=<path>      Dataset JSONL path for governance")
     io_println("  --output-dir=<path>   Output directory")
 }
-pub func main(string[] args) i32 {
+pub func main([]string args) i32 {
     parsed := ops_parse_args(args)
     output_dir := ops_get_arg(parsed.options, "output-dir", "artifact/industrial_ops")
     match parsed.command {

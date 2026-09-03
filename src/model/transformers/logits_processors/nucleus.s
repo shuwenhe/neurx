@@ -15,12 +15,12 @@ func create_nucleus_processor(float p) nucleus_processor {
 }
 
 func apply_nucleus(
-    logits: float[],
+    logits: []float,
     nucleus_processor processor
 ) []float {
     int vocab_size = len(logits)
-    float[] probs = processor_utils.softmax(logits)
-    int[] sorted_indices
+    []float probs = processor_utils.softmax(logits)
+    []int sorted_indices
     for i = 0; i < vocab_size; i = i + 1 {
         sorted_indices.append(i)
     }
@@ -44,7 +44,7 @@ func apply_nucleus(
             break
         }
     }
-    bool[] mask
+    []bool mask
     for i = 0; i < vocab_size; i = i + 1 {
         bool keep = false
         for j = 0; j < num_tokens_to_keep; j = j + 1 {
@@ -59,7 +59,7 @@ func apply_nucleus(
 }
 
 func apply_adaptive_nucleus(
-    logits: float[],
+    logits: []float,
     base_p: float,
     float temperature
 ) []float {
@@ -80,10 +80,10 @@ func apply_adaptive_nucleus(
 }
 
 func apply_nucleus_batch(
-    logits_batch: float[][],
+    logits_batch: []float[],
     nucleus_processor processor
-) float[][] {
-    float[][] filtered_batch
+) []float[] {
+    []float[] filtered_batch
     for batch_logits in logits_batch {
         filtered := apply_nucleus(batch_logits, processor)
         filtered_batch.append(filtered)
@@ -92,16 +92,16 @@ func apply_nucleus_batch(
 }
 
 func sample_from_nucleus(
-    logits: float[],
+    logits: []float,
     processor: nucleus_processor,
     float temperature
 ) int {
-    float[] scaled_logits
+    []float scaled_logits
     for logit in logits {
         scaled_logits.append(logit / temperature)
     }
-    float[] filtered = apply_nucleus(scaled_logits, processor)
-    float[] probs = processor_utils.softmax(filtered)
+    []float filtered = apply_nucleus(scaled_logits, processor)
+    []float probs = processor_utils.softmax(filtered)
     int best_token = 0
     float best_prob = probs[0]
     for i = 1; i < len(probs); i = i + 1 {
@@ -114,13 +114,13 @@ func sample_from_nucleus(
 }
 
 func apply_top_k_nucleus(
-    logits: float[],
+    logits: []float,
     k: int,
     float p
 ) []float {
     int vocab_size = len(logits)
-    float[] probs = processor_utils.softmax(logits)
-    int[] sorted_indices
+    []float probs = processor_utils.softmax(logits)
+    []int sorted_indices
     for i = 0; i < vocab_size; i = i + 1 {
         sorted_indices.append(i)
     }
@@ -147,7 +147,7 @@ func apply_top_k_nucleus(
             break
         }
     }
-    bool[] mask
+    []bool mask
     for i = 0; i < vocab_size; i = i + 1 {
         bool keep = false
         for j = 0; j < num_to_keep; j = j + 1 {
@@ -167,16 +167,16 @@ struct nucleus_stats {
     int num_tokens_kept
     float fraction_kept
     float cumulative_prob
-    float[] kept_token_probs
+    []float kept_token_probs
 }
 
 func analyze_nucleus_filtering(
-    logits: float[],
+    logits: []float,
     float p
 ) nucleus_stats {
-    float[] probs = processor_utils.softmax(logits)
+    []float probs = processor_utils.softmax(logits)
     int vocab_size = len(logits)
-    int[] sorted_indices
+    []int sorted_indices
     for i = 0; i < vocab_size; i = i + 1 {
         sorted_indices.append(i)
     }
@@ -191,7 +191,7 @@ func analyze_nucleus_filtering(
     }
     float cumsum = 0.0
     int num_kept = 0
-    float[] kept_probs
+    []float kept_probs
     for i = 0; i < vocab_size; i = i + 1 {
         idx := sorted_indices[i]
         cumsum = cumsum + probs[idx]

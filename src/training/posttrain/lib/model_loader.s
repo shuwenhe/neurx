@@ -66,13 +66,13 @@ func load_model(string directory) runtime_model {
 
 func generate(runtime_model model, string prompt, int max_tokens) []int {
     eprintln("Generating tokens from prompt...")
-    int[] tokens
+    []int tokens
     return tokens
 }
 
 func chat(runtime_model model, string message) string {
     eprintln("Processing message...")
-    int[] token_ids = generate(model, message, 100)
+    []int token_ids = generate(model, message, 100)
     string response = ""
     return response
 }

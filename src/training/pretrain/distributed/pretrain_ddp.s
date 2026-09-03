@@ -17,8 +17,8 @@ struct pretrain_ddp_sync_result {
     tensor third
 }
 
-func copy_float(float[] values) []float {
-    float[] out = make([]float, len(values))
+func copy_float([]float values) []float {
+    []float out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -27,8 +27,8 @@ func copy_float(float[] values) []float {
     out
 }
 
-func copy_int(int[] values) []int {
-    int[] out = make([]int, len(values))
+func copy_int([]int values) []int {
+    []int out = make([]int, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -112,8 +112,8 @@ func pretrain_ddp_sync_tensor(pretrain_ddp_state state, tensor value) tensor {
     if !state.enabled {
         return new(copy_float(value.data), copy_int(value.shape), value.requires_grad)
     }
-    float[] payload = copy_float(value.data)
-    float[] reduced = all_reduce_sum(state.process_group, payload)
+    []float payload = copy_float(value.data)
+    []float reduced = all_reduce_sum(state.process_group, payload)
     int world_size = process_group_world_size(state.process_group)
     if world_size <= 0 {
         world_size = 1

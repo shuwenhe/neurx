@@ -113,9 +113,9 @@ func int_to_str_test(int n) string {
 }
 
 func test_new_tensor_1d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 5)
+    []float data = make([]float, 5)
     data[0] = 1.0; data[1] = 2.0; data[2] = 3.0; data[3] = 4.0; data[4] = 5.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 5
     tensor_s t = new_tensor_s(data, shape)
     bool passed = assert_equal_int_s(t.total_elements, 5) &&
@@ -126,10 +126,10 @@ func test_new_tensor_1d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_new_tensor_2d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     data[0] = 1.0; data[1] = 2.0; data[2] = 3.0
     data[3] = 4.0; data[4] = 5.0; data[5] = 6.0
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 3
     tensor_s t = new_tensor_s(data, shape)
@@ -142,13 +142,13 @@ func test_new_tensor_2d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_new_tensor_3d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 24)
+    []float data = make([]float, 24)
     int i = 0
     for i < 24 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 3)
+    []int shape = make([]int, 3)
     shape[0] = 2
     shape[1] = 3
     shape[2] = 4
@@ -170,8 +170,8 @@ func float_from_int(int n) float {
 }
 
 func test_new_tensor_empty_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 0)
-    int[] shape = make(int[], 0)
+    []float data = make([]float, 0)
+    []int shape = make([]int, 0)
     tensor_s t = new_tensor_s(data, shape)
     bool passed = assert_equal_int_s(t.total_elements, 1) &&
                   assert_equal_int_s(t.rank, 0)
@@ -180,9 +180,9 @@ func test_new_tensor_empty_s(test_suite_s suite) test_suite_s {
 }
 
 func test_new_tensor_single_element_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 1)
+    []float data = make([]float, 1)
     data[0] = 42.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 1
     tensor_s t = new_tensor_s(data, shape)
     bool passed = assert_equal_int_s(t.total_elements, 1) &&
@@ -192,9 +192,9 @@ func test_new_tensor_single_element_s(test_suite_s suite) test_suite_s {
 }
 
 func test_tensor_dtype_default_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 1)
+    []float data = make([]float, 1)
     data[0] = 1.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 1
     tensor_s t = new_tensor_s(data, shape)
     bool passed = t.dtype == "float32"
@@ -203,9 +203,9 @@ func test_tensor_dtype_default_s(test_suite_s suite) test_suite_s {
 }
 
 func test_tensor_device_default_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 1)
+    []float data = make([]float, 1)
     data[0] = 1.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 1
     tensor_s t = new_tensor_s(data, shape)
     bool passed = t.device == "cpu"
@@ -214,13 +214,13 @@ func test_tensor_device_default_s(test_suite_s suite) test_suite_s {
 }
 
 func test_tensor_large_1d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 1000)
+    []float data = make([]float, 1000)
     int i = 0
     for i < 1000 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 1000
     tensor_s t = new_tensor_s(data, shape)
     bool passed = assert_equal_int_s(t.total_elements, 1000)
@@ -229,9 +229,9 @@ func test_tensor_large_1d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_compute_strides_1d_s(test_suite_s suite) test_suite_s {
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 5
-    int[] strides = compute_strides_s(shape)
+    []int strides = compute_strides_s(shape)
     bool passed = assert_equal_int_s(len(strides), 1) &&
                   assert_equal_int_s(strides[0], 1)
     add_test_result_s(suite, "test_compute_strides_1d_s", passed,
@@ -239,10 +239,10 @@ func test_compute_strides_1d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_compute_strides_2d_s(test_suite_s suite) test_suite_s {
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 3
     shape[1] = 4
-    int[] strides = compute_strides_s(shape)
+    []int strides = compute_strides_s(shape)
     bool passed = assert_equal_int_s(len(strides), 2) &&
                   assert_equal_int_s(strides[0], 4) &&
                   assert_equal_int_s(strides[1], 1)
@@ -251,11 +251,11 @@ func test_compute_strides_2d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_compute_strides_3d_s(test_suite_s suite) test_suite_s {
-    int[] shape = make(int[], 3)
+    []int shape = make([]int, 3)
     shape[0] = 2
     shape[1] = 3
     shape[2] = 4
-    int[] strides = compute_strides_s(shape)
+    []int strides = compute_strides_s(shape)
     bool passed = assert_equal_int_s(len(strides), 3) &&
                   assert_equal_int_s(strides[0], 12) &&
                   assert_equal_int_s(strides[1], 4) &&
@@ -265,12 +265,12 @@ func test_compute_strides_3d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_compute_strides_4d_s(test_suite_s suite) test_suite_s {
-    int[] shape = make(int[], 4)
+    []int shape = make([]int, 4)
     shape[0] = 2
     shape[1] = 3
     shape[2] = 4
     shape[3] = 5
-    int[] strides = compute_strides_s(shape)
+    []int strides = compute_strides_s(shape)
     bool passed = assert_equal_int_s(len(strides), 4) &&
                   assert_equal_int_s(strides[0], 60) &&
                   assert_equal_int_s(strides[1], 20) &&
@@ -281,21 +281,21 @@ func test_compute_strides_4d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_compute_strides_empty_s(test_suite_s suite) test_suite_s {
-    int[] shape = make(int[], 0)
-    int[] strides = compute_strides_s(shape)
+    []int shape = make([]int, 0)
+    []int strides = compute_strides_s(shape)
     bool passed = assert_equal_int_s(len(strides), 0)
     add_test_result_s(suite, "test_compute_strides_empty_s", passed,
                       if passed { "" } else { "empty strides computation failed" })
 }
 
 func test_flat_index_1d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 5)
+    []float data = make([]float, 5)
     data[0] = 1.0; data[1] = 2.0; data[2] = 3.0; data[3] = 4.0; data[4] = 5.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 5
     tensor_s t = new_tensor_s(data, shape)
-    int[] idx0 = make(int[], 1); idx0[0] = 0
-    int[] idx4 = make(int[], 1); idx4[0] = 4
+    []int idx0 = make([]int, 1); idx0[0] = 0
+    []int idx4 = make([]int, 1); idx4[0] = 4
     int flat0 = tensor_get_flat_index_s(t, idx0)
     int flat4 = tensor_get_flat_index_s(t, idx4)
     bool passed = assert_equal_int_s(flat0, 0) &&
@@ -305,19 +305,19 @@ func test_flat_index_1d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_flat_index_2d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     int i = 0
     for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 3
     tensor_s t = new_tensor_s(data, shape)
-    int[] idx_0_0 = make(int[], 2); idx_0_0[0] = 0; idx_0_0[1] = 0
-    int[] idx_0_2 = make(int[], 2); idx_0_2[0] = 0; idx_0_2[1] = 2
-    int[] idx_1_1 = make(int[], 2); idx_1_1[0] = 1; idx_1_1[1] = 1
+    []int idx_0_0 = make([]int, 2); idx_0_0[0] = 0; idx_0_0[1] = 0
+    []int idx_0_2 = make([]int, 2); idx_0_2[0] = 0; idx_0_2[1] = 2
+    []int idx_1_1 = make([]int, 2); idx_1_1[0] = 1; idx_1_1[1] = 1
     int flat_0_0 = tensor_get_flat_index_s(t, idx_0_0)
     int flat_0_2 = tensor_get_flat_index_s(t, idx_0_2)
     int flat_1_1 = tensor_get_flat_index_s(t, idx_1_1)
@@ -329,18 +329,18 @@ func test_flat_index_2d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_flat_index_3d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 24)
+    []float data = make([]float, 24)
     int i = 0
     for i < 24 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 3)
+    []int shape = make([]int, 3)
     shape[0] = 2
     shape[1] = 3
     shape[2] = 4
     tensor_s t = new_tensor_s(data, shape)
-    int[] idx = make(int[], 3)
+    []int idx = make([]int, 3)
     idx[0] = 1; idx[1] = 2; idx[2] = 3
     int flat = tensor_get_flat_index_s(t, idx)
     bool passed = assert_equal_int_s(flat, 23)
@@ -349,10 +349,10 @@ func test_flat_index_3d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_strides_row_major_s(test_suite_s suite) test_suite_s {
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 4
     shape[1] = 5
-    int[] strides = compute_strides_s(shape)
+    []int strides = compute_strides_s(shape)
     bool passed = assert_equal_int_s(strides[0], 5) &&
                   assert_equal_int_s(strides[1], 1)
     add_test_result_s(suite, "test_strides_row_major_s", passed,
@@ -360,11 +360,11 @@ func test_strides_row_major_s(test_suite_s suite) test_suite_s {
 }
 
 func test_strides_consistency_s(test_suite_s suite) test_suite_s {
-    int[] shape = make(int[], 3)
+    []int shape = make([]int, 3)
     shape[0] = 2
     shape[1] = 3
     shape[3] = 4
-    int[] strides = compute_strides_s(shape)
+    []int strides = compute_strides_s(shape)
     bool dim0_ok = assert_equal_int_s(strides[0], 12)
     bool dim1_ok = assert_equal_int_s(strides[1], 4)
     add_test_result_s(suite, "test_strides_consistency_s", dim0_ok && dim1_ok,
@@ -372,16 +372,16 @@ func test_strides_consistency_s(test_suite_s suite) test_suite_s {
 }
 
 func test_reshape_1d_to_2d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     int i = 0
     for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 6
     tensor_s t1 = new_tensor_s(data, shape)
-    int[] new_shape = make(int[], 2)
+    []int new_shape = make([]int, 2)
     new_shape[0] = 2
     new_shape[1] = 3
     tensor_s t2 = tensor_reshape_s(t1, new_shape)
@@ -394,17 +394,17 @@ func test_reshape_1d_to_2d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_reshape_2d_to_1d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     int i = 0
     for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 3
     tensor_s t1 = new_tensor_s(data, shape)
-    int[] new_shape = make(int[], 1)
+    []int new_shape = make([]int, 1)
     new_shape[0] = 6
     tensor_s t2 = tensor_reshape_s(t1, new_shape)
     bool passed = assert_equal_int_s(t2.total_elements, 6) &&
@@ -415,17 +415,17 @@ func test_reshape_2d_to_1d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_reshape_2d_to_3d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 24)
+    []float data = make([]float, 24)
     int i = 0
     for i < 24 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 4
     shape[1] = 6
     tensor_s t1 = new_tensor_s(data, shape)
-    int[] new_shape = make(int[], 3)
+    []int new_shape = make([]int, 3)
     new_shape[0] = 2
     new_shape[1] = 3
     new_shape[2] = 4
@@ -437,13 +437,13 @@ func test_reshape_2d_to_3d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_reshape_preserves_data_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     data[0] = 1.0; data[1] = 2.0; data[2] = 3.0
     data[3] = 4.0; data[4] = 5.0; data[5] = 6.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 6
     tensor_s t1 = new_tensor_s(data, shape)
-    int[] new_shape = make(int[], 2)
+    []int new_shape = make([]int, 2)
     new_shape[0] = 2
     new_shape[1] = 3
     tensor_s t2 = tensor_reshape_s(t1, new_shape)
@@ -454,16 +454,16 @@ func test_reshape_preserves_data_s(test_suite_s suite) test_suite_s {
 }
 
 func test_reshape_invalid_total_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     int i = 0
     for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 6
     tensor_s t1 = new_tensor_s(data, shape)
-    int[] bad_shape = make(int[], 1)
+    []int bad_shape = make([]int, 1)
     bad_shape[0] = 5
     tensor_s t2 = tensor_reshape_s(t1, bad_shape)
     bool passed = assert_equal_int_s(t2.shape[0], 6)
@@ -472,17 +472,17 @@ func test_reshape_invalid_total_s(test_suite_s suite) test_suite_s {
 }
 
 func test_reshape_same_shape_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     int i = 0
     for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 3
     tensor_s t1 = new_tensor_s(data, shape)
-    int[] same_shape = make(int[], 2)
+    []int same_shape = make([]int, 2)
     same_shape[0] = 2
     same_shape[1] = 3
     tensor_s t2 = tensor_reshape_s(t1, same_shape)
@@ -493,14 +493,14 @@ func test_reshape_same_shape_s(test_suite_s suite) test_suite_s {
 }
 
 func test_reshape_to_single_element_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 1)
+    []float data = make([]float, 1)
     data[0] = 42.0
-    int[] shape = make(int[], 3)
+    []int shape = make([]int, 3)
     shape[0] = 1
     shape[1] = 1
     shape[2] = 1
     tensor_s t1 = new_tensor_s(data, shape)
-    int[] new_shape = make(int[], 1)
+    []int new_shape = make([]int, 1)
     new_shape[0] = 1
     tensor_s t2 = tensor_reshape_s(t1, new_shape)
     bool passed = assert_equal_int_s(t2.total_elements, 1) &&
@@ -510,17 +510,17 @@ func test_reshape_to_single_element_s(test_suite_s suite) test_suite_s {
 }
 
 func test_reshape_complex_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 120)
+    []float data = make([]float, 120)
     int i = 0
     for i < 120 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 10
     shape[1] = 12
     tensor_s t1 = new_tensor_s(data, shape)
-    int[] new_shape = make(int[], 4)
+    []int new_shape = make([]int, 4)
     new_shape[0] = 2
     new_shape[1] = 5
     new_shape[2] = 3
@@ -533,10 +533,10 @@ func test_reshape_complex_s(test_suite_s suite) test_suite_s {
 }
 
 func test_transpose_2d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     data[0] = 1.0; data[1] = 2.0; data[2] = 3.0
     data[3] = 4.0; data[4] = 5.0; data[5] = 6.0
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 3
     tensor_s t1 = new_tensor_s(data, shape)
@@ -549,11 +549,11 @@ func test_transpose_2d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_transpose_square_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 9)
+    []float data = make([]float, 9)
     data[0] = 1.0; data[1] = 2.0; data[2] = 3.0
     data[3] = 4.0; data[4] = 5.0; data[5] = 6.0
     data[6] = 7.0; data[7] = 8.0; data[8] = 9.0
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 3
     shape[1] = 3
     tensor_s t1 = new_tensor_s(data, shape)
@@ -565,13 +565,13 @@ func test_transpose_square_s(test_suite_s suite) test_suite_s {
 }
 
 func test_transpose_1xn_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 5)
+    []float data = make([]float, 5)
     int i = 0
     for i < 5 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 1
     shape[1] = 5
     tensor_s t1 = new_tensor_s(data, shape)
@@ -583,13 +583,13 @@ func test_transpose_1xn_s(test_suite_s suite) test_suite_s {
 }
 
 func test_transpose_nx1_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 5)
+    []float data = make([]float, 5)
     int i = 0
     for i < 5 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 5
     shape[1] = 1
     tensor_s t1 = new_tensor_s(data, shape)
@@ -601,13 +601,13 @@ func test_transpose_nx1_s(test_suite_s suite) test_suite_s {
 }
 
 func test_transpose_preserves_total_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 12)
+    []float data = make([]float, 12)
     int i = 0
     for i < 12 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 3
     shape[1] = 4
     tensor_s t1 = new_tensor_s(data, shape)
@@ -618,10 +618,10 @@ func test_transpose_preserves_total_s(test_suite_s suite) test_suite_s {
 }
 
 func test_transpose_preserves_data_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     data[0] = 1.0; data[1] = 2.0; data[2] = 3.0
     data[3] = 4.0; data[4] = 5.0; data[5] = 6.0
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 3
     tensor_s t1 = new_tensor_s(data, shape)
@@ -632,13 +632,13 @@ func test_transpose_preserves_data_s(test_suite_s suite) test_suite_s {
 }
 
 func test_slice_basic_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 10)
+    []float data = make([]float, 10)
     int i = 0
     for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 10
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 2, 5)
@@ -650,13 +650,13 @@ func test_slice_basic_s(test_suite_s suite) test_suite_s {
 }
 
 func test_slice_from_start_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 10)
+    []float data = make([]float, 10)
     int i = 0
     for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 10
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 0, 5)
@@ -667,13 +667,13 @@ func test_slice_from_start_s(test_suite_s suite) test_suite_s {
 }
 
 func test_slice_to_end_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 10)
+    []float data = make([]float, 10)
     int i = 0
     for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 10
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 5, 10)
@@ -685,13 +685,13 @@ func test_slice_to_end_s(test_suite_s suite) test_suite_s {
 }
 
 func test_slice_single_element_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 10)
+    []float data = make([]float, 10)
     int i = 0
     for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 10
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 3, 4)
@@ -702,13 +702,13 @@ func test_slice_single_element_s(test_suite_s suite) test_suite_s {
 }
 
 func test_slice_full_range_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 10)
+    []float data = make([]float, 10)
     int i = 0
     for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 10
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 0, 10)
@@ -718,13 +718,13 @@ func test_slice_full_range_s(test_suite_s suite) test_suite_s {
 }
 
 func test_slice_invalid_negative_start_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 10)
+    []float data = make([]float, 10)
     int i = 0
     for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 10
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, -1, 5)
@@ -734,13 +734,13 @@ func test_slice_invalid_negative_start_s(test_suite_s suite) test_suite_s {
 }
 
 func test_slice_invalid_out_of_bounds_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 10)
+    []float data = make([]float, 10)
     int i = 0
     for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 10
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 0, 15)
@@ -750,13 +750,13 @@ func test_slice_invalid_out_of_bounds_s(test_suite_s suite) test_suite_s {
 }
 
 func test_slice_invalid_inverted_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 10)
+    []float data = make([]float, 10)
     int i = 0
     for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 10
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 5, 3)
@@ -766,13 +766,13 @@ func test_slice_invalid_inverted_s(test_suite_s suite) test_suite_s {
 }
 
 func test_cat_1d_basic_s(test_suite_s suite) test_suite_s {
-    float[] data1 = make(float[], 3)
+    []float data1 = make([]float, 3)
     data1[0] = 1.0; data1[1] = 2.0; data1[2] = 3.0
-    float[] data2 = make(float[], 2)
+    []float data2 = make([]float, 2)
     data2[0] = 4.0; data2[1] = 5.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 3
-    int[] shape2 = make(int[], 1)
+    []int shape2 = make([]int, 1)
     shape2[0] = 2
     tensor_s t1 = new_tensor_s(data1, shape)
     tensor_s t2 = new_tensor_s(data2, shape2)
@@ -785,13 +785,13 @@ func test_cat_1d_basic_s(test_suite_s suite) test_suite_s {
 }
 
 func test_cat_dtype_mismatch_s(test_suite_s suite) test_suite_s {
-    float[] data1 = make(float[], 3)
+    []float data1 = make([]float, 3)
     data1[0] = 1.0; data1[1] = 2.0; data1[2] = 3.0
-    float[] data2 = make(float[], 2)
+    []float data2 = make([]float, 2)
     data2[0] = 4.0; data2[1] = 5.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 3
-    int[] shape2 = make(int[], 1)
+    []int shape2 = make([]int, 1)
     shape2[0] = 2
     tensor_s t1 = new_tensor_s(data1, shape)
     tensor_s t2 = new_tensor_s(data2, shape2)
@@ -802,11 +802,11 @@ func test_cat_dtype_mismatch_s(test_suite_s suite) test_suite_s {
 }
 
 func test_cat_2d_dim0_s(test_suite_s suite) test_suite_s {
-    float[] data1 = make(float[], 4)
+    []float data1 = make([]float, 4)
     data1[0] = 1.0; data1[1] = 2.0; data1[2] = 3.0; data1[3] = 4.0
-    float[] data2 = make(float[], 4)
+    []float data2 = make([]float, 4)
     data2[0] = 5.0; data2[1] = 6.0; data2[2] = 7.0; data2[3] = 8.0
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 2
     tensor_s t1 = new_tensor_s(data1, shape)
@@ -820,11 +820,11 @@ func test_cat_2d_dim0_s(test_suite_s suite) test_suite_s {
 }
 
 func test_cat_2d_dim1_s(test_suite_s suite) test_suite_s {
-    float[] data1 = make(float[], 4)
+    []float data1 = make([]float, 4)
     data1[0] = 1.0; data1[1] = 2.0; data1[2] = 3.0; data1[3] = 4.0
-    float[] data2 = make(float[], 4)
+    []float data2 = make([]float, 4)
     data2[0] = 5.0; data2[1] = 6.0; data2[2] = 7.0; data2[3] = 8.0
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 2
     tensor_s t1 = new_tensor_s(data1, shape)
@@ -838,13 +838,13 @@ func test_cat_2d_dim1_s(test_suite_s suite) test_suite_s {
 }
 
 func test_cat_preserves_dtype_s(test_suite_s suite) test_suite_s {
-    float[] data1 = make(float[], 3)
+    []float data1 = make([]float, 3)
     data1[0] = 1.0; data1[1] = 2.0; data1[2] = 3.0
-    float[] data2 = make(float[], 2)
+    []float data2 = make([]float, 2)
     data2[0] = 4.0; data2[1] = 5.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 3
-    int[] shape2 = make(int[], 1)
+    []int shape2 = make([]int, 1)
     shape2[0] = 2
     tensor_s t1 = new_tensor_s(data1, shape)
     tensor_s t2 = new_tensor_s(data2, shape2)
@@ -855,9 +855,9 @@ func test_cat_preserves_dtype_s(test_suite_s suite) test_suite_s {
 }
 
 func test_to_string_1d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 5)
+    []float data = make([]float, 5)
     data[0] = 1.0
-    int[] shape = make(int[], 1)
+    []int shape = make([]int, 1)
     shape[0] = 5
     tensor_s t = new_tensor_s(data, shape)
     string desc = tensor_to_string_s(t)
@@ -867,13 +867,13 @@ func test_to_string_1d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_to_string_2d_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 6)
+    []float data = make([]float, 6)
     int i = 0
     for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
-    int[] shape = make(int[], 2)
+    []int shape = make([]int, 2)
     shape[0] = 2
     shape[1] = 3
     tensor_s t = new_tensor_s(data, shape)
@@ -884,8 +884,8 @@ func test_to_string_2d_s(test_suite_s suite) test_suite_s {
 }
 
 func test_rank_calculation_s(test_suite_s suite) test_suite_s {
-    float[] data = make(float[], 24)
-    int[] shape = make(int[], 3)
+    []float data = make([]float, 24)
+    []int shape = make([]int, 3)
     shape[0] = 2
     shape[1] = 3
     shape[2] = 4

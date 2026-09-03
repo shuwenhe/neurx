@@ -4,7 +4,7 @@ use neurx.inference.sampling.sampling_utils2
 use neurx.inference.sampling.sampling_utils3
 use neurx.inference.sampling.sampling_utils4
 func greedy_step(
-    float[] logits,
+    []float logits,
     sampling_config cfg,
     uint64 rng_state
 ) (int, uint64) {
@@ -14,17 +14,17 @@ func greedy_step(
     (argmax(logits), rng_state)
 }
 
-func extract_generated_part(int[] full_ids, int prompt_length) []int {
+func extract_generated_part([]int full_ids, int prompt_length) []int {
     int gen_len = len(full_ids) - prompt_length
     if gen_len <= 0 { return [] }
-    int[] generated = make([]int, gen_len)
+    []int generated = make([]int, gen_len)
     for i in 0..gen_len {
         generated[i] = full_ids[prompt_length + i]
     }
     generated
 }
 
-func check_all_finished(int[][] sequences, int eos_id) bool {
+func check_all_finished([]int[] sequences, int eos_id) bool {
     for seq in sequences {
         bool has_eos = false
         for id in seq {
@@ -40,7 +40,7 @@ func check_all_finished(int[][] sequences, int eos_id) bool {
     true
 }
 
-func compute_avg_score(float[][][] all_scores) float {
+func compute_avg_score([]float[][] all_scores) float {
     if len(all_scores) == 0 { return 0.0 }
     float total = 0.0
     int count = 0

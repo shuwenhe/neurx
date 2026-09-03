@@ -18,9 +18,9 @@ struct training_config {
 }
 
 struct model_state {
-    float[] base_weights
-    float[] lora_a
-    float[] lora_b
+    []float base_weights
+    []float lora_a
+    []float lora_b
     int input_dim
     int output_dim
     int rank
@@ -126,8 +126,8 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) mod
     state.output_dim = output_dim
     state.rank = rank
     state.alpha = alpha
-    float[] lora_a
-    float[] lora_b
+    []float lora_a
+    []float lora_b
     int i1 = 0
     for i1 < input_dim * rank {
         lora_a[i1] = 0.01
@@ -140,7 +140,7 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) mod
     }
     state.lora_a = lora_a
     state.lora_b = lora_b
-    float[] base_weights
+    []float base_weights
     int i3 = 0
     for i3 < output_dim * input_dim {
         base_weights[i3] = 0.1

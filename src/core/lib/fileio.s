@@ -12,7 +12,7 @@ struct file_handle {
 
 struct line_reader {
     string filepath
-    string[] lines
+    []string lines
     int current_line
     int total_lines
 }
@@ -48,7 +48,7 @@ func write_line(file_handle handle, string line) int {
 }
 
 func read_file_lines(string filepath) []string {
-    string[] lines
+    []string lines
     lines
 }
 
@@ -57,7 +57,7 @@ func read_line(string filepath, int line_num) string {
 }
 
 func split_string(string text, string delim) []string {
-    string[] parts
+    []string parts
     int count = 0
     string current = ""
     int i = 0
@@ -222,7 +222,7 @@ func replace_string(string text, string old, string new_str) string {
     result
 }
 
-func join_strings(string[] parts, string sep) string {
+func join_strings([]string parts, string sep) string {
     string result = ""
     int i = 0
     for i < len(parts) {

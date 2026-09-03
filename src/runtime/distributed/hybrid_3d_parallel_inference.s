@@ -23,7 +23,7 @@ struct hybrid_3_d_parallel_inference {
     config              hybrid_3_d_config
     tp_engine           *tensor_parallel_inference
     pp_engine           *pipeline_parallel_inference
-    rank_to_coords      map[int32]int[]32
+    rank_to_coords      map[int32][]int32
     coords_to_rank      map[string]int32
     tp_group            int32
     pp_group            int32
@@ -43,7 +43,7 @@ func NewHybrid3DParallelInference(config hybrid_3_d_config) *hybrid_3_d_parallel
     config.dp_rank = dp_rank
     engine := *hybrid_3_d_parallel_inference{
         config:         config,
-        rank_to_coords: make(map[int32]int[]32),
+        rank_to_coords: make(map[int32][]int32),
         coords_to_rank: make(map[string]int32),
         metrics:        make(map[string]interface{}),
     }
@@ -69,7 +69,7 @@ func NewHybrid3DParallelInference(config hybrid_3_d_config) *hybrid_3_d_parallel
         tp := (rank / 1) % config.tp_size
         pp := (rank / config.tp_size) % config.pp_size
         dp := rank / (config.tp_size * config.pp_size)
-        coords := int[]32{tp, pp, dp}
+        coords := []int32{tp, pp, dp}
         engine.rank_to_coords[rank] = coords
         key := core.Sprintf("%d,%d,%d", tp, pp, dp)
         engine.coords_to_rank[key] = rank
@@ -88,8 +88,8 @@ func (hybrid_3_d_parallel_inference* h) GetRankInGroup(group_type string) int32 
     return 0
 }
 
-func (hybrid_3_d_parallel_inference* h) GetDataParallelGroup() int[]32 {
-    group := int[]32{}
+func (hybrid_3_d_parallel_inference* h) GetDataParallelGroup() []int32 {
+    group := []int32{}
     for rank := int32(0); rank < h.config.world_size; rank++ {
         coords := h.rank_to_coords[rank]
         if coords[0] == h.config.tp_rank && coords[1] == h.config.pp_rank {
@@ -99,8 +99,8 @@ func (hybrid_3_d_parallel_inference* h) GetDataParallelGroup() int[]32 {
     return group
 }
 
-func (hybrid_3_d_parallel_inference* h) GetTensorParallelGroup() int[]32 {
-    group := int[]32{}
+func (hybrid_3_d_parallel_inference* h) GetTensorParallelGroup() []int32 {
+    group := []int32{}
     for rank := int32(0); rank < h.config.world_size; rank++ {
         coords := h.rank_to_coords[rank]
         if coords[1] == h.config.pp_rank && coords[2] == h.config.dp_rank {
@@ -110,8 +110,8 @@ func (hybrid_3_d_parallel_inference* h) GetTensorParallelGroup() int[]32 {
     return group
 }
 
-func (hybrid_3_d_parallel_inference* h) GetPipelineParallelGroup() int[]32 {
-    group := int[]32{}
+func (hybrid_3_d_parallel_inference* h) GetPipelineParallelGroup() []int32 {
+    group := []int32{}
     for rank := int32(0); rank < h.config.world_size; rank++ {
         coords := h.rank_to_coords[rank]
         if coords[0] == h.config.tp_rank && coords[2] == h.config.dp_rank {
@@ -122,10 +122,10 @@ func (hybrid_3_d_parallel_inference* h) GetPipelineParallelGroup() int[]32 {
 }
 
 func (hybrid_3_d_parallel_inference* h) Forward(
-    input float[]32,
+    input []float32,
     batch_size int32,
     seq_len int32,
-) float[]32 {
+) []float32 {
     sharded_input := input
     if h.config.tp_size > 1 {
         shard_size := h.config.hidden_size / h.config.tp_size
@@ -144,11 +144,11 @@ func (hybrid_3_d_parallel_inference* h) Forward(
 }
 
 func (hybrid_3_d_parallel_inference* h) sliceHidden(
-    tensor float[]32,
+    tensor []float32,
     start int32,
     end int32,
-) float[]32 {
-    result := float[]32{}
+) []float32 {
+    result := []float32{}
     size := end - start
     for i := int32(0); i < size && int32(i+start) < int32(len(tensor)); i++ {
         result = append(result, tensor[int(i+start)])

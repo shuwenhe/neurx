@@ -30,7 +30,7 @@ struct generate_request {
 struct generate_response {
     request_id       int64
     generated_text   string
-    output_tokens    int[]32
+    output_tokens    []int32
     total_tokens     int32
     latency_ms       int64
 }
@@ -92,7 +92,7 @@ func (unified_inference_engine* e) Submit(req generate_request) (int64, error) {
     if !e.is_initialized {
         return -1, core.Errorf("Engine not initialized")
     }
-    tokens := int[]32{1, 2, 3, 4, 5}
+    tokens := []int32{1, 2, 3, 4, 5}
     request_id := e.scheduler.SubmitRequest(tokens, req.max_tokens, req.priority)
     e.total_requests = e.total_requests + 1
     return request_id, nil
@@ -190,7 +190,7 @@ func (unified_inference_engine* e) Benchmark(num_requests int, seq_length int32)
     results := make(map[string]interface{})
     start_time := core.Now()
     for i := 0; i < num_requests; i++ {
-        prompt := make(int[]32, seq_length)
+        prompt := make([]int32, seq_length)
         for j := int32(0); j < seq_length; j++ {
             prompt[j] = int32(j % 1000)
         }

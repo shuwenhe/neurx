@@ -9,11 +9,11 @@ struct batch_state {
     bool active
     int batch_size
     int batch_dim
-    string[] primitives
-    string[] params
+    []string primitives
+    []string params
 }
 
-func join_strings(string[] values) string {
+func join_strings([]string values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -28,7 +28,7 @@ func join_strings(string[] values) string {
 
 func copy_shape_tail(tensor a) []int {
     int ndim = len(a.shape)
-    int[] shape = make([]int, ndim)
+    []int shape = make([]int, ndim)
     int i = 1
     int out_i = 1
     for i < ndim {
@@ -53,7 +53,7 @@ func slice_axis0(tensor a, int index) tensor {
         slice_size = slice_size * a.shape[i]
         i = i + 1
     }
-    float[] out = make([]float, slice_size)
+    []float out = make([]float, slice_size)
     int start = index * slice_size
     i = 0
     for i < slice_size {
@@ -65,7 +65,7 @@ func slice_axis0(tensor a, int index) tensor {
 
 func batch_reduce_scalar(tensor a, int mode) tensor {
     int batch = a.shape[0]
-    float[] out = make([]float, batch)
+    []float out = make([]float, batch)
     int i = 0
     for i < batch {
         tensor slice = slice_axis0(a, i)
@@ -109,7 +109,7 @@ func batch_matmul(tensor a, tensor b) tensor {
         first_b = slice_axis0(b, 0)
     }
     tensor first_out = neurx.tensor.tensor.matmul(first_a, first_b)
-    int[] out_shape = make([]int, len(first_out.shape) + 1)
+    []int out_shape = make([]int, len(first_out.shape) + 1)
     out_shape[0] = batch
     int j = 0
     for j < len(first_out.shape) {
@@ -117,7 +117,7 @@ func batch_matmul(tensor a, tensor b) tensor {
         j = j + 1
     }
     int slice_size = len(first_out.data)
-    float[] out = make([]float, batch * slice_size)
+    []float out = make([]float, batch * slice_size)
     int k = 0
     for k < slice_size {
         out[k] = first_out.data[k]
@@ -203,9 +203,9 @@ func batch_has_param(batch_state state, string param) bool {
 }
 
 func batch_add_primitive(batch_state state, string primitive) batch_state {
-    string[] primitives = copy_strings(state.primitives)
+    []string primitives = copy_strings(state.primitives)
     int n = len(primitives)
-    string[] next = make([]string, n + 1)
+    []string next = make([]string, n + 1)
     int i = 0
     for i < n {
         next[i] = primitives[i]
@@ -223,9 +223,9 @@ func batch_add_primitive(batch_state state, string primitive) batch_state {
 }
 
 func batch_add_param(batch_state state, string param) batch_state {
-    string[] params = copy_strings(state.params)
+    []string params = copy_strings(state.params)
     int n = len(params)
-    string[] next = make([]string, n + 1)
+    []string next = make([]string, n + 1)
     int i = 0
     for i < n {
         next[i] = params[i]

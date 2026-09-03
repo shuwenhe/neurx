@@ -8,9 +8,9 @@ func test_flash_attention_basic() {
     int num_heads = 2
     int head_dim = 64
     int num_kv_heads = 2
-    float[] queries = make(float[], seq_len * num_heads * head_dim)
-    float[] keys = make(float[], seq_len * num_kv_heads * head_dim)
-    float[] values = make(float[], seq_len * num_kv_heads * head_dim)
+    []float queries = make([]float, seq_len * num_heads * head_dim)
+    []float keys = make([]float, seq_len * num_kv_heads * head_dim)
+    []float values = make([]float, seq_len * num_kv_heads * head_dim)
     int i = 0
     for i < len(queries) {
         queries[i] = float((i % 10 + 1)) / 10.0
@@ -166,9 +166,9 @@ func test_performance_benchmarking() {
     int seq_len = 512
     int head_dim = 128
     int num_heads = 32
-    float[] q = make(float[], seq_len * num_heads * head_dim)
-    float[] k = make(float[], seq_len * num_heads * head_dim)
-    float[] v = make(float[], seq_len * num_heads * head_dim)
+    []float q = make([]float, seq_len * num_heads * head_dim)
+    []float k = make([]float, seq_len * num_heads * head_dim)
+    []float v = make([]float, seq_len * num_heads * head_dim)
     reports := benchmark_inference_methods(q, k, v, 10)
     if len(reports) > 0 {
         print("  ✓ Benchmarking completed")

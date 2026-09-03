@@ -1,7 +1,7 @@
 package ops
 struct kernel_fusion_opportunity {
     string opportunity_id
-    string[] fusible_ops
+    []string fusible_ops
     int potential_memory_reduction
     int potential_flops_reduction
     float fusion_benefit_ratio
@@ -14,7 +14,7 @@ struct operation_dependency {
 }
 
 struct operation_fusion_graph {
-    string[] nodes
+    []string nodes
     operation_dependency[] edges
     int num_nodes
     int num_edges
@@ -22,7 +22,7 @@ struct operation_fusion_graph {
 
 struct fused_kernel_config {
     string fused_op_name
-    string[] component_ops
+    []string component_ops
     int total_flops
     int total_memory_access
     int estimated_latency_us
@@ -30,7 +30,7 @@ struct fused_kernel_config {
     float compute_bound_ratio
 }
 
-func detect_fusion_opportunities(operation_registry reg, string[] operation_sequence) []kernel_fusion_opportunity {
+func detect_fusion_opportunities(operation_registry reg, []string operation_sequence) []kernel_fusion_opportunity {
     opportunities := []kernel_fusion_opportunity{}
     i := 0
     for i < len(operation_sequence) - 1 {
@@ -47,7 +47,7 @@ func detect_fusion_opportunities(operation_registry reg, string[] operation_sequ
                 can_fuse = true
             }
             if can_fuse {
-                component_ops := string[]{op_id1, op_id2}
+                component_ops := []string{op_id1, op_id2}
                 opp := kernel_fusion_opportunity {
                     opportunity_id: op_id1 + "_" + op_id2,
                     fusible_ops: component_ops,
@@ -65,7 +65,7 @@ func detect_fusion_opportunities(operation_registry reg, string[] operation_sequ
 
 struct operation_scheduler {
     operation_registry registry
-    string[] operation_queue
+    []string operation_queue
     operation_fusion_graph fusion_graph
     int num_scheduled_ops
     bool optimization_enabled

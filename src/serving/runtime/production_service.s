@@ -161,7 +161,7 @@ func production_service_complete_prefill(
 func production_service_complete_decode(
     production_service_state state,
     production_batch batch,
-    bool[] eos,
+    []bool eos,
     bool succeeded
 ) production_service_state {
     production_service_state {

@@ -24,9 +24,9 @@ struct vision_encoder_config {
 }
 
 struct image_feature {
-    float[] features
-    float[] spatial_features
-    float[] scale_features
+    []float features
+    []float spatial_features
+    []float scale_features
     int width
     int height
     int num_patches
@@ -35,17 +35,17 @@ struct image_feature {
 
 struct vision_encoder {
     vision_encoder_config config
-    float[][] patch_embedding_weights
-    float[] patch_embedding_biases
-    float[][] transformer_weights
-    float[][] transformer_biases
-    float[][] positional_embeddings
-    float[][] scale_projection_weights
-    float[] scale_projection_biases
+    []float[] patch_embedding_weights
+    []float patch_embedding_biases
+    []float[] transformer_weights
+    []float[] transformer_biases
+    []float[] positional_embeddings
+    []float[] scale_projection_weights
+    []float scale_projection_biases
 }
 
 struct image_token {
-    float[] embedding
+    []float embedding
     int row_idx
     int col_idx
     int scale_idx
@@ -106,7 +106,7 @@ func new_vision_encoder(vision_encoder_config config) vision_encoder {
 }
 
 func compute_2d_rope_embedding(int row, int col, vision_encoder_config config) []float {
-    float[] embedding = math.allocate_float(config.hidden_dim, 0.0)
+    []float embedding = math.allocate_float(config.hidden_dim, 0.0)
     float theta = config.rope_theta
     float scale = config.rope_scale
     int head_dim = config.hidden_dim / config.num_heads
@@ -131,8 +131,8 @@ func compute_2d_rope_embedding(int row, int col, vision_encoder_config config) [
     embedding
 }
 
-func adaptive_resolution_scaling(float[] image, int original_width, int original_height,
-                                  vision_encoder_config config) (float[], int, int) {
+func adaptive_resolution_scaling([]float image, int original_width, int original_height,
+                                  vision_encoder_config config) ([]float, int, int) {
     int target_size = config.image_size
     if config.use_adaptive_resolution {
         float ratio = float(original_width) / float(original_height)
@@ -151,7 +151,7 @@ func adaptive_resolution_scaling(float[] image, int original_width, int original
         new_width = int(float(target_size) * (float(original_width) / float(original_height)))
     }
     int num_pixels = new_width * new_height * config.num_channels
-    float[] scaled_image = math.allocate_float(num_pixels, 0.0)
+    []float scaled_image = math.allocate_float(num_pixels, 0.0)
     int y = 0
     for y < new_height {
         int x = 0
@@ -174,20 +174,20 @@ func adaptive_resolution_scaling(float[] image, int original_width, int original
     (scaled_image, new_width, new_height)
 }
 
-func patchify_image(float[] image, int width, int height, vision_encoder_config config) []float {
+func patchify_image([]float image, int width, int height, vision_encoder_config config) []float {
     int patch_size = config.patch_size
     int num_channels = config.num_channels
     int hidden_dim = config.hidden_dim
     int num_patches_x = width / patch_size
     int num_patches_y = height / patch_size
     int num_patches = num_patches_x * num_patches_y
-    float[] patches = math.allocate_float(num_patches * hidden_dim, 0.0)
+    []float patches = math.allocate_float(num_patches * hidden_dim, 0.0)
     int py = 0
     for py < num_patches_y {
         int px = 0
         for px < num_patches_x {
             int patch_idx = py * num_patches_x + px
-            float[] patch = math.allocate_float(patch_size * patch_size * num_channels, 0.0)
+            []float patch = math.allocate_float(patch_size * patch_size * num_channels, 0.0)
             int y = 0
             for y < patch_size {
                 int x = 0
@@ -205,7 +205,7 @@ func patchify_image(float[] image, int width, int height, vision_encoder_config 
                 }
                 y = y + 1
             }
-            float[] patch_embedding = math.allocate_float(hidden_dim, 0.0)
+            []float patch_embedding = math.allocate_float(hidden_dim, 0.0)
             int i = 0
             for i < hidden_dim {
                 patch_embedding[i] = config.patch_embedding_biases[i]
@@ -225,15 +225,15 @@ func patchify_image(float[] image, int width, int height, vision_encoder_config 
     patches
 }
 
-func multihead_attention_2d(float[] queries, float[] keys, float[] values,
+func multihead_attention_2d([]float queries, []float keys, []float values,
                             int num_heads, int head_dim, int seq_len) []float {
     int hidden_dim = num_heads * head_dim
-    float[] output = math.allocate_float(seq_len * hidden_dim, 0.0)
+    []float output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int head = 0
     for head < num_heads {
-        float[] q_head = math.allocate_float(seq_len * head_dim, 0.0)
-        float[] k_head = math.allocate_float(seq_len * head_dim, 0.0)
-        float[] v_head = math.allocate_float(seq_len * head_dim, 0.0)
+        []float q_head = math.allocate_float(seq_len * head_dim, 0.0)
+        []float k_head = math.allocate_float(seq_len * head_dim, 0.0)
+        []float v_head = math.allocate_float(seq_len * head_dim, 0.0)
         int i = 0
         for i < seq_len {
             int j = 0
@@ -245,7 +245,7 @@ func multihead_attention_2d(float[] queries, float[] keys, float[] values,
             }
             i = i + 1
         }
-        float[] attention_scores = math.allocate_float(seq_len * seq_len, 0.0)
+        []float attention_scores = math.allocate_float(seq_len * seq_len, 0.0)
         i = 0
         for i < seq_len {
             int j = 0
@@ -261,13 +261,13 @@ func multihead_attention_2d(float[] queries, float[] keys, float[] values,
             }
             i = i + 1
         }
-        float[] attn_slice = attention_scores
+        []float attn_slice = attention_scores
         for idx in 0..seq_len-1 {
-            float[] row = attn_slice[idx * seq_len..(idx+1) * seq_len]
-            float[] softmax_row = math.softmax_1d(row)
+            []float row = attn_slice[idx * seq_len..(idx+1) * seq_len]
+            []float softmax_row = math.softmax_1d(row)
             attn_slice[idx * seq_len..(idx+1) * seq_len] = softmax_row
         }
-        float[] head_output = math.allocate_float(seq_len * head_dim, 0.0)
+        []float head_output = math.allocate_float(seq_len * head_dim, 0.0)
         i = 0
         for i < seq_len {
             int j = 0
@@ -296,14 +296,14 @@ func multihead_attention_2d(float[] queries, float[] keys, float[] values,
     output
 }
 
-func transformer_layer_forward(float[] input, float[] weights_qkv, float[] weights_out,
-                               float[] biases_qkv, float[] biases_out,
+func transformer_layer_forward([]float input, []float weights_qkv, []float weights_out,
+                               []float biases_qkv, []float biases_out,
                                int num_heads, int head_dim, int seq_len) []float {
     int hidden_dim = num_heads * head_dim
-    float[] qkv = math.matmul_bias(input, weights_qkv, biases_qkv, seq_len, hidden_dim, hidden_dim * 3)
-    float[] queries = math.allocate_float(seq_len * hidden_dim, 0.0)
-    float[] keys = math.allocate_float(seq_len * hidden_dim, 0.0)
-    float[] values = math.allocate_float(seq_len * hidden_dim, 0.0)
+    []float qkv = math.matmul_bias(input, weights_qkv, biases_qkv, seq_len, hidden_dim, hidden_dim * 3)
+    []float queries = math.allocate_float(seq_len * hidden_dim, 0.0)
+    []float keys = math.allocate_float(seq_len * hidden_dim, 0.0)
+    []float values = math.allocate_float(seq_len * hidden_dim, 0.0)
     int i = 0
     for i < seq_len {
         int j = 0
@@ -315,8 +315,8 @@ func transformer_layer_forward(float[] input, float[] weights_qkv, float[] weigh
         }
         i = i + 1
     }
-    float[] attention_output = multihead_attention_2d(queries, keys, values, num_heads, head_dim, seq_len)
-    float[] output = math.matmul_bias(attention_output, weights_out, biases_out, seq_len, hidden_dim, hidden_dim)
+    []float attention_output = multihead_attention_2d(queries, keys, values, num_heads, head_dim, seq_len)
+    []float output = math.matmul_bias(attention_output, weights_out, biases_out, seq_len, hidden_dim, hidden_dim)
     i = 0
     for i < seq_len * hidden_dim {
         output[i] = output[i] + input[i]
@@ -326,11 +326,11 @@ func transformer_layer_forward(float[] input, float[] weights_qkv, float[] weigh
     output
 }
 
-func extract_multi_scale_features(float[] features, int width, int height,
+func extract_multi_scale_features([]float features, int width, int height,
                                   vision_encoder_config config) []float {
     int hidden_dim = config.hidden_dim
     int num_scales = config.num_scales
-    float[] scale_features = math.allocate_float(num_scales * hidden_dim, 0.0)
+    []float scale_features = math.allocate_float(num_scales * hidden_dim, 0.0)
     int num_patches_x = width / config.patch_size
     int num_patches_y = height / config.patch_size
     int scale = 0
@@ -339,7 +339,7 @@ func extract_multi_scale_features(float[] features, int width, int height,
         int center_x = num_patches_x / 2
         int center_y = num_patches_y / 2
         int radius = int(float(math.min_int(num_patches_x, num_patches_y)) * scale_factor)
-        float[] scale_feature = math.allocate_float(hidden_dim, 0.0)
+        []float scale_feature = math.allocate_float(hidden_dim, 0.0)
         int count = 0
         int y = math.max_int(0, center_y - radius)
         for y < math.min_int(num_patches_y, center_y + radius) {
@@ -369,27 +369,27 @@ func extract_multi_scale_features(float[] features, int width, int height,
     scale_features
 }
 
-func encode_image(vision_encoder encoder, float[] image, int original_width, int original_height) image_feature {
+func encode_image(vision_encoder encoder, []float image, int original_width, int original_height) image_feature {
     vision_encoder_config config = encoder.config
-    (float[] scaled_image, int new_width, int new_height) = adaptive_resolution_scaling(
+    ([]float scaled_image, int new_width, int new_height) = adaptive_resolution_scaling(
         image, original_width, original_height, config
     )
-    float[] patches = patchify_image(scaled_image, new_width, new_height, config)
+    []float patches = patchify_image(scaled_image, new_width, new_height, config)
     int num_patches = (new_width / config.patch_size) * (new_height / config.patch_size)
-    float[] features = math.copy_float(patches)
+    []float features = math.copy_float(patches)
     features = math.apply_bias(features, encoder.positional_embeddings, num_patches, config.hidden_dim)
     int layer = 0
     for layer < config.num_layers {
-        float[] weights_qkv = encoder.transformer_weights[layer * config.hidden_dim * config.hidden_dim..(layer+1) * config.hidden_dim * config.hidden_dim]
-        float[] weights_out = encoder.transformer_weights[(layer + config.num_layers) * config.hidden_dim * config.hidden_dim..(layer + config.num_layers + 1) * config.hidden_dim * config.hidden_dim]
-        float[] biases_qkv = encoder.transformer_biases[layer * config.hidden_dim..(layer+1) * config.hidden_dim]
-        float[] biases_out = encoder.transformer_biases[(layer + config.num_layers) * config.hidden_dim..(layer + config.num_layers + 1) * config.hidden_dim]
+        []float weights_qkv = encoder.transformer_weights[layer * config.hidden_dim * config.hidden_dim..(layer+1) * config.hidden_dim * config.hidden_dim]
+        []float weights_out = encoder.transformer_weights[(layer + config.num_layers) * config.hidden_dim * config.hidden_dim..(layer + config.num_layers + 1) * config.hidden_dim * config.hidden_dim]
+        []float biases_qkv = encoder.transformer_biases[layer * config.hidden_dim..(layer+1) * config.hidden_dim]
+        []float biases_out = encoder.transformer_biases[(layer + config.num_layers) * config.hidden_dim..(layer + config.num_layers + 1) * config.hidden_dim]
         features = transformer_layer_forward(features, weights_qkv, weights_out, biases_qkv, biases_out,
                                             config.num_heads, config.hidden_dim / config.num_heads, num_patches)
         layer = layer + 1
     }
-    float[] spatial_features = math.copy_float(features)
-    float[] scale_features = math.allocate_float(0, 0.0)
+    []float spatial_features = math.copy_float(features)
+    []float scale_features = math.allocate_float(0, 0.0)
     if config.use_multi_scale_features {
         scale_features = extract_multi_scale_features(features, new_width, new_height, config)
     }
@@ -404,10 +404,10 @@ func encode_image(vision_encoder encoder, float[] image, int original_width, int
     }
 }
 
-func project_to_text_space(image_feature feature, float[] projection_weights, float[] projection_biases,
+func project_to_text_space(image_feature feature, []float projection_weights, []float projection_biases,
                            int text_dim) []float {
     int num_tokens = feature.num_patches
-    float[] projected = math.allocate_float(num_tokens * text_dim, 0.0)
+    []float projected = math.allocate_float(num_tokens * text_dim, 0.0)
     projected = math.matmul_flat(feature.features, projection_weights, num_tokens, len(feature.features) / num_tokens, text_dim)
     projected = math.apply_bias(projected, projection_biases, num_tokens, text_dim)
     projected
@@ -421,7 +421,7 @@ func vision_encoder_compute_spatial_positions(int width, int height, int patch_s
     int num_patches_x = width / patch_size
     int num_patches_y = height / patch_size
     int num_patches = num_patches_x * num_patches_y
-    int[] positions = math.allocate_int(num_patches * 2, 0)
+    []int positions = math.allocate_int(num_patches * 2, 0)
     int y = 0
     for y < num_patches_y {
         int x = 0

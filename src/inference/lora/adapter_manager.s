@@ -11,8 +11,8 @@ struct lora_adapter_config {
 }
 
 struct lora_weights {
-    float[] lora_a
-    float[] lora_b
+    []float lora_a
+    []float lora_b
     float scaling
     int rank
 }
@@ -28,8 +28,8 @@ struct lora_adapter_manager {
     map[string]lora_cache_entry cache
     int max_cache_size_mb
     int current_cache_used_mb
-    string[] loaded_adapters
-    string[] pinned_adapters
+    []string loaded_adapters
+    []string pinned_adapters
     string active_adapter_id
     int cache_hits
     int cache_misses
@@ -80,7 +80,7 @@ func create_lora_config(
 }
 
 func compute_lora_output(
-    float[] input,
+    []float input,
     lora_weights weights,
     int input_dim,
     int batch_seq_len
@@ -90,8 +90,8 @@ func compute_lora_output(
     if output_dim <= 0 {
         output_dim = input_dim
     }
-    float[] intermediate = matrix_mult(input, weights.lora_a, batch_seq_len, input_dim, rank)
-    float[] output = matrix_mult(intermediate, weights.lora_b, batch_seq_len, rank, output_dim)
+    []float intermediate = matrix_mult(input, weights.lora_a, batch_seq_len, input_dim, rank)
+    []float output = matrix_mult(intermediate, weights.lora_b, batch_seq_len, rank, output_dim)
     int i = 0
     for i < len(output) {
         output[i] = output[i] * weights.scaling
@@ -101,10 +101,10 @@ func compute_lora_output(
 }
 
 func apply_lora_to_output(
-    float[] original_output,
-    float[] lora_output
+    []float original_output,
+    []float lora_output
 ) []float {
-    float[] result = make(float[], len(original_output))
+    []float result = make([]float, len(original_output))
     int i = 0
     for i < len(original_output) {
         if i < len(lora_output) {
@@ -118,13 +118,13 @@ func apply_lora_to_output(
 }
 
 func matrix_mult(
-    float[] a,
-    float[] b,
+    []float a,
+    []float b,
     int m,
     int k,
     int n
 ) []float {
-    float[] result = make(float[], m * n)
+    []float result = make([]float, m * n)
     int i = 0
     for i < m {
         int j = 0
@@ -148,8 +148,8 @@ func initialize_lora_weights(
 ) lora_weights {
     int a_size = config.input_dim * config.rank
     int b_size = config.rank * config.output_dim
-    float[] lora_a = make(float[], a_size)
-    float[] lora_b = make(float[], b_size)
+    []float lora_a = make([]float, a_size)
+    []float lora_b = make([]float, b_size)
     if config.initialization == "zero" {
         int i = 0
         for i < len(lora_a) {
@@ -312,8 +312,8 @@ func get_timestamp() int64 {
     return 0
 }
 
-func remove_string(string[] arr, string val) []string {
-    string[] result = []string{}
+func remove_string([]string arr, string val) []string {
+    []string result = []string{}
     int i = 0
     for i < len(arr) {
         if arr[i] != val {
@@ -324,8 +324,8 @@ func remove_string(string[] arr, string val) []string {
     return result
 }
 
-func append(string[] arr, string val) []string {
-    string[] new_arr = make(string[], len(arr) + 1)
+func append([]string arr, string val) []string {
+    []string new_arr = make([]string, len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]
@@ -365,7 +365,7 @@ func (lora_adapter_manager* mgr) get_active_adapter() lora_weights {
 }
 
 func (lora_adapter_manager* mgr) merge_adapter_to_base_weights(
-    float[] base_weights,
+    []float base_weights,
     string adapter_id,
     int input_dim,
     int output_dim
@@ -374,9 +374,9 @@ func (lora_adapter_manager* mgr) merge_adapter_to_base_weights(
         return base_weights
     }
     lora := mgr.cache[adapter_id].weights
-    float[] at = transpose(lora.lora_a, input_dim, lora.rank)
-    float[] ba_t = matrix_mult(lora.lora_b, at, output_dim, lora.rank, input_dim)
-    float[] merged = make(float[], len(base_weights))
+    []float at = transpose(lora.lora_a, input_dim, lora.rank)
+    []float ba_t = matrix_mult(lora.lora_b, at, output_dim, lora.rank, input_dim)
+    []float merged = make([]float, len(base_weights))
     int i = 0
     for i < len(base_weights) {
         if i < len(ba_t) {
@@ -389,8 +389,8 @@ func (lora_adapter_manager* mgr) merge_adapter_to_base_weights(
     return merged
 }
 
-func transpose(float[] matrix, int rows, int cols) []float {
-    float[] result = make(float[], rows * cols)
+func transpose([]float matrix, int rows, int cols) []float {
+    []float result = make([]float, rows * cols)
     int i = 0
     for i < rows {
         int j = 0
@@ -404,13 +404,13 @@ func transpose(float[] matrix, int rows, int cols) []float {
 }
 
 func (lora_adapter_manager* mgr) merge_multiple_adapters(
-    float[] base_weights,
-    string[] adapter_ids,
-    float[] weights_per_adapter,
+    []float base_weights,
+    []string adapter_ids,
+    []float weights_per_adapter,
     int input_dim,
     int output_dim
 ) []float {
-    float[] result = make(float[], len(base_weights))
+    []float result = make([]float, len(base_weights))
     int i = 0
     for i < len(base_weights) {
         result[i] = base_weights[i]
@@ -422,8 +422,8 @@ func (lora_adapter_manager* mgr) merge_multiple_adapters(
         weight := weights_per_adapter[idx]
         if mgr.cache[adapter_id].weights.rank > 0 {
             lora := mgr.cache[adapter_id].weights
-            float[] at = transpose(lora.lora_a, input_dim, lora.rank)
-            float[] ba_t = matrix_mult(lora.lora_b, at, output_dim, lora.rank, input_dim)
+            []float at = transpose(lora.lora_a, input_dim, lora.rank)
+            []float ba_t = matrix_mult(lora.lora_b, at, output_dim, lora.rank, input_dim)
             int i = 0
             for i < len(ba_t) {
                 result[i] = result[i] + ba_t[i] * lora.scaling * weight
@@ -436,9 +436,9 @@ func (lora_adapter_manager* mgr) merge_multiple_adapters(
 }
 
 func (lora_adapter_manager* mgr) unmerge_adapter_from_weights(
-    float[] merged_weights,
+    []float merged_weights,
     string adapter_id,
-    float[] base_weights,
+    []float base_weights,
     int input_dim,
     int output_dim
 ) []float {
@@ -446,9 +446,9 @@ func (lora_adapter_manager* mgr) unmerge_adapter_from_weights(
         return merged_weights
     }
     lora := mgr.cache[adapter_id].weights
-    float[] at = transpose(lora.lora_a, input_dim, lora.rank)
-    float[] ba_t = matrix_mult(lora.lora_b, at, output_dim, lora.rank, input_dim)
-    float[] unmerged = make(float[], len(merged_weights))
+    []float at = transpose(lora.lora_a, input_dim, lora.rank)
+    []float ba_t = matrix_mult(lora.lora_b, at, output_dim, lora.rank, input_dim)
+    []float unmerged = make([]float, len(merged_weights))
     int i = 0
     for i < len(merged_weights) {
         if i < len(ba_t) {

@@ -11,8 +11,8 @@ func test_paged_attention_basic() bool {
 }
 
 func test_batch_scheduler_basic() bool {
-    int[][] queue = []
-    int[] req1 = int[]{1, 0, 0, 0}
+    []int[] queue = []
+    []int req1 = []int{1, 0, 0, 0}
     queue = append(queue, req1)
     if len(queue) != 1 {
         return false
@@ -24,7 +24,7 @@ func test_batch_scheduler_basic() bool {
 }
 
 func test_unified_engine_basic() bool {
-    int[] engine = int[]{100, 16, 32, 64, 0, 0, 0, 0}
+    []int engine = []int{100, 16, 32, 64, 0, 0, 0, 0}
     if engine[0] != 100 {
         return false
     }
@@ -39,9 +39,9 @@ func test_unified_engine_basic() bool {
 }
 
 func test_integration_flow() bool {
-    int[] engine = int[]{100, 16, 32, 64, 0, 0, 0, 0}
-    int[][] queue = []
-    int[] req = int[]{1, 0, 0, 0}
+    []int engine = []int{100, 16, 32, 64, 0, 0, 0, 0}
+    []int[] queue = []
+    []int req = []int{1, 0, 0, 0}
     queue = append(queue, req)
     if len(queue) == 0 {
         return false
@@ -53,7 +53,7 @@ func test_integration_flow() bool {
 }
 
 func test_cache_stats() bool {
-    int[] stats = int[]{100, 0, 0, 0, 0, 0}
+    []int stats = []int{100, 0, 0, 0, 0, 0}
     stats[1] = stats[1] + 4
     if stats[1] != 4 {
         return false
@@ -66,11 +66,11 @@ func test_cache_stats() bool {
 }
 
 func test_scheduler_statistics() bool {
-    int[][] queue = []
-    int[] req1 = int[]{1, 0, 0, 0}
-    int[] req2 = int[]{2, 1, 0, 0}
-    int[] req3 = int[]{3, 2, 0, 0}
-    int[] req4 = int[]{4, 3, 0, 0}
+    []int[] queue = []
+    []int req1 = []int{1, 0, 0, 0}
+    []int req2 = []int{2, 1, 0, 0}
+    []int req3 = []int{3, 2, 0, 0}
+    []int req4 = []int{4, 3, 0, 0}
     queue = append(queue, req1)
     queue = append(queue, req2)
     queue = append(queue, req3)

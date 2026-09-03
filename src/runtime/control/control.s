@@ -8,11 +8,11 @@ struct control_state {
     bool loop_enabled
     bool scan_enabled
     int iterations
-    string[] branches
-    string[] params
+    []string branches
+    []string params
 }
 
-func join_strings(string[] values) string {
+func join_strings([]string values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -88,7 +88,7 @@ func control_has_param(control_state state, string param) bool {
 }
 
 func control_add_branch(control_state state, string branch) control_state {
-    string[] branches = copy_strings(state.branches)
+    []string branches = copy_strings(state.branches)
     branches = append(branches, branch)
     control_state {
         name: state.name,
@@ -102,7 +102,7 @@ func control_add_branch(control_state state, string branch) control_state {
 }
 
 func control_add_param(control_state state, string param) control_state {
-    string[] params = copy_strings(state.params)
+    []string params = copy_strings(state.params)
     params = append(params, param)
     control_state {
         name: state.name,
@@ -244,7 +244,7 @@ func while_loop(control_state state, tensor value, int steps, string op) tensor 
 func scan_sum(control_state state, tensor value) tensor {
     del state
     int n = len(value.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     float acc = 0.0
     int i = 0
     for i < n {
@@ -258,7 +258,7 @@ func scan_sum(control_state state, tensor value) tensor {
 func scan_prod(control_state state, tensor value) tensor {
     del state
     int n = len(value.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     float acc = 1.0
     int i = 0
     for i < n {
@@ -287,8 +287,8 @@ func control_to_transform_chain(control_state state) transform_chain {
 }
 
 func transform_chain_to_control(transform_chain chain, string name, int iterations) control_state {
-    string[] branches = copy_strings(chain.steps)
-    string[] params = copy_strings(chain.params)
+    []string branches = copy_strings(chain.steps)
+    []string params = copy_strings(chain.params)
     if len(chain.eqns) > 0 {
         branches = make([]string, len(chain.eqns))
         params = make([]string, len(chain.eqns))

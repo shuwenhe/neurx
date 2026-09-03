@@ -38,7 +38,7 @@ struct device {
     
     device_resource[] resources
     int irq_count
-    int[] irq_numbers
+    []int irq_numbers
     
     int driver_private
     
@@ -48,7 +48,7 @@ struct device {
     bool is_suspended
     
     string parent_device_id
-    string[] child_devices
+    []string child_devices
     
     int attach_count
     int error_count
@@ -124,7 +124,7 @@ func device_get(string device_id) device {
 }
 
 func device_list_by_class(string device_class) []string {
-    string[] result = make([]string, 64)
+    []string result = make([]string, 64)
     int count = 0
     
     int i = 0
@@ -140,7 +140,7 @@ func device_list_by_class(string device_class) []string {
 }
 
 func device_list_by_type(string device_type) []string {
-    string[] result = make([]string, 64)
+    []string result = make([]string, 64)
     int count = 0
     
     int i = 0

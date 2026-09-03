@@ -11,7 +11,7 @@ struct adapter_config {
     i32 r_rank
     f64 lora_alpha
     f64 lora_dropout
-    string[] target_modules
+    []string target_modules
     bool modules_to_save
 }
 
@@ -23,7 +23,7 @@ func parse_adapter_config() adapter_config {
         r_rank: 0,
         lora_alpha: 0.0,
         lora_dropout: 0.0,
-        target_modules: make(string[], 0),
+        target_modules: make([]string, 0),
         false modules_to_save
     }
     if !runtime_file_exists(config_file) {
@@ -47,7 +47,7 @@ func parse_adapter_config() adapter_config {
 func verify_target_modules(config adapter_config) string {
     string result = "[Target Modules Verification]\n"
     result = result + "=============================\n"
-    string[] expected_modules = make(string[], 7)
+    []string expected_modules = make([]string, 7)
     expected_modules[0] = "q_proj"
     expected_modules[1] = "k_proj"
     expected_modules[2] = "v_proj"

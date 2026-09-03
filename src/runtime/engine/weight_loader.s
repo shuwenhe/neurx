@@ -47,7 +47,7 @@ struct weight_shard_info {
     int32 shard_id
     int64 start_offset
     int64 end_offset
-    string[] tensors
+    []string tensors
     int64 size_bytes
 }
 
@@ -240,7 +240,7 @@ func (weight_loader* wl) load_tensor(string name, model_dtype target_dtype) (*we
     weight_buf := *weight_buffer{
         data: buffer,
         dtype: target_dtype,
-        shape: int[]32{},
+        shape: []int32{},
         size_bytes: int64(len(buffer)),
         device_location: "gpu",
         is_pinned: wl.enable_pin_memory,
@@ -257,7 +257,7 @@ func (weight_loader* wl) load_tensor_quantized(string name, weight_quantization_
     weight_buf := *weight_buffer{
         data: buffer,
         dtype: quant_info.scale_dtype,
-        shape: int[]32{},
+        shape: []int32{},
         size_bytes: size,
         device_location: "gpu",
         is_pinned: false,

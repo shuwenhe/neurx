@@ -33,11 +33,11 @@ type lazy_resource struct {
     factory_fn interface{}
     is_initialized bool
     resource_obj interface{}
-    dependencies string[]
+    dependencies []string
     creation_time_ms uint64
 }
 type dependency_graph struct {
-    nodes map[string]string[]
+    nodes map[string][]string
     visited map[string]bool
     in_progress map[string]bool
 }
@@ -83,14 +83,14 @@ func create_lazy_resource(name string) lazy_resource* {
     resource.factory_fn = nil
     resource.is_initialized = false
     resource.resource_obj = nil
-    resource.dependencies = make(string[], 0)
+    resource.dependencies = make([]string, 0)
     resource.creation_time_ms = 0
     return resource
 }
 
 func create_dependency_graph() dependency_graph* {
     graph := new(dependency_graph)
-    graph.nodes = make(map[string]string[])
+    graph.nodes = make(map[string][]string)
     graph.visited = make(map[string]bool)
     graph.in_progress = make(map[string]bool)
     return graph
@@ -175,7 +175,7 @@ func (loader lazy_loader*) unload_module(module_name string) bool {
 
 func (loader lazy_loader*) register_resource(
     name string,
-    dependencies string[],
+    dependencies []string,
 ) bool {
     resource := create_lazy_resource(name)
     resource.dependencies = dependencies

@@ -12,13 +12,13 @@ struct model_config {
 }
 
 struct layer_weights {
-    float[] q_proj_weight
-    float[] k_proj_weight
-    float[] v_proj_weight
-    float[] o_proj_weight
-    float[] mlp_up_weight
-    float[] mlp_down_weight
-    float[] norm_weight
+    []float q_proj_weight
+    []float k_proj_weight
+    []float v_proj_weight
+    []float o_proj_weight
+    []float mlp_up_weight
+    []float mlp_down_weight
+    []float norm_weight
 }
 
 func get_model_config() model_config {
@@ -34,7 +34,7 @@ func get_model_config() model_config {
 }
 
 func tokenize_simple(string text) []int {
-    int[] tokens = make([]int, 512)
+    []int tokens = make([]int, 512)
     int token_count = 0
     int i = 0
     int word_start = 0
@@ -61,7 +61,7 @@ func tokenize_simple(string text) []int {
 }
 
 func get_token_embedding(int token_id, int hidden_size) []float {
-    float[] embedding = make([]float, hidden_size)
+    []float embedding = make([]float, hidden_size)
     int i = 0
     for i < hidden_size {
         int seed = (token_id * 73 + i * 37) % 1000
@@ -72,11 +72,11 @@ func get_token_embedding(int token_id, int hidden_size) []float {
     return embedding
 }
 
-func stack_embeddings(int[] token_ids, int hidden_size) []float {
-    float[] batch_embeddings = make([]float, len(token_ids) * hidden_size)
+func stack_embeddings([]int token_ids, int hidden_size) []float {
+    []float batch_embeddings = make([]float, len(token_ids) * hidden_size)
     int token_idx = 0
     for token_idx < len(token_ids) {
-        float[] emb = get_token_embedding(token_ids[token_idx], hidden_size)
+        []float emb = get_token_embedding(token_ids[token_idx], hidden_size)
         int i = 0
         for i < len(emb) {
             batch_embeddings[token_idx * hidden_size + i] = emb[i]
@@ -89,13 +89,13 @@ func stack_embeddings(int[] token_ids, int hidden_size) []float {
 
 func load_layer_weights(string model_path, int layer_idx, int hidden_size, int intermediate_size) layer_weights {
     int weight_size = hidden_size
-    float[] q = make([]float, weight_size)
-    float[] k = make([]float, weight_size)
-    float[] v = make([]float, weight_size)
-    float[] o = make([]float, weight_size)
-    float[] up = make([]float, weight_size)
-    float[] down = make([]float, weight_size)
-    float[] norm = make([]float, weight_size)
+    []float q = make([]float, weight_size)
+    []float k = make([]float, weight_size)
+    []float v = make([]float, weight_size)
+    []float o = make([]float, weight_size)
+    []float up = make([]float, weight_size)
+    []float down = make([]float, weight_size)
+    []float norm = make([]float, weight_size)
     int i = 0
     for i < weight_size {
         int seed = (layer_idx * 1000 + i * 73) % 1000
@@ -120,8 +120,8 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size, int i
     }
 }
 
-func linear_transform(float[] input, float[] weights, int output_dim) []float {
-    float[] output = make([]float, output_dim)
+func linear_transform([]float input, []float weights, int output_dim) []float {
+    []float output = make([]float, output_dim)
     int i = 0
     for i < output_dim {
         float sum = 0.0
@@ -136,12 +136,12 @@ func linear_transform(float[] input, float[] weights, int output_dim) []float {
     return output
 }
 
-func forward_transformer_layer(float[] hidden_state, layer_weights weights, int hidden_size, int intermediate_size, int layer_idx) []float {
-    float[] normed = rms_norm(hidden_state, weights.norm_weight, 0.000001)
-    float[] query = linear_transform(normed, weights.q_proj_weight, hidden_size)
-    float[] key = linear_transform(normed, weights.k_proj_weight, hidden_size)
-    float[] value = linear_transform(normed, weights.v_proj_weight, hidden_size)
-    float[] attn_scores = make([]float, hidden_size)
+func forward_transformer_layer([]float hidden_state, layer_weights weights, int hidden_size, int intermediate_size, int layer_idx) []float {
+    []float normed = rms_norm(hidden_state, weights.norm_weight, 0.000001)
+    []float query = linear_transform(normed, weights.q_proj_weight, hidden_size)
+    []float key = linear_transform(normed, weights.k_proj_weight, hidden_size)
+    []float value = linear_transform(normed, weights.v_proj_weight, hidden_size)
+    []float attn_scores = make([]float, hidden_size)
     int i = 0
     for i < hidden_size {
         float score = 0.0
@@ -153,8 +153,8 @@ func forward_transformer_layer(float[] hidden_state, layer_weights weights, int 
         attn_scores[i] = score / sqrt_approx(float(hidden_size / 12))
         i = i + 1
     }
-    float[] attn_weights = softmax(attn_scores)
-    float[] attn_output = make([]float, hidden_size)
+    []float attn_weights = softmax(attn_scores)
+    []float attn_output = make([]float, hidden_size)
     i = 0
     for i < hidden_size {
         float val = 0.0
@@ -166,10 +166,10 @@ func forward_transformer_layer(float[] hidden_state, layer_weights weights, int 
         attn_output[i] = val
         i = i + 1
     }
-    float[] attn_out_proj = linear_transform(attn_output, weights.o_proj_weight, hidden_size)
-    float[] hidden_after_attn = add_vectors(hidden_state, attn_out_proj)
-    float[] normed2 = rms_norm(hidden_after_attn, weights.norm_weight, 0.000001)
-    float[] ffn_hidden = linear_transform(normed2, weights.mlp_up_weight, intermediate_size)
+    []float attn_out_proj = linear_transform(attn_output, weights.o_proj_weight, hidden_size)
+    []float hidden_after_attn = add_vectors(hidden_state, attn_out_proj)
+    []float normed2 = rms_norm(hidden_after_attn, weights.norm_weight, 0.000001)
+    []float ffn_hidden = linear_transform(normed2, weights.mlp_up_weight, intermediate_size)
     i = 0
     for i < len(ffn_hidden) {
         float x = ffn_hidden[i]
@@ -177,13 +177,13 @@ func forward_transformer_layer(float[] hidden_state, layer_weights weights, int 
         ffn_hidden[i] = x * sig
         i = i + 1
     }
-    float[] ffn_output = linear_transform(ffn_hidden, weights.mlp_down_weight, hidden_size)
-    float[] output = add_vectors(hidden_after_attn, ffn_output)
+    []float ffn_output = linear_transform(ffn_hidden, weights.mlp_down_weight, hidden_size)
+    []float output = add_vectors(hidden_after_attn, ffn_output)
     return output
 }
 
-func forward_all_layers(float[] embeddings, string model_path, model_config config) []float {
-    float[] hidden_state = embeddings
+func forward_all_layers([]float embeddings, string model_path, model_config config) []float {
+    []float hidden_state = embeddings
     int layer_idx = 0
     for layer_idx < config.num_hidden_layers && layer_idx < 2 {
         print("[Forward] Layer " + int_to_string(layer_idx) + " / " + int_to_string(config.num_hidden_layers) + "\n")
@@ -194,8 +194,8 @@ func forward_all_layers(float[] embeddings, string model_path, model_config conf
     return hidden_state
 }
 
-func get_logits(float[] last_hidden, int vocab_size, int hidden_size) []float {
-    float[] logits = make([]float, vocab_size)
+func get_logits([]float last_hidden, int vocab_size, int hidden_size) []float {
+    []float logits = make([]float, vocab_size)
     int i = 0
     for i < vocab_size && i < 1000 {
         float score = 0.0
@@ -212,7 +212,7 @@ func get_logits(float[] last_hidden, int vocab_size, int hidden_size) []float {
     return logits
 }
 
-func sample_next_token_greedy(float[] logits) int {
+func sample_next_token_greedy([]float logits) int {
     if len(logits) == 0 {
         return 0
     }
@@ -248,16 +248,16 @@ func token_to_text(int token_id) string {
 func generate_response(string prompt, string model_path, int max_tokens) string {
     print("[Inference] Starting real model inference\n")
     model_config config = get_model_config()
-    int[] input_tokens = tokenize_simple(prompt)
+    []int input_tokens = tokenize_simple(prompt)
     print("[Inference] Tokenized " + int_to_string(len(input_tokens)) + " tokens\n")
-    float[] embeddings = stack_embeddings(input_tokens, config.hidden_size)
+    []float embeddings = stack_embeddings(input_tokens, config.hidden_size)
     print("[Inference] Created embeddings: " + int_to_string(len(embeddings)) + " values\n")
-    float[] hidden_state = forward_all_layers(embeddings, model_path, config)
+    []float hidden_state = forward_all_layers(embeddings, model_path, config)
     print("[Inference] Forward pass complete, hidden state size: " + int_to_string(len(hidden_state)) + "\n")
     string response = ""
     int token_count = 0
     for token_count < max_tokens {
-        float[] logits = get_logits(hidden_state, config.vocab_size, config.hidden_size)
+        []float logits = get_logits(hidden_state, config.vocab_size, config.hidden_size)
         int next_token = sample_next_token_greedy(logits)
         string token_text = token_to_text(next_token)
         response = response + token_text
@@ -311,10 +311,10 @@ func exp_approx(float x) float {
     return 1.0 + x + x2 / 2.0 + x3 / 6.0 + x4 / 24.0
 }
 
-func softmax(float[] logits) []float {
+func softmax([]float logits) []float {
     int n = len(logits)
     if n == 0 { return []float{} }
-    float[] probs = make([]float, n)
+    []float probs = make([]float, n)
     float maxv = logits[0]
     int i = 1
     for i < n {
@@ -338,8 +338,8 @@ func softmax(float[] logits) []float {
     return probs
 }
 
-func rms_norm(float[] input, float[] gamma, float eps) []float {
-    float[] output = make([]float, len(input))
+func rms_norm([]float input, []float gamma, float eps) []float {
+    []float output = make([]float, len(input))
     float sum_sq = 0.0
     int i = 0
     for i < len(input) {
@@ -361,8 +361,8 @@ func rms_norm(float[] input, float[] gamma, float eps) []float {
     return output
 }
 
-func add_vectors(float[] a, float[] b) []float {
-    float[] result = make([]float, len(a))
+func add_vectors([]float a, []float b) []float {
+    []float result = make([]float, len(a))
     int i = 0
     for i < len(a) && i < len(b) {
         result[i] = a[i] + b[i]

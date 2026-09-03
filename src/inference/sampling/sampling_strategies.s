@@ -22,22 +22,22 @@ struct sampling_config {
 }
 
 struct beam_state {
-    int[] token_ids
+    []int token_ids
     float score
     bool is_finished
 }
 
 struct generation_state {
-    int[] input_ids
-    int[] generated_ids
+    []int input_ids
+    []int generated_ids
     int current_step
     bool is_finished
     []beam_state beams
 }
 
-func copy_float(float[] data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -46,9 +46,9 @@ func copy_float(float[] data) []float {
     return out
 }
 
-func copy_int(int[] data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -58,7 +58,7 @@ func copy_int(int[] data) []int {
 }
 
 func make_one_hot(int idx, int size) []float {
-    float[] out = make([]float, size)
+    []float out = make([]float, size)
     int i = 0
     for i < size {
         out[i] = 0.0
@@ -119,7 +119,7 @@ func abs_float(float x) float {
     x
 }
 
-func softmax(float[] logits) []float {
+func softmax([]float logits) []float {
     int n = len(logits)
     if n == 0 {
         return []
@@ -132,7 +132,7 @@ func softmax(float[] logits) []float {
         }
         i = i + 1
     }
-    float[] probs = make([]float, n)
+    []float probs = make([]float, n)
     float sum_exp = 0.0
     i = 0
     for i < n {
@@ -158,7 +158,7 @@ func softmax(float[] logits) []float {
     probs
 }
 
-func normalize(float[] arr) []float {
+func normalize([]float arr) []float {
     int n = len(arr)
     if n == 0 {
         return []
@@ -169,7 +169,7 @@ func normalize(float[] arr) []float {
         sum = sum + arr[i]
         i = i + 1
     }
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     if sum <= 0.0 {
         float uniform = 1.0 / n
         i = 0
@@ -187,7 +187,7 @@ func normalize(float[] arr) []float {
     out
 }
 
-func argmax(float[] arr) int {
+func argmax([]float arr) int {
     int n = len(arr)
     if n == 0 {
         return -1
@@ -205,9 +205,9 @@ func argmax(float[] arr) int {
     best_idx
 }
 
-func argsort_descending(float[] arr) []int {
+func argsort_descending([]float arr) []int {
     int n = len(arr)
-    int[] indices = make([]int, n)
+    []int indices = make([]int, n)
     int i = 0
     for i < n {
         indices[i] = i
@@ -233,9 +233,9 @@ func argsort_descending(float[] arr) []int {
     indices
 }
 
-func argsort_ascending(float[] arr) []int {
+func argsort_ascending([]float arr) []int {
     int n = len(arr)
-    int[] indices = make([]int, n)
+    []int indices = make([]int, n)
     int i = 0
     for i < n {
         indices[i] = i
@@ -333,7 +333,7 @@ func creative_config() sampling_config {
     }
 }
 
-func apply_temperature(float[] logits, float temperature) []float {
+func apply_temperature([]float logits, float temperature) []float {
     int n = len(logits)
     if n == 0 {
         return []
@@ -344,7 +344,7 @@ func apply_temperature(float[] logits, float temperature) []float {
     if temperature == 1.0 {
         return copy_float(logits)
     }
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     float inv = 1.0 / temperature
     int i = 0
     for i < n {
@@ -354,12 +354,12 @@ func apply_temperature(float[] logits, float temperature) []float {
     out
 }
 
-func apply_repetition_penalty(float[] logits, int[] past_tokens, float penalty) []float {
+func apply_repetition_penalty([]float logits, []int past_tokens, float penalty) []float {
     int n = len(logits)
     if penalty == 1.0 || n == 0 || len(past_tokens) == 0 {
         return copy_float(logits)
     }
-    float[] out = copy_float(logits)
+    []float out = copy_float(logits)
     int i = 0
     for i < len(past_tokens) {
         int token = past_tokens[i]
@@ -376,8 +376,8 @@ func apply_repetition_penalty(float[] logits, int[] past_tokens, float penalty) 
 }
 
 func apply_presence_frequency_penalties(
-    float[] logits,
-    int[] past_tokens,
+    []float logits,
+    []int past_tokens,
     float presence_penalty,
     float frequency_penalty
 ) []float {
@@ -385,8 +385,8 @@ func apply_presence_frequency_penalties(
     if n == 0 || (presence_penalty == 0.0 && frequency_penalty == 0.0) || len(past_tokens) == 0 {
         return copy_float(logits)
     }
-    float[] out = copy_float(logits)
-    int[] counts = make([]int, n)
+    []float out = copy_float(logits)
+    []int counts = make([]int, n)
     int i = 0
     for i < n {
         counts[i] = 0
@@ -415,13 +415,13 @@ func apply_presence_frequency_penalties(
     out
 }
 
-func get_blocked_tokens(int[] past_tokens, int ngram_size, int vocab_size) []int {
+func get_blocked_tokens([]int past_tokens, int ngram_size, int vocab_size) []int {
     if ngram_size <= 1 || len(past_tokens) < ngram_size - 1 {
         return []
     }
     int prefix_len = ngram_size - 1
     int recent_start = len(past_tokens) - prefix_len
-    int[] blocked = make([]int, vocab_size)
+    []int blocked = make([]int, vocab_size)
     int i = 0
     for i < vocab_size {
         blocked[i] = 0
@@ -447,7 +447,7 @@ func get_blocked_tokens(int[] past_tokens, int ngram_size, int vocab_size) []int
         }
         pos = pos + 1
     }
-    int[] out = make([]int, vocab_size)
+    []int out = make([]int, vocab_size)
     i = 0
     for i < vocab_size {
         if blocked[i] == 1 {
@@ -458,16 +458,16 @@ func get_blocked_tokens(int[] past_tokens, int ngram_size, int vocab_size) []int
     out
 }
 
-func apply_ngram_blocking(float[] logits, int[] past_tokens, int ngram_size) []float {
+func apply_ngram_blocking([]float logits, []int past_tokens, int ngram_size) []float {
     int n = len(logits)
     if n == 0 || ngram_size <= 1 {
         return copy_float(logits)
     }
-    int[] blocked = get_blocked_tokens(past_tokens, ngram_size, n)
+    []int blocked = get_blocked_tokens(past_tokens, ngram_size, n)
     if len(blocked) == 0 {
         return copy_float(logits)
     }
-    float[] out = copy_float(logits)
+    []float out = copy_float(logits)
     int i = 0
     for i < len(blocked) {
         int token = blocked[i]
@@ -479,14 +479,14 @@ func apply_ngram_blocking(float[] logits, int[] past_tokens, int ngram_size) []f
     out
 }
 
-func apply_top_k(float[] logits, int k) []float {
+func apply_top_k([]float logits, int k) []float {
     int n = len(logits)
     if n == 0 || k <= 0 || k >= n {
         return copy_float(logits)
     }
-    float[] probs = softmax(logits)
-    int[] sorted = argsort_descending(probs)
-    float[] out = make([]float, n)
+    []float probs = softmax(logits)
+    []int sorted = argsort_descending(probs)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = -10000000000.0
@@ -501,14 +501,14 @@ func apply_top_k(float[] logits, int k) []float {
     out
 }
 
-func apply_top_p(float[] logits, float p) []float {
+func apply_top_p([]float logits, float p) []float {
     int n = len(logits)
     if n == 0 || p <= 0.0 || p >= 1.0 {
         return copy_float(logits)
     }
-    float[] probs = softmax(logits)
-    int[] sorted = argsort_descending(probs)
-    float[] out = make([]float, n)
+    []float probs = softmax(logits)
+    []int sorted = argsort_descending(probs)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = -10000000000.0
@@ -528,12 +528,12 @@ func apply_top_p(float[] logits, float p) []float {
     out
 }
 
-func apply_typical_p(float[] logits, float p) []float {
+func apply_typical_p([]float logits, float p) []float {
     int n = len(logits)
     if n == 0 || p <= 0.0 || p >= 1.0 {
         return copy_float(logits)
     }
-    float[] probs = softmax(logits)
+    []float probs = softmax(logits)
     float entropy = 0.0
     int i = 0
     for i < n {
@@ -542,14 +542,14 @@ func apply_typical_p(float[] logits, float p) []float {
         }
         i = i + 1
     }
-    float[] deviations = make([]float, n)
+    []float deviations = make([]float, n)
     i = 0
     for i < n {
         deviations[i] = abs_float((0.0 - log_approx(probs[i])) - entropy)
         i = i + 1
     }
-    int[] sorted = argsort_ascending(deviations)
-    float[] out = make([]float, n)
+    []int sorted = argsort_ascending(deviations)
+    []float out = make([]float, n)
     i = 0
     for i < n {
         out[i] = -10000000000.0
@@ -569,7 +569,7 @@ func apply_typical_p(float[] logits, float p) []float {
     out
 }
 
-func contrastive_candidate_penalty(int token, int[] past_tokens) float {
+func contrastive_candidate_penalty(int token, []int past_tokens) float {
     if len(past_tokens) == 0 {
         return 0.0
     }
@@ -587,13 +587,13 @@ func contrastive_candidate_penalty(int token, int[] past_tokens) float {
     penalty
 }
 
-func contrastive_search_token(float[] logits, int[] past_tokens, sampling_config config) int {
+func contrastive_search_token([]float logits, []int past_tokens, sampling_config config) int {
     int n = len(logits)
     if n == 0 {
         return -1
     }
-    float[] processed = process_logits(logits, past_tokens, config)
-    int[] ranked = argsort_descending(processed)
+    []float processed = process_logits(logits, past_tokens, config)
+    []int ranked = argsort_descending(processed)
     int k = config.contrastive_top_k
     if k <= 0 {
         k = 4
@@ -617,8 +617,8 @@ func contrastive_search_token(float[] logits, int[] past_tokens, sampling_config
     best_token
 }
 
-func process_logits(float[] logits, int[] past_tokens, sampling_config config) []float {
-    float[] out = copy_float(logits)
+func process_logits([]float logits, []int past_tokens, sampling_config config) []float {
+    []float out = copy_float(logits)
     if config.no_repeat_ngram_size > 1 {
         out = apply_ngram_blocking(out, past_tokens, config.no_repeat_ngram_size)
     }
@@ -646,7 +646,7 @@ func process_logits(float[] logits, int[] past_tokens, sampling_config config) [
     out
 }
 
-func sample_from_distribution(float[] probs, uint64 rng_state) (int, uint64) {
+func sample_from_distribution([]float probs, uint64 rng_state) (int, uint64) {
     int n = len(probs)
     if n == 0 {
         return -1, advance_rng(rng_state)
@@ -664,7 +664,7 @@ func sample_from_distribution(float[] probs, uint64 rng_state) (int, uint64) {
     (n - 1, advance_rng(rng_state))
 }
 
-func sample_from_distribution_index(float[] probs, uint64 rng_state) int {
+func sample_from_distribution_index([]float probs, uint64 rng_state) int {
     int n = len(probs)
     if n == 0 {
         return -1
@@ -682,25 +682,25 @@ func sample_from_distribution_index(float[] probs, uint64 rng_state) int {
     n - 1
 }
 
-func sample_from_softmax(float[] logits, float temperature, uint64 rng_state) (int, uint64) {
-    float[] scaled = apply_temperature(logits, temperature)
-    float[] probs = softmax(scaled)
+func sample_from_softmax([]float logits, float temperature, uint64 rng_state) (int, uint64) {
+    []float scaled = apply_temperature(logits, temperature)
+    []float probs = softmax(scaled)
     sample_from_distribution(probs, rng_state)
 }
 
-func sample_from_softmax_index(float[] logits, float temperature, uint64 rng_state) int {
-    float[] scaled = apply_temperature(logits, temperature)
-    float[] probs = softmax(scaled)
+func sample_from_softmax_index([]float logits, float temperature, uint64 rng_state) int {
+    []float scaled = apply_temperature(logits, temperature)
+    []float probs = softmax(scaled)
     sample_from_distribution_index(probs, rng_state)
 }
 
-func greedy_sample(float[] logits) int {
+func greedy_sample([]float logits) int {
     argmax(logits)
 }
 
 func sample_next_token(
-    float[] logits,
-    int[] past_tokens,
+    []float logits,
+    []int past_tokens,
     sampling_config config,
     uint64 rng_state
 ) (int, uint64) {
@@ -710,14 +710,14 @@ func sample_next_token(
     if config.strategy == "contrastive" {
         return (contrastive_search_token(logits, past_tokens, config), advance_rng(rng_state))
     }
-    float[] processed = process_logits(logits, past_tokens, config)
-    float[] probs = softmax(processed)
+    []float processed = process_logits(logits, past_tokens, config)
+    []float probs = softmax(processed)
     sample_from_distribution(probs, rng_state)
 }
 
 func sample_next_token_index(
-    float[] logits,
-    int[] past_tokens,
+    []float logits,
+    []int past_tokens,
     sampling_config config,
     uint64 rng_state
 ) int {
@@ -727,14 +727,14 @@ func sample_next_token_index(
     if config.strategy == "contrastive" {
         return contrastive_search_token(logits, past_tokens, config)
     }
-    float[] processed = process_logits(logits, past_tokens, config)
-    float[] probs = softmax(processed)
+    []float processed = process_logits(logits, past_tokens, config)
+    []float probs = softmax(processed)
     sample_from_distribution_index(probs, rng_state)
 }
 
 func sample_token(
-    float[] logits,
-    int[] past_tokens,
+    []float logits,
+    []int past_tokens,
     sampling_config config,
     uint64 rng_state
 ) int {
@@ -797,20 +797,20 @@ func best_beam([]beam_state beams) beam_state {
 }
 
 func beam_search_decode(
-    float[][] all_logits,
+    []float[] all_logits,
     sampling_config config,
     int eos_token_id
 ) []int {
     int num_beams = config.num_beams
     if num_beams <= 1 {
-        int[] greedy = []
+        []int greedy = []
         int step = 0
         int max_steps = len(all_logits)
         if config.max_length > 0 && config.max_length < max_steps {
             max_steps = config.max_length
         }
         for step < max_steps {
-            float[] logits = copy_float(all_logits[step])
+            []float logits = copy_float(all_logits[step])
             logits = process_logits(logits, greedy, config)
             int token = greedy_sample(logits)
             if token == eos_token_id && len(greedy) >= config.min_length {
@@ -844,9 +844,9 @@ func beam_search_decode(
             if beam.is_finished {
                 candidates = append(candidates, beam)
             } else {
-                float[] logits = copy_float(all_logits[step])
+                []float logits = copy_float(all_logits[step])
                 logits = process_logits(logits, beam.token_ids, config)
-                int[] ranked = argsort_descending(logits)
+                []int ranked = argsort_descending(logits)
                 int expand = num_beams
                 if expand > len(ranked) {
                     expand = len(ranked)
@@ -854,7 +854,7 @@ func beam_search_decode(
                 int i = 0
                 for i < expand {
                     int token = ranked[i]
-                    int[] new_tokens = copy_int(beam.token_ids)
+                    []int new_tokens = copy_int(beam.token_ids)
                     new_tokens = append(new_tokens, token)
                     bool is_finished = token == eos_token_id && len(new_tokens) >= config.min_length
                     candidates.push(beam_state {
@@ -898,12 +898,12 @@ func beam_search_decode(
 }
 
 func beam_search_decode_two_steps(
-    float[] first_logits,
-    float[] second_logits,
+    []float first_logits,
+    []float second_logits,
     sampling_config config,
     int eos_token_id
 ) []int {
-    float[][] all_logits = floatmake([][], 2)
+    []float[] all_logits = floatmake([][], 2)
     all_logits = append(all_logits, first_logits)
     all_logits = append(all_logits, second_logits)
     beam_search_decode(all_logits, config, eos_token_id)

@@ -132,7 +132,7 @@ func (env ray_env*) initialize_ray(config ray_config*) bool {
 func (env ray_env*) create_placement_group(
     name string,
     strategy string,
-    bundles map[stringfloat[]64],
+    bundles map[string[]float64],
 ) placement_group* {
     pg := new(placement_group)
     pg.id = name
@@ -190,7 +190,7 @@ func (env ray_env*) get_actor(name string) interface{} {
 }
 
 func (env ray_env*) list_actors() []string {
-    names := make(string[], 0)
+    names := make([]string, 0)
     for name := range env.actors {
         names = append(names, name)
     }
@@ -216,7 +216,7 @@ func (env ray_env*) get_placement_group(name string) placement_group* {
 }
 
 func (env ray_env*) list_placement_groups() []string {
-    names := make(string[], 0)
+    names := make([]string, 0)
     for name := range env.placement_groups {
         names = append(names, name)
     }

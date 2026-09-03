@@ -130,7 +130,7 @@ func (HFTokenizer* h) Decode(i32[] token_ids) string {
 }
 
 func (HFTokenizer* h) basic_tokenize(string text) []string {
-    tokens := make(string[], 0)
+    tokens := make([]string, 0)
     current := ""
     for i := 0; i < len(text); i += 1 {
         char := string(text[i])
@@ -155,8 +155,8 @@ func (HFTokenizer* h) basic_tokenize(string text) []string {
     return tokens
 }
 
-func (HFTokenizer* h) wordpiece_tokenize(string[] tokens) []string {
-    output := make(string[], 0)
+func (HFTokenizer* h) wordpiece_tokenize([]string tokens) []string {
+    output := make([]string, 0)
     for i := 0; i < len(tokens); i += 1 {
         token := tokens[i]
         if _, ok := h.base.vocab_text_to_id[token]; ok {
@@ -172,7 +172,7 @@ func (HFTokenizer* h) wordpiece_tokenize(string[] tokens) []string {
 }
 
 func (HFTokenizer* h) split_subwords(string word) []string {
-    subwords := make(string[], 0)
+    subwords := make([]string, 0)
     start := 0
     for start < len(word) {
         end := len(word)

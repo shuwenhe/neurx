@@ -202,18 +202,18 @@ func (request_batch* batch) is_empty() bool {
 
 struct request_pool {
     map[string, active_request] all_requests
-    string[] pending_ids
-    string[] running_ids
-    string[] completed_ids
+    []string pending_ids
+    []string running_ids
+    []string completed_ids
     int32 max_pool_size
 }
 
 func create_request_pool(int32 max_size) request_pool* {
     return *request_pool{
         all_requests: make(map[string, active_request]),
-        pending_ids: make(string[]),
-        running_ids: make(string[]),
-        completed_ids: make(string[]),
+        pending_ids: make([]string),
+        running_ids: make([]string),
+        completed_ids: make([]string),
         max_pool_size: max_size,
     }
 }

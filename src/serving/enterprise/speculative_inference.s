@@ -74,9 +74,9 @@ func init_speculative_inference_system(speculative_inference_config spec_cfg) sp
 
 func speculative_inference_single(
     speculative_inference_system sys,
-    int[] input_ids,
+    []int input_ids,
     int max_tokens,
-) (speculative_inference_system, int[]) {
+) (speculative_inference_system, []int) {
     updated_sys := sys
     request := speculative_runtime.new_generation_request(1, input_ids, max_tokens)
     updated_runtime, output_tokens := speculative_runtime.generate_with_speculative_decoding(
@@ -90,11 +90,11 @@ func speculative_inference_single(
 
 func speculative_inference_batch(
     speculative_inference_system sys,
-    int[][] batch_input_ids,
+    []int[] batch_input_ids,
     int max_tokens,
-) (speculative_inference_system, int[][]) {
+) (speculative_inference_system, []int[]) {
     updated_sys := sys
-    batch_outputs := int[][]{}
+    batch_outputs := []int[]{}
     batch := speculative_runtime.new_generation_batch()
     i := 0
     for i < batch_input_ids.len {

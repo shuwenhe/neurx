@@ -12,7 +12,7 @@ struct fsdp_config {
     int backward_prefetch
     int forward_prefetch
     bool use_orig_params
-    string[] ignored_modules
+    []string ignored_modules
 }
 
 struct fsdp_state {

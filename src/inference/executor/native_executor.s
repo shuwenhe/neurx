@@ -12,7 +12,7 @@ struct native_execution_result {
     bool ok
     string request_id
     string output
-    int[] token_ids
+    []int token_ids
     string finish_reason
     string backend
     string error_code
@@ -27,7 +27,7 @@ func native_int_string(int value) string {
     output
 }
 
-func native_token_ids(int[] values) string {
+func native_token_ids([]int values) string {
     string output = ""
     int i = 0
     for i < len(values) {

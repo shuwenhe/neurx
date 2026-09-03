@@ -16,7 +16,7 @@ struct zen_platform_config {
     zen_cpu_info cpu_info
     bool numa_enabled
     int num_numa_nodes
-    int[] cores_per_node
+    []int cores_per_node
     string frequency_mode
     bool power_management_enabled
 }

@@ -7,9 +7,9 @@ struct zone_deployment_config {
     string zone_id
     string zone_name
     int node_count
-    string[] central_servers
-    string[] edge_nodes
-    string[] client_nodes
+    []string central_servers
+    []string edge_nodes
+    []string client_nodes
     string model_cache_strategy
     int network_latency_target_ms
 }
@@ -33,9 +33,9 @@ func new_zone_deployment(string zone_id, string zone_name, int total_nodes) zone
         zone_id: zone_id,
         zone_name: zone_name,
         node_count: total_nodes,
-        central_servers: string[](),
-        edge_nodes: string[](),
-        client_nodes: string[](),
+        central_servers: []string(),
+        edge_nodes: []string(),
+        client_nodes: []string(),
         model_cache_strategy: "lru_with_replica",
         network_latency_target_ms: 10,
     }

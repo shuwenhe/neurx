@@ -18,8 +18,8 @@ struct data_load_config {
 
 struct data_batch {
     int batch_id
-    string[] input_ids
-    string[] labels
+    []string input_ids
+    []string labels
     int num_samples
     int num_tokens
 }
@@ -122,8 +122,8 @@ func pipeline_create_batch(batch_id, num_samples, int num_tokens) data_batch {
 }
 
 func batch_add_sample(data_batch batch, string input, string label) data_batch {
-    batch.input_ids += string[]{input}
-    batch.labels += string[]{label}
+    batch.input_ids += []string{input}
+    batch.labels += []string{label}
     batch
 }
 
@@ -143,7 +143,7 @@ func pipeline_apply_augmentation(data_batch batch, bool enable_augmentation) dat
     int original_size = len(batch.input_ids)
     for i in range(original_size) {
         string augmented_input = batch.input_ids[i] + "_augmented"
-        batch.input_ids += string[]{augmented_input}
+        batch.input_ids += []string{augmented_input}
     }
     batch.num_samples = len(batch.input_ids)
     eprintln("[DataPipeline] Applied augmentation, new batch size: " + int_to_string_3(batch.num_samples))
@@ -201,6 +201,6 @@ func float_to_string_3(float f) string {
 }
 
 func range_helper(int end) []int {
-    int[] r = make([]int, end)
+    []int r = make([]int, end)
     r
 }

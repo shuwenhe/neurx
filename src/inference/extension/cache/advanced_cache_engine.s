@@ -32,7 +32,7 @@ func create_advanced_kv_cache_engine(string node_id) advanced_kv_cache_engine {
 
 func advanced_cache_query(advanced_kv_cache_engine engine, string prefix_hash) []int {
     engine.total_reads = engine.total_reads + 1
-    int[] cached_blocks = hash_table_lookup(engine.index, prefix_hash)
+    []int cached_blocks = hash_table_lookup(engine.index, prefix_hash)
     if len(cached_blocks) > 0 {
         engine.total_hits = engine.total_hits + 1
         int block_id = cached_blocks[0]
@@ -49,7 +49,7 @@ func advanced_cache_query(advanced_kv_cache_engine engine, string prefix_hash) [
     if best_tier >= 0 {
         tiered_storage_record_miss(engine.storage, best_tier)
     }
-    int[] replicas = distributed_cache_compute_replica_nodes(engine.peers, prefix_hash)
+    []int replicas = distributed_cache_compute_replica_nodes(engine.peers, prefix_hash)
     if len(replicas) > 0 {
         string best_node = distributed_cache_find_best_replica_node(engine.peers, replicas)
         print("[AdvancedCache] MISS locally, querying replicas: " + best_node + "\n")
@@ -58,7 +58,7 @@ func advanced_cache_query(advanced_kv_cache_engine engine, string prefix_hash) [
     return []int{}
 }
 
-func advanced_cache_store(advanced_kv_cache_engine engine, string prefix_hash, int[] block_ids) int {
+func advanced_cache_store(advanced_kv_cache_engine engine, string prefix_hash, []int block_ids) int {
     engine.total_writes = engine.total_writes + 1
     hash_table_insert(engine.index, prefix_hash, block_ids)
     lru_cache_put(engine.lru, prefix_hash, block_ids[0])
@@ -84,7 +84,7 @@ func advanced_cache_store(advanced_kv_cache_engine engine, string prefix_hash, i
             }
         }
     }
-    string[] replicas = distributed_cache_compute_replica_nodes(engine.peers, prefix_hash)
+    []string replicas = distributed_cache_compute_replica_nodes(engine.peers, prefix_hash)
     if len(replicas) > 0 {
         print("[AdvancedCache] Replicating to " + int_to_string(len(replicas)) + " nodes\n")
     }

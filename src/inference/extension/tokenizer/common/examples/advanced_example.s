@@ -66,7 +66,7 @@ func CachePerformanceExample() {
     println("\n=== Cache Performance Analysis ===\n")
     cache_lru := cache.NewTokenCache(100000, "lru")
     cache_lfu := cache.NewTokenCache(100000, "lfu")
-    texts := make(string[], 0)
+    texts := make([]string, 0)
     texts = append(texts, "hello world")
     texts = append(texts, "hello there")
     texts = append(texts, "goodbye world")
@@ -186,7 +186,7 @@ func PerformanceBenchmarkingExample() {
         cache_size: 100000,
     }
     tokenizer_inst := tokenizer.NewBaseTokenizer(config)
-    texts := make(string[], 0)
+    texts := make([]string, 0)
     texts = append(texts, "Hello world")
     texts = append(texts, "How are you")
     texts = append(texts, "Hello world")

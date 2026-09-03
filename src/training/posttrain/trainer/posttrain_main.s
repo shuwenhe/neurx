@@ -38,15 +38,15 @@ struct lora_config {
 }
 
 struct lora_linear {
-    float[] base_weight
+    []float base_weight
     int out_dim
     int in_dim
-    float[] lora_a
-    float[] lora_b
+    []float lora_a
+    []float lora_b
     int rank
     float scaling
     float dropout_rate
-    float[] last_input
+    []float last_input
 }
 
 struct named_lora_module {
@@ -56,10 +56,10 @@ struct named_lora_module {
     int in_dim
     int rank
     float scaling
-    float[] lora_a
-    float[] lora_b
-    float[] initial_a
-    float[] initial_b
+    []float lora_a
+    []float lora_b
+    []float initial_a
+    []float initial_b
 }
 
 struct adapter_stats {
@@ -134,7 +134,7 @@ func char_at(string text, int idx) string {
 }
 
 func runtime_split_lines(string text) []string {
-    string[] lines = []
+    []string lines = []
     string current = ""
     int i = 0
     for i < len(text) {
@@ -156,7 +156,7 @@ func runtime_split_lines(string text) []string {
 }
 
 func text_window_to_vector(string text, int start, int count, int dim) []float {
-    float[] vec = fill_lora(dim, 0.0)
+    []float vec = fill_lora(dim, 0.0)
     if dim < 1 || count < 1 || start >= len(text) {
         return vec
     }
@@ -352,7 +352,7 @@ func run_posttrain_lora_sft() int {
     int lm_loss_count = 54
     int prompt_end_idx = 40
     int response_loss_count = 54
-    int[] shifted_labels = make([]int, 94)
+    []int shifted_labels = make([]int, 94)
     int i = 0
     for i < 94 {
         shifted_labels[i] = 0
@@ -372,11 +372,11 @@ func run_posttrain_lora_sft() int {
     eprintln("[Step 4] ✓ Step 4 prepared (SIMPLIFIED)")
     eprintln("")
     println("Training loop start")
-    float[] loss_history = make([]float, epochs)
+    []float loss_history = make([]float, epochs)
     float best_loss = 0.0
-    float[] prompt_vec = fill_lora(hidden_size, 0.1)
-    float[] target_q = fill_lora(hidden_size, 0.0)
-    float[] target_v = fill_lora(v_out, 0.0)
+    []float prompt_vec = fill_lora(hidden_size, 0.1)
+    []float target_q = fill_lora(hidden_size, 0.0)
+    []float target_v = fill_lora(v_out, 0.0)
     int epoch = 0
     for epoch < epochs {
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " started")
@@ -388,8 +388,8 @@ func run_posttrain_lora_sft() int {
             int module_cursor = 0
             float sample_loss_sum = 0.0
             int sample_module_count = 0
-            float[] output_reuse = fill_lora(896, 0.0)
-            float[] hidden_reuse = fill_lora(8, 0.0)
+            []float output_reuse = fill_lora(896, 0.0)
+            []float hidden_reuse = fill_lora(8, 0.0)
             int max_modules = len(modules)
             for module_cursor < max_modules {
                 named_lora_module module = modules[module_cursor]
@@ -397,9 +397,9 @@ func run_posttrain_lora_sft() int {
                 int in_dim = module.in_dim
                 int rank_val = module.rank
                 float scaling_val = module.scaling
-                float[] lora_a = module.lora_a
-                float[] lora_b = module.lora_b
-                float[] target = target_q
+                []float lora_a = module.lora_a
+                []float lora_b = module.lora_b
+                []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
                     target = target_v
@@ -510,7 +510,7 @@ func run_posttrain_lora_sft() int {
 }
 
 func fill_lora(int n, float val) []float {
-    float[] result = make([]float, n)
+    []float result = make([]float, n)
     int i = 0
     for i < n {
         result[i] = val
@@ -520,7 +520,7 @@ func fill_lora(int n, float val) []float {
 }
 
 func init_gaussian(int n, float std) []float {
-    float[] result = make([]float, n)
+    []float result = make([]float, n)
     int i = 0
     for i < n {
         float val = ((i + 1) as float) * std * 0.001
@@ -550,10 +550,10 @@ func write_simple_adapter_checkpoint(
     string output_dir,
     string model_path,
     string data_file,
-    float[] q_a,
-    float[] q_b,
-    float[] v_a,
-    float[] v_b,
+    []float q_a,
+    []float q_b,
+    []float v_a,
+    []float v_b,
     float loss0,
     float loss1,
     float loss2,
@@ -569,7 +569,7 @@ func write_simple_adapter_checkpoint(
 ) {
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
-    int[] q_a_shape = make([]int, 2)
+    []int q_a_shape = make([]int, 2)
     q_a_shape[0] = rank
     q_a_shape[1] = 896
     tensor q_a_tensor = tensor {
@@ -581,7 +581,7 @@ func write_simple_adapter_checkpoint(
         data_count: len(q_a),
     }
     safetensors_writer_add_tensor(writer, q_a_tensor)
-    int[] q_b_shape = make([]int, 2)
+    []int q_b_shape = make([]int, 2)
     q_b_shape[0] = 896
     q_b_shape[1] = rank
     tensor q_b_tensor = tensor {
@@ -593,7 +593,7 @@ func write_simple_adapter_checkpoint(
         data_count: len(q_b),
     }
     safetensors_writer_add_tensor(writer, q_b_tensor)
-    int[] v_a_shape = make([]int, 2)
+    []int v_a_shape = make([]int, 2)
     v_a_shape[0] = rank
     v_a_shape[1] = 896
     tensor v_a_tensor = tensor {
@@ -605,7 +605,7 @@ func write_simple_adapter_checkpoint(
         data_count: len(v_a),
     }
     safetensors_writer_add_tensor(writer, v_a_tensor)
-    int[] v_b_shape = make([]int, 2)
+    []int v_b_shape = make([]int, 2)
     v_b_shape[0] = v_out
     v_b_shape[1] = rank
     tensor v_b_tensor = tensor {
@@ -721,8 +721,8 @@ func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
         if is_odd == 1 {
             out_dim = v_out_const
         }
-        float[] lora_a_copy = copy_float_array(module.lora_a)
-        float[] lora_b_copy = copy_float_array(module.lora_b)
+        []float lora_a_copy = copy_float_array(module.lora_a)
+        []float lora_b_copy = copy_float_array(module.lora_b)
         int i = 0
         int a_len = rank * in_dim
         for i < a_len {
@@ -788,10 +788,10 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
         if is_odd == 1 {
             out_dim = v_out_const
         }
-        float[] lora_a_copy = copy_float_array(module.lora_a)
-        float[] lora_b_copy = copy_float_array(module.lora_b)
-        float[] init_a_copy = copy_float_array(module.initial_a)
-        float[] init_b_copy = copy_float_array(module.initial_b)
+        []float lora_a_copy = copy_float_array(module.lora_a)
+        []float lora_b_copy = copy_float_array(module.lora_b)
+        []float init_a_copy = copy_float_array(module.initial_a)
+        []float init_b_copy = copy_float_array(module.initial_b)
         int i = 0
         int a_len = rank * in_dim
         for i < a_len {
@@ -990,7 +990,7 @@ func save_adapter_weights_safetensors(
     int m_idx = 0
     for m_idx < len(modules) && m_idx < 4 {
         named_lora_module curr_module = modules[m_idx]
-        int[] a_shape = make([]int, 2)
+        []int a_shape = make([]int, 2)
         a_shape[0] = rank
         a_shape[1] = 896
         tensor a_tensor = tensor {
@@ -1006,7 +1006,7 @@ func save_adapter_weights_safetensors(
         if m_idx - (m_idx / 2) * 2 == 1 {
             b_out_dim = v_out
         }
-        int[] b_shape = make([]int, 2)
+        []int b_shape = make([]int, 2)
         b_shape[0] = b_out_dim
         b_shape[1] = rank
         tensor b_tensor = tensor {
@@ -1048,7 +1048,7 @@ func build_adapter_config_json(string model_path, int rank, float alpha, float e
 
 func build_training_state_json(
     string data_file,
-    float[] loss_history,
+    []float loss_history,
     adapter_stats stats,
     delta_stats deltas,
     int rank,
@@ -1101,7 +1101,7 @@ func build_training_state_json(
 }
 
 func text_to_vector(string text, int dim) []float {
-    float[] vec = fill_lora(dim, 0.0)
+    []float vec = fill_lora(dim, 0.0)
     if dim < 1 {
         return vec
     }
@@ -1134,7 +1134,7 @@ func text_to_vector(string text, int dim) []float {
     vec
 }
 
-func mse_loss(float[] predictions, float[] targets) float {
+func mse_loss([]float predictions, []float targets) float {
     float loss = 0.0
     int i = 0
     int limit = len(predictions)
@@ -1152,12 +1152,12 @@ func mse_loss(float[] predictions, float[] targets) float {
     loss
 }
 
-func mse_gradient(float[] predictions, float[] targets) []float {
+func mse_gradient([]float predictions, []float targets) []float {
     int limit = len(predictions)
     if len(targets) < limit {
         limit = len(targets)
     }
-    float[] grad = fill_lora(len(predictions), 0.0)
+    []float grad = fill_lora(len(predictions), 0.0)
     int i = 0
     for i < limit {
         grad[i] = 2.0 * (predictions[i] - targets[i]) / (limit as float)
@@ -1173,8 +1173,8 @@ func abs_float(float value) float {
     value
 }
 
-func copy_float_array(float[] source) []float {
-    float[] result = make([]float, len(source))
+func copy_float_array([]float source) []float {
+    []float result = make([]float, len(source))
     int i = 0
     for i < len(source) {
         result[i] = source[i]
@@ -1326,7 +1326,7 @@ func find_substring(string text, string pattern) int {
 }
 
 func make_shape(int a, int b) []int {
-    int[] shape = make([]int, 2)
+    []int shape = make([]int, 2)
     shape[0] = a
     shape[1] = b
     shape

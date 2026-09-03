@@ -20,13 +20,13 @@ struct kv_event_stream_config {
 
 struct kv_event_stream_state {
     kv_event_stream_config config
-    int[] sequences
-    int[] event_types
-    int[] block_hashes
-    int[] parent_hashes
-    int[] mediums
-    int[] group_indices
-    int[] worker_masks
+    []int sequences
+    []int event_types
+    []int block_hashes
+    []int parent_hashes
+    []int mediums
+    []int group_indices
+    []int worker_masks
     int event_count
     int next_sequence
     int dropped_events
@@ -41,17 +41,17 @@ struct kv_event_publish_result {
 }
 
 struct kv_event_poll_result {
-    int[] sequences
-    int[] event_types
-    int[] block_hashes
-    int[] mediums
-    int[] group_indices
+    []int sequences
+    []int event_types
+    []int block_hashes
+    []int mediums
+    []int group_indices
     int event_count
     int high_watermark
 }
 
 func kv_event_zero_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
@@ -149,11 +149,11 @@ func publish_kv_event(kv_event_stream_state state, int event_type, int block_has
 }
 
 func poll_kv_events(kv_event_stream_state state, int after_sequence, bool common_only) kv_event_poll_result {
-    int[] sequences = kv_event_zero_array(state.event_count)
-    int[] types = kv_event_zero_array(state.event_count)
-    int[] hashes = kv_event_zero_array(state.event_count)
-    int[] mediums = kv_event_zero_array(state.event_count)
-    int[] groups = kv_event_zero_array(state.event_count)
+    []int sequences = kv_event_zero_array(state.event_count)
+    []int types = kv_event_zero_array(state.event_count)
+    []int hashes = kv_event_zero_array(state.event_count)
+    []int mediums = kv_event_zero_array(state.event_count)
+    []int groups = kv_event_zero_array(state.event_count)
     int count = 0
     int high_watermark = after_sequence
     int i = 0

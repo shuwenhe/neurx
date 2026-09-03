@@ -39,7 +39,7 @@ struct model_registry {
 	map[string]*model_registration_info models
 	map[model_type][]*model_registration_info models_by_type
 	map[model_capability][]*model_registration_info models_by_capability
-	map[string]string[] model_dependencies
+	map[string][]string model_dependencies
 	int64 total_registered
 	int64 total_active
 	time.Time created_at
@@ -50,7 +50,7 @@ func create_model_registry() *model_registry {
 		models: make(map[string]*model_registration_info),
 		models_by_type: make(map[model_type][]*model_registration_info),
 		models_by_capability: make(map[model_capability][]*model_registration_info),
-		model_dependencies: make(map[string]string[]),
+		model_dependencies: make(map[string][]string),
 		created_at: time.Now(),
 	}
 }

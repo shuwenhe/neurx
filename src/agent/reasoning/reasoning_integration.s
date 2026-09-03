@@ -23,8 +23,8 @@ struct reasoning_response {
 	string              request_id
 	string              status
 	string              final_answer
-	string[]         reasoning_steps
-	string[]         intermediate_thoughts
+	[]string         reasoning_steps
+	[]string         intermediate_thoughts
 	float32             confidence_score
 	float32             quality_score
 	int32               total_steps
@@ -121,8 +121,8 @@ func (reasoning_engine* e) process_cot_reasoning(
 	response := reasoning_response{
 		request_id:        req.request_id,
 		status:            "in_progress",
-		reasoning_steps:   make(string[], 0, req.max_steps),
-		intermediate_thoughts: make(string[], 0, req.max_steps*3),
+		reasoning_steps:   make([]string, 0, req.max_steps),
+		intermediate_thoughts: make([]string, 0, req.max_steps*3),
 		metadata:          make(map[string]interface{}),
 	}
 	for step_id := int32(0); step_id < req.max_steps; step_id++ {
@@ -193,13 +193,13 @@ func (reasoning_engine* e) process_tot_reasoning(
 	response := reasoning_response{
 		request_id:        req.request_id,
 		status:            "in_progress",
-		reasoning_steps:   make(string[], 0),
-		intermediate_thoughts: make(string[], 0),
+		reasoning_steps:   make([]string, 0),
+		intermediate_thoughts: make([]string, 0),
 		metadata:          make(map[string]interface{}),
 	}
 	root_id := e.tot_engine.add_root_node(req.problem_statement)
 	response.reasoning_steps = append(response.reasoning_steps, req.problem_statement)
-	current_level := make(string[], 0, 1)
+	current_level := make([]string, 0, 1)
 	current_level = append(current_level, root_id)
 	for depth := int32(0); depth < req.max_depth; depth++ {
 		if int32(len(current_level)) == 0 {
@@ -208,9 +208,9 @@ func (reasoning_engine* e) process_tot_reasoning(
 		if !e.optimizer.check_resource_limits() {
 			break
 		}
-		next_level := make(string[], 0)
+		next_level := make([]string, 0)
 		for node_id := range current_level {
-			child_contents := make(string[], 0, e.tot_engine.branching_factor)
+			child_contents := make([]string, 0, e.tot_engine.branching_factor)
 			for i := int32(0); i < e.tot_engine.branching_factor; i++ {
 				child_contents = append(
 					child_contents,

@@ -277,7 +277,7 @@ func (logits_processor* processor) get_processor_stats() map[string]interface{} 
     stats["total_calls"] = processor.total_calls
     stats["total_time_us"] = processor.total_process_time_us
     stats["num_processors"] = len(processor.processors)
-    processor_types := make(string[])
+    processor_types := make([]string)
     for i := 0; i < len(processor.processors); i = i + 1 {
         if processor.processors[i].enabled {
             processor_types = append(processor_types, string(processor.processors[i].type))

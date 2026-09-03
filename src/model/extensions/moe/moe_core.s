@@ -10,20 +10,20 @@ struct moe_config {
 
 struct moe_weights {
     moe_config config
-    float[] router_down
-    float[] router_up
-    float[] router_balance_bias
-    float[] shared_w1
-    float[] shared_w2
-    float[] routed_w1
-    float[] routed_w2
+    []float router_down
+    []float router_up
+    []float router_balance_bias
+    []float shared_w1
+    []float shared_w2
+    []float routed_w1
+    []float routed_w2
 }
 
 struct moe_result {
-    float[] output
-    int[] expert_indices
-    float[] expert_weights
-    float[] expert_load
+    []float output
+    []int expert_indices
+    []float expert_weights
+    []float expert_load
 }
 
 func new_moe_config(
@@ -45,7 +45,7 @@ func new_moe_config(
 }
 
 func moe_zeros(int n) []float {
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -55,7 +55,7 @@ func moe_zeros(int n) []float {
 }
 
 func moe_zeros_int(int n) []int {
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = 0
@@ -65,7 +65,7 @@ func moe_zeros_int(int n) []int {
 }
 
 func moe_deterministic_weights(int n, int salt, float scale) []float {
-    float[] out = moe_zeros(n)
+    []float out = moe_zeros(n)
     int i = 0
     for i < n {
         int raw = i * 37 + salt * 19 + 11
@@ -109,8 +109,8 @@ func moe_situ(float x) float {
     s * t
 }
 
-func moe_linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) []float {
-    float[] out = moe_zeros(rows * out_dim)
+func moe_linear([]float input, []float weight, int rows, int in_dim, int out_dim) []float {
+    []float out = moe_zeros(rows * out_dim)
     int row = 0
     for row < rows {
         int o = 0
@@ -145,9 +145,9 @@ func new_moe_weights(moe_config cfg) moe_weights {
     }
 }
 
-func moe_top_k_indices(float[] scores, int offset, int count, int top_k) []int {
-    int[] indices = moe_zeros_int(top_k)
-    float[] selected = moe_zeros(top_k)
+func moe_top_k_indices([]float scores, int offset, int count, int top_k) []int {
+    []int indices = moe_zeros_int(top_k)
+    []float selected = moe_zeros(top_k)
     int k = 0
     for k < top_k {
         selected[k] = -1000000.0
@@ -181,15 +181,15 @@ func moe_top_k_indices(float[] scores, int offset, int count, int top_k) []int {
 }
 
 func moe_expert_ffn(
-    float[] input,
-    float[] w1,
-    float[] w2,
+    []float input,
+    []float w1,
+    []float w2,
     int w1_offset,
     int w2_offset,
     int hidden,
     int ffn
 ) []float {
-    float[] middle = moe_zeros(ffn)
+    []float middle = moe_zeros(ffn)
     int f = 0
     for f < ffn {
         int h = 0
@@ -200,7 +200,7 @@ func moe_expert_ffn(
         middle[f] = moe_situ(middle[f])
         f = f + 1
     }
-    float[] out = moe_zeros(hidden)
+    []float out = moe_zeros(hidden)
     int h = 0
     for h < hidden {
         f = 0
@@ -213,18 +213,18 @@ func moe_expert_ffn(
     out
 }
 
-func moe_forward(moe_weights weights, float[] input, int tokens) moe_result {
+func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
     moe_config cfg = weights.config
     int h = cfg.hidden_dim
     int l = cfg.latent_dim
     int expert_count = cfg.n_routed_experts
     int top_k = cfg.top_k
-    float[] latent = moe_linear(input, weights.router_down, tokens, h, l)
-    float[] scores = moe_linear(latent, weights.router_up, tokens, l, expert_count)
-    float[] output = moe_zeros(tokens * h)
-    int[] indices = moe_zeros_int(tokens * top_k)
-    float[] route_weights = moe_zeros(tokens * top_k)
-    float[] load = moe_zeros(expert_count)
+    []float latent = moe_linear(input, weights.router_down, tokens, h, l)
+    []float scores = moe_linear(latent, weights.router_up, tokens, l, expert_count)
+    []float output = moe_zeros(tokens * h)
+    []int indices = moe_zeros_int(tokens * top_k)
+    []float route_weights = moe_zeros(tokens * top_k)
+    []float load = moe_zeros(expert_count)
     int token = 0
     for token < tokens {
         float mean_score = 0.0
@@ -242,7 +242,7 @@ func moe_forward(moe_weights weights, float[] input, int tokens) moe_result {
                 scores[token * expert_count + expert] - mean_score
             expert = expert + 1
         }
-        int[] chosen = moe_top_k_indices(scores, token * expert_count, expert_count, top_k)
+        []int chosen = moe_top_k_indices(scores, token * expert_count, expert_count, top_k)
         float route_sum = 0.0
         int k = 0
         for k < top_k {
@@ -260,13 +260,13 @@ func moe_forward(moe_weights weights, float[] input, int tokens) moe_result {
                 route_weights[token * top_k + k] / route_sum
             k = k + 1
         }
-        float[] token_input = moe_zeros(h)
+        []float token_input = moe_zeros(h)
         int channel = 0
         for channel < h {
             token_input[channel] = input[token * h + channel]
             channel = channel + 1
         }
-        float[] shared = moe_expert_ffn(
+        []float shared = moe_expert_ffn(
             token_input, weights.shared_w1, weights.shared_w2, 0, 0, h, cfg.ffn_dim
         )
         channel = 0
@@ -277,7 +277,7 @@ func moe_forward(moe_weights weights, float[] input, int tokens) moe_result {
         k = 0
         for k < top_k {
             expert = indices[token * top_k + k]
-            float[] routed = moe_expert_ffn(
+            []float routed = moe_expert_ffn(
                 token_input,
                 weights.routed_w1,
                 weights.routed_w2,
@@ -304,7 +304,7 @@ func moe_forward(moe_weights weights, float[] input, int tokens) moe_result {
     }
 }
 
-func moe_sum(float[] values, int offset, int count) float {
+func moe_sum([]float values, int offset, int count) float {
     float result = 0.0
     int i = 0
     for i < count {
@@ -324,7 +324,7 @@ func moe_abs(float value) float {
 func moe_core_self_test() int {
     moe_config cfg = new_moe_config(4, 2, 6, 1, 4, 2)
     moe_weights weights = new_moe_weights(cfg)
-    float[] input = moe_deterministic_weights(16, 51, 0.03)
+    []float input = moe_deterministic_weights(16, 51, 0.03)
     moe_result result = moe_forward(weights, input, 4)
     int token = 0
     for token < 4 {

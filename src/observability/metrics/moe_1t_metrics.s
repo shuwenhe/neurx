@@ -15,9 +15,9 @@ struct training_metrics {
 }
 
 struct moe_metrics {
-    float[] expert_load
-    float[] expert_utilization
-    int[] expert_dropout_count
+    []float expert_load
+    []float expert_utilization
+    []int expert_dropout_count
     float load_balance_ratio
     float expert_diversity
 }
@@ -98,9 +98,9 @@ func metrics_collector_new(
                 gradient_flow: 0.0,
             },
             moe_metrics: moe_metrics {
-                expert_load: make(float[], 256),
-                expert_utilization: make(float[], 256),
-                expert_dropout_count: make(int[], 256),
+                expert_load: make([]float, 256),
+                expert_utilization: make([]float, 256),
+                expert_dropout_count: make([]int, 256),
                 load_balance_ratio: 0.0,
                 expert_diversity: 0.0,
             },
@@ -172,9 +172,9 @@ func update_training_metrics(
 
 func update_moe_metrics(
     metrics_collector collector,
-    float[] expert_load,
-    float[] expert_utilization,
-    int[] expert_dropout_count
+    []float expert_load,
+    []float expert_utilization,
+    []int expert_dropout_count
 ) {
     collector.current_frame.moe_metrics.expert_load = expert_load
     collector.current_frame.moe_metrics.expert_utilization = expert_utilization

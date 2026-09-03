@@ -45,7 +45,7 @@ struct resource_allocation {
 struct reasoning_optimizer {
 	optimization_strategy strategy
 	pruning_strategy      pruning_method
-	backtrack_point[]  backtrack_history
+	backtrack_po[]int  backtrack_history
 	optimization_stats[] optimization_history
 	resource_allocation   resources
 	float32               score_threshold
@@ -55,8 +55,8 @@ struct reasoning_optimizer {
 	map[string]float32    node_scores
 	bool                  enable_adaptive_strategy
 	int32                 strategy_switch_count
-	string[]           pruned_node_ids
-	string[]           backtracked_paths
+	[]string           pruned_node_ids
+	[]string           backtracked_paths
 	sync.Mutex            mu
 }
 
@@ -64,7 +64,7 @@ func create_reasoning_optimizer() reasoning_optimizer {
 	return reasoning_optimizer{
 		strategy:              ADAPTIVE,
 		pruning_method:        HYBRID,
-		backtrack_history:     make(backtrack_point[], 0, 100),
+		backtrack_history:     make(backtrack_po[]int, 0, 100),
 		optimization_history:  make(optimization_stats[], 0, 50),
 		resources: resource_allocation{
 			max_nodes_allowed:    1000,
@@ -82,8 +82,8 @@ func create_reasoning_optimizer() reasoning_optimizer {
 		node_scores:           make(map[string]float32),
 		enable_adaptive_strategy: true,
 		strategy_switch_count: 0,
-		pruned_node_ids:       make(string[], 0, 500),
-		backtracked_paths:     make(string[], 0, 100),
+		pruned_node_ids:       make([]string, 0, 500),
+		backtracked_paths:     make([]string, 0, 100),
 		mu:                    sync.Mutex{},
 	}
 }
@@ -94,7 +94,7 @@ func (reasoning_optimizer* o) optimize_reasoning_path(
 ) []string {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	optimized := make(string[], 0, len(node_ids))
+	optimized := make([]string, 0, len(node_ids))
 	for node_id := range node_ids {
 		score, exists := node_scores[node_id]
 		if !exists {
@@ -121,7 +121,7 @@ func (reasoning_optimizer* o) greedy_optimization(
 	node_ids []string,
 	node_scores map[string]float32,
 ) []string {
-	result := make(string[], 0, len(node_ids))
+	result := make([]string, 0, len(node_ids))
 	best_id := ""
 	best_score := float32(-1.0)
 	for node_id := range node_ids {
@@ -144,8 +144,8 @@ func (reasoning_optimizer* o) beam_search_optimization(
 	node_ids []string,
 	node_scores map[string]float32,
 ) []string {
-	result := make(string[], 0, o.beam_width)
-	scored_nodes := make(string[], 0, len(node_ids))
+	result := make([]string, 0, o.beam_width)
+	scored_nodes := make([]string, 0, len(node_ids))
 	for node_id := range node_ids {
 		scored_nodes = append(scored_nodes, node_id)
 	}
@@ -172,7 +172,7 @@ func (reasoning_optimizer* o) branch_and_bound_optimization(
 	node_ids []string,
 	node_scores map[string]float32,
 ) []string {
-	result := make(string[], 0, len(node_ids))
+	result := make([]string, 0, len(node_ids))
 	upper_bound := float32(1.0)
 	for node_id := range node_ids {
 		score, exists := node_scores[node_id]
@@ -224,7 +224,7 @@ func (reasoning_optimizer* o) prune_low_scoring_nodes(
 ) []string {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	result := make(string[], 0, len(node_ids))
+	result := make([]string, 0, len(node_ids))
 	for node_id := range node_ids {
 		score, exists := node_scores[node_id]
 		if !exists {
@@ -354,7 +354,7 @@ func (reasoning_optimizer* o) get_pruning_percentage() float32 {
 func (reasoning_optimizer* o) get_backtrack_history() []backtrack_point {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	history := make(backtrack_point[], 0, len(o.backtrack_history))
+	history := make(backtrack_po[]int, 0, len(o.backtrack_history))
 	for point := range o.backtrack_history {
 		history = append(history, point)
 	}
@@ -377,10 +377,10 @@ func (reasoning_optimizer* o) get_resource_utilization() map[string]float32 {
 func (reasoning_optimizer* o) reset() {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	o.backtrack_history = make(backtrack_point[], 0, 100)
+	o.backtrack_history = make(backtrack_po[]int, 0, 100)
 	o.optimization_history = make(optimization_stats[], 0, 50)
-	o.pruned_node_ids = make(string[], 0, 500)
-	o.backtracked_paths = make(string[], 0, 100)
+	o.pruned_node_ids = make([]string, 0, 500)
+	o.backtracked_paths = make([]string, 0, 100)
 	o.node_priority = make(map[string]int32)
 	o.node_scores = make(map[string]float32)
 	o.strategy_switch_count = 0

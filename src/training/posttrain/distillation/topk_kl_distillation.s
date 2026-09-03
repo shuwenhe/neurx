@@ -30,7 +30,7 @@ func compute_topk_kl_loss(
     int batch_size = size(student_logits, 0)
     int seq_len = size(student_logits, 1)
     int vocab_size = size(student_logits, 2)
-    tensor loss = zeros(int[]{batch_size, seq_len})
+    tensor loss = zeros([]int{batch_size, seq_len})
     int num_chunks = (vocab_size + config.chunk_size - 1) / config.chunk_size
     for int chunk_idx = 0; chunk_idx < num_chunks; chunk_idx = chunk_idx + 1 {
         int start_idx = chunk_idx * config.chunk_size

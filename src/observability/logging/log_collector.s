@@ -28,7 +28,7 @@ struct log_aggregation {
 	event_type              event_category
 	int32                   count
 	int32                   error_count
-	string[]             message_samples
+	[]string             message_samples
 	map[string]int32        component_counts
 }
 
@@ -139,7 +139,7 @@ func (log_collector* c) aggregate_by_level() map[log_level]log_aggregation {
 					level:            entry.level,
 					count:            1,
 					error_count:      0,
-					message_samples:  make(string[], 0, 5),
+					message_samples:  make([]string, 0, 5),
 					component_counts: make(map[string]int32),
 				}
 				if entry.level == ERROR || entry.level == FATAL {
@@ -168,7 +168,7 @@ func (log_collector* c) aggregate_by_component() map[string]log_aggregation {
 				agg := log_aggregation{
 					count:            1,
 					error_count:      0,
-					message_samples:  make(string[], 0, 5),
+					message_samples:  make([]string, 0, 5),
 					component_counts: make(map[string]int32),
 				}
 				if entry.level == ERROR || entry.level == FATAL {

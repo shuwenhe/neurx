@@ -45,11 +45,11 @@ struct transformer_layer {
 
 struct language_model {
     model_config config
-    float[] wte
-    float[] wpe
+    []float wte
+    []float wpe
     []transformer_layer layers
     rms_norm final_norm
-    float[] lm_head
+    []float lm_head
     rope_embedding rope
     int n_layer
     int vocab_size
@@ -58,8 +58,8 @@ struct language_model {
 }
 
 struct model_output {
-    float[] logits
-    float[] last_hidden
+    []float logits
+    []float last_hidden
     float loss
 }
 
@@ -208,7 +208,7 @@ func custom_model_config(int n_embd, int n_layer, int n_head, int block_size, st
 }
 
 func alloc_tensor(int size, float init_val) []float {
-    float[] v = make([]float, size)
+    []float v = make([]float, size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -217,8 +217,8 @@ func alloc_tensor(int size, float init_val) []float {
     v
 }
 
-func copy_tensor(float[] src) []float {
-    float[] out = gpt_alloc(len(src), 0.0)
+func copy_tensor([]float src) []float {
+    []float out = gpt_alloc(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -227,8 +227,8 @@ func copy_tensor(float[] src) []float {
     out
 }
 
-func add_tensors(float[] a, float[] b) []float {
-    float[] out = gpt_copy(a)
+func add_tensors([]float a, []float b) []float {
+    []float out = gpt_copy(a)
     int i = 0
     for i < len(out) {
         out[i] = out[i] + b[i]
@@ -237,8 +237,8 @@ func add_tensors(float[] a, float[] b) []float {
     out
 }
 
-func matmul_transposefloat[] a, float[] b, int m, int k, int n) []float {
-    float[] result = gpt_alloc(m * n, 0.0)
+func matmul_transpose[]float a, []float b, int m, int k, int n) []float {
+    []float result = gpt_alloc(m * n, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -257,8 +257,8 @@ func matmul_transposefloat[] a, float[] b, int m, int k, int n) []float {
     result
 }
 
-func matmulfloat[] a, float[] b, int m, int k, int n) []float {
-    float[] result = gpt_alloc(m * n, 0.0)
+func matmul[]float a, []float b, int m, int k, int n) []float {
+    []float result = gpt_alloc(m * n, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -393,8 +393,8 @@ func gelu_activationfloat x) float {
     0.5 * x * (1.0 + inner * 0.7978845608)
 }
 
-func softmax_rowfloat[] scores, int size) []float {
-    float[] out = gpt_alloc(size, 0.0)
+func softmax_row[]float scores, int size) []float {
+    []float out = gpt_alloc(size, 0.0)
     float max_val = scores[0]
     int i = 1
     for i < size {
@@ -421,8 +421,8 @@ func softmax_rowfloat[] scores, int size) []float {
     out
 }
 
-func matmul_kvfloat[] a, float[] b, int m, int k, int n, int full_n) []float {
-    float[] result = gpt_alloc(m * n, 0.0)
+func matmul_kv[]float a, []float b, int m, int k, int n, int full_n) []float {
+    []float result = gpt_alloc(m * n, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -442,7 +442,7 @@ func matmul_kvfloat[] a, float[] b, int m, int k, int n, int full_n) []float {
 }
 
 func init_weightsint size, float scale) []float {
-    float[] w = gpt_alloc(size, 0.0)
+    []float w = gpt_alloc(size, 0.0)
     int i = 0
     for i < size {
         float t = (i * 1.0 + 1.0) / ((size + 1) * 1.0)
@@ -488,9 +488,9 @@ func new_transformer_layermodel_config cfg) transformer_layer {
 func new_language_modelmodel_config cfg) language_model {
     int hidden_dim = cfg.n_embd
     float wte_scale = gpt_sqrt(2.0 / (hidden_dim * 1.0)) * 0.02
-    float[] wte = gpt_init_weights(cfg.vocab_size * hidden_dim, wte_scale)
+    []float wte = gpt_init_weights(cfg.vocab_size * hidden_dim, wte_scale)
     float wpe_scale = 0.01
-    float[] wpe = gpt_init_weights(cfg.block_size * hidden_dim, wpe_scale)
+    []float wpe = gpt_init_weights(cfg.block_size * hidden_dim, wpe_scale)
     []transformer_layer layers = make([]transformer_layer, cfg.n_layer)
     int i = 0
     for i < cfg.n_layer {
@@ -503,7 +503,7 @@ func new_language_modelmodel_config cfg) language_model {
         use_bias: false,
         norm_type: "rmsnorm",
     }
-    float[] lm_head_w
+    []float lm_head_w
     if cfg.tie_embeddings {
         lm_head_w = gpt_copy(wte)
     } else {
@@ -534,15 +534,15 @@ func new_language_modelmodel_config cfg) language_model {
 }
 
 func embed_tokens(
-    float[] wte,
-    float[] wpe,
-    int[] token_ids,
+    []float wte,
+    []float wpe,
+    []int token_ids,
     int batch_size,
     int seq_len,
     int n_embd
 ) []float {
     int total = batch_size * seq_len
-    float[] out = gpt_alloc(total * n_embd, 0.0)
+    []float out = gpt_alloc(total * n_embd, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -576,9 +576,9 @@ func embed_tokens(
 }
 
 func causal_sdpa
-    float[] query,
-    float[] key,
-    float[] value,
+    []float query,
+    []float key,
+    []float value,
     int seq_len,
     int num_heads,
     int num_kv_heads,
@@ -586,7 +586,7 @@ func causal_sdpa
 ) []float {
     int total = seq_len
     int out_size = total * num_heads * head_dim
-    float[] output = gpt_alloc(out_size, 0.0)
+    []float output = gpt_alloc(out_size, 0.0)
     float scale = 1.0 / gpt_sqrt(head_dim * 1.0)
     float NEG_INF = -1000000.0
     int h = 0
@@ -597,7 +597,7 @@ func causal_sdpa
         }
         int i = 0
         for i < total {
-            float[] scores = gpt_alloc(total, 0.0)
+            []float scores = gpt_alloc(total, 0.0)
             int j = 0
             for j < total {
                 if j > i {
@@ -615,7 +615,7 @@ func causal_sdpa
                 }
                 j = j + 1
             }
-            float[] weights = gpt_softmax_row(scores, total)
+            []float weights = gpt_softmax_row(scores, total)
             int d = 0
             for d < head_dim {
                 float sum_val = 0.0
@@ -649,7 +649,7 @@ func transformer_layer_at([]transformer_layer layers, int idx) transformer_layer
 
 func transformer_layer_forward(
     transformer_layer layer,
-    float[] x,
+    []float x,
     int batch_size,
     int seq_len,
     rope_embedding rope
@@ -660,10 +660,10 @@ func transformer_layer_forward(
     int n_kv_head = layer.n_kv_head
     int head_dim = layer.head_dim
     int kv_hidden = n_kv_head * head_dim
-    float[] normed1 = rms_normalize(layer.norm1, x, batch_size, seq_len)
-    float[] q_out = gpt_matmul(normed1, layer.attn.query_weight, total_tokens, hidden_dim, hidden_dim)
-    float[] k_out = gpt_matmul_kv(normed1, layer.attn.key_weight,   total_tokens, hidden_dim, kv_hidden, hidden_dim)
-    float[] v_out = gpt_matmul_kv(normed1, layer.attn.value_weight, total_tokens, hidden_dim, kv_hidden, hidden_dim)
+    []float normed1 = rms_normalize(layer.norm1, x, batch_size, seq_len)
+    []float q_out = gpt_matmul(normed1, layer.attn.query_weight, total_tokens, hidden_dim, hidden_dim)
+    []float k_out = gpt_matmul_kv(normed1, layer.attn.key_weight,   total_tokens, hidden_dim, kv_hidden, hidden_dim)
+    []float v_out = gpt_matmul_kv(normed1, layer.attn.value_weight, total_tokens, hidden_dim, kv_hidden, hidden_dim)
     if layer.attn.config.use_qkv_bias {
         int i = 0
         for i < total_tokens {
@@ -681,8 +681,8 @@ func transformer_layer_forward(
             i = i + 1
         }
     }
-    float[] q_rope = gpt_copy(q_out)
-    float[] k_rope = gpt_copy(k_out)
+    []float q_rope = gpt_copy(q_out)
+    []float k_rope = gpt_copy(k_out)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -727,16 +727,16 @@ func transformer_layer_forward(
         }
         b = b + 1
     }
-    float[] attn_out = gpt_alloc(total_tokens * hidden_dim, 0.0)
+    []float attn_out = gpt_alloc(total_tokens * hidden_dim, 0.0)
     b = 0
     for b < batch_size {
         int batch_offset = b * seq_len
         int q_offset = batch_offset * hidden_dim
         int k_offset = batch_offset * kv_hidden
         int v_offset = batch_offset * kv_hidden
-        float[] q_batch = gpt_alloc(seq_len * hidden_dim, 0.0)
-        float[] k_batch = gpt_alloc(seq_len * kv_hidden, 0.0)
-        float[] v_batch = gpt_alloc(seq_len * kv_hidden, 0.0)
+        []float q_batch = gpt_alloc(seq_len * hidden_dim, 0.0)
+        []float k_batch = gpt_alloc(seq_len * kv_hidden, 0.0)
+        []float v_batch = gpt_alloc(seq_len * kv_hidden, 0.0)
         int i = 0
         for i < seq_len * hidden_dim {
             q_batch[i] = q_rope[q_offset + i]
@@ -748,7 +748,7 @@ func transformer_layer_forward(
             v_batch[i] = v_out[v_offset + i]
             i = i + 1
         }
-        float[] sdpa_out = gpt_causal_sdpa(q_batch, k_batch, v_batch, seq_len, n_head, n_kv_head, head_dim)
+        []float sdpa_out = gpt_causal_sdpa(q_batch, k_batch, v_batch, seq_len, n_head, n_kv_head, head_dim)
         int o = 0
         for o < seq_len * hidden_dim {
             attn_out[batch_offset * hidden_dim + o] = sdpa_out[o]
@@ -756,7 +756,7 @@ func transformer_layer_forward(
         }
         b = b + 1
     }
-    float[] attn_proj = gpt_matmul(attn_out, layer.attn.output_weight, total_tokens, hidden_dim, hidden_dim)
+    []float attn_proj = gpt_matmul(attn_out, layer.attn.output_weight, total_tokens, hidden_dim, hidden_dim)
     if layer.attn.config.use_qkv_bias {
         int i = 0
         for i < total_tokens {
@@ -768,9 +768,9 @@ func transformer_layer_forward(
             i = i + 1
         }
     }
-    float[] h_attn = gpt_add(x, attn_proj)
-    float[] normed2 = rms_normalize(layer.norm2, h_attn, batch_size, seq_len)
-    float[] ffn_out
+    []float h_attn = gpt_add(x, attn_proj)
+    []float normed2 = rms_normalize(layer.norm2, h_attn, batch_size, seq_len)
+    []float ffn_out
     if layer.activation == "swiglu" || layer.activation == "geglu" {
         ffn_out = forward_swiglu_ffn(layer.ffn, normed2, total_tokens)
     } else {
@@ -781,22 +781,22 @@ func transformer_layer_forward(
 
 func model_forward
     language_model model,
-    int[] token_ids,
+    []int token_ids,
     int batch_size,
     int seq_len
 ) model_output {
     int n_embd = model.n_embd
     int vocab_size = model.vocab_size
     int total = batch_size * seq_len
-    float[] hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, n_embd)
+    []float hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, n_embd)
     int l = 0
     for l < model.n_layer {
         transformer_layer layer = transformer_layer_at(model.layers, l)
         hidden = transformer_layer_forward(layer, hidden, batch_size, seq_len, model.rope)
         l = l + 1
     }
-    float[] normed_final = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
-    float[] logits
+    []float normed_final = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
+    []float logits
     if model.config.tie_embeddings {
         logits = gpt_matmul_t(normed_final, model.lm_head, total, n_embd, vocab_size)
     } else {
@@ -810,8 +810,8 @@ func model_forward
 }
 
 func gpt_loss(
-    float[] logits,
-    int[] targets,
+    []float logits,
+    []int targets,
     int total_tokens,
     int vocab_size
 ) float {
@@ -856,12 +856,12 @@ func gpt_loss(
 
 func gpt_generate_greedy(
     language_model model,
-    int[] prompt,
+    []int prompt,
     int max_new_tokens
 ) []int {
     int prompt_len = len(prompt)
     int max_total = prompt_len + max_new_tokens
-    int[] context = gpt_alloc_int(max_total)
+    []int context = gpt_alloc_int(max_total)
     int i = 0
     for i < prompt_len {
         context[i] = prompt[i]
@@ -874,7 +874,7 @@ func gpt_generate_greedy(
             start = 0
         }
         int input_len = cur_len - start
-        int[] input_ids = gpt_alloc_int(input_len)
+        []int input_ids = gpt_alloc_int(input_len)
         int s = 0
         for s < input_len {
             input_ids[s] = context[start + s]
@@ -899,7 +899,7 @@ func gpt_generate_greedy(
         }
     }
     int new_len = cur_len - prompt_len
-    int[] result = gpt_alloc_int(new_len)
+    []int result = gpt_alloc_int(new_len)
     i = 0
     for i < new_len {
         result[i] = context[prompt_len + i]
@@ -910,7 +910,7 @@ func gpt_generate_greedy(
 
 func gpt_generate_topk(
     language_model model,
-    int[] prompt,
+    []int prompt,
     int max_new_tokens,
     int top_k,
     float temperature,
@@ -918,7 +918,7 @@ func gpt_generate_topk(
 ) []int {
     int prompt_len = len(prompt)
     int max_total = prompt_len + max_new_tokens
-    int[] context = gpt_alloc_int(max_total)
+    []int context = gpt_alloc_int(max_total)
     int i = 0
     for i < prompt_len {
         context[i] = prompt[i]
@@ -932,7 +932,7 @@ func gpt_generate_topk(
             start = 0
         }
         int input_len = cur_len - start
-        int[] input_ids = gpt_alloc_int(input_len)
+        []int input_ids = gpt_alloc_int(input_len)
         int s = 0
         for s < input_len {
             input_ids[s] = context[start + s]
@@ -940,7 +940,7 @@ func gpt_generate_topk(
         }
         model_output out = gpt_forward(model, input_ids, 1, input_len)
         int last_base = (input_len - 1) * model.vocab_size
-        float[] scaled = gpt_alloc(model.vocab_size, 0.0)
+        []float scaled = gpt_alloc(model.vocab_size, 0.0)
         if temperature > 0.0001 {
             int v = 0
             for v < model.vocab_size {
@@ -958,8 +958,8 @@ func gpt_generate_topk(
         if actual_k <= 0 || actual_k > model.vocab_size {
             actual_k = model.vocab_size
         }
-        int[] top_indices = gpt_alloc_int(actual_k)
-        float[] top_vals = gpt_alloc(actual_k, -1000000.0)
+        []int top_indices = gpt_alloc_int(actual_k)
+        []float top_vals = gpt_alloc(actual_k, -1000000.0)
         int v = 0
         for v < model.vocab_size {
             int min_pos = 0
@@ -976,7 +976,7 @@ func gpt_generate_topk(
             }
             v = v + 1
         }
-        float[] top_probs = gpt_softmax_row(top_vals, actual_k)
+        []float top_probs = gpt_softmax_row(top_vals, actual_k)
         rng_state = rng_state * 1664525 + 1013904223
         int rng_abs = rng_state
         if rng_abs < 0 {
@@ -1002,7 +1002,7 @@ func gpt_generate_topk(
         }
     }
     int new_len = cur_len - prompt_len
-    int[] result = gpt_alloc_int(new_len)
+    []int result = gpt_alloc_int(new_len)
     i = 0
     for i < new_len {
         result[i] = context[prompt_len + i]
@@ -1013,7 +1013,7 @@ func gpt_generate_topk(
 
 func gpt_generate_nucleus(
     language_model model,
-    int[] prompt,
+    []int prompt,
     int max_new_tokens,
     float top_p,
     float temperature,
@@ -1021,7 +1021,7 @@ func gpt_generate_nucleus(
 ) []int {
     int prompt_len = len(prompt)
     int max_total = prompt_len + max_new_tokens
-    int[] context = gpt_alloc_int(max_total)
+    []int context = gpt_alloc_int(max_total)
     int i = 0
     for i < prompt_len {
         context[i] = prompt[i]
@@ -1035,7 +1035,7 @@ func gpt_generate_nucleus(
             start = 0
         }
         int input_len = cur_len - start
-        int[] input_ids = gpt_alloc_int(input_len)
+        []int input_ids = gpt_alloc_int(input_len)
         int s = 0
         for s < input_len {
             input_ids[s] = context[start + s]
@@ -1043,7 +1043,7 @@ func gpt_generate_nucleus(
         }
         model_output out = gpt_forward(model, input_ids, 1, input_len)
         int last_base = (input_len - 1) * model.vocab_size
-        float[] scaled = gpt_alloc(model.vocab_size, 0.0)
+        []float scaled = gpt_alloc(model.vocab_size, 0.0)
         float temp = temperature
         if temp < 0.0001 {
             temp = 1.0
@@ -1053,8 +1053,8 @@ func gpt_generate_nucleus(
             scaled[v] = out.logits[last_base + v] / temp
             v = v + 1
         }
-        float[] probs = gpt_softmax_row(scaled, model.vocab_size)
-        int[] sorted_idx = gpt_alloc_int(model.vocab_size)
+        []float probs = gpt_softmax_row(scaled, model.vocab_size)
+        []int sorted_idx = gpt_alloc_int(model.vocab_size)
         v = 0
         for v < model.vocab_size {
             sorted_idx[v] = v
@@ -1107,7 +1107,7 @@ func gpt_generate_nucleus(
         }
     }
     int new_len = cur_len - prompt_len
-    int[] result = gpt_alloc_int(new_len)
+    []int result = gpt_alloc_int(new_len)
     i = 0
     for i < new_len {
         result[i] = context[prompt_len + i]
@@ -1117,7 +1117,7 @@ func gpt_generate_nucleus(
 }
 
 func gpt_alloc_int(int size) []int {
-    int[] v = make([]int, size)
+    []int v = make([]int, size)
     int i = 0
     for i < size {
         v[i] = 0
@@ -1197,8 +1197,8 @@ func gpt_perplexity(float loss) float {
 
 func gpt_forward_with_loss(
     language_model model,
-    int[] token_ids,
-    int[] targets,
+    []int token_ids,
+    []int targets,
     int batch_size,
     int seq_len
 ) model_output {

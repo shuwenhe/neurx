@@ -26,7 +26,7 @@ interface i_optimizer {
     step_with_closure(closure: func() . f64) . void
     state_dict() . map[string]tensor
     load_state_dict(map state[string]tensor) . void
-    add_param_group(string[] param_names, f64 lr, f64 weight_decay) . void
+    add_param_group([]string param_names, f64 lr, f64 weight_decay) . void
     get_param_groups() . []map[string]f64
 }
 interface isgd_optimizer {

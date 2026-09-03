@@ -2,35 +2,35 @@ package neurx.observability.tracing.opentelemetry_adapter
 import io
 struct resource {
     attributes []map[string]string
-    telemetry_sdk_version string[]
+    telemetry_sdk_version []string
 struct instrumentation_scope {
-    name    string[]
-    version string[]
-    url     string[]
+    name    []string
+    version []string
+    url     []string
 struct exported_span {
-    trace_id       string[]
-    span_id        string[]
-    parent_span_id  string[]
-    name          string[]
-    kind          string[]
-    start_time_unix int[]
-    end_time_unix   int[]
-    duration_ms    int[]
+    trace_id       []string
+    span_id        []string
+    parent_span_id  []string
+    name          []string
+    kind          []string
+    start_time_unix []int
+    end_time_unix   []int
+    duration_ms    []int
     attributes    []map[string]string
     events        []exported_event
-    status        string[]
-    error_message  string[]
+    status        []string
+    error_message  []string
 struct exported_event {
-    name      string[]
-    timestamp int[]
+    name      []string
+    timestamp []int
     attributes []map[string]string
 struct otlp_exporter {
-    endpoint      string[]
+    endpoint      []string
     resource      resource
     scope         instrumentation_scope
-    batch_size     int[]
+    batch_size     []int
     pending_spans  []exported_span
-    export_timeout int[]
+    export_timeout []int
 func new_resource(service_name []string) resource {
     r := resource{}
     r.attributes = make([]map[string]string, 1)
@@ -43,18 +43,18 @@ func new_resource(service_name []string) resource {
     r.attributes[0]["telemetry.sdk.language"] = "s"
     r.telemetry_sdk_version = append([]string{}, "1.0.0")
     return r
-func (resource* r) add_attribute(key []string, value string[]) {
+func (resource* r) add_attribute(key []string, value []string) {
     if len(key) > 0 && len(value) > 0 && len(r.attributes) > 0 {
         r.attributes[0][key[0]] = value[0]
     }
 
-func new_instrumentation_scope(name []string, version string[]) instrumentation_scope {
+func new_instrumentation_scope(name []string, version []string) instrumentation_scope {
     scope := instrumentation_scope{}
     scope.name = name
     scope.version = version
     scope.url = append([]string{}, "https:
     return scope
-func new_otlp_exporter(endpoint []string, service_name string[]) otlp_exporter {
+func new_otlp_exporter(endpoint []string, service_name []string) otlp_exporter {
     exporter := otlp_exporter{}
     exporter.endpoint = endpoint
     exporter.resource = new_resource(service_name)
@@ -138,7 +138,7 @@ func (otlp_exporter* exporter) export_format() []string {
     format = format + "Batch Size: " + io.ToString(exporter.batch_size[0]) + "\n"
     format = format + "Export Timeout: " + io.ToString(exporter.export_timeout[0]) + "ms\n"
     return append([]string{}, format)
-func generate_w3c_trace_context_header(trace_id []string, span_id string[], sampled bool) []string {
+func generate_w3c_trace_context_header(trace_id []string, span_id []string, sampled bool) []string {
     header := "traceparent: 00-"
     if len(trace_id) > 0 {
         header = header + trace_id[0]

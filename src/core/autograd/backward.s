@@ -13,16 +13,16 @@ struct backward_state {
     bool ready
     bool seeded
     bool executed
-    string[] steps
-    string[] params
-    string[] inputs
-    string[] outputs
-    string[] tags
-    float[] upstream
+    []string steps
+    []string params
+    []string inputs
+    []string outputs
+    []string tags
+    []float upstream
 }
 
-func copy_float(float[] values) []float {
-    float[] out = make([]float, len(values))
+func copy_float([]float values) []float {
+    []float out = make([]float, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -309,7 +309,7 @@ func backward_has_tag(backward_state state, string tag) bool {
 }
 
 func backward_add_step(backward_state state, string step) backward_state {
-    string[] steps = copy_strings(state.steps)
+    []string steps = copy_strings(state.steps)
     steps = append(steps, step)
     backward_state {
         name: state.name,
@@ -326,8 +326,8 @@ func backward_add_step(backward_state state, string step) backward_state {
 }
 
 func backward_add_step_with_param(backward_state state, string step, string param) backward_state {
-    string[] steps = copy_strings(state.steps)
-    string[] params = copy_strings(state.params)
+    []string steps = copy_strings(state.steps)
+    []string params = copy_strings(state.params)
     steps = append(steps, step)
     params = append(params, param)
     backward_state {
@@ -345,7 +345,7 @@ func backward_add_step_with_param(backward_state state, string step, string para
 }
 
 func backward_add_input(backward_state state, string input) backward_state {
-    string[] inputs = copy_strings(state.inputs)
+    []string inputs = copy_strings(state.inputs)
     inputs = append(inputs, input)
     backward_state {
         name: state.name,
@@ -362,7 +362,7 @@ func backward_add_input(backward_state state, string input) backward_state {
 }
 
 func backward_add_output(backward_state state, string output) backward_state {
-    string[] outputs = copy_strings(state.outputs)
+    []string outputs = copy_strings(state.outputs)
     outputs = append(outputs, output)
     backward_state {
         name: state.name,
@@ -379,7 +379,7 @@ func backward_add_output(backward_state state, string output) backward_state {
 }
 
 func backward_add_tag(backward_state state, string tag) backward_state {
-    string[] tags = copy_strings(state.tags)
+    []string tags = copy_strings(state.tags)
     tags = append(tags, tag)
     backward_state {
         name: state.name,
@@ -515,7 +515,7 @@ func backward_set_executed(backward_state state, bool executed) backward_state {
     }
 }
 
-func backward_set_upstream(backward_state state, float[] upstream) backward_state {
+func backward_set_upstream(backward_state state, []float upstream) backward_state {
     backward_state {
         name: state.name,
         ready: state.ready,

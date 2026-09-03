@@ -131,7 +131,7 @@ func test_weight_merging() {
     mgr := new_lora_adapter_manager(1024)
     config := create_lora_config("merge_test", "/test", 8, 16, 64, 64)
     mgr.load_adapter(config)
-    base_weights := make(float[], 64 * 64)
+    base_weights := make([]float, 64 * 64)
     int i = 0
     for i < len(base_weights) {
         base_weights[i] = 0.5
@@ -185,7 +185,7 @@ func test_request_submission() {
     req := lora_request{
         request_id: "req_1",
         adapter_id: "req_test",
-        input_hidden: make(float[], 256),
+        input_hidden: make([]float, 256),
         batch_size: 2,
         seq_len: 8,
         hidden_dim: 128,

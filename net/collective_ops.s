@@ -12,7 +12,7 @@ struct tensor_descriptor {
 struct collective_operation {
     int op_id
     string op_type
-    int[] participant_ranks
+    []int participant_ranks
     tensor_descriptor tensor_desc
     int status
 }
@@ -38,7 +38,7 @@ func allreduce_op(collective_context ctx, tensor_descriptor desc) collective_con
     op := collective_operation {
         op_id: ctx.op_counter,
         op_type: "allreduce",
-        participant_ranks: int[](),
+        participant_ranks: []int(),
         tensor_desc: desc,
         status: 0
     }
@@ -51,7 +51,7 @@ func allgather_op(collective_context ctx, tensor_descriptor desc) collective_con
     op := collective_operation {
         op_id: ctx.op_counter,
         op_type: "allgather",
-        participant_ranks: int[](),
+        participant_ranks: []int(),
         tensor_desc: desc,
         status: 0
     }
@@ -64,7 +64,7 @@ func broadcast_op(collective_context ctx, int root_rank, tensor_descriptor desc)
     op := collective_operation {
         op_id: ctx.op_counter,
         op_type: "broadcast",
-        participant_ranks: int[](),
+        participant_ranks: []int(),
         tensor_desc: desc,
         status: 0
     }
@@ -77,7 +77,7 @@ func reduce_scatter_op(collective_context ctx, tensor_descriptor desc) collectiv
     op := collective_operation {
         op_id: ctx.op_counter,
         op_type: "reduce_scatter",
-        participant_ranks: int[](),
+        participant_ranks: []int(),
         tensor_desc: desc,
         status: 0
     }

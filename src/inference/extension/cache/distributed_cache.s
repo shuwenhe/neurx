@@ -55,7 +55,7 @@ func distributed_cache_add_peer(distributed_cache dc, string peer_id, string hos
 }
 
 func distributed_cache_compute_replica_nodes(distributed_cache dc, string cache_key) []string {
-    string[] replicas = make([]string, 8)
+    []string replicas = make([]string, 8)
     int hash = 0
     int i = 0
     for i < len(cache_key) {
@@ -139,7 +139,7 @@ func distributed_cache_update_peer_capacity(distributed_cache dc, string peer_id
     }
 }
 
-func distributed_cache_find_best_replica_node(distributed_cache dc, string[] replicas) string {
+func distributed_cache_find_best_replica_node(distributed_cache dc, []string replicas) string {
     if len(replicas) == 0 {
         return dc.local_node_id
     }

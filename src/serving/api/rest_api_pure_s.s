@@ -2,20 +2,20 @@ package neurx.inference.api
 struct http_request {
     string method
     string path
-    string[] headers
+    []string headers
     string body
 }
 
 struct http_response {
     int status_code
     string status_message
-    string[] headers
+    []string headers
     string body
 }
 
 struct inference_request {
     string model
-    string[] messages
+    []string messages
     int max_tokens
     float temperature
 }

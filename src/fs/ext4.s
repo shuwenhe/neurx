@@ -11,7 +11,7 @@ struct inode {
     int mtime  
     int ctime  
     int block_count
-    int[] block_pointers
+    []int block_pointers
 }
 
 struct dentry {

@@ -35,7 +35,7 @@ struct parallel_coordinates {
 struct group_coordinator {
     string name
     string backend
-    int[] ranks
+    []int ranks
     int global_rank
     int rank_in_group
     int world_size
@@ -65,8 +65,8 @@ func parallel_remainder(int value, int divisor) int {
     value - (value / divisor) * divisor
 }
 
-func copy_parallel_ranks(int[] ranks) []int {
-    int[] copied = make([]int, len(ranks))
+func copy_parallel_ranks([]int ranks) []int {
+    []int copied = make([]int, len(ranks))
     int i = 0
     for i < len(ranks) {
         copied[i] = ranks[i]
@@ -153,7 +153,7 @@ func empty_group_coordinator(string name, string backend, int global_rank, int l
     }
 }
 
-func make_group_coordinator(string name, string backend, int[] ranks, int global_rank, int local_rank) group_coordinator {
+func make_group_coordinator(string name, string backend, []int ranks, int global_rank, int local_rank) group_coordinator {
     int rank_in_group = 0 - 1
     int i = 0
     for i < len(ranks) {
@@ -175,7 +175,7 @@ func make_group_coordinator(string name, string backend, int[] ranks, int global
 }
 
 func build_world_group(model_parallel_config config) group_coordinator {
-    int[] ranks = make([]int, config.world_size)
+    []int ranks = make([]int, config.world_size)
     int i = 0
     for i < config.world_size {
         ranks[i] = i
@@ -185,7 +185,7 @@ func build_world_group(model_parallel_config config) group_coordinator {
 }
 
 func build_tensor_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
-    int[] ranks = make([]int, config.tensor_parallel_size)
+    []int ranks = make([]int, config.tensor_parallel_size)
     int base = coordinates.data_parallel_rank * config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
     base = base + coordinates.pipeline_parallel_rank * config.prefill_context_parallel_size * config.tensor_parallel_size
     base = base + coordinates.prefill_context_parallel_rank * config.tensor_parallel_size
@@ -198,7 +198,7 @@ func build_tensor_parallel_group(model_parallel_config config, parallel_coordina
 }
 
 func build_pipeline_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
-    int[] ranks = make([]int, config.pipeline_parallel_size)
+    []int ranks = make([]int, config.pipeline_parallel_size)
     int data_base = coordinates.data_parallel_rank * config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
     int offset = coordinates.prefill_context_parallel_rank * config.tensor_parallel_size + coordinates.tensor_parallel_rank
     int i = 0
@@ -210,7 +210,7 @@ func build_pipeline_parallel_group(model_parallel_config config, parallel_coordi
 }
 
 func build_data_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
-    int[] ranks = make([]int, config.data_parallel_size)
+    []int ranks = make([]int, config.data_parallel_size)
     int model_domain = config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
     int offset = coordinates.pipeline_parallel_rank * config.prefill_context_parallel_size * config.tensor_parallel_size
     offset = offset + coordinates.prefill_context_parallel_rank * config.tensor_parallel_size + coordinates.tensor_parallel_rank
@@ -223,7 +223,7 @@ func build_data_parallel_group(model_parallel_config config, parallel_coordinate
 }
 
 func build_prefill_context_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
-    int[] ranks = make([]int, config.prefill_context_parallel_size)
+    []int ranks = make([]int, config.prefill_context_parallel_size)
     int data_base = coordinates.data_parallel_rank * config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
     int pipeline_base = data_base + coordinates.pipeline_parallel_rank * config.prefill_context_parallel_size * config.tensor_parallel_size
     int i = 0
@@ -236,7 +236,7 @@ func build_prefill_context_parallel_group(model_parallel_config config, parallel
 
 func build_decode_context_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
     int dcp_size = config.decode_context_parallel_size
-    int[] ranks = make([]int, dcp_size)
+    []int ranks = make([]int, dcp_size)
     int linear_context_rank = coordinates.tensor_parallel_rank * config.prefill_context_parallel_size + coordinates.prefill_context_parallel_rank
     int group_base = (linear_context_rank / dcp_size) * dcp_size
     int data_base = coordinates.data_parallel_rank * config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
@@ -254,7 +254,7 @@ func build_decode_context_parallel_group(model_parallel_config config, parallel_
 
 func build_expert_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
     int expert_world_size = config.data_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
-    int[] ranks = make([]int, expert_world_size)
+    []int ranks = make([]int, expert_world_size)
     int model_domain = config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
     int count = 0
     int data_rank = 0

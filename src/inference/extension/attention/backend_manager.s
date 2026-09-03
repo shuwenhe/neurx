@@ -10,7 +10,7 @@ package attention
 
 struct backend_capability {
     string backend_name
-    string[] supported_dtypes
+    []string supported_dtypes
     hardware_type[] supported_hardware
     int min_batch_size
     int max_seq_length
@@ -35,7 +35,7 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
     switch backend_type {
         attention_backend_type_standard : backend_capability {
             backend_name: "standard",
-            supported_dtypes: string[]{"float32", "float16", "bfloat16"},
+            supported_dtypes: []string{"float32", "float16", "bfloat16"},
             supported_hardware: hardware_type[]{hardware_type_cpu, hardware_type_unknown},
             min_batch_size: 1,
             max_seq_length: 8192,
@@ -45,7 +45,7 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
         attention_backend_type_flash_attention : backend_capability {
             backend_name: "flash_attention",
-            supported_dtypes: string[]{"float16", "bfloat16"},
+            supported_dtypes: []string{"float16", "bfloat16"},
             supported_hardware: hardware_type[]{hardware_type_cuda_sm_70, hardware_type_cuda_sm_80, hardware_type_cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 16384,
@@ -55,7 +55,7 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
         attention_backend_type_dsa : backend_capability {
             backend_name: "dsa",
-            supported_dtypes: string[]{"float16", "bfloat16"},
+            supported_dtypes: []string{"float16", "bfloat16"},
             supported_hardware: hardware_type[]{hardware_type_cuda_sm_80, hardware_type_cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 32768,
@@ -65,7 +65,7 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
         attention_backend_type_paged_attention : backend_capability {
             backend_name: "paged_attention",
-            supported_dtypes: string[]{"float16", "bfloat16", "int8"},
+            supported_dtypes: []string{"float16", "bfloat16", "int8"},
             supported_hardware: hardware_type[]{hardware_type_cuda_sm_70, hardware_type_cuda_sm_80, hardware_type_cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 32768,
@@ -75,7 +75,7 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
         attention_backend_type_sparse_attention : backend_capability {
             backend_name: "sparse_attention",
-            supported_dtypes: string[]{"float16", "bfloat16"},
+            supported_dtypes: []string{"float16", "bfloat16"},
             supported_hardware: hardware_type[]{hardware_type_cuda_sm_80, hardware_type_cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 1000000,

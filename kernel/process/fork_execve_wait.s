@@ -223,7 +223,7 @@ func get_task_by_pid(process_table* ptable, int pid) task_struct* {
     return nil
 }
 
-func find_child_processes(process_table* ptable, int parent_pid) (int[], int) {
+func find_child_processes(process_table* ptable, int parent_pid) ([]int, int) {
     children := int[128]{}
     count := 0
     

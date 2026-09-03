@@ -9,9 +9,9 @@ struct eplb_config {
 
 struct eplb_state {
     eplb_config config
-    int[] expert_rank
-    int[] expert_load
-    int[] rank_load
+    []int expert_rank
+    []int expert_load
+    []int rank_load
     int routing_samples
     int rebalance_count
     bool initialized
@@ -33,14 +33,14 @@ func eplb_config_valid(eplb_config config) bool {
 }
 
 func eplb_zero_array(int count) []int {
-    int[] values = make([]int, count)
+    []int values = make([]int, count)
     int i = 0
     for i < count { values[i] = 0; i = i + 1 }
     values
 }
 
 func eplb_initial_placement(int expert_count, int rank_count) []int {
-    int[] placement = make([]int, expert_count)
+    []int placement = make([]int, expert_count)
     int i = 0
     for i < expert_count {
         placement[i] = i - (i / rank_count) * rank_count

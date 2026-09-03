@@ -134,8 +134,8 @@ func (DistributedExecutor* de) PipelineParallelForward(layers []string) Executio
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) LoadBalance(sequences []string) string[][] {
-    result := make(string[][], de.distributed_config.world_size)
+func (DistributedExecutor* de) LoadBalance(sequences []string) []string[] {
+    result := make([]string[], de.distributed_config.world_size)
     for i := 0; i < len(sequences); i++ {
         rank := i % int(de.distributed_config.world_size)
         result[rank] = append(result[rank], sequences[i])

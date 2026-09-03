@@ -156,7 +156,7 @@ func truncate_at_error(string text, string error_msg) ParseResult {
     result.recovery_method = "truncate"
     result.raw_output = text
     error_pos := 0
-    pos_patterns := string[]{"position ", "at ", "line "}
+    pos_patterns := []string{"position ", "at ", "line "}
     i := 0
     for i < len(pos_patterns) {
         pos := find_substring(error_msg, pos_patterns[i], 0)

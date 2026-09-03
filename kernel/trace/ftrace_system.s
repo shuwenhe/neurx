@@ -62,7 +62,7 @@ struct trace_buffer {
 }
 
 struct ftrace_controller {
-    tracepoint[] tracepoints
+    tracepo[]int tracepoints
     kprobe[] kprobes
     kretprobe[] kretprobes
     trace_buffer buffer
@@ -235,7 +235,7 @@ func (trace_buffer* buffer) get_events_by_pid(int pid) int {
 
 func ftrace_controller_create() ftrace_controller {
     ctrl := ftrace_controller {
-        tracepoints: tracepoint[](),
+        tracepoints: tracepo[]int(),
         kprobes: kprobe[](),
         kretprobes: kretprobe[](),
         buffer: trace_buffer_create(10000),

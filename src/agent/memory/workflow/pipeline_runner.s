@@ -13,7 +13,7 @@ func run_agent_memory_workflow(int max_steps, string output_dir, string dataset_
     string mem_path = output_dir + "/memory.txt"
     string report_path = output_dir + "/report.txt"
     string trace_path = output_dir + "/trace.txt"
-    string[] phase1_inputs = make([]string, 4)
+    []string phase1_inputs = make([]string, 4)
     phase1_inputs[0] = "search and index neurx agent architecture overview"
     phase1_inputs[1] = "retrieve tensor operations documentation and store key facts"
     phase1_inputs[2] = "analyze model checkpoint structure and record format details"
@@ -30,13 +30,13 @@ func run_agent_memory_workflow(int max_steps, string output_dir, string dataset_
         ""
     )
     int keys_before_phase2 = len(agent_memory_keys(phase2))
-    string[] phase2_inputs = make([]string, 3)
+    []string phase2_inputs = make([]string, 3)
     phase2_inputs[0] = "what is the neurx agent architecture overview that was stored"
     phase2_inputs[1] = "recall the tensor operations documentation key facts"
     phase2_inputs[2] = "retrieve the distributed training configuration defaults"
     phase2 = run_agent_batch(phase2, phase2_inputs, steps_per_input)
     int keys_after_phase2 = len(agent_memory_keys(phase2))
-    string[] expected_keys = make([]string, 3)
+    []string expected_keys = make([]string, 3)
     expected_keys[0] = "agent_architecture"
     expected_keys[1] = "tensor_ops"
     expected_keys[2] = "distributed_config"

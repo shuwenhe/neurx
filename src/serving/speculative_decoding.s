@@ -27,14 +27,14 @@ func default_spec_decode_config(int vocab_size) spec_decode_config {
     }
 }
 
-func spec_softmax(float[] logits, int V) []float {
+func spec_softmax([]float logits, int V) []float {
     float m = logits[0]
     int i = 0
     for i < V {
         if logits[i] > m { m = logits[i] }
         i = i + 1
     }
-    float[] probs = []
+    []float probs = []
     float sum = 0.0
     int j = 0
     for j < V {
@@ -52,8 +52,8 @@ func spec_softmax(float[] logits, int V) []float {
     probs
 }
 
-func spec_softmax_temp(float[] logits, int V, float temp) []float {
-    float[] scaled = []
+func spec_softmax_temp([]float logits, int V, float temp) []float {
+    []float scaled = []
     int i = 0
     for i < V {
         scaled = append(scaled, logits[i] / temp)
@@ -62,7 +62,7 @@ func spec_softmax_temp(float[] logits, int V, float temp) []float {
     spec_softmax(scaled, V)
 }
 
-func spec_top_p_sample(float[] probs, int V, float top_p, int seed) int {
+func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
     int best = 0
     float best_p = probs[0]
     int i = 1
@@ -76,8 +76,8 @@ func spec_top_p_sample(float[] probs, int V, float top_p, int seed) int {
     best
 }
 
-func spec_residual_sample(float[] q, float[] p, int V, int seed) int {
-    float[] diff = []
+func spec_residual_sample([]float q, []float p, int V, int seed) int {
+    []float diff = []
     float sum = 0.0
     int i = 0
     for i < V {
@@ -104,13 +104,13 @@ func spec_residual_sample(float[] q, float[] p, int V, int seed) int {
 }
 
 struct spec_draft_output {
-    int[]   token_ids
-    float[] log_probs
-    float[][] all_probs
+    []int   token_ids
+    []float log_probs
+    []float[] all_probs
 }
 
 struct spec_verify_result {
-    int[] accepted_tokens
+    []int accepted_tokens
     int   num_accepted
     float acceptance_rate
     bool  all_accepted
@@ -136,12 +136,12 @@ func spec_accept_reject(
 
 func spec_verify(
     spec_draft_output draft,
-    float[][] target_probs,
+    []float[] target_probs,
     int V,
     spec_decode_config cfg
 ) spec_verify_result {
     int gamma = cfg.gamma
-    int[] accepted = []
+    []int accepted = []
     int num_acc = 0
     bool all_ok = true
     int i = 0
@@ -179,7 +179,7 @@ func spec_verify(
 
 struct spec_decode_state {
     spec_decode_config cfg
-    int[]  token_buffer
+    []int  token_buffer
     int    seq_len
     int    total_tokens_gen
     int    total_draft_calls
@@ -189,7 +189,7 @@ struct spec_decode_state {
     int    seed_state
 }
 
-func new_spec_decode_state(int[] prompt_ids, spec_decode_config cfg) spec_decode_state {
+func new_spec_decode_state([]int prompt_ids, spec_decode_config cfg) spec_decode_state {
     spec_decode_state {
         cfg: cfg,
         token_buffer: prompt_ids,
@@ -205,7 +205,7 @@ func new_spec_decode_state(int[] prompt_ids, spec_decode_config cfg) spec_decode
 
 struct spec_decode_step_result {
     spec_decode_state state
-    int[] new_tokens
+    []int new_tokens
     int   tokens_added
     float step_acceptance_rate
     bool  done
@@ -214,7 +214,7 @@ struct spec_decode_step_result {
 func spec_decode_step(
     spec_decode_state state,
     spec_draft_output draft,
-    float[][] target_probs,
+    []float[] target_probs,
     int eos_token_id
 ) spec_decode_step_result {
     spec_verify_result vr = spec_verify(draft, target_probs, state.cfg.vocab_size, state.cfg)
@@ -227,7 +227,7 @@ func spec_decode_step(
     float new_acc = vr.acceptance_rate
     updated.avg_acceptance = (old_avg * float_spec(state.step) + new_acc) / float_spec(state.step + 1)
     bool done = false
-    int[] new_toks = []
+    []int new_toks = []
     int i = 0
     for i < len(vr.accepted_tokens) {
         int tok = vr.accepted_tokens[i]
@@ -260,8 +260,8 @@ struct medusa_config {
 }
 
 struct medusa_head {
-    float[] weight
-    float[] bias
+    []float weight
+    []float bias
     int head_idx
 }
 
@@ -273,8 +273,8 @@ func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
     }
 }
 
-func medusa_head_forward(medusa_head head, float[] hidden, int H, int V) []float {
-    float[] logits = zeros_spec(V)
+func medusa_head_forward(medusa_head head, []float hidden, int H, int V) []float {
+    []float logits = zeros_spec(V)
     int j = 0
     for j < V {
         float s = head.bias[j]
@@ -290,17 +290,17 @@ func medusa_head_forward(medusa_head head, float[] hidden, int H, int V) []float
 }
 
 struct medusa_output {
-    float[][] head_logits
-    int[]     candidates
+    []float[] head_logits
+    []int     candidates
     int       tree_depth
 }
 
-func medusa_forward([]medusa_head heads, float[] last_hidden, int H, int V) medusa_output {
-    float[][] all_logits = []
-    int[] candidates = []
+func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medusa_output {
+    []float[] all_logits = []
+    []int candidates = []
     int h = 0
     for h < len(heads) {
-        float[] logits = medusa_head_forward(heads[h], last_hidden, H, V)
+        []float logits = medusa_head_forward(heads[h], last_hidden, H, V)
         all_logits = append(all_logits, logits)
         int best = argmax_spec(logits, V)
         candidates = append(candidates, best)
@@ -342,7 +342,7 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
 }
 
 func zeros_spec(int n) []float {
-    float[] out = []
+    []float out = []
     int i = 0
     for i < n {
         out = append(out, 0.0)
@@ -376,7 +376,7 @@ func pseudo_rand(int seed) float {
     float_spec(s % 10000) / 10000.0
 }
 
-func argmax_spec(float[] arr, int n) int {
+func argmax_spec([]float arr, int n) int {
     int best = 0
     float best_v = arr[0]
     int i = 1

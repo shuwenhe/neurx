@@ -31,15 +31,15 @@ struct data_pipeline {
     preprocessing_config preprocess_cfg
     batch_config batch_cfg
     data_pipeline_config pipeline_cfg
-    string[] shard_paths
-    int[] shard_order
+    []string shard_paths
+    []int shard_order
     int shard_order_index
     int shard_epoch
     int shard_shuffle_seed
     int active_shard_index
     string active_shard_path
-    string[] active_documents
-    int[] active_token_stream
+    []string active_documents
+    []int active_token_stream
     int shard_document_cursor
     int shard_token_cursor
     bool shard_finished
@@ -85,7 +85,7 @@ func new_training_data_pipeline_config() data_pipeline_config {
 
 func new_data_pipeline(data_pipeline_config cfg) data_pipeline {
     string manifest_path = data_pipeline_resolve_manifest_path(cfg.dataset_path)
-    string[] shard_paths = data_pipeline_resolve_shard_paths(manifest_path)
+    []string shard_paths = data_pipeline_resolve_shard_paths(manifest_path)
     string dataset_path = data_pipeline_resolve_dataset_path(manifest_path)
     if len(shard_paths) > 0 {
         dataset_path = shard_paths[0]
@@ -184,7 +184,7 @@ func data_pipeline_trim(string s) string {
 }
 
 func data_pipeline_split_lines(string text) []string {
-    string[] lines = make([]string, 1)
+    []string lines = make([]string, 1)
     string current = ""
     int i = 0
     for i < len(text) {
@@ -272,8 +272,8 @@ func data_pipeline_parse_manifest_file(string manifest_path) []string {
         return []string{}
     }
     string text = runtime_read_text_file(manifest_path)
-    string[] paths = make([]string, 3)
-    string[] shard_paths = data_pipeline_extract_json_manifest_paths(text, "file_path")
+    []string paths = make([]string, 3)
+    []string shard_paths = data_pipeline_extract_json_manifest_paths(text, "file_path")
     if len(shard_paths) > 0 {
         return shard_paths
     }
@@ -293,8 +293,8 @@ func data_pipeline_parse_manifest_file(string manifest_path) []string {
 }
 
 func data_pipeline_extract_json_manifest_paths(string text, string key) []string {
-    string[] paths = make([]string, 16)
-    string[] lines = data_pipeline_split_lines(text)
+    []string paths = make([]string, 16)
+    []string lines = data_pipeline_split_lines(text)
     string needle = "\"" + key + "\""
     int i = 0
     for i < len(lines) {
@@ -330,7 +330,7 @@ func data_pipeline_extract_json_manifest_paths(string text, string key) []string
 }
 
 func data_pipeline_extract_json_manifest_value(string text, string key, string fallback) string {
-    string[] lines = data_pipeline_split_lines(text)
+    []string lines = data_pipeline_split_lines(text)
     string needle = "\"" + key + "\""
     int i = 0
     for i < len(lines) {
@@ -370,7 +370,7 @@ func data_pipeline_resolve_dataset_path(string source_path) string {
     if runtime_file_exists(path) {
         if data_pipeline_find_substring(path, ".json") >= 0 {
             string manifest_text = runtime_read_text_file(path)
-            string[] shard_paths = data_pipeline_extract_json_manifest_paths(manifest_text, "file_path")
+            []string shard_paths = data_pipeline_extract_json_manifest_paths(manifest_text, "file_path")
             if len(shard_paths) > 0 {
                 return shard_paths[0]
             }
@@ -411,7 +411,7 @@ func data_pipeline_resolve_shard_paths(string manifest_path) []string {
 func data_pipeline_parse_directory_shards(string dir_path) []string {
     string cmd = "find " + runtime_shell_escape(dir_path) + " -maxdepth 1 -name '*.jsonl' | sort"
     string raw = runtime_run_command_output(cmd)
-    string[] paths = make([]string, 8)
+    []string paths = make([]string, 8)
     string current = ""
     int i = 0
     for i < len(raw) {
@@ -443,8 +443,8 @@ func data_pipeline_positive_mod(int value, int modulus) int {
     result
 }
 
-func data_pipeline_shuffle_ints(int[] values, int seed) []int {
-    int[] out = make([]int, len(values))
+func data_pipeline_shuffle_ints([]int values, int seed) []int {
+    []int out = make([]int, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -467,7 +467,7 @@ func data_pipeline_build_shard_order(int shard_count, int seed, int epoch) []int
     if shard_count <= 0 {
         return []int{}
     }
-    int[] order = make([]int, shard_count)
+    []int order = make([]int, shard_count)
     int i = 0
     for i < shard_count {
         order[i] = i
@@ -476,7 +476,7 @@ func data_pipeline_build_shard_order(int shard_count, int seed, int epoch) []int
     data_pipeline_shuffle_ints(order, seed + epoch * 1103515245 + shard_count)
 }
 
-func data_pipeline_shard_path_at(string[] paths, int index) string {
+func data_pipeline_shard_path_at([]string paths, int index) string {
     if len(paths) == 0 {
         return ""
     }
@@ -494,8 +494,8 @@ func data_pipeline_shard_path_at(string[] paths, int index) string {
 }
 
 func data_pipeline_jsonl_to_documents(string text) []string {
-    string[] lines = data_pipeline_split_lines(text)
-    string[] docs = make([]string, len(lines))
+    []string lines = data_pipeline_split_lines(text)
+    []string docs = make([]string, len(lines))
     int i = 0
     for i < len(lines) {
         string doc = data_pipeline_extract_jsonl_text(lines[i])
@@ -508,8 +508,8 @@ func data_pipeline_jsonl_to_documents(string text) []string {
     docs
 }
 
-func data_pipeline_documents_to_tokens(string[] documents) []int {
-    int[] tokens = []int{}
+func data_pipeline_documents_to_tokens([]string documents) []int {
+    []int tokens = []int{}
     int i = 0
     for i < len(documents) {
         string doc = data_pipeline_trim(documents[i])
@@ -552,7 +552,7 @@ func data_pipeline_active_documents_for_shard(string shard_path) []string {
     if data_pipeline_find_substring(shard_path, ".jsonl") >= 0 {
         return data_pipeline_jsonl_to_documents(text)
     }
-    string[] docs = data_pipeline_split_lines(text)
+    []string docs = data_pipeline_split_lines(text)
     docs
 }
 

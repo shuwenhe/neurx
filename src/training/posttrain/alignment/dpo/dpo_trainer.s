@@ -10,9 +10,9 @@ use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.observability.training.training_observability.*
 struct dpo_preference_pair {
-    int[] prompt_tokens
-    int[] chosen_response_tokens
-    int[] rejected_response_tokens
+    []int prompt_tokens
+    []int chosen_response_tokens
+    []int rejected_response_tokens
     float preference_score
     string annotator_id
     string domain
@@ -26,7 +26,7 @@ struct dpo_dataset {
     int train_test_split
     float avg_prompt_len
     float avg_response_len
-    float[] domain_distribution
+    []float domain_distribution
 }
 
 struct dpo_train_config {
@@ -79,9 +79,9 @@ struct dpo_trainer_state {
     float running_chosen_reward
     float running_rejected_reward
     float running_accuracy
-    float[] loss_history
-    float[] margin_history
-    float[] accuracy_history
+    []float loss_history
+    []float margin_history
+    []float accuracy_history
     dataloader train_loader
     dataloader eval_loader
 }

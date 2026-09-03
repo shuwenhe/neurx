@@ -41,9 +41,9 @@ func tanh_approx(float x) float {
     (ep - en) / denom
 }
 
-func copy_float(float[] data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -52,9 +52,9 @@ func copy_float(float[] data) []float {
     out
 }
 
-func copy_int(int[] data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -69,7 +69,7 @@ func get_tensor_data(tensor t, int index) float {
 
 func relu(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float v = input.data[i]
@@ -85,7 +85,7 @@ func relu(tensor input) tensor {
 
 func leaky_relu(tensor input, float negative_slope) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float v = input.data[i]
@@ -101,7 +101,7 @@ func leaky_relu(tensor input, float negative_slope) tensor {
 
 func elu(tensor input, float alpha) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float v = input.data[i]
@@ -117,7 +117,7 @@ func elu(tensor input, float alpha) tensor {
 
 func sigmoid(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = 1.0 / (1.0 + exp_approx(-input.data[i]))
@@ -128,7 +128,7 @@ func sigmoid(tensor input) tensor {
 
 func tanh(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = tanh_approx(input.data[i])
@@ -139,7 +139,7 @@ func tanh(tensor input) tensor {
 
 func gelu(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float x = input.data[i]
@@ -153,7 +153,7 @@ func gelu(tensor input) tensor {
 
 func silu(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float x = input.data[i]
@@ -165,7 +165,7 @@ func silu(tensor input) tensor {
 
 func softplus(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float x = input.data[i]
@@ -178,7 +178,7 @@ func softplus(tensor input) tensor {
 func mish(tensor input) tensor {
     tensor sp = softplus(input)
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = input.data[i] * tanh_approx(sp.data[i])
@@ -207,7 +207,7 @@ func abs_value(float x) float {
 
 func relu6(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = clamp_value(input.data[i], 0.0, 6.0)
@@ -218,7 +218,7 @@ func relu6(tensor input) tensor {
 
 func hardtanh(tensor input, float min_value, float max_value) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = clamp_value(input.data[i], min_value, max_value)
@@ -229,7 +229,7 @@ func hardtanh(tensor input, float min_value, float max_value) tensor {
 
 func hardsigmoid(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = clamp_value((input.data[i] + 3.0) / 6.0, 0.0, 1.0)
@@ -240,7 +240,7 @@ func hardsigmoid(tensor input) tensor {
 
 func hardswish(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float gate = clamp_value((input.data[i] + 3.0) / 6.0, 0.0, 1.0)
@@ -252,7 +252,7 @@ func hardswish(tensor input) tensor {
 
 func threshold(tensor input, float threshold_value, float value) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         if input.data[i] > threshold_value {
@@ -267,7 +267,7 @@ func threshold(tensor input, float threshold_value, float value) tensor {
 
 func softsign(tensor input) tensor {
     int n = len(input.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = input.data[i] / (1.0 + abs_value(input.data[i]))
@@ -276,9 +276,9 @@ func softsign(tensor input) tensor {
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
-func softmax_1d(float[] values) []float {
+func softmax_1d([]float values) []float {
     int n = len(values)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     float max_v = values[0]
     int i = 1
     for i < n {
@@ -309,7 +309,7 @@ func softmax_1d(float[] values) []float {
 func softmax(tensor input) tensor {
     int rows = input.shape[0]
     int cols = input.shape[1]
-    float[] out = make([]float, rows * cols)
+    []float out = make([]float, rows * cols)
     int r = 0
     for r < rows {
         int base = r * cols
@@ -345,7 +345,7 @@ func softmax(tensor input) tensor {
 func log_softmax(tensor input) tensor {
     tensor sm = softmax(input)
     int n = len(sm.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float v = sm.data[i]

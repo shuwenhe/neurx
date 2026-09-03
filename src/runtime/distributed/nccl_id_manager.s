@@ -72,7 +72,7 @@ func load_nccl_id_from_shared_storage(
     for elapsed < timeout_seconds {
         if file_exists(id_file) {
             string content = runtime_read_text_file(id_file)
-            string[] lines = split_string(content, "\n")
+            []string lines = split_string(content, "\n")
             if len(lines) >= 3 {
                 nccl_unique_id id = nccl_unique_id {
                     id_value: lines[0],
@@ -154,7 +154,7 @@ func load_nccl_id_from_distributed_store(
 }
 
 func split_string(string s, string sep) []string {
-    string[] parts = make([]string, 10)
+    []string parts = make([]string, 10)
     int part_idx = 0
     int i = 0
     string current = ""

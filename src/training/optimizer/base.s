@@ -13,7 +13,7 @@ struct param_group {
 
 struct optimizer_base {
     []param_group param_groups
-    float[][] param_states
+    []float[] param_states
     optimizer_config config
     int step_count
 }
@@ -27,7 +27,7 @@ func new_optimizer_base(float lr, float weight_decay) optimizer_base {
     })
     optimizer_base {
         param_groups: groups,
-        param_states: make(float[][], 0),
+        param_states: make([]float[], 0),
         config: optimizer_config{
             lr: lr,
             weight_decay: weight_decay,

@@ -18,7 +18,7 @@ func new_ddpm_sampler_state(noise_schedule_state noise) ddpm_sampler_state {
     }
 }
 
-func ddpm_step(ddpm_sampler_state state, float[] x_t, float[] eps_pred) ddpm_sampler_state {
+func ddpm_step(ddpm_sampler_state state, []float x_t, []float eps_pred) ddpm_sampler_state {
     del x_t
     del eps_pred
     bool finished = state.current_t <= 0

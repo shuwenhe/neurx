@@ -3,15 +3,15 @@ struct robotics_perception_state {
     string perception_name
     int obs_dim
     int latent_dim
-    float[] weight
-    float[] bias
+    []float weight
+    []float bias
     bool normalized
     bool trained
 }
 
-func robotics_perception_copy_float(float[] values) []float {
+func robotics_perception_copy_float([]float values) []float {
     int n = len(values)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -20,9 +20,9 @@ func robotics_perception_copy_float(float[] values) []float {
     out
 }
 
-func robotics_perception_copy_int(int[] values) []int {
+func robotics_perception_copy_int([]int values) []int {
     int n = len(values)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -32,7 +32,7 @@ func robotics_perception_copy_int(int[] values) []int {
 }
 
 func robotics_perception_ramp_values(int n, float scale) []float {
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = scale * ((i + 1) as float) / ((n + 1) as float)
@@ -78,8 +78,8 @@ func robotics_perception_load_state_dict(robotics_perception_state state, roboti
     }
 }
 
-func robotics_perception_encode(robotics_perception_state state, float[] observation) []float {
-    float[] latent = make([]float, state.latent_dim)
+func robotics_perception_encode(robotics_perception_state state, []float observation) []float {
+    []float latent = make([]float, state.latent_dim)
     int j = 0
     for j < state.latent_dim {
         float acc = state.bias[j]

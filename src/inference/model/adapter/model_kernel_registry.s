@@ -30,17 +30,17 @@ struct model_kernel_registry_config {
 
 struct model_kernel_registry_state {
     model_kernel_registry_config config
-    int[] kernel_ids
-    int[] model_families
-    int[] kernel_types
-    int[] platform_masks
-    int[] minimum_sm
-    int[] maximum_sequence_lengths
-    int[] supports_prefill
-    int[] supports_decode
-    int[] supports_tbo
-    int[] priorities
-    int[] enabled
+    []int kernel_ids
+    []int model_families
+    []int kernel_types
+    []int platform_masks
+    []int minimum_sm
+    []int maximum_sequence_lengths
+    []int supports_prefill
+    []int supports_decode
+    []int supports_tbo
+    []int priorities
+    []int enabled
     int kernel_count
     int selected_count
     int fallback_count
@@ -55,7 +55,7 @@ struct model_kernel_selection {
 }
 
 func kernel_int_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

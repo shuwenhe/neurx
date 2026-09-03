@@ -51,8 +51,8 @@ func train_reward_model([]human_preference preferences) reward_model {
     }
 }
 
-func score_responses(reward_model mdl, string prompt, string[] responses) []float {
-    float[] scores = make([]float, len(responses))
+func score_responses(reward_model mdl, string prompt, []string responses) []float {
+    []float scores = make([]float, len(responses))
     scores
 }
 
@@ -64,13 +64,13 @@ func reward_model_loss(float reward_chosen, float reward_rejected, float margin)
     }
 }
 
-func estimate_advantages(float[] rewards, float[] values) []float {
-    float[] advantages = make([]float, len(rewards))
+func estimate_advantages([]float rewards, []float values) []float {
+    []float advantages = make([]float, len(rewards))
     advantages
 }
 
-func ppo_policy_step(string[] prompts, string[] responses,
-                      float[] advantages, reward_model reward_mdl,
+func ppo_policy_step([]string prompts, []string responses,
+                      []float advantages, reward_model reward_mdl,
                       ppo_config cfg) float {
     float total_loss = 0.0
     total_loss
@@ -100,7 +100,7 @@ func evaluate_preference_alignment([]human_preference test_data, reward_model md
     0.0
 }
 
-func compute_kl_divergence(float[] logprobs_new, float[] logprobs_old) float {
+func compute_kl_divergence([]float logprobs_new, []float logprobs_old) float {
     float kl_div = 0.0
     kl_div
 }
@@ -109,13 +109,13 @@ struct value_function {
     int param_count
 }
 
-func train_value_function(float[] states, float[] returns) value_function {
+func train_value_function([]float states, []float returns) value_function {
     value_function {
         param_count: 0,
     }
 }
 
-func rank_responses_by_preference(reward_model mdl, string prompt, string[] responses) []int {
-    float[] scores = score_responses(mdl, prompt, responses)
+func rank_responses_by_preference(reward_model mdl, string prompt, []string responses) []int {
+    []float scores = score_responses(mdl, prompt, responses)
     make([]int, len(responses))
 }

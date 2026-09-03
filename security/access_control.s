@@ -49,14 +49,14 @@ func (process_context* ctx) grant_capability(capability cap) int {    ctx.capabi
 struct access_control_list {
     int acl_id
     int owner_pid
-    int[] permissions
+    []int permissions
 }
 
 func acl_create(int id, int owner) access_control_list {
     acl := access_control_list {
         acl_id: id,
         owner_pid: owner,
-        int[] permissions
+        []int permissions
     }
     acl
 }
@@ -75,7 +75,7 @@ func (access_control_list* acl) acl_grant(int pid, int perm) int {    acl.permis
 
 struct tenant_isolation {
     int tenant_id
-    int[] isolated_resources
+    []int isolated_resources
     int quota_memory
     int quota_cpu
     int quota_gpu

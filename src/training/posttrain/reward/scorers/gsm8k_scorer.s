@@ -39,7 +39,7 @@ func extract_strict_answer(string text) string {
 }
 
 func extract_flexible_answer(string text) string {
-    string[] numbers = extract_all_numbers(text)
+    []string numbers = extract_all_numbers(text)
     for int i = len(numbers) - 1; i >= 0; i = i - 1 {
         string candidate = numbers[i]
         if candidate != "" && candidate != "." {
@@ -91,7 +91,7 @@ func extract_leading_number(string text) string {
 }
 
 func extract_all_numbers(string text) []string {
-    string[] numbers = make(string[], 0)
+    []string numbers = make([]string, 0)
     int text_len = len(text)
     string current = ""
     for int i = 0; i < text_len; i = i + 1 {

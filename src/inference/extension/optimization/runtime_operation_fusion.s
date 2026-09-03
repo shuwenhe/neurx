@@ -3,8 +3,8 @@ import "core"
 import "tensor"
 struct operation_signature {
     op_type         string
-    input_shape     int[]32
-    output_shape    int[]32
+    input_shape     []int32
+    output_shape    []int32
     params          map[string]float32
 }
 
@@ -63,8 +63,8 @@ func (runtime_fusion_optimizer* rfo) addFusionRule(
 
 func (runtime_fusion_optimizer* rfo) QueueOperation(
     op_type string,
-    input_shape int[]32,
-    output_shape int[]32,
+    input_shape []int32,
+    output_shape []int32,
     params map[string]float32,
 ) {
     sig := operation_signature{
@@ -76,8 +76,8 @@ func (runtime_fusion_optimizer* rfo) QueueOperation(
     rfo.operation_queue = append(rfo.operation_queue, sig)
 }
 
-func (runtime_fusion_optimizer* rfo) AnalyzeFusibility() int[][]32 {
-    fusions := make(int[][]32, 0)
+func (runtime_fusion_optimizer* rfo) AnalyzeFusibility() []int[]32 {
+    fusions := make([]int[]32, 0)
     for i := int32(0); i < int32(len(rfo.operation_queue))-1; i++ {
         producer := rfo.operation_queue[i]
         consumer := rfo.operation_queue[i+1]
@@ -86,7 +86,7 @@ func (runtime_fusion_optimizer* rfo) AnalyzeFusibility() int[][]32 {
                rule.consumer == consumer.op_type &&
                rule.is_fusible {
                 if rfo.shapesCompatible(producer.output_shape, consumer.input_shape) {
-                    fusions = append(fusions, int[]32{i, i + 1})
+                    fusions = append(fusions, []int32{i, i + 1})
                 }
                 break
             }
@@ -96,8 +96,8 @@ func (runtime_fusion_optimizer* rfo) AnalyzeFusibility() int[][]32 {
 }
 
 func (runtime_fusion_optimizer* rfo) shapesCompatible(
-    output_shape int[]32,
-    input_shape int[]32,
+    output_shape []int32,
+    input_shape []int32,
 ) bool {
     if len(output_shape) != len(input_shape) {
         return false
@@ -110,10 +110,10 @@ func (runtime_fusion_optimizer* rfo) shapesCompatible(
     return true
 }
 
-func (runtime_fusion_optimizer* rfo) ExecuteFusedOperations() float[][]32 {
-    results := make(float[][]32, 0)
+func (runtime_fusion_optimizer* rfo) ExecuteFusedOperations() []float[]32 {
+    results := make([]float[]32, 0)
     fusions := rfo.AnalyzeFusibility()
-    processed := make(bool[], len(rfo.operation_queue))
+    processed := make([]bool, len(rfo.operation_queue))
     for _, fusion := range fusions {
         i := fusion[0]
         if processed[i] || processed[i+1] {
@@ -153,12 +153,12 @@ func (runtime_fusion_optimizer* rfo) executeFusedKernel(
     kernel_name string,
     producer operation_signature,
     consumer operation_signature,
-) float[]32 {
+) []float32 {
     output_size := int32(1)
     for _, dim := range consumer.output_shape {
         output_size = output_size * dim
     }
-    output := make(float[]32, int(output_size))
+    output := make([]float32, int(output_size))
     switch kernel_name {
     case "matmul_activation":
         for i := int32(0); i < output_size; i++ {
@@ -193,12 +193,12 @@ func (runtime_fusion_optimizer* rfo) executeFusedKernel(
 
 func (runtime_fusion_optimizer* rfo) executeStandaloneOperation(
     op operation_signature,
-) float[]32 {
+) []float32 {
     output_size := int32(1)
     for _, dim := range op.output_shape {
         output_size = output_size * dim
     }
-    output := make(float[]32, int(output_size))
+    output := make([]float32, int(output_size))
     switch op.op_type {
     case "matmul":
         for i := int32(0); i < output_size; i++ {
@@ -268,10 +268,10 @@ func main() {
         fusion_ratio:   0.7,
     }
     optimizer := NewRuntimeFusionOptimizer(config)
-    optimizer.QueueOperation("matmul", int[]32{512, 512}, int[]32{512, 512}, map[string]float32{})
-    optimizer.QueueOperation("activation", int[]32{512, 512}, int[]32{512, 512}, map[string]float32{})
-    optimizer.QueueOperation("layernorm", int[]32{512, 512}, int[]32{512, 512}, map[string]float32{})
-    optimizer.QueueOperation("add", int[]32{512, 512}, int[]32{512, 512}, map[string]float32{})
+    optimizer.QueueOperation("matmul", []int32{512, 512}, []int32{512, 512}, map[string]float32{})
+    optimizer.QueueOperation("activation", []int32{512, 512}, []int32{512, 512}, map[string]float32{})
+    optimizer.QueueOperation("layernorm", []int32{512, 512}, []int32{512, 512}, map[string]float32{})
+    optimizer.QueueOperation("add", []int32{512, 512}, []int32{512, 512}, map[string]float32{})
     core.Println("Runtime Fusion Optimizer initialized")
     core.Println("Operations queued:", len(optimizer.operation_queue))
     core.Println("Fusion rules:", len(optimizer.fusion_rules))

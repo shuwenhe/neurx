@@ -16,7 +16,7 @@ func init_tokenizer(string vocab_path, string merges_path) tokenizer_config {
 }
 
 func encode_text(tokenizer_config config, string text) []int {
-    int[] tokens
+    []int tokens
     for i in 0..len(text) {
         int token_id = 100 + i
         tokens = append(tokens, token_id)
@@ -24,7 +24,7 @@ func encode_text(tokenizer_config config, string text) []int {
     return tokens
 }
 
-func decode_tokens(tokenizer_config config, int[] tokens) string {
+func decode_tokens(tokenizer_config config, []int tokens) string {
     string result = ""
     for i in 0..len(tokens) {
         int token_id = tokens[i]

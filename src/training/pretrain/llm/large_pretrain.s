@@ -86,11 +86,11 @@ struct gpt_large_pretrain_state {
     pretrain_config cfg
     string dataset_manifest
     string output_dir
-    string[] shard_refs
-    string[] train_shard_refs
-    string[] valid_shard_refs
-    string[] test_shard_refs
-    int[] shard_order
+    []string shard_refs
+    []string train_shard_refs
+    []string valid_shard_refs
+    []string test_shard_refs
+    []int shard_order
     int shard_order_index
     int shard_epoch
     int shard_shuffle_seed
@@ -112,9 +112,9 @@ struct gpt_large_pretrain_state {
 }
 
 struct gpt_large_pretrain_shard_splits {
-    string[] train_refs
-    string[] valid_refs
-    string[] test_refs
+    []string train_refs
+    []string valid_refs
+    []string test_refs
 }
 
 struct gpt_large_pretrain_eval_result {
@@ -167,7 +167,7 @@ func int_to_str(int n, int fallback) string {
     s
 }
 
-func join_ints(int[] values) string {
+func join_ints([]int values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -206,7 +206,7 @@ func gpt_large_pretrain_shard_summary_text(int shard_index, int shard_total, str
     "Shard " + int_to_str(shard_index, 0) + "/" + int_to_str(shard_total, 0) + " " + shard_name
 }
 
-func gpt_large_pretrain_string_at(string[] values, int idx) string {
+func gpt_large_pretrain_string_at([]string values, int idx) string {
     int i = idx
     if i < 0 {
         i = 0
@@ -220,7 +220,7 @@ func gpt_large_pretrain_string_at(string[] values, int idx) string {
     return values[i]
 }
 
-func gpt_large_pretrain_int_at(int[] values, int idx) int {
+func gpt_large_pretrain_int_at([]int values, int idx) int {
     int i = idx
     if i < 0 {
         i = 0
@@ -252,8 +252,8 @@ func gpt_large_pretrain_mix_seed(int seed, int epoch, int total) int {
     mixed
 }
 
-func gpt_large_pretrain_shuffle_ints(int[] values, int seed) []int {
-    int[] out = copy_int(values)
+func gpt_large_pretrain_shuffle_ints([]int values, int seed) []int {
+    []int out = copy_int(values)
     int i = len(out) - 1
     int state = seed
     for i > 0 {
@@ -271,7 +271,7 @@ func gpt_large_pretrain_build_shard_order(int shard_count, int shard_seed, int s
     if shard_count <= 0 {
         return []int{}
     }
-    int[] order = make([]int, shard_count)
+    []int order = make([]int, shard_count)
     int i = 0
     for i < shard_count {
         order[i] = i
@@ -280,8 +280,8 @@ func gpt_large_pretrain_build_shard_order(int shard_count, int shard_seed, int s
     return gpt_large_pretrain_shuffle_ints(order, gpt_large_pretrain_mix_seed(shard_seed, shard_epoch, shard_count))
 }
 
-func gpt_large_pretrain_shuffle_strings(string[] values, int seed) []string {
-    string[] out = make([]string, len(values))
+func gpt_large_pretrain_shuffle_strings([]string values, int seed) []string {
+    []string out = make([]string, len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -300,7 +300,7 @@ func gpt_large_pretrain_shuffle_strings(string[] values, int seed) []string {
     out
 }
 
-func gpt_large_pretrain_slice_strings(string[] values, int start, int end) []string {
+func gpt_large_pretrain_slice_strings([]string values, int start, int end) []string {
     int lo = start
     int hi = end
     if lo < 0 {
@@ -315,7 +315,7 @@ func gpt_large_pretrain_slice_strings(string[] values, int start, int end) []str
     if lo > len(values) {
         lo = len(values)
     }
-    string[] out = make([]string, hi - lo)
+    []string out = make([]string, hi - lo)
     int i = lo
     int j = 0
     for i < hi {
@@ -326,8 +326,8 @@ func gpt_large_pretrain_slice_strings(string[] values, int start, int end) []str
     out
 }
 
-func gpt_large_pretrain_split_shard_refs(string[] refs, int seed) gpt_large_pretrain_shard_splits {
-    string[] ordered = gpt_large_pretrain_shuffle_strings(refs, seed)
+func gpt_large_pretrain_split_shard_refs([]string refs, int seed) gpt_large_pretrain_shard_splits {
+    []string ordered = gpt_large_pretrain_shuffle_strings(refs, seed)
     int total = len(ordered)
     gpt_large_pretrain_shard_splits splits = gpt_large_pretrain_shard_splits {
         train_refs: []string{},
@@ -408,7 +408,7 @@ func gpt_large_pretrain_split_csv(string value) []string {
     if text == "" {
         return []string{}
     }
-    string[] parts = make([]string, len(text))
+    []string parts = make([]string, len(text))
     int count = 0
     int start = 0
     int i = 0
@@ -427,7 +427,7 @@ func gpt_large_pretrain_split_csv(string value) []string {
     if count == 0 {
         return []string{}
     }
-    string[] out = make([]string, count)
+    []string out = make([]string, count)
     int j = 0
     for j < count {
         out[j] = parts[j]
@@ -457,12 +457,12 @@ func gpt_large_pretrain_string_matches_shard(string value, string shard_path) bo
     false
 }
 
-func gpt_large_pretrain_filter_shard_refs(string[] refs, string selection_csv) []string {
-    string[] selection = gpt_large_pretrain_split_csv(selection_csv)
+func gpt_large_pretrain_filter_shard_refs([]string refs, string selection_csv) []string {
+    []string selection = gpt_large_pretrain_split_csv(selection_csv)
     if len(selection) == 0 {
         return refs
     }
-    string[] out = make([]string, len(refs))
+    []string out = make([]string, len(refs))
     int out_len = 0
     int i = 0
     for i < len(refs) {
@@ -485,7 +485,7 @@ func gpt_large_pretrain_filter_shard_refs(string[] refs, string selection_csv) [
     if out_len == len(refs) {
         return refs
     }
-    string[] filtered = make([]string, out_len)
+    []string filtered = make([]string, out_len)
     int k = 0
     for k < out_len {
         filtered[k] = out[k]
@@ -585,11 +585,11 @@ func str_to_float(string s) float {
     value
 }
 
-func copy_float(float[] values) []float {
+func copy_float([]float values) []float {
     values
 }
 
-func copy_int(int[] values) []int {
+func copy_int([]int values) []int {
     values
 }
 
@@ -597,7 +597,7 @@ func copy_tensor(tensor value) tensor {
     new(copy_float(value.data), copy_int(value.shape), value.requires_grad)
 }
 
-func tensor_numel(int[] shape) int {
+func tensor_numel([]int shape) int {
     int n = 1
     int i = 0
     for i < len(shape) {
@@ -607,9 +607,9 @@ func tensor_numel(int[] shape) int {
     n
 }
 
-func tensor_from_ints(int[] values, int[] shape) tensor {
+func tensor_from_ints([]int values, []int shape) tensor {
     int n = len(values)
-    float[] data = make([]float, n)
+    []float data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = values[i]
@@ -619,14 +619,14 @@ func tensor_from_ints(int[] values, int[] shape) tensor {
 }
 
 func shape1(int size) []int {
-    int[] out = make([]int, 1)
+    []int out = make([]int, 1)
     out[0] = size
     out
 }
 
 func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
-    float[] data = make([]float, n)
+    []float data = make([]float, n)
     int i = 0
     for i < n {
         data[i] = value.data[i] * scale
@@ -680,7 +680,7 @@ func split_lines(string text) []string {
     if count <= 0 {
         return []string{}
     }
-    string[] lines = make([]string, count)
+    []string lines = make([]string, count)
     int line_start = 0
     int out_idx = 0
     i = 0
@@ -740,7 +740,7 @@ func line_before(string line, int stop_char) string {
 }
 
 func gpt_large_pretrain_json_string_value(string text, string key, string fallback) string {
-    string[] lines = split_lines(text)
+    []string lines = split_lines(text)
     string needle = "\"" + key + "\""
     int i = 0
     for i < len(lines) {
@@ -805,7 +805,7 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
         return []string{}
     }
     if gpt_large_pretrain_find_substring(manifest_path, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(manifest_path, ".gz") < 0 {
-        string[] refs = make([]string, 1)
+        []string refs = make([]string, 1)
         refs[0] = manifest_path
         return refs
     }
@@ -856,7 +856,7 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     if ref_count <= 0 {
         return []string{}
     }
-    string[] refs = make([]string, ref_count)
+    []string refs = make([]string, ref_count)
     int ref_idx = 0
     if trim(train_ref) != "" && trim(train_ref) != "null" {
         if runtime_file_exists(train_ref) {
@@ -928,9 +928,9 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
     }
     println("[init] ✓ file loaded successfully, text length: " + int_to_str(len(text), 0) + " bytes")
     println("[init] splitting lines...")
-    string[] lines = split_lines(text)
+    []string lines = split_lines(text)
     println("[init] ✓ split complete: " + int_to_str(len(lines), 0) + " lines found, parsing documents...")
-    string[] docs = []string{}
+    []string docs = []string{}
     int line_count = 0
     int doc_count = 0
     bool is_jsonl = gpt_large_pretrain_find_substring(shard_ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(shard_ref, ".gz") < 0
@@ -949,7 +949,7 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
                 }
             } else {
                 int docs_push_len = len(docs)
-                string[] docs_push_tmp = make([]string, docs_push_len + 1)
+                []string docs_push_tmp = make([]string, docs_push_len + 1)
                 int docs_push_i = 0
                 for docs_push_i < docs_push_len {
                     docs_push_tmp[docs_push_i] = docs[docs_push_i]
@@ -971,18 +971,18 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
     return docs
 }
 
-func gpt_large_pretrain_documents_for_refs(string[] shard_refs) []string {
+func gpt_large_pretrain_documents_for_refs([]string shard_refs) []string {
     println("[init] collecting documents from shard set: " + int_to_str(len(shard_refs), 0))
-    string[] documents = []string{}
+    []string documents = []string{}
     int i = 0
     for i < len(shard_refs) {
         string shard_ref = gpt_large_pretrain_string_at(shard_refs, i)
         println("[init] loading shard " + int_to_str(i + 1, 0) + "/" + int_to_str(len(shard_refs), 0) + ": " + shard_ref)
-        string[] shard_documents = gpt_large_pretrain_documents_for_ref(shard_ref)
+        []string shard_documents = gpt_large_pretrain_documents_for_ref(shard_ref)
         int j = 0
             for j < len(shard_documents) {
             int documents_push_len = len(documents)
-            string[] documents_push_tmp = make([]string, documents_push_len + 1)
+            []string documents_push_tmp = make([]string, documents_push_len + 1)
             int documents_push_i = 0
             for documents_push_i < documents_push_len {
                 documents_push_tmp[documents_push_i] = documents[documents_push_i]
@@ -999,9 +999,9 @@ func gpt_large_pretrain_documents_for_refs(string[] shard_refs) []string {
     return documents
 }
 
-func gpt_large_pretrain_corpus_from_documents(string[] documents, int shard_seed) bpe_tokenized_corpus_state {
+func gpt_large_pretrain_corpus_from_documents([]string documents, int shard_seed) bpe_tokenized_corpus_state {
     println("[init] building corpus from documents")
-    string[] shuffled_documents = documents
+    []string shuffled_documents = documents
     if len(shuffled_documents) > 1 {
         println("[init] shuffling " + int_to_str(len(shuffled_documents), 0) + " documents...")
         shuffled_documents = gpt_large_pretrain_shuffle_strings(shuffled_documents, shard_seed)
@@ -1015,7 +1015,7 @@ func gpt_large_pretrain_corpus_from_documents(string[] documents, int shard_seed
 
 func gpt_large_pretrain_corpus_for_ref(string shard_ref, int shard_seed) bpe_tokenized_corpus_state {
     println("[init] collecting documents for corpus: " + shard_ref)
-    string[] documents = gpt_large_pretrain_documents_for_ref(shard_ref)
+    []string documents = gpt_large_pretrain_documents_for_ref(shard_ref)
     println("[init] documents ready for tokenizer: " + int_to_str(len(documents), 0))
     println("[init] training BPE tokenizer")
     bpe_tokenized_corpus_state corpus = bpe_tokenized_corpus_from_documents(documents, 4096, 2, 0.1, 1337)
@@ -1030,8 +1030,8 @@ func gpt_large_pretrain_loader_from_corpus(bpe_tokenized_corpus_state corpus, pr
     with_config(loader, loader_cfg)
 }
 
-func gpt_large_pretrain_loader_from_paths(string[] paths, pretrain_config cfg, bool shuffle) dataloader_state {
-    string[] documents = gpt_large_pretrain_documents_for_refs(paths)
+func gpt_large_pretrain_loader_from_paths([]string paths, pretrain_config cfg, bool shuffle) dataloader_state {
+    []string documents = gpt_large_pretrain_documents_for_refs(paths)
     if len(documents) > 1 {
         documents = gpt_large_pretrain_shuffle_strings(documents, cfg.micro_batch_size + cfg.seq_len)
     }
@@ -1080,7 +1080,7 @@ func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
 
 func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, int seq_len, int max_steps, float lr, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir) gpt_large_pretrain_state {
     println("[init] loading manifest refs from: " + dataset_manifest)
-    string[] shard_refs = gpt_large_pretrain_manifest_refs(dataset_manifest)
+    []string shard_refs = gpt_large_pretrain_manifest_refs(dataset_manifest)
     println("[init] manifest refs loaded: " + int_to_str(len(shard_refs), 0))
     pretrain_config cfg = new_gpt_large_pretrain_config()
     cfg = pretrain_config {
@@ -1122,10 +1122,10 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
         label_smoothing: 0.0,
     }
     println("[init] collecting shard documents")
-    string[] all_documents = gpt_large_pretrain_documents_for_refs(shard_refs)
+    []string all_documents = gpt_large_pretrain_documents_for_refs(shard_refs)
     if len(all_documents) == 0 {
         println("[init] WARNING: no shard documents found; using synthetic fallback corpus")
-        all_documents = string[]{
+        all_documents = []string{
             "neurx trains a decoder only transformer for language modeling.",
             "neurx uses s to build the full training pipeline.",
         }
@@ -1491,7 +1491,7 @@ func gpt_large_pretrain_write_system_report(gpt_large_pretrain_state state) () {
 }
 
 func gpt_large_pretrain_apply_shard(gpt_large_pretrain_state state, int shard_index) gpt_large_pretrain_state {
-    string[] train_refs = state.train_shard_refs
+    []string train_refs = state.train_shard_refs
     if len(train_refs) == 0 {
         train_refs = state.shard_refs
     }
@@ -1584,7 +1584,7 @@ func gpt_large_pretrain_advance_shard(gpt_large_pretrain_state state) gpt_large_
 }
 
 func gpt_large_pretrain_advance_epoch_shard(gpt_large_pretrain_state state) gpt_large_pretrain_state {
-    int[] next_order = state.shard_order
+    []int next_order = state.shard_order
     int next_order_index = state.shard_order_index + 1
     int next_shard_epoch = state.shard_epoch
     if len(next_order) == 0 {
@@ -1614,7 +1614,7 @@ func gpt_large_pretrain_advance_epoch_shard(gpt_large_pretrain_state state) gpt_
 }
 
 func gpt_large_pretrain_metadata_value(string text, string key, string fallback) string {
-    string[] lines = split_lines(text)
+    []string lines = split_lines(text)
     int i = 0
     for i < len(lines) {
         string value = line_after(lines[i], key + "=")
@@ -1634,7 +1634,7 @@ func gpt_large_pretrain_metadata_float(string text, string key, float fallback) 
     str_to_float(gpt_large_pretrain_metadata_value(text, key, fmt_float(fallback, 6)))
 }
 
-func gpt_large_pretrain_metadata_float_list(string text, string key, float[] fallback) []float {
+func gpt_large_pretrain_metadata_float_list(string text, string key, []float fallback) []float {
     parse_float_list(gpt_large_pretrain_metadata_value(text, key, join_floats(fallback)))
 }
 
@@ -2194,7 +2194,7 @@ func gpt_large_pretrain_test_metrics(gpt_large_pretrain_state state) gpt_large_p
 }
 
 func embedding_grad_tensor(tensor token_ids, tensor grad_hidden, int vocab_size, int hidden_size) tensor {
-    float[] data = make([]float, vocab_size * hidden_size)
+    []float data = make([]float, vocab_size * hidden_size)
     int token_count = len(token_ids.data)
     int i = 0
     for i < token_count {

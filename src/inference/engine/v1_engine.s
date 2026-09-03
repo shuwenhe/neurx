@@ -104,7 +104,7 @@ func (llm_engine_v1* engine) complete_stream(string prompt, int32 max_tokens) []
     req.max_tokens = max_tokens
     req.stream = true
     engine.add_request(req)
-    outputs := make(string[])
+    outputs := make([]string)
     for !req.is_finished() && engine.step() {
         if len(req.output_texts) > 0 {
             outputs = append(outputs, req.output_texts[len(req.output_texts) - 1])

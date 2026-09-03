@@ -3,15 +3,15 @@ struct robotics_policy_state {
     string policy_name
     int input_dim
     int act_dim
-    float[] weight
-    float[] bias
+    []float weight
+    []float bias
     float train_loss
     bool trained
 }
 
-func robotics_policy_copy_float(float[] values) []float {
+func robotics_policy_copy_float([]float values) []float {
     int n = len(values)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -21,7 +21,7 @@ func robotics_policy_copy_float(float[] values) []float {
 }
 
 func robotics_policy_ramp_values(int n, float scale) []float {
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         out[i] = scale * ((i + 1) as float) / ((n + 1) as float)
@@ -79,8 +79,8 @@ func robotics_policy_mark_trained(robotics_policy_state state) robotics_policy_s
     }
 }
 
-func robotics_policy_forward(robotics_policy_state state, float[] input) []float {
-    float[] action = make([]float, state.act_dim)
+func robotics_policy_forward(robotics_policy_state state, []float input) []float {
+    []float action = make([]float, state.act_dim)
     int a = 0
     for a < state.act_dim {
         float acc = state.bias[a]

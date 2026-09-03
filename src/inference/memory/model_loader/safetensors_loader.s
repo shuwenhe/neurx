@@ -1,10 +1,10 @@
 package neurx.inference.safetensors_loader
-extern "intrinsic" func __host_read_binary_file_range(string path, int offset, int size) int[]
+extern "intrinsic" func __host_read_binary_file_range(string path, int offset, int size) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 struct tensor_metadata {
     string name
     string dtype
-    int[] shape
+    []int shape
     int data_offset
     int data_size
 }
@@ -16,7 +16,7 @@ struct safetensors_file {
     int data_start
 }
 
-func read_u64_le(int[] bytes, int offset) int {
+func read_u64_le([]int bytes, int offset) int {
     if offset + 8 > len(bytes) {
         return 0
     }
@@ -36,7 +36,7 @@ func read_u64_le(int[] bytes, int offset) int {
 }
 
 func parse_safetensors_header(string model_path) safetensors_file {
-    int[] header_len_bytes = __host_read_binary_file_range(model_path, 0, 8)
+    []int header_len_bytes = __host_read_binary_file_range(model_path, 0, 8)
     if len(header_len_bytes) < 8 {
         print("[SafeTensors] Failed to read header length\n")
         return safetensors_file{tensors: make([]tensor_metadata, 0), model_path: model_path, header_size: 0, data_start: 0}
@@ -47,7 +47,7 @@ func parse_safetensors_header(string model_path) safetensors_file {
         print("[SafeTensors] Invalid header size\n")
         return safetensors_file{tensors: make([]tensor_metadata, 0), model_path: model_path, header_size: 0, data_start: 0}
     }
-    int[] header_bytes = __host_read_binary_file_range(model_path, 8, header_size)
+    []int header_bytes = __host_read_binary_file_range(model_path, 8, header_size)
     if len(header_bytes) < header_size {
         print("[SafeTensors] Failed to read full header\n")
         return safetensors_file{tensors: make([]tensor_metadata, 0), model_path: model_path, header_size: 0, data_start: 0}
@@ -88,10 +88,10 @@ func get_layer_weight_offset(string layer_name, int layer_idx, string weight_typ
 }
 
 func load_embeddings(string model_path, int vocab_size, int hidden_dim) []float {
-    float[] embeddings = make([]float, vocab_size * hidden_dim)
+    []float embeddings = make([]float, vocab_size * hidden_dim)
     int offset = 8 + 10000
     int embedding_bytes = vocab_size * hidden_dim * 2
-    int[] weight_data = __host_read_binary_file_range(model_path, offset, embedding_bytes)
+    []int weight_data = __host_read_binary_file_range(model_path, offset, embedding_bytes)
     if len(weight_data) < embedding_bytes {
         print("[Embeddings] Failed to load embeddings\n")
         return embeddings

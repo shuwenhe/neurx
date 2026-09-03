@@ -10,7 +10,7 @@ struct asgd_optimizer {
     int step
     float eta
     float mu
-    float[] ax
+    []float ax
 }
 
 func new_asgd(float lr, float lambd, float alpha, float t0, float weight_decay) asgd_optimizer {
@@ -31,7 +31,7 @@ func asgd_step(asgd_optimizer optimizer, tensor params, tensor grads) asgd_optim
     int n = len(params.data)
     optimizer.step = optimizer.step + 1
     optimizer.ax = ensure_asgd_state(optimizer.ax, n)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float grad = grads.data[i]
@@ -61,8 +61,8 @@ struct asgd_optimizer_step_output {
     tensor params
 }
 
-func ensure_asgd_state(float[] values, int n) []float {
-    float[] out = make([]float, n)
+func ensure_asgd_state([]float values, int n) []float {
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         if i < len(values) {

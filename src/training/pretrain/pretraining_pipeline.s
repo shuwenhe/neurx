@@ -11,8 +11,8 @@ import neurx.amp.scaler.*
 struct pretrain_config {
     string model_name
     neurx_config model_config
-    string[] train_data_paths
-    string[] eval_data_paths
+    []string train_data_paths
+    []string eval_data_paths
     float clm_ratio
     float mlm_ratio
     float prefix_lm_ratio
@@ -153,10 +153,10 @@ struct pretrain_state {
     float current_lr
     training_phase phase
     struct loss_history {
-        float[] clm_losses
-        float[] mlm_losses
-        float[] prefix_lm_losses
-        float[] combined_losses
+        []float clm_losses
+        []float mlm_losses
+        []float prefix_lm_losses
+        []float combined_losses
         float running_loss
         float best_val_loss
     } loss_history
@@ -274,7 +274,7 @@ func sample_training_task(
 
 func prepare_clm_batch(
     tokenizer_state tokenizer,
-    string[] batch_texts,
+    []string batch_texts,
     int max_len
 ) {
     """
@@ -305,7 +305,7 @@ func prepare_clm_batch(
 
 func prepare_mlm_batch(
     tokenizer_state tokenizer,
-    string[] batch_texts,
+    []string batch_texts,
     int max_len,
     float = 0.15 mlm_probability
 ) {
@@ -348,8 +348,8 @@ func prepare_mlm_batch(
 
 func prepare_prefix_lm_batch(
     tokenizer_state tokenizer,
-    string[] batch_prefixes,
-    string[] batch_continuations,
+    []string batch_prefixes,
+    []string batch_continuations,
     int max_len,
     float = 0.7 max_prefix_ratio
 ) {
@@ -372,7 +372,7 @@ func prepare_prefix_lm_batch(
             prefix=batch_prefixes[i],
             continuation=batch_continuations[i]
         )
-        int[] ids = sample["input_ids"].tolist() if isinstance(sample["input_ids"], tensor) else sample["input_ids"]
+        []int ids = sample["input_ids"].tolist() if isinstance(sample["input_ids"], tensor) else sample["input_ids"]
         int actual_len = min(len(ids), max_len)
         for j in range(actual_len):
             all_input_ids[i, j] = ids[j]
@@ -833,7 +833,7 @@ func test_pretrain_framework() {
     print("✅ Phase transitions work correctly!")
     print("\n[Test 7] Testing data preparation functions...")
     tokenizer_state tok = create_tokenizer("vocab/neurx.model")
-    string[] texts = ["Hello world", "Test sentence"]
+    []string texts = ["Hello world", "Test sentence"]
     dict[str, any] clm_batch = prepare_clm_batch(tok, texts, max_len=64)
     assert(shape(clm_batch["input_ids"]) == (2, 64))
     assert("labels" in clm_batch)
@@ -842,8 +842,8 @@ func test_pretrain_framework() {
     assert(shape(mlm_batch["input_ids"]) == (2, 64))
     assert("mask_positions" in mlm_batch)
     print("✅ MLM batch preparation works!")
-    string[] prefixes = ["Translate:", "Summarize:"]
-    string[] conts = ["Hello", "This is a test."]
+    []string prefixes = ["Translate:", "Summarize:"]
+    []string conts = ["Hello", "This is a test."]
     dict[str, any] plm_batch = prepare_prefix_lm_batch(tok, prefixes, conts, max_len=64)
     assert(shape(plm_batch["input_ids"]) == (2, 64))
     assert("sop_positions" in plm_batch)

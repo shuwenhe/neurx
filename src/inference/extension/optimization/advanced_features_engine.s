@@ -8,7 +8,7 @@ struct speculative_config {
 }
 
 struct draft_request {
-    prompt_tokens       int[]32
+    prompt_tokens       []int32
     max_length          int32
 }
 
@@ -31,10 +31,10 @@ func NewSpeculativeDecodingEngine(config speculative_config) *speculative_decodi
 }
 
 func (speculative_decoding_engine* sde) DraftTokens(
-    context int[]32,
+    context []int32,
     num_tokens int32,
-) int[]32 {
-    drafted := make(int[]32, 0)
+) []int32 {
+    drafted := make([]int32, 0)
     for i := int32(0); i < num_tokens; i++ {
         draft_token := int32(i % 100)
         drafted = append(drafted, draft_token)
@@ -44,11 +44,11 @@ func (speculative_decoding_engine* sde) DraftTokens(
 }
 
 func (speculative_decoding_engine* sde) VerifyDraftTokens(
-    context int[]32,
-    drafted_tokens int[]32,
+    context []int32,
+    drafted_tokens []int32,
     threshold float32,
-) int[]32 {
-    verified := make(int[]32, 0)
+) []int32 {
+    verified := make([]int32, 0)
     for i, drafted := range drafted_tokens {
         main_logits := sde.getMainModelLogits(context, int32(i))
         prob := sde.computeAcceptanceProbability(main_logits, drafted)
@@ -67,10 +67,10 @@ func (speculative_decoding_engine* sde) VerifyDraftTokens(
 }
 
 func (speculative_decoding_engine* sde) getMainModelLogits(
-    context int[]32,
+    context []int32,
     position int32,
-) float[]32 {
-    logits := make(float[]32, 50000)
+) []float32 {
+    logits := make([]float32, 50000)
     for i := 0; i < len(logits); i++ {
         logits[i] = 0.01 * float32(i%100)
     }
@@ -78,7 +78,7 @@ func (speculative_decoding_engine* sde) getMainModelLogits(
 }
 
 func (speculative_decoding_engine* sde) computeAcceptanceProbability(
-    main_logits float[]32,
+    main_logits []float32,
     token_id int32,
 ) float32 {
     max_logit := main_logits[0]
@@ -101,7 +101,7 @@ func (speculative_decoding_engine* sde) computeAcceptanceProbability(
 }
 
 func (speculative_decoding_engine* sde) resampleFromMainModel(
-    logits float[]32,
+    logits []float32,
 ) int32 {
     max_idx := int32(0)
     max_val := logits[0]
@@ -138,10 +138,10 @@ func NewVisionLanguageModelAdapter(
 }
 
 func (vision_language_model_adapter* vlm) EncodeImage(
-    image_features float[]32,
+    image_features []float32,
     num_patches int32,
-) float[]32 {
-    visual_tokens := make(float[]32, int(num_patches*vlm.language_model_dim))
+) []float32 {
+    visual_tokens := make([]float32, int(num_patches*vlm.language_model_dim))
     for i := int32(0); i < num_patches; i++ {
         for d := int32(0); d < vlm.language_model_dim; d++ {
             visual_tokens[i*vlm.language_model_dim+d] = 0.1 * float32(i+d)
@@ -151,9 +151,9 @@ func (vision_language_model_adapter* vlm) EncodeImage(
 }
 
 func (vision_language_model_adapter* vlm) BridgeVisionToLanguage(
-    visual_tokens float[]32,
-) float[]32 {
-    bridged := make(float[]32, len(visual_tokens))
+    visual_tokens []float32,
+) []float32 {
+    bridged := make([]float32, len(visual_tokens))
     copy(bridged, visual_tokens)
     return bridged
 }
@@ -161,35 +161,35 @@ func (vision_language_model_adapter* vlm) BridgeVisionToLanguage(
 struct lo_ra_config {
     rank                int32
     alpha               float32
-    target_modules      string[]
+    target_modules      []string
 }
 
 struct lo_ra_adapter {
     config              lo_ra_config
     rank                int32
-    adapters            map[string]float[][]32
+    adapters            map[string][]float[]32
 }
 
 func NewLoRAAdapter(config lo_ra_config) *lo_ra_adapter {
     return *lo_ra_adapter{
         config:    config,
         rank:      config.rank,
-        adapters:  make(map[string]float[][]32),
+        adapters:  make(map[string][]float[]32),
     }
 }
 
 func (lo_ra_adapter* la) AddLoRAWeight(
     layer_name string,
-    weight_a float[]32,
-    weight_b float[]32,
+    weight_a []float32,
+    weight_b []float32,
 ) {
-    la.adapters[layer_name] = float[][]32{weight_a, weight_b}
+    la.adapters[layer_name] = []float[]32{weight_a, weight_b}
 }
 
 func (lo_ra_adapter* la) ApplyLoRA(
     layer_name string,
-    x float[]32,
-) float[]32 {
+    x []float32,
+) []float32 {
     weights, exists := la.adapters[layer_name]
     if !exists {
         return x
@@ -199,7 +199,7 @@ func (lo_ra_adapter* la) ApplyLoRA(
     }
     weight_a := weights[0]
     weight_b := weights[1]
-    output := make(float[]32, len(x))
+    output := make([]float32, len(x))
     copy(output, x)
     for i := 0; i < len(output); i++ {
         output[i] = output[i] + x[i]*la.config.alpha/float32(la.rank)
@@ -209,21 +209,21 @@ func (lo_ra_adapter* la) ApplyLoRA(
 
 struct multi_model_serving_manager {
     loaded_models       map[string]bool
-    model_cache         map[string]float[]32
+    model_cache         map[string][]float32
     max_memory_mb       int32
 }
 
 func NewMultiModelServingManager(max_memory_mb int32) *multi_model_serving_manager {
     return *multi_model_serving_manager{
         loaded_models: make(map[string]bool),
-        model_cache:   make(map[string]float[]32),
+        model_cache:   make(map[string][]float32),
         max_memory_mb: max_memory_mb,
     }
 }
 
 func (multi_model_serving_manager* mms) LoadModel(
     model_name string,
-    model_data float[]32,
+    model_data []float32,
 ) bool {
     model_size_mb := int32(len(model_data) * 4 / 1024 / 1024)
     if model_size_mb > mms.max_memory_mb {
@@ -235,7 +235,7 @@ func (multi_model_serving_manager* mms) LoadModel(
     return true
 }
 
-func (multi_model_serving_manager* mms) GetModel(model_name string) (float[]32, bool) {
+func (multi_model_serving_manager* mms) GetModel(model_name string) ([]float32, bool) {
     data, exists := mms.model_cache[model_name]
     return data, exists
 }
@@ -246,7 +246,7 @@ func (multi_model_serving_manager* mms) UnloadModel(model_name string) {
 }
 
 func (multi_model_serving_manager* mms) GetLoadedModels() []string {
-    models := make(string[], 0)
+    models := make([]string, 0)
     for name := range mms.loaded_models {
         models = append(models, name)
     }
@@ -269,7 +269,7 @@ func NewAdvancedFeaturesEngine() *advanced_features_engine {
     lora_config := lo_ra_config{
         rank:               16,
         alpha:              16.0,
-        target_modules:     string[]{"q_proj", "v_proj"},
+        target_modules:     []string{"q_proj", "v_proj"},
     }
     return *advanced_features_engine{
         speculative_decoder: NewSpeculativeDecodingEngine(spec_config),

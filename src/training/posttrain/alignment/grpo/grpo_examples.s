@@ -86,7 +86,7 @@ func example_grpo_group_size_comparison() {
     print("║     Example 2: GRPO with Different Group Sizes             ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    int[] group_sizes = int[]{4, 8, 16}
+    []int group_sizes = []int{4, 8, 16}
     neurx_model model = load_pretrained_grpo_model("neurx_200b")
     neurx_model reference_model = load_pretrained_grpo_model("neurx_200b")
     tokenizer_state tokenizer = load_tokenizer_grpo()

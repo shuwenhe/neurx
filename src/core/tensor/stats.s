@@ -1,7 +1,7 @@
 package neurx.stats
 struct tensor {
-    float[] data
-    int[] shape
+    []float data
+    []int shape
     bool requires_grad
     option[tensor] grad
 }
@@ -15,18 +15,18 @@ func clone(tensor a) tensor {
     }
 }
 
-func copy_float(float[] data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     for i in 0..n {
         out[i] = data[i]
     }
     out
 }
 
-func copy_int(int[] data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
-    int[] out = make([]int, n)
+    []int out = make([]int, n)
     for i in 0..n {
         out[i] = data[i]
     }
@@ -34,7 +34,7 @@ func copy_int(int[] data) []int {
 }
 
 func shape1(int n) []int {
-    int[] shape = make([]int, 1)
+    []int shape = make([]int, 1)
     shape[0] = n
     shape
 }
@@ -47,7 +47,7 @@ func normalize_dim(int dim, int ndim) int {
     axis
 }
 
-func shape_prod(int[] shape) int {
+func shape_prod([]int shape) int {
     int n = 1
     int i = 0
     for i < len(shape) {
@@ -57,9 +57,9 @@ func shape_prod(int[] shape) int {
     n
 }
 
-func unravel_index(int flat_index, int[] shape) []int {
+func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
-    int[] coords = make([]int, ndim)
+    []int coords = make([]int, ndim)
     int i = 0
     for i < ndim {
         coords[i] = 0
@@ -80,7 +80,7 @@ func unravel_index(int flat_index, int[] shape) []int {
     coords
 }
 
-func ravel_index(int[] coords, int[] shape) int {
+func ravel_index([]int coords, []int shape) int {
     int ndim = len(shape)
     int flat = 0
     int stride = 1
@@ -93,13 +93,13 @@ func ravel_index(int[] coords, int[] shape) int {
     flat
 }
 
-func reduce_output_shape(int[] shape, int dim) []int {
+func reduce_output_shape([]int shape, int dim) []int {
     int ndim = len(shape)
     int axis = normalize_dim(dim, ndim)
     if ndim <= 1 {
         return shape1(1)
     }
-    int[] out = make([]int, ndim - 1)
+    []int out = make([]int, ndim - 1)
     int i = 0
     int j = 0
     for i < ndim {
@@ -112,9 +112,9 @@ func reduce_output_shape(int[] shape, int dim) []int {
     out
 }
 
-func sorted_pair(float[] values, bool descending) tensor {
+func sorted_pair([]float values, bool descending) tensor {
     int n = len(values)
-    float[] out = copy_float(values)
+    []float out = copy_float(values)
     int i = 0
     for i < n {
         int best = i
@@ -138,7 +138,7 @@ func sorted_pair(float[] values, bool descending) tensor {
         }
         i = i + 1
     }
-    int[] shape = shape1(n)
+    []int shape = shape1(n)
     tensor {
         data: out,
         shape: shape,
@@ -147,8 +147,8 @@ func sorted_pair(float[] values, bool descending) tensor {
     }
 }
 
-func replace_dim_shape(int[] shape, int dim, int size) []int {
-    int[] out = copy_int(shape)
+func replace_dim_shape([]int shape, int dim, int size) []int {
+    []int out = copy_int(shape)
     int ndim = len(shape)
     int axis = normalize_dim(dim, ndim)
     if axis >= 0 && axis < ndim {
@@ -157,7 +157,7 @@ func replace_dim_shape(int[] shape, int dim, int size) []int {
     out
 }
 
-func sort_slice_values(float[] values, bool descending) []float {
+func sort_slice_values([]float values, bool descending) []float {
     int n = len(values)
     int i = 0
     for i < n {
@@ -185,7 +185,7 @@ func sort_slice_values(float[] values, bool descending) []float {
     values
 }
 
-func sort_slice_values_and_indices(float[] values, float[] indices, bool descending) {
+func sort_slice_values_and_indices([]float values, []float indices, bool descending) {
     int n = len(values)
     int i = 0
     for i < n {
@@ -215,12 +215,12 @@ func sort_slice_values_and_indices(float[] values, float[] indices, bool descend
     }
 }
 
-func slice_sorted_value(tensor a, int[] coords, int axis, int rank, bool descending) float {
+func slice_sorted_value(tensor a, []int coords, int axis, int rank, bool descending) float {
     int axis_len = a.shape[axis]
-    float[] values = make([]float, axis_len)
+    []float values = make([]float, axis_len)
     int i = 0
     for i < axis_len {
-        int[] src_coords = copy_int(coords)
+        []int src_coords = copy_int(coords)
         src_coords[axis] = i
         values[i] = a.data[ravel_index(src_coords, a.shape)]
         i = i + 1
@@ -229,13 +229,13 @@ func slice_sorted_value(tensor a, int[] coords, int axis, int rank, bool descend
     values[rank]
 }
 
-func slice_sorted_index(tensor a, int[] coords, int axis, int rank, bool descending) float {
+func slice_sorted_index(tensor a, []int coords, int axis, int rank, bool descending) float {
     int axis_len = a.shape[axis]
-    float[] values = make([]float, axis_len)
-    float[] indices = make([]float, axis_len)
+    []float values = make([]float, axis_len)
+    []float indices = make([]float, axis_len)
     int i = 0
     for i < axis_len {
-        int[] src_coords = copy_int(coords)
+        []int src_coords = copy_int(coords)
         src_coords[axis] = i
         values[i] = a.data[ravel_index(src_coords, a.shape)]
         indices[i] = i
@@ -245,12 +245,12 @@ func slice_sorted_index(tensor a, int[] coords, int axis, int rank, bool descend
     indices[rank]
 }
 
-func slice_values(tensor a, int[] coords, int axis) []float {
+func slice_values(tensor a, []int coords, int axis) []float {
     int axis_len = a.shape[axis]
-    float[] values = make([]float, axis_len)
+    []float values = make([]float, axis_len)
     int i = 0
     for i < axis_len {
-        int[] src_coords = copy_int(coords)
+        []int src_coords = copy_int(coords)
         src_coords[axis] = i
         values[i] = a.data[ravel_index(src_coords, a.shape)]
         i = i + 1
@@ -268,10 +268,10 @@ func sort(tensor a, int dim) tensor {
         return sorted_pair(a.data, false)
     }
     int total = shape_prod(a.shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, a.shape)
+        []int coords = unravel_index(flat, a.shape)
         out[flat] = slice_sorted_value(a, coords, axis, coords[axis], false)
         flat = flat + 1
     }
@@ -287,8 +287,8 @@ func argsort(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     if ndim <= 1 {
         int n = len(a.data)
-        float[] values = copy_float(a.data)
-        float[] idx = make([]float, n)
+        []float values = copy_float(a.data)
+        []float idx = make([]float, n)
         int i = 0
         for i < n {
             idx[i] = i
@@ -305,8 +305,8 @@ func argsort(tensor a, int dim) tensor {
     int axis = normalize_dim(dim, ndim)
     if axis < 0 || axis >= ndim {
         int n = len(a.data)
-        float[] values = copy_float(a.data)
-        float[] idx = make([]float, n)
+        []float values = copy_float(a.data)
+        []float idx = make([]float, n)
         int i = 0
         for i < n {
             idx[i] = i
@@ -321,10 +321,10 @@ func argsort(tensor a, int dim) tensor {
         }
     }
     int total = shape_prod(a.shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, a.shape)
+        []int coords = unravel_index(flat, a.shape)
         out[flat] = slice_sorted_index(a, coords, axis, coords[axis], false)
         flat = flat + 1
     }
@@ -343,13 +343,13 @@ func topk(tensor a, int k) tensor {
     if count > n {
         count = n
     }
-    float[] out = make([]float, count)
+    []float out = make([]float, count)
     int i = 0
     for i < count {
         out[i] = sorted.data[i]
         i = i + 1
     }
-    int[] shape = shape1(count)
+    []int shape = shape1(count)
     tensor {
         data: out,
         shape: shape,
@@ -369,12 +369,12 @@ func topk_dim(tensor a, int k, int dim) tensor {
     if count > axis_len {
         count = axis_len
     }
-    int[] out_shape = replace_dim_shape(a.shape, dim, count)
+    []int out_shape = replace_dim_shape(a.shape, dim, count)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
+        []int coords = unravel_index(flat, out_shape)
         out[flat] = slice_sorted_value(a, coords, axis, coords[axis], true)
         flat = flat + 1
     }
@@ -393,10 +393,10 @@ func cumsum_dim(tensor a, int dim) tensor {
         return clone(a)
     }
     int total = shape_prod(a.shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, a.shape)
+        []int coords = unravel_index(flat, a.shape)
         int inner = coords[axis]
         float acc = 0.0
         int i = 0
@@ -423,10 +423,10 @@ func cumprod_dim(tensor a, int dim) tensor {
         return clone(a)
     }
     int total = shape_prod(a.shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, a.shape)
+        []int coords = unravel_index(flat, a.shape)
         int inner = coords[axis]
         float acc = 1.0
         int i = 0
@@ -452,13 +452,13 @@ func prod_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return clone(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -489,7 +489,7 @@ func prod_dim(tensor a, int dim) tensor {
 
 func unique(tensor a) tensor {
     int n = len(a.data)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int count = 0
     int i = 0
     for i < n {
@@ -507,7 +507,7 @@ func unique(tensor a) tensor {
         }
         i = i + 1
     }
-    float[] trimmed = make([]float, count)
+    []float trimmed = make([]float, count)
     i = 0
     for i < count {
         trimmed[i] = out[i]
@@ -527,10 +527,10 @@ func unique_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return unique(a)
     }
-    int[] out_shape = copy_int(a.shape)
+    []int out_shape = copy_int(a.shape)
     int axis_len = a.shape[axis]
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
         out[flat] = 0.0
@@ -538,10 +538,10 @@ func unique_dim(tensor a, int dim) tensor {
     }
     flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
+        []int coords = unravel_index(flat, out_shape)
         int i = 0
         int j = 0
-        int[] src_coords = make([]int, ndim)
+        []int src_coords = make([]int, ndim)
         for i < ndim {
             src_coords[i] = 0
             if i != axis {
@@ -550,8 +550,8 @@ func unique_dim(tensor a, int dim) tensor {
             }
             i = i + 1
         }
-        float[] values = slice_values(a, src_coords, axis)
-        float[] uniques = make([]float, axis_len)
+        []float values = slice_values(a, src_coords, axis)
+        []float uniques = make([]float, axis_len)
         int unique_count = 0
         int v = 0
         for v < len(values) {
@@ -597,7 +597,7 @@ func median(tensor a) tensor {
             value = sorted.data[half]
         }
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = value
     tensor {
         data: out,
@@ -613,13 +613,13 @@ func median_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return median(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -630,7 +630,7 @@ func median_dim(tensor a, int dim) tensor {
             }
             i = i + 1
         }
-        float[] values = slice_values(a, src_coords, axis)
+        []float values = slice_values(a, src_coords, axis)
         values = sort_slice_values(values, false)
         int n = len(values)
         float value = 0.0
@@ -673,7 +673,7 @@ func mode(tensor a) tensor {
         }
         i = i + 1
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = best_value
     tensor {
         data: out,
@@ -689,13 +689,13 @@ func mode_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return mode(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -706,7 +706,7 @@ func mode_dim(tensor a, int dim) tensor {
             }
             i = i + 1
         }
-        float[] values = slice_values(a, src_coords, axis)
+        []float values = slice_values(a, src_coords, axis)
         float best_value = 0.0
         int best_count = 0
         int i2 = 0
@@ -750,7 +750,7 @@ func quantile(tensor a, float q) tensor {
         }
         value = sorted.data[index]
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = value
     tensor {
         data: out,
@@ -766,13 +766,13 @@ func quantile_dim(tensor a, float q, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return quantile(a, q)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -783,7 +783,7 @@ func quantile_dim(tensor a, float q, int dim) tensor {
             }
             i = i + 1
         }
-        float[] values = slice_values(a, src_coords, axis)
+        []float values = slice_values(a, src_coords, axis)
         values = sort_slice_values(values, false)
         int n = len(values)
         float value = 0.0
@@ -815,7 +815,7 @@ func sum(tensor a) tensor {
         acc = acc + a.data[i]
         i = i + 1
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = acc
     tensor {
         data: out,
@@ -836,7 +836,7 @@ func mean(tensor a) tensor {
     if n > 0 {
         acc = acc / n
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = acc
     tensor {
         data: out,
@@ -859,7 +859,7 @@ func max(tensor a) tensor {
         }
         i = i + 1
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = best
     tensor {
         data: out,
@@ -882,7 +882,7 @@ func min(tensor a) tensor {
         }
         i = i + 1
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = best
     tensor {
         data: out,
@@ -907,7 +907,7 @@ func argmax(tensor a) tensor {
         }
         i = i + 1
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = best_idx
     tensor {
         data: out,
@@ -932,7 +932,7 @@ func argmin(tensor a) tensor {
         }
         i = i + 1
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = best_idx
     tensor {
         data: out,
@@ -948,13 +948,13 @@ func sum_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return sum(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -989,13 +989,13 @@ func mean_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return mean(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -1033,13 +1033,13 @@ func max_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return max(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -1078,13 +1078,13 @@ func min_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return min(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -1123,13 +1123,13 @@ func argmax_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return argmax(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -1170,13 +1170,13 @@ func argmin_dim(tensor a, int dim) tensor {
     if axis < 0 || axis >= ndim {
         return argmin(a)
     }
-    int[] out_shape = reduce_output_shape(a.shape, dim)
+    []int out_shape = reduce_output_shape(a.shape, dim)
     int total = shape_prod(out_shape)
-    float[] out = make([]float, total)
+    []float out = make([]float, total)
     int flat = 0
     for flat < total {
-        int[] coords = unravel_index(flat, out_shape)
-        int[] src_coords = make([]int, ndim)
+        []int coords = unravel_index(flat, out_shape)
+        []int src_coords = make([]int, ndim)
         int i = 0
         int j = 0
         for i < ndim {
@@ -1232,7 +1232,7 @@ func prod(tensor a, int dim) tensor {
         acc = acc * a.data[i]
         i = i + 1
     }
-    float[] out = make([]float, 1)
+    []float out = make([]float, 1)
     out[0] = acc
     tensor {
         data: out,

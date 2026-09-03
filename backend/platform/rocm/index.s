@@ -3,7 +3,7 @@ package neurx.platform.rocm.index
 struct rocm_module_info {
     string module_name
     string description
-    string[] exports
+    []string exports
     string status
 }
 

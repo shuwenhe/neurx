@@ -8,9 +8,9 @@ use std.encoding.is_ascii_space
 use std.text.substring
 struct bpe_tokenizer {
     map[string]int vocab
-    string[] id_to_token
+    []string id_to_token
     map[string]int bpe_merges
-    string[] special_tokens
+    []string special_tokens
     int unk_token_id
     int pad_token_id
     int bos_token_id
@@ -20,8 +20,8 @@ struct bpe_tokenizer {
 }
 
 struct tokenization_state {
-    string[] tokens
-    int[] token_ids
+    []string tokens
+    []int token_ids
     int position
 }
 
@@ -30,7 +30,7 @@ func normalize_text(string text) string {
 }
 
 func pretokenize(string text) []string {
-    string[] tokens
+    []string tokens
     string current = ""
     int i = 0
     for i < len(text) {
@@ -59,7 +59,7 @@ func pretokenize(string text) []string {
 }
 
 func word_to_byte_tokens(string word) []string {
-    string[] tokens
+    []string tokens
     int i = 0
     for i < len(word) {
         string ch = string(word[i])
@@ -78,8 +78,8 @@ func word_to_byte_tokens(string word) []string {
     return tokens
 }
 
-func apply_bpe(string[] tokens, map[string]int merge_rank) []string {
-    string[] result = tokens
+func apply_bpe([]string tokens, map[string]int merge_rank) []string {
+    []string result = tokens
     int iteration = 0
     for iteration < 100 {
         int best_rank = 999999
@@ -100,7 +100,7 @@ func apply_bpe(string[] tokens, map[string]int merge_rank) []string {
             i = i + 1
         }
         if best_pos == -1 { break }
-        string[] new_result
+        []string new_result
         i = 0
         for i < len(result) {
             if i == best_pos {
@@ -119,17 +119,17 @@ func apply_bpe(string[] tokens, map[string]int merge_rank) []string {
 }
 
 func encode(bpe_tokenizer tokenizer, string text) []int {
-    int[] result
+    []int result
     if tokenizer.add_bos_token {
         result = append(result, tokenizer.bos_token_id)
     }
     string normalized = normalize_text(text)
-    string[] words = pretokenize(normalized)
+    []string words = pretokenize(normalized)
     int w = 0
     for w < len(words) {
         string word = words[w]
-        string[] word_tokens = word_to_byte_tokens(word)
-        string[] merged = apply_bpe(word_tokens, tokenizer.bpe_merges)
+        []string word_tokens = word_to_byte_tokens(word)
+        []string merged = apply_bpe(word_tokens, tokenizer.bpe_merges)
         int t = 0
         for t < len(merged) {
             string token = merged[t]
@@ -148,7 +148,7 @@ func encode(bpe_tokenizer tokenizer, string text) []int {
     return result
 }
 
-func decode(bpe_tokenizer tokenizer, int[] token_ids) string {
+func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     string result = ""
     int i = 0
     for i < len(token_ids) {

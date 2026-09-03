@@ -223,7 +223,7 @@ func (thp_manager* mgr) try_collapse_pages(
 return     (huge_ppage, "")
 }
 
-func (thp_manager* mgr) split_huge_page(ppage: u64) (u64), string[] {
+func (thp_manager* mgr) split_huge_page(ppage: u64) (u64), []string {
     _guard := mgr.lock.lock()?
 
     regular_pages := u64[]()

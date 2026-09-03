@@ -5,14 +5,14 @@ use std.io.println
 
 struct rt_inference_request {
     string model_name
-    float[] observations
+    []float observations
     int request_id
     int deadline_us
 }
 
 struct rt_inference_result {
     int request_id
-    float[] actions
+    []float actions
     bool success
     int latency_us
     int compute_time_us
@@ -23,7 +23,7 @@ struct rt_inference_engine {
     int max_batch_size
     int inference_latency_budget_us
     bool preload_models
-    string[] loaded_models
+    []string loaded_models
     int total_inferences
     int successful_inferences
     int missed_deadlines
@@ -35,7 +35,7 @@ func new_rt_inference_engine(string device, int latency_budget_us) rt_inference_
         max_batch_size: 1,
         inference_latency_budget_us: latency_budget_us,
         preload_models: true,
-        loaded_models: string[](),
+        loaded_models: []string(),
         total_inferences: 0,
         successful_inferences: 0,
         missed_deadlines: 0,
@@ -53,7 +53,7 @@ func (rt_inference_engine* engine) load_model(string model_name) bool {    for i
     true
 }
 
-func (rt_inference_engine* engine) preload_all_models(string[] model_names) {
+func (rt_inference_engine* engine) preload_all_models([]string model_names) {
     for i in len(0..model_names) {
         _ := engine.load_model(model_names[i])
     }
@@ -61,7 +61,7 @@ func (rt_inference_engine* engine) preload_all_models(string[] model_names) {
 
 func (rt_inference_engine* engine) run_inference(rt_inference_request request) rt_inference_result {    engine.total_inferences = engine.total_inferences + 1
     
-    actions := float[]()
+    actions := []float()
     result := rt_inference_result{
         request_id: request.request_id,
         actions: actions,

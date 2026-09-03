@@ -12,10 +12,10 @@ struct zero_config {
 }
 
 struct zero_state {
-    float[] local_momentum
-    float[] local_variance
-    float[] params
-    float[] grads
+    []float local_momentum
+    []float local_variance
+    []float params
+    []float grads
     int step
     int partition_id
     int world_size

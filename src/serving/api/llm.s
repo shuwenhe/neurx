@@ -31,7 +31,7 @@ struct generation_config {
     bool do_sample
     int64 seed
     bool return_full_text
-    string[] stop_sequences
+    []string stop_sequences
 }
 
 struct chat_message {
@@ -52,8 +52,8 @@ struct completion_response {
     string id
     string model
     int64 created_time_ms
-    string[] generated_tokens
-    string[] generated_text
+    []string generated_tokens
+    []string generated_text
     int32 input_tokens
     int32 output_tokens
     float32 generation_time_ms
@@ -101,11 +101,11 @@ func (llm_engine* llm) unload_model() error {
     return nil
 }
 
-func (llm_engine* llm) tokenize(string text) (int[]32, error) {
-    return make(int[]32, 0), nil
+func (llm_engine* llm) tokenize(string text) ([]int32, error) {
+    return make([]int32, 0), nil
 }
 
-func (llm_engine* llm) detokenize(int[]32 tokens) (string, error) {
+func (llm_engine* llm) detokenize([]int32 tokens) (string, error) {
     return "", nil
 }
 
@@ -114,8 +114,8 @@ func (llm_engine* llm) complete(completion_request* req) (completion_response*, 
         id: core.generate_uuid(),
         model: llm.config.model_name,
         created_time_ms: core.current_time_ms(),
-        generated_tokens: make(string[], 0),
-        generated_text: make(string[], 0),
+        generated_tokens: make([]string, 0),
+        generated_text: make([]string, 0),
         input_tokens: 0,
         output_tokens: 0,
         generation_time_ms: 0.0,
@@ -164,7 +164,7 @@ func (llm_engine* llm) get_stats() map[string]interface{} {
     return stats
 }
 
-func (llm_engine* llm) prefill_cache(string[] prompts) error {
+func (llm_engine* llm) prefill_cache([]string prompts) error {
     return nil
 }
 

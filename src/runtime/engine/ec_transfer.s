@@ -32,7 +32,7 @@ struct erasure_transfer_plan {
     int32 data_blocks
     int32 parity_blocks
     []erasure_encoded_block* blocks
-    int[]32 target_ranks
+    []int32 target_ranks
     int64 total_bytes
     float32 estimated_time_ms
 }
@@ -63,13 +63,13 @@ func create_erasure_codec(erasure_config* config, communicator* comm) erasure_co
     }
 }
 
-func (erasure_codec* ec) encode_data(interface{} input_data) (int[]erface{}, error) {
+func (erasure_codec* ec) encode_data(interface{} input_data) ([]interface{}, error) {
     num_total := ec.config.data_blocks + ec.config.parity_blocks
-    result := make(int[]erface{}, num_total)
+    result := make([]interface{}, num_total)
     return result, nil
 }
 
-func (erasure_codec* ec) decode_data(int[]erface{} encoded_blocks) (interface{}, error) {
+func (erasure_codec* ec) decode_data([]interface{} encoded_blocks) (interface{}, error) {
     return nil, nil
 }
 
@@ -92,7 +92,7 @@ func (erasure_codec* ec) create_transfer_plan(interface{} data) erasure_transfer
         data_blocks: ec.config.data_blocks,
         parity_blocks: ec.config.parity_blocks,
         blocks: make([]erasure_encoded_block*, 0),
-        target_ranks: make(int[]32, 0),
+        target_ranks: make([]int32, 0),
         total_bytes: 0,
         estimated_time_ms: 0.0,
     }
@@ -102,11 +102,11 @@ func (erasure_codec* ec) execute_transfer_plan(erasure_transfer_plan* plan) erro
     return nil
 }
 
-func (erasure_codec* ec) distribute_blocks(erasure_transfer_plan* plan, int[]32 target_ranks) error {
+func (erasure_codec* ec) distribute_blocks(erasure_transfer_plan* plan, []int32 target_ranks) error {
     return nil
 }
 
-func (erasure_codec* ec) recover_from_failure(int[]32 failed_block_ids) error {
+func (erasure_codec* ec) recover_from_failure([]int32 failed_block_ids) error {
     return nil
 }
 
@@ -115,8 +115,8 @@ func (erasure_codec* ec) can_recover() bool {
     return num_available >= ec.config.data_blocks
 }
 
-func (erasure_codec* ec) get_recovery_candidates() int[]32 {
-    return make(int[]32, 0)
+func (erasure_codec* ec) get_recovery_candidates() []int32 {
+    return make([]int32, 0)
 }
 
 func (erasure_codec* ec) cache_block(int32 block_id, interface{} data) {
@@ -140,12 +140,12 @@ func (erasure_codec* ec) reset_stats() {
     ec.stats = erasure_transfer_stats{}
 }
 
-func (erasure_codec* ec) reed_solomon_encode(int[]erface{} data_blocks) (int[]erface{}, error) {
-    result := make(int[]erface{}, ec.config.data_blocks + ec.config.parity_blocks)
+func (erasure_codec* ec) reed_solomon_encode([]interface{} data_blocks) ([]interface{}, error) {
+    result := make([]interface{}, ec.config.data_blocks + ec.config.parity_blocks)
     return result, nil
 }
 
-func (erasure_codec* ec) reed_solomon_decode(int[]erface{} encoded_blocks) (int[]erface{}, error) {
-    result := make(int[]erface{}, ec.config.data_blocks)
+func (erasure_codec* ec) reed_solomon_decode([]interface{} encoded_blocks) ([]interface{}, error) {
+    result := make([]interface{}, ec.config.data_blocks)
     return result, nil
 }

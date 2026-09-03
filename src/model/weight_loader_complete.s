@@ -10,7 +10,7 @@ struct tensor_metadata {
     int64 start_offset
     int64 end_offset
     int64 dtype
-    int[] shape
+    []int shape
 }
 
 struct safetensors_file {
@@ -23,7 +23,7 @@ struct safetensors_file {
 struct weight_tensor {
     string name
     int64 device_ptr
-    int[] shape
+    []int shape
     int64 size_bytes
 }
 
@@ -54,7 +54,7 @@ func get_dtype_size(int dtype) int {
     return 0
 }
 
-func tensor_shape_size(int[] shape) int64 {
+func tensor_shape_size([]int shape) int64 {
     size := 1
     for i := 0; i < shape.len(); i = i + 1 {
         size = size * shape[i]

@@ -6,16 +6,16 @@ struct parallel_sampling_config {
 
 struct parallel_sampling_state {
     parallel_sampling_config config
-    int[] parent_request_ids
-    int[] child_counts
-    int[] completed_children
-    int[] maximum_generated_tokens
-    int[] final_only
-    int[] active
-    int[] child_finished
-    int[] child_cancelled
-    int[] child_token_counts
-    float[] child_scores
+    []int parent_request_ids
+    []int child_counts
+    []int completed_children
+    []int maximum_generated_tokens
+    []int final_only
+    []int active
+    []int child_finished
+    []int child_cancelled
+    []int child_token_counts
+    []float child_scores
     int parent_count
     int completed_parents
     int cancelled_children
@@ -33,14 +33,14 @@ struct parallel_sampling_result {
 }
 
 func parallel_int_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
 func parallel_float_array(int capacity) []float {
-    float[] values = make([]float, capacity)
+    []float values = make([]float, capacity)
     int i = 0
     for i < capacity { values[i] = 0.0; i = i + 1 }
     values

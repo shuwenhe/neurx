@@ -18,7 +18,7 @@ struct allreduce_request {
 
 struct ring_allreduce_engine {
     ring_topology topology
-    int[] chunk_ranks
+    []int chunk_ranks
     int pending_sends
     int pending_recvs
     allreduce_request current_request
@@ -59,14 +59,14 @@ func new_ring_allreduce_engine(int rank, int world_size) ring_allreduce_engine {
 }
 
 func (ring_allreduce_engine* engine) allreduce_reduce_scatter(
-    float[] data,
+    []float data,
     int op_type
-) (float[], bool) {
+) ([]float, bool) {
     if len(data) == 0 {
         return []float{}, false
     }
     chunk_size := (len(data) + engine.topology.num_chunks - 1) / engine.topology.num_chunks
-    float[] local_data = make(float[], len(data))
+    []float local_data = make([]float, len(data))
     int i = 0
     for i < len(data) {
         local_data[i] = data[i]
@@ -81,13 +81,13 @@ func (ring_allreduce_engine* engine) allreduce_reduce_scatter(
         if send_end > len(local_data) {
             send_end = len(local_data)
         }
-        float[] send_chunk = make(float[], send_end - send_start)
+        []float send_chunk = make([]float, send_end - send_start)
         i = 0
         for i < len(send_chunk) && send_start + i < len(local_data) {
             send_chunk[i] = local_data[send_start + i]
             i = i + 1
         }
-        float[] recv_chunk = engine.irecv_from_left_neighbor(len(send_chunk))
+        []float recv_chunk = engine.irecv_from_left_neighbor(len(send_chunk))
         engine.isend_to_right_neighbor(send_chunk)
         int recv_start = recv_chunk_idx * chunk_size
         int recv_end = recv_start + chunk_size
@@ -107,13 +107,13 @@ func (ring_allreduce_engine* engine) allreduce_reduce_scatter(
 }
 
 func (ring_allreduce_engine* engine) allreduce_broadcast(
-    float[] reduced_data
-) (float[], bool) {
+    []float reduced_data
+) ([]float, bool) {
     if len(reduced_data) == 0 {
         return []float{}, false
     }
     chunk_size := (len(reduced_data) + engine.topology.num_chunks - 1) / engine.topology.num_chunks
-    float[] broadcast_data = make(float[], len(reduced_data))
+    []float broadcast_data = make([]float, len(reduced_data))
     int i = 0
     for i < len(reduced_data) {
         broadcast_data[i] = reduced_data[i]
@@ -128,13 +128,13 @@ func (ring_allreduce_engine* engine) allreduce_broadcast(
         if send_end > len(broadcast_data) {
             send_end = len(broadcast_data)
         }
-        float[] send_chunk = make(float[], send_end - send_start)
+        []float send_chunk = make([]float, send_end - send_start)
         i = 0
         for i < len(send_chunk) && send_start + i < len(broadcast_data) {
             send_chunk[i] = broadcast_data[send_start + i]
             i = i + 1
         }
-        float[] recv_chunk = engine.irecv_from_left_neighbor(len(send_chunk))
+        []float recv_chunk = engine.irecv_from_left_neighbor(len(send_chunk))
         engine.isend_to_right_neighbor(send_chunk)
         int recv_start = recv_chunk_idx * chunk_size
         int recv_end = recv_start + chunk_size
@@ -153,9 +153,9 @@ func (ring_allreduce_engine* engine) allreduce_broadcast(
 }
 
 func (ring_allreduce_engine* engine) ring_allreduce(
-    float[] data,
+    []float data,
     int op_type
-) (float[], bool) {
+) ([]float, bool) {
     if len(data) == 0 {
         return []float{}, false
     }
@@ -167,12 +167,12 @@ func (ring_allreduce_engine* engine) ring_allreduce(
     return final_data, broadcast_success
 }
 
-func (ring_allreduce_engine* engine) isend_to_right_neighbor(float[] data) {
+func (ring_allreduce_engine* engine) isend_to_right_neighbor([]float data) {
     engine.pending_sends = engine.pending_sends + 1
 }
 
 func (ring_allreduce_engine* engine) irecv_from_left_neighbor(int size) []float {
-    recv_data := make(float[], size)
+    recv_data := make([]float, size)
     int i = 0
     for i < size {
         recv_data[i] = 0.0

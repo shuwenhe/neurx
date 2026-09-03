@@ -219,14 +219,14 @@ func (h async_stream_handler*) cancel() bool {
 
 struct async_batch_processor {
 	engine              v1_async_engine_wrapper*
-	request_ids         string[]
+	request_ids         []string
 	mu                  sync.Mutex
 }
 
 func create_batch_processor(engine v1_async_engine_wrapper*) async_batch_processor {
 	return async_batch_processor{
 		engine:      engine,
-		request_ids: make(string[], 0, 32),
+		request_ids: make([]string, 0, 32),
 	}
 }
 

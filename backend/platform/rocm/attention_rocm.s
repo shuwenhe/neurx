@@ -46,7 +46,7 @@ func rocm_paged_attention_forward(attention_config config,
                                  rocm_rt.rocm_memory_ptr q,
                                  rocm_rt.rocm_memory_ptr k_cache,
                                  rocm_rt.rocm_memory_ptr v_cache,
-                                 int[]64 block_table) rocm_rt.rocm_memory_ptr {
+                                 []int64 block_table) rocm_rt.rocm_memory_ptr {
     0
 }
 
@@ -89,7 +89,7 @@ func rocm_attention_with_alibi(attention_config config,
                               rocm_rt.rocm_memory_ptr q,
                               rocm_rt.rocm_memory_ptr k,
                               rocm_rt.rocm_memory_ptr v,
-                              float[] alibi_slopes) rocm_rt.rocm_memory_ptr {
+                              []float alibi_slopes) rocm_rt.rocm_memory_ptr {
     0
 }
 
@@ -97,7 +97,7 @@ func rocm_attention_with_rope(attention_config config,
                              rocm_rt.rocm_memory_ptr q,
                              rocm_rt.rocm_memory_ptr k,
                              rocm_rt.rocm_memory_ptr v,
-                             float[] freqs_cos,
-                             float[] freqs_sin) rocm_rt.rocm_memory_ptr {
+                             []float freqs_cos,
+                             []float freqs_sin) rocm_rt.rocm_memory_ptr {
     0
 }

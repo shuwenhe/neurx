@@ -155,7 +155,7 @@ struct workload_schedule {
     workload_type wl_type
     int priority
     int deadline_ms
-    string[] resource_hints
+    []string resource_hints
 }
 
 func neuray_schedule(workload_schedule wl) syscall_result {
@@ -239,11 +239,11 @@ func neuray_metrics_start(string device_id) syscall_result {
 
 struct recorded_metrics {
     int sample_count
-    int[] timestamps
-    int[] utilization
-    int[] power_watts
-    int[] temperature_c
-    int[] bandwidth_gbps
+    []int timestamps
+    []int utilization
+    []int power_watts
+    []int temperature_c
+    []int bandwidth_gbps
 }
 
 func neuray_metrics_get(string device_id) recorded_metrics {

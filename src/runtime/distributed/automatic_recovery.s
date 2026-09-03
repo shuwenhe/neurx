@@ -2,9 +2,9 @@ package neurx.distributed.automatic_recovery
 struct recovery_checkpoint {
     int checkpoint_id
     int global_step
-    float[] model_params
-    float[] optimizer_state
-    int[] grad_accumulation
+    []float model_params
+    []float optimizer_state
+    []int grad_accumulation
     int num_ranks
     int tp_size
     int pp_size
@@ -17,7 +17,7 @@ struct recovery_state {
     int failed_rank
     int recovery_step
     int last_checkpoint_id
-    int[] ranks_to_recover
+    []int ranks_to_recover
     float recovery_start_time_ms
     float recovery_end_time_ms
 }
@@ -25,7 +25,7 @@ struct recovery_state {
 struct automatic_recovery_manager {
     int my_rank
     int world_size
-    recovery_checkpoint[] checkpoints
+    recovery_checkpo[]int checkpoints
     recovery_state current_recovery
     int max_checkpoints_to_keep
     int checkpoint_save_interval
@@ -63,9 +63,9 @@ func new_automatic_recovery_manager(
 func (automatic_recovery_manager* manager) save_checkpoint(
     int global_step,
     int epoch,
-    float[] model_params,
-    float[] optimizer_state,
-    int[] grad_accum,
+    []float model_params,
+    []float optimizer_state,
+    []int grad_accum,
     int tp_size,
     int pp_size,
     int dp_size
@@ -73,9 +73,9 @@ func (automatic_recovery_manager* manager) save_checkpoint(
     checkpoint := recovery_checkpoint {
         checkpoint_id: global_step,
         global_step: global_step,
-        model_params: make(float[], len(model_params)),
-        optimizer_state: make(float[], len(optimizer_state)),
-        grad_accumulation: make(int[], len(grad_accum)),
+        model_params: make([]float, len(model_params)),
+        optimizer_state: make([]float, len(optimizer_state)),
+        grad_accumulation: make([]int, len(grad_accum)),
         num_ranks: manager.world_size,
         tp_size: tp_size,
         pp_size: pp_size,
@@ -108,7 +108,7 @@ func (automatic_recovery_manager* manager) remove_oldest_checkpoint() {
         return
     }
     int new_len = len(manager.checkpoints) - 1
-    recovery_checkpoint[] new_checkpoints = make(recovery_checkpoint[], new_len)
+    recovery_checkpo[]int new_checkpoints = make(recovery_checkpo[]int, new_len)
     int i = 1
     for i < len(manager.checkpoints) {
         new_checkpoints[i - 1] = manager.checkpoints[i]
@@ -154,7 +154,7 @@ func (automatic_recovery_manager* manager) initiate_recovery(
     manager.current_recovery.recovery_step = 0
     manager.current_recovery.last_checkpoint_id = latest.checkpoint_id
     manager.current_recovery.recovery_start_time_ms = 0.0
-    int[] ranks_to_keep = make([]int, manager.world_size)
+    []int ranks_to_keep = make([]int, manager.world_size)
     int i = 0
     for i < manager.world_size {
         if i != failed_rank {
@@ -167,8 +167,8 @@ func (automatic_recovery_manager* manager) initiate_recovery(
 }
 
 func (automatic_recovery_manager* manager) execute_recovery_steps(
-    float[] model_params,
-    float[] optimizer_state,
+    []float model_params,
+    []float optimizer_state,
     int tp_size,
     int pp_size,
     int dp_size
@@ -260,8 +260,8 @@ func (automatic_recovery_manager* manager) update_world_size_metadata(
 }
 
 func (automatic_recovery_manager* manager) remap_parameters(
-    float[] dst_params,
-    float[] src_params,
+    []float dst_params,
+    []float src_params,
     int old_tp int, old_pp int, old_dp int,
     int new_tp int, new_pp int, new_dp int
 ) bool {
@@ -292,7 +292,7 @@ func (automatic_recovery_manager* manager) remap_parameters(
 }
 
 func (automatic_recovery_manager* manager) synchronize_to_all_ranks(
-    float[] model_params
+    []float model_params
 ) bool {
     int rank = 0
     for rank < len(manager.current_recovery.ranks_to_recover) {
@@ -329,9 +329,9 @@ func (automatic_recovery_manager* manager) get_last_checkpoint_step() int {
 
 func (automatic_recovery_manager* manager) save_async_checkpoint(
     int global_step,
-    float[] model_params,
-    float[] optimizer_state,
-    int[] grad_accum,
+    []float model_params,
+    []float optimizer_state,
+    []int grad_accum,
     int tp_size,
     int pp_size,
     int dp_size
@@ -349,9 +349,9 @@ func (automatic_recovery_manager* manager) save_async_checkpoint(
 
 func (automatic_recovery_manager* manager) async_checkpoint_worker(
     int global_step,
-    float[] model_params,
-    float[] optimizer_state,
-    int[] grad_accum,
+    []float model_params,
+    []float optimizer_state,
+    []int grad_accum,
     int tp_size,
     int pp_size,
     int dp_size

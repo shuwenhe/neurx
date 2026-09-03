@@ -27,7 +27,7 @@ const (
 )
 struct model_weight_spec {
     string name
-    int[]32 shape
+    []int32 shape
     model_dtype dtype
     int64 offset
     int64 size_bytes
@@ -133,7 +133,7 @@ struct model_executor {
     model_executor_cache cache
     []*model_layer_executor layer_executors
     int64 device_memory_bytes
-    int[]erface{} compute_streams
+    []interface{} compute_streams
     bool initialized
     bool ready
 }
@@ -152,7 +152,7 @@ struct model_loader {
 struct weight_buffer {
     []byte data
     model_dtype dtype
-    int[]32 shape
+    []int32 shape
     int64 size_bytes
     string device_location
     bool is_pinned
@@ -366,7 +366,7 @@ func (model_executor* me) execute_layer(int32 layer_id, interface{} input) (*lay
     return output, nil
 }
 
-func (model_executor* me) forward_pass(int[]32 tokens) (interface{}, error) {
+func (model_executor* me) forward_pass([]int32 tokens) (interface{}, error) {
     if !me.ready {
         return nil, "executor not ready"
     }

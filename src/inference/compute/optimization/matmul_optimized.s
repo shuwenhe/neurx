@@ -15,7 +15,7 @@ func default_block_multiply_config() block_multiply_config {
     }
 }
 
-func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b, int m, int n, int k, block_multiply_config config) bool {
+func matrix_multiply_blocked([]float result, []float matrix_a, []float matrix_b, int m, int n, int k, block_multiply_config config) bool {
     int block_size = config.block_size
     if block_size <= 0 || block_size > 256 {
         return false
@@ -57,7 +57,7 @@ func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b,
     true
 }
 
-func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] vector, int rows, int cols) bool {
+func matrix_vector_multiply_optimized([]float result, []float matrix, []float vector, int rows, int cols) bool {
     int i = 0
     for i < rows {
         float sum = 0.0
@@ -73,7 +73,7 @@ func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] ve
     true
 }
 
-func fused_matmul_add(float[] result, float[] a, float[] b, float[] bias, int m, int n, int k) bool {
+func fused_matmul_add([]float result, []float a, []float b, []float bias, int m, int n, int k) bool {
     int i = 0
     for i < m {
         int j = 0
@@ -95,7 +95,7 @@ func fused_matmul_add(float[] result, float[] a, float[] b, float[] bias, int m,
     true
 }
 
-func memory_efficient_gemm(float[] result, float[] a, float[] b, int m, int n, int k, int cache_line_size) bool {
+func memory_efficient_gemm([]float result, []float a, []float b, int m, int n, int k, int cache_line_size) bool {
     if cache_line_size <= 0 {
         return false
     }
@@ -110,7 +110,7 @@ func memory_efficient_gemm(float[] result, float[] a, float[] b, int m, int n, i
     })
 }
 
-func transpose_optimized(float[] result, float[] input, int rows, int cols) bool {
+func transpose_optimized([]float result, []float input, int rows, int cols) bool {
     int i = 0
     for i < rows {
         int j = 0
@@ -125,7 +125,7 @@ func transpose_optimized(float[] result, float[] input, int rows, int cols) bool
     true
 }
 
-func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
+func compute_softmax_optimized([]float result, []float logits, int size) bool {
     if size <= 0 {
         return false
     }

@@ -5,14 +5,14 @@ struct lora_module_s {
     int output_dim
     int rank
     float alpha
-    float[][] lora_a
-    float[][] lora_b
+    []float[] lora_a
+    []float[] lora_b
     float scale_factor
 }
 
 struct lora_forward_result_s {
-    float[][] output
-    float[][] lora_a_input
+    []float[] output
+    []float[] lora_a_input
     int rank
 }
 
@@ -25,11 +25,11 @@ struct lora_layer_spec_s {
 }
 
 func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lora_module_s {
-    float[][] lora_a = make(float[][], 0)
-    float[][] lora_b = make(float[][], 0)
+    []float[] lora_a = make([]float[], 0)
+    []float[] lora_b = make([]float[], 0)
     int i = 0
     for i < input_dim {
-        float[] row_a = make(float[], 0)
+        []float row_a = make([]float, 0)
         int j = 0
         for j < rank {
             row_a = append(row_a, 0.02)
@@ -40,7 +40,7 @@ func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lor
     }
     i = 0
     for i < rank {
-        float[] row_b = make(float[], 0)
+        []float row_b = make([]float, 0)
         int j = 0
         for j < output_dim {
             row_b = append(row_b, 0.0)
@@ -60,11 +60,11 @@ func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lor
     }
 }
 
-func matrix_multiply_s(float[][] a, float[][] b) float[][] {
-    float[][] result = make(float[][], 0)
+func matrix_multiply_s([]float[] a, []float[] b) []float[] {
+    []float[] result = make([]float[], 0)
     int i = 0
     for i < len(a) {
-        float[] row_result = make(float[], 0)
+        []float row_result = make([]float, 0)
         if len(b) == 0 {
             i = i + 1
         } else {
@@ -86,14 +86,14 @@ func matrix_multiply_s(float[][] a, float[][] b) float[][] {
     result
 }
 
-func lora_forward_s(float[][] x, lora_module_s lora) lora_forward_result_s {
-    float[][] lora_out = matrix_multiply_s(x, lora.lora_a)
+func lora_forward_s([]float[] x, lora_module_s lora) lora_forward_result_s {
+    []float[] lora_out = matrix_multiply_s(x, lora.lora_a)
     lora_out = matrix_multiply_s(lora_out, lora.lora_b)
-    float[][] scaled_out = make(float[][], 0)
+    []float[] scaled_out = make([]float[], 0)
     int i = 0
     for i < len(lora_out) {
-        float[] row = lora_out[i]
-        float[] scaled_row = make(float[], 0)
+        []float row = lora_out[i]
+        []float scaled_row = make([]float, 0)
         int j = 0
         for j < len(row) {
             scaled_row = append(scaled_row, row[j] * lora.scale_factor)
@@ -109,13 +109,13 @@ func lora_forward_s(float[][] x, lora_module_s lora) lora_forward_result_s {
     }
 }
 
-func lora_merge_to_weight_s(float[][] original_weight, lora_module_s lora) float[][] {
-    float[][] lora_delta = matrix_multiply_s(lora.lora_b, lora.lora_a)
-    float[][] merged = make(float[][], 0)
+func lora_merge_to_weight_s([]float[] original_weight, lora_module_s lora) []float[] {
+    []float[] lora_delta = matrix_multiply_s(lora.lora_b, lora.lora_a)
+    []float[] merged = make([]float[], 0)
     int i = 0
     for i < len(original_weight) {
-        float[] row = original_weight[i]
-        float[] merged_row = make(float[], 0)
+        []float row = original_weight[i]
+        []float merged_row = make([]float, 0)
         int j = 0
         for j < len(row) {
             float delta_val = 0.0
@@ -132,12 +132,12 @@ func lora_merge_to_weight_s(float[][] original_weight, lora_module_s lora) float
 }
 
 func lora_backward_s(
-    float[][] grad_output,
+    []float[] grad_output,
     lora_forward_result_s forward_cache,
     lora_module_s lora
-) float[][] {
-    float[][] grad_lora_b = forward_cache.lora_a_input
-    float[][] grad_lora_a = grad_output
+) []float[] {
+    []float[] grad_lora_b = forward_cache.lora_a_input
+    []float[] grad_lora_a = grad_output
     grad_lora_b
 }
 

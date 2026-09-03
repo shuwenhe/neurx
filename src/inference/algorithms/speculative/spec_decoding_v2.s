@@ -24,8 +24,8 @@ struct verification_result {
     bool tokens_accepted
     int num_accepted_tokens
     int num_rejected_tokens
-    int[] accepted_positions
-    int[] rejected_positions
+    []int accepted_positions
+    []int rejected_positions
     bool full_sequence_accepted
 }
 
@@ -145,7 +145,7 @@ func new_token_verifier(string verifier_id, float threshold) token_verifier {
     }
 }
 
-func (token_verifier* verifier) verify_tokens(draft_sequence draft_tokens, float[] target_logits) verification_result {
+func (token_verifier* verifier) verify_tokens(draft_sequence draft_tokens, []float target_logits) verification_result {
     accepted_positions := []int{}
     rejected_positions := []int{}
     i := 0

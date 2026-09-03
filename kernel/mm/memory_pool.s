@@ -384,7 +384,7 @@ func pool_dump_info(string pool_name) string {
 }
 
 func pool_list_all() []string {
-    string[] result = make([]string, 16)
+    []string result = make([]string, 16)
     int i = 0
     for i < global_pools.pool_count {
         result[i] = global_pools.pools[i].pool_name

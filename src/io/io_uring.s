@@ -10,7 +10,7 @@ struct io_uring_sqe {
     int fd
     int offset
     int length
-    int[] buffer
+    []int buffer
     int flags
     int user_data
 }
@@ -67,7 +67,7 @@ func (uring* io_uring) prep_read(fd int, offset int, len int) (int, string) {
     return sqe_index, ""
 }
 
-func (uring* io_uring) prep_write(fd int, offset int, len int, data int[]) (int, string) {
+func (uring* io_uring) prep_write(fd int, offset int, len int, data []int) (int, string) {
     sqe := io_uring_sqe{
         opcode: URING_OPCODE_WRITE,
         fd: fd,

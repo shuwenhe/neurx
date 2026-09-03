@@ -1,64 +1,64 @@
 package neurx.system.unified_engine
 func new_engine_state(int total_blocks, int block_size, int max_prefill, int max_decode) []int {
-    int[] state = int[]{total_blocks, block_size, max_prefill, max_decode, 0, 0, 0, 0}
+    []int state = []int{total_blocks, block_size, max_prefill, max_decode, 0, 0, 0, 0}
     return state
 }
 
-func get_engine_total_blocks(int[] state) int {
+func get_engine_total_blocks([]int state) int {
     return state[0]
 }
 
-func get_engine_block_size(int[] state) int {
+func get_engine_block_size([]int state) int {
     return state[1]
 }
 
-func get_engine_max_prefill(int[] state) int {
+func get_engine_max_prefill([]int state) int {
     return state[2]
 }
 
-func get_engine_max_decode(int[] state) int {
+func get_engine_max_decode([]int state) int {
     return state[3]
 }
 
-func get_engine_iterations(int[] state) int {
+func get_engine_iterations([]int state) int {
     return state[4]
 }
 
-func get_engine_tokens_generated(int[] state) int {
+func get_engine_tokens_generated([]int state) int {
     return state[5]
 }
 
-func get_engine_memory_used(int[] state) int {
+func get_engine_memory_used([]int state) int {
     return state[6]
 }
 
-func get_engine_cache_hits(int[] state) int {
+func get_engine_cache_hits([]int state) int {
     return state[7]
 }
 
-func increment_iterations(int[] state) []int {
+func increment_iterations([]int state) []int {
     state[4] = state[4] + 1
     return state
 }
 
-func add_tokens_generated(int[] state, int tokens) []int {
+func add_tokens_generated([]int state, int tokens) []int {
     state[5] = state[5] + tokens
     return state
 }
 
-func set_memory_used(int[] state, int memory) []int {
+func set_memory_used([]int state, int memory) []int {
     state[6] = memory
     return state
 }
 
-func record_cache_event(int[] state, int is_hit) []int {
+func record_cache_event([]int state, int is_hit) []int {
     if is_hit > 0 {
         state[7] = state[7] + 1
     }
     return state
 }
 
-func execute_iteration(int[][] requests, int[] prefill_indices, int[] decode_indices) string {
+func execute_iteration([]int[] requests, []int prefill_indices, []int decode_indices) string {
     int total_prefill = len(prefill_indices)
     int total_decode = len(decode_indices)
     int total_active = total_prefill + total_decode
@@ -86,7 +86,7 @@ func compute_throughput(int tokens_generated, int iterations, int block_size) fl
     return float(tokens_generated) / float(iterations)
 }
 
-func get_engine_stats(int[] engine_state, int[] paged_stats, int[][] requests) string {
+func get_engine_stats([]int engine_state, []int paged_stats, []int[] requests) string {
     int total_requests = len(requests)
     int iterations = get_engine_iterations(engine_state)
     int tokens = get_engine_tokens_generated(engine_state)
@@ -115,7 +115,7 @@ func estimate_speedup(int baseline_throughput, int current_throughput) float {
     return float(current_throughput) / float(baseline_throughput)
 }
 
-func should_continue_inference(int[][] requests) bool {
+func should_continue_inference([]int[] requests) bool {
     int i = 0
     for i < len(requests) {
         if requests[i][1] < 3 {

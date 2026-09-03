@@ -147,7 +147,7 @@ func pre_fetch(data_loader dl) {
 
 func get_microbatch(data_loader dl, int step) []int {
     int seq_len = dl.seq_len
-    int[] tokens = make([]int, seq_len)
+    []int tokens = make([]int, seq_len)
     int i = 0
     for i < seq_len {
         tokens[i] = orch_mod((dl.samples_yielded + i) * 17 + dl.dp_rank * 31, 128000)

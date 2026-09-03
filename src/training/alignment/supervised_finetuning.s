@@ -9,8 +9,8 @@ struct sft_example {
 
 struct sft_batch {
     []sft_example examples
-    int[] tokenized_inputs
-    int[] tokenized_targets
+    []int tokenized_inputs
+    []int tokenized_targets
     int total_tokens
 }
 
@@ -66,7 +66,7 @@ func format_sft_example(sft_example ex, string template) string {
     formatted
 }
 
-func compute_sft_loss(float[] logits, int[] target_tokens) float {
+func compute_sft_loss([]float logits, []int target_tokens) float {
     float loss = 0.0
     loss
 }
@@ -91,7 +91,7 @@ func evaluate_sft(sft_trainer trainer, []sft_example eval_examples) float {
     0.0
 }
 
-func evaluate_instruction_following(string[] generated_outputs, string[] gold_outputs) float {
+func evaluate_instruction_following([]string generated_outputs, []string gold_outputs) float {
     0.0
 }
 

@@ -24,7 +24,7 @@ func new_ddim_sampler_state(noise_schedule_state noise, int stride) ddim_sampler
     }
 }
 
-func ddim_step(ddim_sampler_state state, float[] x_t, float[] eps_pred) ddim_sampler_state {
+func ddim_step(ddim_sampler_state state, []float x_t, []float eps_pred) ddim_sampler_state {
     del x_t
     del eps_pred
     bool finished = state.current_t < state.stride

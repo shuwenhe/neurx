@@ -8,7 +8,7 @@ struct adagrad_optimizer {
     float initial_accumulator_value
     float eps
     int step
-    float[] state_sum
+    []float state_sum
 }
 
 func new_adagrad(
@@ -34,7 +34,7 @@ func adagrad_step(adagrad_optimizer optimizer, tensor params, tensor grads) adag
     optimizer.step = optimizer.step + 1
     optimizer.state_sum = ensure_adagrad_state(optimizer.state_sum, n, optimizer.initial_accumulator_value)
     float clr = optimizer.lr / (1.0 + float(optimizer.step - 1) * optimizer.lr_decay)
-    float[] out = make([]float, n)
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         float grad = grads.data[i]
@@ -57,8 +57,8 @@ struct adagrad_optimizer_step_output {
     tensor params
 }
 
-func ensure_adagrad_state(float[] values, int n, float initial_value) []float {
-    float[] out = make([]float, n)
+func ensure_adagrad_state([]float values, int n, float initial_value) []float {
+    []float out = make([]float, n)
     int i = 0
     for i < n {
         if i < len(values) {

@@ -77,7 +77,7 @@ func TestPrefillExecutor() {
     prefill := NewPrefillExecutor(config, prefill_config)
     result := prefill.Initialize()
     LogTest("Prefill executor initializes", result.success, "Initialization failed")
-    sequences := make(string[], 4)
+    sequences := make([]string, 4)
     tokens := make([]i32, 4)
     for i := 0; i < 4; i++ {
         sequences[i] = "seq_" + string(i)
@@ -102,7 +102,7 @@ func TestDecodeExecutor() {
     decoder := NewDecodeExecutor(config, decode_config)
     result := decoder.Initialize()
     LogTest("Decode executor initializes", result.success, "Initialization failed")
-    sequences := make(string[], 16)
+    sequences := make([]string, 16)
     for i := 0; i < 16; i++ {
         sequences[i] = "seq_" + string(i)
         decoder.base.AddSequence(sequences[i], 0)
@@ -232,7 +232,7 @@ func TestLoadBalancing() {
     }
     dist := NewDistributedExecutor(config, dist_config)
     dist.Initialize()
-    sequences := make(string[], 16)
+    sequences := make([]string, 16)
     for i := 0; i < 16; i++ {
         sequences[i] = "seq_" + string(i)
     }

@@ -7,10 +7,10 @@ struct lora_config {
     int lora_rank
     float lora_alpha
     float lora_dropout
-    *string[] target_modules
+    *[]string target_modules
     string bias
     string task_type
-    option[*string[]] modules_to_save
+    option[*[]string] modules_to_save
     bool init_lora_weights
 }
 
@@ -24,7 +24,7 @@ func default() lora_config {
         lora_rank: 8,
         lora_alpha: 16.0,
         lora_dropout: 0.05,
-        target_modules: string[](),
+        target_modules: []string(),
         bias: "none",
         task_type: "CAUSAL_LM",
         modules_to_save: nil,

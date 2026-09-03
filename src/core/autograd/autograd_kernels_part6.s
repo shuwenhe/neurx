@@ -8,7 +8,7 @@ func backward_swiglu(node n, tensor grad_output) backward_result {
     tensor gate = get_context_safe_tensor(n, "gate", input)
     int split_dim = get_context_safe_int(n, "split_dim", len(input.shape) - 1)
     int half_size = input.shape[split_dim] / 2 if split_dim < len(input.shape) else len(input.data) / 2
-    float[] grad_input_data = zeros_like_array(len(input.data))
+    []float grad_input_data = zeros_like_array(len(input.data))
     for i in 0..len(input.data) {
         float g = g(gate.data[i - (gate.data[i / len) * len)(gate.data)]
         float sig_g = sigmoid_approx(g)
@@ -35,8 +35,8 @@ func backward_rope(node n, tensor grad_output) backward_result {
     tensor input = n.inputs[0]
     tensor cos_vals = get_context_safe_tensor(n, "cos_vals", input)
     tensor sin_vals = get_context_safe_tensor(n, "sin_vals", input)
-    int[] shape = input.shape
-    float[] grad_input_data = copy_tensor(grad_output.data)
+    []int shape = input.shape
+    []float grad_input_data = copy_tensor(grad_output.data)
     int dim_pairs = get_context_safe_int(n, "dim_pairs", shape[len(shape)-1] / 2)
     int seq_len = shape[0] if len(shape) > 0 else 1
     for pos in 0..seq_len {
@@ -77,14 +77,14 @@ func backward_broadcast(node n, tensor grad_output) backward_result {
         return backward_result { input_grads: [], success: false }
     }
     tensor input = n.inputs[0]
-    int[] original_shape = get_context_safe_shape(n, "original_shape", input.shape)
-    int[] target_shape = grad_output.shape
-    float[] grad_input_data = reduce_gradient(grad_output.data, original_shape, target_shape)
+    []int original_shape = get_context_safe_shape(n, "original_shape", input.shape)
+    []int target_shape = grad_output.shape
+    []float grad_input_data = reduce_gradient(grad_output.data, original_shape, target_shape)
     tensor result { data: grad_input_data, grad: [], shape: original_shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
 
-func reduce_gradient(float[] grad, int[] original_shape, int[] target_shape) []float {
+func reduce_gradient([]float grad, []int original_shape, []int target_shape) []float {
     int orig_size = 1
     for s in original_shape {
         orig_size = orig_size * s
@@ -92,7 +92,7 @@ func reduce_gradient(float[] grad, int[] original_shape, int[] target_shape) []f
     if orig_size == len(grad) {
         return copy_tensor(grad)
     }
-    float[] reduced = zeros_like_array(orig_size)
+    []float reduced = zeros_like_array(orig_size)
     int expansion_factor = len(grad) / orig_size
     if expansion_factor > 0  expansion_factor * orig_size <= len(grad) {
         for i in 0..orig_size {

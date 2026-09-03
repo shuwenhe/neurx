@@ -3,7 +3,7 @@ use std.strings.int_to_string
 struct irq_desc {
     int irq_num
     string name
-    string[] handler_names
+    []string handler_names
     int cpu_affinity
     int count
     int depth

@@ -17,7 +17,7 @@ struct tensor_stats {
 struct tensor_sample {
     string name
     string dtype
-    float[] values
+    []float values
     int data_start
     int data_end
 }
@@ -32,7 +32,7 @@ func main() {
         println("❌ FAIL: Adapter file not found: " + adapter_path)
         return
     }
-    int[] file_bytes = runtime_read_binary_file(adapter_path)
+    []int file_bytes = runtime_read_binary_file(adapter_path)
     if len(file_bytes) < 16 {
         println("❌ FAIL: Adapter file too small: " + adapter_path)
         return
@@ -128,7 +128,7 @@ func main() {
     println("- This can only happen via gradient descent")
 }
 
-func read_tensor_sample(int[] file_bytes, string header, string tensor_name) tensor_sample {
+func read_tensor_sample([]int file_bytes, string header, string tensor_name) tensor_sample {
     int name_pos = find_substring(header, "\"" + tensor_name + "\":{")
     if name_pos < 0 {
         tensor_sample missing
@@ -150,7 +150,7 @@ func read_tensor_sample(int[] file_bytes, string header, string tensor_name) ten
     int data_start = parse_int(substring(header, offsets_start, offsets_mid), 0)
     int data_end = parse_int(substring(header, offsets_mid + 1, offsets_end), 0)
     int data_base = 8 + len(header)
-    float[] values = decode_f32_values(file_bytes, data_base + data_start, data_base + data_end)
+    []float values = decode_f32_values(file_bytes, data_base + data_start, data_base + data_end)
     tensor_sample {
         name: tensor_name,
         dtype: dtype,
@@ -160,8 +160,8 @@ func read_tensor_sample(int[] file_bytes, string header, string tensor_name) ten
     }
 }
 
-func decode_f32_values(int[] bytes, int start, int end) []float {
-    float[] values = []float{}
+func decode_f32_values([]int bytes, int start, int end) []float {
+    []float values = []float{}
     int i = start
     for i + 3 < end {
         values = append(values, f32_from_le_bytes(bytes, i))
@@ -170,7 +170,7 @@ func decode_f32_values(int[] bytes, int start, int end) []float {
     values
 }
 
-func f32_from_le_bytes(int[] bytes, int idx) float {
+func f32_from_le_bytes([]int bytes, int idx) float {
     int b0 = bytes[idx]
     int b1 = bytes[idx + 1]
     int b2 = bytes[idx + 2]
@@ -220,7 +220,7 @@ func pow2_int(int exponent) float {
     value
 }
 
-func compute_stats(float[] values) tensor_stats {
+func compute_stats([]float values) tensor_stats {
     if len(values) == 0 {
         tensor_stats empty
         empty.mean = 0.0

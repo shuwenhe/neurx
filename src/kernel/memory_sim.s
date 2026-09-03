@@ -1,5 +1,5 @@
 package kernel.mem
-int[] phys_mem
+[]int phys_mem
 func init_phys_mem() int {
     phys_mem = []int{}
     i := 0
@@ -25,7 +25,7 @@ func mem_get(int addr, int count) []int {
     res
 }
 
-func mem_set(int addr, int[] data) int {
+func mem_set(int addr, []int data) int {
     i := 0
     for i < len(data) {
         if addr + i >= 0 && addr + i < len(phys_mem) {

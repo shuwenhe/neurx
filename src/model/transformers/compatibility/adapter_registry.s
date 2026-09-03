@@ -2,7 +2,7 @@ package neurx.transformers_utils.compatibility.adapter_registry
 struct model_adapter_entry {
     string model_type
     string display_name
-    string[] supported_model_ids
+    []string supported_model_ids
     string adapter_module
     int popularity_rank
 }
@@ -159,7 +159,7 @@ func count_supported_models() int {
 
 func get_popular_models() []string {
     []model_adapter_entry registry = get_model_registry()
-    string[] popular
+    []string popular
     for entry in registry {
         if entry.popularity_rank <= 5 {
             for model_id in entry.supported_model_ids {

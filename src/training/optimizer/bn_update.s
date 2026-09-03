@@ -2,16 +2,16 @@ package neurx.optimizer.bn_update
 use neurx.tensor.tensor
 use neurx.tensor.new
 struct batch_norm_stats {
-    float[] running_mean
-    float[] running_var
-    int[] num_batches
+    []float running_mean
+    []float running_var
+    []int num_batches
 }
 
 func new_batch_norm_stats(int num_features) batch_norm_stats {
     batch_norm_stats {
         running_mean: make_zeros(num_features),
         running_var: make_ones(num_features),
-        num_batches: make(int[], 0),
+        num_batches: make([]int, 0),
     }
 }
 
@@ -22,7 +22,7 @@ func reset_running_stats(batch_norm_stats stats) batch_norm_stats {
         stats.running_var[i] = 1.0
         i = i + 1
     }
-    stats.num_batches = make(int[], 0)
+    stats.num_batches = make([]int, 0)
     return stats
 }
 
@@ -35,8 +35,8 @@ func update_batch_norm_from_batch(
     if batch_size <= 0 {
         return stats
     }
-    float[] batch_mean = make_zeros(num_features)
-    float[] batch_var = make_zeros(num_features)
+    []float batch_mean = make_zeros(num_features)
+    []float batch_var = make_zeros(num_features)
     int f = 0
     for f < num_features {
         float sum_f = 0.0
@@ -91,7 +91,7 @@ func apply_batch_norm(
 ) tensor {
     int batch_size = len(input_data.data)
     int num_features = len(stats.running_mean)
-    float[] out = make_zeros(batch_size)
+    []float out = make_zeros(batch_size)
     int i = 0
     for i < batch_size {
         int f = 0
@@ -110,7 +110,7 @@ func apply_batch_norm(
 }
 
 func make_zeros(int n) []float {
-    float[] arr = make([]float, n)
+    []float arr = make([]float, n)
     int i = 0
     for i < n {
         arr[i] = 0.0
@@ -120,7 +120,7 @@ func make_zeros(int n) []float {
 }
 
 func make_ones(int n) []float {
-    float[] arr = make([]float, n)
+    []float arr = make([]float, n)
     int i = 0
     for i < n {
         arr[i] = 1.0

@@ -8,7 +8,7 @@ func main() {
     pattern_var := "^\\s*var\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(::\\s*([^=]+))\\s*=\\s*"
     pattern_let := "^\\s*let\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(::\\s*([^=]+))\\s*=\\s*"
     
-    files := string[]()
+    files := []string()
     find_all_s_files(project_root, *files)
     
     total_replaced := 0
@@ -37,7 +37,7 @@ func main() {
     println("✅ 迁移complete! 共替换 " + count_to_string(total_replaced) + " 处")
 }
 
-func find_all_s_files(string dir, string[] files) {
+func find_all_s_files(string dir, []string files) {
     entries := fs_list_dir(dir)
     
     for entry in entries {
@@ -55,7 +55,7 @@ func find_all_s_files(string dir, string[] files) {
 
 func replace_var_declarations(string content) string {
     lines := string_split(content, "\n")
-    result := string[]()
+    result := []string()
     
     for line in lines {
         new_line := line
@@ -73,7 +73,7 @@ func replace_var_declarations(string content) string {
 
 func replace_let_declarations(string content) string {
     lines := string_split(content, "\n")
-    result := string[]()
+    result := []string()
     
     for line in lines {
         new_line := line
@@ -240,7 +240,7 @@ func string_contains(string s, char c) bool {
 }
 
 func string_split(string s, string delimiter) []string {
-    result := string[]()
+    result := []string()
     if string_len(s) == 0 {
         return result
     }
@@ -263,7 +263,7 @@ func string_split(string s, string delimiter) []string {
     result
 }
 
-func string_join(string[] arr, string delimiter) string {
+func string_join([]string arr, string delimiter) string {
     if len(arr) == 0 {
         return ""
     }
@@ -349,8 +349,8 @@ func fs_exists(string path) bool {
     true
 }
 
-func fs_list_dir(string path) (string), string[] {
-    (string[](, ""))
+func fs_list_dir(string path) (string), []string {
+    ([]string(, ""))
 }
 
 func fs_is_dir(string path) bool {

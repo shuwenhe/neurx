@@ -2,10 +2,10 @@ package neurx.inference.logits_processors.test
 use neurx.inference.logits_processors
 func test_base_processor_temperature() {
     print("🧪 Test: Temperature Scaling")
-    float[] logits = float[]{1.0, 2.0, 3.0, 4.0}
+    []float logits = []float{1.0, 2.0, 3.0, 4.0}
     map[string]float params = map[string]float{}
     params["temperature"] = 2.0
-    float[] result = apply_temperature(logits, params)
+    []float result = apply_temperature(logits, params)
     if result[0] == 0.5 {
         print("  ✓ Temperature scaling applied correctly")
     }
@@ -14,10 +14,10 @@ func test_base_processor_temperature() {
 
 func test_top_k_filtering() {
     print("🧪 Test: Top-K Filtering")
-    float[] logits = float[]{5.0, 2.0, 8.0, 1.0, 6.0}
+    []float logits = []float{5.0, 2.0, 8.0, 1.0, 6.0}
     map[string]float params = map[string]float{}
     params["k"] = 2.0
-    float[] result = apply_top_k(logits, params)
+    []float result = apply_top_k(logits, params)
     if result[2] > 0.0 {
         print("  ✓ Top-K filtering preserves top values")
     }
@@ -26,10 +26,10 @@ func test_top_k_filtering() {
 
 func test_top_p_filtering() {
     print("🧪 Test: Top-P (Nucleus) Filtering")
-    float[] logits = float[]{5.0, 4.0, 3.0, 2.0, 1.0}
+    []float logits = []float{5.0, 4.0, 3.0, 2.0, 1.0}
     map[string]float params = map[string]float{}
     params["p"] = 0.9
-    float[] result = apply_top_p(logits, params)
+    []float result = apply_top_p(logits, params)
     if result[0] > 0.0 {
         print("  ✓ Top-P filtering applied correctly")
     }
@@ -38,10 +38,10 @@ func test_top_p_filtering() {
 
 func test_repetition_penalty() {
     print("🧪 Test: Repetition Penalty")
-    float[] logits = float[]{2.0, 3.0, 4.0, 3.5}
+    []float logits = []float{2.0, 3.0, 4.0, 3.5}
     map[string]float params = map[string]float{}
     params["penalty"] = 1.2
-    float[] result = apply_repetition_penalty(logits, params)
+    []float result = apply_repetition_penalty(logits, params)
     if len(result) == len(logits) {
         print("  ✓ Repetition penalty applied")
     }
@@ -51,14 +51,14 @@ func test_repetition_penalty() {
 func test_grammar_constraint_processor() {
     print("🧪 Test: Grammar Constraint Processor")
     grammar_constraint_processor processor = new_grammar_constraint_processor(1000)
-    processor.add_grammar_rule("numbers", string[]{"0", "1", "2"}, "exact")
-    float[] logits = make(float[], 1000)
+    processor.add_grammar_rule("numbers", []string{"0", "1", "2"}, "exact")
+    []float logits = make([]float, 1000)
     int i = 0
     for i < 1000 {
         logits[i] = float(i % 10)
         i = i + 1
     }
-    float[] result = processor.process_logits(logits)
+    []float result = processor.process_logits(logits)
     if len(result) == 1000 {
         print("  ✓ Grammar constraint processor processes logits")
     }
@@ -117,7 +117,7 @@ func test_unban_token() {
 func test_adaptive_ban() {
     print("🧪 Test: Adaptive Ban")
     banned_tokens_processor processor = new_banned_tokens_processor(256)
-    int[] history = int[]{1, 2, 3, 1, 2, 3, 1, 2, 3}
+    []int history = []int{1, 2, 3, 1, 2, 3, 1, 2, 3}
     processor.ban_repeated_token(history, 1)
     if processor.is_token_banned(1) {
         print("  ✓ Adaptive ban applied for repeated token")
@@ -131,13 +131,13 @@ func test_diversity_processor() {
     processor.set_temperature(0.8)
     processor.set_top_k(40)
     processor.set_top_p(0.9)
-    float[] logits = make(float[], 256)
+    []float logits = make([]float, 256)
     int i = 0
     for i < 256 {
         logits[i] = float(i)
         i = i + 1
     }
-    float[] result = processor.process_logits(logits)
+    []float result = processor.process_logits(logits)
     if len(result) == 256 {
         print("  ✓ Diversity processor processes logits correctly")
     }
@@ -192,13 +192,13 @@ func test_processor_pipeline() {
     topk_params["k"] = 40.0
     mgr.register_processor("temp", "temperature", 1, temp_params)
     mgr.register_processor("topk", "top_k", 2, topk_params)
-    float[] logits = make(float[], 256)
+    []float logits = make([]float, 256)
     int i = 0
     for i < 256 {
         logits[i] = float(i)
         i = i + 1
     }
-    float[] result = mgr.process_logits(logits)
+    []float result = mgr.process_logits(logits)
     if len(result) == 256 {
         print("  ✓ Pipeline processes logits correctly")
     }
@@ -239,7 +239,7 @@ func test_creative_preset() {
 func test_inference_pipeline() {
     print("🧪 Test: Inference Pipeline")
     inference_with_logits_processing pipeline = create_inference_pipeline(256)
-    float[] logits = make(float[], 256)
+    []float logits = make([]float, 256)
     int i = 0
     for i < 256 {
         logits[i] = float(i)
@@ -254,7 +254,7 @@ func test_inference_pipeline() {
 
 func test_token_selection() {
     print("🧪 Test: Token Selection Methods")
-    float[] logits = float[]{1.0, 5.0, 3.0, 2.0}
+    []float logits = []float{1.0, 5.0, 3.0, 2.0}
     int greedy_token = select_greedy_token(logits)
     if greedy_token == 1 {
         print("  ✓ Greedy selection picks maximum")
@@ -268,7 +268,7 @@ func test_statistics() {
     map[string]float params = map[string]float{}
     params["temperature"] = 0.8
     mgr.register_processor("temp", "temperature", 0, params)
-    float[] logits = make(float[], 256)
+    []float logits = make([]float, 256)
     int i = 0
     for i < 256 {
         logits[i] = float(i)

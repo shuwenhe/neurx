@@ -1,9 +1,9 @@
 import "types.s"
 struct ExecutionScheduler {
     scheduling_policy   i32
-    prefill_sequences   string[]
-    decode_sequences    string[]
-    pending_sequences   string[]
+    prefill_sequences   []string
+    decode_sequences    []string
+    pending_sequences   []string
     current_schedule    IterationSchedule
     schedule_count      i64
     total_scheduled     i64
@@ -143,14 +143,14 @@ func (ExecutionScheduler* es) GetScheduleStatistics() map[string]i64 {
 func (ExecutionScheduler* es) ClearCompleted(completed_ids []string) {
     for i := 0; i < len(completed_ids); i++ {
         completed := completed_ids[i]
-        new_prefill := make(string[], 0)
+        new_prefill := make([]string, 0)
         for j := 0; j < len(es.prefill_sequences); j++ {
             if es.prefill_sequences[j] != completed {
                 new_prefill = append(new_prefill, es.prefill_sequences[j])
             }
         }
         es.prefill_sequences = new_prefill
-        new_decode := make(string[], 0)
+        new_decode := make([]string, 0)
         for j := 0; j < len(es.decode_sequences); j++ {
             if es.decode_sequences[j] != completed {
                 new_decode = append(new_decode, es.decode_sequences[j])
@@ -171,7 +171,7 @@ func (ExecutionScheduler* es) EstimateLatency(schedule IterationSchedule) i32 {
 }
 
 func (ExecutionScheduler* es) GetNextBatch(batch_type i32, batch_size i32) []string {
-    batch := make(string[], 0)
+    batch := make([]string, 0)
     if batch_type == PHASE_PREFILL {
         for i := 0; i < len(es.prefill_sequences) && i < int(batch_size); i++ {
             batch = append(batch, es.prefill_sequences[i])

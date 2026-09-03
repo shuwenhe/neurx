@@ -203,7 +203,7 @@ func (r error_recovery*) get_backoff_delay(attempt_number int32) int64 {
 
 struct content_filter {
 	bool                        enabled
-	string[]                 filter_rules
+	[]string                 filter_rules
 	int64                       blocked_count
 	sync.Mutex                  mu
 }
@@ -211,7 +211,7 @@ struct content_filter {
 func create_content_filter() content_filter {
 	return content_filter{
 		enabled:       true,
-		filter_rules:  make(string[], 0),
+		filter_rules:  make([]string, 0),
 		blocked_count: 0,
 		mu:            sync.Mutex{},
 	}
@@ -247,7 +247,7 @@ func (f content_filter*) get_blocked_count() int64 {
 struct error_logging {
 	bool                        enable_logging
 	string                      log_level
-	string[]                 error_logs
+	[]string                 error_logs
 	int32                       max_log_size
 	sync.Mutex                  mu
 }
@@ -256,7 +256,7 @@ func create_error_logging() error_logging {
 	return error_logging{
 		enable_logging: true,
 		log_level:      "error",
-		error_logs:     make(string[], 0, 10000),
+		error_logs:     make([]string, 0, 10000),
 		max_log_size:   10000,
 		mu:             sync.Mutex{},
 	}
@@ -278,7 +278,7 @@ func (l error_logging*) log_error(error_msg string) {
 func (l error_logging*) get_error_logs() []string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	logs := make(string[], 0, len(l.error_logs))
+	logs := make([]string, 0, len(l.error_logs))
 	for log := range l.error_logs {
 		logs = append(logs, log)
 	}
@@ -288,7 +288,7 @@ func (l error_logging*) get_error_logs() []string {
 func (l error_logging*) clear_logs() {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.error_logs = make(string[], 0, 10000)
+	l.error_logs = make([]string, 0, 10000)
 }
 
 func contains(text string, substring string) bool {

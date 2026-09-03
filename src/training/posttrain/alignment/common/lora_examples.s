@@ -35,8 +35,8 @@ func example_1_basic_lora_finetuning() {
     []lora_trajectory trajectories = []lora_trajectory{}
     int i = 0
     for i < 10 {
-        float[] input_ids = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
-        float[] targets = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
+        []float input_ids = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
+        []float targets = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
         lora_trajectory traj = lora_trajectory {
             input_ids: input_ids,
             targets: targets,
@@ -60,7 +60,7 @@ func example_2_rank_tradeoff() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 2: Rank Trade-off Analysis                     ║")
     println("╚════════════════════════════════════════════════════════╝")
-    int[] ranks = int[]{4, 8, 16, 32}
+    []int ranks = []int{4, 8, 16, 32}
     lora_config base_cfg = default_lora_config()
     base_cfg.seq_len = 128
     base_cfg.hidden_size = 256
@@ -71,8 +71,8 @@ func example_2_rank_tradeoff() {
     []lora_trajectory trajectories = []lora_trajectory{}
     int i = 0
     for i < 5 {
-        float[] input_ids = init_gaussian(base_cfg.seq_len * base_cfg.hidden_size, 0.1)
-        float[] targets = init_gaussian(base_cfg.seq_len * base_cfg.hidden_size, 0.1)
+        []float input_ids = init_gaussian(base_cfg.seq_len * base_cfg.hidden_size, 0.1)
+        []float targets = init_gaussian(base_cfg.seq_len * base_cfg.hidden_size, 0.1)
         lora_trajectory traj = lora_trajectory {
             input_ids: input_ids,
             targets: targets,
@@ -136,8 +136,8 @@ func example_3_multilayer_lora() {
     println("\nTraining progress:")
     int step = 0
     for step < 100 {
-        float[] input_ids = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
-        float[] targets = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
+        []float input_ids = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
+        []float targets = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
         state = lora_training_step(state, input_ids, targets)
         if step % 20 == 0 {
             println("Step " + int_to_str(step) + " - Loss: " + fmt_float(state.current_loss, 4) + ", LR: " + fmt_float(state.current_lr, 6))
@@ -152,9 +152,9 @@ func example_4_task_specific_lora() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 4: task-Specific LoRA Configuration            ║")
     println("╚════════════════════════════════════════════════════════╝")
-    string[] tasks = string[]{"classification", "generation", "qa"}
-    int[] task_ranks = int[]{8, 16, 24}
-    float[] task_lrs = float[]{1e-3, 5e-4, 1e-4}
+    []string tasks = []string{"classification", "generation", "qa"}
+    []int task_ranks = []int{8, 16, 24}
+    []float task_lrs = []float{1e-3, 5e-4, 1e-4}
     println("task Configuration Summary:")
     println("| task | Rank | Learning Rate | Memory Efficiency |")
     println("|------|------|---------------|-------------------|")

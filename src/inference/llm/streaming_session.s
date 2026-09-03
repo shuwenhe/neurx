@@ -18,20 +18,20 @@ struct streaming_session_config {
 
 struct streaming_session_state {
     streaming_session_config config
-    int[] session_ids
-    int[] streaming
-    int[] timeout_ms
-    int[] last_active_ms
-    int[] inflight
-    int[] close_on_finish
-    int[] last_request_ids
-    int[] pending_request_ids
-    int[] committed_origin_tokens
-    int[] committed_output_tokens
-    int[] pending_origin_tokens
-    int[] kv_committed_tokens
-    int[] kv_pages
-    int[] active
+    []int session_ids
+    []int streaming
+    []int timeout_ms
+    []int last_active_ms
+    []int inflight
+    []int close_on_finish
+    []int last_request_ids
+    []int pending_request_ids
+    []int committed_origin_tokens
+    []int committed_output_tokens
+    []int pending_origin_tokens
+    []int kv_committed_tokens
+    []int kv_pages
+    []int active
     int session_count
     int opened
     int closed
@@ -49,7 +49,7 @@ struct session_update_result {
 }
 
 func session_int_array(int capacity) []int {
-    int[] values = make([]int, capacity)
+    []int values = make([]int, capacity)
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

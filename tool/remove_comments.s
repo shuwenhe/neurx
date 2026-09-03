@@ -73,7 +73,7 @@ func remove_all_comments(string content) string {
     return step2
 }
 
-func main(string[] args) int {
+func main([]string args) int {
     _ = __sys_write_string(1, "NeurX Comment Remover (Pure S Implementation)\n")
     _ = __sys_write_string(1, "✓ All comments removed using sed (POSIX compliance)\n")
     return 0

@@ -233,7 +233,7 @@ func (worker_process_monitor* monitor) GetWorkerMetrics(worker_id string) *worke
 }
 
 func (worker_process_monitor* monitor) ListAllWorkers() []string {
-    workers := make(string[], 0)
+    workers := make([]string, 0)
     for worker_id := range monitor.workers {
         workers = append(workers, worker_id)
     }

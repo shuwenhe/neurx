@@ -15,8 +15,8 @@ struct kv_cache_page {
     int page_id
     int used_tokens
     int max_tokens
-    float[] key_data
-    float[] value_data
+    []float key_data
+    []float value_data
     int last_accessed_step
     int access_count
 }
@@ -36,8 +36,8 @@ struct kv_cache_optimizer {
     []kv_cache_page pages
     kv_cache_config config
     kv_cache_statistics stats
-    int[] free_page_list
-    int[] lru_order
+    []int free_page_list
+    []int lru_order
     int current_step
 }
 
@@ -163,8 +163,8 @@ func evict_page_if_needed(kv_cache_optimizer* opt) bool {
 
 func add_kv_tokens(
     kv_cache_optimizer* opt,
-    float[] key_tokens,
-    float[] value_tokens
+    []float key_tokens,
+    []float value_tokens
 ) bool {
     if len(key_tokens) == 0 {
         return true
@@ -306,8 +306,8 @@ func main() {
     println("")
     println("Step 2: Simulating token caching")
     println("─────────────────────────────────────────────────────────────")
-    float[] dummy_keys = make([]float, 1024)
-    float[] dummy_values = make([]float, 1024)
+    []float dummy_keys = make([]float, 1024)
+    []float dummy_values = make([]float, 1024)
     int j = 0
     for j < 10 {
         if add_kv_tokens(opt, dummy_keys, dummy_values) {
