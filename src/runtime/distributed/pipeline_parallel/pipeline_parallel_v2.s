@@ -109,7 +109,9 @@ func execute_1f1b_step(
     ref pipeline_state state,
     [][]double initial_input,
     func forward_fn,
+
     func backward_fn,
+
     func loss_fn) double {
     pipeline_config cfg = state.config
     int rank = cfg.pp_rank

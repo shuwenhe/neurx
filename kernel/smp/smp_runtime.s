@@ -1,15 +1,23 @@
 package neurx.kernel.smp
 
 func CPU_ABSENT() int { 0 }
+
 func CPU_DISCOVERED() int { 1 }
+
 func CPU_PREPARED() int { 2 }
+
 func CPU_INIT_SENT() int { 3 }
+
 func CPU_SIPI_SENT() int { 4 }
+
 func CPU_ONLINE() int { 5 }
+
 func CPU_FAILED() int { 6 }
 
 func IPI_RESCHEDULE() int { 1 }
+
 func IPI_CALL_FUNCTION() int { 2 }
+
 func IPI_CPU_STOP() int { 4 }
 
 struct cpu_context {

@@ -5,13 +5,21 @@ struct bpf_program_type {
 }
 
 func bpf_program_type_socket_filter() bpf_program_type { bpf_program_type { value: 0 } }
+
 func bpf_program_type_kprobe() bpf_program_type { bpf_program_type { value: 1 } }
+
 func bpf_program_type_tracepoint() bpf_program_type { bpf_program_type { value: 2 } }
+
 func bpf_program_type_xdp() bpf_program_type { bpf_program_type { value: 3 } }
+
 func bpf_program_type_perf_event() bpf_program_type { bpf_program_type { value: 4 } }
+
 func bpf_program_type_cgroup_sock() bpf_program_type { bpf_program_type { value: 5 } }
+
 func bpf_program_type_cgroup_device() bpf_program_type { bpf_program_type { value: 6 } }
+
 func bpf_program_type_sk_msg() bpf_program_type { bpf_program_type { value: 7 } }
+
 func bpf_program_type_raw_tracepoint() bpf_program_type { bpf_program_type { value: 8 } }
 
 struct bpf_map_type {
@@ -19,9 +27,13 @@ struct bpf_map_type {
 }
 
 func bpf_map_type_array() bpf_map_type { bpf_map_type { value: 0 } }
+
 func bpf_map_type_hash() bpf_map_type { bpf_map_type { value: 1 } }
+
 func bpf_map_type_ringbuf() bpf_map_type { bpf_map_type { value: 2 } }
+
 func bpf_map_type_perf_array() bpf_map_type { bpf_map_type { value: 3 } }
+
 func bpf_map_type_stack_trace() bpf_map_type { bpf_map_type { value: 4 } }
 
 struct bpf_insn {

@@ -5,8 +5,11 @@ struct module_state {
 }
 
 func module_state_live() module_state { module_state { value: 0 } }
+
 func module_state_coming() module_state { module_state { value: 1 } }
+
 func module_state_going() module_state { module_state { value: 2 } }
+
 func module_state_unformed() module_state { module_state { value: 3 } }
 
 struct module_dependency {

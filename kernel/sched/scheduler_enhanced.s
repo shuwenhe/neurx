@@ -5,10 +5,15 @@ struct sched_class {
 }
 
 func sched_class_idle() sched_class { sched_class { value: 0 } }
+
 func sched_class_normal() sched_class { sched_class { value: 1 } }
+
 func sched_class_batch() sched_class { sched_class { value: 2 } }
+
 func sched_class_fifo() sched_class { sched_class { value: 3 } }
+
 func sched_class_rr() sched_class { sched_class { value: 4 } }
+
 func sched_class_deadline() sched_class { sched_class { value: 5 } }
 
 struct se_stats {

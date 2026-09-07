@@ -1,8 +1,11 @@
 package neurx.kernel.core
 
 func MAX_CPUS() int { 64 }
+
 func MAX_TASKS() int { 1024 }
+
 func NO_CPU() int { -1 }
+
 func NO_TASK() int { -1 }
 
 struct highres_clock {

@@ -5,14 +5,23 @@ struct device_type {
 }
 
 func device_type_cpu() device_type { device_type { value: 0 } }
+
 func device_type_memory() device_type { device_type { value: 1 } }
+
 func device_type_storage() device_type { device_type { value: 2 } }
+
 func device_type_network() device_type { device_type { value: 3 } }
+
 func device_type_gpu() device_type { device_type { value: 4 } }
+
 func device_type_tpu() device_type { device_type { value: 5 } }
+
 func device_type_sensor() device_type { device_type { value: 6 } }
+
 func device_type_actuator() device_type { device_type { value: 7 } }
+
 func device_type_pci() device_type { device_type { value: 8 } }
+
 func device_type_usb() device_type { device_type { value: 9 } }
 
 struct device_state {
@@ -20,10 +29,15 @@ struct device_state {
 }
 
 func device_state_unknown() device_state { device_state { value: 0 } }
+
 func device_state_detected() device_state { device_state { value: 1 } }
+
 func device_state_initialized() device_state { device_state { value: 2 } }
+
 func device_state_bound() device_state { device_state { value: 3 } }
+
 func device_state_suspended() device_state { device_state { value: 4 } }
+
 func device_state_removed() device_state { device_state { value: 5 } }
 
 struct device_attribute {

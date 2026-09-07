@@ -54,13 +54,19 @@ struct mm_struct {
 }
 
 func PROT_NONE() int { 0 }
+
 func PROT_READ() int { 1 }
+
 func PROT_WRITE() int { 2 }
+
 func PROT_EXEC() int { 4 }
 
 func MAP_PRIVATE() int { 2 }
+
 func MAP_SHARED() int { 1 }
+
 func MAP_ANONYMOUS() int { 32 }
+
 func MAP_FIXED() int { 16 }
 
 struct tlb_entry {

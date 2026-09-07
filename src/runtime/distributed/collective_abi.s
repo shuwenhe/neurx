@@ -13,11 +13,17 @@ extern "libc:neurx_collective_async_error" func neurx_collective_async_error(int
 extern "libc:neurx_collective_last_error" func neurx_collective_last_error(int communicator) string
 
 func collective_backend_nccl() string { "nccl" }
+
 func collective_backend_hccl() string { "hccl" }
+
 func collective_backend_rccl() string { "rccl" }
+
 func collective_dtype_float32() int { 0 }
+
 func collective_dtype_float16() int { 1 }
+
 func collective_dtype_bfloat16() int { 2 }
+
 func collective_reduce_sum() int { 0 }
 
 struct communicator {

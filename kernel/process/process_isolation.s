@@ -1,9 +1,13 @@
 package neurx.kernel.process
 
 func PROCESS_OK() int { 0 }
+
 func PROCESS_NOT_FOUND() int { 1 }
+
 func PROCESS_PERMISSION_DENIED() int { 2 }
+
 func PROCESS_LIMIT() int { 3 }
+
 func PROCESS_INVALID_NAMESPACE() int { 4 }
 
 struct process_isolation {

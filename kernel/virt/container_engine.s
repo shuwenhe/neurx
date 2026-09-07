@@ -5,11 +5,17 @@ struct namespace_type {
 }
 
 func namespace_type_ipc() namespace_type { namespace_type { value: 0 } }
+
 func namespace_type_network() namespace_type { namespace_type { value: 1 } }
+
 func namespace_type_mount() namespace_type { namespace_type { value: 2 } }
+
 func namespace_type_pid() namespace_type { namespace_type { value: 3 } }
+
 func namespace_type_user() namespace_type { namespace_type { value: 4 } }
+
 func namespace_type_uts() namespace_type { namespace_type { value: 5 } }
+
 func namespace_type_cgroup() namespace_type { namespace_type { value: 6 } }
 
 struct namespace {

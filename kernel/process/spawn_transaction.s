@@ -12,10 +12,15 @@ use neurx.kernel.core.execution_core
 use neurx.kernel.core.enqueue_task
 
 func SPAWN_OK() int { 0 }
+
 func SPAWN_NAMESPACE_FAILED() int { 1 }
+
 func SPAWN_RESOURCE_FAILED() int { 2 }
+
 func SPAWN_BIND_FAILED() int { 3 }
+
 func SPAWN_CREDENTIAL_FAILED() int { 4 }
+
 func SPAWN_SCHEDULER_FAILED() int { 5 }
 
 struct spawn_transaction_result {

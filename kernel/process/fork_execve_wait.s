@@ -31,11 +31,17 @@ struct signal_struct {
 }
 
 func task_state_new() int { 0 }
+
 func task_state_ready() int { 1 }
+
 func task_state_running() int { 2 }
+
 func task_state_blocked() int { 3 }
+
 func task_state_stopped() int { 4 }
+
 func task_state_zombie() int { 5 }
+
 func task_state_dead() int { 6 }
 
 struct process_table {

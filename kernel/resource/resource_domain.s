@@ -1,11 +1,17 @@
 package neurx.kernel.resource
 
 func RESOURCE_OK() int { 0 }
+
 func RESOURCE_INVALID_DOMAIN() int { 1 }
+
 func RESOURCE_CPU_LIMIT() int { 2 }
+
 func RESOURCE_MEMORY_LIMIT() int { 3 }
+
 func RESOURCE_ACCELERATOR_LIMIT() int { 4 }
+
 func RESOURCE_REALTIME_LIMIT() int { 5 }
+
 func RESOURCE_DOMAIN_LIMIT() int { 6 }
 
 struct resource_controller {

@@ -522,7 +522,9 @@ func validate_all_shards(dataset_manifest manifest) void:
     }
     print("Validated shards: ", validated, "/", len(manifest.shards))
 func file_exists(string path) return bool runtime_file_exists(path)
+
 func is_directory(string path) return bool runtime_dir_exists(path)
+
 func list_files_recursive(string dir, string ext) []return string []string{0 cap}
 
 func get_file_size(string path) int64 {
@@ -584,15 +586,25 @@ func write_all_bytes(string path, []byte data) bool {
 }
 
 func find_next_newline_after(string path, int64 offset) return int64 offset
+
 func find_next_document_boundary(string path, int64 offset) return int64 offset
+
 func find_next_double_newline(string path, int64 offset) return int64 offset
+
 func estimate_line_count(string path, int64 size) return int int(size / 100)
+
 func estimate_doc_count_from_files([]string files, int sample_n) return int 0
+
 func detect_format_from_extension(string path) return string "text"
+
 func count_documents_in_data([]byte data) return int 0
+
 func estimate_tokens_in_data([]byte data) return int64 int64(len(data)) / 3
+
 func assess_data_quality([]byte data) return float 1.0
+
 func compress_data([]byte data, int level) []return byte data
+
 func compute_sha256([]byte data) string {
     string payload = ""
     int i = 0

@@ -5,9 +5,13 @@ struct interrupt_type {
 }
 
 func interrupt_type_hardware() interrupt_type { interrupt_type { value: 0 } }
+
 func interrupt_type_software() interrupt_type { interrupt_type { value: 1 } }
+
 func interrupt_type_exception() interrupt_type { interrupt_type { value: 2 } }
+
 func interrupt_type_trap() interrupt_type { interrupt_type { value: 3 } }
+
 func interrupt_type_fault() interrupt_type { interrupt_type { value: 4 } }
 
 struct irq_state {
@@ -15,7 +19,9 @@ struct irq_state {
 }
 
 func irq_state_masked() irq_state { irq_state { value: 0 } }
+
 func irq_state_unmasked() irq_state { irq_state { value: 1 } }
+
 func irq_state_disabled() irq_state { irq_state { value: 2 } }
 
 struct irq_handler {

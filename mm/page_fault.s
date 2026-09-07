@@ -1,8 +1,11 @@
 package neurx.mm.fault
 
 func VM_OK() int { 0 }
+
 func VM_OUT_OF_MEMORY() int { 1 }
+
 func VM_SEGFAULT() int { 2 }
+
 func VM_MAPPING_LIMIT() int { 3 }
 
 struct vm_system {

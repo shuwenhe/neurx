@@ -63,6 +63,7 @@ struct code_block {
     string code
     string filename
 }
+
 struct sandbox_environment {
     code_interpreter_config config
     string session_id
@@ -241,6 +242,7 @@ struct security_check_result {
     bool allowed
     string reason
 }
+
 struct session_state {
     string session_id
     float created_at
@@ -298,6 +300,7 @@ struct session_summary {
     list<string> variable_names
     float success_rate
 }
+
 struct python_runtime {
     string sandbox_dir
     int memory_limit
@@ -429,6 +432,7 @@ struct error_info {
     string message
     list<string> traceback
 }
+
 struct java_script_runtime {
     any vm_context
     init() {
@@ -474,6 +478,7 @@ struct java_script_runtime {
         }
     }
 }
+
 struct shell_runtime {
     bool allow_network
     set<string> allowed_commands
@@ -537,6 +542,7 @@ struct shell_runtime {
         }
     }
 }
+
 struct sql_runtime {
     string db_path
     DatabaseConnection connection
@@ -611,6 +617,7 @@ struct sql_query_result {
     list<list<any>> rows
     int row_count
 }
+
 struct result_formatter {
     code_interpreter_config config
     init(config: code_interpreter_config) {
@@ -685,6 +692,7 @@ struct formatted_output {
     bool has_visualizations
     bool has_files
 }
+
 struct data_analysis_helper {
     sandbox_environment sandbox
     result_formatter formatter
@@ -843,6 +851,7 @@ else:
         return this.sandbox.execute(code_block)
     }
 }
+
 struct code_interpreter {
     code_interpreter_config config
     sandbox_environment sandbox

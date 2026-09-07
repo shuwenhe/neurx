@@ -1,7 +1,9 @@
 package neurx.kernel.platform
 
 func PROFILE_DATACENTER() int { 1 }
+
 func PROFILE_ROBOTICS() int { 2 }
+
 func PROFILE_AUTOMOTIVE() int { 3 }
 
 struct platform_capabilities {

@@ -5,11 +5,17 @@ struct resource_type {
 }
 
 func resource_type_cpu_shares() resource_type { resource_type { value: 0 } }
+
 func resource_type_cpu_quota() resource_type { resource_type { value: 1 } }
+
 func resource_type_memory_limit() resource_type { resource_type { value: 2 } }
+
 func resource_type_memory_soft_limit() resource_type { resource_type { value: 3 } }
+
 func resource_type_io_weight() resource_type { resource_type { value: 4 } }
+
 func resource_type_io_max_bandwidth() resource_type { resource_type { value: 5 } }
+
 func resource_type_pids_max() resource_type { resource_type { value: 6 } }
 
 struct cgroup_cpu_stats {

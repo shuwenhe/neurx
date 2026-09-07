@@ -5,12 +5,19 @@ struct log_level {
 }
 
 func log_level_emerg() log_level { log_level { value: 0 } }
+
 func log_level_alert() log_level { log_level { value: 1 } }
+
 func log_level_crit() log_level { log_level { value: 2 } }
+
 func log_level_err() log_level { log_level { value: 3 } }
+
 func log_level_warning() log_level { log_level { value: 4 } }
+
 func log_level_notice() log_level { log_level { value: 5 } }
+
 func log_level_info() log_level { log_level { value: 6 } }
+
 func log_level_debug() log_level { log_level { value: 7 } }
 
 struct log_entry {

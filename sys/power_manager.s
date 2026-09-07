@@ -5,11 +5,17 @@ struct power_state {
 }
 
 func power_state_on() power_state { power_state { value: 0 } }
+
 func power_state_idle() power_state { power_state { value: 1 } }
+
 func power_state_s1() power_state { power_state { value: 2 } }
+
 func power_state_s2() power_state { power_state { value: 3 } }
+
 func power_state_s3() power_state { power_state { value: 4 } }
+
 func power_state_s4() power_state { power_state { value: 5 } }
+
 func power_state_s5() power_state { power_state { value: 6 } }
 
 struct cpu_freq_governor {
@@ -17,9 +23,13 @@ struct cpu_freq_governor {
 }
 
 func cpu_freq_governor_performance() cpu_freq_governor { cpu_freq_governor { value: 0 } }
+
 func cpu_freq_governor_powersave() cpu_freq_governor { cpu_freq_governor { value: 1 } }
+
 func cpu_freq_governor_ondemand() cpu_freq_governor { cpu_freq_governor { value: 2 } }
+
 func cpu_freq_governor_conservative() cpu_freq_governor { cpu_freq_governor { value: 3 } }
+
 func cpu_freq_governor_schedutil() cpu_freq_governor { cpu_freq_governor { value: 4 } }
 
 struct cpufreq_policy {

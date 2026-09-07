@@ -5,12 +5,19 @@ struct trace_event_type {
 }
 
 func trace_event_type_syscall() trace_event_type { trace_event_type { value: 0 } }
+
 func trace_event_type_irq() trace_event_type { trace_event_type { value: 1 } }
+
 func trace_event_type_scheduling() trace_event_type { trace_event_type { value: 2 } }
+
 func trace_event_type_memory() trace_event_type { trace_event_type { value: 3 } }
+
 func trace_event_type_io() trace_event_type { trace_event_type { value: 4 } }
+
 func trace_event_type_network() trace_event_type { trace_event_type { value: 5 } }
+
 func trace_event_type_gpu() trace_event_type { trace_event_type { value: 6 } }
+
 func trace_event_type_custom() trace_event_type { trace_event_type { value: 7 } }
 
 struct trace_event {

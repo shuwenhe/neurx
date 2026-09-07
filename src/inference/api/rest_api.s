@@ -37,6 +37,7 @@ func get_inference_backend() string {
     }
     return "cpu"
 }
+
 func parse_json_string(string json_str, string key) string {
     start_key := "\"" + key + "\":"
     start_idx := index_of(json_str, start_key)
