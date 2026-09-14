@@ -1,7 +1,9 @@
 package main
-use std.strings
-use std.io
-use neurx.tool_parsers
+import (
+    "neurx.tool_parsers"
+    "std.io"
+    "std.strings"
+)
 func main() {
     println("╔════════════════════════════════════════════════════════════════╗")
     println("║     NeurX Tool Calling & Function Extraction Framework         ║")

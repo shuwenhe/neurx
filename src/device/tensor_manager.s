@@ -1,6 +1,8 @@
 package neurx.device.tensor_manager
-use neurx.device.abi
-use std.vec.vec
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 struct tensor_allocation {
     device_ptr ptr
     int element_count

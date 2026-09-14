@@ -1,5 +1,7 @@
 package neurx.posttrain.lib.json_parser
-use std.io.{readfile, writefile}
+import (
+    "std.io."
+)
 
 struct json_value {
     int type

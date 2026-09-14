@@ -1,5 +1,7 @@
 package neurx.autograd
-use neurx.tensor.tensor
+import (
+    "neurx.tensor.tensor"
+)
     INPUT,
     ADD,
     MUL,

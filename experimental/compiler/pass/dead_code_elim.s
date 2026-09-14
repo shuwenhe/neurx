@@ -1,6 +1,8 @@
 package neurx.experimental.compiler.passes.dead_code_elim
 
-use neurx.experimental.compiler.ir.graph.computation_graph
+import (
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+)
 
 struct dead_code_result {
     int removed_ops

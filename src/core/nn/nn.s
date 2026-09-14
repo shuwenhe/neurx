@@ -1,10 +1,12 @@
 package neurx.nn
-use neurx.cpu.compute_backend
-use neurx.tensor.tensor
-use neurx.nn.activations
-use neurx.nn.conv
-use neurx.nn.pooling
-use neurx.nn.rnn
+import (
+    "neurx.cpu.compute_backend"
+    "neurx.nn.activations"
+    "neurx.nn.conv"
+    "neurx.nn.pooling"
+    "neurx.nn.rnn"
+    "neurx.tensor.tensor"
+)
 struct linear {
     int in_features
     int out_features

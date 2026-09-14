@@ -1,5 +1,7 @@
-use neurx.agent
-use neurx.runtime.io.{runtime_write_text_file}
+import (
+    "neurx.agent"
+    "neurx.runtime.io."
+)
 string out_prefix = "artifact/checkpoints/agent/code_agent"
 string report_path = out_prefix + "/report.txt"
 string trace_path = out_prefix + "/trace.txt"

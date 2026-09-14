@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_dir_exists, runtime_file_exists}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 func main() {
     project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     shards_dir := runtime_env_get("VERIFY_DATASET_DIR", project_root + "/dataset/pretrain/shard")

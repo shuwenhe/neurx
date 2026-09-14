@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_run_command_output, runtime_file_exists}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     println("[CUDA Environment Verification]")

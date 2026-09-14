@@ -1,5 +1,7 @@
 package neurx.inference.logits_processors.test
-use neurx.inference.logits_processors
+import (
+    "neurx.inference.logits_processors"
+)
 func test_base_processor_temperature() {
     print("🧪 Test: Temperature Scaling")
     []float logits = []float{1.0, 2.0, 3.0, 4.0}

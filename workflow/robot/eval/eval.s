@@ -1,5 +1,7 @@
 package neurx.workflows.robotics.eval
-use neurx.model.robotics.eval.{robotics_eval_state}
+import (
+    "neurx.model.robotics.eval."
+)
 
 func new_robotics_eval_state(string metric_name) robotics_eval_state {
     neurx.model.robotics.eval.new_robotics_eval_state(metric_name)

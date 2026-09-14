@@ -1,5 +1,7 @@
 package neurx.posttrain.multiturn.multiturn_manager
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
     SYSTEM,
     USER,
     ASSISTANT,

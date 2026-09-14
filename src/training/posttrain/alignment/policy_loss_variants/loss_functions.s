@@ -1,5 +1,7 @@
 package neurx.posttrain.loss_variants
-use neurx.tensor
+import (
+    "neurx.tensor"
+)
 struct policy_loss_config {
     float clip_epsilon
     float kl_coef

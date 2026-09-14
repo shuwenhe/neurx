@@ -1,11 +1,13 @@
 package neurx.posttrain.trainer.real_training
-use std.io.eprintln
-use neurx.model.weight_loader.{load_model_weights_mock, load_model_weights_real, model_weights, init_gaussian}
-use neurx.model.base_model_forward.{model_forward}
-use neurx.tokenizer.simple_tokenizer.{create_simple_tokenizer, tokenize, create_labels, simple_tokenizer}
-use neurx.loss.cross_entropy.{cross_entropy_loss, cross_entropy_gradient, perplexity_from_loss}
-use neurx.posttrain.checkpoint.adapter_saver.{save_checkpoint, load_checkpoint}
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+import (
+    "neurx.loss.cross_entropy."
+    "neurx.model.base_model_forward."
+    "neurx.model.weight_loader."
+    "neurx.posttrain.checkpoint.adapter_saver."
+    "neurx.runtime.io."
+    "neurx.tokenizer.simple_tokenizer."
+    "std.io.eprintln"
+)
 
 struct training_config {
     string model_path

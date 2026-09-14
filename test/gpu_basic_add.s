@@ -1,6 +1,8 @@
 package neurx.test.gpu_basic_add
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct cuda_device {
     int device_id

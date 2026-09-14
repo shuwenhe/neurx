@@ -1,7 +1,9 @@
 package main
 
-use std.io
-use std.fs
+import (
+    "std.fs"
+    "std.io"
+)
 
 func main() {
     project_root := "."

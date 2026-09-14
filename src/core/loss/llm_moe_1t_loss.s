@@ -1,6 +1,8 @@
 package neurx.loss.llm_moe_1t_loss
-use neurx.strings
-use neurx.runtime.io.{io_println}
+import (
+    "neurx.runtime.io."
+    "neurx.strings"
+)
 
 struct loss_config {
     string loss_type

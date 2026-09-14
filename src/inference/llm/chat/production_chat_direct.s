@@ -1,6 +1,8 @@
 package neurx.inference.production_chat_direct
-use std.conv.int_to_string
-use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, generate_response_stream}
+import (
+    "neurx.inference.runtime.real_text_engine."
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern func runtime_env_get(string key, string default_value) string

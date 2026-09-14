@@ -1,6 +1,8 @@
 package neurx.posttrain.alignment.vapo
-use neurx.tensor.{tensor, tensor_ops}
-use neurx.nn.{module}
+import (
+    "neurx.nn."
+    "neurx.tensor."
+)
 
 struct vapo_config {
     float learning_rate

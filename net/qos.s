@@ -1,9 +1,11 @@
 package neurx.net.qos
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.spinlock
+import (
+    "neurx.kernel.locking.spinlock"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 enum qos_policy {
     fifo,

@@ -1,5 +1,7 @@
 package main
-use std.io.println
+import (
+    "std.io.println"
+)
 func int_to_str(int n) string {
     if n == 0 {
         return "0"

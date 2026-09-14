@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     dataset_root := runtime_env_get("NEURX_SPLIT_DATASET_ROOT", "dataset/pretrain")

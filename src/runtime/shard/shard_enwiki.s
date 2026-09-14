@@ -1,7 +1,9 @@
 package neurx.shard.shard_enwiki
-use std.io.{exit}
-use std.os.{command, getenv}
-use std.strings.{split, join, contains, has_prefix, has_suffix}
+import (
+    "std.io."
+    "std.os."
+    "std.strings."
+)
 
 func string_char(int c) string {
     string(c)

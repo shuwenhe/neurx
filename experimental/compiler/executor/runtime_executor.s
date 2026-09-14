@@ -1,9 +1,11 @@
 package neurx.experimental.compiler.executor.runtime_executor
 
-use neurx.experimental.compiler.ir.graph.computation_graph
-use neurx.experimental.compiler.ir.operation.{operation, op_type}
-use neurx.experimental.compiler.executor.execution_plan.{execution_plan, create_execution_plan}
-use neurx.experimental.compiler.executor.memory_allocator.{memory_arena, allocate_for_graph}
+import (
+    "neurx.experimental.compiler.executor.execution_plan."
+    "neurx.experimental.compiler.executor.memory_allocator."
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+    "neurx.experimental.compiler.ir.operation."
+)
 
 struct execution_context {
     computation_graph graph

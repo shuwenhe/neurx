@@ -1,8 +1,10 @@
-use std.conv.int_to_string
-use std.result.result
 package neurx.inference.api.http_server
-use src.net.{listen_tcp, tcp_listener, tcp_conn}
-use src.net.http.{http_request, http_response, parse_http_request, format_http_response}
+import (
+    "src.net."
+    "src.net.http."
+    "std.conv.int_to_string"
+    "std.result.result"
+)
 
 struct http_server {
     int listen_fd

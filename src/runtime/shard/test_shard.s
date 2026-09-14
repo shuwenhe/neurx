@@ -1,5 +1,7 @@
 package neurx.shard.test_shard
-use std.io.{println}
+import (
+    "std.io."
+)
 
 func main() i32 {
     println("Test")

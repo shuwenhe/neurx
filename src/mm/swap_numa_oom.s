@@ -1,5 +1,7 @@
 package neurx.mm
-use std.slices
+import (
+    "std.slices"
+)
 struct swap_page {
     int page_id
     int physical_address

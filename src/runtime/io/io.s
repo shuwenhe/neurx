@@ -1,10 +1,12 @@
 package neurx.runtime.io
-use std.env.get as env_get
-use std.fs.read_to_string as fs_read_to_string
-use std.fs.write_text_file as fs_write_text_file
-use std.process.run_process
-use std.process.run_process_output
-use std.slices
+import (
+    "std.env.get"
+    "std.fs.read_to_string"
+    "std.fs.write_text_file"
+    "std.process.run_process"
+    "std.process.run_process_output"
+    "std.slices"
+)
 struct json_value {
 }
 

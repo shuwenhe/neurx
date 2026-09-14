@@ -1,13 +1,14 @@
 package neurx.examples.http_client_example
 
-use std.net.{
+import (
+    "std.net.{"
+)
     socket,
     socket_connect,
     socket_send,
     socket_recv,
     socket_close
 }
-use std.string.{
     string_concat,
     string_length
 }

@@ -1,6 +1,8 @@
 package kernel.rcu
-use std.strings.int_to_string
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+    "std.strings.int_to_string"
+)
 struct rcu_data {
     int cpu_id
     int gp_seq

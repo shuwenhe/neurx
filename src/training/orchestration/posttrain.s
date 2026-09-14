@@ -1,5 +1,7 @@
 package neurx.trainer.posttrain
-use neurx.posttrain.loop.{posttrain_loop_state, posttrain_step, posttrain_loop_state_dict, posttrain_loop_load_state_dict}
+import (
+    "neurx.posttrain.loop."
+)
 
 struct posttrain_trainer_ref {
     posttrain_loop_state loop

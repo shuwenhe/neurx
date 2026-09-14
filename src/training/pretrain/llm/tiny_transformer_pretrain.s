@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output}
-use std.conv.parse_int_default as parse_int
+import (
+    "neurx.runtime.io."
+    "std.conv.parse_int_default"
+)
 extern "intrinsic" func __host_write_text_file(string path, string content) int
 func runtime_write_text_file(string path, string content) () {
     _ = __host_write_text_file(path, content)

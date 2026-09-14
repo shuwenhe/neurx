@@ -1,5 +1,7 @@
 package neurx.posttrain.alignment.pf_ppo
-use neurx.tensor
+import (
+    "neurx.tensor"
+)
 struct pf_ppo_config {
     string reweight_method
     float weight_pow

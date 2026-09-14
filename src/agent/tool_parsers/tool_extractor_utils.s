@@ -1,7 +1,9 @@
 package neurx.tool_parsers
-use std.strings
-use std.regex
-use std.json
+import (
+    "std.json"
+    "std.regex"
+    "std.strings"
+)
 struct ToolExtractorUtils {}
 
 func extract_json_between_markers(

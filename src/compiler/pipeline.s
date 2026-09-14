@@ -1,10 +1,12 @@
 package neurx.compile.pipeline
-use neurx.runtime.compile
-use neurx.compile.ir
-use neurx.compile.pass_manager
-use neurx.compile.lowering
-use neurx.compile.executor
-use neurx.compile.cache
+import (
+    "neurx.compile.cache"
+    "neurx.compile.executor"
+    "neurx.compile.ir"
+    "neurx.compile.lowering"
+    "neurx.compile.pass_manager"
+    "neurx.runtime.compile"
+)
 struct compile_pipeline_state {
     compile_state state
     ir_graph_state graph

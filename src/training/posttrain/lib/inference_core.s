@@ -1,5 +1,7 @@
 package neurx.posttrain.lib.inference_core
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 func model_load(string path) string {
     string msg = "Loaded model: " + path
     return msg

@@ -1,5 +1,7 @@
 package kernel.irq
-use std.strings.int_to_string
+import (
+    "std.strings.int_to_string"
+)
 struct irq_desc {
     int irq_num
     string name

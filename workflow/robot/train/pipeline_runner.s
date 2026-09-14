@@ -1,5 +1,7 @@
 package neurx.workflows.robotics.train.pipeline_runner
-use neurx.model.robotics.train.{
+import (
+    "neurx.model.robotics.train.{"
+)
     robotics_trajectory_train_config,
     robotics_trajectory_train_state,
     robotics_robot_train_config,

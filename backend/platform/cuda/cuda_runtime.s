@@ -1,6 +1,8 @@
 package neurx.platform.cuda.runtime
-use neurx.runtime.io.{runtime_env_get, runtime_run_command_output}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 type cuda_device_ptr = int64
 type cuda_memory_ptr = int64
 type cublas_handle = int64

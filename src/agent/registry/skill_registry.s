@@ -1,7 +1,9 @@
 package neurx.registry.skill_registry
-use neurx.agent.observation
-use neurx.agent.skill_schema
-use neurx.runtime.io.{runtime_write_text_file}
+import (
+    "neurx.agent.observation"
+    "neurx.agent.skill_schema"
+    "neurx.runtime.io."
+)
 
 struct agent_skill_registry_state {
     []agent_skill_record records

@@ -1,8 +1,10 @@
 package neurx.tool_parsers.parsers
-use std.strings
-use std.regex
-use std.json
-use neurx.tool_parsers
+import (
+    "neurx.tool_parsers"
+    "std.json"
+    "std.regex"
+    "std.strings"
+)
 struct Qwen3Parser {
     BaseToolParser base
     bool use_xml

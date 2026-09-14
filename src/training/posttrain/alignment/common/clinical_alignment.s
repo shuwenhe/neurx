@@ -1,7 +1,9 @@
 package neurx.posttrain.alignment.clinical
-use neurx.posttrain.config
-use neurx.posttrain.data
-use neurx.eval.six_dimension
+import (
+    "neurx.eval.six_dimension"
+    "neurx.posttrain.config"
+    "neurx.posttrain.data"
+)
 struct test_set_info {
     string dataset_name
     []string test_question_ids

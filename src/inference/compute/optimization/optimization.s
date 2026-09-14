@@ -1,5 +1,7 @@
 package neurx.inference.optimization
-use std.conv.int_to_string
+import (
+    "std.conv.int_to_string"
+)
 struct flash_attention_config {
     int block_size
     bool use_flash_attention

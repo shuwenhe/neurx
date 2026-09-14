@@ -1,5 +1,7 @@
 package neurx.worker.rollout.trtllm
-use neurx.tensor
+import (
+    "neurx.tensor"
+)
 struct trtllm_config {
     string engine_dir
     int max_batch_size

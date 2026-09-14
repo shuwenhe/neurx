@@ -1,11 +1,13 @@
 package neurx.integration
-use neurx.mm.vm_subsystem
-use neurx.mm.huge_pages
-use neurx.fs.ext4
-use neurx.net.qos_netfilter
-use neurx.driver.cpufreq
-use neurx.mm.compaction_io
-use neurx.kernel.cpu_scheduling
+import (
+    "neurx.driver.cpufreq"
+    "neurx.fs.ext4"
+    "neurx.kernel.cpu_scheduling"
+    "neurx.mm.compaction_io"
+    "neurx.mm.huge_pages"
+    "neurx.mm.vm_subsystem"
+    "neurx.net.qos_netfilter"
+)
 struct os_features_integration {
     vm_manager vm_manager
     huge_pages_pool huge_pages_pool

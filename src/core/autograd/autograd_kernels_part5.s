@@ -1,5 +1,7 @@
 package neurx.autograd
-use neurx.tensor.tensor
+import (
+    "neurx.tensor.tensor"
+)
 func backward_exp(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }

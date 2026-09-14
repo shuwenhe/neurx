@@ -1,5 +1,7 @@
 package neurx.model.llm.base_large
-use neurx.util.math.{exp_approx}
+import (
+    "neurx.util.math."
+)
 
 struct gpt_large_state {
     string name

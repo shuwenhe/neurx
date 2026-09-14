@@ -1,5 +1,7 @@
 package main
-use std.os.{command, getenv}
+import (
+    "std.os."
+)
 
 func string_char(int c) string {
     string(c)

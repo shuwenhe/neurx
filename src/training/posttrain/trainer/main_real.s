@@ -1,6 +1,8 @@
 package neurx.posttrain.trainer.main_real
-use std.io.eprintln
-use neurx.posttrain.trainer.real_training.{run_real_training}
+import (
+    "neurx.posttrain.trainer.real_training."
+    "std.io.eprintln"
+)
 
 func main() {
     eprintln("[NeurX PostTrain] Starting Real Training Pipeline")

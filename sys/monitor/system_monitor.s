@@ -1,6 +1,8 @@
 package neurx.sys.monitor
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct system_metrics {
     int cpu_usage

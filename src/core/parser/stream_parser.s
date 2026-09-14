@@ -1,7 +1,9 @@
 package neurx.parser.stream_parser
-use neurx.parser.types
-use neurx.parser.text_parser
-use neurx.parser.format_parser
+import (
+    "neurx.parser.format_parser"
+    "neurx.parser.text_parser"
+    "neurx.parser.types"
+)
 func create_stream_state() IncrementalParseState {
     return IncrementalParseState{
         buffer: "",

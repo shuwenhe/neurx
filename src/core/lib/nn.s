@@ -1,5 +1,7 @@
 package neurx.lib.nn
-use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, random_matrix, vector_scale, matrix_scale, matrix_multiply, matrix_vector_multiply, matrix_add, vector_add, outer_product}
+import (
+    "neurx.lib.tensor."
+)
 
 struct linear_layer {
     matrix weight

@@ -1,5 +1,7 @@
 package neurx.compile.passes.memory
-use neurx.compile.ir.{ir_graph, ir_node}
+import (
+    "neurx.compile.ir."
+)
 
 struct memory_stats {
     int peak_memory_bytes

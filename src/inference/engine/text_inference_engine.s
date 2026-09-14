@@ -1,5 +1,7 @@
 package neurx.inference.engine.text_inference_engine
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_file, trim, println, printf}
+import (
+    "neurx.runtime.io."
+)
 
 func vocab_size() int { return 151936 }
 

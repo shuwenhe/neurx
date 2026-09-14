@@ -1,7 +1,9 @@
 package main
-use neurx.inference.api.contracts.{inference_request}
-use neurx.inference.executor.native_executor.{native_execution_result}
-use neurx.serving.lifecycle.native_inference_service.{serve_native_inference}
+import (
+    "neurx.inference.api.contracts."
+    "neurx.inference.executor.native_executor."
+    "neurx.serving.lifecycle.native_inference_service."
+)
 
 func main() {
     inference_request request = inference_request {

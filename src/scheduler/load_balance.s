@@ -1,6 +1,8 @@
 package neurx.scheduler.load_balance
 
-use std.vec.vec
+import (
+    "std.vec.vec"
+)
 
 struct load_balance_policy {
     int policy_type

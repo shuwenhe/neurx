@@ -1,7 +1,9 @@
 package neurx.experimental.compiler.ir.graph
 
-use neurx.experimental.compiler.ir.value.{value_type, tensor_value}
-use neurx.experimental.compiler.ir.operation.{operation, op_type}
+import (
+    "neurx.experimental.compiler.ir.operation."
+    "neurx.experimental.compiler.ir.value."
+)
 
 struct computation_graph {
     string graph_name

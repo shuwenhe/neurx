@@ -1,5 +1,7 @@
 package neurx.tests.sse_server_real_test
-use neurx.inference.api.sse_server.{
+import (
+    "neurx.inference.api.sse_server.{"
+)
     sse_server_config,
     sse_session,
     generation_callback_state,
@@ -15,8 +17,6 @@ use neurx.inference.api.sse_server.{
     json_response_header,
     error_response,
 }
-use neurx.inference.api.http_server.{http_request, http_response}
-use neurx.inference.api.openai_protocol.{openai_chat_chunk, openai_done_event}
 
 func expect(bool cond, string name) int {
     if cond {

@@ -1,6 +1,8 @@
 package neurx.inference.engine.decode_state
-use neurx.inference.cache.serving.kv_cache
-use neurx.inference.sampling.serving_sampling
+import (
+    "neurx.inference.cache.serving.kv_cache"
+    "neurx.inference.sampling.serving_sampling"
+)
 struct decode_state {
     int step
     int max_new_tokens

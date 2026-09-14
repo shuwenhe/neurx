@@ -1,6 +1,8 @@
 package neurx.context.context_manager
-use neurx.inference
-use neurx.tool.workspace_tools.{agent_workspace_clip}
+import (
+    "neurx.inference"
+    "neurx.tool.workspace_tools."
+)
 
 struct agent_context_state {
     int token_count

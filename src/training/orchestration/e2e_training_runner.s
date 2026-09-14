@@ -1,8 +1,10 @@
 package neurx.trainer.e2e_training_runner
-use neurx.core.bundle
-use neurx.core.autograd
-use neurx.model.mini_transformer
-use neurx.optimizer.adamw
+import (
+    "neurx.core.autograd"
+    "neurx.core.bundle"
+    "neurx.model.mini_transformer"
+    "neurx.optimizer.adamw"
+)
 import fmt
 import math
 import time

@@ -1,6 +1,8 @@
 package neurx.kernel.devicetree
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct dt_property {
     string prop_name

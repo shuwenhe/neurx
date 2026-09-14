@@ -1,9 +1,11 @@
 package neurx.compile.compiler
-use neurx.platform.errors.{platform_error_state, new_configuration_error, clear_error, platform_error_active}
-use neurx.compile.pipeline
-use neurx.compile.ir.{ir_graph_state, new_ir_graph_state, ir_add_input, ir_add_output, ir_add_node, ir_add_edge, make_ir_node_state, ir_graph_to_text}
-use neurx.compile.backend.direct_codegen.{direct_codegen_plan_state, new_direct_codegen_plan_state, direct_codegen_compile_ir, direct_codegen_result_state, machine_code_blob_state, direct_codegen_write_blob, direct_codegen_write_object_file, direct_codegen_link_executable}
-use neurx.runtime.io.{runtime_env_get, runtime_make_dirs, runtime_write_text_file}
+import (
+    "neurx.compile.backend.direct_codegen."
+    "neurx.compile.ir."
+    "neurx.compile.pipeline"
+    "neurx.platform.errors."
+    "neurx.runtime.io."
+)
 struct compile_options {
     string backend
     string mode

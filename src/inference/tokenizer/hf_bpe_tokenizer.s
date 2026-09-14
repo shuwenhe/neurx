@@ -1,5 +1,7 @@
 package neurx.inference.tokenizer.hf_bpe_tokenizer
-use neurx.core.unicode.normalization.{unicode_database, empty_unicode_database, load_unicode_database, unicode_nfc, unicode_nfkc}
+import (
+    "neurx.core.unicode.normalization."
+)
 extern "intrinsic" func __host_read_binary_file(string path) []int
 struct hf_bpe_tokenizer {
     bool valid

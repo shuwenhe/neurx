@@ -1,5 +1,7 @@
 package neurx.runtime.model.bpe_tokenizer
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 struct bpe_tokenizer {
     map[string]int token_to_id
     []string id_to_token

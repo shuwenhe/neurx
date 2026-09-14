@@ -1,17 +1,19 @@
 package neurx.kernel.os_features_integration
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.mutex
-use neurx.mm.virtual_memory
-use neurx.mm.huge_pages
-use neurx.fs.ext4
-use neurx.net.netfilter
-use neurx.net.qos
-use neurx.kernel.power_management.cpufreq
-use neurx.kernel.power_management.cpuidle
-use neurx.kernel.time_management
+import (
+    "neurx.fs.ext4"
+    "neurx.kernel.locking.mutex"
+    "neurx.kernel.power_management.cpufreq"
+    "neurx.kernel.power_management.cpuidle"
+    "neurx.kernel.time_management"
+    "neurx.mm.huge_pages"
+    "neurx.mm.virtual_memory"
+    "neurx.net.netfilter"
+    "neurx.net.qos"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 struct os_features_manager {
     virtual_memory_enabled: bool,

@@ -1,6 +1,8 @@
 package main
 
-use neurx.distributed.cluster.heartbeat.{create_cluster_heartbeat_state, cluster_heartbeat_write, cluster_heartbeat_scan, cluster_heartbeat_scan_summary}
+import (
+    "neurx.distributed.cluster.heartbeat."
+)
 
 func expect(bool condition, string name) int {
     if condition {

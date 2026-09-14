@@ -1,5 +1,7 @@
 package neurx.distributed.device_communicators
-use neurx.distributed.parallel_state.{group_coordinator, copy_parallel_ranks}
+import (
+    "neurx.distributed.parallel_state."
+)
 extern func neurx_nccl_init_rank(int rank, int world_size, int local_rank) int64
 extern func neurx_nccl_destroy(int64 communicator) int
 extern func neurx_nccl_all_reduce_f32(int64 communicator, int64 send_pointer, int64 receive_pointer, int count, int operation, int64 stream) int

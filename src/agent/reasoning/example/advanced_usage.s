@@ -1,9 +1,11 @@
 package neurx.reasoning.examples.advanced_cot_example
-use neurx.reasoning.cot_config.{new_default_cot_config, new_hierarchical_cot_config}
-use neurx.reasoning.reasoning_chain.new_reasoning_chain
-use neurx.reasoning.reasoning_step.{new_reasoning_step, step_type}
-use neurx.reasoning.reasoning_manager.new_reasoning_manager
-use neurx.reasoning.reasoning_validator.new_reasoning_validator
+import (
+    "neurx.reasoning.cot_config."
+    "neurx.reasoning.reasoning_chain.new_reasoning_chain"
+    "neurx.reasoning.reasoning_manager.new_reasoning_manager"
+    "neurx.reasoning.reasoning_step."
+    "neurx.reasoning.reasoning_validator.new_reasoning_validator"
+)
 func example_adaptive_reasoning_length() {
     config := new_default_cot_config()
     simple_prompt := "What is 5 + 3"
@@ -208,4 +210,3 @@ func example_reasoning_export() {
     validator := new_reasoning_validator(config)
     report := validator.generate_report(chain)
 }
-use neurx.reasoning.cot_config.validation_strategy

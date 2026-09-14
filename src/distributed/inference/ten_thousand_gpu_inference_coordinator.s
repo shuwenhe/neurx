@@ -1,7 +1,9 @@
 package neurx.distributed.inference.ten_thousand_gpu_inference
-use neurx.distributed.inference.global_scheduler
-use neurx.distributed.inference.paged_kv_cache
-use neurx.distributed.inference.prefill_decode
+import (
+    "neurx.distributed.inference.global_scheduler"
+    "neurx.distributed.inference.paged_kv_cache"
+    "neurx.distributed.inference.prefill_decode"
+)
 struct ten_thousand_gpu_inference_coordinator {
     int coordinator_id
     int world_size

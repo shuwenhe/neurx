@@ -1,6 +1,8 @@
 package neurx.optimizer.lbfgs
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct lbfgs_optimizer {
     float lr
     int max_iter

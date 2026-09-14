@@ -1,6 +1,8 @@
 package test.kernel
 
-use kernel.scheduler
+import (
+    "kernel.scheduler"
+)
 
 func main() int {
     init_scheduler()

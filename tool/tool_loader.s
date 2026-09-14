@@ -1,6 +1,8 @@
 package neurx.agent.tool_loader
-use neurx.agent.tool_registry
-use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists}
+import (
+    "neurx.agent.tool_registry"
+    "neurx.runtime.io."
+)
 
 func agent_tool_loader_find_colon(string text, int start) int {
     int i = start

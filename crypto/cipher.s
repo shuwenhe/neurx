@@ -1,6 +1,8 @@
 package neurx.crypto
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct sha256_context {
     int h0

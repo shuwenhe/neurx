@@ -1,5 +1,7 @@
 package neurx.posttrain.loss.cross_entropy
-use neurx.posttrain.model.model_loader.{fill_model_tensor}
+import (
+    "neurx.posttrain.model.model_loader."
+)
 
 struct loss_batch_result {
     float total_loss

@@ -1,5 +1,7 @@
 package neurx.posttrain.core.lora_module
-use std.io.println
+import (
+    "std.io.println"
+)
 struct lora_module_s {
     int input_dim
     int output_dim

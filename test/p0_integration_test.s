@@ -1,13 +1,15 @@
 package neurx.test.p0_integration_test
 
-use std.vec.vec
-use std.string.string
-use neurx.device.cuda_runtime_binding
-use neurx.compute.gpu_gemm_engine
-use neurx.model.weight_loader_complete
-use neurx.model.gpu_transformer_forward
-use neurx.distributed.nccl_binding
-use neurx.inference.engine.gpu_inference_complete
+import (
+    "neurx.compute.gpu_gemm_engine"
+    "neurx.device.cuda_runtime_binding"
+    "neurx.distributed.nccl_binding"
+    "neurx.inference.engine.gpu_inference_complete"
+    "neurx.model.gpu_transformer_forward"
+    "neurx.model.weight_loader_complete"
+    "std.string.string"
+    "std.vec.vec"
+)
 
 func test_weight_loading() (bool, string) {
     println("=== Testing Weight Loading ===")

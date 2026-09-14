@@ -1,13 +1,15 @@
 package neurx.init
 
-use std.slices
-use std.string.string
-use neurx.hal
-use neurx.mm.allocator
-use neurx.kernel.sched
-use neurx.sys.monitor
-use neurx.sys.rpc_framework
-use neurx.backend_selector
+import (
+    "neurx.backend_selector"
+    "neurx.hal"
+    "neurx.kernel.sched"
+    "neurx.mm.allocator"
+    "neurx.sys.monitor"
+    "neurx.sys.rpc_framework"
+    "std.slices"
+    "std.string.string"
+)
 
 struct system_state {
     bool is_running

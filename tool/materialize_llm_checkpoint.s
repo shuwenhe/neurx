@@ -1,5 +1,7 @@
 package main
-use std.io.println
+import (
+    "std.io.println"
+)
 
 func parse_int(string text, int fallback) int {
     if len(text) == 0 { return fallback }

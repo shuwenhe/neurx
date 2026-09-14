@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     ir_path := runtime_env_get("S_IR_RUNNER_INPUT", "")

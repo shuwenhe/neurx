@@ -1,6 +1,8 @@
 package neurx.workflows.agent.code_agent.pipeline_runner
-use neurx.agent
-use neurx.runtime.io.{runtime_write_text_file}
+import (
+    "neurx.agent"
+    "neurx.runtime.io."
+)
 
 func run_agent_code_workflow(
     string goal,

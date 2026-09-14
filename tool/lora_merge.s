@@ -1,5 +1,7 @@
 package neurx.tool.lora_merge
-use std.io.println
+import (
+    "std.io.println"
+)
 
 struct safetensors_header {
     string name

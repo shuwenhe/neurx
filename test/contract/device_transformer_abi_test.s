@@ -1,8 +1,10 @@
 package main
-use neurx.runtime.device.device_tensor.{tensor_dtype_bytes, tensor_numel, tensor_contiguous_strides}
-use neurx.inference.runtime.device_transformer.{transformer_device_config, transformer_schedule, transformer_prefill_schedule, transformer_decode_schedule, transformer_vendor_at}
-use neurx.runtime.device.device_binding.{embedding_binding, paged_attention_binding}
-use neurx.inference.runtime.transformer_executor.{transformer_execution_plan, transformer_plan_binding_valid}
+import (
+    "neurx.inference.runtime.device_transformer."
+    "neurx.inference.runtime.transformer_executor."
+    "neurx.runtime.device.device_binding."
+    "neurx.runtime.device.device_tensor."
+)
 
 func require(bool condition, string message) {
     if !condition { print("FAIL: " + message + "\n"); return }

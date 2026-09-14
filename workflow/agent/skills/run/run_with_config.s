@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     string config = runtime_env_get("NEURX_SKILLS_CONFIG", "workflow/agent/skills/config/sample.yaml")

@@ -1,6 +1,8 @@
 package neurx.optimizer.asgd
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct asgd_optimizer {
     float lr
     float lambd

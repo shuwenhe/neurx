@@ -1,5 +1,7 @@
 package neurx.inference.streaming_chat
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
+import (
+    "neurx.runtime.io."
+)
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int family) int
 extern "intrinsic" func __sys_write_string(int fd, string data) int

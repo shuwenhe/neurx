@@ -1,9 +1,10 @@
 package neurx.moe.transformer_backward
-use neurx.moe.transformer.{
+import (
+    "neurx.moe.transformer.{"
+)
     moe_layer, moe_config, moe_expert, routing_decision, moe_output,
     moe_route, moe_expert_forward, moe_capacity
 }
-use neurx.model.llm.gpt.{gpt_alloc, gpt_matmul, gpt_swish, gpt_sigmoid}
 
 struct moe_expert_grads {
     []float d_gate_weight

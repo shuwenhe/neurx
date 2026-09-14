@@ -1,6 +1,8 @@
 package neurx.fs
-use std.slices
-use std.string.string
+import (
+    "std.slices"
+    "std.string.string"
+)
 struct inode {
     int inode_num
     int file_size

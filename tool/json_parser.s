@@ -1,6 +1,8 @@
 package neurx.tool.json_parser
 
-use std.conv.int_to_string
+import (
+    "std.conv.int_to_string"
+)
 
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_file_read(string path, int max_size) string

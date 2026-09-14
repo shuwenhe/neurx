@@ -1,5 +1,7 @@
 package neurx.platform.config
-use neurx.platform.errors.{platform_error_state, new_configuration_error, clear_error, platform_error_active}
+import (
+    "neurx.platform.errors."
+)
 
 struct runtime_config {
     string default_device

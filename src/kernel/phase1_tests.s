@@ -1,6 +1,8 @@
 package kernel.tests
-use std.io.println
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+    "std.io.println"
+)
 func test_rcu_basic() bool {
     println("[TEST] RCU Basic Functionality")
     var err1 = init_rcu()

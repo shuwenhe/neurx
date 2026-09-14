@@ -1,6 +1,8 @@
 package neurx.optimizer.adamax
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct adamax_optimizer {
     float lr
     float beta1

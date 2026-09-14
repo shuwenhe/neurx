@@ -1,9 +1,11 @@
 package neurx.service
 
-use std.strings.concat
-use std.strings.int_to_string
-use std.io.eprintln
-use std.io.println
+import (
+    "std.io.eprintln"
+    "std.io.println"
+    "std.strings.concat"
+    "std.strings.int_to_string"
+)
 
 struct Node {
     name: string

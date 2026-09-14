@@ -1,6 +1,8 @@
 package neurx.attention.paged_attention_test
-use neurx.attention.paged_attention_core
-use neurx.inference.paged_attention_runtime
+import (
+    "neurx.attention.paged_attention_core"
+    "neurx.inference.paged_attention_runtime"
+)
 func test_basic_paged_cache() {
     config = paged_attention_config{
         block_size: 16,

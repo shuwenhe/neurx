@@ -1,7 +1,9 @@
 package neurx.tool_parsers
-use std.json
-use std.regex
-use std.strings
+import (
+    "std.json"
+    "std.regex"
+    "std.strings"
+)
 struct JsonToolParser {
     BaseToolParser base
     str tool_call_start_marker

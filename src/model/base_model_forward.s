@@ -1,9 +1,10 @@
 package neurx.model.base_model_forward
-use neurx.model.weight_loader.{model_weights, layer_weights}
-use neurx.model.transformer_ops.{
+import (
+    "neurx.model.transformer_ops.{"
+    "neurx.model.weight_loader."
+)
     embedding_lookup, rms_norm, transformer_layer, matmul, add_arrays
 }
-use std.io.eprintln
 func model_forward(
     []int input_ids,
     model_weights weights,

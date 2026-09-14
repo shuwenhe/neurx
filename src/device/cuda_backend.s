@@ -1,5 +1,7 @@
 package neurx.device.cuda_backend
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+)
 struct cuda_device {
     int device_id
     int64 total_memory

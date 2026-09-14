@@ -1,5 +1,7 @@
 package main
-use neurx.moe.core.{moe_core_self_test}
+import (
+    "neurx.moe.core."
+)
 
 func main() {
     int status = moe_core_self_test()

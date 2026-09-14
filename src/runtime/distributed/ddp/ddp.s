@@ -1,6 +1,8 @@
 package neurx.distributed.ddp
-use neurx.strings
-use neurx.distributed.comm
+import (
+    "neurx.distributed.comm"
+    "neurx.strings"
+)
 struct ddp_state {
     string name
     string backend

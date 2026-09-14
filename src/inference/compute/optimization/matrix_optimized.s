@@ -1,5 +1,7 @@
 package neurx.inference.matrix_optimized
-use std.conv.int_to_string
+import (
+    "std.conv.int_to_string"
+)
 struct matrix {
     []float data
     int rows

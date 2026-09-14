@@ -1,5 +1,7 @@
 package neurx.ipc
-use std.slices
+import (
+    "std.slices"
+)
 struct semaphore {
     int sem_id
     int value

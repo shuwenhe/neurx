@@ -1,6 +1,8 @@
 package neurx.data.loader.distributed
-use neurx.runtime.io.{runtime_run_command_output}
-use neurx.data.dataset.dataset.{dataset}
+import (
+    "neurx.data.dataset.dataset."
+    "neurx.runtime.io."
+)
 
 struct data_shard {
     string shard_id

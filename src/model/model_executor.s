@@ -1,6 +1,8 @@
 package neurx.model.model_executor
-use std.slices
-use std.option
+import (
+    "std.option"
+    "std.slices"
+)
 struct model_executor {
     string current_model
     string device

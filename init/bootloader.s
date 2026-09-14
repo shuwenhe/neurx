@@ -1,7 +1,9 @@
 package neurx.init
 
-use std.slices
-use std.string.string
+import (
+    "std.slices"
+    "std.string.string"
+)
 
 struct boot_context {
     int cpu_count

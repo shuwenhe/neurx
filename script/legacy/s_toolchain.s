@@ -1,7 +1,9 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-use std.env.args as host_args
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.env.args"
+    "std.io.println"
+)
 
 func main() {
     args := host_args()

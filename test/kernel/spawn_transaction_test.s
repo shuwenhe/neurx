@@ -1,17 +1,19 @@
 package neurx.test.kernel
 
-use neurx.kernel.process.process_isolation
-use neurx.kernel.process.process_isolation_create
-use neurx.kernel.resource.resource_controller
-use neurx.kernel.resource.resource_controller_create
-use neurx.kernel.resource.create_domain
-use neurx.kernel.core.execution_core
-use neurx.kernel.core.execution_core_create
-use neurx.kernel.process.transaction.process_spawn_transaction
-use neurx.kernel.process.transaction.spawn_transaction_result
-use neurx.kernel.process.transaction.SPAWN_OK
-use neurx.kernel.process.transaction.SPAWN_RESOURCE_FAILED
-use neurx.kernel.process.transaction.SPAWN_CREDENTIAL_FAILED
+import (
+    "neurx.kernel.core.execution_core"
+    "neurx.kernel.core.execution_core_create"
+    "neurx.kernel.process.process_isolation"
+    "neurx.kernel.process.process_isolation_create"
+    "neurx.kernel.process.transaction.SPAWN_CREDENTIAL_FAILED"
+    "neurx.kernel.process.transaction.SPAWN_OK"
+    "neurx.kernel.process.transaction.SPAWN_RESOURCE_FAILED"
+    "neurx.kernel.process.transaction.process_spawn_transaction"
+    "neurx.kernel.process.transaction.spawn_transaction_result"
+    "neurx.kernel.resource.create_domain"
+    "neurx.kernel.resource.resource_controller"
+    "neurx.kernel.resource.resource_controller_create"
+)
 
 func expect(bool condition, string name) int {
     if condition { print("PASS " + name); return 0 }

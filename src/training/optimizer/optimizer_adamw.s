@@ -1,5 +1,7 @@
 package neurx.optimizer.optimizer_adamw
-use neurx.tensor.{tensor, zeros, ones, fill, new}
+import (
+    "neurx.tensor."
+)
 
 struct adam_state {
     float learning_rate

@@ -1,5 +1,7 @@
 package neurx.inference.optimization.optimization_profiler
-use neurx.util.logger
+import (
+    "neurx.util.logger"
+)
 struct performance_metric {
     string metric_name
     float value

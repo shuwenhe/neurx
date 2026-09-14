@@ -1,5 +1,7 @@
 package neurx.posttrain.core.training_loop
-use std.io.println
+import (
+    "std.io.println"
+)
 struct training_step_s {
     int step
     float loss

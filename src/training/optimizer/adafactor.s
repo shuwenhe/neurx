@@ -1,6 +1,8 @@
 package neurx.optimizer.adafactor
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct adafactor_optimizer {
     float lr
     float beta2_decay

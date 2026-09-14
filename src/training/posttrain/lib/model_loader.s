@@ -1,6 +1,8 @@
 package neurx.runtime.model.model_loader
-use std.io.eprintln
-use neurx.posttrain.lib.hf_config as hf_cfg
+import (
+    "neurx.posttrain.lib.hf_config"
+    "std.io.eprintln"
+)
 struct runtime_model {
     string model_type
     int vocab_size

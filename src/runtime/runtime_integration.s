@@ -1,5 +1,7 @@
 package v1
-use neurx.inference.runtime.model_manifest.{hf_model_manifest, load_hf_model_manifest}
+import (
+    "neurx.inference.runtime.model_manifest."
+)
 
 struct runtime_config {
     string model_path

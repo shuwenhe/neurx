@@ -1,9 +1,11 @@
 package neurx.kernel.power_management.cpufreq
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.spinlock
+import (
+    "neurx.kernel.locking.spinlock"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 enum frequency_scaling_governor {
     gov_performance,

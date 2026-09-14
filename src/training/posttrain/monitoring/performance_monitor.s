@@ -1,5 +1,7 @@
 package neurx.posttrain.monitoring.performance_monitor
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 struct performance_metric {
     string metric_name
     float value

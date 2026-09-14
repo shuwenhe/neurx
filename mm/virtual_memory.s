@@ -1,12 +1,14 @@
 package neurx.mm.virtual_memory
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.mutex
-use neurx.kernel.locking.spinlock
-use neurx.mm.page_table
-use neurx.mm.memory_manager
+import (
+    "neurx.kernel.locking.mutex"
+    "neurx.kernel.locking.spinlock"
+    "neurx.mm.memory_manager"
+    "neurx.mm.page_table"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 struct virtual_address_space {
     vm_areas: vm_area[],

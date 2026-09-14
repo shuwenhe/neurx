@@ -1,6 +1,8 @@
 package neurx.sys.inference
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct model_config {
     string model_id

@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func trim(string s) string {
     int i = 0

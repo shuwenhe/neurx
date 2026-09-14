@@ -1,5 +1,7 @@
 package main
-use std.io.println
+import (
+    "std.io.println"
+)
 
 func main() {
     println("🔧 NeurX toolsystem - neurxcompleteimplementation")
@@ -57,7 +59,7 @@ func main() {
     println("🚀 quickstartexample: ")
     println("")
     println("
-    println("auto system = std::make_unique<neur_x_tool_system>();")
+    println("auto system = std.make_unique<neur_x_tool_system>();")
     println("system.initialize();")
     println("")
     println("

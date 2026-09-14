@@ -1,5 +1,7 @@
 package neurx.compile.ir
-use neurx.strings
+import (
+    "neurx.strings"
+)
 struct ir_node_state {
     string name
     string op

@@ -1,5 +1,7 @@
 package neurx.diffusion.model
-use neurx.ops
+import (
+    "neurx.ops"
+)
 struct denoiser_state {
     string name
     int channels

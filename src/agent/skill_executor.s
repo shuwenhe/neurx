@@ -1,6 +1,8 @@
 package neurx.agent.skill_executor
-use neurx.registry.skill_registry
-use neurx.agent.skill_schema
+import (
+    "neurx.agent.skill_schema"
+    "neurx.registry.skill_registry"
+)
 struct agent_skill_execution_state {
     string active_skill
     string status

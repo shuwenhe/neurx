@@ -1,5 +1,7 @@
 package neurx.mm
-use std.slices
+import (
+    "std.slices"
+)
 struct huge_page {
     int base_address
     int size  

@@ -1,8 +1,10 @@
 package main
-use neurx.backends.cpu.transformer_decode.{hf_cpu_config, hf_kv_cache, hf_layer_result, hf_generation_result, new_hf_kv_cache, hf_cpu_layer, hf_generate}
-use neurx.models.loaders.hf_transformer.{hf_layer_weights, hf_model_weights, hf_resolve_tensor_path}
-use neurx.models.formats.hf_config.{hf_model_config, parse_hf_config}
-use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding, read_f32_tensor, f32_tensor_result}
+import (
+    "neurx.backends.cpu.transformer_decode."
+    "neurx.models.formats.hf_config."
+    "neurx.models.formats.safetensors_embedding."
+    "neurx.models.loaders.hf_transformer."
+)
 
 func matrix(int rows, int columns, float diagonal, float other) []float {
     []float values = make([]float, rows * columns)

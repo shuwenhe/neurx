@@ -1,10 +1,12 @@
 package neurx.mm.huge_pages
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.spinlock
-use neurx.mm.page_table
+import (
+    "neurx.kernel.locking.spinlock"
+    "neurx.mm.page_table"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 const huge_page_2m_size = 0x200000
 const huge_page_1g_size = 0x40000000

@@ -1,5 +1,7 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
+import (
+    "neurx.runtime.io."
+)
 
 func pick_input_file(string root) string {
     string candidate = runtime_env_get("SHARD_INPUT_FILE", "")

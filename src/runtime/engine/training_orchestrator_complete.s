@@ -1,10 +1,12 @@
 package neurx.engine
-use neurx.model.transformer
-use neurx.amp.scaler
-use neurx.distributed.nccl_backend
-use neurx.cuda.device_manager
-use neurx.optimizer.adamw
-use neurx.data.tokenizer
+import (
+    "neurx.amp.scaler"
+    "neurx.cuda.device_manager"
+    "neurx.data.tokenizer"
+    "neurx.distributed.nccl_backend"
+    "neurx.model.transformer"
+    "neurx.optimizer.adamw"
+)
 struct training_config {
     string model_name
     int vocab_size

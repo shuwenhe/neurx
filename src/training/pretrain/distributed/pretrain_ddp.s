@@ -1,9 +1,11 @@
 package neurx.pretrain.distributed
-use neurx.distributed.comm.{process_group_state, new_process_group, process_group_rank, process_group_world_size, process_group_initialized, all_reduce_sum, process_group_state_dict, process_group_load_state_dict}
-use neurx.distributed.ddp.{ddp_state, new_ddp_state, ddp_attach_process_group, ddp_is_distributed, ddp_state_dict, ddp_load_state_dict, ddp_sync_scale, ddp_finalize_step, ddp_step}
-use neurx.runtime.io.{runtime_env_get}
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.distributed.comm."
+    "neurx.distributed.ddp."
+    "neurx.runtime.io."
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct pretrain_ddp_state {
     ddp_state ddp
     process_group_state process_group

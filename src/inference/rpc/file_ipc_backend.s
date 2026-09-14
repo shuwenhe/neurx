@@ -1,6 +1,8 @@
-use std.conv.int_to_string
 package neurx.inference.file_backend
-use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env}
+import (
+    "neurx.inference.runtime.real_text_engine."
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)

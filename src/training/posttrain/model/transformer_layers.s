@@ -1,5 +1,7 @@
 package neurx.posttrain.model.transformer_layers
-use neurx.posttrain.model.model_loader.{fill_model_tensor}
+import (
+    "neurx.posttrain.model.model_loader."
+)
 
 struct embedding_layer {
     []float weight

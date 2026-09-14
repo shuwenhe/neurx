@@ -1,10 +1,12 @@
 package neurx.compute.gpu_gemm_engine
 
-use neurx.compute.cublas_binding
-use neurx.device.cuda_runtime_binding
-use neurx.device.cuda_stream_manager
-use neurx.device.cuda_memory_pool
-use std.vec.vec
+import (
+    "neurx.compute.cublas_binding"
+    "neurx.device.cuda_memory_pool"
+    "neurx.device.cuda_runtime_binding"
+    "neurx.device.cuda_stream_manager"
+    "std.vec.vec"
+)
 
 struct gpu_matrix {
     int64 device_ptr

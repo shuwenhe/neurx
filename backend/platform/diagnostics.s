@@ -1,5 +1,7 @@
 package neurx.platform.diagnostics
-use neurx.platform.config.{runtime_config_parse_result, get_runtime_config}
+import (
+    "neurx.platform.config."
+)
 
 struct runtime_info_state {
     string tensor_version

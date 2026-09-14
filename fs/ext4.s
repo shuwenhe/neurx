@@ -1,9 +1,11 @@
 package neurx.fs.ext4
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.mutex
+import (
+    "neurx.kernel.locking.mutex"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 struct ext4_superblock {
     total_inodes: u32,

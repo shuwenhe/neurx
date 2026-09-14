@@ -1,5 +1,7 @@
 package neurx.posttrain.tools.data_preprocess
-use neurx.tensor.{tensor}
+import (
+    "neurx.tensor."
+)
 
 struct conversation {
     []message messages

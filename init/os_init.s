@@ -1,10 +1,12 @@
 package neurx.os.init
 
-use neurx.kernel.syscall.syscall_dispatcher_create
-use neurx.kernel.syscall.syscall_entry_handler
-use neurx.kernel.process.process_table_create
-use neurx.kernel.process.task_struct_create
-use neurx.mm.vm.mm_struct_create
+import (
+    "neurx.kernel.process.process_table_create"
+    "neurx.kernel.process.task_struct_create"
+    "neurx.kernel.syscall.syscall_dispatcher_create"
+    "neurx.kernel.syscall.syscall_entry_handler"
+    "neurx.mm.vm.mm_struct_create"
+)
 
 struct neurx_os {
     string version

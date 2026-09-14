@@ -1,6 +1,8 @@
 package neurx.posttrain.adapter.peft_saver
-use std.io.println
-use std.io.file
+import (
+    "std.io.file"
+    "std.io.println"
+)
 struct peft_adapter_config {
     int r
     float lora_alpha

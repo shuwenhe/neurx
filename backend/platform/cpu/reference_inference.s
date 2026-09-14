@@ -1,5 +1,7 @@
 package neurx.backends.cpu.reference_inference
-use neurx.backends.api.inference_backend.{backend_generation_result, backend_generation_success, backend_generation_failure}
+import (
+    "neurx.backends.api.inference_backend."
+)
 
 func cpu_reference_generate(string model, string prompt, int max_tokens) backend_generation_result {
     if model == "" { return backend_generation_failure("cpu-reference", "model_not_loaded", "model is required") }

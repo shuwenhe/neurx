@@ -1,8 +1,10 @@
 package neurx.tests.test_module_facade
-use neurx.tensor.tensor
-use neurx.module
-use neurx.module.state_dict
-use neurx.nn
+import (
+    "neurx.module"
+    "neurx.module.state_dict"
+    "neurx.nn"
+    "neurx.tensor.tensor"
+)
 
 func test_module_facade_basic() bool {
     tensor weight = neurx.tensor.new([1.0, 2.0, 3.0, 4.0], [2, 2], true)

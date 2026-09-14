@@ -1,5 +1,7 @@
 package neurx.compile.lowering
-use neurx.runtime.compile
+import (
+    "neurx.runtime.compile"
+)
 struct lowering_plan_state {
     string backend
     string target

@@ -1,5 +1,7 @@
 package neurx.eval.benchmark_eval
-use neurx.model.llm.gpt.{
+import (
+    "neurx.model.llm.gpt.{"
+)
     model_config, language_model, model_output,
     gpt_forward, gpt_generate_greedy
 }

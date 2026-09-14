@@ -1,6 +1,8 @@
 package neurx.kernel.numa
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct numa_node {
     int node_id

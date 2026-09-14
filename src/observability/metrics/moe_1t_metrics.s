@@ -1,7 +1,9 @@
 package neurx.observability.metrics.moe_1t_metrics
-use neurx.strings
-use neurx.runtime.io.{io_println, runtime_make_dirs, runtime_write_text_file, runtime_run_command_output}
-use std.conv.float_to_string_precision
+import (
+    "neurx.runtime.io."
+    "neurx.strings"
+    "std.conv.float_to_string_precision"
+)
 struct training_metrics {
     float loss
     float loss_ce

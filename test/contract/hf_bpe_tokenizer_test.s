@@ -1,6 +1,8 @@
 package main
-use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, hf_bpe_decode_result, hf_bpe_offset_result, load_hf_bpe_tokenizer, hf_bpe_encode, hf_bpe_decode, hf_bpe_encode_bytelevel_offsets}
-use neurx.models.formats.safetensors_embedding.{st_f16_le, st_bf16_le}
+import (
+    "neurx.inference.tokenizer.hf_bpe_tokenizer."
+    "neurx.models.formats.safetensors_embedding."
+)
 
 func main() {
     hf_bpe_tokenizer tokenizer = load_hf_bpe_tokenizer("test/fixture/gateway_model")

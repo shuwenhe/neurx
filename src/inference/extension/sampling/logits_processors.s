@@ -1,8 +1,10 @@
 package neurx.sampling.logits_processors
-use std.slices
-use std.result.result
-use std.math.exp
-use std.math.log
+import (
+    "std.math.exp"
+    "std.math.log"
+    "std.result.result"
+    "std.slices"
+)
 struct processor_error {
     string code
     string message

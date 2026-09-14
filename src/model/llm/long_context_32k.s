@@ -1,6 +1,8 @@
 package neurx.model.llm.long_context_32k
-use neurx.strings
-use neurx.runtime.io.{io_println}
+import (
+    "neurx.runtime.io."
+    "neurx.strings"
+)
 
 struct rope_config {
     int dim

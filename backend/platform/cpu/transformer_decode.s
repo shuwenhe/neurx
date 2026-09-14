@@ -1,6 +1,8 @@
 package neurx.backends.cpu.transformer_decode
-use neurx.models.formats.safetensors_embedding.{safetensors_embedding, embedding_lookup_result, lookup_f32_embedding}
-use neurx.models.loaders.hf_transformer.{hf_layer_weights, hf_model_weights}
+import (
+    "neurx.models.formats.safetensors_embedding."
+    "neurx.models.loaders.hf_transformer."
+)
 
 struct hf_cpu_config {
     int hidden_size

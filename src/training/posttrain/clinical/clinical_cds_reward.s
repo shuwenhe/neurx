@@ -1,5 +1,7 @@
 package neurx.posttrain.clinical
-use neurx.posttrain.reward.{reward_model, reward_train_result}
+import (
+    "neurx.posttrain.reward."
+)
 
 struct medical_fact {
     string entity

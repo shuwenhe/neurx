@@ -1,5 +1,7 @@
 package neurx.inference.real_transformer_layer
-use neurx.attention.paged_attention_core.{
+import (
+    "neurx.attention.paged_attention_core.{"
+)
     paged_attention_config,
     paged_kv_cache,
     slot_mapping,

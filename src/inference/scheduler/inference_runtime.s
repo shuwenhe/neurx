@@ -1,9 +1,11 @@
 package neurx.inference.scheduler.inference_runtime
-use neurx.inference.scheduler.queue.request_queue
-use neurx.scheduler.inference_scheduler
-use neurx.observability.metrics.inference_metrics
-use neurx.inference.cache.prefix_cache
-use neurx.attention.inference_paged
+import (
+    "neurx.attention.inference_paged"
+    "neurx.inference.cache.prefix_cache"
+    "neurx.inference.scheduler.queue.request_queue"
+    "neurx.observability.metrics.inference_metrics"
+    "neurx.scheduler.inference_scheduler"
+)
 struct neurx_inference_runtime_state {
     neurx_request_queue_state queue
     neurx_scheduler_state scheduler

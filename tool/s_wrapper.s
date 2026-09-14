@@ -1,7 +1,9 @@
 package main
-use std.exec
-use std.os
-use std.path
+import (
+    "std.exec"
+    "std.os"
+    "std.path"
+)
 
 func find_s_compiler() string {
     real_s := "/usr/local/bin/s"

@@ -1,8 +1,10 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_run_command_output}
-use neurx.distributed.launcher.{distributed_config, new_distributed_config, validate_distributed_config}
-use neurx.distributed.ddp.{pretrain_ddp_state, new_pretrain_ddp_state_from_env}
-use std.io.println
+import (
+    "neurx.distributed.ddp."
+    "neurx.distributed.launcher."
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 struct distributed_pretrain_config {
     int num_gpus

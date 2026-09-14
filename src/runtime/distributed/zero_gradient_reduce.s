@@ -1,7 +1,9 @@
 package neurx.distributed.zero_gradient_reduce
-use neurx.strings
-use neurx.runtime.io.{io_println}
-use neurx.distributed.collective.{collective_state, allreduce_async, reduce_scatter_async}
+import (
+    "neurx.distributed.collective."
+    "neurx.runtime.io."
+    "neurx.strings"
+)
 
 struct zero_stage3_config {
     int rank

@@ -1,6 +1,8 @@
 package neurx.kernel.syscall
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct syscall_handler_entry {
     int syscall_number

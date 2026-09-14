@@ -1,18 +1,20 @@
 package neurx.test.kernel
 
-use neurx.kernel.resource.resource_controller
-use neurx.kernel.resource.resource_controller_create
-use neurx.kernel.resource.create_domain
-use neurx.kernel.resource.charge
-use neurx.kernel.resource.release
-use neurx.kernel.resource.reset_period
-use neurx.kernel.resource.bind_process
-use neurx.kernel.resource.find_domain
-use neurx.kernel.resource.RESOURCE_OK
-use neurx.kernel.resource.RESOURCE_CPU_LIMIT
-use neurx.kernel.resource.RESOURCE_MEMORY_LIMIT
-use neurx.kernel.resource.RESOURCE_ACCELERATOR_LIMIT
-use neurx.kernel.resource.RESOURCE_REALTIME_LIMIT
+import (
+    "neurx.kernel.resource.RESOURCE_ACCELERATOR_LIMIT"
+    "neurx.kernel.resource.RESOURCE_CPU_LIMIT"
+    "neurx.kernel.resource.RESOURCE_MEMORY_LIMIT"
+    "neurx.kernel.resource.RESOURCE_OK"
+    "neurx.kernel.resource.RESOURCE_REALTIME_LIMIT"
+    "neurx.kernel.resource.bind_process"
+    "neurx.kernel.resource.charge"
+    "neurx.kernel.resource.create_domain"
+    "neurx.kernel.resource.find_domain"
+    "neurx.kernel.resource.release"
+    "neurx.kernel.resource.reset_period"
+    "neurx.kernel.resource.resource_controller"
+    "neurx.kernel.resource.resource_controller_create"
+)
 
 func expect(bool condition, string name) int {
     if condition { print("PASS " + name); return 0 }

@@ -1,11 +1,13 @@
 package main
-use neurx.runtime.device.device_abi.{device_context, device_open, device_close}
-use neurx.runtime.device.device_tensor.{device_tensor, tensor_empty, tensor_release}
-use neurx.runtime.device.device_ops.{op_residual_add}
-use neurx.runtime.device.device_binding.{residual_add_binding}
-use neurx.runtime.device.vendor_lowering.{lowered_op, lower_device_op}
-use neurx.inference.runtime.device_transformer.{transformer_schedule}
-use neurx.inference.runtime.transformer_executor.{transformer_execution_plan, transformer_execution_result, transformer_descriptor_plan_compile, transformer_plan_execute, transformer_plan_release}
+import (
+    "neurx.inference.runtime.device_transformer."
+    "neurx.inference.runtime.transformer_executor."
+    "neurx.runtime.device.device_abi."
+    "neurx.runtime.device.device_binding."
+    "neurx.runtime.device.device_ops."
+    "neurx.runtime.device.device_tensor."
+    "neurx.runtime.device.vendor_lowering."
+)
 
 func main() {
     device_context context = device_open("cuda", 0, "{}")

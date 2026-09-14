@@ -1,6 +1,8 @@
 package neurx.parser.format_parser
-use neurx.parser.types
-use neurx.parser.text_parser
+import (
+    "neurx.parser.text_parser"
+    "neurx.parser.types"
+)
 func detect_format(string text) FormatDetectionResult {
     trimmed := trim_string(text)
     if len(trimmed) == 0 {

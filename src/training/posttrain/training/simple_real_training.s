@@ -1,5 +1,7 @@
 package neurx.posttrain.training.simple_real
-use neurx.runtime.io.{runtime_env_get, runtime_write_binary_file}
+import (
+    "neurx.runtime.io."
+)
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }

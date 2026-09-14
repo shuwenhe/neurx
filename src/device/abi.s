@@ -1,5 +1,7 @@
 package neurx.device.abi
-use std.vec.vec
+import (
+    "std.vec.vec"
+)
 struct device_ptr {
     int64 address
     int device_id

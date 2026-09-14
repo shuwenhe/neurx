@@ -1,12 +1,14 @@
 package neurx.tests
-use neurx.cuda.device_manager
-use neurx.distributed.nccl_backend
-use neurx.engine.training_orchestrator
-use neurx.trainer.industrial_gpt_training
-use neurx.model.transformer
-use neurx.amp.scaler
-use neurx.optimizer.adamw
-use neurx.tokenizer.data_pipeline
+import (
+    "neurx.amp.scaler"
+    "neurx.cuda.device_manager"
+    "neurx.distributed.nccl_backend"
+    "neurx.engine.training_orchestrator"
+    "neurx.model.transformer"
+    "neurx.optimizer.adamw"
+    "neurx.tokenizer.data_pipeline"
+    "neurx.trainer.industrial_gpt_training"
+)
 
 struct test_result {
     string name

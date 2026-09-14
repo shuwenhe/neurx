@@ -1,8 +1,10 @@
 package main
-use std.io
-use std.strings
-use std.path
-use std.env
+import (
+    "std.env"
+    "std.io"
+    "std.path"
+    "std.strings"
+)
 
 struct deployment_config {
     string cluster_name

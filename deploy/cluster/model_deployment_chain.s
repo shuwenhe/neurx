@@ -1,6 +1,8 @@
 package neurx.deployment.chain
-use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
-use neurx.strings
+import (
+    "neurx.runtime.io."
+    "neurx.strings"
+)
 
 struct model_deployment_config {
     string cluster_name

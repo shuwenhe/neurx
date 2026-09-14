@@ -1,6 +1,8 @@
 package neurx.sys.scheduler
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct inference_task {
     int64 task_id

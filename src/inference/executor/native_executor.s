@@ -1,12 +1,14 @@
 package neurx.inference.executor.native_executor
-use neurx.backends.api.inference_backend.{backend_generation_result}
-use neurx.backends.cpu.reference_inference.{cpu_reference_generate}
-use neurx.backends.cpu.transformer_decode.{cpu_transformer_result, cpu_transformer_prefill_decode, hf_generation_result, hf_generate_until}
-use neurx.inference.scheduler.native_scheduler.{native_schedule_decision, schedule_native_request}
-use neurx.inference.tokenizer.byte_tokenizer.{byte_tokenization_result, tokenize_bytes}
-use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, hf_bpe_decode_result, load_hf_bpe_tokenizer, hf_bpe_encode, hf_bpe_decode_generated}
-use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding}
-use neurx.models.loaders.hf_transformer.{hf_model_weights, load_hf_model}
+import (
+    "neurx.backends.api.inference_backend."
+    "neurx.backends.cpu.reference_inference."
+    "neurx.backends.cpu.transformer_decode."
+    "neurx.inference.scheduler.native_scheduler."
+    "neurx.inference.tokenizer.byte_tokenizer."
+    "neurx.inference.tokenizer.hf_bpe_tokenizer."
+    "neurx.models.formats.safetensors_embedding."
+    "neurx.models.loaders.hf_transformer."
+)
 
 struct native_execution_result {
     bool ok

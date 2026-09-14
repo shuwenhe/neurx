@@ -1,5 +1,7 @@
 package neurx.transformers_utils.logits_processors.top_k
-use neurx.transformers_utils.logits_processors.processor_utils
+import (
+    "neurx.transformers_utils.logits_processors.processor_utils"
+)
 struct top_k_processor {
     int k
     float min_tokens_to_keep

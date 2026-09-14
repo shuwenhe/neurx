@@ -1,6 +1,8 @@
 package neurx.tool_parsers.constraint.constraint_generator
-use neurx.tool_parsers.schema.schema_types
-use std.slices
+import (
+    "neurx.tool_parsers.schema.schema_types"
+    "std.slices"
+)
 func generate_initial_constraint(*json_schema schema) token_constraint {
     constraint := schema_types.create_empty_constraint()
     constraint.context = "root"

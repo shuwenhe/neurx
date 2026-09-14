@@ -1,7 +1,9 @@
 package neurx.nn
-use neurx.tensor.tensor
-use neurx.nn.conv
-use neurx.nn.rnn
+import (
+    "neurx.nn.conv"
+    "neurx.nn.rnn"
+    "neurx.tensor.tensor"
+)
 struct parameter {
     tensor value
     string name

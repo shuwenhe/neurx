@@ -1,6 +1,8 @@
 package neurx.kernel.perf
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct perf_event {
     int event_id

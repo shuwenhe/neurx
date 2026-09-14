@@ -1,6 +1,8 @@
 package neurx.inference.lora.model_integration
-use neurx.inference.lora.adapter_manager
-use neurx.inference.lora.request_router
+import (
+    "neurx.inference.lora.adapter_manager"
+    "neurx.inference.lora.request_router"
+)
 struct lora_model_config {
     int hidden_dim
     int num_layers

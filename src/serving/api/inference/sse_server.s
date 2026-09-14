@@ -1,11 +1,13 @@
 package neurx.inference.api.sse_server
-use std.result.result
-use neurx.inference.api.http_server.{http_server, create_http_server, close_http_server, int_to_string, write_client_data}
-use neurx.inference.api.openai_protocol.{openai_request, openai_request_result, parse_openai_request, openai_chat_chunk, openai_done_event, openai_error_body, openai_json_escape, openai_embedding_body}
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response_stream}
-use src.net.http.{http_request, http_response, parse_http_request, format_http_response}
-use neurx.serving.protocol.transport.native_socket.{neurx_net_accept}
+import (
+    "neurx.inference.api.http_server."
+    "neurx.inference.api.openai_protocol."
+    "neurx.inference.runtime.real_text_engine."
+    "neurx.runtime.io."
+    "neurx.serving.protocol.transport.native_socket."
+    "src.net.http."
+    "std.result.result"
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_write_string(int fd, string data) int

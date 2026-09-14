@@ -1,9 +1,11 @@
 package neurx.kernel.enhanced
 
-use neurx.io.async_ring as async_io
-use neurx.kernel.ipc.ipc as ipc_sys
-use neurx.security.access_control as sec_sys
-use neurx.crypto.cipher as crypto_sys
+import (
+    "neurx.crypto.cipher"
+    "neurx.io.async_ring"
+    "neurx.kernel.ipc.ipc"
+    "neurx.security.access_control"
+)
 
 struct enhanced_kernel_state {
     int version

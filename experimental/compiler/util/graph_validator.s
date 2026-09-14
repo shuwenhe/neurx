@@ -1,6 +1,8 @@
 package neurx.experimental.compiler.utils.graph_validator
 
-use neurx.experimental.compiler.ir.graph.computation_graph
+import (
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+)
 
 struct validation_error {
     string error_type

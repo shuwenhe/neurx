@@ -1,8 +1,10 @@
 package neurx.experimental.compiler.passes.constant_folding
 
-use neurx.experimental.compiler.ir.graph.computation_graph
-use neurx.experimental.compiler.ir.value.value_type
-use neurx.experimental.compiler.ir.operation.{operation, op_type}
+import (
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+    "neurx.experimental.compiler.ir.operation."
+    "neurx.experimental.compiler.ir.value.value_type"
+)
 
 struct folding_candidate {
     int op_id

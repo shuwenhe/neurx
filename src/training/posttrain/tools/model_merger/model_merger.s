@@ -1,6 +1,8 @@
 package neurx.posttrain.tools.model_merger
-use neurx.tensor.{tensor, tensor_ops}
-use neurx.nn.{module}
+import (
+    "neurx.nn."
+    "neurx.tensor."
+)
 
 struct merge_config {
     string merge_method

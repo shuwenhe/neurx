@@ -1,5 +1,7 @@
 package neurx.security
-use std.slices
+import (
+    "std.slices"
+)
 struct audit_log_entry {
     int entry_id
     int timestamp

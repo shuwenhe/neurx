@@ -1,8 +1,10 @@
 package main
 
-use neurx.compile.compiler.{compile_options, new_compile_options, compile_module}
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-use std.io.println
+import (
+    "neurx.compile.compiler."
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     string module_name = runtime_env_get("NEURX_NATIVE_SMOKE_MODULE", "native_smoke")

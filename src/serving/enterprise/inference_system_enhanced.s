@@ -1,11 +1,13 @@
 package neurx.enterprise.inference_system_with_speculative
-use neurx.cpu.cuda_core
-use neurx.compute.cuda_matmul
-use neurx.quantization.quant_core
-use neurx.api.openai_compatible
-use neurx.distributed.rank_manager
-use neurx.observability.metrics
-use neurx.enterprise.speculative_inference
+import (
+    "neurx.api.openai_compatible"
+    "neurx.compute.cuda_matmul"
+    "neurx.cpu.cuda_core"
+    "neurx.distributed.rank_manager"
+    "neurx.enterprise.speculative_inference"
+    "neurx.observability.metrics"
+    "neurx.quantization.quant_core"
+)
 struct inference_system_config {
     bool enable_speculative_decode
     speculative_inference.speculative_inference_config speculative_config

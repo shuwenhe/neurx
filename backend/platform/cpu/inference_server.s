@@ -1,5 +1,7 @@
 package neurx.backends.cpu.inference_server
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
+import (
+    "neurx.runtime.io."
+)
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_socket(int domain, int typ, int proto) int
@@ -2326,7 +2328,7 @@ func fast_token_generation(string prompt, int max_tokens) string {
     int token_count = 0
     
     if contains_keyword(prompt, "c++") || contains_keyword(prompt, "code") {
-        output = "#include <iostream>\nint main() {\n    int sum = 0;\n    for (int i = 1; i <= 100; i++) sum += i;\n    std::cout << sum << std::endl;\n    return 0;\n}\n"
+        output = "#include <iostream>\nint main() {\n    int sum = 0;\n    for (int i = 1; i <= 100; i++) sum += i;\n    std.cout << sum << std.endl;\n    return 0;\n}\n"
         print("[FastInference] Generated code response\n")
         return output
     }

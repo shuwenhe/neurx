@@ -1,10 +1,12 @@
 package neurx.posttrain.examples.verl_features_integration
-use std.io.eprintln
-use neurx.posttrain.monitoring.experiment_tracker
-use neurx.posttrain.multiturn.multiturn_manager
-use neurx.posttrain.reward.verifiable_reward_manager
-use neurx.posttrain.monitoring.performance_monitor
-use neurx.posttrain.data.advanced_data_pipeline
+import (
+    "neurx.posttrain.data.advanced_data_pipeline"
+    "neurx.posttrain.monitoring.experiment_tracker"
+    "neurx.posttrain.monitoring.performance_monitor"
+    "neurx.posttrain.multiturn.multiturn_manager"
+    "neurx.posttrain.reward.verifiable_reward_manager"
+    "std.io.eprintln"
+)
 func run_verl_style_training() int {
     eprintln("============================================================")
     eprintln("[VeRL Features Integration] Starting Training with Advanced Features")

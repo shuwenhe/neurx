@@ -1,7 +1,9 @@
 package neurx.data.moe_1t_data_pipeline
-use neurx.strings
-use neurx.runtime.io.{io_println, io_file_exists, io_read_lines, io_mkdir_recursive}
-use neurx.tokenizer.bpe_trainer.{bpe_tokenizer_state}
+import (
+    "neurx.runtime.io."
+    "neurx.strings"
+    "neurx.tokenizer.bpe_trainer."
+)
 
 struct data_shard_meta {
     string shard_id

@@ -1,5 +1,7 @@
 package neurx.inference.lora.request_router
-use neurx.inference.lora.adapter_manager
+import (
+    "neurx.inference.lora.adapter_manager"
+)
 struct lora_request {
     string request_id
     string adapter_id

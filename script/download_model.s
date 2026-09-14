@@ -1,6 +1,8 @@
-use std.conv.int_to_string
 package neurx.scripts.download_model
-use neurx.runtime.io.{
+import (
+    "neurx.runtime.io.{"
+    "std.conv.int_to_string"
+)
     runtime_env_get,
     runtime_file_exists,
     runtime_make_dirs,

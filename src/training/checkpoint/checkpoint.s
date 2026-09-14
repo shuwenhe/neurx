@@ -1,5 +1,7 @@
 package neurx.checkpoint
-use neurx.tensor.tensor
+import (
+    "neurx.tensor.tensor"
+)
 struct checkpoint {
     int step
     float loss

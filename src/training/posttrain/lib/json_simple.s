@@ -1,5 +1,7 @@
 package neurx.posttrain.lib.json_simple
-use std.io.readfile
+import (
+    "std.io.readfile"
+)
 struct json_value {
     int type
     bool bool_value

@@ -1,5 +1,7 @@
 package neurx.driver
-use std.slices
+import (
+    "std.slices"
+)
 struct cpu_freq_state {
     int frequency  
     int voltage    

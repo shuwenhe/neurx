@@ -1,7 +1,9 @@
 package neurx.compute.gpu_attention
 
-use std.vec.vec
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct attention_kernel_config {
     int num_heads

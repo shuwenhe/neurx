@@ -1,6 +1,8 @@
 package neurx.inference.vocabulary_loader
-use std.conv.int_to_string
-use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file, trim}
+import (
+    "neurx.runtime.io."
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __sys_json_parse(string json_text) map[string]string
 struct vocabulary_cache {
     map[string]string vocab_map

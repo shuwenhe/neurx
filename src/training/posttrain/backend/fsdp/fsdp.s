@@ -1,7 +1,9 @@
 package neurx.posttrain.backend.fsdp
-use neurx.tensor.{tensor, tensor_ops}
-use neurx.nn.{module}
-use neurx.distributed.{distributed_context}
+import (
+    "neurx.distributed."
+    "neurx.nn."
+    "neurx.tensor."
+)
 
 struct fsdp_config {
     int world_size

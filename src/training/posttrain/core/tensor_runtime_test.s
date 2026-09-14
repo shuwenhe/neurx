@@ -1,5 +1,7 @@
 package neurx.posttrain.core.tensor_runtime_test
-use neurx.posttrain.core.tensor_runtime.{
+import (
+    "neurx.posttrain.core.tensor_runtime.{"
+)
     tensor_s,
     new_tensor_s,
     compute_strides_s,

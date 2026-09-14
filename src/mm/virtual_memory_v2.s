@@ -1,5 +1,7 @@
 package mm.virtual_memory
-use std.strings.int_to_string
+import (
+    "std.strings.int_to_string"
+)
 struct page_struct {
     int page_num
     int flags

@@ -1,6 +1,8 @@
 package main
-use std.os.{command, getenv}
-use std.conv.parse_int_default as parse_int
+import (
+    "std.conv.parse_int_default"
+    "std.os."
+)
 func string_char(int c) string {
     string(c)
 }

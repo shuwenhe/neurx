@@ -1,25 +1,27 @@
 package neurx.test.ai_os_test
 
-use neurx.kernel.syscall.syscall_context_create
-use neurx.kernel.syscall.trap_frame_create
-use neurx.kernel.syscall.get_syscall_name
-use neurx.kernel.syscall.SYS_read
-use neurx.kernel.syscall.SYS_write
-use neurx.kernel.syscall.SYS_fork
-use neurx.kernel.syscall.SYS_getpid
-use neurx.kernel.syscall.SYS_exit
-use neurx.kernel.syscall.syscall_entry_handler
-use neurx.kernel.process.process_table_create
-use neurx.kernel.process.task_struct_create
-use neurx.kernel.process.do_fork
-use neurx.kernel.process.do_execve
-use neurx.kernel.process.do_exit
-use neurx.kernel.process.do_wait
-use neurx.mm.vm.mm_struct_create
-use neurx.mm.vm.tlb_create
-use neurx.mm.vm.tlb_lookup
-use neurx.mm.vm.tlb_insert
-use neurx.init.os_init_complete
+import (
+    "neurx.init.os_init_complete"
+    "neurx.kernel.process.do_execve"
+    "neurx.kernel.process.do_exit"
+    "neurx.kernel.process.do_fork"
+    "neurx.kernel.process.do_wait"
+    "neurx.kernel.process.process_table_create"
+    "neurx.kernel.process.task_struct_create"
+    "neurx.kernel.syscall.SYS_exit"
+    "neurx.kernel.syscall.SYS_fork"
+    "neurx.kernel.syscall.SYS_getpid"
+    "neurx.kernel.syscall.SYS_read"
+    "neurx.kernel.syscall.SYS_write"
+    "neurx.kernel.syscall.get_syscall_name"
+    "neurx.kernel.syscall.syscall_context_create"
+    "neurx.kernel.syscall.syscall_entry_handler"
+    "neurx.kernel.syscall.trap_frame_create"
+    "neurx.mm.vm.mm_struct_create"
+    "neurx.mm.vm.tlb_create"
+    "neurx.mm.vm.tlb_insert"
+    "neurx.mm.vm.tlb_lookup"
+)
 
 struct test_result {
     string test_name

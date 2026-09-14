@@ -1,5 +1,7 @@
 package neurx.eval.six_dimension
-use neurx.eval.benchmark_eval
+import (
+    "neurx.eval.benchmark_eval"
+)
 
 struct medical_question {
     string id

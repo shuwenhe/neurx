@@ -1,5 +1,7 @@
 package neurx.worker.reward.remote
-use neurx.tensor
+import (
+    "neurx.tensor"
+)
 struct remote_reward_config {
     string server_url
     int port

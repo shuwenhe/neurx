@@ -1,16 +1,18 @@
 package neurx.test.kernel
 
-use neurx.kernel.core.highres_clock_create
-use neurx.kernel.core.highres_clock
-use neurx.kernel.core.highres_clock_update
-use neurx.kernel.core.execution_core_create
-use neurx.kernel.core.execution_core
-use neurx.kernel.core.cpu_online
-use neurx.kernel.core.cpu_offline
-use neurx.kernel.core.enqueue_task
-use neurx.kernel.core.select_task
-use neurx.kernel.core.schedule_cpu
-use neurx.kernel.core.scheduler_tick
+import (
+    "neurx.kernel.core.cpu_offline"
+    "neurx.kernel.core.cpu_online"
+    "neurx.kernel.core.enqueue_task"
+    "neurx.kernel.core.execution_core"
+    "neurx.kernel.core.execution_core_create"
+    "neurx.kernel.core.highres_clock"
+    "neurx.kernel.core.highres_clock_create"
+    "neurx.kernel.core.highres_clock_update"
+    "neurx.kernel.core.schedule_cpu"
+    "neurx.kernel.core.scheduler_tick"
+    "neurx.kernel.core.select_task"
+)
 
 func expect(bool condition, string name) int {
     if condition { print("PASS " + name); return 0 }

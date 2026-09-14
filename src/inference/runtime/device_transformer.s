@@ -1,6 +1,8 @@
 package neurx.inference.runtime.device_transformer
-use neurx.runtime.device.device_ops.{device_op, op_embedding, op_rms_norm, op_linear, op_rope, op_paged_attention, op_swiglu, op_residual_add}
-use neurx.runtime.device.vendor_lowering.{lowered_op, lower_device_op, lower_vendor_name}
+import (
+    "neurx.runtime.device.device_ops."
+    "neurx.runtime.device.vendor_lowering."
+)
 
 struct transformer_device_config {
     int layers

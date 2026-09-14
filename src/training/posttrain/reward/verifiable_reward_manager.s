@@ -1,5 +1,7 @@
 package neurx.posttrain.reward.verifiable_reward_manager
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
     MODEL_BASED,
     FUNCTION_BASED,
     HUMAN_FEEDBACK,

@@ -1,6 +1,8 @@
 package main
 
-use neurx.distributed.cluster.parallel_plan.{cluster_parallel_request, cluster_parallel_plan_for, cluster_parallel_plan_ready, cluster_parallel_plan_summary}
+import (
+    "neurx.distributed.cluster.parallel_plan."
+)
 
 func expect(bool condition, string name) int {
     if condition {

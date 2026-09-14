@@ -1,21 +1,23 @@
 package neurx.examples
-use neurx.autograd.autograd_engine
-use neurx.data.loader.dataloader_full
-use neurx.data.dataset.dataset_loaders
-use neurx.data.loader.dataloader_collator
-use neurx.train.optimizer
-use neurx.train.gradient_checkpoint
-use neurx.checkpoint_operations
-use neurx.checkpoint_restore
-use neurx.observability.logging.logger_base
-use neurx.observability.logging.logger_core
-use neurx.observability.logging.logger_api
-use neurx.observability.logging.tensorboard_writer
-use neurx.observability.logging.wandb_integration
-use neurx.observability.logging.progress_display
-use neurx.inference.text_generator
-use neurx.cuda.device_manager
-use neurx.distributed.nccl_backend
+import (
+    "neurx.autograd.autograd_engine"
+    "neurx.checkpoint_operations"
+    "neurx.checkpoint_restore"
+    "neurx.cuda.device_manager"
+    "neurx.data.dataset.dataset_loaders"
+    "neurx.data.loader.dataloader_collator"
+    "neurx.data.loader.dataloader_full"
+    "neurx.distributed.nccl_backend"
+    "neurx.inference.text_generator"
+    "neurx.observability.logging.logger_api"
+    "neurx.observability.logging.logger_base"
+    "neurx.observability.logging.logger_core"
+    "neurx.observability.logging.progress_display"
+    "neurx.observability.logging.tensorboard_writer"
+    "neurx.observability.logging.wandb_integration"
+    "neurx.train.gradient_checkpoint"
+    "neurx.train.optimizer"
+)
 
 struct training_config {
     int vocab_size

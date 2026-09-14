@@ -1,7 +1,9 @@
 package neurx.quantization
-use neurx.tensor.tensor
-use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
-use neurx.strings.{concat2, from_i32, strings_eq, substring}
+import (
+    "neurx.runtime.io."
+    "neurx.strings."
+    "neurx.tensor.tensor"
+)
     INT8_DYNAMIC,
     INT8_STATIC,
     INT8_PER_CHANNEL,

@@ -1,5 +1,7 @@
-use neurx.agent
-use neurx.runtime.io.{runtime_write_text_file, runtime_file_exists}
+import (
+    "neurx.agent"
+    "neurx.runtime.io."
+)
 string out_prefix = "artifact/checkpoints/agent/skills"
 string snapshot_path = out_prefix + "/snapshot.txt"
 string report_path   = out_prefix + "/report.txt"

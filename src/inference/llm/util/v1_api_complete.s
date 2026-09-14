@@ -1,5 +1,7 @@
 package neurx.inference.v1_api_integration
-use std.slices
+import (
+    "std.slices"
+)
     waiting_prefill,
     in_prefill,
     waiting_decode,

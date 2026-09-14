@@ -1,8 +1,10 @@
 package neurx.posttrain.sft.examples
-use neurx.posttrain.sft.sft_trainer
-use neurx.model.llm.neurx
-use neurx.tokenizer.neurx
-use std.io.println
+import (
+    "neurx.model.llm.neurx"
+    "neurx.posttrain.sft.sft_trainer"
+    "neurx.tokenizer.neurx"
+    "std.io.println"
+)
 func create_sft_example_config() sft_train_config {
     sft_train_config {
         method: "sft",

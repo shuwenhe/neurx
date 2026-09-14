@@ -1,9 +1,11 @@
 package main
-use std.io
-use std.os
-use std.exec
-use std.time
-use std.path
+import (
+    "std.exec"
+    "std.io"
+    "std.os"
+    "std.path"
+    "std.time"
+)
 
 func check_nvidia_smi() int {
     cmd := exec.command("nvidia-smi", "-L")

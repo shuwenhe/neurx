@@ -1,5 +1,7 @@
-use std.conv.int_to_string
 package neurx.inference.transformer_layer
+import (
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 struct tensor_one_d {
     []float data

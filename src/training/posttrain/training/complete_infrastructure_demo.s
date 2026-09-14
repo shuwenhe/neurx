@@ -1,6 +1,8 @@
 package main
-use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy}
-use neurx.posttrain.training.metrics.{
+import (
+    "neurx.posttrain.training.metrics.{"
+    "neurx.posttrain.training.stability."
+)
     create_metrics,
     update_step,
     update_epoch,
@@ -12,7 +14,6 @@ use neurx.posttrain.training.metrics.{
     print_metrics_summary,
     train_metrics
 }
-use neurx.posttrain.training.accuracy.{compute_token_accuracy, accuracy_percentage}
 
 func main() {
     println("====================================================")

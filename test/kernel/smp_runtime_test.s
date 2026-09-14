@@ -1,21 +1,23 @@
 package neurx.test.kernel
 
-use neurx.kernel.smp.smp_runtime
-use neurx.kernel.smp.cpu_context
-use neurx.kernel.smp.smp_runtime_create
-use neurx.kernel.smp.cpu_context_create
-use neurx.kernel.smp.register_madt_cpu
-use neurx.kernel.smp.prepare_per_cpu
-use neurx.kernel.smp.bsp_online
-use neurx.kernel.smp.send_init
-use neurx.kernel.smp.send_sipi
-use neurx.kernel.smp.ap_online
-use neurx.kernel.smp.send_ipi
-use neurx.kernel.smp.receive_ipi
-use neurx.kernel.smp.set_next_task
-use neurx.kernel.smp.apic_timer_tick
-use neurx.kernel.smp.CPU_ONLINE
-use neurx.kernel.smp.IPI_RESCHEDULE
+import (
+    "neurx.kernel.smp.CPU_ONLINE"
+    "neurx.kernel.smp.IPI_RESCHEDULE"
+    "neurx.kernel.smp.ap_online"
+    "neurx.kernel.smp.apic_timer_tick"
+    "neurx.kernel.smp.bsp_online"
+    "neurx.kernel.smp.cpu_context"
+    "neurx.kernel.smp.cpu_context_create"
+    "neurx.kernel.smp.prepare_per_cpu"
+    "neurx.kernel.smp.receive_ipi"
+    "neurx.kernel.smp.register_madt_cpu"
+    "neurx.kernel.smp.send_init"
+    "neurx.kernel.smp.send_ipi"
+    "neurx.kernel.smp.send_sipi"
+    "neurx.kernel.smp.set_next_task"
+    "neurx.kernel.smp.smp_runtime"
+    "neurx.kernel.smp.smp_runtime_create"
+)
 
 func expect(bool condition, string name) int {
     if condition { print("PASS " + name); return 0 }

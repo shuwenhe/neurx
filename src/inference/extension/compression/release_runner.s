@@ -1,7 +1,9 @@
 package main
-use neurx.compression.release.{compression_release_config, prepare_compression_release}
-use neurx.exporter.{default_model_export_config}
-use neurx.deployment.chain.{default_model_deployment_config}
+import (
+    "neurx.compression.release."
+    "neurx.deployment.chain."
+    "neurx.exporter."
+)
 
 func main() {
     compression_release_config config = compression_release_config {

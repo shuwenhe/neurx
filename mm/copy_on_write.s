@@ -1,10 +1,12 @@
 package neurx.mm.copy_on_write
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.mutex
-use neurx.mm.page_table
+import (
+    "neurx.kernel.locking.mutex"
+    "neurx.mm.page_table"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 struct cow_page {
     physical_address: u64,

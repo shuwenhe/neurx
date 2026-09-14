@@ -1,6 +1,8 @@
 package neurx.cluster.cluster_comm
 
-use std.vec.vec
+import (
+    "std.vec.vec"
+)
 
 struct node_info {
     int node_id

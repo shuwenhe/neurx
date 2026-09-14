@@ -1,6 +1,8 @@
 package neurx.kernel.trace
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct trace_event {
     int event_id

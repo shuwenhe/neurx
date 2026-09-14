@@ -1,7 +1,9 @@
 package neurx.agent.code_agent
-use neurx.agent.runtime
-use neurx.agent.memory
-use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_write_text_file}
+import (
+    "neurx.agent.memory"
+    "neurx.agent.runtime"
+    "neurx.runtime.io."
+)
 
 func code_agent_default_step_budget() int {
     64

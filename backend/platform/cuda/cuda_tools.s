@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_text_file, trim}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 extern func runtime_run_command(string command) int
 
 func main() {

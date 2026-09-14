@@ -1,5 +1,7 @@
 package neurx.inference.prefill_decode_scheduler
-use std.slices
+import (
+    "std.slices"
+)
     fcfs,
     priority,
     min_latency,

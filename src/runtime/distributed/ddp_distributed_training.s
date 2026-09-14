@@ -1,6 +1,8 @@
 package neurx.distributed_training
-use std.io
-use std.math
+import (
+    "std.io"
+    "std.math"
+)
 struct process_group {
     int rank
     int world_size

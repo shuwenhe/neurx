@@ -1,10 +1,12 @@
 package neurx.test.gpu_backend_test
 
-use neurx.device.cuda_runtime_binding
-use neurx.compute.cublas_binding
-use neurx.device.cuda_stream_manager
-use neurx.device.cuda_memory_pool
-use neurx.compute.gpu_gemm_engine
+import (
+    "neurx.compute.cublas_binding"
+    "neurx.compute.gpu_gemm_engine"
+    "neurx.device.cuda_memory_pool"
+    "neurx.device.cuda_runtime_binding"
+    "neurx.device.cuda_stream_manager"
+)
 
 func test_cuda_device_discovery() (bool, string) {
     count, ok, err := cuda_get_device_count()

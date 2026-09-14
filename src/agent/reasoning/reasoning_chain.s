@@ -1,6 +1,8 @@
 package neurx.reasoning.reasoning_chain
-use neurx.reasoning.cot_config.{cot_config, reasoning_style, validation_strategy}
-use neurx.reasoning.reasoning_step.{reasoning_step, step_type, step_state}
+import (
+    "neurx.reasoning.cot_config."
+    "neurx.reasoning.reasoning_step."
+)
     initialized
     running
     completed

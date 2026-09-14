@@ -1,7 +1,9 @@
 package neurx.device.gate0_test
-use std.vec.vec
-use neurx.device.abi
-use neurx.device.gate0_cuda_impl
+import (
+    "neurx.device.abi"
+    "neurx.device.gate0_cuda_impl"
+    "std.vec.vec"
+)
 func gate0_test_vector_add() (bool, string) {
     state := gate0_cuda_impl.gate0_cuda_state_init()
     success, init_err := gate0_cuda_impl.gate0_device_backend_init(&state)

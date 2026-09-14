@@ -1,8 +1,10 @@
 package neurx.os.core
 
-use neurx.os.boot.boot_state_create
-use neurx.os.boot.run_boot_sequence
-use neurx.os.boot.boot_is_ready
+import (
+    "neurx.os.boot.boot_is_ready"
+    "neurx.os.boot.boot_state_create"
+    "neurx.os.boot.run_boot_sequence"
+)
 
 func print_banner() {
     print("╔════════════════════════════════════════════════════════════╗")

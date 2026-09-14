@@ -1,7 +1,9 @@
 package neurx.compute
 
-use neurx.compute.core_kernels
-use neurx.device.abi
+import (
+    "neurx.compute.core_kernels"
+    "neurx.device.abi"
+)
 
 func test_rms_norm_basic() (int, int, string) {
     passed := 0

@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     cmd := runtime_env_get("NEURX_SCRIPTS_CMD", "help")

@@ -1,5 +1,7 @@
 package neurx.tool_parsers.formatter.output_formatter
-use std.slices
+import (
+    "std.slices"
+)
 const FORMAT_JSON = "json"
 const FORMAT_XML = "xml"
 const FORMAT_YAML = "yaml"

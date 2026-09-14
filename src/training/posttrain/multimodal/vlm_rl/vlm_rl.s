@@ -1,6 +1,8 @@
 package neurx.posttrain.multimodal.vlm_rl
-use neurx.tensor.{tensor, tensor_ops}
-use neurx.nn.{module}
+import (
+    "neurx.nn."
+    "neurx.tensor."
+)
 
 struct vlm_config {
     int vision_encoder_dim

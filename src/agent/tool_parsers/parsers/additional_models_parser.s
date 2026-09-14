@@ -1,7 +1,9 @@
 package neurx.tool_parsers.parsers
-use std.strings
-use std.regex
-use neurx.tool_parsers
+import (
+    "neurx.tool_parsers"
+    "std.regex"
+    "std.strings"
+)
 struct GlmParser {
     BaseToolParser base
 }

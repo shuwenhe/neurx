@@ -1,5 +1,7 @@
 package neurx.posttrain.alignment.loss_aggregation
-use neurx.tensor
+import (
+    "neurx.tensor"
+)
 func masked_sum(tensor values, tensor mask) tensor {
     return sum_all(mul(values, mask))
 }

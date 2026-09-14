@@ -1,5 +1,7 @@
 package neurx.inference.runtime.s_mainchain_validator
-use std.io
+import (
+    "std.io"
+)
 func validate_tokenization() bool {
     print("🧪 [TOKENIZATION] Testing tokenization layer...\n")
     return true

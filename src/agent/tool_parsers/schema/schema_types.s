@@ -1,5 +1,7 @@
 package neurx.tool_parsers.schema.schema_types
-use std.slices
+import (
+    "std.slices"
+)
 const TYPE_STRING = "string"
 const TYPE_NUMBER = "number"
 const TYPE_INTEGER = "integer"

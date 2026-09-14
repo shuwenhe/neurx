@@ -1,14 +1,16 @@
 package main
 
-use neurx.experimental.compiler.ir.graph.new_computation_graph
-use neurx.experimental.compiler.ir.value.{value_type_float32, value_type_int32}
-use neurx.experimental.compiler.ir.operation.op_type
-use neurx.experimental.compiler.compiler.graph_compiler.{new_graph_compiler_default, graph_compiler}
-use neurx.experimental.compiler.compiler.compilation_unit.default_compilation_config
-use neurx.experimental.compiler.utils.graph_printer.print_graph_structure
-use neurx.experimental.compiler.utils.graph_validator.validate_graph
-use neurx.experimental.compiler.utils.performance_meter.estimate_graph_performance
-use neurx.experimental.compiler.executor.runtime_executor.execute_operation_sequence
+import (
+    "neurx.experimental.compiler.compiler.compilation_unit.default_compilation_config"
+    "neurx.experimental.compiler.compiler.graph_compiler."
+    "neurx.experimental.compiler.executor.runtime_executor.execute_operation_sequence"
+    "neurx.experimental.compiler.ir.graph.new_computation_graph"
+    "neurx.experimental.compiler.ir.operation.op_type"
+    "neurx.experimental.compiler.ir.value."
+    "neurx.experimental.compiler.utils.graph_printer.print_graph_structure"
+    "neurx.experimental.compiler.utils.graph_validator.validate_graph"
+    "neurx.experimental.compiler.utils.performance_meter.estimate_graph_performance"
+)
 
 func main() {
     println("=== NeurX Compilation Framework Example ===")

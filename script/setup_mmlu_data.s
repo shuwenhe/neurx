@@ -1,9 +1,11 @@
 package main
-use std.io
-use std.os
-use std.path
-use std.exec
-use std.collections
+import (
+    "std.collections"
+    "std.exec"
+    "std.io"
+    "std.os"
+    "std.path"
+)
 
 func main() {
     script_dir := path.Dir(os.Args[0])

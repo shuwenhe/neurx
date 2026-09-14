@@ -1,5 +1,7 @@
 package neurx.model.model_executor
-use std.slices
+import (
+    "std.slices"
+)
 func main() {
     println("🤖 Model Executor - 30+ typemodelinferenceengine")
     println("=====================================")

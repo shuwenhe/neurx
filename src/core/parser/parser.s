@@ -1,9 +1,11 @@
 package neurx.parser.parser
-use neurx.parser.types
-use neurx.parser.text_parser
-use neurx.parser.format_parser
-use neurx.parser.stream_parser
-use neurx.parser.error_recovery
+import (
+    "neurx.parser.error_recovery"
+    "neurx.parser.format_parser"
+    "neurx.parser.stream_parser"
+    "neurx.parser.text_parser"
+    "neurx.parser.types"
+)
 struct ParserInstance {
     ParserConfig config
     ParserStats stats

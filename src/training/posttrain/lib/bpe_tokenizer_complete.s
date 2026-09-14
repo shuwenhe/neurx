@@ -1,11 +1,13 @@
 package neurx.posttrain.lib.bpe_tokenizer_complete
-use std.io.eprintln
-use std.encoding.bytes_to_string
-use std.encoding.normalize_byte
-use std.encoding.str_to_bytes
-use std.encoding.normalize_ascii_text
-use std.encoding.is_ascii_space
-use std.text.substring
+import (
+    "std.encoding.bytes_to_string"
+    "std.encoding.is_ascii_space"
+    "std.encoding.normalize_ascii_text"
+    "std.encoding.normalize_byte"
+    "std.encoding.str_to_bytes"
+    "std.io.eprintln"
+    "std.text.substring"
+)
 struct bpe_tokenizer {
     map[string]int vocab
     []string id_to_token

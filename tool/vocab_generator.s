@@ -1,5 +1,7 @@
 package neurx.tool.vocab_generator
-use std.conv.int_to_string
+import (
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __sys_fopen(string filename, string mode) int
 extern "intrinsic" func __sys_fclose(int fd) int
 extern "intrinsic" func __sys_fwrite(int fd, string data) int

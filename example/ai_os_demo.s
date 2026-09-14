@@ -1,18 +1,20 @@
 package neurx.example.ai_os_demo
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.os_features_integration
-use neurx.mm.virtual_memory
-use neurx.mm.page_table
-use neurx.mm.huge_pages
-use neurx.fs.ext4
-use neurx.net.netfilter
-use neurx.net.qos
-use neurx.kernel.power_management.cpufreq
-use neurx.kernel.power_management.cpuidle
-use neurx.kernel.time_management
+import (
+    "neurx.fs.ext4"
+    "neurx.kernel.os_features_integration"
+    "neurx.kernel.power_management.cpufreq"
+    "neurx.kernel.power_management.cpuidle"
+    "neurx.kernel.time_management"
+    "neurx.mm.huge_pages"
+    "neurx.mm.page_table"
+    "neurx.mm.virtual_memory"
+    "neurx.net.netfilter"
+    "neurx.net.qos"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 func main() (void, string) {
     print_banner()?
@@ -131,7 +133,7 @@ func demo_filesystem() (void, string) {
     
     inode_num := fs.create_inode(0o100644)?
     
-    fs.open_file(inode_num, ext4_file_mode::read_write)?
+    fs.open_file(inode_num, ext4_file_mode.read_write)?
     
     fs.close_file(inode_num)?
     
@@ -149,7 +151,7 @@ func demo_netfilter() (void, string) {
         nil,
         nil,
         some(6),
-        netfilter_packet_verdict::nf_accept,
+        netfilter_packet_verdict.nf_accept,
         100
     )?
     
@@ -159,10 +161,10 @@ func demo_netfilter() (void, string) {
 }
 
 func demo_qos() (void, string) {
-    qos_engine := qos_new_qos_engine(qos_qos_policy::token_bucket)?
+    qos_engine := qos_new_qos_engine(qos_qos_policy.token_bucket)?
     
     qos_engine.create_qos_class(
-        qos_traffic_class::tc_interactive,
+        qos_traffic_class.tc_interactive,
         10,
         1000000
     )?
@@ -177,7 +179,7 @@ func demo_qos() (void, string) {
 func demo_cpufreq() (void, string) {
     cpufreq_engine := cpufreq_new_cpufreq_engine(16, 1000000, 4000000)?
     
-    cpufreq_engine.set_governor(cpufreq_frequency_scaling_governor::gov_ondemand)?
+    cpufreq_engine.set_governor(cpufreq_frequency_scaling_governor.gov_ondemand)?
     
     cpufreq_engine.set_cpu_frequency(0, 2000000)?
     
@@ -192,7 +194,7 @@ func demo_cpuidle() (void, string) {
     cpuidle_engine := cpuidle_new_cpuidle_engine(16)?
     
     c1_state := cpuidle_c_state{
-        state_type: cpuidle_c_state_type::c1,
+        state_type: cpuidle_c_state_type.c1,
         exit_latency_us: 2,
         power_usage_mw: 100,
         target_residency_us: 10,
@@ -202,9 +204,9 @@ func demo_cpuidle() (void, string) {
     
     cpuidle_engine.register_c_state(0, *c1_state)?
     
-    cpuidle_engine.enable_c_state(0, cpuidle_c_state_type::c1)?
+    cpuidle_engine.enable_c_state(0, cpuidle_c_state_type.c1)?
     
-    cpuidle_engine.enter_idle_state(0, cpuidle_c_state_type::c1)?
+    cpuidle_engine.enter_idle_state(0, cpuidle_c_state_type.c1)?
     cpuidle_engine.exit_idle_state(0)?
     
     stats := cpuidle_engine.get_statistics()?
@@ -216,12 +218,12 @@ func demo_time_management() (void, string) {
     time_engine := time_management_new_time_management_engine()?
     
     ts := time_management_timespec{ tv_sec: 1724000000, tv_nsec: 0 }
-    time_engine.set_time(time_management_clock_type::clock_realtime, *ts)?
+    time_engine.set_time(time_management_clock_type.clock_realtime, *ts)?
     
-    current_time := time_engine.get_time(time_management_clock_type::clock_realtime)?
+    current_time := time_engine.get_time(time_management_clock_type.clock_realtime)?
     
     timer_id := time_engine.create_timer(
-        time_management_clock_type::clock_monotonic,
+        time_management_clock_type.clock_monotonic,
         *ts,
         some(*time_management_timespec{ tv_sec: 1, tv_nsec: 0 }),
         nil

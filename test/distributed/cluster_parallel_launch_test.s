@@ -1,7 +1,9 @@
 package main
 
-use neurx.deployment.cluster_orchestration.{new_demo_cluster_state}
-use neurx.deployment.cluster_runtime_bridge.{bridge_probe_runtime, bridge_launch_plan}
+import (
+    "neurx.deployment.cluster_orchestration."
+    "neurx.deployment.cluster_runtime_bridge."
+)
 
 func expect(bool condition, string name) int {
     if condition {

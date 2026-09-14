@@ -1,9 +1,11 @@
 package neurx.model.neurx.main
-use neurx.attention.mla
-use neurx.moe.fine_grained
-use neurx.model.neurx.mtp
-use neurx.model.neurx.fp8_training
-use neurx.alignment.neurx_r1_grpo
+import (
+    "neurx.alignment.neurx_r1_grpo"
+    "neurx.attention.mla"
+    "neurx.model.neurx.fp8_training"
+    "neurx.model.neurx.mtp"
+    "neurx.moe.fine_grained"
+)
 struct neurx_v3_config {
     int hidden_dim
     int num_layers

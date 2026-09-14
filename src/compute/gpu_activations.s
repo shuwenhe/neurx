@@ -1,7 +1,9 @@
 package neurx.compute.gpu_activations
 
-use std.vec.vec
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct activation_config {
     string activation_type

@@ -1,5 +1,7 @@
 package neurx.net
-use std.slices
+import (
+    "std.slices"
+)
 struct qos_class {
     int class_id
     int bandwidth_limit  

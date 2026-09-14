@@ -1,5 +1,7 @@
 package neurx.posttrain.optimizer.adamw
-use neurx.posttrain.model.model_loader.{fill_model_tensor}
+import (
+    "neurx.posttrain.model.model_loader."
+)
 
 struct adamw_optimizer {
     []float param_groups

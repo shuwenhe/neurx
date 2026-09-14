@@ -1,5 +1,7 @@
 package neurx.tests.weights_gqa_sampling_test
-use neurx.inference.safetensors_weight_loader.{
+import (
+    "neurx.inference.safetensors_weight_loader.{"
+)
     safetensors_header,
     tensor_meta,
     load_safetensors_header,
@@ -12,7 +14,6 @@ use neurx.inference.safetensors_weight_loader.{
     ints_to_float,
     pow2,
 }
-use neurx.attention.paged_attention_core.{
     paged_attention_config,
     paged_kv_cache,
     slot_mapping,
@@ -22,7 +23,6 @@ use neurx.attention.paged_attention_core.{
     compute_paged_attention,
     compute_paged_attention_gqa,
 }
-use neurx.inference.real_sampling.{
     sampling_params,
     rng_state,
     new_sampling_params,
@@ -38,7 +38,6 @@ use neurx.inference.real_sampling.{
     next_float,
     next_uint,
 }
-use neurx.inference.engine.generation_engine_adapter.{
     generation_engine,
     new_generation_engine,
     generate,

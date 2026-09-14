@@ -1,6 +1,8 @@
 package kernel.bootstrap
-use std.io.println
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+    "std.io.println"
+)
 func init_phase1_subsystems() (int, string) {
     println("")
     println("=== Initializing Phase 1: Core Kernel Subsystems ===")

@@ -1,6 +1,8 @@
 package neurx.kernel.cgroup
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct cgroup_resources {
     int cpu_limit

@@ -1,13 +1,11 @@
 package neurx.autograd.engine
-use neurx.strings
-use neurx.autograd.ir
-use neurx.strings
-use neurx.autograd.tracer
-use neurx.strings
-use neurx.autograd.tensor
-use neurx.strings
-use neurx.tensor.tensor
-use neurx.strings
+import (
+    "neurx.autograd.ir"
+    "neurx.autograd.tensor"
+    "neurx.autograd.tracer"
+    "neurx.strings"
+    "neurx.tensor.tensor"
+)
 struct backward_state {
     string name
     bool ready

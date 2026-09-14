@@ -1,5 +1,7 @@
 package neurx.posttrain.alignment.lora_examples
-use neurx.posttrain.alignment.lora_trainer.{
+import (
+    "neurx.posttrain.alignment.lora_trainer.{"
+)
     lora_config, lora_state, lora_linear, lora_trajectory,
     default_lora_config, create_lora_state, lora_training_step,
     start_lora_training, lora_compute_stats, lora_adamw_state,

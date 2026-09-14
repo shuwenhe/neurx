@@ -1,5 +1,7 @@
 package neurx.backends.cuda.inference_server
-use neurx.models.formats.hf_config.{hf_model_config, load_hf_config}
+import (
+    "neurx.models.formats.hf_config."
+)
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_bind(int sockfd, string ip, int port, int family) int
 extern "intrinsic" func __sys_listen(int sockfd, int backlog) int

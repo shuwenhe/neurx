@@ -1,5 +1,7 @@
 package neurx.tests.real_inference_stack_test
-use neurx.inference.real_transformer_layer.{
+import (
+    "neurx.inference.real_transformer_layer.{"
+)
     transformer_layer_config,
     transformer_layer_weights,
     default_layer_config,
@@ -13,20 +15,17 @@ use neurx.inference.real_transformer_layer.{
     moe_routing_result,
     sqrt_approx,
 }
-use neurx.tokenizer.real_bpe_tokenizer.{
     real_bpe_tokenizer,
     new_real_bpe_tokenizer,
     encode,
     decode,
 }
-use neurx.inference.engine.generation_engine_adapter.{
     generation_engine,
     new_generation_engine,
     generate,
     generate_stream,
     decode_ids,
 }
-use neurx.attention.paged_attention_core.{
     paged_kv_cache,
     paged_attention_config,
     slot_mapping,

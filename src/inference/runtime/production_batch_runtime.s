@@ -1,5 +1,7 @@
 package neurx.inference.runtime.production_batch_runtime
-use neurx.inference.runtime.transformer_executor.{transformer_execution_plan, transformer_execution_result, transformer_plan_execute}
+import (
+    "neurx.inference.runtime.transformer_executor."
+)
 
 func production_request_free() int { 0 }
 

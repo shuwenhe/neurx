@@ -1,7 +1,9 @@
 package neurx.model
 
-use neurx.model.transformer_block
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "neurx.model.transformer_block"
+)
 
 func test_transformer_block_config() (int, int, string) {
     passed := 0

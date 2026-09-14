@@ -1,7 +1,9 @@
 package neurx.checkpoint
-use neurx.tensor.tensor
-use neurx.tensor.new
-use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
+import (
+    "neurx.runtime.io."
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 
 func copy_float([]float data) []float {
     int n = len(data)

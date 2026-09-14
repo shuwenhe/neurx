@@ -1,7 +1,9 @@
 package neurx.distributed.moe_all_to_all
-use neurx.strings
-use neurx.runtime.io.{io_println}
-use neurx.distributed.collective.{collective_state, alltoall_async}
+import (
+    "neurx.distributed.collective."
+    "neurx.runtime.io."
+    "neurx.strings"
+)
 
 struct routing_decision {
     []int expert_indices

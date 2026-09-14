@@ -1,5 +1,7 @@
 package mm.vm
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 struct vm_region {
     int start
     int end

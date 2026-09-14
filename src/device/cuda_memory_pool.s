@@ -1,7 +1,9 @@
 package neurx.device.cuda_memory_pool
 
-use neurx.device.cuda_runtime_binding
-use std.vec.vec
+import (
+    "neurx.device.cuda_runtime_binding"
+    "std.vec.vec"
+)
 
 struct memory_block {
     int64 device_ptr

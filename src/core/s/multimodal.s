@@ -1,6 +1,8 @@
 package neurx.multimodal
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = make([]float, n)

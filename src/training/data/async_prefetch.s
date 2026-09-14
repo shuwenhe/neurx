@@ -1,6 +1,8 @@
 package neurx.data.async_prefetch
-use neurx.data.streaming_reader.{streaming_reader_state, read_batch_of_lines}
-use neurx.tokenizer.data_pipeline.{tokenizer_config, default_llm_tokenizer_config, bpe_tokenizer_state, init_bpe_tokenizer, encode}
+import (
+    "neurx.data.streaming_reader."
+    "neurx.tokenizer.data_pipeline."
+)
 
 struct prefetch_config {
     int prefetch_queue_size

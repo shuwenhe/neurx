@@ -1,6 +1,8 @@
 package neurx.cluster.topology
 
-use std.vec.vec
+import (
+    "std.vec.vec"
+)
 
 struct node_distance {
     int from_node

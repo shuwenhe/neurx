@@ -1,6 +1,8 @@
 package neurx.posttrain.alignment.gspo
-use neurx.tensor
-use neurx.posttrain.alignment.loss_aggregation
+import (
+    "neurx.posttrain.alignment.loss_aggregation"
+    "neurx.tensor"
+)
 struct gspo_config {
     float clip_ratio_low
     float clip_ratio_high

@@ -1,5 +1,7 @@
 package neurx.posttrain.monitoring.experiment_tracker
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
     WANDB,
     MLFLOW,
     TENSORBOARD,

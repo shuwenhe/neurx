@@ -1,9 +1,11 @@
 package neurx.distributed
 
-use neurx.distributed.nccl_comm
-use neurx.distributed.tensor_parallel
-use neurx.distributed.pipeline_parallel
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "neurx.distributed.nccl_comm"
+    "neurx.distributed.pipeline_parallel"
+    "neurx.distributed.tensor_parallel"
+)
 
 func test_nccl_init() (int, int, string) {
     passed := 0

@@ -1,6 +1,8 @@
 package neurx.kernel.namespace
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct pid_namespace {
     int ns_id

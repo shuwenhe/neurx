@@ -1,5 +1,7 @@
 package neurx.attention.ring
-use neurx.attention.flash_v2.{
+import (
+    "neurx.attention.flash_v2.{"
+)
     flash_attn_config, flash_attn_forward_head, flash_attn_backward
 }
 

@@ -1,10 +1,12 @@
 package main
-use neurx.runtime.command.{runtime_env_get, runtime_parse_int, runtime_run_command_exit_code, runtime_shell_escape}
-use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
-use neurx.deployment.cluster_orchestration.{cluster_orchestration_state, new_cluster_orchestration_state, cluster_discover_nodes, cluster_discovery_summary, cluster_recommended_world_size, cluster_int_to_string, new_cluster_deployment_spec}
-use neurx.deployment.cluster_runtime_bridge.{cluster_runtime_bridge_result, bridge_probe_runtime, bridge_deployment_summary, bridge_remote_execution_commands, bridge_fault_injection_relaunch_commands, bridge_fault_injection_relaunch_execute}
-use neurx.deployment.hetero_runtime_bridge.{bridge_hetero_demo_script, bridge_hetero_demo_execute}
-use neurx.distributed.cluster.heartbeat.{create_cluster_heartbeat_state, cluster_heartbeat_is_live, cluster_heartbeat_summary}
+import (
+    "neurx.deployment.cluster_orchestration."
+    "neurx.deployment.cluster_runtime_bridge."
+    "neurx.deployment.hetero_runtime_bridge."
+    "neurx.distributed.cluster.heartbeat."
+    "neurx.runtime.command."
+    "neurx.runtime.io."
+)
 
 func main() {
     string cluster_name = runtime_env_get("NEURX_CLUSTER_NAME", "neurx-inference")

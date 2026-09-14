@@ -1,6 +1,8 @@
 package neurx.tool.lora_safetensors_merge
-use std.io.println
-use neurx.runtime.io.{runtime_env_get}
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func concat(string a, string b) string {
     a + b

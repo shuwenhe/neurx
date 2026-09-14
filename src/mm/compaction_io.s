@@ -1,5 +1,7 @@
 package neurx.mm
-use std.slices
+import (
+    "std.slices"
+)
 struct memory_compaction_stats {
     int pages_compacted
     int pages_freed

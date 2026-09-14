@@ -1,6 +1,8 @@
 package neurx.model.transformer_executor
-use neurx.device.abi
-use neurx.device.tensor_manager
+import (
+    "neurx.device.abi"
+    "neurx.device.tensor_manager"
+)
 struct transformer_config {
     int hidden_size
     int num_attention_heads

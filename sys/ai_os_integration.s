@@ -1,6 +1,8 @@
 package neurx.sys.ai_os_integration
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct workload_request {
     int workload_id

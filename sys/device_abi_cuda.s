@@ -1,6 +1,8 @@
 package neurx.sys.device_abi
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct cuda_error {
     int code

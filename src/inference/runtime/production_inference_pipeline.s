@@ -1,5 +1,7 @@
 package neurx.inference.runtime.production_inference_pipeline
-use std.conv.{int_to_string, float_to_string}
+import (
+    "std.conv."
+)
 
 struct inference_request {
     string prompt

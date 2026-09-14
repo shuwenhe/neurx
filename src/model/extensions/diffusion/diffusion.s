@@ -1,11 +1,13 @@
 package neurx.diffusion
-use neurx.diffusion.config
-use neurx.diffusion.noise
-use neurx.diffusion.model
-use neurx.diffusion.sampler.ddpm
-use neurx.diffusion.sampler.ddim
-use neurx.diffusion.train
-use neurx.diffusion.eval
+import (
+    "neurx.diffusion.config"
+    "neurx.diffusion.eval"
+    "neurx.diffusion.model"
+    "neurx.diffusion.noise"
+    "neurx.diffusion.sampler.ddim"
+    "neurx.diffusion.sampler.ddpm"
+    "neurx.diffusion.train"
+)
 struct diffusion_pipeline_state {
     diffusion_config cfg
     noise_schedule_state noise

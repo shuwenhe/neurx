@@ -1,7 +1,9 @@
 package neurx.inference.engine.v1_api_engine
 import "core"
 import "engine"
-use neurx.inference.reasoning.reasoning_parser_registry.{reasoning_parser_none, reasoning_config_for, parse_reasoning_text, reasoning_parser_deepseek_r1, reasoning_parser_deepseek_v3, reasoning_parser_qwen3, reasoning_parser_kimi, reasoning_parser_mistral, reasoning_parser_gpt_oss, reasoning_parser_granite, reasoning_parser_step3}
+import (
+    "neurx.inference.reasoning.reasoning_parser_registry."
+)
 
 struct v1_request {
     request_id         string

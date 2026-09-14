@@ -1,6 +1,8 @@
 package neurx.parser.text_parser
-use neurx.parser.types
-use std.slices
+import (
+    "neurx.parser.types"
+    "std.slices"
+)
 func tokenize(string input) []string {
     tokens := []string{}
     current_token := ""

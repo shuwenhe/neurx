@@ -1,9 +1,11 @@
 package neurx.reasoning.examples.basic_cot_example
-use neurx.reasoning.cot_config.{new_default_cot_config}
-use neurx.reasoning.reasoning_chain.new_reasoning_chain
-use neurx.reasoning.reasoning_step.{new_reasoning_step, step_type}
-use neurx.reasoning.reasoning_manager.new_reasoning_manager
-use neurx.reasoning.prompt_engineer.new_prompt_engineer
+import (
+    "neurx.reasoning.cot_config."
+    "neurx.reasoning.prompt_engineer.new_prompt_engineer"
+    "neurx.reasoning.reasoning_chain.new_reasoning_chain"
+    "neurx.reasoning.reasoning_manager.new_reasoning_manager"
+    "neurx.reasoning.reasoning_step."
+)
 func example_math_reasoning() {
     config := new_default_cot_config()
     user_prompt := "If a rectangle has a width of 5 and length of 10, what is its area"
@@ -156,5 +158,3 @@ func example_validation() {
         report := validator.generate_report(chain)
     }
 }
-use neurx.reasoning.reasoning_validator.new_reasoning_validator
-use neurx.reasoning.cot_config.new_detailed_cot_config

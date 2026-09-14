@@ -1,7 +1,9 @@
 package neurx.fs
 
-use std.slices
-use std.option.option
+import (
+    "std.option.option"
+    "std.slices"
+)
 
 struct inode {
     int inode_num

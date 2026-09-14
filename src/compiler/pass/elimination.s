@@ -1,5 +1,7 @@
 package neurx.compile.passes.elimination
-use neurx.compile.ir.{ir_graph, ir_node, ir_op}
+import (
+    "neurx.compile.ir."
+)
 
 struct elimination_config {
     bool enable_dce

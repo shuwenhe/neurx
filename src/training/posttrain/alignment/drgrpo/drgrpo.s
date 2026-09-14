@@ -1,6 +1,8 @@
 package neurx.posttrain.alignment.drgrpo
-use neurx.tensor.{tensor, tensor_ops}
-use neurx.nn.{module}
+import (
+    "neurx.nn."
+    "neurx.tensor."
+)
 
 struct drgrpo_config {
     float learning_rate

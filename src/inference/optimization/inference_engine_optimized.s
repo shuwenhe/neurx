@@ -1,6 +1,8 @@
 package neurx.inference.optimization.inference_engine_optimized
-use neurx.inference.optimization.attention_layers
-use neurx.inference.optimization.attention_integration
+import (
+    "neurx.inference.optimization.attention_integration"
+    "neurx.inference.optimization.attention_layers"
+)
 struct optimized_inference_engine {
     attention_layer_manager attn_manager
     attention_optimized_model_config model_config

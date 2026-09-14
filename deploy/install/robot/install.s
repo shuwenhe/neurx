@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     string platform = runtime_env_get("NEURX_ROBOT_PLATFORM", "jetson_orin")

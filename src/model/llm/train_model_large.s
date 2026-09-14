@@ -1,7 +1,9 @@
 package neurx.model.llm.train_gpt_large
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
-use neurx.pretrain.llm.gpt_large_pretrain
-use neurx.util.math.{exp_approx}
+import (
+    "neurx.pretrain.llm.gpt_large_pretrain"
+    "neurx.runtime.io."
+    "neurx.util.math."
+)
 
 func trim(string s) string {
     int i = 0

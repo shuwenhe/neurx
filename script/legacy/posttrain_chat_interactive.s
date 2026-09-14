@@ -1,9 +1,11 @@
 package main
-use std.io
-use std.os
-use std.strings
-use std.bufio
-use std.collections
+import (
+    "std.bufio"
+    "std.collections"
+    "std.io"
+    "std.os"
+    "std.strings"
+)
 
 func main() {
     neurx_dir := "/home/shuwen/shuwen/train/neurx"

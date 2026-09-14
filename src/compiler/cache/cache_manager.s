@@ -1,5 +1,7 @@
 package neurx.compile.cache.cache_manager
-use neurx.compile.ir.{ir_graph, ir_node}
+import (
+    "neurx.compile.ir."
+)
 
 struct cache_entry {
     string cache_key

@@ -1,9 +1,11 @@
 package neurx.kernel.demo
 
-use neurx.kernel.sched.advanced_scheduler
-use neurx.ipc.pipes
-use neurx.ipc.msgqueue
-use neurx.kernel.process.process_manager
+import (
+    "neurx.ipc.msgqueue"
+    "neurx.ipc.pipes"
+    "neurx.kernel.process.process_manager"
+    "neurx.kernel.sched.advanced_scheduler"
+)
 
 func demonstrate_scheduler() {
     print("")

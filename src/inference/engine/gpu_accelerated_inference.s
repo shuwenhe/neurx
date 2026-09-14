@@ -1,9 +1,11 @@
 package neurx.inference.engine.gpu_accelerated_inference
 
-use std.vec.vec
-use neurx.compute.gpu_gemm_engine
-use neurx.device.cuda_runtime_binding
-use neurx.inference.runtime.real_text_engine
+import (
+    "neurx.compute.gpu_gemm_engine"
+    "neurx.device.cuda_runtime_binding"
+    "neurx.inference.runtime.real_text_engine"
+    "std.vec.vec"
+)
 
 struct gpu_accelerated_engine {
     real_text_engine_state cpu_engine

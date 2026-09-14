@@ -1,7 +1,9 @@
 package neurx.reasoning.reasoning_validator
-use neurx.reasoning.cot_config.{cot_config, validation_strategy}
-use neurx.reasoning.reasoning_chain.reasoning_chain
-use neurx.reasoning.reasoning_step.{reasoning_step, step_state}
+import (
+    "neurx.reasoning.cot_config."
+    "neurx.reasoning.reasoning_chain.reasoning_chain"
+    "neurx.reasoning.reasoning_step."
+)
 
 struct validation_result {
     bool is_valid

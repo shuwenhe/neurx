@@ -1,9 +1,11 @@
 package main
-use neurx.inference.api.contracts.{inference_request}
-use neurx.inference.executor.native_executor.{native_execution_result, execute_native_request}
-use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, load_hf_bpe_tokenizer}
-use neurx.models.loaders.hf_transformer.{hf_model_weights, load_hf_model}
-use neurx.serving.api.native_openai.{native_openai_response, serve_native_openai}
+import (
+    "neurx.inference.api.contracts."
+    "neurx.inference.executor.native_executor."
+    "neurx.inference.tokenizer.hf_bpe_tokenizer."
+    "neurx.models.loaders.hf_transformer."
+    "neurx.serving.api.native_openai."
+)
 
 func contains(string text, string pattern) bool {
     int i = 0

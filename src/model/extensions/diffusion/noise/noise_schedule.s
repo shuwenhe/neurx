@@ -1,6 +1,8 @@
 package neurx.diffusion.noise
-use neurx.diffusion.config
-use neurx.ops
+import (
+    "neurx.diffusion.config"
+    "neurx.ops"
+)
 struct noise_schedule_state {
     diffusion_config cfg
     int step

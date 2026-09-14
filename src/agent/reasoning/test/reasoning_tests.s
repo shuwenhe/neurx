@@ -1,10 +1,12 @@
 package neurx.reasoning.tests.reasoning_tests
-use neurx.reasoning.cot_config.{new_default_cot_config, new_fast_cot_config, validation_strategy}
-use neurx.reasoning.reasoning_chain.{new_reasoning_chain, chain_state}
-use neurx.reasoning.reasoning_step.{new_reasoning_step, step_type, step_state}
-use neurx.reasoning.reasoning_manager.new_reasoning_manager
-use neurx.reasoning.prompt_engineer.new_prompt_engineer
-use neurx.reasoning.reasoning_validator.new_reasoning_validator
+import (
+    "neurx.reasoning.cot_config."
+    "neurx.reasoning.prompt_engineer.new_prompt_engineer"
+    "neurx.reasoning.reasoning_chain."
+    "neurx.reasoning.reasoning_manager.new_reasoning_manager"
+    "neurx.reasoning.reasoning_step."
+    "neurx.reasoning.reasoning_validator.new_reasoning_validator"
+)
 struct test_result {
     string test_name
     bool passed

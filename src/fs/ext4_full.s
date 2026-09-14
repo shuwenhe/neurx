@@ -1,5 +1,7 @@
 package fs.ext4
-use std.strings.int_to_string
+import (
+    "std.strings.int_to_string"
+)
 struct ext4_inode {
     int ino
     int mode

@@ -1,5 +1,7 @@
 package neurx.posttrain.lora.lora_layer
-use neurx.posttrain.model.model_loader.{fill_model_tensor}
+import (
+    "neurx.posttrain.model.model_loader."
+)
 
 struct lora_linear {
     []float base_weight

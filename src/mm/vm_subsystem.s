@@ -1,6 +1,8 @@
 package neurx.mm
-use std.slices
-use std.collections.hashmap
+import (
+    "std.collections.hashmap"
+    "std.slices"
+)
 struct page_table_entry {
     int address
     bool present

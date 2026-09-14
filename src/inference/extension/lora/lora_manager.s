@@ -1,8 +1,10 @@
 package neurx.lora.lora_manager
-use std.slices
-use std.option.option
-use std.result.result
-use std.map.map
+import (
+    "std.map.map"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 struct lora_config {
     int lora_rank
     float lora_alpha

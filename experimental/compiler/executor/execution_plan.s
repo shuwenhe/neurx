@@ -1,7 +1,9 @@
 package neurx.experimental.compiler.executor.execution_plan
 
-use neurx.experimental.compiler.ir.graph.computation_graph
-use neurx.experimental.compiler.ir.operation.operation
+import (
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+    "neurx.experimental.compiler.ir.operation.operation"
+)
 
 struct execution_task {
     int op_id

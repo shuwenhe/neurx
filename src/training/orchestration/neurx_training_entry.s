@@ -1,10 +1,12 @@
 package neurx.trainer.neurx_training_entry
-use neurx.model.transformer.rope_scaling.*
-use neurx.attention.ring.*
-use neurx.distributed.training_3d.*
-use neurx.checkpoint.distributed.*
-use neurx.data.loader.dataloader.*
-use neurx.observability.training.training_observability.*
+import (
+    "neurx.attention.ring.*"
+    "neurx.checkpoint.distributed.*"
+    "neurx.data.loader.dataloader.*"
+    "neurx.distributed.training_3d.*"
+    "neurx.model.transformer.rope_scaling.*"
+    "neurx.observability.training.training_observability.*"
+)
 func create_neurx_200b_model_config() model_parallel_config {
     parallel dims = create_parallel_config(64, 8, 4, 2, 0)
     model_parallel_config {

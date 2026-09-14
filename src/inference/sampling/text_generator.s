@@ -1,5 +1,7 @@
 package neurx.inference
-use neurx.inference.sampling_strategies
+import (
+    "neurx.inference.sampling_strategies"
+)
 struct generator_config {
     sampling_config sampling
     int eos_token_id

@@ -1,7 +1,9 @@
 package neurx.autograd.tracer
-use neurx.autograd.function
-use neurx.autograd.eqn
-use neurx.strings
+import (
+    "neurx.autograd.eqn"
+    "neurx.autograd.function"
+    "neurx.strings"
+)
 struct tracer_state {
     string name
     bool active

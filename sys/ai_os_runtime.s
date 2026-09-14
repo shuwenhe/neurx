@@ -1,6 +1,8 @@
 package neurx.sys.ai_os
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct resource_quota {
     int cpu_cores

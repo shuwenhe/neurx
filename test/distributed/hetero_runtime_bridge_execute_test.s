@@ -1,6 +1,8 @@
 package main
 
-use neurx.deployment.hetero_runtime_bridge.{bridge_hetero_demo_execute}
+import (
+    "neurx.deployment.hetero_runtime_bridge."
+)
 
 func expect(bool condition, string name) int {
     if condition {

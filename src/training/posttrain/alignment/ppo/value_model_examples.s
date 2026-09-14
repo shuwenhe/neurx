@@ -1,5 +1,7 @@
 package neurx.posttrain.rlhf.value_model_examples
-use neurx.posttrain.rlhf.value_model_trainer.*
+import (
+    "neurx.posttrain.rlhf.value_model_trainer.*"
+)
 func create_value_config() value_config {
     value_config {
         seq_len: 128,

@@ -1,5 +1,7 @@
 package neurx.kernel
-use std.slices
+import (
+    "std.slices"
+)
 struct clock_type {
     int value  
 }

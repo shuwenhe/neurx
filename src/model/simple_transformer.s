@@ -1,5 +1,7 @@
 package neurx.model.simple_transformer
-use neurx.tensor
+import (
+    "neurx.tensor"
+)
 struct simple_transformer {
     vocab_size i64
     hidden_size i64

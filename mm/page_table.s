@@ -1,9 +1,11 @@
 package neurx.mm.page_table
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.spinlock
+import (
+    "neurx.kernel.locking.spinlock"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 struct page_table {
     level4_table: *page_directory_entry,

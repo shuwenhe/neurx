@@ -1,6 +1,8 @@
 package neurx.scheduler.lr_scheduler_moe_1t
-use neurx.strings
-use neurx.runtime.io.{io_println}
+import (
+    "neurx.runtime.io."
+    "neurx.strings"
+)
 
 struct lr_schedule_config {
     string schedule_type

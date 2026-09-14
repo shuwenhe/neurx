@@ -1,5 +1,7 @@
 package main
-use neurx.training.api.contracts.{training_job_config, training_validation_result, validate_training_job}
+import (
+    "neurx.training.api.contracts."
+)
 
 func main() {
     training_job_config config = training_job_config {

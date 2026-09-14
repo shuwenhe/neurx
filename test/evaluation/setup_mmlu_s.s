@@ -1,5 +1,7 @@
 package main
-use neurx.runtime.io.{
+import (
+    "neurx.runtime.io.{"
+)
     io_println,
     io_get_env,
     io_mkdir_recursive,

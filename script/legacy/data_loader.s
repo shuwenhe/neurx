@@ -1,6 +1,8 @@
 package main
-use std.io
-use std.strings
+import (
+    "std.io"
+    "std.strings"
+)
 
 struct data_loader_config {
     string shard_dir

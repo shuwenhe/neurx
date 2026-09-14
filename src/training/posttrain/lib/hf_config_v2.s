@@ -1,6 +1,8 @@
 package neurx.posttrain.lib.hf_config
-use std.io.eprintln
-use std.io.readfile
+import (
+    "std.io.eprintln"
+    "std.io.readfile"
+)
 struct hf_config {
     string model_type
     int vocab_size

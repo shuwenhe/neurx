@@ -1,6 +1,8 @@
 package neurx.data.data_cleaning
-use neurx.strings.{string_contains, string_index_of, string_split, string_trim, string_length}
-use neurx.runtime.io.{
+import (
+    "neurx.runtime.io.{"
+    "neurx.strings."
+)
     io_println, io_file_exists, io_read_lines, io_mkdir_recursive,
     io_write_file, io_list_files, io_file_size
 }

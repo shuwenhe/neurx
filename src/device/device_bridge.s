@@ -1,6 +1,8 @@
 package neurx.device.device_bridge
-use neurx.device.abi
-use neurx.device.gate0_cuda_impl
+import (
+    "neurx.device.abi"
+    "neurx.device.gate0_cuda_impl"
+)
 struct device_bridge_state {
     bool is_initialized
     gate0_cuda_impl.gate0_cuda_state cuda_state

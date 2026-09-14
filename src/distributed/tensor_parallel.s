@@ -1,9 +1,11 @@
 package neurx.distributed.tensor_parallel
 
-use std.vec.vec
-use neurx.device.abi
-use neurx.distributed.nccl_comm
-use neurx.compute.core_kernels
+import (
+    "neurx.compute.core_kernels"
+    "neurx.device.abi"
+    "neurx.distributed.nccl_comm"
+    "std.vec.vec"
+)
 
 struct tensor_parallel_config {
     int world_size

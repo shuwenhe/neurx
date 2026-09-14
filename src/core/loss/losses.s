@@ -1,6 +1,8 @@
 package neurx.loss
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct loss {
     string name
 }

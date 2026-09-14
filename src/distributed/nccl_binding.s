@@ -1,7 +1,9 @@
 package neurx.distributed.nccl_binding
 
-use std.vec.vec
-use neurx.device.cuda_runtime_binding
+import (
+    "neurx.device.cuda_runtime_binding"
+    "std.vec.vec"
+)
 
 extern func ncclGetUniqueId(void* unique_id) -> int
 extern func ncclCommInitRank(void* comm_ptr, int nranks, void* unique_id, int rank) -> int

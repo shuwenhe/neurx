@@ -1,10 +1,12 @@
 package main
-use std.io.println
-use neurx.lib.fileio.{read_file_lines, split_string, trim_string, starts_with, file_exists}
-use neurx.lib.json.{extract_json_field, json_string_to_float, json_string_to_int}
-use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, matrix_vector_multiply, vector_add, vector_subtract, vector_scale}
-use neurx.lib.nn.{lora_linear_layer, create_lora_linear_layer, lora_forward}
-use neurx.lib.loss.{mse_loss_forward, mse_loss_backward, create_adam_optimizer, adam_optimizer, adam_step}
+import (
+    "neurx.lib.fileio."
+    "neurx.lib.json."
+    "neurx.lib.loss."
+    "neurx.lib.nn."
+    "neurx.lib.tensor."
+    "std.io.println"
+)
 
 struct training_example {
     string instruction

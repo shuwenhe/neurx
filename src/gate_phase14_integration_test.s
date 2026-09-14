@@ -1,15 +1,17 @@
 package neurx.gate_phase14_integration_test
 
-use std.vec.vec
-use neurx.device.abi
-use neurx.compute.gpu_gemm
-use neurx.compute.gpu_attention
-use neurx.compute.gpu_activations
-use neurx.compute.gpu_embedding
-use neurx.model.transformer_forward
-use neurx.io.weight_loader_complete
-use neurx.distributed.collective_communication
-use neurx.inference.inference_pipeline_phase14
+import (
+    "neurx.compute.gpu_activations"
+    "neurx.compute.gpu_attention"
+    "neurx.compute.gpu_embedding"
+    "neurx.compute.gpu_gemm"
+    "neurx.device.abi"
+    "neurx.distributed.collective_communication"
+    "neurx.inference.inference_pipeline_phase14"
+    "neurx.io.weight_loader_complete"
+    "neurx.model.transformer_forward"
+    "std.vec.vec"
+)
 
 func test_phase1_gpu_gemm_basic() (int, int, string) {
     passed := 0

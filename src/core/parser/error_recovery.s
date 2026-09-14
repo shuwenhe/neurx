@@ -1,6 +1,8 @@
 package neurx.parser.error_recovery
-use neurx.parser.types
-use neurx.parser.text_parser
+import (
+    "neurx.parser.text_parser"
+    "neurx.parser.types"
+)
 func attempt_recovery(string error_msg, string text, int strategy) ParseResult {
     result := create_parse_result()
     result.raw_output = text

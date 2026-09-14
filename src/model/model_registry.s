@@ -1,8 +1,10 @@
 package neurx.model.model_registry
-use std.slices
-use std.map
-use std.option
-use neurx.model.model_zoo
+import (
+    "neurx.model.model_zoo"
+    "std.map"
+    "std.option"
+    "std.slices"
+)
 const ATTENTION_STANDARD = "standard"
 const ATTENTION_FLASH = "flash_attention"
 const ATTENTION_GQA = "gqa"

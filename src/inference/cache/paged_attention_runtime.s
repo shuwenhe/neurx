@@ -1,5 +1,7 @@
 package neurx.inference.paged_attention_runtime
-use neurx.attention.paged_attention_core
+import (
+    "neurx.attention.paged_attention_core"
+)
 struct paged_attention_runtime {
     paged_kv_cache cache
     paged_attention_config config

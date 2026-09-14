@@ -1,5 +1,7 @@
 package neurx.posttrain.training.enhanced_demo
-use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy, compute_accuracy}
+import (
+    "neurx.posttrain.training.stability."
+)
 
 func training_loop_with_stability() {
     println("=== Enhanced Training Loop Demo ===")

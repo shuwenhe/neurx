@@ -1,14 +1,16 @@
 package neurx.test.kernel
 
-use neurx.mm.fault.vm_system
-use neurx.mm.fault.vm_system_create
-use neurx.mm.fault.anonymous_page_fault
-use neurx.mm.fault.fork_address_space
-use neurx.mm.fault.find_mapping
-use neurx.mm.fault.map_file_page
-use neurx.mm.fault.age_pages
-use neurx.mm.fault.reclaim_clean_file_pages
-use neurx.mm.fault.VM_OK
+import (
+    "neurx.mm.fault.VM_OK"
+    "neurx.mm.fault.age_pages"
+    "neurx.mm.fault.anonymous_page_fault"
+    "neurx.mm.fault.find_mapping"
+    "neurx.mm.fault.fork_address_space"
+    "neurx.mm.fault.map_file_page"
+    "neurx.mm.fault.reclaim_clean_file_pages"
+    "neurx.mm.fault.vm_system"
+    "neurx.mm.fault.vm_system_create"
+)
 
 func expect(bool condition, string name) int {
     if condition { print("PASS " + name); return 0 }

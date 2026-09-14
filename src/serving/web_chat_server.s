@@ -1,9 +1,11 @@
 package neurx.serving.web_chat
 
-use std.io_syscall
-use std.syscall
-use std.encoding
-use std.runtime_nostdlib
+import (
+    "std.encoding"
+    "std.io_syscall"
+    "std.runtime_nostdlib"
+    "std.syscall"
+)
 
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_setsockopt(int fd, int level, int option, int value) int

@@ -1,14 +1,16 @@
 package main
-use neurx.transformers_utils.hf_model_loader
-use neurx.transformers_utils.hf_config
-use neurx.transformers_utils.hf_tokenizer
-use neurx.transformers_utils.weight_conversion.safetensors_loader
-use neurx.transformers_utils.logits_processors.top_k
-use neurx.transformers_utils.logits_processors.nucleus
-use neurx.transformers_utils.logits_processors.temperature
-use neurx.transformers_utils.model_adapters.llama_adapter
-use neurx.transformers_utils.model_adapters.qwen_adapter
-use neurx.transformers_utils.compatibility.adapter_registry
+import (
+    "neurx.transformers_utils.compatibility.adapter_registry"
+    "neurx.transformers_utils.hf_config"
+    "neurx.transformers_utils.hf_model_loader"
+    "neurx.transformers_utils.hf_tokenizer"
+    "neurx.transformers_utils.logits_processors.nucleus"
+    "neurx.transformers_utils.logits_processors.temperature"
+    "neurx.transformers_utils.logits_processors.top_k"
+    "neurx.transformers_utils.model_adapters.llama_adapter"
+    "neurx.transformers_utils.model_adapters.qwen_adapter"
+    "neurx.transformers_utils.weight_conversion.safetensors_loader"
+)
 func main() {
     print("\n")
     print("╔════════════════════════════════════════════════════════════════╗\n")

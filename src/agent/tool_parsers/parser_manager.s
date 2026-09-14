@@ -1,6 +1,8 @@
 package neurx.tool_parsers
-use std.map
-use std.slices
+import (
+    "std.map"
+    "std.slices"
+)
 type ToolParserFactory = func() . ToolParser
 struct ToolParserManager {
     parsers: Map<str, ToolParserFactory>

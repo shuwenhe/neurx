@@ -1,5 +1,7 @@
 package neurx.tensor.reduce
-use neurx.tensor.core
+import (
+    "neurx.tensor.core"
+)
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = make([]int, n)

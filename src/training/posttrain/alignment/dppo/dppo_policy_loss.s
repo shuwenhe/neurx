@@ -1,6 +1,8 @@
 package neurx.posttrain.alignment.dppo
-use neurx.tensor
-use neurx.posttrain.alignment.loss_aggregation
+import (
+    "neurx.posttrain.alignment.loss_aggregation"
+    "neurx.tensor"
+)
 struct dppo_config {
     float clip_divergence_low
     float clip_divergence_high

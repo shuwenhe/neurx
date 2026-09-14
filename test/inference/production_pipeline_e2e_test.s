@@ -1,6 +1,8 @@
 package neurx.test.inference.production_pipeline_e2e
 
-use neurx.inference.runtime.production_inference_pipeline.{
+import (
+    "neurx.inference.runtime.production_inference_pipeline.{"
+)
     create_production_pipeline,
     inference_request,
     inference_response,

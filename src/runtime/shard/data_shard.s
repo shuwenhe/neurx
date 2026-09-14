@@ -1,5 +1,7 @@
 package neurx.shard.data_shard
-use neurx.script.data_utils.{
+import (
+    "neurx.script.data_utils.{"
+)
     file_read_text,
     file_write_text,
     file_delete,
@@ -23,7 +25,6 @@ use neurx.script.data_utils.{
     div_round_up,
     dir_list_files,
 }
-use neurx.strings.{string_split, string_join}
 
 struct shard_config {
     string input_file

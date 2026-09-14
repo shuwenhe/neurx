@@ -1,6 +1,8 @@
 module posttrain_validation_golden_dataset
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file, trim}
-use std.conv.parse_int_default as parse_int
+import (
+    "neurx.runtime.io."
+    "std.conv.parse_int_default"
+)
 func main() {
     string mode = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_MODE", "verify")
     string golden_dir = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_DIR", "../posttrain/golden")

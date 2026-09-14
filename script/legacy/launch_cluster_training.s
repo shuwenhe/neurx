@@ -1,7 +1,9 @@
 package main
-use std.conv.extract_int_default as parse_int
-use neurx.runtime.io.{runtime_env_get}
-use neurx.strings.{string_concat}
+import (
+    "neurx.runtime.io."
+    "neurx.strings."
+    "std.conv.extract_int_default"
+)
 
 struct cluster_config {
     int num_nodes

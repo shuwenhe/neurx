@@ -1,6 +1,8 @@
 package neurx.tool_parsers.validator.schema_validator
-use neurx.tool_parsers.schema.schema_types
-use std.slices
+import (
+    "neurx.tool_parsers.schema.schema_types"
+    "std.slices"
+)
 struct validation_result {
     bool is_valid
     errors: []string

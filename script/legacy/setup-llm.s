@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     string api_key = runtime_env_get("NEURX_API_KEY", "")
@@ -41,7 +43,7 @@ func main() {
     println("")
     println("int main() {")
     println("
-    println("    auto analyzer = std::make_unique<llm_code_analyzer>();")
+    println("    auto analyzer = std.make_unique<llm_code_analyzer>();")
     println("")
     println("
     println("    auto provider = new RemoteProvider();")
@@ -50,7 +52,7 @@ func main() {
     println("")
     println("
     println("    auto result = analyzer.analyzeCode(\"def hello(): print('world')\",")
-    println("                                        ProgrammingLanguage::Python);")
+    println("                                        ProgrammingLanguage.Python);")
     println("")
     println("    qDebug() << \"Quality:\" << result.quality;")
     println("    qDebug() << \"Issues:\" << result.issues.size();")

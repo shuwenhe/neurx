@@ -1,7 +1,9 @@
 package neurx.compute.gpu_embedding
 
-use std.vec.vec
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct embedding_config {
     int vocab_size

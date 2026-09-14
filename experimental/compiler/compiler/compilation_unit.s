@@ -1,7 +1,9 @@
 package neurx.experimental.compiler.compiler.compilation_unit
 
-use neurx.experimental.compiler.ir.graph.computation_graph
-use neurx.experimental.compiler.compiler.pass_manager.{pass_pipeline, pass_result}
+import (
+    "neurx.experimental.compiler.compiler.pass_manager."
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+)
 
 struct compilation_stats {
     int original_op_count

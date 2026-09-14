@@ -1,7 +1,9 @@
 package neurx.inference.verify
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-use std.conv.int_to_string
+import (
+    "neurx.runtime.io."
+    "std.conv.int_to_string"
+)
 
 struct inference_test_case {
     string name

@@ -1,6 +1,8 @@
 package neurx.agent.call_trace
-use neurx.agent.memory
-use neurx.runtime.io.{runtime_write_text_file, runtime_env_get}
+import (
+    "neurx.agent.memory"
+    "neurx.runtime.io."
+)
 string CALL_TRACE_RUNTIME   = "neurx/agent/runtime.s"
 string CALL_TRACE_SAFETY    = "neurx/safety/safety.s"
 string CALL_TRACE_REASONING = "neurx/reasoning/reasoning.s"

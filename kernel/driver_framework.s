@@ -1,6 +1,8 @@
 package neurx.kernel.driver_framework
 
-use neurx.kernel.device_model.{device, device_register, device_unregister, device_get}
+import (
+    "neurx.kernel.device_model."
+)
 
 struct driver_result {
     bool success

@@ -1,5 +1,7 @@
 package neurx.posttrain.alignment.kl_penalty
-use neurx.tensor
+import (
+    "neurx.tensor"
+)
 func kl_penalty_k1(tensor log_prob, tensor ref_log_prob) tensor {
     return sub(log_prob, ref_log_prob)
 }

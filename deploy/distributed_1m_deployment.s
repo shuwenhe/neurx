@@ -1,7 +1,9 @@
 package neurx.deployment.distributed_1m
 
-use std.slices
-use std.io.println
+import (
+    "std.io.println"
+    "std.slices"
+)
 
 struct zone_deployment_config {
     string zone_id

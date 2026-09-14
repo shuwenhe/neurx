@@ -1,7 +1,9 @@
 package neurx.tensor
-use neurx.cpu.compute_backend
-use neurx.autograd.ir
-use neurx.autograd.tracer
+import (
+    "neurx.autograd.ir"
+    "neurx.autograd.tracer"
+    "neurx.cpu.compute_backend"
+)
 struct tensor {
     []float data
     []int shape

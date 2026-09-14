@@ -1,5 +1,7 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_write_binary_file}
+import (
+    "neurx.runtime.io."
+)
 
 struct tensor {
     int rows

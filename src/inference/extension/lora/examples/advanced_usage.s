@@ -1,12 +1,14 @@
 package neurx.lora.examples.advanced_usage
-use std.slices
-use std.option.option
-use std.result.result
-use std.map.map
-use neurx.lora.lora_config
-use neurx.lora.lora_adapter
-use neurx.lora.weight_fusion
-use neurx.lora.lora_state
+import (
+    "neurx.lora.lora_adapter"
+    "neurx.lora.lora_config"
+    "neurx.lora.lora_state"
+    "neurx.lora.weight_fusion"
+    "std.map.map"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 func example_weight_fusion() ((), string) {
     println("example 1: 权重融合")
     config := default()

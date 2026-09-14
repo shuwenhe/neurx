@@ -1,6 +1,8 @@
 package neurx.inference.runtime.start_inference_with_logs
-use std.io.{output, input}
-use std.conv.{int_to_string}
+import (
+    "std.conv."
+    "std.io."
+)
 extern "c" func system(string cmd) int
 func main() {
     print("\n🚀 start NeurX inference系统（带日志记录）\n")

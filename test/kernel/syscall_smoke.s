@@ -1,6 +1,8 @@
 package test.kernel
 
-use kernel.syscall
+import (
+    "kernel.syscall"
+)
 
 func main() {
     init_syscall_table()

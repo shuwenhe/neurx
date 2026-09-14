@@ -1,9 +1,11 @@
 package neurx.enterprise.speculative_inference
-use neurx.cpu.cuda_core
-use neurx.inference.speculative.speculative_decode_core
-use neurx.inference.speculative.draft_model_executor
-use neurx.inference.speculative.speculative_verifier
-use neurx.inference.speculative.speculative_runtime
+import (
+    "neurx.cpu.cuda_core"
+    "neurx.inference.speculative.draft_model_executor"
+    "neurx.inference.speculative.speculative_decode_core"
+    "neurx.inference.speculative.speculative_runtime"
+    "neurx.inference.speculative.speculative_verifier"
+)
 struct speculative_inference_config {
     bool enable_speculative_decode
     int num_draft_tokens

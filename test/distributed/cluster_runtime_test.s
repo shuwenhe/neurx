@@ -1,6 +1,8 @@
 package main
 
-use neurx.distributed.cluster.{cluster_default_cuda_capability, create_cluster_runtime, cluster_register_node, cluster_select_node, cluster_assign_request, cluster_release_request, cluster_workload_request, cluster_healthy_node_count, cluster_total_device_count}
+import (
+    "neurx.distributed.cluster."
+)
 
 func expect(bool condition, string name) int {
     if condition {

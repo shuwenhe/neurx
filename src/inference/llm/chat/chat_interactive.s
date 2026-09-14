@@ -1,5 +1,7 @@
 package interactive_chat
-use neurx.runtime.io.{runtime_run_command_output}
+import (
+    "neurx.runtime.io."
+)
 
 func main() {
     print("\n╔═══════════════════════════════════════════════╗\n")

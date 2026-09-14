@@ -1,7 +1,9 @@
 package neurx.device.cuda_stream_manager
 
-use neurx.device.cuda_runtime_binding
-use std.vec.vec
+import (
+    "neurx.device.cuda_runtime_binding"
+    "std.vec.vec"
+)
 
 struct stream_pool {
     vec[int64] available_streams

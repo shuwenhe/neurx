@@ -1,8 +1,10 @@
 package main
-use std.io
-use std.math
-use std.time
-use std.strings
+import (
+    "std.io"
+    "std.math"
+    "std.strings"
+    "std.time"
+)
 println := io.println
 
 struct compile_config {

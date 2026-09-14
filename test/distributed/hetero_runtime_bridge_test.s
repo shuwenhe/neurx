@@ -1,7 +1,9 @@
 package main
 
-use neurx.runtime.distributed.topology.{hetero_topology_new, hetero_topology_add_node, hetero_topology_node_new, hetero_default_capability}
-use neurx.deployment.hetero_runtime_bridge.{bridge_hetero_launch_summary}
+import (
+    "neurx.deployment.hetero_runtime_bridge."
+    "neurx.runtime.distributed.topology."
+)
 
 func expect(bool condition, string name) int {
     if condition {

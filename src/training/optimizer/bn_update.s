@@ -1,6 +1,8 @@
 package neurx.optimizer.bn_update
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct batch_norm_stats {
     []float running_mean
     []float running_var

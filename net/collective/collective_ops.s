@@ -1,6 +1,8 @@
 package neurx.net.collective
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct comm_rank {
     int rank_id

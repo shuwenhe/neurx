@@ -1,5 +1,7 @@
 package neurx.inference.medusa
-use std.conv.int64_to_string
+import (
+    "std.conv.int64_to_string"
+)
 struct medusa_head {
     int head_id
     int layer_depth

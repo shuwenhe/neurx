@@ -1,5 +1,7 @@
 package main
-use neurx.models.formats.safetensors_embedding.{safetensors_embedding, embedding_lookup_result, load_f32_embedding, lookup_f32_embedding}
+import (
+    "neurx.models.formats.safetensors_embedding."
+)
 
 func main() {
     safetensors_embedding embedding = load_f32_embedding("artifact/build/commands/model-format-test/embedding.safetensors", "embedding.weight")

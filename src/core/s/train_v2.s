@@ -1,9 +1,11 @@
 package neurx.train.v2
-use std.tensor_core as T
-use std.math_dl as M
-use std.autograd as AG
-use std.nn as NN
-use std.training_io as IO
+import (
+    "std.autograd"
+    "std.math_dl"
+    "std.nn"
+    "std.tensor_core"
+    "std.training_io"
+)
 struct train_config {
     int vocab_size
     int embed_dim

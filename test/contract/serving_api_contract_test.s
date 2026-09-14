@@ -1,5 +1,7 @@
 package main
-use neurx.serving.api.contracts.{serving_config, serving_validation_result, validate_serving_config}
+import (
+    "neurx.serving.api.contracts."
+)
 
 func main() {
     serving_config config = serving_config {

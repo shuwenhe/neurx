@@ -1,6 +1,8 @@
 package neurx.distributed.tp_collective
-use neurx.distributed.tp
-use neurx.distributed.comm
+import (
+    "neurx.distributed.comm"
+    "neurx.distributed.tp"
+)
 struct tp_collective_state {
     tp_state tp
     process_group_state pg

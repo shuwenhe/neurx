@@ -1,5 +1,7 @@
 package neurx.runtime.device.device_binding
-use neurx.runtime.device.device_ops.{op_int_string}
+import (
+    "neurx.runtime.device.device_ops."
+)
 
 func binding_buffer(string name, int handle) string {
     "buffer." + name + "=" + op_int_string(handle)

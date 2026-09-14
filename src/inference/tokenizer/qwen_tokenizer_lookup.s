@@ -1,5 +1,7 @@
 package neurx.inference.qwen_tokenizer_lookup
-use std.conv.int_to_string
+import (
+    "std.conv.int_to_string"
+)
 func qwen_token_to_text(int token_id) string {
     switch token_id {
         case 0: "!"
@@ -2580,7 +2582,7 @@ func qwen_token_to_text(int token_id) string {
         case 3501: "Ġpoints"
         case 3502: "ĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠ"
         case 3503: ".J"
-        case 3504: "Ġ::"
+        case 3504: "Ġ."
         case 3505: "ptr"
         case 3506: "DB"
         case 3507: "++;Ċ"

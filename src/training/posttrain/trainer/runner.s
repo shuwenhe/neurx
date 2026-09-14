@@ -1,6 +1,8 @@
 package neurx.posttrain.trainer
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs, safetensors_writer_new, safetensors_writer_add_tensor, safetensors_writer_finish, tensor, trim}
-use neurx.lib.json.{extract_json_field, parse_json_number, parse_json_string}
+import (
+    "neurx.lib.json."
+    "neurx.runtime.io."
+)
 
 struct training_pipeline {
     trainer_factory factory

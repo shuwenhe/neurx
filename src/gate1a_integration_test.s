@@ -1,8 +1,10 @@
 package neurx.gate1a_test
 
-use neurx.device.abi
-use neurx.device.device_bridge
-use neurx.device.device_tensor_manager
+import (
+    "neurx.device.abi"
+    "neurx.device.device_bridge"
+    "neurx.device.device_tensor_manager"
+)
 
 struct gate1a_test_config {
     int initial_tensor_count

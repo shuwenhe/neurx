@@ -1,15 +1,17 @@
 package neurx.integration
-use neurx.ipc.sem_msg_shm
-use neurx.kernel.signals_interrupts
-use neurx.kernel.timers_workqueue
-use neurx.mm.swap_numa_oom
-use neurx.mm.vm_subsystem
-use neurx.mm.huge_pages
-use neurx.fs.ext4
-use neurx.net.qos_netfilter
-use neurx.driver.cpufreq
-use neurx.mm.compaction_io
-use neurx.kernel.cpu_scheduling
+import (
+    "neurx.driver.cpufreq"
+    "neurx.fs.ext4"
+    "neurx.ipc.sem_msg_shm"
+    "neurx.kernel.cpu_scheduling"
+    "neurx.kernel.signals_interrupts"
+    "neurx.kernel.timers_workqueue"
+    "neurx.mm.compaction_io"
+    "neurx.mm.huge_pages"
+    "neurx.mm.swap_numa_oom"
+    "neurx.mm.vm_subsystem"
+    "neurx.net.qos_netfilter"
+)
 struct os_features_tier2_integration {
     vm_manager vm_manager
     huge_pages_pool huge_pages_pool

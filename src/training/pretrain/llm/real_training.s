@@ -1,8 +1,10 @@
 package neurx.pretrain.llm.real_training
-use neurx.tensor.tensor
-use neurx.tensor.new
-use neurx.ops
-use neurx.strings
+import (
+    "neurx.ops"
+    "neurx.strings"
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 func relu(tensor x) tensor {
     int n = len(x.data)
     []float out = make([]float, n)

@@ -1,5 +1,7 @@
 package neurx.kernel
-use std.slices
+import (
+    "std.slices"
+)
 struct timer {
     int timer_id
     int owner_pid

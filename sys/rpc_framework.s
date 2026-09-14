@@ -1,6 +1,8 @@
 package neurx.sys.rpc_framework
 
-use std.slices
+import (
+    "std.slices"
+)
 
     request,
     response,

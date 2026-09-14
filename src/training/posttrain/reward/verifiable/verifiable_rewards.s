@@ -1,5 +1,7 @@
 package neurx.posttrain.reward.verifiable
-use neurx.tensor.{tensor}
+import (
+    "neurx.tensor."
+)
 
 struct math_problem {
     string question

@@ -1,11 +1,13 @@
 package neurx.model.transformer_forward
 
-use std.vec.vec
-use neurx.device.abi
-use neurx.compute.gpu_embedding
-use neurx.compute.gpu_gemm
-use neurx.compute.gpu_attention
-use neurx.compute.gpu_activations
+import (
+    "neurx.compute.gpu_activations"
+    "neurx.compute.gpu_attention"
+    "neurx.compute.gpu_embedding"
+    "neurx.compute.gpu_gemm"
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct transformer_layer_weights {
     abi.device_tensor q_weight

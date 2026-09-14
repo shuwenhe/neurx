@@ -1,8 +1,10 @@
 package neurx.lora.lora_config
-use std.slices
-use std.option.option
-use std.result.result
-use std.map.map
+import (
+    "std.map.map"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 struct lora_config {
     int lora_rank
     float lora_alpha
@@ -73,7 +75,7 @@ func from_dict(*map[string, string] config_dict) (lora_config, lora_config_error
     config := default()
     switch config_dict.get("lora_rank") {
         some(val) : {
-            switch val.parse::<int>() {
+            switch val.parse.<int>() {
                 some(rank) : {
                     config.lora_rank = rank
                 },
@@ -89,7 +91,7 @@ func from_dict(*map[string, string] config_dict) (lora_config, lora_config_error
     }
     switch config_dict.get("lora_alpha") {
         some(val) : {
-            switch val.parse::<float>() {
+            switch val.parse.<float>() {
                 some(alpha) : {
                     config.lora_alpha = alpha
                 },
@@ -105,7 +107,7 @@ func from_dict(*map[string, string] config_dict) (lora_config, lora_config_error
     }
     switch config_dict.get("lora_dropout") {
         some(val) : {
-            switch val.parse::<float>() {
+            switch val.parse.<float>() {
                 some(dropout) : {
                     config.lora_dropout = dropout
                 },

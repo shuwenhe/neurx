@@ -1,6 +1,8 @@
 package neurx.test.e2e_execution_chain
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct test_result {
     string test_name

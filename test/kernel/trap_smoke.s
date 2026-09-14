@@ -1,6 +1,8 @@
 package test.kernel
 
-use kernel.trap
+import (
+    "kernel.trap"
+)
 
 func main() int {
     

@@ -1,5 +1,7 @@
 package neurx.inference.safetensors_weight_loader
-use std.encoding.bytes_to_string
+import (
+    "std.encoding.bytes_to_string"
+)
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_file_exists(string path) bool

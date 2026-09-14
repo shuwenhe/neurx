@@ -1,6 +1,8 @@
 package neurx.kernel.sched
 
-use std.slices
+import (
+    "std.slices"
+)
 
     training_task,
     inference_task,

@@ -1,5 +1,7 @@
 package neurx.trainer.pretrain
-use neurx.pretrain.loop.{pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
+import (
+    "neurx.pretrain.loop."
+)
 
 struct pretrain_trainer_ref {
     pretrain_loop_state loop

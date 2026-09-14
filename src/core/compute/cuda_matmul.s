@@ -1,5 +1,7 @@
 package neurx.compute.cuda_matmul
-use neurx.cpu.cuda_core
+import (
+    "neurx.cpu.cuda_core"
+)
 struct cuda_matrix {
     int rows
     int columns

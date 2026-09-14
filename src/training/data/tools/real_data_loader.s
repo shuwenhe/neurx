@@ -1,7 +1,9 @@
 package neurx.data.tools.real_data_loader
-use std.io
-use std.strings
-use std.math
+import (
+    "std.io"
+    "std.math"
+    "std.strings"
+)
 struct tokenizer {
     int vocab_size
     vocab: []string

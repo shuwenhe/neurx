@@ -1,6 +1,8 @@
 package neurx.kernel.virt
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct virtual_machine {
     int vm_id

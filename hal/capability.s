@@ -1,6 +1,8 @@
 package neurx.hal
 
-use std.slices
+import (
+    "std.slices"
+)
 
 enum compute_type {
     cpu_only,

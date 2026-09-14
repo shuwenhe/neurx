@@ -1,5 +1,7 @@
 package neurx.inference.optimization_suite
-use std.conv.int_to_string
+import (
+    "std.conv.int_to_string"
+)
 struct optimization_config {
     bool enable_kv_cache_optimization
     bool enable_batch_optimization

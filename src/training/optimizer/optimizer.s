@@ -1,7 +1,9 @@
 package neurx.optimizer.optimizer
-use neurx.tensor.tensor
-use neurx.optimizer.optim
-use neurx.scheduler.training_scheduler
+import (
+    "neurx.optimizer.optim"
+    "neurx.scheduler.training_scheduler"
+    "neurx.tensor.tensor"
+)
 struct optimizer_param_group {
     []tensor params
     float lr

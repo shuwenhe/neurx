@@ -1,5 +1,7 @@
 package neurx.posttrain.core.numerical_validation
-use std.io.println
+import (
+    "std.io.println"
+)
 struct golden_test_case_s {
     string test_name
     string operation

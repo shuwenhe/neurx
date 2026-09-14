@@ -1,10 +1,10 @@
 package neurx.posttrain.alignment.dapo.trainer
-use neurx.posttrain.alignment.dapo.{
+import (
+    "neurx.posttrain.alignment.dapo.{"
+)
     dapo_config, dapo_state, dapo_rollout_result,
     dapo_step, dapo_select_top_k_trajectories, new_dapo_config
 }
-use neurx.nn.{module, optimizer}
-use neurx.tensor.{tensor}
 
 struct dapo_trainer {
     module policy

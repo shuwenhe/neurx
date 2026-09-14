@@ -1,5 +1,7 @@
 package neurx.inference.optimization.attention_integration
-use neurx.inference.optimization.attention_layers
+import (
+    "neurx.inference.optimization.attention_layers"
+)
 struct attention_layer_manager {
     flash_attention_config flash_config
     mla_config mla_config

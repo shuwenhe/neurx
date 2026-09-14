@@ -1,10 +1,12 @@
 package neurx.lora.lora_adapter
-use std.slices
-use std.option.option
-use std.result.result
-use std.map.map
-use neurx.lora.lora_config
-use neurx.lora.weight_fusion
+import (
+    "neurx.lora.lora_config"
+    "neurx.lora.weight_fusion"
+    "std.map.map"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 struct lora_adapter_error {
     string code
     string message

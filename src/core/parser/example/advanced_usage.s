@@ -1,9 +1,11 @@
 package main
-use neurx.parser.parser
-use neurx.parser.types
-use neurx.parser.utils
-use neurx.parser.text_parser
-use neurx.parser.format_parser
+import (
+    "neurx.parser.format_parser"
+    "neurx.parser.parser"
+    "neurx.parser.text_parser"
+    "neurx.parser.types"
+    "neurx.parser.utils"
+)
 func main() {
     print("\n")
     print("╔════════════════════════════════════════════════════════════╗\n")

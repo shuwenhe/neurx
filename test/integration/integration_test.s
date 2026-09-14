@@ -1,9 +1,11 @@
 package neurx.test.integration
-use neurx.moe.transformer
-use neurx.attention
-use neurx.data.loader.streaming
-use neurx.distributed.fsdp
-use neurx.tokenizer.bpe_trainer
+import (
+    "neurx.attention"
+    "neurx.data.loader.streaming"
+    "neurx.distributed.fsdp"
+    "neurx.moe.transformer"
+    "neurx.tokenizer.bpe_trainer"
+)
 
 func test_all_modules() {
     print("=== NeurX Integration Test ===\n")

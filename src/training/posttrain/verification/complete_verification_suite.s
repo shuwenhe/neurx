@@ -1,5 +1,7 @@
 package neurx.posttrain.verification.complete_suite
-use neurx.runtime.io.{
+import (
+    "neurx.runtime.io.{"
+)
     runtime_env_get,
     runtime_file_exists,
     runtime_file_size,

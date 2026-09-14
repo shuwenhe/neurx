@@ -1,5 +1,7 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+import (
+    "neurx.runtime.io."
+)
 
 func abs_float(float x) float {
     if x < 0.0 {

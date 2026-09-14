@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.command.{runtime_env_get, runtime_parse_int, runtime_run_command_exit_code, runtime_shell_escape}
-use neurx.training.api.contracts.{training_job_config, training_validation_result, validate_training_job}
+import (
+    "neurx.runtime.command."
+    "neurx.training.api.contracts."
+)
 
 func main() {
     string mode = runtime_env_get("NEURX_TRAIN_MODE", "pretrain")

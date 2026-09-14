@@ -1,6 +1,8 @@
 package neurx.distillation
-use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
-use neurx.strings
+import (
+    "neurx.runtime.io."
+    "neurx.strings"
+)
 struct distillation_config {
     float temperature
     float student_weight

@@ -1,5 +1,7 @@
 package neurx.runtime.model.safetensors
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 struct safe_tensor_info {
     string name
     string dtype

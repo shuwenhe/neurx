@@ -1,5 +1,7 @@
 package neurx.kernel
-use std.slices
+import (
+    "std.slices"
+)
 struct cgroup_subsystem {
     int subsys_id  
     string name

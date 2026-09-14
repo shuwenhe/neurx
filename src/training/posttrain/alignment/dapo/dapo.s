@@ -1,7 +1,9 @@
 package neurx.posttrain.alignment.dapo
-use neurx.tensor.{tensor, tensor_ops}
-use neurx.nn.{module}
-use neurx.posttrain.rl.{rollout, reward_manager}
+import (
+    "neurx.nn."
+    "neurx.posttrain.rl."
+    "neurx.tensor."
+)
 
 struct dapo_config {
     float learning_rate

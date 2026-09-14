@@ -1,7 +1,9 @@
 package neurx.gate0_integration_test
-use std.vec.vec
-use neurx.device.abi
-use neurx.device.device_bridge
+import (
+    "neurx.device.abi"
+    "neurx.device.device_bridge"
+    "std.vec.vec"
+)
 struct vector_add_test_config {
     int vector_size
     float tolerance

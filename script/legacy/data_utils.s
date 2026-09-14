@@ -1,7 +1,9 @@
 package neurx.script.data_utils
-use std.io
-use std.os
-use std.strings
+import (
+    "std.io"
+    "std.os"
+    "std.strings"
+)
 
 struct json_value {
     string type

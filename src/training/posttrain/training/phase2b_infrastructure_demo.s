@@ -1,12 +1,13 @@
 package main
-use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy}
-use neurx.posttrain.training.metrics.{
+import (
+    "neurx.posttrain.training.metrics.{"
+    "neurx.posttrain.training.stability."
+)
     print_metrics_inline,
     print_training_summary,
     compute_perplexity,
     compute_accuracy
 }
-use neurx.posttrain.training.accuracy.{argmax, accuracy_percentage}
 
 func main() {
     println("====================================================")

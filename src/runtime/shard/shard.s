@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-use std.conv.parse_int_default as parse_int
+import (
+    "neurx.runtime.io."
+    "std.conv.parse_int_default"
+)
 func string_char(int c) string {
     string(c)
 }

@@ -1,6 +1,8 @@
 package neurx.kernel.mm.allocator
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct memory_region {
     int base_addr

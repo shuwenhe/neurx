@@ -1,8 +1,9 @@
 package neurx.runtime.compile
-use neurx.strings
-use neurx.runtime.stage
-use neurx.strings
-use neurx.compile.backend.direct_codegen
+import (
+    "neurx.compile.backend.direct_codegen"
+    "neurx.runtime.stage"
+    "neurx.strings"
+)
 struct compile_state {
     string name
     string backend

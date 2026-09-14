@@ -1,5 +1,7 @@
 package neurx.inference.logits_processors.grammar
-use neurx.inference.logits_processors
+import (
+    "neurx.inference.logits_processors"
+)
 struct grammar_rule {
     string rule_name
     []string allowed_tokens

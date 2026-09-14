@@ -1,5 +1,7 @@
 package neurx.inference.optimization.quantization_engine
-use neurx.util.logger
+import (
+    "neurx.util.logger"
+)
 struct quantization_config {
     string quantization_type
     int bits

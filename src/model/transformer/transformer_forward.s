@@ -1,5 +1,7 @@
 package neurx.model.transformer.transformer_forward
-use neurx.model.transformer.layer_norm.{
+import (
+    "neurx.model.transformer.layer_norm.{"
+)
     layer_norm_config,
     layer_norm_state,
     rms_norm_state,
@@ -8,7 +10,6 @@ use neurx.model.transformer.layer_norm.{
     layer_normalize,
     rms_normalize
 }
-use neurx.model.transformer.position_encoding.{
     position_encoding_config,
     absolute_position_encoding,
     learned_position_encoding,

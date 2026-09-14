@@ -1,7 +1,9 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
-use std.io.println
-use std.conv.parse_int_default as parse_int
+import (
+    "neurx.runtime.io."
+    "std.conv.parse_int_default"
+    "std.io.println"
+)
 
 func main() {
     println("[TRAINER] Initializing minimal_train.s...")

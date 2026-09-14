@@ -1,6 +1,8 @@
 package neurx.posttrain.alignment.sapo
-use neurx.tensor
-use neurx.posttrain.alignment.loss_aggregation
+import (
+    "neurx.posttrain.alignment.loss_aggregation"
+    "neurx.tensor"
+)
 struct sapo_config {
     float tau_pos
     float tau_neg

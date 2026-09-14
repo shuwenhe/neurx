@@ -1,6 +1,8 @@
 package main
-use std.io.println
-use neurx.runtime.io.runtime_run_command_output
+import (
+    "neurx.runtime.io.runtime_run_command_output"
+    "std.io.println"
+)
 
 func main() {
     println("[CLEAN] Removing CUDA build artifacts...")

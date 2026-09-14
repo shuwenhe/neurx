@@ -1,5 +1,7 @@
 package main
-use neurx.inference.api.contracts.{inference_request, inference_validation_result, validate_inference_request}
+import (
+    "neurx.inference.api.contracts."
+)
 
 func main() {
     inference_request request = inference_request {

@@ -1,7 +1,9 @@
 package neurx.compute.gpu_gemm
 
-use std.vec.vec
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct gemm_config {
     int m

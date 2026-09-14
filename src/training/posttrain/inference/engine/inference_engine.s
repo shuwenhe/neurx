@@ -1,6 +1,8 @@
 package neurx.posttrain.inference.engine
-use neurx.tensor.{tensor, tensor_ops}
-use neurx.nn.{module}
+import (
+    "neurx.nn."
+    "neurx.tensor."
+)
 
 struct inference_config {
     int max_num_batched_tokens

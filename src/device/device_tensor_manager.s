@@ -1,7 +1,9 @@
 package neurx.device.device_tensor_manager
 
-use neurx.device.abi
-use std.vec.vec
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct tensor_pool_block {
     int64 address

@@ -1,6 +1,8 @@
 package neurx.io
 
-use neurx.io.safetensors_loader
+import (
+    "neurx.io.safetensors_loader"
+)
 
 func test_weight_manager_init() (int, int, string) {
     passed := 0

@@ -1,7 +1,9 @@
 package neurx.backend.platform.driving
 
-use std.slices
-use std.io.println
+import (
+    "std.io.println"
+    "std.slices"
+)
 
     cam,
     denm,

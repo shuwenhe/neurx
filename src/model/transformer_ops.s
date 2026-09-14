@@ -1,5 +1,7 @@
 package neurx.model.transformer_ops
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 func embedding_lookup(
     []int token_ids,
     []float embed_weight,

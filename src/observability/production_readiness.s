@@ -1,5 +1,7 @@
 package neurx.inference.runtime.production_readiness
-use std.conv.{int_to_string, float_to_string}
+import (
+    "std.conv."
+)
 
 struct production_check {
     string category

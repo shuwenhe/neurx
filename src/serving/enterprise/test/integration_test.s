@@ -1,11 +1,13 @@
 package main
-use neurx.cpu.cuda_core
-use neurx.compute.cuda_matmul
-use neurx.quantization.quant_core
-use neurx.api.openai_compatible
-use neurx.distributed.rank_manager
-use neurx.observability.metrics
-use neurx.enterprise.inference_system
+import (
+    "neurx.api.openai_compatible"
+    "neurx.compute.cuda_matmul"
+    "neurx.cpu.cuda_core"
+    "neurx.distributed.rank_manager"
+    "neurx.enterprise.inference_system"
+    "neurx.observability.metrics"
+    "neurx.quantization.quant_core"
+)
 func main() {
     print("\n")
     print("╔════════════════════════════════════════════════════════════╗\n")

@@ -1,5 +1,7 @@
 package neurx.util.string_utils
-use std.conv.string_to_int
+import (
+    "std.conv.string_to_int"
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 func string_split(string text, string delimiter) []string {
     []string result = make([]string, 1000)

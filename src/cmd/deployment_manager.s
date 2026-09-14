@@ -1,6 +1,8 @@
 package neurx.deployment.manager
 
-use std.io.println
+import (
+    "std.io.println"
+)
 
 struct DeploymentConfig {
     local_path: string

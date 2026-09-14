@@ -1,8 +1,10 @@
 package neurx.workflows.llm.pretrain.run.pipeline_runner
-use neurx.distributed.two_t_runtime.{two_t_runtime_state, new_two_t_runtime_state, two_t_runtime_load_checkpoint, two_t_runtime_train, two_t_runtime_summary, two_t_runtime_report}
-use neurx.distributed.two_t_training.{two_t_training_plan, new_two_t_training_plan, two_t_training_plan_summary}
-use neurx.model.model_2t_config.{model_2t_config, new_2t_model_config}
-use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
+import (
+    "neurx.distributed.two_t_runtime."
+    "neurx.distributed.two_t_training."
+    "neurx.model.model_2t_config."
+    "neurx.runtime.io."
+)
 
 func workflow_two_t_config(int micro_batch, int seq_len, float lr, int steps, int warmup_steps, float min_lr, float weight_decay, int hidden_dim, int num_layers, int num_attention_heads, int num_kv_heads, int intermediate_dim, int vocab_size) model_2t_config {
     model_2t_config cfg = new_2t_model_config()

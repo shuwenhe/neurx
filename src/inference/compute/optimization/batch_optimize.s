@@ -1,6 +1,8 @@
 package neurx.inference.batch_optimize
-use std.conv.int_to_string
-use std.conv.float_to_string_precision
+import (
+    "std.conv.float_to_string_precision"
+    "std.conv.int_to_string"
+)
 struct batch_config {
     int max_batch_size
     int max_seq_length

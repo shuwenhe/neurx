@@ -1,6 +1,8 @@
 package neurx.device.gate0_cuda_impl
-use std.vec.vec
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 struct gate0_cuda_state {
     bool initialized
     int device_id

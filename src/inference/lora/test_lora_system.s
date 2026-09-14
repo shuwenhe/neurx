@@ -1,7 +1,9 @@
 package neurx.inference.lora.test_lora_system
-use neurx.inference.lora.adapter_manager
-use neurx.inference.lora.request_router
-use neurx.inference.lora.model_integration
+import (
+    "neurx.inference.lora.adapter_manager"
+    "neurx.inference.lora.model_integration"
+    "neurx.inference.lora.request_router"
+)
 func test_adapter_manager_creation() {
     print("🧪 Test: Adapter Manager Creation")
     mgr := new_lora_adapter_manager(1024)

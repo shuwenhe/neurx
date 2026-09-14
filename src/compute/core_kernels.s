@@ -1,7 +1,9 @@
 package neurx.compute.core_kernels
 
-use std.vec.vec
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct compute_kernel_config {
     int block_size

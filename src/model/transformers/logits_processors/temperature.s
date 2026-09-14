@@ -1,5 +1,7 @@
 package neurx.transformers_utils.logits_processors.temperature
-use neurx.transformers_utils.logits_processors.processor_utils
+import (
+    "neurx.transformers_utils.logits_processors.processor_utils"
+)
 struct temperature_processor {
     float temperature
     bool preserve_extremes

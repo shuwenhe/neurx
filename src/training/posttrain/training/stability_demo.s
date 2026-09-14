@@ -1,5 +1,7 @@
 package neurx.posttrain.training.stability_demo
-use neurx.posttrain.training.stability.{has_nan, has_inf}
+import (
+    "neurx.posttrain.training.stability."
+)
 
 func demo_nan_detection() {
     println("=== NaN/Inf Detection Demo ===")

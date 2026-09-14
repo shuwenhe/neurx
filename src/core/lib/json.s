@@ -1,5 +1,7 @@
 package neurx.lib.json
-use neurx.lib.fileio.{trim_string, split_string, starts_with, ends_with, replace_string}
+import (
+    "neurx.lib.fileio."
+)
 const int JSON_NULL = 0
 const int JSON_BOOL = 1
 const int JSON_NUMBER = 2

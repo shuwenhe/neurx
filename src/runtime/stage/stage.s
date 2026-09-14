@@ -1,10 +1,10 @@
 package neurx.runtime.stage
-use neurx.strings
-use neurx.runtime.control
-use neurx.strings
-use neurx.autograd.function
-use neurx.strings
-use neurx.compile.backend.direct_codegen
+import (
+    "neurx.autograd.function"
+    "neurx.compile.backend.direct_codegen"
+    "neurx.runtime.control"
+    "neurx.strings"
+)
 struct stage_state {
     string name
     string backend

@@ -1,11 +1,13 @@
 package neurx.posttrain.grpo.grpo_trainer
-use neurx.model.llm.neurx.*
-use neurx.tokenizer.neurx.*
-use neurx.amp.scaler.*
-use neurx.distributed.training_3d.*
-use neurx.checkpoint.distributed.*
-use neurx.data.loader.dataloader.*
-use neurx.observability.training.training_observability.*
+import (
+    "neurx.amp.scaler.*"
+    "neurx.checkpoint.distributed.*"
+    "neurx.data.loader.dataloader.*"
+    "neurx.distributed.training_3d.*"
+    "neurx.model.llm.neurx.*"
+    "neurx.observability.training.training_observability.*"
+    "neurx.tokenizer.neurx.*"
+)
 struct generation_output {
     string text
     []int token_ids

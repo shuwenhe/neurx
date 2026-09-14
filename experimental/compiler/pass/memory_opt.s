@@ -1,6 +1,8 @@
 package neurx.experimental.compiler.passes.memory_opt
 
-use neurx.experimental.compiler.ir.graph.computation_graph
+import (
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+)
 
 struct memory_usage {
     int peak_memory

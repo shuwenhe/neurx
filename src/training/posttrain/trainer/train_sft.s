@@ -1,6 +1,8 @@
 package neurx.posttrain.trainer.train_sft
-use std.io.eprintln
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
+import (
+    "neurx.runtime.io."
+    "std.io.eprintln"
+)
 
 struct training_config {
     string model_path

@@ -1,6 +1,8 @@
 package neurx.net.collective
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct tensor_descriptor {
     int tensor_id

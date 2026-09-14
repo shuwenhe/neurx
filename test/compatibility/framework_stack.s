@@ -1,5 +1,7 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+import (
+    "neurx.runtime.io."
+)
 
 func resolve_path(string root, string rel) string {
     if root == "" {

@@ -1,10 +1,12 @@
 package main
-use std.io
-use std.os
-use std.path
-use std.exec
-use std.strings
-use std.regexp
+import (
+    "std.exec"
+    "std.io"
+    "std.os"
+    "std.path"
+    "std.regexp"
+    "std.strings"
+)
 
 func find_latest_log(string dir) string {
     stat, err := os.Stat(dir)

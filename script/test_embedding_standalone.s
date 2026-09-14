@@ -1,5 +1,7 @@
 package neurx.scripts.test_embedding_standalone
-use neurx.runtime.io.{runtime_file_exists, runtime_env_get}
+import (
+    "neurx.runtime.io."
+)
 
 func abs_float(float x) float {
     if x < 0.0 { return 0.0 - x }

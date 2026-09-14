@@ -1,7 +1,9 @@
 package neurx.experimental.compiler.utils.performance_meter
 
-use neurx.experimental.compiler.ir.graph.computation_graph
-use neurx.experimental.compiler.compiler.compilation_unit.compilation_unit
+import (
+    "neurx.experimental.compiler.compiler.compilation_unit.compilation_unit"
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+)
 
 struct performance_metrics {
     int total_time_ms

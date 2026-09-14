@@ -1,6 +1,8 @@
 package neurx.runtime.model.json_parser
-use std.slices
-use std.io.println
+import (
+    "std.io.println"
+    "std.slices"
+)
     null_type,
     bool_type,
     number_type,

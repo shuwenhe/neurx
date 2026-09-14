@@ -1,7 +1,9 @@
 package neurx.scheduler
 
-use neurx.scheduler
-use neurx.scheduler.load_balance
+import (
+    "neurx.scheduler"
+    "neurx.scheduler.load_balance"
+)
 
 func test_scheduler_init() (int, int, string) {
     passed := 0

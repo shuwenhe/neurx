@@ -1,7 +1,9 @@
 package neurx.distributed.training_coordinator
-use neurx.distributed.synchronization.{synchronization_state, new_synchronization_state}
-use neurx.distributed.fault_tolerance.{fault_tolerance_state, new_fault_tolerance_state, save_distributed_checkpoint, restore_from_checkpoint}
-use neurx.distributed.performance_monitor.{performance_monitor, new_performance_monitor, update_rank_metrics}
+import (
+    "neurx.distributed.fault_tolerance."
+    "neurx.distributed.performance_monitor."
+    "neurx.distributed.synchronization."
+)
 
 struct parallel_strategy {
     string name

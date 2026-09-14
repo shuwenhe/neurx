@@ -1,6 +1,8 @@
 package neurx.fs.model_storage
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct model_file {
     string file_path

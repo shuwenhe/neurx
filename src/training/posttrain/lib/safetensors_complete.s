@@ -1,7 +1,9 @@
 package neurx.posttrain.lib.safetensors_complete
-use std.binary.i32_le_string
-use std.binary.u64_le_string
-use std.io.eprintln
+import (
+    "std.binary.i32_le_string"
+    "std.binary.u64_le_string"
+    "std.io.eprintln"
+)
 struct safe_tensor_info {
     string name
     string dtype

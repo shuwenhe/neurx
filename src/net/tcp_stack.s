@@ -1,5 +1,7 @@
 package neurx.net
-use std.slices
+import (
+    "std.slices"
+)
 const TCP_STATE_CLOSED = 0
 const TCP_STATE_LISTEN = 1
 const TCP_STATE_SYN_SENT = 2

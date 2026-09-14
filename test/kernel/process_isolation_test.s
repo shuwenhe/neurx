@@ -1,14 +1,16 @@
 package neurx.test.kernel
 
-use neurx.kernel.process.process_isolation
-use neurx.kernel.process.process_isolation_create
-use neurx.kernel.process.clone_namespace
-use neurx.kernel.process.spawn_isolated_process
-use neurx.kernel.process.grant_capabilities
-use neurx.kernel.process.find_process
-use neurx.kernel.process.may_manage_network
-use neurx.kernel.process.may_use_accelerator
-use neurx.kernel.process.PROCESS_OK
+import (
+    "neurx.kernel.process.PROCESS_OK"
+    "neurx.kernel.process.clone_namespace"
+    "neurx.kernel.process.find_process"
+    "neurx.kernel.process.grant_capabilities"
+    "neurx.kernel.process.may_manage_network"
+    "neurx.kernel.process.may_use_accelerator"
+    "neurx.kernel.process.process_isolation"
+    "neurx.kernel.process.process_isolation_create"
+    "neurx.kernel.process.spawn_isolated_process"
+)
 
 func expect(bool condition, string name) int {
     if condition { print("PASS " + name); return 0 }

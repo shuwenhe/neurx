@@ -1,7 +1,9 @@
 package neurx.planner
-use neurx.agent.memory
-use neurx.agent.observation
-use neurx.agent.tool_registry
+import (
+    "neurx.agent.memory"
+    "neurx.agent.observation"
+    "neurx.agent.tool_registry"
+)
 struct agent_plan_state {
     string goal
     string current_task

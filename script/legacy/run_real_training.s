@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-use neurx.pretrain.llm.real_training_loop.{run_training_loop}
+import (
+    "neurx.pretrain.llm.real_training_loop."
+    "neurx.runtime.io."
+)
 
 func main() {
     project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")

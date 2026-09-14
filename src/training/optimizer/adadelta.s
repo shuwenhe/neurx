@@ -1,6 +1,8 @@
 package neurx.optimizer.adadelta
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct adadelta_optimizer {
     float lr
     float rho

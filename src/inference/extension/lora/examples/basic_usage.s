@@ -1,11 +1,13 @@
 package neurx.lora.examples.basic_usage
-use std.slices
-use std.option.option
-use std.result.result
-use std.map.map
-use neurx.lora.lora_config
-use neurx.lora.lora_adapter
-use neurx.lora.lora_manager
+import (
+    "neurx.lora.lora_adapter"
+    "neurx.lora.lora_config"
+    "neurx.lora.lora_manager"
+    "std.map.map"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 func example_create_basic_adapter() ((), string) {
     config := default()
     config.lora_rank = 8

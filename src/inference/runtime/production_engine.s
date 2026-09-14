@@ -1,8 +1,10 @@
 package neurx.inference.runtime.production_engine
-use neurx.inference.runtime.model_manifest
-use neurx.inference.runtime.worker_cluster
-use neurx.inference.runtime.engine_lifecycle
-use neurx.observability.tracing.inference_observability
+import (
+    "neurx.inference.runtime.engine_lifecycle"
+    "neurx.inference.runtime.model_manifest"
+    "neurx.inference.runtime.worker_cluster"
+    "neurx.observability.tracing.inference_observability"
+)
 func engine_request_active_status() int { 1 }
 
 func engine_request_finished_status() int { 2 }

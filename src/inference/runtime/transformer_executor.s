@@ -1,6 +1,8 @@
 package neurx.inference.runtime.transformer_executor
-use neurx.inference.runtime.device_transformer.{transformer_schedule}
-use neurx.runtime.device.device_abi.{device_context, device_operation_launch, device_stream_synchronize, device_context_error, device_stream_open_handle, device_stream_close_handle, device_operation_open_handle, device_operation_close_handle}
+import (
+    "neurx.inference.runtime.device_transformer."
+    "neurx.runtime.device.device_abi."
+)
 
 struct transformer_execution_plan {
     int context_handle

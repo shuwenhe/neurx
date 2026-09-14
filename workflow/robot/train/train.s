@@ -1,6 +1,7 @@
 package neurx.workflows.robotics.train
-use neurx.model.robotics.train.{robotics_training_state, robotics_training_config}
-use neurx.model.robotics.train.{robotics_trajectory_train_config, robotics_trajectory_train_state}
+import (
+    "neurx.model.robotics.train."
+)
 
 struct robotics_train_state {
     robotics_training_state state

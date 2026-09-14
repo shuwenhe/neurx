@@ -1,6 +1,8 @@
 package neurx.posttrain.alignment.simpo_trainer
-use neurx.distributed.collective
-use neurx.amp.scaler
+import (
+    "neurx.amp.scaler"
+    "neurx.distributed.collective"
+)
 struct simpo_config {
     int seq_len
     int hidden_size

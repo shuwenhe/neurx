@@ -1,5 +1,7 @@
 package neurx.distributed.communication_op
-use neurx.distributed.parallel_state.{group_coordinator}
+import (
+    "neurx.distributed.parallel_state."
+)
 
 struct distributed_tensor {
     []float data

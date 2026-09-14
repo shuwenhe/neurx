@@ -1,6 +1,8 @@
 package main
 
-use neurx.runtime.distributed.topology.{hetero_topology_new, hetero_topology_add_node, hetero_topology_mark_failed, hetero_topology_select_node, hetero_topology_place_workload, hetero_build_launch_plan, hetero_build_multi_launch_plan, hetero_multi_launch_script, hetero_default_capability, hetero_topology_summary, hetero_placement_summary, hetero_launch_summary, hetero_multi_launch_summary}
+import (
+    "neurx.runtime.distributed.topology."
+)
 
 func expect(bool condition, string name) int {
     if condition {

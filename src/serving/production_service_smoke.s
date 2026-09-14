@@ -1,6 +1,8 @@
 package main
-use neurx.serving.runtime.production_runtime.{new_production_runtime_config}
-use neurx.serving.runtime.production_service.{
+import (
+    "neurx.serving.runtime.production_runtime."
+    "neurx.serving.runtime.production_service.{"
+)
     new_production_service_state,
     new_production_service_request,
     production_service_submit_request,

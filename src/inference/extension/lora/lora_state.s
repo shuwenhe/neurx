@@ -1,8 +1,10 @@
 package neurx.lora.lora_state
-use std.slices
-use std.option.option
-use std.result.result
-use std.map.map
+import (
+    "std.map.map"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 struct lora_request_state {
     string request_id
     *[]string adapter_names

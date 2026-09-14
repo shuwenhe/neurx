@@ -1,13 +1,14 @@
 package neurx.script.gpu_train
-use std.io.println
-use neurx.runtime.io.{
+import (
+    "neurx.runtime.io.{"
+    "std.io.println"
+)
     runtime_read_text_file,
     runtime_write_text_file,
     runtime_file_exists,
     runtime_run_command_output,
     runtime_env_get
 }
-use neurx.cuda.runtime.{
     cuda_malloc, cuda_free, cuda_memcpy_h2d, cuda_memcpy_d2h,
     cublas_create, cublas_destroy, cublas_sgemm,
     linear_forward, linear_backward,
@@ -16,8 +17,6 @@ use neurx.cuda.runtime.{
     adam_step, cuda_synchronize,
     get_device_count, get_device_name
 }
-use neurx.common.parse.{parse_int, parse_float}
-use neurx.common.string.{trim, substring, str_len, int_to_str, float_to_str}
 
 struct gpu_training_config {
     int max_steps

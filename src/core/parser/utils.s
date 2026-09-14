@@ -1,5 +1,7 @@
 package neurx.parser.utils
-use neurx.parser.types
+import (
+    "neurx.parser.types"
+)
 struct Timer {
     int start_time
     int end_time

@@ -1,7 +1,9 @@
 package neurx.inference.optimization.test_attention_layers
-use neurx.inference.optimization.attention_layers
-use neurx.inference.optimization.attention_integration
-use neurx.inference.optimization.inference_engine_optimized
+import (
+    "neurx.inference.optimization.attention_integration"
+    "neurx.inference.optimization.attention_layers"
+    "neurx.inference.optimization.inference_engine_optimized"
+)
 func test_flash_attention_basic() {
     print("🧪 Test: Flash Attention Basic Functionality")
     int seq_len = 8

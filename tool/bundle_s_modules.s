@@ -1,8 +1,10 @@
 package main
-use std.io
-use std.os
-use std.path
-use std.strings
+import (
+    "std.io"
+    "std.os"
+    "std.path"
+    "std.strings"
+)
 
 func strip_package_and_imports(string content) string {
     lines := strings.Split(content, "\n")

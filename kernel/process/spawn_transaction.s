@@ -1,15 +1,17 @@
 package neurx.kernel.process.transaction
 
-use neurx.kernel.process.process_isolation
-use neurx.kernel.process.clone_namespace
-use neurx.kernel.process.spawn_isolated_process
-use neurx.kernel.process.PROCESS_OK
-use neurx.kernel.resource.resource_controller
-use neurx.kernel.resource.charge
-use neurx.kernel.resource.bind_process
-use neurx.kernel.resource.RESOURCE_OK
-use neurx.kernel.core.execution_core
-use neurx.kernel.core.enqueue_task
+import (
+    "neurx.kernel.core.enqueue_task"
+    "neurx.kernel.core.execution_core"
+    "neurx.kernel.process.PROCESS_OK"
+    "neurx.kernel.process.clone_namespace"
+    "neurx.kernel.process.process_isolation"
+    "neurx.kernel.process.spawn_isolated_process"
+    "neurx.kernel.resource.RESOURCE_OK"
+    "neurx.kernel.resource.bind_process"
+    "neurx.kernel.resource.charge"
+    "neurx.kernel.resource.resource_controller"
+)
 
 func SPAWN_OK() int { 0 }
 

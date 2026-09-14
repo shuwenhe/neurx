@@ -1,6 +1,8 @@
 package main
-use std.conv.extract_int_default as parse_int
-use neurx.distributed.multi_node_launcher.{
+import (
+    "neurx.distributed.multi_node_launcher.{"
+    "std.conv.extract_int_default"
+)
     init_multi_node_config,
     generate_rank_info,
     calculate_global_rank,
@@ -9,12 +11,10 @@ use neurx.distributed.multi_node_launcher.{
     save_distributed_checkpoint,
     load_distributed_checkpoint,
 }
-use neurx.distributed.nccl_id_manager.{
     generate_nccl_unique_id,
     save_nccl_id_to_shared_storage,
     load_nccl_id_from_shared_storage,
 }
-use neurx.runtime.io.{runtime_env_get}
 
 func main() {
     print("="*60)

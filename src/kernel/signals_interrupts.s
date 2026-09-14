@@ -1,5 +1,7 @@
 package neurx.kernel
-use std.slices
+import (
+    "std.slices"
+)
 struct signal {
     int sig_num  
     int sender_pid

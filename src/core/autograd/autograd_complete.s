@@ -1,5 +1,7 @@
 package neurx.autograd.complete
-use neurx.tensor.{tensor, zeros, ones, fill, new}
+import (
+    "neurx.tensor."
+)
 
 struct gradient_node {
     int id

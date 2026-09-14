@@ -1,5 +1,7 @@
 package neurx.trainer.industrial_1t_training
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
+import (
+    "neurx.runtime.io."
+)
 
 struct industrial_batch {
     tokens: []int

@@ -1,5 +1,7 @@
 package neurx.agent.memory
-use neurx.runtime.io.{runtime_write_text_file, runtime_read_text_file, runtime_file_exists}
+import (
+    "neurx.runtime.io."
+)
 
 struct agent_memory_state {
     []string short_keys

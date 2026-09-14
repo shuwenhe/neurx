@@ -1,10 +1,12 @@
 package main
-use std.io
-use std.strings
-use std.path
-use std.env
-use std.time
-use std.process
+import (
+    "std.env"
+    "std.io"
+    "std.path"
+    "std.process"
+    "std.strings"
+    "std.time"
+)
 
 struct compilation_result {
     string filename

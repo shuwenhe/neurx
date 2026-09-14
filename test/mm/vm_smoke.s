@@ -1,6 +1,8 @@
 package test.mm
 
-use mm.vm
+import (
+    "mm.vm"
+)
 
 func main() int {
     init_vm()

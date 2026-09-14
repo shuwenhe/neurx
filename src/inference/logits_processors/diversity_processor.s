@@ -1,5 +1,7 @@
 package neurx.inference.logits_processors.diversity
-use neurx.inference.logits_processors
+import (
+    "neurx.inference.logits_processors"
+)
 struct diversity_control_config {
     float temperature
     int top_k

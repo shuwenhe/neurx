@@ -1,10 +1,12 @@
 package neurx.integration
-use neurx.crypto as crypto_mod
-use neurx.security as security_mod
-use neurx.io as io_mod
-use neurx.net as net_mod
-use neurx.kernel as kernel_mod
-use neurx.driver as driver_mod
+import (
+    "neurx.crypto"
+    "neurx.driver"
+    "neurx.io"
+    "neurx.kernel"
+    "neurx.net"
+    "neurx.security"
+)
 struct os_features_tier4_integration {
     int crypto_hash_mgr_id
     int crypto_cipher_engine_id

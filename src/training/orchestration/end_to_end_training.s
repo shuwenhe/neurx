@@ -1,6 +1,8 @@
 package neurx.trainer.end_to_end_training
-use std.io
-use std.math
+import (
+    "std.io"
+    "std.math"
+)
 struct data_bundle {
     input_ids: []int[]
     labels: []int[]

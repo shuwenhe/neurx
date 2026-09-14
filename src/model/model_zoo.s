@@ -1,5 +1,7 @@
 package neurx.model.model_zoo
-use std.map
+import (
+    "std.map"
+)
 struct model_spec {
     string name
     string model_type

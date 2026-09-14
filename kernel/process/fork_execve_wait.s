@@ -1,7 +1,9 @@
 package neurx.kernel.process
 
-use neurx.mm.vm.mm_struct
-use neurx.mm.vm.vma
+import (
+    "neurx.mm.vm.mm_struct"
+    "neurx.mm.vm.vma"
+)
 
 struct task_struct {
     int pid

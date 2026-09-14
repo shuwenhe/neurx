@@ -1,5 +1,7 @@
 package neurx.inference.attention_optimized
-use std.conv.int_to_string
+import (
+    "std.conv.int_to_string"
+)
 struct attention_state {
     []float query
     []float key

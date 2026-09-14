@@ -1,6 +1,8 @@
 package neurx.optimizer.adagrad
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct adagrad_optimizer {
     float lr
     float lr_decay

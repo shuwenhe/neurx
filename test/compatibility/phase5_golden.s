@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_file_exists, runtime_run_command_output}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func phase5_summary_command(string path) string {
     string cmd = "set -e; default=$(sed -n 'src/core/s/.*\"default_prompt\": \"\\([^\"]*\\)\".*/\\1/p' '" + path + "' | head -1)"

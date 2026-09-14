@@ -1,5 +1,7 @@
 package neurx.examples.production_training
-use neurx.trainer.production.*
+import (
+    "neurx.trainer.production.*"
+)
 
 func example_single_gpu_training() {
     println("=== Example 1: Single GPU Training ===\n")

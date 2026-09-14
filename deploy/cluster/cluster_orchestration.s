@@ -1,6 +1,8 @@
 package neurx.deployment.cluster_orchestration
-use neurx.runtime.command.{runtime_env_get}
-use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
+import (
+    "neurx.runtime.command."
+    "neurx.runtime.io."
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int family) int

@@ -1,5 +1,7 @@
 package neurx.tool_parsers
-use neurx.tool_parsers.parsers
+import (
+    "neurx.tool_parsers.parsers"
+)
 struct ToolParserRegistry {
     parsers: Map<str, func() . ToolParser>
 func new() . ToolParserRegistry {

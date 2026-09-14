@@ -1,12 +1,14 @@
 package neurx.agent
-use neurx.agent.runtime
-use neurx.agent.observation
-use neurx.planner
-use neurx.agent.memory
-use neurx.agent.tool_registry
-use neurx.executor.executor
-use neurx.agent.trace
-use neurx.registry.skill_registry
+import (
+    "neurx.agent.memory"
+    "neurx.agent.observation"
+    "neurx.agent.runtime"
+    "neurx.agent.tool_registry"
+    "neurx.agent.trace"
+    "neurx.executor.executor"
+    "neurx.planner"
+    "neurx.registry.skill_registry"
+)
 func new_default_agent(string goal) agent_runtime_state {
     new_agent_runtime_state(goal, "analyze", 8)
 }

@@ -1,9 +1,11 @@
 package neurx.reasoning.reasoning_manager
-use neurx.reasoning.cot_config.cot_config
-use neurx.reasoning.reasoning_chain.{reasoning_chain, chain_state}
-use neurx.reasoning.reasoning_step.{reasoning_step, step_type}
-use neurx.reasoning.prompt_engineer.prompt_engineer
-use neurx.reasoning.reasoning_validator.{reasoning_validator, validation_result}
+import (
+    "neurx.reasoning.cot_config.cot_config"
+    "neurx.reasoning.prompt_engineer.prompt_engineer"
+    "neurx.reasoning.reasoning_chain."
+    "neurx.reasoning.reasoning_step."
+    "neurx.reasoning.reasoning_validator."
+)
 
 struct reasoning_manager {
     map[string]reasoning_chain chains

@@ -1,5 +1,7 @@
 package neurx.posttrain.lib.test_json_simple
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 struct json_value {
     int type
     bool bool_value

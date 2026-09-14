@@ -1,6 +1,8 @@
 package neurx.scripts.posttrain_lora_train
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_write_text_file, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
-use std.conv.parse_int_default as parse_int
+import (
+    "neurx.runtime.io."
+    "std.conv.parse_int_default"
+)
 
 struct lora_config {
     int seq_len

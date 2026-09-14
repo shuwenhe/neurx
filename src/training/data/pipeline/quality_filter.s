@@ -1,5 +1,7 @@
 package neurx.data.pipeline.quality_filter
-use neurx.strings
+import (
+    "neurx.strings"
+)
 struct quality_filter_config:
     float min_quality_score
     int min_length_chars

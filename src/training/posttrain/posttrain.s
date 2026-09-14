@@ -1,13 +1,15 @@
 package neurx.posttrain
-use neurx.reasoning.data
-use neurx.posttrain.config
-use neurx.posttrain.data
-use neurx.posttrain.reward
-use neurx.posttrain.loop
-use neurx.posttrain.rlhf.ppo
-use neurx.posttrain.dpo.dpo_state
-use neurx.posttrain.dpo.dpo_step
-use neurx.train.loop.{training_pipeline_state}
+import (
+    "neurx.posttrain.config"
+    "neurx.posttrain.data"
+    "neurx.posttrain.dpo.dpo_state"
+    "neurx.posttrain.dpo.dpo_step"
+    "neurx.posttrain.loop"
+    "neurx.posttrain.reward"
+    "neurx.posttrain.rlhf.ppo"
+    "neurx.reasoning.data"
+    "neurx.train.loop."
+)
 
 func new_default_posttrain_pipeline(string dataset_name, string sample_mode, string reward_model, string run_name, string root) posttrain_pipeline_state {
     posttrain_config cfg = new_posttrain_config()

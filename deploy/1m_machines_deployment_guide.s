@@ -1,6 +1,8 @@
 package neurx.deployment.1m_deployment_guide
 
-use std.io.println
+import (
+    "std.io.println"
+)
 
 func print_deployment_guide() {
     println("")

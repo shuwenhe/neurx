@@ -1,5 +1,7 @@
 package neurx.posttrain.alignment.simpo_examples
-use neurx.posttrain.alignment.simpo_trainer.*
+import (
+    "neurx.posttrain.alignment.simpo_trainer.*"
+)
 func create_simpo_config() simpo_config {
     simpo_config {
         seq_len: 128,

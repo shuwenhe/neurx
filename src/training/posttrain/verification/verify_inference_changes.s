@@ -1,5 +1,7 @@
 package neurx.posttrain.verification.inference_changes
-use neurx.runtime.io.{
+import (
+    "neurx.runtime.io.{"
+)
     runtime_env_get
 }
 

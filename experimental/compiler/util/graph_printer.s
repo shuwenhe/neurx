@@ -1,7 +1,9 @@
 package neurx.experimental.compiler.utils.graph_printer
 
-use neurx.experimental.compiler.ir.graph.computation_graph
-use neurx.experimental.compiler.ir.operation.op_type
+import (
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+    "neurx.experimental.compiler.ir.operation.op_type"
+)
 
 func print_graph_info(*computation_graph g) string {
     s = ""

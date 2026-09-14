@@ -1,6 +1,8 @@
 package neurx.docs.tokenizer_weights_loading_guide
 
-use std.io.println
+import (
+    "std.io.println"
+)
 
 func print_complete_guide() {
     println("")

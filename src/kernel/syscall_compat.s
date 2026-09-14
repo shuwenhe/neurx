@@ -1,8 +1,10 @@
 package kernel.syscall
-use std.strings.int_to_string
-use std.io.eprintln
-use mm.vm
-use kernel.mem
+import (
+    "kernel.mem"
+    "mm.vm"
+    "std.io.eprintln"
+    "std.strings.int_to_string"
+)
 struct syscall_entry {
     int number
     string name

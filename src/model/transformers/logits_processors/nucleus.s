@@ -1,5 +1,7 @@
 package neurx.transformers_utils.logits_processors.nucleus
-use neurx.transformers_utils.logits_processors.processor_utils
+import (
+    "neurx.transformers_utils.logits_processors.processor_utils"
+)
 struct nucleus_processor {
     float p
     int min_tokens_to_keep

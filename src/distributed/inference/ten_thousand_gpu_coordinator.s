@@ -1,10 +1,12 @@
 package neurx.distributed.inference.ten_thousand_gpu_coordinator
-use neurx.distributed.elasticity.dynamic_node_management
-use neurx.distributed.phi_failure_detector
-use neurx.distributed.automatic_recovery
-use neurx.distributed.collective.ring_allreduce
-use neurx.distributed.collective.overlap_comm_compute
-use neurx.distributed.inference.dynamic_load_balancer
+import (
+    "neurx.distributed.automatic_recovery"
+    "neurx.distributed.collective.overlap_comm_compute"
+    "neurx.distributed.collective.ring_allreduce"
+    "neurx.distributed.elasticity.dynamic_node_management"
+    "neurx.distributed.inference.dynamic_load_balancer"
+    "neurx.distributed.phi_failure_detector"
+)
 struct ten_thousand_gpu_config {
     int total_gpus
     int gpus_per_node

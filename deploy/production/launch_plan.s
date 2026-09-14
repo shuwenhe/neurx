@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     string startup_env = runtime_env_get("NEURX_CLUSTER_ENV", "./training_startup.env")

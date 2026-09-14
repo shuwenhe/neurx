@@ -1,9 +1,11 @@
 package neurx.model.transformer_block
 
-use std.vec.vec
-use neurx.device.abi
-use neurx.compute.core_kernels
-use neurx.io.safetensors_loader
+import (
+    "neurx.compute.core_kernels"
+    "neurx.device.abi"
+    "neurx.io.safetensors_loader"
+    "std.vec.vec"
+)
 
 struct transformer_block_config {
     int hidden_size

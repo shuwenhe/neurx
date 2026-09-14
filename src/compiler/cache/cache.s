@@ -1,5 +1,7 @@
 package neurx.compile.cache
-use neurx.strings
+import (
+    "neurx.strings"
+)
 struct compile_cache_state {
     []string keys
     []string entries

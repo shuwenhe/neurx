@@ -1,6 +1,8 @@
 package neurx.driver.gpu
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct gpu_capability {
     int device_id

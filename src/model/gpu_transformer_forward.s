@@ -1,8 +1,10 @@
 package neurx.model.gpu_transformer_forward
 
-use std.vec.vec
-use neurx.compute.gpu_gemm_engine
-use neurx.model.weight_loader_complete
+import (
+    "neurx.compute.gpu_gemm_engine"
+    "neurx.model.weight_loader_complete"
+    "std.vec.vec"
+)
 
 struct transformer_config {
     int hidden_size

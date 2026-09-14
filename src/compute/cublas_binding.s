@@ -1,6 +1,8 @@
 package neurx.compute.cublas_binding
 
-use neurx.device.cuda_runtime_binding
+import (
+    "neurx.device.cuda_runtime_binding"
+)
 
 extern func cublasCreate(void* handle_ptr) -> int
 extern func cublasDestroy(int64 handle) -> int

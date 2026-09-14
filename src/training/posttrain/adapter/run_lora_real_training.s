@@ -1,8 +1,10 @@
-use std::io
-use std::fs
-use std::json
-use neurx::lib::tensor
-use neurx::lib::safetensors
+import (
+    "neurx.lib.safetensors"
+    "neurx.lib.tensor"
+    "std.fs"
+    "std.io"
+    "std.json"
+)
 struct tensor_2 {
     []float data
     []int shape

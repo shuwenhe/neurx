@@ -1,5 +1,7 @@
 package neurx.runtime.device.device_ops
-use neurx.runtime.device.device_abi.{device_backend_capability, device_feature_enabled, device_feature_paged_attention}
+import (
+    "neurx.runtime.device.device_abi."
+)
 
 func op_int_string(int value) string {
     if value == 0 { return "0" }

@@ -1,6 +1,8 @@
 package neurx.tests.tokenizer_test
-use std.io.println
-use neurx.inference.tokenizer_loader
+import (
+    "neurx.inference.tokenizer_loader"
+    "std.io.println"
+)
 
 struct test_result_2 {
     string test_name

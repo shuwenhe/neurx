@@ -1,9 +1,11 @@
 package main
-use std.conv.extract_int_default as parse_int
-use neurx.runtime.io.{runtime_env_get, runtime_run_command_exit_code}
-use neurx.eval.mmlu_data
-use neurx.eval.mmlu_evaluator
-use std.io.println
+import (
+    "neurx.eval.mmlu_data"
+    "neurx.eval.mmlu_evaluator"
+    "neurx.runtime.io."
+    "std.conv.extract_int_default"
+    "std.io.println"
+)
 
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/Users/shuwen/shuwen/train/neurx")

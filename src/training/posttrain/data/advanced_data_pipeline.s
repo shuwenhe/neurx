@@ -1,5 +1,7 @@
 package neurx.posttrain.data.advanced_data_pipeline
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
     NONE,
     SIMPLE,
     ADVANCED,

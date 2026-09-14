@@ -1,5 +1,7 @@
 package kernel.sched
-use std.strings.int_to_string
+import (
+    "std.strings.int_to_string"
+)
 struct sched_entity {
     int pid
     int vruntime

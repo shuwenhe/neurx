@@ -1,6 +1,8 @@
 package neurx.model.weight_loader
-use neurx.runtime.io.{runtime_read_binary_file, runtime_file_exists}
-use std.io.eprintln
+import (
+    "neurx.runtime.io."
+    "std.io.eprintln"
+)
 struct model_weights {
     []float embed_tokens
     []layer_weights layers

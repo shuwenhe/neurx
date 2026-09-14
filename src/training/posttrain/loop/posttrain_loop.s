@@ -1,11 +1,13 @@
 package neurx.posttrain.loop
-use neurx.posttrain.config
-use neurx.posttrain.data
-use neurx.posttrain.reward
-use neurx.posttrain.checkpoint
-use neurx.posttrain.eval
-use neurx.optimizer.optimizer
-use neurx.scheduler.training_scheduler
+import (
+    "neurx.optimizer.optimizer"
+    "neurx.posttrain.checkpoint"
+    "neurx.posttrain.config"
+    "neurx.posttrain.data"
+    "neurx.posttrain.eval"
+    "neurx.posttrain.reward"
+    "neurx.scheduler.training_scheduler"
+)
 struct posttrain_loop_state {
     posttrain_config cfg
     posttrain_data_state data

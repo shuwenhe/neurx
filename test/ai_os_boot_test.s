@@ -1,10 +1,12 @@
 package neurx.test.ai_os_boot
 
-use neurx.os.boot.boot_state_create
-use neurx.os.boot.init_scheduler
-use neurx.os.boot.init_model_runtime
-use neurx.os.boot.run_boot_sequence
-use neurx.os.boot.boot_is_ready
+import (
+    "neurx.os.boot.boot_is_ready"
+    "neurx.os.boot.boot_state_create"
+    "neurx.os.boot.init_model_runtime"
+    "neurx.os.boot.init_scheduler"
+    "neurx.os.boot.run_boot_sequence"
+)
 
 func assert_test(bool condition, string name) int {
     if condition {

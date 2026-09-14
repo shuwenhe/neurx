@@ -1,9 +1,11 @@
 package neurx.model.weight_loader_complete
 
-use std.vec.vec
-use std.string.string
-use neurx.device.cuda_runtime_binding
-use neurx.device.cuda_memory_pool
+import (
+    "neurx.device.cuda_memory_pool"
+    "neurx.device.cuda_runtime_binding"
+    "std.string.string"
+    "std.vec.vec"
+)
 
 struct tensor_metadata {
     string name

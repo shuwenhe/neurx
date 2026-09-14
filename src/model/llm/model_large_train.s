@@ -1,21 +1,15 @@
 package neurx.model.llm.base_large_train
-use neurx.strings
-use neurx.data.loader.dataloader.{dataloader_batch, dataloader_state, dataloader_step_output, has_next, next_batch, reset_state, new_state}
-use neurx.strings
-use neurx.dataset_text.{build_vocab, encode_text}
-use neurx.strings
-use neurx.model.llm.gpt_large.{gpt_large_state, new_gpt_large_state, gpt_large_state_dict, gpt_large_load_state_dict}
-use neurx.strings
-use neurx.nn.{embedding_lookup, transformer, transformer_config, transformer_forward, transformer_init, transformer_state_dict, transformer_load_state_dict}
-use neurx.strings
-use neurx.optimizer.optim.{adamw_optimizer, adamw_step_output, adamw_step_state, new_adamw}
-use neurx.strings
-use neurx.ops
-use neurx.strings
-use neurx.tensor.tensor
-use neurx.strings
-use neurx.tensor.new
-use neurx.strings
+import (
+    "neurx.data.loader.dataloader."
+    "neurx.dataset_text."
+    "neurx.model.llm.gpt_large."
+    "neurx.nn."
+    "neurx.ops"
+    "neurx.optimizer.optim."
+    "neurx.strings"
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct gpt_large_training_config {
     int batch_size
     int seq_len

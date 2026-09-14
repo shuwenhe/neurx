@@ -1,10 +1,12 @@
 package neurx.test.platform
 
-use neurx.kernel.platform.empty_platform_capabilities
-use neurx.kernel.platform.evaluate_platform
-use neurx.kernel.platform.PROFILE_DATACENTER
-use neurx.kernel.platform.PROFILE_ROBOTICS
-use neurx.kernel.platform.PROFILE_AUTOMOTIVE
+import (
+    "neurx.kernel.platform.PROFILE_AUTOMOTIVE"
+    "neurx.kernel.platform.PROFILE_DATACENTER"
+    "neurx.kernel.platform.PROFILE_ROBOTICS"
+    "neurx.kernel.platform.empty_platform_capabilities"
+    "neurx.kernel.platform.evaluate_platform"
+)
 
 func expect(bool condition, string name) int {
     if condition {

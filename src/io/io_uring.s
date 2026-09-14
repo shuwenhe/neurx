@@ -1,5 +1,7 @@
 package neurx.io
-use std.slices
+import (
+    "std.slices"
+)
 const URING_OPCODE_READ = 0
 const URING_OPCODE_WRITE = 1
 const URING_OPCODE_FSYNC = 2

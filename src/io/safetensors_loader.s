@@ -1,8 +1,10 @@
 package neurx.io.safetensors_loader
 
-use std.vec.vec
-use neurx.device.abi
-use neurx.device.device_tensor_manager
+import (
+    "neurx.device.abi"
+    "neurx.device.device_tensor_manager"
+    "std.vec.vec"
+)
 
 struct safetensors_header {
     int64 header_size

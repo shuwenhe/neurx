@@ -1,7 +1,9 @@
 package neurx.lora.examples.config_presets
-use std.slices
-use std.map.map
-use neurx.lora.lora_config
+import (
+    "neurx.lora.lora_config"
+    "std.map.map"
+    "std.slices"
+)
 func preset_lightweight() lora_config {
     config := default()
     config.lora_rank = 4

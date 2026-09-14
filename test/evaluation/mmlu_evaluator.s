@@ -1,8 +1,10 @@
 package neurx.eval.mmlu_evaluator
-use neurx.eval.mmlu_data
-use neurx.eval.benchmark_eval
-use neurx.model.llm.gpt
-use std.io.println
+import (
+    "neurx.eval.benchmark_eval"
+    "neurx.eval.mmlu_data"
+    "neurx.model.llm.gpt"
+    "std.io.println"
+)
 
 struct mmlu_fewshot_prompt {
     []mmlu_data.mmlu_question examples

@@ -1,9 +1,11 @@
 package neurx.distributed.pipeline_parallel
 
-use std.vec.vec
-use neurx.device.abi
-use neurx.model.transformer_block
-use neurx.distributed.nccl_comm
+import (
+    "neurx.device.abi"
+    "neurx.distributed.nccl_comm"
+    "neurx.model.transformer_block"
+    "std.vec.vec"
+)
 
 struct pipeline_stage_config {
     int stage_id

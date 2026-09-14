@@ -1,6 +1,8 @@
 package main
-use std.io
-use std.strings
+import (
+    "std.io"
+    "std.strings"
+)
 struct training_data {
     string text
 }

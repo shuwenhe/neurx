@@ -1,7 +1,9 @@
 package neurx.io.weight_loader_complete
 
-use std.vec.vec
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct weight_file_header {
     string magic

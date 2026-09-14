@@ -1,5 +1,7 @@
 package neurx.security
-use std.slices
+import (
+    "std.slices"
+)
 struct user {
     int uid
     string username

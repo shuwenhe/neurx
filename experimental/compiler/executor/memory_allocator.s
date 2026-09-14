@@ -1,6 +1,8 @@
 package neurx.experimental.compiler.executor.memory_allocator
 
-use neurx.experimental.compiler.ir.graph.computation_graph
+import (
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+)
 
 struct memory_block {
     int block_id

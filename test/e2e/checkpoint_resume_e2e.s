@@ -1,9 +1,11 @@
 package main
-use std.io
-use std.os
-use std.path
-use std.time
-use std.exec
+import (
+    "std.exec"
+    "std.io"
+    "std.os"
+    "std.path"
+    "std.time"
+)
 
 struct test_config {
     script_dir string

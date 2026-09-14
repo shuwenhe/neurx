@@ -1,8 +1,10 @@
 package neurx.lora.weight_fusion
-use std.slices
-use std.option.option
-use std.result.result
-use std.map.map
+import (
+    "std.map.map"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 struct fusion_error {
     string code
     string message

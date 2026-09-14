@@ -1,8 +1,10 @@
 package neurx.compile.backend.direct_codegen
 
-use neurx.compile.ir
-use neurx.strings
-use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file, runtime_write_binary_file, runtime_run_command, runtime_shell_escape}
+import (
+    "neurx.compile.ir"
+    "neurx.runtime.io."
+    "neurx.strings"
+)
 
 struct target_arch_state {
     string name

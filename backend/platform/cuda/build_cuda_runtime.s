@@ -1,6 +1,8 @@
 package main
-use std.io.println
-use neurx.runtime.io.{
+import (
+    "neurx.runtime.io.{"
+    "std.io.println"
+)
     runtime_env_get,
     runtime_file_exists,
     runtime_make_dirs,

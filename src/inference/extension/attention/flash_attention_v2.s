@@ -1,5 +1,7 @@
 package neurx.attention.flash_v2
-use neurx.attention.core.{
+import (
+    "neurx.attention.core.{"
+)
     attention_config, multi_head_attention_module
 }
 

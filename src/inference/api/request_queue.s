@@ -1,5 +1,7 @@
-use std.conv.int_to_string
 package neurx.inference.api.request_queue
+import (
+    "std.conv.int_to_string"
+)
 struct request_item {
     string request_id
     string prompt

@@ -1,8 +1,10 @@
 package neurx.cluster
 
-use neurx.cluster.cluster_comm
-use neurx.cluster.topology
-use neurx.cluster.coordinator
+import (
+    "neurx.cluster.cluster_comm"
+    "neurx.cluster.coordinator"
+    "neurx.cluster.topology"
+)
 
 func test_cluster_init() (int, int, string) {
     passed := 0

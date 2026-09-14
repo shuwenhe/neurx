@@ -1,10 +1,12 @@
 package neurx.autograd.ad
-use neurx.autograd.ir
-use neurx.autograd.tracer
-use neurx.tensor.tensor
-use neurx.autograd.tensor
-use neurx.autograd.engine
-use neurx.autograd.function
+import (
+    "neurx.autograd.engine"
+    "neurx.autograd.function"
+    "neurx.autograd.ir"
+    "neurx.autograd.tensor"
+    "neurx.autograd.tracer"
+    "neurx.tensor.tensor"
+)
 struct grad_record {
     int id
     []int shape

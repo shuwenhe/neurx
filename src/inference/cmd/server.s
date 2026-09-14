@@ -1,8 +1,10 @@
-use std.conv.int_to_string
 package neurx.inference.cmd.server
-use neurx.inference.api.http_server.{create_http_server, close_http_server, server_accept_loop, http_server}
-use neurx.inference.api.rest_api.{route_request}
-use neurx.runtime.io.{runtime_env_get}
+import (
+    "neurx.inference.api.http_server."
+    "neurx.inference.api.rest_api."
+    "neurx.runtime.io."
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __host_readline(string prompt) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 func main() {

@@ -1,5 +1,7 @@
 package neurx.posttrain.core.data_loader
-use std.io.println
+import (
+    "std.io.println"
+)
 struct training_example_s {
     string instruction
     string input

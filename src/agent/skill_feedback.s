@@ -1,7 +1,9 @@
 package neurx.agent.skill_feedback
-use neurx.agent.observation
-use neurx.agent.trace
-use neurx.agent.memory
+import (
+    "neurx.agent.memory"
+    "neurx.agent.observation"
+    "neurx.agent.trace"
+)
 struct agent_skill_feedback_state {
     string skill_name
     string task

@@ -1,5 +1,7 @@
 package main
-use std.io.println
+import (
+    "std.io.println"
+)
 func println_separator() int {
     println("═══════════════════════════════════════════════════════════════")
     0

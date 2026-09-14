@@ -1,5 +1,7 @@
 package neurx.nn.activations
-use neurx.tensor.tensor
+import (
+    "neurx.tensor.tensor"
+)
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0

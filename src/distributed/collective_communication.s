@@ -1,7 +1,9 @@
 package neurx.distributed.collective_communication
 
-use std.vec.vec
-use neurx.device.abi
+import (
+    "neurx.device.abi"
+    "std.vec.vec"
+)
 
 struct collective_op_config {
     string op_type

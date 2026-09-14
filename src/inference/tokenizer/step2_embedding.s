@@ -1,5 +1,7 @@
 package step2_embedding
-use neurx.inference.safetensors_loader.{load_tensor_embedding}
+import (
+    "neurx.inference.safetensors_loader."
+)
 
 struct embedding_layer {
     int vocab_size

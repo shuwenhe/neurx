@@ -1,13 +1,15 @@
 package neurx.inference.runtime.real_text_engine
-use neurx.attention.paged_attention_core.{paged_attention_config, paged_kv_cache, slot_mapping, new_paged_kv_cache, reserve_tokens, write_kv_to_cache, compute_paged_attention_gqa}
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
-use neurx.inference.runtime.model_manifest.{hf_model_manifest, load_hf_model_manifest}
-use neurx.inference.model_cpu_inference.{safetensors_model, open_model, validate_model, read_tensor_elements, bf16_at, load_vector, matvec_named, rms_norm}
-use neurx.inference.vocabulary_loader.{load_qwen_vocabulary, get_token_text, vocabulary_size}
-use neurx.compute.gpu_gemm_engine.{gpu_gemm_engine, new_gpu_gemm_engine}
-use neurx.device.cuda_runtime_binding.{cuda_malloc, cuda_free, cuda_memcpy_h2d}
-use std.conv.int_to_string
-use std.conv.float_to_string_precision
+import (
+    "neurx.attention.paged_attention_core."
+    "neurx.compute.gpu_gemm_engine."
+    "neurx.device.cuda_runtime_binding."
+    "neurx.inference.model_cpu_inference."
+    "neurx.inference.runtime.model_manifest."
+    "neurx.inference.vocabulary_loader."
+    "neurx.runtime.io."
+    "std.conv.float_to_string_precision"
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 struct real_text_engine_state {
     string model_directory

@@ -1,10 +1,12 @@
 package main
-use neurx.tool_parsers.schema.schema_types
-use neurx.tool_parsers.schema.schema_parser
-use neurx.tool_parsers.constraint.constraint_generator
-use neurx.tool_parsers.structured_sampler
-use neurx.tool_parsers.formatter.output_formatter
-use neurx.tool_parsers.validator.schema_validator
+import (
+    "neurx.tool_parsers.constraint.constraint_generator"
+    "neurx.tool_parsers.formatter.output_formatter"
+    "neurx.tool_parsers.schema.schema_parser"
+    "neurx.tool_parsers.schema.schema_types"
+    "neurx.tool_parsers.structured_sampler"
+    "neurx.tool_parsers.validator.schema_validator"
+)
 func main() {
     print("\n")
     print("╔════════════════════════════════════════════════════════════════╗\n")

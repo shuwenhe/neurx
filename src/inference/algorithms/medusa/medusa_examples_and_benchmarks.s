@@ -1,6 +1,8 @@
 package neurx.inference.medusa_examples
-use neurx.inference.medusa.*
-use neurx.inference.medusa_integration.*
+import (
+    "neurx.inference.medusa.*"
+    "neurx.inference.medusa_integration.*"
+)
 func create_medusa_config_small() medusa_heads_config {
     config := medusa_heads_config{
         num_heads: 4,

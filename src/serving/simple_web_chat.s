@@ -1,7 +1,9 @@
 package neurx.serving.simple_chat
 
-use std.syscall
-use std.io
+import (
+    "std.io"
+    "std.syscall"
+)
 
 struct model_info {
     string id

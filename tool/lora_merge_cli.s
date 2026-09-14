@@ -1,6 +1,8 @@
 package neurx.tool.lora_merge_cli
-use neurx.runtime.io.{runtime_env_get}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")

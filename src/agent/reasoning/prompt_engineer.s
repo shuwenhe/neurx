@@ -1,6 +1,8 @@
 package neurx.reasoning.prompt_engineer
-use neurx.reasoning.cot_config.{cot_config, reasoning_style}
-use neurx.reasoning.reasoning_chain.reasoning_chain
+import (
+    "neurx.reasoning.cot_config."
+    "neurx.reasoning.reasoning_chain.reasoning_chain"
+)
 struct prompt_engineer {
     cot_config config
     map[string]string templates

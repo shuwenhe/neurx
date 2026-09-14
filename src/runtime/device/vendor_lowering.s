@@ -1,5 +1,7 @@
 package neurx.runtime.device.vendor_lowering
-use neurx.runtime.device.device_ops.{device_op}
+import (
+    "neurx.runtime.device.device_ops."
+)
 
 struct lowered_op {
     string backend

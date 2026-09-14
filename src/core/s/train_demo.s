@@ -1,6 +1,8 @@
 package neurx.train.demo
-use std.fs.write_text_file as fs_write
-use std.fs.read_to_string as fs_read
+import (
+    "std.fs.read_to_string"
+    "std.fs.write_text_file"
+)
 struct training_config {
     int batch_size
     int seq_len

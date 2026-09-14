@@ -1,6 +1,8 @@
 package neurx.module.state_dict
-use neurx.tensor.tensor
-use neurx.nn
+import (
+    "neurx.nn"
+    "neurx.tensor.tensor"
+)
 struct named_tensor {
     string name
     tensor value

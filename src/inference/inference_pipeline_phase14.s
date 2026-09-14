@@ -1,10 +1,12 @@
 package neurx.inference.inference_pipeline_phase14
 
-use std.vec.vec
-use neurx.device.abi
-use neurx.model.transformer_forward
-use neurx.io.weight_loader_complete
-use neurx.compute.gpu_embedding
+import (
+    "neurx.compute.gpu_embedding"
+    "neurx.device.abi"
+    "neurx.io.weight_loader_complete"
+    "neurx.model.transformer_forward"
+    "std.vec.vec"
+)
 
 struct inference_request {
     int request_id

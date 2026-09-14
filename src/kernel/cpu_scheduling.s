@@ -1,5 +1,7 @@
 package neurx.kernel
-use std.slices
+import (
+    "std.slices"
+)
 struct cpu_affinity {
     int cpu_mask  
     int cpu_id

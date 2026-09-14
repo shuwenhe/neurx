@@ -1,5 +1,7 @@
 package kernel.scheduler
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 struct task {
     int pid
     int prio

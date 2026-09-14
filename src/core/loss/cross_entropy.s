@@ -1,5 +1,7 @@
 package neurx.loss.cross_entropy
-use std.io.eprintln
+import (
+    "std.io.eprintln"
+)
 func cross_entropy_loss(
     []float logits,
     []int labels,

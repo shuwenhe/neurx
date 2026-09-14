@@ -1,6 +1,8 @@
 package main
 
-use neurx.distributed.topology.fabric_planner.{fabric_topology_new, fabric_topology_add_node, fabric_request, fabric_plan, fabric_plan_summary}
+import (
+    "neurx.distributed.topology.fabric_planner."
+)
 
 func expect(bool condition, string name) int {
     if condition {

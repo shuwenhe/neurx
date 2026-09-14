@@ -1,6 +1,8 @@
 package neurx.platform.cuda_backend
-use std.io
-use std.math
+import (
+    "std.io"
+    "std.math"
+)
 
 struct cuda_device {
     int device_id

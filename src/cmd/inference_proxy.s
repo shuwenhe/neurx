@@ -1,10 +1,12 @@
 package neurx.inference
 
-use std.strings.string_concat
-use std.strings.int_to_string
-use std.io.eprintln
-use std.io.println
-use std.collections.map
+import (
+    "std.collections.map"
+    "std.io.eprintln"
+    "std.io.println"
+    "std.strings.int_to_string"
+    "std.strings.string_concat"
+)
 
 struct RemoteNode {
     name: string

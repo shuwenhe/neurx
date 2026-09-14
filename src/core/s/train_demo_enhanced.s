@@ -1,7 +1,8 @@
 package neurx.train.demo
-use std.math.{exp, log, sqrt, tanh, sigmoid, relu, gelu,
+import (
+    "std.math.{exp, log, sqrt, tanh, sigmoid, relu, gelu,"
+)
               abs, max, min, mod, pow, EPSILON}
-use std.tensor.{tensor_2, tensor, zeros, ones, randn, xavier_uniform, kaiming_normal,
                  arange, linspace, eye, scalar,
                  add, sub, mul, div, matmul_2d, dot, outer,
                  reshape, flatten, squeeze, unsqueeze, transpose, permute, view,
@@ -11,10 +12,8 @@ use std.tensor.{tensor_2, tensor, zeros, ones, randn, xavier_uniform, kaiming_no
                  gather, one_hot,
                  mse_loss, cross_entropy_loss, l1_loss, bce_with_logits_loss,
                  print_info, print_values, numel, shape}
-use std.ai.autograd.{auto_grad_tensor, create_autograd_tensor, parameter, backward,
                       new_sgd_optimizer, new_adam_optimizer, sgd_step, adam_step,
                       zero_grad, clip_grad_norm_, clip_grad_value_}
-use std.ai.nn.modules.{linear, embedding, layer_norm, multi_head_attention,
                          feed_forward, transformer_block, dropout,
                          re_lu, GELU, si_lu, sigmoid, softmax,
                          sequential, new_linear, new_embedding, new_layer_norm,

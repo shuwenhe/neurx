@@ -1,5 +1,7 @@
 package neurx.posttrain.reward.reward_model
-use neurx.model.llm.gpt.{
+import (
+    "neurx.model.llm.gpt.{"
+)
     model_config, language_model, model_output,
     new_language_model, gpt_forward
 }

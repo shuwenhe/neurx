@@ -1,11 +1,13 @@
 package neurx.inference.engine.gpu_inference_complete
 
-use std.vec.vec
-use neurx.compute.gpu_gemm_engine
-use neurx.model.weight_loader_complete
-use neurx.model.gpu_transformer_forward
-use neurx.distributed.nccl_binding
-use neurx.device.cuda_runtime_binding
+import (
+    "neurx.compute.gpu_gemm_engine"
+    "neurx.device.cuda_runtime_binding"
+    "neurx.distributed.nccl_binding"
+    "neurx.model.gpu_transformer_forward"
+    "neurx.model.weight_loader_complete"
+    "std.vec.vec"
+)
 
 struct inference_request {
     string request_id

@@ -1,5 +1,7 @@
 package neurx.inference.logits_processors.banned_tokens
-use neurx.inference.logits_processors
+import (
+    "neurx.inference.logits_processors"
+)
 struct banned_token_config {
     []int banned_token_ids
     []string banned_words

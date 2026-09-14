@@ -1,5 +1,7 @@
 package neurx.reasoning.reasoning
-use neurx.agent.observation
+import (
+    "neurx.agent.observation"
+)
 struct agent_reasoning_step {
     int index
     string thought

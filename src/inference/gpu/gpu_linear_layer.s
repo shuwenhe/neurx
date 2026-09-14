@@ -1,8 +1,10 @@
 package neurx.inference.gpu.gpu_linear_layer
 
-use neurx.compute.gpu_gemm_engine
-use neurx.device.cuda_runtime_binding
-use neurx.inference.runtime.real_text_engine
+import (
+    "neurx.compute.gpu_gemm_engine"
+    "neurx.device.cuda_runtime_binding"
+    "neurx.inference.runtime.real_text_engine"
+)
 
 struct gpu_linear_layer {
     gpu_gemm_engine* gemm_engine

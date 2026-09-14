@@ -1,5 +1,7 @@
 package neurx.posttrain.rlhf.ppo
-use neurx.posttrain.config
+import (
+    "neurx.posttrain.config"
+)
 struct ppo_state {
     float clip_range
     float kl_coef

@@ -1,5 +1,7 @@
 package neurx.api.openai_compatible
-use neurx.inference.api.openai_protocol
+import (
+    "neurx.inference.api.openai_protocol"
+)
 func api_route_unknown() int { 0 }
 
 func api_route_health() int { 1 }

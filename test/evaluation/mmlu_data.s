@@ -1,5 +1,7 @@
 package neurx.eval.mmlu_data
-use std.io.println
+import (
+    "std.io.println"
+)
 
 struct mmlu_task {
     string name

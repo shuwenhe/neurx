@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     string ascend_home = runtime_env_get("ASCEND_HOME_PATH", "/usr/local/Ascend/ascend-toolkit/latest")

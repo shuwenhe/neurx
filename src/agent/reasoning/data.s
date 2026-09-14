@@ -1,5 +1,7 @@
 package neurx.reasoning.data
-use neurx.agent.runtime
+import (
+    "neurx.agent.runtime"
+)
 struct reasoning_trace_sample_state {
     int step
     string goal

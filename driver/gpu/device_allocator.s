@@ -1,6 +1,8 @@
 package neurx.driver.gpu.device_allocator
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct gpu_device {
     int device_id

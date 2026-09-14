@@ -1,6 +1,8 @@
 package neurx.enterprise.speculative_integration_test
-use neurx.enterprise.speculative_inference
-use neurx.enterprise.inference_system_enhanced
+import (
+    "neurx.enterprise.inference_system_enhanced"
+    "neurx.enterprise.speculative_inference"
+)
 func test_speculative_inference_config_creation() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     cfg.enable_speculative_decode && cfg.num_draft_tokens == 4

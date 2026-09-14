@@ -1,5 +1,7 @@
 package main
-use neurx.core.unicode.normalization.{unicode_database, load_unicode_database, unicode_nfc, unicode_nfkc}
+import (
+    "neurx.core.unicode.normalization."
+)
 
 func main() {
     unicode_database database = load_unicode_database("config/unicode")

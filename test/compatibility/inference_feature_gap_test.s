@@ -1,12 +1,14 @@
 package main
-use neurx.serving.lifecycle.inference_request
-use neurx.inference.advanced.structured_output
-use neurx.inference.advanced.tool_parser
-use neurx.inference.engine.lora_router
-use neurx.inference.scheduler.disaggregated_runtime
-use neurx.inference.advanced.pooling
-use neurx.inference.api.openai_protocol
-use neurx.observability.tracing.inference_observability
+import (
+    "neurx.inference.advanced.pooling"
+    "neurx.inference.advanced.structured_output"
+    "neurx.inference.advanced.tool_parser"
+    "neurx.inference.api.openai_protocol"
+    "neurx.inference.engine.lora_router"
+    "neurx.inference.scheduler.disaggregated_runtime"
+    "neurx.observability.tracing.inference_observability"
+    "neurx.serving.lifecycle.inference_request"
+)
 
 func gap_close(float actual, float expected) bool {
     float difference = actual - expected

@@ -1,13 +1,13 @@
 package neurx.data.dataset.corpus_loader
-use neurx.data.streaming_reader.{
+import (
+    "neurx.data.streaming_reader.{"
+)
     streaming_reader_state, line_read_result,
     init_streaming_reader, read_next_line, default_tb_stream_reader_config,
     stream_reader_config, reset_reader
 }
-use neurx.tokenizer.data_pipeline.{
     bpe_tokenizer_state, encode, init_bpe_tokenizer, default_llm_tokenizer_config
 }
-use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists, runtime_run_command_output}
 
 struct data_source {
     string name

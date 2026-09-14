@@ -1,6 +1,8 @@
 package neurx.inference.runtime.s_production_inference_mainchain
-use std.io.{input, output}
-use std.conv.{int_to_string, float_to_string}
+import (
+    "std.conv."
+    "std.io."
+)
 
 struct inference_request {
     string request_id

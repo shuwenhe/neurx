@@ -1,5 +1,7 @@
 package neurx.script.data_clean
-use neurx.script.data_utils.{
+import (
+    "neurx.script.data_utils.{"
+)
     file_read_text,
     file_write_text,
     file_append_text,
@@ -19,7 +21,6 @@ use neurx.script.data_utils.{
     normalize_whitespace,
     hash_key,
 }
-use neurx.strings.{string_split, string_join, string_contains, string_trim}
 
 struct clean_config {
     string raw_dir

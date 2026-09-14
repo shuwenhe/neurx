@@ -1,5 +1,7 @@
 package neurx.inference.direct_chat
-use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result}
+import (
+    "neurx.inference.runtime.real_text_engine."
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 func contains_keyword(string text, string keyword) bool {

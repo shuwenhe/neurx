@@ -1,6 +1,8 @@
 package neurx.build.gateway
 
-use std.io.println
+import (
+    "std.io.println"
+)
 
 struct CompileConfig {
     source_file: string

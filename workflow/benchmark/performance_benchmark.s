@@ -1,8 +1,10 @@
 package main
-use std.io
-use std.strings
-use std.math
-use std.time
+import (
+    "std.io"
+    "std.math"
+    "std.strings"
+    "std.time"
+)
 
 struct model_config {
     string name

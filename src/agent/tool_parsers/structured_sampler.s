@@ -1,8 +1,10 @@
 package neurx.tool_parsers.structured_sampler
-use neurx.tool_parsers.schema.schema_types
-use neurx.tool_parsers.schema.schema_parser
-use neurx.tool_parsers.constraint.constraint_generator
-use std.slices
+import (
+    "neurx.tool_parsers.constraint.constraint_generator"
+    "neurx.tool_parsers.schema.schema_parser"
+    "neurx.tool_parsers.schema.schema_types"
+    "std.slices"
+)
 struct structured_sampler {
     json_schema schema
     string mode

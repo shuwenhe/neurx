@@ -1,6 +1,8 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
-use std.io.println
+import (
+    "neurx.runtime.io."
+    "std.io.println"
+)
 
 func main() {
     string log_fifo = runtime_env_get("NEURX_SHARD_LOG_FIFO", ".neurx-shard-log")

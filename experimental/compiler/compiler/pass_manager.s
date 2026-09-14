@@ -1,10 +1,12 @@
 package neurx.experimental.compiler.compiler.pass_manager
 
-use neurx.experimental.compiler.ir.graph.computation_graph
-use neurx.experimental.compiler.passes.constant_folding.{apply_constant_folding, fold_result}
-use neurx.experimental.compiler.passes.op_fusion.{apply_op_fusion, fusion_result}
-use neurx.experimental.compiler.passes.dead_code_elim.{remove_dead_code, dead_code_result}
-use neurx.experimental.compiler.passes.memory_opt.{apply_memory_optimization, memory_opt_result}
+import (
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+    "neurx.experimental.compiler.passes.constant_folding."
+    "neurx.experimental.compiler.passes.dead_code_elim."
+    "neurx.experimental.compiler.passes.memory_opt."
+    "neurx.experimental.compiler.passes.op_fusion."
+)
 
     constant_folding,
     op_fusion,

@@ -1,5 +1,7 @@
 package main
-use neurx.runtime.io.{io_mkdir_recursive, io_println, runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
+import (
+    "neurx.runtime.io."
+)
 
 struct industrial_run_summary {
     name            string

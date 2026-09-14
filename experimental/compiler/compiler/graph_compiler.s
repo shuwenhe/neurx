@@ -1,8 +1,10 @@
 package neurx.experimental.compiler.compiler.graph_compiler
 
-use neurx.experimental.compiler.ir.graph.computation_graph
-use neurx.experimental.compiler.compiler.pass_manager.{pass_pipeline, default_optimization_pipeline, run_pass_pipeline}
-use neurx.experimental.compiler.compiler.compilation_unit.{compilation_unit, compilation_config, compilation_stats, default_compilation_config, new_compilation_unit}
+import (
+    "neurx.experimental.compiler.compiler.compilation_unit."
+    "neurx.experimental.compiler.compiler.pass_manager."
+    "neurx.experimental.compiler.ir.graph.computation_graph"
+)
 
 struct compiler_options {
     bool enable_constant_folding

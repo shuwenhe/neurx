@@ -1,6 +1,8 @@
 package neurx.agent.skill_synthesizer
-use neurx.agent.skill_schema
-use neurx.agent.skill_feedback
+import (
+    "neurx.agent.skill_feedback"
+    "neurx.agent.skill_schema"
+)
 func agent_skill_version_from_step(int step) string {
     "v" + string(step)
 }

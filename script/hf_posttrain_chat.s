@@ -1,5 +1,7 @@
 module hf_posttrain_chat
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
+import (
+    "neurx.runtime.io."
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __host_write_text_file(string path, string content) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string

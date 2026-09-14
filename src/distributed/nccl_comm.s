@@ -1,6 +1,8 @@
 package neurx.distributed.nccl_comm
 
-use std.vec.vec
+import (
+    "std.vec.vec"
+)
 
 struct nccl_communicator {
     int rank

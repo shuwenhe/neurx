@@ -1,6 +1,8 @@
 package neurx.models.loaders.hf_transformer
-use neurx.models.formats.safetensors_embedding.{safetensors_embedding, f32_tensor_result, load_f32_tensor, read_f32_tensor}
-use neurx.models.formats.hf_config.{hf_model_config, load_hf_config}
+import (
+    "neurx.models.formats.hf_config."
+    "neurx.models.formats.safetensors_embedding."
+)
 extern "intrinsic" func __host_file_exists(string path) bool
 extern "intrinsic" func __host_read_binary_file(string path) []int
 struct hf_layer_weights {

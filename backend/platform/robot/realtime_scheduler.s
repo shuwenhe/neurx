@@ -1,7 +1,9 @@
 package neurx.backend.platform.robot
 
-use std.slices
-use std.io.println
+import (
+    "std.io.println"
+    "std.slices"
+)
 
 struct realtime_task {
     string name

@@ -1,10 +1,12 @@
-use std.conv.int_to_string
-use std.conv.string_to_int
 package neurx.inference.api.rest_api
-use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, resolve_prompt_from_body, parse_max_tokens, parse_bool, build_health_json, build_models_json, build_generate_json, build_chat_completion_json}
-use neurx.inference.engine.gpu_inference_complete.{gpu_inference_engine, new_gpu_inference_engine, inference_single, inference_request}
-use neurx.runtime.io.{runtime_env_get}
-use src.net.http.{http_request, http_response}
+import (
+    "neurx.inference.engine.gpu_inference_complete."
+    "neurx.inference.runtime.real_text_engine."
+    "neurx.runtime.io."
+    "src.net.http."
+    "std.conv.int_to_string"
+    "std.conv.string_to_int"
+)
 
 struct inference_request {
     string prompt

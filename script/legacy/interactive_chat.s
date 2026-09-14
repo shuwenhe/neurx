@@ -1,8 +1,10 @@
 package main
-use std.io
-use std.os
-use std.strings
-use std.bufio
+import (
+    "std.bufio"
+    "std.io"
+    "std.os"
+    "std.strings"
+)
 
 func main() {
     model_path := "/home/shuwen/shuwen/posttrain/model.safetensors"

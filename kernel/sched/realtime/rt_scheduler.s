@@ -1,6 +1,8 @@
 package neurx.kernel.sched.realtime
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct rt_task {
     int task_id

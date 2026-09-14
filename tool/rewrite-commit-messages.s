@@ -1,5 +1,7 @@
 package main
-use std.io.println
+import (
+    "std.io.println"
+)
 
 func main() {
     println("rewrite-commit-messages.s has been migrated to S.")

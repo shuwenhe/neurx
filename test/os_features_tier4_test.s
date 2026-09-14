@@ -1,12 +1,14 @@
 package neurx.test
 
-use neurx.integration as integration_mod
-use neurx.crypto as crypto_mod
-use neurx.security as security_mod
-use neurx.io as io_mod
-use neurx.net as net_mod
-use neurx.kernel as kernel_mod
-use neurx.driver as driver_mod
+import (
+    "neurx.crypto"
+    "neurx.driver"
+    "neurx.integration"
+    "neurx.io"
+    "neurx.kernel"
+    "neurx.net"
+    "neurx.security"
+)
 
 func test_sha256() (int, string) {
     data := {}

@@ -1,6 +1,8 @@
 package neurx.test
 
-use neurx.integration.os_features
+import (
+    "neurx.integration.os_features"
+)
 
 func main() {
     osfi := new_os_features_integration()

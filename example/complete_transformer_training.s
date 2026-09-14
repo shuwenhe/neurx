@@ -1,16 +1,16 @@
 package neurx.example.complete_transformer_example
-use neurx.model.transformer.layer_norm.{
+import (
+    "neurx.model.transformer.layer_norm.{"
+)
     layer_norm_config,
     layer_norm_state,
     new_layer_norm,
     layer_normalize
 }
-use neurx.model.transformer.position_encoding.{
     position_encoding_config,
     new_absolute_position_encoding,
     get_position_encoding
 }
-use neurx.model.transformer.transformer_forward.{
     transformer_forward_config,
     transformer_forward_state,
     transformer_layer_state,
@@ -20,7 +20,6 @@ use neurx.model.transformer.transformer_forward.{
     transformer_forward_pass,
     forward_pass_output
 }
-use neurx.model.transformer.transformer_backward.{
     compute_cross_entropy_loss_with_gradient,
     transformer_backward_pass,
     backward_pass_output

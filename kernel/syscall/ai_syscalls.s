@@ -1,6 +1,8 @@
 package neurx.kernel.syscall.ai_syscalls
 
-use neurx.kernel.accelerator.unified_executor.{executor_context, execution_result}
+import (
+    "neurx.kernel.accelerator.unified_executor."
+)
 
 enum syscall_error {
     ESYSCALL_OK,

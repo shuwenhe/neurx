@@ -1,8 +1,10 @@
 package neurx.cluster.coordinator
 
-use std.vec.vec
-use neurx.cluster.cluster_comm
-use neurx.cluster.topology
+import (
+    "neurx.cluster.cluster_comm"
+    "neurx.cluster.topology"
+    "std.vec.vec"
+)
 
 struct global_task {
     int64 task_id

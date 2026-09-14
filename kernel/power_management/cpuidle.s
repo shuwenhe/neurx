@@ -1,9 +1,11 @@
 package neurx.kernel.power_management.cpuidle
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.spinlock
+import (
+    "neurx.kernel.locking.spinlock"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 enum c_state_type {
     c0,

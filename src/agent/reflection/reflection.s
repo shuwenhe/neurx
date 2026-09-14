@@ -1,7 +1,9 @@
 package neurx.reflection
-use neurx.agent.trace
-use neurx.agent.memory
-use neurx.agent.observation
+import (
+    "neurx.agent.memory"
+    "neurx.agent.observation"
+    "neurx.agent.trace"
+)
 struct agent_reflection_state {
     string critique
     string suggestion

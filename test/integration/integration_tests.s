@@ -1,11 +1,13 @@
 package neurx.test.integration
 
-use neurx.init
-use neurx.mm.allocator
-use neurx.kernel.sched
-use neurx.sys.monitor
-use neurx.sys.rpc_framework
-use neurx.hal
+import (
+    "neurx.hal"
+    "neurx.init"
+    "neurx.kernel.sched"
+    "neurx.mm.allocator"
+    "neurx.sys.monitor"
+    "neurx.sys.rpc_framework"
+)
 
 func test_system_bootstrap() (int, string) {
     core := init_kernel_main()

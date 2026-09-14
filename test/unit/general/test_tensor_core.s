@@ -1,7 +1,9 @@
 package main
-use neurx.tensor.core
-use neurx.autograd.tensor
-use neurx.tensor.reduce
+import (
+    "neurx.autograd.tensor"
+    "neurx.tensor.core"
+    "neurx.tensor.reduce"
+)
 
 func assert_true(bool value, string name) {
     if value {

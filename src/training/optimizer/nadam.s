@@ -1,6 +1,8 @@
 package neurx.optimizer.nadam
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct nadam_optimizer {
     float lr
     float beta1

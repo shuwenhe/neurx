@@ -1,5 +1,7 @@
 package neurx.experimental.async_policy
-use neurx.tensor
+import (
+    "neurx.tensor"
+)
 
 struct async_policy_config {
     int num_rollout_workers

@@ -1,8 +1,10 @@
 package main
 
-use neurx.deployment.cluster_orchestration.{new_demo_cluster_state}
-use neurx.deployment.cluster_runtime_bridge.{bridge_fault_injection_recovery}
-use neurx.distributed.cluster.heartbeat.{create_cluster_heartbeat_state, cluster_heartbeat_write}
+import (
+    "neurx.deployment.cluster_orchestration."
+    "neurx.deployment.cluster_runtime_bridge."
+    "neurx.distributed.cluster.heartbeat."
+)
 
 func expect(bool condition, string name) int {
     if condition {

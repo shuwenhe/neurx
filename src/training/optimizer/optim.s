@@ -1,6 +1,8 @@
 package neurx.optimizer.optim
-use neurx.tensor.tensor
-use neurx.tensor.new
+import (
+    "neurx.tensor.new"
+    "neurx.tensor.tensor"
+)
 struct sgd_optimizer {
     float lr
 }

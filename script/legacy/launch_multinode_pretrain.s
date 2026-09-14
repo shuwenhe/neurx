@@ -1,8 +1,10 @@
 package main
-use std.exec
-use std.os
-use std.path
-use std.strings
+import (
+    "std.exec"
+    "std.os"
+    "std.path"
+    "std.strings"
+)
 
 struct multi_node_config_2 {
     root string

@@ -1,6 +1,8 @@
 package neurx.diffusion.sampler.ddim
-use neurx.diffusion.noise
-use neurx.ops
+import (
+    "neurx.diffusion.noise"
+    "neurx.ops"
+)
 struct ddim_sampler_state {
     int current_t
     int stride

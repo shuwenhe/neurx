@@ -1,6 +1,8 @@
 package neurx.security
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct capability {
     int cap_id

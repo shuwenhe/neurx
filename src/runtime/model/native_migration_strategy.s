@@ -1,6 +1,8 @@
 package neurx.runtime.model.native_migration
-use std.slices
-use std.io.println
+import (
+    "std.io.println"
+    "std.slices"
+)
 struct json_value {
     string type_name    
     string string_value

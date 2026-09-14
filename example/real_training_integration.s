@@ -1,5 +1,7 @@
 package main
-use neurx.pretrain.llm.real_main_training.{
+import (
+    "neurx.pretrain.llm.real_main_training.{"
+)
     default_training_config,
     real_training_config,
     run_real_training_loop

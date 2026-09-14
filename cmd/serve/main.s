@@ -1,10 +1,12 @@
 package main
-use neurx.runtime.command.{runtime_env_get, runtime_parse_int}
-use neurx.inference.api.contracts.{inference_request}
-use neurx.inference.executor.native_executor.{native_execution_result}
-use neurx.serving.api.contracts.{serving_config, serving_validation_result, validate_serving_config}
-use neurx.serving.lifecycle.native_inference_service.{serve_native_inference}
-use neurx.serving.api.native_openai.{native_openai_response, serve_native_openai}
+import (
+    "neurx.inference.api.contracts."
+    "neurx.inference.executor.native_executor."
+    "neurx.runtime.command."
+    "neurx.serving.api.contracts."
+    "neurx.serving.api.native_openai."
+    "neurx.serving.lifecycle.native_inference_service."
+)
 
 func main() {
     serving_config config = serving_config {

@@ -1,11 +1,13 @@
 package neurx.enterprise.inference_system
-use neurx.cpu.cuda_core
-use neurx.compute.cuda_matmul
-use neurx.quantization.quant_core
-use neurx.api.openai_compatible
-use neurx.distributed.rank_manager
-use neurx.distributed.tensor_parallel
-use neurx.observability.metrics
+import (
+    "neurx.api.openai_compatible"
+    "neurx.compute.cuda_matmul"
+    "neurx.cpu.cuda_core"
+    "neurx.distributed.rank_manager"
+    "neurx.distributed.tensor_parallel"
+    "neurx.observability.metrics"
+    "neurx.quantization.quant_core"
+)
 struct enterprise_inference_config {
     int gpu_device_id
     bool enable_cuda

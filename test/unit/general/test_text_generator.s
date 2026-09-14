@@ -1,5 +1,7 @@
 package main
-use neurx.inference
+import (
+    "neurx.inference"
+)
 
 func assert_true(bool value, string name) {
     if value {

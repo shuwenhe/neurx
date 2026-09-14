@@ -1,7 +1,9 @@
 package neurx.inference.verify_numeric
-use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
-use std.conv.int_to_string
-use std.conv.float_to_string_precision
+import (
+    "neurx.inference.cpu_backend."
+    "std.conv.float_to_string_precision"
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 struct matrix_stats {

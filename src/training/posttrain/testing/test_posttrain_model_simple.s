@@ -1,5 +1,7 @@
 package neurx.posttrain.testing.test_model_simple
-use neurx.runtime.io.{
+import (
+    "neurx.runtime.io.{"
+)
     runtime_env_get,
     runtime_file_exists,
     runtime_file_size

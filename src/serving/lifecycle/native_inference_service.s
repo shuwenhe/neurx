@@ -1,6 +1,8 @@
 package neurx.serving.lifecycle.native_inference_service
-use neurx.inference.api.contracts.{inference_request, inference_validation_result, validate_inference_request}
-use neurx.inference.executor.native_executor.{native_execution_result, execute_native_request}
+import (
+    "neurx.inference.api.contracts."
+    "neurx.inference.executor.native_executor."
+)
 
 func serve_native_inference(inference_request request, int capacity, int active_requests) native_execution_result {
     inference_validation_result validation = validate_inference_request(request)

@@ -1,8 +1,10 @@
 package neurx.executor.model_tool_select
-use neurx.inference
-use neurx.agent.memory
-use neurx.agent.tool_registry
-use neurx.agent.action_schema
+import (
+    "neurx.agent.action_schema"
+    "neurx.agent.memory"
+    "neurx.agent.tool_registry"
+    "neurx.inference"
+)
 func agent_model_clip(string text, int max_chars) string {
     if len(text) <= max_chars {
         return text

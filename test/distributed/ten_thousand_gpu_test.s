@@ -1,6 +1,8 @@
 package neurx.distributed.inference.ten_thousand_gpu_test
 
-use neurx.distributed.inference.ten_thousand_gpu_coordinator
+import (
+    "neurx.distributed.inference.ten_thousand_gpu_coordinator"
+)
 
 func test_ten_thousand_gpu_initialization() {
     

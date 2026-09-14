@@ -1,5 +1,7 @@
 package neurx.runtime.device.device_tensor
-use neurx.runtime.device.device_abi.{device_context, device_buffer_alloc, device_buffer_free}
+import (
+    "neurx.runtime.device.device_abi."
+)
 
 struct device_tensor {
     int buffer

@@ -1,6 +1,8 @@
 package main
-use neurx.backends.cpu.transformer_decode.{cpu_transformer_result, cpu_abs, cpu_rms_norm, cpu_transformer_prefill_decode}
-use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding}
+import (
+    "neurx.backends.cpu.transformer_decode."
+    "neurx.models.formats.safetensors_embedding."
+)
 
 func main() {
     []float input = make([]float, 2)

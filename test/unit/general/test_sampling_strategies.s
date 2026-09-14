@@ -1,5 +1,7 @@
 package main
-use neurx.inference.sampling_strategies
+import (
+    "neurx.inference.sampling_strategies"
+)
 
 func assert_true(bool value, string name) {
     if value {

@@ -1,5 +1,7 @@
 package main
-use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_shell_escape, trim}
+import (
+    "neurx.runtime.io."
+)
 
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/app/shuwen/neurx")

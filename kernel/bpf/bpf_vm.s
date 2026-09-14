@@ -1,6 +1,8 @@
 package neurx.kernel.bpf
 
-use std.slices
+import (
+    "std.slices"
+)
 
 struct bpf_insn {
     int opcode

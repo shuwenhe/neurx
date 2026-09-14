@@ -1,9 +1,11 @@
 package neurx.net.netfilter
 
-use std.slices
-use std.option.option
-use std.result.result
-use neurx.kernel.locking.spinlock
+import (
+    "neurx.kernel.locking.spinlock"
+    "std.option.option"
+    "std.result.result"
+    "std.slices"
+)
 
 enum netfilter_hook_type {
     nf_inet_pre_routing,

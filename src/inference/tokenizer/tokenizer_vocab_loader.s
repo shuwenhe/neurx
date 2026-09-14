@@ -1,6 +1,8 @@
 package neurx.inference.tokenizer_vocab_loader
-use std.conv.int_to_string
-use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
+import (
+    "neurx.runtime.io."
+    "std.conv.int_to_string"
+)
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 struct vocab_entry {
     int token_id

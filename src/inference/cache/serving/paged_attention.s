@@ -1,5 +1,7 @@
 package neurx.inference.cache.serving.paged_attention
-use neurx.inference.cache.serving.paged_kv_cache
+import (
+    "neurx.inference.cache.serving.paged_kv_cache"
+)
 struct paged_attention_state {
     paged_kv_cache_state kv
     int page_size

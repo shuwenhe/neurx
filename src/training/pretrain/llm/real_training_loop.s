@@ -1,15 +1,12 @@
 package neurx.pretrain.llm.real_training_loop
-use neurx.pretrain.llm.real_training.{
+import (
+    "neurx.pretrain.llm.real_training.{"
+)
     relu, relu_backward, softmax_last_dim, cross_entropy_loss,
     matmul, transpose, sum_first_dim,
     adamw_update, grad_logits,
     print_training_progress, int_to_str, fmt_float
 }
-use neurx.pretrain.llm.gpt_large_pretrain.{gpt_large_pretrain_manifest_refs}
-use neurx.data.dataset.corpus_loader.{corpus_state, corpus_batch_result, new_corpus_state_from_paths, corpus_next_batch}
-use neurx.tensor.tensor
-use neurx.tensor.new
-use neurx.strings
 struct real_training_state {
     tensor weights_q
     tensor weights_k

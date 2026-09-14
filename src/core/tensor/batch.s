@@ -1,9 +1,9 @@
 package neurx.tensor.batch
-use neurx.strings
-use neurx.autograd.function
-use neurx.strings
-use neurx.tensor.tensor
-use neurx.strings
+import (
+    "neurx.autograd.function"
+    "neurx.strings"
+    "neurx.tensor.tensor"
+)
 struct batch_state {
     string name
     bool active
