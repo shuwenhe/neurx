@@ -1,4 +1,5 @@
 package neurx.distributed.cluster.parallel_plan
+extern "intrinsic" func __std_byte_string(int value) string
 extern "intrinsic" func __int_to_string(int value) string
 struct cluster_parallel_topology {
     int tensor_parallel_size
@@ -150,7 +151,7 @@ func cluster_parallel_rank_of(cluster_parallel_topology topology, int global_ran
 
 func cluster_parallel_build_stages(cluster_parallel_topology topology, int num_layers) cluster_parallel_stage[] {
     if topology.pipeline_parallel_size <= 0 { topology.pipeline_parallel_size = 1 }
-    cluster_parallel_stage[] stages = make(neurx.distributed.cluster.parallel_plan.cluster_parallel_stage[], topology.pipeline_parallel_size)
+    cluster_parallel_stage[] stages = neurx.distributed.cluster.parallel_plan.cluster_parallel_stage[]()
     int per_stage = num_layers / topology.pipeline_parallel_size
     int remainder = num_layers - per_stage * topology.pipeline_parallel_size
     int stage = 0
@@ -174,7 +175,7 @@ func cluster_parallel_build_stages(cluster_parallel_topology topology, int num_l
 }
 
 func cluster_parallel_build_ranks(cluster_parallel_topology topology) cluster_parallel_rank[] {
-    cluster_parallel_rank[] ranks = make(neurx.distributed.cluster.parallel_plan.cluster_parallel_rank[], topology.world_size)
+    cluster_parallel_rank[] ranks = neurx.distributed.cluster.parallel_plan.cluster_parallel_rank[]()
     int global_rank = 0
     for global_rank < topology.world_size {
         ranks = append(ranks, cluster_parallel_rank_of(topology, global_rank))
@@ -506,7 +507,7 @@ func cluster_parallel_execution_script_summary(cluster_parallel_execution_script
     out = out + "valid=" + __int_to_string(int(script.valid)) + "\n"
     out = out + "length=" + __int_to_string(len(script.script)) + "\n"
     if len(script.script) > 0 {
-        out = out + "prefix=" + script.script[0] + "\n"
+        out = out + "prefix=" + __std_byte_string(script.script[0]) + "\n"
     }
     out
 }

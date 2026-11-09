@@ -1,50 +1,65 @@
 # Build NeurX with the self-hosted S compiler
 
-Use the accepted Stage4 binary from the adjacent S checkout:
-
 ```sh
-make native-stage4 NATIVE_COMMANDS="train benchmark"
+cd /root/shuwen/neurx
+make native-stage4
 make native-stage4-test
 ```
 
-The commands are written to `artifact/build/native-stage4/train` and
-`artifact/build/native-stage4/benchmark`. These are native Linux/amd64 executables.
-`train` validates configuration and launches the existing Make training workflow;
-compiling this launcher does not compile or validate the training engine.
-`benchmark` launches an external measurement executable and validates its result;
-it does not implement an inference engine or establish performance claims.
+All five command entry points (`train`, `benchmark`, `worker`, `controller`,
+`serve`) build as native Linux/amd64 ELF executables in
+`artifact/build/native-stage4/`. No seed IR interpreter or legacy backend is used
+to compile or execute these commands.
 
-To select another accepted compiler:
+The local default selects the extended self-hosted compiler at
+`../s/.bootstrap/neurx-extension/compiler-final` when present, otherwise the
+standard `../s/.bootstrap/native-imports/stage4`. The original accepted Stage4
+predates the floating-point/runtime additions and is preserved. On another
+checkout, first bootstrap the updated S sources or explicitly select an extended
+native compiler:
 
 ```sh
-make native-stage4 NATIVE_COMMANDS="train benchmark" \
-  S_REPO_ROOT=/path/to/s \
-  S_NATIVE_COMPILER=/path/to/s/.bootstrap/native-imports/stage4
+make native-stage4 S_REPO_ROOT=/path/to/s \
+  S_NATIVE_COMPILER=/path/to/extended/native/compiler
+make native-stage4 NATIVE_COMMANDS="worker serve"
 ```
 
-No seed compiler, seed IR runner or legacy backend is used. The build tool records
-the selected compiler path and SHA-256 in `manifest.json`, source closures in
-`*.sources`, and compiler/emitter output in `*.log`. It resolves NeurX package
-names from source declarations, including historical terminal-dot/member imports.
-It does not rewrite or discard imported source. Unresolved imports fail explicitly.
-Each requested command is built independently. Failed rebuilds remove that
-command's previous binary and assembly so they cannot be mistaken for new output.
+The S extension development directory contains immutable compiler source
+snapshots, source hashes, native assembly and build logs. Its native compiler
+chain starts with the previously verified Stage4, which compiles the extension;
+that native compiler then compiles the updated compiler sources. The final
+artifact has been tested as a compiler, separately from seed-hosted development
+builds. This development chain is distinct from rerunning the repository's full
+fresh four-stage clean-room acceptance/install workflow.
 
-`make native-stage4` attempts all five commands and returns nonzero if any fails.
-Currently `worker`, `controller` and `serve` remain blocked:
+The NeurX build tool records compiler path/SHA-256 in `manifest.json`, source
+closures in `*.sources`, and compiler/emitter diagnostics in `*.log`. It resolves
+packages and declared historical member imports from source; missing imports
+fail explicitly. Each requested command is independent, and a failed rebuild
+removes its old executable/assembly before preflight. All requested commands must
+succeed for the overall build to return zero.
 
-- `worker`/`controller` depend on `std` imports without a resolvable source package.
-- Their source closures use prefix array types such as `[]cluster_node_spec`;
-  the current canonical parser expects suffix arrays such as `cluster_node_spec[]`.
-- `serve` fails on `[]int` in `src/inference/executor/native_executor.s`.
-- Beyond syntax, cluster utilization and model weights require floating point.
-  Stage4 rejects a minimal `float weight = 1.5` program, and its SSA supported-type
-  set omits floating point. Replacing these with integers would change behavior.
-- The cluster code declares socket intrinsics such as `__sys_socket`; a minimal
-  Stage4 program calling that intrinsic fails with `unresolved external function`.
+## Validated behavior
 
-The current native regression tests execute the real train and benchmark binaries,
-including configuration errors, child failure status and shell quoting. Training,
-GPU/NPU execution, distributed orchestration and full model serving have not been
-validated. The existing unrelated `quality-gate` still references missing scripts
-and old repository paths; it is not bypassed or claimed to pass by these targets.
+- Train configuration checks and launching a controlled Make target.
+- Benchmark configuration, measured-result validation and child exit propagation.
+- Shell argument quoting, including single quotes and shell metacharacters.
+- Worker configuration and execution of a local child with rank/master variables.
+- Cluster collection builders preserve counts and exclude default/empty entries.
+- Runtime file/binary/range operations, empty/missing environment keys, process
+  stdout capture and error handling; socket extensions have local loopback probes.
+- Native serving for a reference model, a tiny safetensors embedding model, and a
+  tiny HF model; KV caches propagate across forward/prefill/decode steps and HF
+  numeric configuration accepts scientific notation.
+
+`train` remains a launcher of the existing Make training workflow, and
+`benchmark` launches an external measurement executable. Compiling them does not
+compile the complete training engine or establish performance measurements.
+The controller has been exercised in local dry-run mode; remote multi-node
+launch, GPU/NPU training and production deployment are not validated here.
+The existing unrelated `quality-gate` still references missing scripts and old
+paths; it is not bypassed or claimed to pass.
+
+The RL/PPO/GRPO files outside these command closures also remain unvalidated as a
+real training pipeline. Some rollout/reward paths are explicitly placeholders,
+and compiling these five commands does not establish RL infrastructure readiness.

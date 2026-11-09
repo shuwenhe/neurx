@@ -7,7 +7,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 S_ROOT = Path(os.environ.get('S_REPO_ROOT', ROOT.parent / 's'))
-COMPILER = Path(os.environ.get('S_NATIVE_COMPILER', S_ROOT / '.bootstrap/native-imports/stage4'))
+EXTENDED = S_ROOT / '.bootstrap/neurx-extension/compiler-final'
+COMPILER = Path(os.environ.get('S_NATIVE_COMPILER', EXTENDED if EXTENDED.is_file() else S_ROOT / '.bootstrap/native-imports/stage4'))
 
 
 class NativeCommands(unittest.TestCase):

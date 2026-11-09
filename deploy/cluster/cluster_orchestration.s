@@ -228,7 +228,7 @@ func cluster_parse_float(string text, float fallback) float {
 }
 
 func cluster_parse_node_record(string line) cluster_node_spec {
-    string[] parts = make(string[], 8)
+    string[] parts = string[]()
     string current = ""
     int i = 0
     for i < len(line) {
@@ -511,7 +511,7 @@ func cluster_discover_nodes_from_manifest() cluster_node_spec[] {
     }
     string text = runtime_read_text_file(manifest_path)
     string[] lines = cluster_split_lines(text)
-    cluster_node_spec[] nodes = make(neurx.deployment.cluster_orchestration.cluster_node_spec[], len(lines))
+    cluster_node_spec[] nodes = neurx.deployment.cluster_orchestration.cluster_node_spec[]()
     int i = 0
     for i < len(lines) {
         string line = cluster_trim(lines[i])
@@ -526,7 +526,7 @@ func cluster_discover_nodes_from_manifest() cluster_node_spec[] {
 }
 
 func cluster_discover_local_fallback() cluster_node_spec[] {
-    cluster_node_spec[] nodes = make(neurx.deployment.cluster_orchestration.cluster_node_spec[], 1)
+    cluster_node_spec[] nodes = neurx.deployment.cluster_orchestration.cluster_node_spec[]()
     nodes = append(nodes, new_cluster_node_spec(0, "localhost", "127.0.0.1", 1, "local", 8, 16, "healthy", 0.0))
     nodes
 }
@@ -670,7 +670,7 @@ func cluster_int_to_string(int value) string {
 }
 
 func cluster_generate_env_lines(cluster_deployment_spec spec) string[] {
-    string[] lines = make(string[], 12)
+    string[] lines = string[]()
     lines = append(lines, "export CLUSTER_NAME=" + spec.cluster_name)
     lines = append(lines, "export MASTER_ADDR=" + spec.master_addr)
     lines = append(lines, "export MASTER_PORT=" + cluster_int_to_string(spec.master_port))
@@ -699,7 +699,7 @@ func cluster_default_pretrain_tokenizer_manifest_path(cluster_deployment_spec sp
 }
 
 func cluster_generate_training_startup_lines(cluster_orchestration_state state, cluster_deployment_spec spec) string[] {
-    string[] lines = make(string[], 32)
+    string[] lines = string[]()
     string pretrain_output_dir = cluster_default_pretrain_output_dir(spec)
     string pretrain_manifest = cluster_default_pretrain_manifest_path(spec)
     string tokenizer_manifest = cluster_default_pretrain_tokenizer_manifest_path(spec)
@@ -756,7 +756,7 @@ func cluster_generate_training_startup_env(cluster_orchestration_state state, cl
 }
 
 func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
-    string[] lines = make(string[], 32)
+    string[] lines = string[]()
     lines = append(lines, "#!/bin/bash")
     lines = append(lines, "")
     lines = append(lines, "# NeurX cluster deployment script")
@@ -792,7 +792,7 @@ func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
 }
 
 func cluster_generate_kubernetes_yaml(cluster_deployment_spec spec) string {
-    string[] lines = make(string[], 40)
+    string[] lines = string[]()
     lines = append(lines, "apiVersion: app/v1")
     lines = append(lines, "kind: StatefulSet")
     lines = append(lines, "metadata:")
@@ -896,7 +896,7 @@ func cluster_write_deployment_bundle(cluster_orchestration_state state, cluster_
 func cluster_write_launch_plan(cluster_orchestration_state state, cluster_deployment_spec spec) cluster_orchestration_state {
     cluster_orchestration_state next = state
     string launch_path = next.deployment_dir + "/launch_plan.s"
-    string launch_plan = "package main\n\nuse neurx.runtime.io.{runtime_run_command, runtime_shell_escape}\nuse std.io.println\n\nfunc main() {\n    string startup_env = \"" + next.deployment_dir + "/training_startup.env\"\n    println(\"NeurX cluster launch plan (S Lang)\")\n    println(\"\")\n    println(\"Startup env : \" + startup_env)\n    println(\"Target      : make run-training-s\")\n    println(\"\")\n\n    string cmd = \". \" + neurx.runtime.command.runtime_shell_escape(startup_env) + \" && export NEURX_PRETRAIN_USE_LAUNCH_PLAN=0 NEURX_CLUSTER_DISABLE=1 && " + cluster_training_launch_command(spec) + "\"\n    if !runtime_run_command(cmd).ok {\n        return 1\n    }\n    0\n}\n"
+    string launch_plan = "package main\n\nuse neurx.runtime.io.{runtime_run_command, runtime_shell_escape}\nuse std.io.println\n\nfunc run_cluster_orchestration_demo() {\n    string startup_env = \"" + next.deployment_dir + "/training_startup.env\"\n    println(\"NeurX cluster launch plan (S Lang)\")\n    println(\"\")\n    println(\"Startup env : \" + startup_env)\n    println(\"Target      : make run-training-s\")\n    println(\"\")\n\n    string cmd = \". \" + neurx.runtime.command.runtime_shell_escape(startup_env) + \" && export NEURX_PRETRAIN_USE_LAUNCH_PLAN=0 NEURX_CLUSTER_DISABLE=1 && " + cluster_training_launch_command(spec) + "\"\n    if !runtime_run_command(cmd).ok {\n        return 1\n    }\n    0\n}\n"
     runtime_write_text_file(launch_path, launch_plan)
     next.last_summary = next.last_summary + "launch_plan=" + launch_path + "\n"
     next
@@ -920,7 +920,7 @@ func new_demo_cluster_state() cluster_orchestration_state {
     state
 }
 
-func main() {
+func run_cluster_orchestration_demo() {
     cluster_orchestration_state state = new_demo_cluster_state()
     state = cluster_discover_nodes(state)
     state = cluster_elastic_recover(state)

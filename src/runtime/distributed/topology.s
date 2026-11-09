@@ -238,8 +238,8 @@ func hetero_build_launch_plan(hetero_placement_result placement, string worker_b
 
 func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string chip_type, string worker_bin, string master_addr, int master_port, int min_devices, int min_memory_gb) hetero_multi_launch_plan {
     hetero_multi_launch_plan plan = hetero_multi_launch_plan {}
-    plan.placements = make(neurx.runtime.distributed.topology.hetero_placement_result[], len(topo.nodes))
-    plan.commands = make(neurx.runtime.distributed.topology.hetero_launch_command[], topo.total_devices)
+    plan.placements = neurx.runtime.distributed.topology.hetero_placement_result[]()
+    plan.commands = neurx.runtime.distributed.topology.hetero_launch_command[]()
     plan.world_size = 0
     plan.valid = false
     plan.reason = ""

@@ -96,9 +96,9 @@ func bridge_probe_runtime(cluster_orchestration_state state) cluster_runtime_bri
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    int[] node_ids = make(int[], len(state.nodes))
-    string[] node_names = make(string[], len(state.nodes))
-    string[] node_hosts = make(string[], len(state.nodes))
+    int[] node_ids = int[]()
+    string[] node_names = string[]()
+    string[] node_hosts = string[]()
     int j = 0
     for j < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[j].node_id)
@@ -350,7 +350,7 @@ func bridge_recover_failed_nodes(cluster_orchestration_state state) string {
     string[] node_hosts = string[]{}
     int j = 0
     for j < len(state.nodes) {
-        if state.nodes[j].healthy {
+        if state.nodes[j].status == "healthy" {
             node_ids = append(node_ids, state.nodes[j].node_id)
             node_names = append(node_names, state.nodes[j].node_name)
             node_hosts = append(node_hosts, bridge_ssh_host(state.nodes[j].ip_address))
@@ -403,7 +403,7 @@ func bridge_fault_injection_recovery(cluster_orchestration_state state) cluster_
     string[] node_hosts = string[]{}
     int j = 0
     for j < len(state.nodes) {
-        if state.nodes[j].healthy {
+        if state.nodes[j].status == "healthy" {
             node_ids = append(node_ids, state.nodes[j].node_id)
             node_names = append(node_names, state.nodes[j].node_name)
             node_hosts = append(node_hosts, bridge_ssh_host(state.nodes[j].ip_address))

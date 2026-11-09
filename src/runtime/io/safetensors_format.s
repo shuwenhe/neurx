@@ -134,7 +134,7 @@ func safetensors_writer_finish(safetensors_writer w) bool {
     runtime_write_binary_file(w.filepath, file_data)
     true
 }
-extern "intrinsic" func __host_write_binary_file(string path, byte[] data) ()
+extern "intrinsic" func __host_write_binary_file(string path, byte[] data)
 func runtime_write_binary_file(string path, byte[] data) () {
     __host_write_binary_file(path, data)
 }

@@ -170,7 +170,7 @@ POSTTRAIN_GOLDEN_DATASET_LIMIT ?= 12
 POSTTRAIN_MATERIALIZED_SAMPLES ?= 1
 
 # Compile with the accepted self-hosted compiler; never fall back to seed IR.
-S_NATIVE_COMPILER ?= $(S_REPO_ROOT)/.bootstrap/native-imports/stage4
+S_NATIVE_COMPILER ?= $(firstword $(wildcard $(S_REPO_ROOT)/.bootstrap/neurx-extension/compiler-final $(S_REPO_ROOT)/.bootstrap/native-imports/stage4) $(S_REPO_ROOT)/.bootstrap/native-imports/stage4)
 NATIVE_COMMANDS ?= train benchmark worker controller serve
 NATIVE_OUTPUT_DIR ?= $(CURDIR_UNIX)/artifact/build/native-stage4
 

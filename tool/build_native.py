@@ -124,7 +124,9 @@ def main():
     args = parser.parse_args()
     args.project_root = args.project_root.resolve()
     args.s_root = args.s_root.resolve()
-    args.compiler = (args.compiler or args.s_root / '.bootstrap/native-imports/stage4').resolve()
+    extended = args.s_root / '.bootstrap/neurx-extension/compiler-final'
+    default_compiler = extended if extended.is_file() else args.s_root / '.bootstrap/native-imports/stage4'
+    args.compiler = (args.compiler or default_compiler).resolve()
     args.output_dir = (args.output_dir or args.project_root / 'artifact/build/native-stage4').resolve()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     for name in dict.fromkeys(args.commands):

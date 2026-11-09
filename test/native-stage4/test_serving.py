@@ -8,7 +8,9 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-COMPILER = Path(os.environ.get('S_NATIVE_COMPILER', ROOT.parent / 's/.bootstrap/native-imports/stage4'))
+S_ROOT = Path(os.environ.get('S_REPO_ROOT', ROOT.parent / 's'))
+EXTENDED = S_ROOT / '.bootstrap/neurx-extension/compiler-final'
+COMPILER = Path(os.environ.get('S_NATIVE_COMPILER', EXTENDED if EXTENDED.is_file() else S_ROOT / '.bootstrap/native-imports/stage4'))
 
 
 class NativeServing(unittest.TestCase):
