@@ -1,21 +1,22 @@
 package neurx.models.loaders.hf_transformer
+extern "intrinsic" func __std_byte_string(int value) string
 import (
-    "neurx.models.formats.hf_config."
-    "neurx.models.formats.safetensors_embedding."
+    "neurx.models.formats.hf_config"
+    "neurx.models.formats.safetensors_embedding"
 )
 extern "intrinsic" func __host_file_exists(string path) bool
-extern "intrinsic" func __host_read_binary_file(string path) []int
+extern "intrinsic" func __host_read_binary_file(string path) int[]
 struct hf_layer_weights {
     bool valid
-    []float input_norm
-    []float q_proj
-    []float k_proj
-    []float v_proj
-    []float o_proj
-    []float post_norm
-    []float gate_proj
-    []float up_proj
-    []float down_proj
+    float[] input_norm
+    float[] q_proj
+    float[] k_proj
+    float[] v_proj
+    float[] o_proj
+    float[] post_norm
+    float[] gate_proj
+    float[] up_proj
+    float[] down_proj
     string error_code
 }
 
@@ -23,17 +24,17 @@ struct hf_model_weights {
     bool valid
     hf_model_config config
     safetensors_embedding embedding
-    []float input_norm
-    []float q_proj
-    []float k_proj
-    []float v_proj
-    []float o_proj
-    []float post_norm
-    []float gate_proj
-    []float up_proj
-    []float down_proj
-    []float final_norm
-    []float lm_head
+    float[] input_norm
+    float[] q_proj
+    float[] k_proj
+    float[] v_proj
+    float[] o_proj
+    float[] post_norm
+    float[] gate_proj
+    float[] up_proj
+    float[] down_proj
+    float[] final_norm
+    float[] lm_head
     string error_code
 }
 
@@ -41,7 +42,7 @@ func hf_int_string(int value) string {
     if value == 0 { return "0" }
     string output = ""
     int current = value
-    for current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
+    for current > 0 { output = __std_byte_string(48 + current % 10) + output; current = current / 10 }
     output
 }
 
@@ -50,10 +51,10 @@ func hf_load_values(string path, string name) f32_tensor_result {
     read_f32_tensor(tensor)
 }
 
-func hf_bytes_string([]int bytes) string {
+func hf_bytes_string(int[] bytes) string {
     string output = ""
     int i = 0
-    for i < len(bytes) { output = output + string(bytes[i]); i = i + 1 }
+    for i < len(bytes) { output = output + __std_byte_string(bytes[i]); i = i + 1 }
     output
 }
 
@@ -83,7 +84,7 @@ func hf_resolve_tensor_path(string model_dir, string name) string {
     if colon < 0 || quote < 0 || end < 0 { return "" }
     string shard = ""
     int i = quote + 1
-    for i < end { shard = shard + string(index[i]); i = i + 1 }
+    for i < end { shard = shard + __std_byte_string(index[i]); i = i + 1 }
     model_dir + "/" + shard
 }
 
@@ -134,7 +135,7 @@ func invalid_hf_model(hf_model_config config, string code) hf_model_weights {
     hf_model_weights { valid: false, config: config, embedding: empty, input_norm: [], q_proj: [], k_proj: [], v_proj: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], final_norm: [], lm_head: [], error_code: code }
 }
 
-func hf_copy_layer([]float target, int offset, []float source) {
+func hf_copy_layer(float[] target, int offset, float[] source) {
     int i = 0
     for i < len(source) { target[offset + i] = source[i]; i = i + 1 }
 }
@@ -149,15 +150,15 @@ func load_hf_model(string model_dir) hf_model_weights {
     int hidden_square = config.hidden_size * config.hidden_size
     int kv_size = config.kv_heads * config.head_dim * config.hidden_size
     int mlp_size = config.intermediate_size * config.hidden_size
-    []float input_norm = make([]float, config.layers * config.hidden_size)
-    []float q_proj = make([]float, config.layers * hidden_square)
-    []float k_proj = make([]float, config.layers * kv_size)
-    []float v_proj = make([]float, config.layers * kv_size)
-    []float o_proj = make([]float, config.layers * hidden_square)
-    []float post_norm = make([]float, config.layers * config.hidden_size)
-    []float gate_proj = make([]float, config.layers * mlp_size)
-    []float up_proj = make([]float, config.layers * mlp_size)
-    []float down_proj = make([]float, config.layers * mlp_size)
+    float[] input_norm = make(float[], config.layers * config.hidden_size)
+    float[] q_proj = make(float[], config.layers * hidden_square)
+    float[] k_proj = make(float[], config.layers * kv_size)
+    float[] v_proj = make(float[], config.layers * kv_size)
+    float[] o_proj = make(float[], config.layers * hidden_square)
+    float[] post_norm = make(float[], config.layers * config.hidden_size)
+    float[] gate_proj = make(float[], config.layers * mlp_size)
+    float[] up_proj = make(float[], config.layers * mlp_size)
+    float[] down_proj = make(float[], config.layers * mlp_size)
     int layer = 0
     for layer < config.layers {
         hf_layer_weights weights = load_hf_model_layer(model_dir, layer)

@@ -1,10 +1,10 @@
 package main
 import (
-    "neurx.runtime.command."
-    "neurx.training.api.contracts."
+    "neurx.runtime.command"
+    "neurx.training.api.contracts"
 )
 
-func main() {
+func main() int {
     string mode = runtime_env_get("NEURX_TRAIN_MODE", "pretrain")
     training_job_config config = training_job_config {
         job_id: runtime_env_get("NEURX_JOB_ID", ""),

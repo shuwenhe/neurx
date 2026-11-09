@@ -2,25 +2,25 @@ package neurx.runtime.io
 struct tensor {
     string name
     string dtype
-    []int shape
-    []float data
+    int[] shape
+    float[] data
     int shape_count
     int data_count
 }
 
 struct tensor_buffer {
-    []byte buffer
+    byte[] buffer
     int pos
 }
 
 func tensor_buffer_new(int capacity) tensor_buffer {
     tensor_buffer {
-        buffer: make([]byte, capacity),
+        buffer: make(byte[], capacity),
         pos: 0,
     }
 }
 
-func tensor_buffer_write_bytes(tensor_buffer buf, []byte data) () {
+func tensor_buffer_write_bytes(tensor_buffer buf, byte[] data) () {
     int i = 0
     for i < len(data) {
         if buf.pos >= len(buf.buffer) {
@@ -33,7 +33,7 @@ func tensor_buffer_write_bytes(tensor_buffer buf, []byte data) () {
 }
 
 func tensor_buffer_write_u64_le(tensor_buffer buf, int value) () {
-    []byte bytes = make([]byte, 8)
+    byte[] bytes = make(byte[], 8)
     int v = value
     int i = 0
     for i < 8 {
@@ -53,7 +53,7 @@ func tensor_buffer_write_f32_le(tensor_buffer buf, float value) () {
     } else {
         bits = float_to_bits(value)
     }
-    []byte bytes = make([]byte, 4)
+    byte[] bytes = make(byte[], 4)
     int v = bits
     bytes[0] = byte(v - (v / 256) * 256)
     v = v / 256
@@ -81,8 +81,8 @@ func tensor_buffer_len(tensor_buffer buf) int {
     buf.pos
 }
 
-func tensor_buffer_slice(tensor_buffer buf) []byte {
-    []byte result = make([]byte, buf.pos)
+func tensor_buffer_slice(tensor_buffer buf) byte[] {
+    byte[] result = make(byte[], buf.pos)
     int i = 0
     for i < buf.pos {
         result[i] = buf.buffer[i]

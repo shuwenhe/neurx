@@ -1,8 +1,8 @@
 package neurx.deployment.hetero_runtime_bridge
 
 import (
-    "neurx.runtime.command."
-    "neurx.runtime.distributed.topology."
+    "neurx.runtime.command"
+    "neurx.runtime.distributed.topology"
 )
 
 struct hetero_runtime_bridge_result {
@@ -49,7 +49,7 @@ func bridge_hetero_demo_script(string worker_bin, string master_addr, int master
 func bridge_hetero_demo_execute(string worker_bin, string master_addr, int master_port) int {
     string script = bridge_hetero_demo_script(worker_bin, master_addr, master_port)
     string script_path = "/tmp/neurx_cluster/hetero_launch.sh"
-    runtime_run_command_exit_code("mkdir -p /tmp/neurx_cluster")
-    runtime_run_command_exit_code("printf %s " + runtime_shell_escape(script) + " > " + runtime_shell_escape(script_path))
-    runtime_run_command_exit_code("sh " + runtime_shell_escape(script_path))
+    neurx.runtime.command.runtime_run_command_exit_code("mkdir -p /tmp/neurx_cluster")
+    neurx.runtime.command.runtime_run_command_exit_code("printf %s " + neurx.runtime.command.runtime_shell_escape(script) + " > " + neurx.runtime.command.runtime_shell_escape(script_path))
+    neurx.runtime.command.runtime_run_command_exit_code("sh " + neurx.runtime.command.runtime_shell_escape(script_path))
 }

@@ -1,9 +1,11 @@
 package neurx.serving.protocol.openai_tgi
+extern "intrinsic" func __std_byte_string(int value) string
+extern "intrinsic" func __int_to_string(int value) string
 func serving_json_escape(string value) string {
     string out = ""
     int i = 0
     for i < len(value) {
-        string ch = string(value[i])
+        string ch = __std_byte_string(value[i])
         if ch == "\\" {
             out = out + "\\\\"
         } else if ch == "\"" {
@@ -34,7 +36,7 @@ func openai_chat_sse_chunk(string request_id, string model, int created, string 
     }
     string payload = "{\"id\":\"" + serving_json_escape(request_id) + "\","
     payload = payload + "\"object\":\"chat.completion.chunk\","
-    payload = payload + "\"created\":" + string(created) + ","
+    payload = payload + "\"created\":" + __int_to_string(created) + ","
     payload = payload + "\"model\":\"" + serving_json_escape(model) + "\","
     payload = payload + "\"choices\":[{\"index\":0,\"delta\":{\"content\":\"" + serving_json_escape(content) + "\"},"
     payload = payload + "\"finish_reason\":" + finish + "}]}"
@@ -44,7 +46,7 @@ func openai_chat_sse_chunk(string request_id, string model, int created, string 
 func openai_completion_sse_chunk(string request_id, string model, int created, string content, string finish_reason) string {
     string finish = "null"
     if finish_reason != "" { finish = "\"" + serving_json_escape(finish_reason) + "\"" }
-    string payload = "{\"id\":\"" + serving_json_escape(request_id) + "\",\"object\":\"text_completion\",\"created\":" + string(created) + ",\"model\":\"" + serving_json_escape(model) + "\",\"choices\":[{\"index\":0,\"text\":\"" + serving_json_escape(content) + "\",\"finish_reason\":" + finish + "}]}"
+    string payload = "{\"id\":\"" + serving_json_escape(request_id) + "\",\"object\":\"text_completion\",\"created\":" + __int_to_string(created) + ",\"model\":\"" + serving_json_escape(model) + "\",\"choices\":[{\"index\":0,\"text\":\"" + serving_json_escape(content) + "\",\"finish_reason\":" + finish + "}]}"
     "data: " + payload + "\n\n"
 }
 
@@ -53,18 +55,18 @@ func openai_sse_done() string {
 }
 
 func openai_error_json(string message, string error_type, int status) string {
-    "{\"error\":{\"message\":\"" + serving_json_escape(message) + "\",\"type\":\"" + serving_json_escape(error_type) + "\",\"code\":" + string(status) + "}}"
+    "{\"error\":{\"message\":\"" + serving_json_escape(message) + "\",\"type\":\"" + serving_json_escape(error_type) + "\",\"code\":" + __int_to_string(status) + "}}"
 }
 
 func tgi_token_sse(int token_id, string token_text, bool special) string {
-    string payload = "{\"token\":{\"id\":" + string(token_id) + ",\"text\":\"" + serving_json_escape(token_text) + "\",\"logprob\":null,\"special\":" + serving_bool_json(special) + "},\"generated_text\":null,\"details\":null}"
+    string payload = "{\"token\":{\"id\":" + __int_to_string(token_id) + ",\"text\":\"" + serving_json_escape(token_text) + "\",\"logprob\":null,\"special\":" + serving_bool_json(special) + "},\"generated_text\":null,\"details\":null}"
     "data: " + payload + "\n\n"
 }
 
 func tgi_final_sse(int token_id, string token_text, string generated_text, string finish_reason, int generated_tokens) string {
-    string payload = "{\"token\":{\"id\":" + string(token_id) + ",\"text\":\"" + serving_json_escape(token_text) + "\",\"logprob\":null,\"special\":false},"
+    string payload = "{\"token\":{\"id\":" + __int_to_string(token_id) + ",\"text\":\"" + serving_json_escape(token_text) + "\",\"logprob\":null,\"special\":false},"
     payload = payload + "\"generated_text\":\"" + serving_json_escape(generated_text) + "\","
-    payload = payload + "\"details\":{\"finish_reason\":\"" + serving_json_escape(finish_reason) + "\",\"generated_tokens\":" + string(generated_tokens) + "}}"
+    payload = payload + "\"details\":{\"finish_reason\":\"" + serving_json_escape(finish_reason) + "\",\"generated_tokens\":" + __int_to_string(generated_tokens) + "}}"
     "data: " + payload + "\n\n"
 }
 

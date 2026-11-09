@@ -1,13 +1,13 @@
 package main
 import (
-    "neurx.runtime.command."
+    "neurx.runtime.command"
 )
 
 func valid_engine(string engine) bool {
     engine == "neurx" || engine == "vllm" || engine == "sglang"
 }
 
-func main() {
+func main() int {
     string benchmark_bin = runtime_env_get("NEURX_BENCHMARK_BIN", "")
     string engine = runtime_env_get("NEURX_BENCHMARK_ENGINE", "")
     string output = runtime_env_get("NEURX_BENCHMARK_OUTPUT", "")

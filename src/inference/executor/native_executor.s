@@ -1,20 +1,21 @@
 package neurx.inference.executor.native_executor
+extern "intrinsic" func __std_byte_string(int value) string
 import (
-    "neurx.backends.api.inference_backend."
-    "neurx.backends.cpu.reference_inference."
-    "neurx.backends.cpu.transformer_decode."
-    "neurx.inference.scheduler.native_scheduler."
-    "neurx.inference.tokenizer.byte_tokenizer."
-    "neurx.inference.tokenizer.hf_bpe_tokenizer."
-    "neurx.models.formats.safetensors_embedding."
-    "neurx.models.loaders.hf_transformer."
+    "neurx.backends.api.inference_backend"
+    "neurx.backends.cpu.reference_inference"
+    "neurx.backends.cpu.transformer_decode"
+    "neurx.inference.scheduler.native_scheduler"
+    "neurx.inference.tokenizer.byte_tokenizer"
+    "neurx.inference.tokenizer.hf_bpe_tokenizer"
+    "neurx.models.formats.safetensors_embedding"
+    "neurx.models.loaders.hf_transformer"
 )
 
 struct native_execution_result {
     bool ok
     string request_id
     string output
-    []int token_ids
+    int[] token_ids
     string finish_reason
     string backend
     string error_code
@@ -25,11 +26,11 @@ func native_int_string(int value) string {
     if value == 0 { return "0" }
     string output = ""
     int current = value
-    for current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
+    for current > 0 { output = __std_byte_string(48 + current % 10) + output; current = current / 10 }
     output
 }
 
-func native_token_ids([]int values) string {
+func native_token_ids(int[] values) string {
     string output = ""
     int i = 0
     for i < len(values) {

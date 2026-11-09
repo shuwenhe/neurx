@@ -1,4 +1,5 @@
 package neurx.core.unicode.normalization
+extern "intrinsic" func __std_byte_string(int value) string
 struct unicode_database {
     bool valid
     string version
@@ -16,27 +17,27 @@ func load_unicode_database(string root) unicode_database {
 func unicode_utf8(int codepoint) string {
     if codepoint < 128 {
         string ascii = ""
-        ascii = ascii + string(codepoint)
+        ascii = ascii + __std_byte_string(codepoint)
         return ascii
     }
     if codepoint < 2048 {
         string two_bytes = ""
-        two_bytes = two_bytes + string(192 + codepoint / 64)
-        two_bytes = two_bytes + string(128 + codepoint % 64)
+        two_bytes = two_bytes + __std_byte_string(192 + codepoint / 64)
+        two_bytes = two_bytes + __std_byte_string(128 + codepoint % 64)
         return two_bytes
     }
     if codepoint < 65536 {
         string three_bytes = ""
-        three_bytes = three_bytes + string(224 + codepoint / 4096)
-        three_bytes = three_bytes + string(128 + codepoint / 64 % 64)
-        three_bytes = three_bytes + string(128 + codepoint % 64)
+        three_bytes = three_bytes + __std_byte_string(224 + codepoint / 4096)
+        three_bytes = three_bytes + __std_byte_string(128 + codepoint / 64 % 64)
+        three_bytes = three_bytes + __std_byte_string(128 + codepoint % 64)
         return three_bytes
     }
     string output = ""
-    output = output + string(240 + codepoint / 262144)
-    output = output + string(128 + codepoint / 4096 % 64)
-    output = output + string(128 + codepoint / 64 % 64)
-    output + string(128 + codepoint % 64)
+    output = output + __std_byte_string(240 + codepoint / 262144)
+    output = output + __std_byte_string(128 + codepoint / 4096 % 64)
+    output = output + __std_byte_string(128 + codepoint / 64 % 64)
+    output + __std_byte_string(128 + codepoint % 64)
 }
 
 func unicode_width(int lead) int {

@@ -1,4 +1,5 @@
 package neurx.runtime.distributed.topology
+extern "intrinsic" func __int_to_string(int value) string
 struct hetero_chip_capability {
     string vendor
     string chip_type
@@ -99,7 +100,7 @@ func hetero_topology_node_new(int node_id, string node_name, string host, int po
 func hetero_topology_new(string cluster_name) hetero_topology {
     hetero_topology {
         cluster_name: cluster_name,
-        nodes: []hetero_topology_node{},
+        nodes: hetero_topology_node[]{},
         world_size: 0,
         healthy_nodes: 0,
         total_devices: 0,
@@ -186,22 +187,22 @@ func hetero_topology_place_workload(hetero_topology topo, string vendor, string 
 func hetero_topology_summary(hetero_topology topo) string {
     string out = ""
     out = out + "cluster=" + topo.cluster_name + "\n"
-    out = out + "nodes=" + itoa(len(topo.nodes)) + "\n"
-    out = out + "healthy_nodes=" + itoa(topo.healthy_nodes) + "\n"
-    out = out + "total_devices=" + itoa(topo.total_devices) + "\n"
-    out = out + "world_size=" + itoa(topo.world_size) + "\n"
-    out = out + "valid=" + itoa(topo.valid ? 1 : 0) + "\n"
+    out = out + "nodes=" + __int_to_string(len(topo.nodes)) + "\n"
+    out = out + "healthy_nodes=" + __int_to_string(topo.healthy_nodes) + "\n"
+    out = out + "total_devices=" + __int_to_string(topo.total_devices) + "\n"
+    out = out + "world_size=" + __int_to_string(topo.world_size) + "\n"
+    out = out + "valid=" + __int_to_string(int(topo.valid)) + "\n"
     out = out + "reason=" + topo.reason + "\n"
     out
 }
 
 func hetero_placement_summary(hetero_placement_result placement) string {
     string out = ""
-    out = out + "launchable=" + itoa(placement.launchable ? 1 : 0) + "\n"
-    out = out + "node_id=" + itoa(placement.node_id) + "\n"
+    out = out + "launchable=" + __int_to_string(int(placement.launchable)) + "\n"
+    out = out + "node_id=" + __int_to_string(placement.node_id) + "\n"
     out = out + "node_name=" + placement.node_name + "\n"
     out = out + "host=" + placement.host + "\n"
-    out = out + "port=" + itoa(placement.port) + "\n"
+    out = out + "port=" + __int_to_string(placement.port) + "\n"
     out = out + "vendor=" + placement.vendor + "\n"
     out = out + "chip_type=" + placement.chip_type + "\n"
     out = out + "reason=" + placement.reason + "\n"
@@ -223,11 +224,11 @@ func hetero_build_launch_plan(hetero_placement_result placement, string worker_b
         return plan
     }
     string cmd = ""
-    cmd = cmd + "WORLD_SIZE=" + itoa(world_size)
+    cmd = cmd + "WORLD_SIZE=" + __int_to_string(world_size)
     cmd = cmd + " RANK=0"
     cmd = cmd + " LOCAL_RANK=0"
     cmd = cmd + " MASTER_ADDR=" + master_addr
-    cmd = cmd + " MASTER_PORT=" + itoa(master_port)
+    cmd = cmd + " MASTER_PORT=" + __int_to_string(master_port)
     cmd = cmd + " exec " + worker_bin
     plan.command = cmd
     plan.valid = true
@@ -237,8 +238,8 @@ func hetero_build_launch_plan(hetero_placement_result placement, string worker_b
 
 func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string chip_type, string worker_bin, string master_addr, int master_port, int min_devices, int min_memory_gb) hetero_multi_launch_plan {
     hetero_multi_launch_plan plan
-    plan.placements = make([]hetero_placement_result, len(topo.nodes))
-    plan.commands = make([]hetero_launch_command, topo.total_devices)
+    plan.placements = make(neurx.runtime.distributed.topology.hetero_placement_result[], len(topo.nodes))
+    plan.commands = make(neurx.runtime.distributed.topology.hetero_launch_command[], topo.total_devices)
     plan.world_size = 0
     plan.valid = false
     plan.reason = ""
@@ -291,15 +292,15 @@ func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string 
                     command.vendor = node.capability.vendor
                     command.chip_type = node.capability.chip_type
                     command.command = ""
-                    command.command = command.command + "WORLD_SIZE=" + itoa(plan.world_size)
-                    command.command = command.command + " RANK=" + itoa(world_rank)
-                    command.command = command.command + " LOCAL_RANK=" + itoa(local_rank)
-                    command.command = command.command + " NEURX_DEVICE_ID=" + itoa(local_rank)
+                    command.command = command.command + "WORLD_SIZE=" + __int_to_string(plan.world_size)
+                    command.command = command.command + " RANK=" + __int_to_string(world_rank)
+                    command.command = command.command + " LOCAL_RANK=" + __int_to_string(local_rank)
+                    command.command = command.command + " NEURX_DEVICE_ID=" + __int_to_string(local_rank)
                     command.command = command.command + " NEURX_DEVICE_VENDOR=" + node.capability.vendor
                     command.command = command.command + " NEURX_DEVICE_TYPE=" + node.capability.chip_type
-                    command.command = command.command + " NEURX_NODE_ID=" + itoa(node.node_id)
+                    command.command = command.command + " NEURX_NODE_ID=" + __int_to_string(node.node_id)
                     command.command = command.command + " MASTER_ADDR=" + master_addr
-                    command.command = command.command + " MASTER_PORT=" + itoa(master_port)
+                    command.command = command.command + " MASTER_PORT=" + __int_to_string(master_port)
                     command.command = command.command + " exec " + worker_bin
                     plan.commands = append(plan.commands, command)
                     world_rank = world_rank + 1
@@ -318,9 +319,9 @@ func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string 
 
 func hetero_launch_summary(hetero_launch_plan plan) string {
     string out = ""
-    out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
-    out = out + "world_size=" + itoa(plan.world_size) + "\n"
-    out = out + "master=" + plan.master_addr + ":" + itoa(plan.master_port) + "\n"
+    out = out + "valid=" + __int_to_string(int(plan.valid)) + "\n"
+    out = out + "world_size=" + __int_to_string(plan.world_size) + "\n"
+    out = out + "master=" + plan.master_addr + ":" + __int_to_string(plan.master_port) + "\n"
     out = out + "worker_bin=" + plan.worker_bin + "\n"
     out = out + "command=" + plan.command + "\n"
     out = out + "reason=" + plan.reason + "\n"
@@ -329,10 +330,10 @@ func hetero_launch_summary(hetero_launch_plan plan) string {
 
 func hetero_multi_launch_summary(hetero_multi_launch_plan plan) string {
     string out = ""
-    out = out + "valid=" + itoa(plan.valid ? 1 : 0) + "\n"
-    out = out + "placements=" + itoa(len(plan.placements)) + "\n"
-    out = out + "commands=" + itoa(len(plan.commands)) + "\n"
-    out = out + "world_size=" + itoa(plan.world_size) + "\n"
+    out = out + "valid=" + __int_to_string(int(plan.valid)) + "\n"
+    out = out + "placements=" + __int_to_string(len(plan.placements)) + "\n"
+    out = out + "commands=" + __int_to_string(len(plan.commands)) + "\n"
+    out = out + "world_size=" + __int_to_string(plan.world_size) + "\n"
     out = out + "reason=" + plan.reason + "\n"
     out
 }

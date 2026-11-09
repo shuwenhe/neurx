@@ -1,7 +1,7 @@
 package neurx.runtime.io
 struct safetensors_writer {
     string filepath
-    []tensor tensors
+    tensor[] tensors
     int tensor_count
     int total_data_size
 }
@@ -9,7 +9,7 @@ struct safetensors_writer {
 func safetensors_writer_new(string filepath) safetensors_writer {
     safetensors_writer {
         filepath: filepath,
-        tensors: make([]tensor, 100),
+        tensors: make(neurx.runtime.io.tensor[], 100),
         tensor_count: 0,
         total_data_size: 0,
     }
@@ -130,11 +130,11 @@ func safetensors_writer_finish(safetensors_writer w) bool {
         }
         tidx = tidx + 1
     }
-    []byte file_data = tensor_buffer_slice(buf)
+    byte[] file_data = tensor_buffer_slice(buf)
     runtime_write_binary_file(w.filepath, file_data)
     true
 }
-extern "intrinsic" func __host_write_binary_file(string path, []byte data) ()
-func runtime_write_binary_file(string path, []byte data) () {
+extern "intrinsic" func __host_write_binary_file(string path, byte[] data) ()
+func runtime_write_binary_file(string path, byte[] data) () {
     __host_write_binary_file(path, data)
 }

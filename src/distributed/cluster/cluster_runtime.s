@@ -1,4 +1,5 @@
 package neurx.distributed.cluster
+extern "intrinsic" func __int_to_string(int value) string
 struct cluster_node_capability {
     string platform
     string device_type
@@ -69,8 +70,8 @@ func cluster_empty_capability() cluster_node_capability {
     }
 }
 
-func cluster_zero_nodes(int capacity) []cluster_node_record {
-    cluster_node_record[] items = make([]cluster_node_record, capacity)
+func cluster_zero_nodes(int capacity) cluster_node_record[] {
+    cluster_node_record[] items = make(neurx.distributed.cluster.cluster_node_record[], capacity)
     int i = 0
     for i < capacity {
         items[i] = cluster_node_record {
@@ -255,11 +256,11 @@ func cluster_failed_node_count(cluster_runtime_state state) int {
 
 func cluster_summary(cluster_runtime_state state) string {
     string out = "cluster=" + state.cluster_name + "\n"
-    out = out + "world_size=" + itoa(state.world_size) + "\n"
-    out = out + "nodes=" + itoa(state.node_count) + "\n"
-    out = out + "healthy_nodes=" + itoa(cluster_healthy_node_count(state)) + "\n"
-    out = out + "failed_nodes=" + itoa(cluster_failed_node_count(state)) + "\n"
-    out = out + "total_devices=" + itoa(cluster_total_device_count(state)) + "\n"
+    out = out + "world_size=" + __int_to_string(state.world_size) + "\n"
+    out = out + "nodes=" + __int_to_string(state.node_count) + "\n"
+    out = out + "healthy_nodes=" + __int_to_string(cluster_healthy_node_count(state)) + "\n"
+    out = out + "failed_nodes=" + __int_to_string(cluster_failed_node_count(state)) + "\n"
+    out = out + "total_devices=" + __int_to_string(cluster_total_device_count(state)) + "\n"
     out
 }
 

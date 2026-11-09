@@ -1,11 +1,11 @@
 package neurx.deployment.cluster_runtime_bridge
 
 import (
-    "neurx.deployment.cluster_orchestration."
-    "neurx.distributed.cluster."
-    "neurx.distributed.cluster.heartbeat."
-    "neurx.distributed.cluster.parallel_plan."
-    "neurx.runtime.command."
+    "neurx.deployment.cluster_orchestration"
+    "neurx.distributed.cluster"
+    "neurx.distributed.cluster.heartbeat"
+    "neurx.distributed.cluster.parallel_plan"
+    "neurx.runtime.command"
 )
 
 struct cluster_runtime_bridge_result {
@@ -62,7 +62,7 @@ func bridge_seed_runtime(cluster_orchestration_state state) cluster_runtime_stat
 }
 
 func bridge_ssh_host(string host) string {
-    string ssh_user = runtime_env_get("NEURX_SSH_USER", "")
+    string ssh_user = neurx.runtime.command.runtime_env_get("NEURX_SSH_USER", "")
     if ssh_user == "" || host == "" {
         return host
     }
@@ -96,9 +96,9 @@ func bridge_probe_runtime(cluster_orchestration_state state) cluster_runtime_bri
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    []int node_ids = make([]int, len(state.nodes))
-    []string node_names = make([]string, len(state.nodes))
-    []string node_hosts = make([]string, len(state.nodes))
+    int[] node_ids = make(int[], len(state.nodes))
+    string[] node_names = make(string[], len(state.nodes))
+    string[] node_hosts = make(string[], len(state.nodes))
     int j = 0
     for j < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[j].node_id)
@@ -196,9 +196,9 @@ func bridge_launch_plan(cluster_orchestration_state state) string {
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    []int node_ids = []int{}
-    []string node_names = []string{}
-    []string node_hosts = []string{}
+    int[] node_ids = int[]{}
+    string[] node_names = string[]{}
+    string[] node_hosts = string[]{}
     int i = 0
     for i < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[i].node_id)
@@ -242,9 +242,9 @@ func bridge_execute_launch_plan(cluster_orchestration_state state) string {
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    []int node_ids = []int{}
-    []string node_names = []string{}
-    []string node_hosts = []string{}
+    int[] node_ids = int[]{}
+    string[] node_names = string[]{}
+    string[] node_hosts = string[]{}
     int i = 0
     for i < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[i].node_id)
@@ -290,9 +290,9 @@ func bridge_remote_execution_commands(cluster_orchestration_state state, bool us
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    []int node_ids = []int{}
-    []string node_names = []string{}
-    []string node_hosts = []string{}
+    int[] node_ids = int[]{}
+    string[] node_names = string[]{}
+    string[] node_hosts = string[]{}
     int i = 0
     for i < len(state.nodes) {
         node_ids = append(node_ids, state.nodes[i].node_id)
@@ -345,9 +345,9 @@ func bridge_recover_failed_nodes(cluster_orchestration_state state) string {
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    []int node_ids = []int{}
-    []string node_names = []string{}
-    []string node_hosts = []string{}
+    int[] node_ids = int[]{}
+    string[] node_names = string[]{}
+    string[] node_hosts = string[]{}
     int j = 0
     for j < len(state.nodes) {
         if state.nodes[j].healthy {
@@ -398,9 +398,9 @@ func bridge_fault_injection_recovery(cluster_orchestration_state state) cluster_
     }
     cluster_placement_result placement = cluster_select_node(runtime, request)
     cluster_parallel_plan plan = cluster_parallel_plan_for(parallel_request, 8, 1, 1, cluster_recommended_world_size(state), placement.backend)
-    []int node_ids = []int{}
-    []string node_names = []string{}
-    []string node_hosts = []string{}
+    int[] node_ids = int[]{}
+    string[] node_names = string[]{}
+    string[] node_hosts = string[]{}
     int j = 0
     for j < len(state.nodes) {
         if state.nodes[j].healthy {
@@ -435,8 +435,8 @@ func bridge_fault_injection_relaunch_commands(cluster_orchestration_state state)
 func bridge_fault_injection_relaunch_execute(cluster_orchestration_state state) int {
     cluster_fault_injection_result result = bridge_fault_injection_recovery(state)
     string script_path = "/tmp/neurx_cluster/relaunch.sh"
-    string command = "sh " + runtime_shell_escape(script_path)
-    runtime_run_command_exit_code(command)
+    string command = "sh " + neurx.runtime.command.runtime_shell_escape(script_path)
+    neurx.runtime.command.runtime_run_command_exit_code(command)
 }
 
 func bridge_fault_injection_worker_relaunch_commands(cluster_orchestration_state state) string {

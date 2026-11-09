@@ -1,6 +1,8 @@
 package neurx.distributed.cluster.heartbeat
+import ("neurx.runtime.command")
+extern "intrinsic" func __int_to_string(int value) string
 import (
-    "neurx.runtime.io."
+    "neurx.runtime.io"
 )
 
 struct cluster_heartbeat_record {
@@ -24,12 +26,12 @@ struct cluster_heartbeat_scan_result {
     int total_ranks
     int live_ranks
     int failed_ranks
-    []int failed_rank_ids
+    int[] failed_rank_ids
     bool healthy
 }
 
-func cluster_heartbeat_zero_records(int capacity) []cluster_heartbeat_record {
-    cluster_heartbeat_record[] records = []cluster_heartbeat_record{}
+func cluster_heartbeat_zero_records(int capacity) cluster_heartbeat_record[] {
+    cluster_heartbeat_record[] records = cluster_heartbeat_record[]{}
     int i = 0
     for i < capacity {
         records = append(records, cluster_heartbeat_record {
@@ -60,7 +62,7 @@ func create_cluster_heartbeat_state(string cluster_name, string heartbeat_dir) c
 }
 
 func cluster_heartbeat_path(cluster_heartbeat_state state, int rank) string {
-    state.heartbeat_dir + "/rank_" + itoa(rank) + ".txt"
+    state.heartbeat_dir + "/rank_" + __int_to_string(rank) + ".txt"
 }
 
 func cluster_heartbeat_write(
@@ -77,13 +79,13 @@ func cluster_heartbeat_write(
     string path = cluster_heartbeat_path(state, rank)
     string payload = ""
     payload = payload + "cluster=" + state.cluster_name + "\n"
-    payload = payload + "node_id=" + itoa(node_id) + "\n"
+    payload = payload + "node_id=" + __int_to_string(node_id) + "\n"
     payload = payload + "node_name=" + node_name + "\n"
     payload = payload + "host=" + host + "\n"
-    payload = payload + "rank=" + itoa(rank) + "\n"
-    payload = payload + "local_rank=" + itoa(local_rank) + "\n"
-    payload = payload + "timestamp_ms=" + itoa(timestamp_ms) + "\n"
-    payload = payload + "healthy=" + itoa(healthy ? 1 : 0) + "\n"
+    payload = payload + "rank=" + __int_to_string(rank) + "\n"
+    payload = payload + "local_rank=" + __int_to_string(local_rank) + "\n"
+    payload = payload + "timestamp_ms=" + __int_to_string(timestamp_ms) + "\n"
+    payload = payload + "healthy=" + __int_to_string(int(healthy)) + "\n"
     payload = payload + "status=" + status + "\n"
     runtime_write_text_file(path, payload)
     state.record_count = state.record_count + 1
@@ -108,7 +110,7 @@ func cluster_heartbeat_scan(cluster_heartbeat_state state, int total_ranks) clus
     result.total_ranks = total_ranks
     result.live_ranks = 0
     result.failed_ranks = 0
-    result.failed_rank_ids = []int{}
+    result.failed_rank_ids = int[]{}
     int rank = 0
     for rank < total_ranks {
         if cluster_heartbeat_is_live(state, rank) {
@@ -125,10 +127,10 @@ func cluster_heartbeat_scan(cluster_heartbeat_state state, int total_ranks) clus
 
 func cluster_heartbeat_scan_summary(cluster_heartbeat_scan_result scan) string {
     string out = ""
-    out = out + "total_ranks=" + itoa(scan.total_ranks) + "\n"
-    out = out + "live_ranks=" + itoa(scan.live_ranks) + "\n"
-    out = out + "failed_ranks=" + itoa(scan.failed_ranks) + "\n"
-    out = out + "healthy=" + itoa(scan.healthy ? 1 : 0) + "\n"
+    out = out + "total_ranks=" + __int_to_string(scan.total_ranks) + "\n"
+    out = out + "live_ranks=" + __int_to_string(scan.live_ranks) + "\n"
+    out = out + "failed_ranks=" + __int_to_string(scan.failed_ranks) + "\n"
+    out = out + "healthy=" + __int_to_string(int(scan.healthy)) + "\n"
     out
 }
 
@@ -136,10 +138,10 @@ func cluster_heartbeat_summary(cluster_heartbeat_state state) string {
     string out = ""
     out = out + "cluster=" + state.cluster_name + "\n"
     out = out + "heartbeat_dir=" + state.heartbeat_dir + "\n"
-    out = out + "records=" + itoa(state.record_count) + "\n"
+    out = out + "records=" + __int_to_string(state.record_count) + "\n"
     out
 }
 
 func cluster_heartbeat_default_dir() string {
-    runtime_env_get("NEURX_HEARTBEAT_DIR", "/tmp/neurx_cluster/heartbeat")
+    neurx.runtime.command.runtime_env_get("NEURX_HEARTBEAT_DIR", "/tmp/neurx_cluster/heartbeat")
 }

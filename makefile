@@ -169,6 +169,18 @@ POSTTRAIN_PRETRAIN_MANIFEST_SOURCE ?= $(CURDIR_UNIX)/script/build_pretrain_manif
 POSTTRAIN_GOLDEN_DATASET_LIMIT ?= 12
 POSTTRAIN_MATERIALIZED_SAMPLES ?= 1
 
+# Compile with the accepted self-hosted compiler; never fall back to seed IR.
+S_NATIVE_COMPILER ?= $(S_REPO_ROOT)/.bootstrap/native-imports/stage4
+NATIVE_COMMANDS ?= train benchmark worker controller serve
+NATIVE_OUTPUT_DIR ?= $(CURDIR_UNIX)/artifact/build/native-stage4
+
+.PHONY: native-stage4 native-stage4-test
+native-stage4:
+	@python3 tool/build_native.py --s-root '$(S_REPO_ROOT)' --compiler '$(S_NATIVE_COMPILER)' --output-dir '$(NATIVE_OUTPUT_DIR)' --commands $(NATIVE_COMMANDS)
+
+native-stage4-test:
+	@S_NATIVE_COMPILER='$(S_NATIVE_COMPILER)' S_REPO_ROOT='$(S_REPO_ROOT)' python3 -m unittest discover -s test/native-stage4 -v
+
 include build/mk/layout.mk
 include build/mk/compiler.mk
 include build/mk/testing.mk

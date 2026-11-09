@@ -1,10 +1,12 @@
 package neurx.serving.api.native_openai
+extern "intrinsic" func __std_byte_string(int value) string
+extern "intrinsic" func __int_to_string(int value) string
 import (
-    "neurx.inference.api.contracts."
-    "neurx.inference.executor.native_executor."
-    "neurx.inference.tokenizer.hf_bpe_tokenizer."
-    "neurx.serving.lifecycle.native_inference_service."
-    "neurx.serving.protocol.openai_tgi."
+    "neurx.inference.api.contracts"
+    "neurx.inference.executor.native_executor"
+    "neurx.inference.tokenizer.hf_bpe_tokenizer"
+    "neurx.serving.lifecycle.native_inference_service"
+    "neurx.serving.protocol.openai_tgi"
 )
 
 struct native_openai_response {
@@ -16,11 +18,11 @@ struct native_openai_response {
 }
 
 func native_openai_completion_json(inference_request request, native_execution_result result) string {
-    "{\"id\":\"" + serving_json_escape(result.request_id) + "\",\"object\":\"text_completion\",\"model\":\"" + serving_json_escape(request.model) + "\",\"choices\":[{\"index\":0,\"text\":\"" + serving_json_escape(result.output) + "\",\"finish_reason\":\"" + result.finish_reason + "\"}],\"usage\":{\"completion_tokens\":" + string(len(result.token_ids)) + "}}"
+    "{\"id\":\"" + serving_json_escape(result.request_id) + "\",\"object\":\"text_completion\",\"model\":\"" + serving_json_escape(request.model) + "\",\"choices\":[{\"index\":0,\"text\":\"" + serving_json_escape(result.output) + "\",\"finish_reason\":\"" + result.finish_reason + "\"}],\"usage\":{\"completion_tokens\":" + __int_to_string(len(result.token_ids)) + "}}"
 }
 
 func native_openai_chat_json(inference_request request, native_execution_result result) string {
-    "{\"id\":\"" + serving_json_escape(result.request_id) + "\",\"object\":\"chat.completion\",\"model\":\"" + serving_json_escape(request.model) + "\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"" + serving_json_escape(result.output) + "\"},\"finish_reason\":\"" + result.finish_reason + "\"}],\"usage\":{\"completion_tokens\":" + string(len(result.token_ids)) + "}}"
+    "{\"id\":\"" + serving_json_escape(result.request_id) + "\",\"object\":\"chat.completion\",\"model\":\"" + serving_json_escape(request.model) + "\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"" + serving_json_escape(result.output) + "\"},\"finish_reason\":\"" + result.finish_reason + "\"}],\"usage\":{\"completion_tokens\":" + __int_to_string(len(result.token_ids)) + "}}"
 }
 
 func native_openai_stream(inference_request request, native_execution_result result, bool chat) string {
@@ -29,7 +31,7 @@ func native_openai_stream(inference_request request, native_execution_result res
     string body = ""
     int i = 0
     for i < len(result.token_ids) {
-        []int single = make([]int, 1)
+        int[] single = make(int[], 1)
         single[0] = result.token_ids[i]
         hf_bpe_decode_result decoded = hf_bpe_decode_generated(tokenizer, single)
         if decoded.ok && decoded.text != "" {

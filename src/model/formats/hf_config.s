@@ -1,5 +1,7 @@
 package neurx.models.formats.hf_config
-extern "intrinsic" func __host_read_binary_file(string path) []int
+extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern "intrinsic" func __std_byte_string(int value) string
+extern "intrinsic" func __host_read_binary_file(string path) int[]
 struct hf_model_config {
     bool valid
     int hidden_size
@@ -174,10 +176,10 @@ func parse_hf_config(string text) hf_model_config {
 }
 
 func load_hf_config(string model_dir) hf_model_config {
-    []int bytes = __host_read_binary_file(model_dir + "/config.json")
+    int[] bytes = __host_read_binary_file(model_dir + "/config.json")
     if len(bytes) == 0 { return invalid_hf_config("config_not_found") }
     string content = ""
     int i = 0
-    for i < len(bytes) { content = content + string(bytes[i]); i = i + 1 }
+    for i < len(bytes) { content = content + __std_byte_string(bytes[i]); i = i + 1 }
     parse_hf_config(content)
 }

@@ -1,7 +1,7 @@
 package neurx.serving.lifecycle.native_inference_service
 import (
-    "neurx.inference.api.contracts."
-    "neurx.inference.executor.native_executor."
+    "neurx.inference.api.contracts"
+    "neurx.inference.executor.native_executor"
 )
 
 func serve_native_inference(inference_request request, int capacity, int active_requests) native_execution_result {

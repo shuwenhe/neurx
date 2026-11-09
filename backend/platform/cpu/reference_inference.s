@@ -1,6 +1,7 @@
 package neurx.backends.cpu.reference_inference
+extern "intrinsic" func __std_byte_string(int value) string
 import (
-    "neurx.backends.api.inference_backend."
+    "neurx.backends.api.inference_backend"
 )
 
 func cpu_reference_generate(string model, string prompt, int max_tokens) backend_generation_result {
@@ -13,7 +14,7 @@ func cpu_reference_generate(string model, string prompt, int max_tokens) backend
     string output = ""
     int i = 0
     for i < limit {
-        output = output + string(prompt[i])
+        output = output + __std_byte_string(prompt[i])
         i = i + 1
     }
     backend_generation_success(output, "cpu-reference")
