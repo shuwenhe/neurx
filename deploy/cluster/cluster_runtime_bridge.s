@@ -113,7 +113,7 @@ func bridge_probe_runtime(cluster_orchestration_state state) cluster_runtime_bri
     cluster_parallel_execution_script execution_script = cluster_parallel_build_execution_script(execution_batch, true)
     cluster_heartbeat_state heartbeat = create_cluster_heartbeat_state(state.cluster_name, "/tmp/neurx_cluster/heartbeat")
     cluster_heartbeat_scan_result heartbeat_scan = cluster_heartbeat_scan(heartbeat, plan.topology.world_size)
-    cluster_parallel_rank_filter_result filter_meta
+    cluster_parallel_rank_filter_result filter_meta = cluster_parallel_rank_filter_result {}
     filter_meta = cluster_parallel_filter_launch_plan(launch_plan, heartbeat_scan.failed_rank_ids)
     cluster_parallel_launch_plan filtered_launch = filter_meta.plan
     cluster_parallel_grouped_launch_plan filtered_grouped = cluster_parallel_group_launch_plan(filtered_launch)

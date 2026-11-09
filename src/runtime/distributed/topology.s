@@ -157,7 +157,7 @@ func hetero_topology_select_node(hetero_topology topo, string vendor, string chi
 
 func hetero_topology_place_workload(hetero_topology topo, string vendor, string chip_type, int min_devices, int min_memory_gb) hetero_placement_result {
     int node_id = hetero_topology_select_node(topo, vendor, chip_type, min_devices, min_memory_gb)
-    hetero_placement_result result
+    hetero_placement_result result = hetero_placement_result {}
     result.launchable = false
     result.node_id = 0 - 1
     result.node_name = ""
@@ -210,7 +210,7 @@ func hetero_placement_summary(hetero_placement_result placement) string {
 }
 
 func hetero_build_launch_plan(hetero_placement_result placement, string worker_bin, string master_addr, int master_port, int world_size) hetero_launch_plan {
-    hetero_launch_plan plan
+    hetero_launch_plan plan = hetero_launch_plan {}
     plan.placement = placement
     plan.worker_bin = worker_bin
     plan.master_addr = master_addr
@@ -237,7 +237,7 @@ func hetero_build_launch_plan(hetero_placement_result placement, string worker_b
 }
 
 func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string chip_type, string worker_bin, string master_addr, int master_port, int min_devices, int min_memory_gb) hetero_multi_launch_plan {
-    hetero_multi_launch_plan plan
+    hetero_multi_launch_plan plan = hetero_multi_launch_plan {}
     plan.placements = make(neurx.runtime.distributed.topology.hetero_placement_result[], len(topo.nodes))
     plan.commands = make(neurx.runtime.distributed.topology.hetero_launch_command[], topo.total_devices)
     plan.world_size = 0
@@ -269,7 +269,7 @@ func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string 
             bool vendor_ok = vendor == "" || node.capability.vendor == vendor
             bool chip_ok = chip_type == "" || node.capability.chip_type == chip_type
             if vendor_ok && chip_ok {
-                hetero_placement_result placement
+                hetero_placement_result placement = hetero_placement_result {}
                 placement.launchable = true
                 placement.node_id = node.node_id
                 placement.node_name = node.node_name
@@ -281,7 +281,7 @@ func hetero_build_multi_launch_plan(hetero_topology topo, string vendor, string 
                 plan.placements = append(plan.placements, placement)
                 int local_rank = 0
                 for local_rank < node.capability.device_count {
-                    hetero_launch_command command
+                    hetero_launch_command command = hetero_launch_command {}
                     command.node_id = node.node_id
                     command.node_name = node.node_name
                     command.host = node.host

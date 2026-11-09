@@ -277,11 +277,16 @@ func hf_forward_token(hf_model_weights model, int token_id, float[] cache_keys, 
         hf_layer_result result = hf_cpu_layer(config, weights, hidden, layer_cache, position)
         if !result.ok { return result }
         hidden = result.hidden
-        hf_float_copy(cache_keys, layer * cache_size, result.cache.keys)
-        hf_float_copy(cache_values, layer * cache_size, result.cache.values)
+        cache_keys = hf_float_copy(cache_keys, layer * cache_size, result.cache.keys)
+        cache_values = hf_float_copy(cache_values, layer * cache_size, result.cache.values)
         layer = layer + 1
     }
-    hf_layer_result { ok: true, hidden: hidden, cache: empty_cache, error_code: "" }
+    // Arrays have value semantics: return every layer's updated cache to the caller.
+    hf_kv_cache updated_cache = hf_kv_cache {
+        keys: cache_keys, values: cache_values, length: position + 1,
+        capacity: cache_capacity, kv_width: config.kv_heads * config.head_dim,
+    }
+    hf_layer_result { ok: true, hidden: hidden, cache: updated_cache, error_code: "" }
 }
 
 func hf_float_slice(float[] values, int offset, int count) float[] {
@@ -292,9 +297,10 @@ func hf_float_slice(float[] values, int offset, int count) float[] {
     output
 }
 
-func hf_float_copy(float[] target, int offset, float[] source) {
+func hf_float_copy(float[] target, int offset, float[] source) float[] {
     int i = 0
     for i < len(source) { target[offset + i] = source[i]; i = i + 1 }
+    target
 }
 
 func hf_generate_until(hf_model_weights model, int[] prompt_tokens, int maximum_new_tokens, int eos_id) hf_generation_result {
@@ -309,6 +315,8 @@ func hf_generate_until(hf_model_weights model, int[] prompt_tokens, int maximum_
     for position < len(prompt_tokens) {
         state = hf_forward_token(model, prompt_tokens[position], cache_keys, cache_values, capacity, position)
         if !state.ok { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: state.error_code } }
+        cache_keys = state.cache.keys
+        cache_values = state.cache.values
         position = position + 1
     }
     int[] generated = make(int[], maximum_new_tokens)
@@ -327,6 +335,8 @@ func hf_generate_until(hf_model_weights model, int[] prompt_tokens, int maximum_
         if step < maximum_new_tokens {
             state = hf_forward_token(model, next_token, cache_keys, cache_values, capacity, position)
             if !state.ok { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: state.error_code } }
+            cache_keys = state.cache.keys
+            cache_values = state.cache.values
             position = position + 1
         }
     }

@@ -106,7 +106,7 @@ func cluster_heartbeat_is_live(cluster_heartbeat_state state, int rank) bool {
 }
 
 func cluster_heartbeat_scan(cluster_heartbeat_state state, int total_ranks) cluster_heartbeat_scan_result {
-    cluster_heartbeat_scan_result result
+    cluster_heartbeat_scan_result result = cluster_heartbeat_scan_result {}
     result.total_ranks = total_ranks
     result.live_ranks = 0
     result.failed_ranks = 0

@@ -47,6 +47,48 @@ class NativeServing(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stdout, 'token:1\n')
 
+    def test_hf_forward_returns_updated_cache_for_next_token(self):
+        probe = self.folder / 'cache_probe.s'
+        probe.write_text('''package main
+import ("neurx.backends.cpu.transformer_decode"; "neurx.models.loaders.hf_transformer")
+func main() int {
+    model := load_hf_model("MODEL_PATH")
+    if !model.valid { return 1 }
+    if model.config.rms_epsilon < 0.000009 || model.config.rms_epsilon > 0.000011 { return 12 }
+    keys := make(float[], 8)
+    values := make(float[], 8)
+    first := hf_forward_token(model, 1, keys, values, 4, 0)
+    if !first.ok { return 2 }
+    if first.cache.length != 1 || len(first.cache.keys) != 8 { return 3 }
+    if first.cache.values[1] < 1.0 { return 4 }
+    second := hf_forward_token(model, 2, first.cache.keys, first.cache.values, 4, 1)
+    if !second.ok { return 5 }
+    if second.cache.length != 2 { return 6 }
+    if second.cache.values[1] != first.cache.values[1] { return 7 }
+    if second.cache.values[2] < 0.9 || second.cache.values[3] < 0.9 { return 8 }
+    if second.hidden[1] <= second.hidden[0] { return 9 }
+    model.lm_head = make(float[], 14)
+    model.lm_head[0] = 1.0
+    model.lm_head[3] = 1.0
+    generated := hf_generate(model, int[]{1, 2}, 2)
+    if !generated.ok || len(generated.token_ids) != 2 { return 10 }
+    if generated.token_ids[0] != 1 || generated.token_ids[1] != 1 { return 11 }
+    return 0
+}
+'''.replace('MODEL_PATH', str(self.model)))
+        sources = (self.output / 'serve.sources').read_text().splitlines()
+        sources = [source for source in sources if Path(source) != ROOT / 'cmd/serve/main.s']
+        assembly = self.folder / 'cache_probe.sasm'
+        result = subprocess.run([str(COMPILER), '--compile-unit', str(assembly), str(probe), *sources],
+                                capture_output=True, text=True, timeout=90)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        executable = self.folder / 'cache_probe'
+        result = subprocess.run([str(COMPILER), '--emit-bin', str(assembly), str(executable)],
+                                capture_output=True, text=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = subprocess.run([str(executable)], capture_output=True, text=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_hf_chat_runs_transformer_and_stops_at_eos(self):
         result = self.serve(self.model, 'Hi', 3, 'openai-chat')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

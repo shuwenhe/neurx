@@ -231,7 +231,7 @@ func cluster_parallel_plan_ready(cluster_parallel_plan plan) bool {
 }
 
 func cluster_parallel_assign_to_nodes(cluster_parallel_plan plan, int[] node_ids, string[] node_names, string[] node_hosts) cluster_parallel_assignment_plan {
-    cluster_parallel_assignment_plan result
+    cluster_parallel_assignment_plan result = cluster_parallel_assignment_plan {}
     if !cluster_parallel_plan_ready(plan) {
         result.assignments = cluster_parallel_node_assignment[]{}
         result.valid = false
@@ -283,7 +283,7 @@ func cluster_parallel_assignment_summary(cluster_parallel_assignment_plan plan) 
 }
 
 func cluster_parallel_build_launch_plan(cluster_parallel_assignment_plan assignment, string worker_bin, string master_addr, int master_port, int world_size) cluster_parallel_launch_plan {
-    cluster_parallel_launch_plan result
+    cluster_parallel_launch_plan result = cluster_parallel_launch_plan {}
     if !assignment.valid {
         result.commands = cluster_parallel_launch_command[]{}
         result.valid = false
@@ -336,7 +336,7 @@ func cluster_parallel_launch_summary(cluster_parallel_launch_plan plan) string {
 }
 
 func cluster_parallel_group_launch_plan(cluster_parallel_launch_plan plan) cluster_parallel_grouped_launch_plan {
-    cluster_parallel_grouped_launch_plan result
+    cluster_parallel_grouped_launch_plan result = cluster_parallel_grouped_launch_plan {}
     if !plan.valid {
         result.bundles = cluster_parallel_host_bundle[]{}
         result.valid = false
@@ -385,7 +385,7 @@ func cluster_parallel_grouped_launch_summary(cluster_parallel_grouped_launch_pla
 }
 
 func cluster_parallel_execute_launch_plan(cluster_parallel_launch_plan plan) cluster_parallel_execution_batch {
-    cluster_parallel_execution_batch result
+    cluster_parallel_execution_batch result = cluster_parallel_execution_batch {}
     if !plan.valid {
         result.lines = cluster_parallel_execution_line[]{}
         result.valid = false
@@ -422,7 +422,7 @@ func cluster_parallel_execution_summary(cluster_parallel_execution_batch batch) 
 }
 
 func cluster_parallel_build_execution_script(cluster_parallel_execution_batch batch, bool use_ssh) cluster_parallel_execution_script {
-    cluster_parallel_execution_script result
+    cluster_parallel_execution_script result = cluster_parallel_execution_script {}
     if !batch.valid {
         result.script = ""
         result.valid = false
@@ -447,7 +447,7 @@ func cluster_parallel_build_execution_script(cluster_parallel_execution_batch ba
 }
 
 func cluster_parallel_filter_launch_plan(cluster_parallel_launch_plan plan, int[] failed_ranks) cluster_parallel_rank_filter_result {
-    cluster_parallel_rank_filter_result meta
+    cluster_parallel_rank_filter_result meta = cluster_parallel_rank_filter_result {}
     if !plan.valid {
         meta.plan.commands = cluster_parallel_launch_command[]{}
         meta.plan.valid = false
