@@ -91,7 +91,17 @@ func hf_json_float(string text, string key, float fallback) float {
         if ch == "e" || ch == "E" { break }
         if ch == "." && scale == 0.0 { scale = 1.0 }
         else if ch >= "0" && ch <= "9" {
-            int digit = literal[position] - 48
+            int digit = 0
+            if ch == "0" { digit = 0 }
+            else if ch == "1" { digit = 1 }
+            else if ch == "2" { digit = 2 }
+            else if ch == "3" { digit = 3 }
+            else if ch == "4" { digit = 4 }
+            else if ch == "5" { digit = 5 }
+            else if ch == "6" { digit = 6 }
+            else if ch == "7" { digit = 7 }
+            else if ch == "8" { digit = 8 }
+            else if ch == "9" { digit = 9 }
             digits = true
             if scale == 0.0 { value = value * 10.0 + digit * 1.0 }
             else { scale = scale * 10.0; value = value + digit * 1.0 / scale }
@@ -110,7 +120,19 @@ func hf_json_float(string text, string key, float fallback) float {
         int exponent = 0
         bool exponent_digits = false
         for position < len(literal) {
-            int digit = literal[position] - 48
+            string ch_digit = __host_slice(literal, position, position + 1)
+            int digit = 0
+            if ch_digit == "0" { digit = 0 }
+            else if ch_digit == "1" { digit = 1 }
+            else if ch_digit == "2" { digit = 2 }
+            else if ch_digit == "3" { digit = 3 }
+            else if ch_digit == "4" { digit = 4 }
+            else if ch_digit == "5" { digit = 5 }
+            else if ch_digit == "6" { digit = 6 }
+            else if ch_digit == "7" { digit = 7 }
+            else if ch_digit == "8" { digit = 8 }
+            else if ch_digit == "9" { digit = 9 }
+            else { digit = -1 }
             if digit < 0 || digit > 9 || exponent > 308 { return fallback }
             exponent = exponent * 10 + digit
             exponent_digits = true

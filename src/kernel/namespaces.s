@@ -13,7 +13,7 @@ struct namespace {
 struct pid_namespace {
     int ns_id
     int parent_pid
-    int[] pids  
+    int[] pids
     int max_pid
     int current_pid_counter
 }
@@ -21,7 +21,7 @@ struct pid_namespace {
 struct network_namespace {
     int ns_id
     int max_interfaces
-    int[] interfaces  
+    int[] interfaces
     int loopback_address
 }
 

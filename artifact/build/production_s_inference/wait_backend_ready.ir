@@ -1,4 +1,7 @@
 SSEED-TARGET-V1
+NOP|return-transfer:parse_int_or_default|_|int
+NOP|param-transfer:parse_int_or_default|s|string
+NOP|param-transfer:parse_int_or_default|default_val|int
 FUNC_BEGIN|parse_int_or_default|_|_
 PARAM|s|_|_
 PARAM|default_val|_|_
@@ -51,6 +54,8 @@ JUMP|L2|_|_
 LABEL|L4|_|_
 RET|result|_|_
 FUNC_END|parse_int_or_default|_|_
+NOP|return-transfer:format_int|_|string
+NOP|param-transfer:format_int|value|int
 FUNC_BEGIN|format_int|_|_
 PARAM|value|_|_
 CMP_EQ|t15|value|0
@@ -158,6 +163,7 @@ LABEL|L43|_|_
 RET|""|_|_
 RET|""|_|_
 FUNC_END|format_int|_|_
+NOP|return-transfer:main|_|()
 FUNC_BEGIN|main|_|_
 ARG|"NEURX_S_HOST"|_|_
 ARG|"127.0.0.1"|_|_
@@ -310,4 +316,6 @@ LABEL|L74|_|_
 ARG|"[HealthCheck] Timeout after attempts\\n"|_|_
 CALL|t83|print|1
 LABEL|L75|_|_
+UNIT|t84|_|_
+RET|t84|_|_
 FUNC_END|main|_|_

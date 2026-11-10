@@ -59,9 +59,9 @@ func (native_tokenizer_handle* t) cleanup() {
 
 struct compilation_strategy {
     string name
-    string[] pure_s_modules     
-    string[] native_modules      
-    string[] external_modules    
+    string[] pure_s_modules
+    string[] native_modules
+    string[] external_modules
     int estimated_compile_time_sec
 }
 

@@ -82,10 +82,12 @@ func contains_substring(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    for i <= len(haystack) - len(needle) {
+    int haystack_len = len(haystack)
+    int needle_len = len(needle)
+    for i <= haystack_len - needle_len {
         bool matches = true
         int j = 0
-        for j < len(needle) {
+        for j < needle_len {
             if haystack[i + j] != needle[j] {
                 matches = false
             }
@@ -130,13 +132,15 @@ func parse_int_or_default(string s, int default_val) int {
 
 func find_substring(string text, string pattern) int {
     int i = 0
-    for i <= len(text) - len(pattern) {
-        if __host_slice(text, i, i + len(pattern)) == pattern {
+    int text_len = len(text)
+    int pattern_len = len(pattern)
+    for i <= text_len - pattern_len {
+        if __host_slice(text, i, i + pattern_len) == pattern {
             return i
         }
         i = i + 1
     }
-    -1
+    return -1
 }
 
 func json_escape(string value) string {
