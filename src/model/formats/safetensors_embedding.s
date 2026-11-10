@@ -1,4 +1,5 @@
 package neurx.models.formats.safetensors_embedding
+import ("neurx.runtime.tensor_builder")
 extern "intrinsic" func __std_byte_string(int value) string
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) int[]
 struct safetensors_embedding {
@@ -41,27 +42,53 @@ func st_find(string text, string pattern, int start) int {
     -1
 }
 
+func st_skip_space(string text, int start) int {
+    int i = start
+    for i >= 0 && i < len(text) && (text[i] == 32 || text[i] == 9 || text[i] == 10 || text[i] == 13) { i = i + 1 }
+    i
+}
+func st_uint_end(string text, int start) int {
+    int i = st_skip_space(text, start)
+    int begin = i
+    for i >= 0 && i < len(text) && text[i] >= 48 && text[i] <= 57 { i = i + 1 }
+    if i == begin { return -1 }
+    st_skip_space(text, i)
+}
 func st_parse_uint(string text, int start) int {
     int value = 0
-    int i = start
-    bool found = false
-    for i < len(text) {
-        int ch = text[i]
-        if ch >= 48 && ch <= 57 { found = true; value = value * 10 + ch - 48; i = i + 1 } else { i = len(text) }
+    int i = st_skip_space(text, start)
+    int begin = i
+    for i >= 0 && i < len(text) && text[i] >= 48 && text[i] <= 57 {
+        int digit = text[i] - 48
+        if value > (9223372036854775807 - digit) / 10 { return -1 }
+        value = value * 10 + digit
+        i = i + 1
     }
-    if !found { return -1 }
+    if i == begin { return -1 }
     value
 }
+func st_field_value(string text, string key, int start, int limit) int {
+    string quoted = "\"" + key + "\""
+    int position = st_find(text, quoted, start)
+    if position < 0 || position >= limit { return -1 }
+    position = st_skip_space(text, position + len(quoted))
+    if position >= limit || text[position] != 58 { return -1 }
+    position = st_skip_space(text, position + 1)
+    if position >= limit { return -1 }
+    position
+}
 
-func st_bytes_to_string(int[] bytes) string {
-    string text = ""
-    int i = 0
-    for i < len(bytes) { text = text + __std_byte_string(bytes[i]); i = i + 1 }
-    text
+func st_bytes_to_string(int[] bytes) string { byte_array_string(bytes) }
+
+func st_dtype_code(string dtype) int {
+    if dtype == "F32" { return 0 }
+    if dtype == "BF16" { return 1 }
+    if dtype == "F16" { return 2 }
+    -1
 }
 
 func st_u64_le(int[] bytes) int {
-    if len(bytes) != 8 { return -1 }
+    if len(bytes) != 8 || bytes[7] >= 128 { return -1 }
     int value = 0
     int scale = 1
     int i = 0
@@ -131,29 +158,39 @@ func load_f32_tensor(string path, string tensor_name) safetensors_embedding {
     int tensor = st_find(header, "\"" + tensor_name + "\"", 0)
     if tensor < 0 { return invalid_safetensors_embedding(path, "tensor_not_found") }
     int object_end = st_find(header, "}", tensor)
-    int dtype_position = st_find(header, "\"dtype\":\"", tensor)
-    if dtype_position < 0 || object_end < 0 || dtype_position > object_end { return invalid_safetensors_embedding(path, "missing_dtype") }
-    int dtype_start = dtype_position + 9
+    if object_end < 0 { return invalid_safetensors_embedding(path, "invalid_tensor_object") }
+    int dtype_start = st_field_value(header, "dtype", tensor, object_end)
+    if dtype_start < 0 || header[dtype_start] != 34 { return invalid_safetensors_embedding(path, "missing_dtype") }
+    dtype_start = dtype_start + 1
     int dtype_end = st_find(header, "\"", dtype_start)
+    if dtype_end < 0 || dtype_end >= object_end { return invalid_safetensors_embedding(path, "missing_dtype") }
     string dtype = ""
     int dtype_cursor = dtype_start
     for dtype_cursor < dtype_end { dtype = dtype + __std_byte_string(header[dtype_cursor]); dtype_cursor = dtype_cursor + 1 }
     int element_bytes = 4
     if dtype == "F16" || dtype == "BF16" { element_bytes = 2 } else if dtype != "F32" { return invalid_safetensors_embedding(path, "unsupported_dtype") }
-    int shape = st_find(header, "\"shape\":[", dtype_end)
-    int comma = st_find(header, ",", shape + 9)
-    int shape_end = st_find(header, "]", shape + 9)
-    if shape < 0 || shape_end < 0 { return invalid_safetensors_embedding(path, "invalid_shape") }
+    int shape = st_field_value(header, "shape", tensor, object_end)
+    if shape < 0 || header[shape] != 91 { return invalid_safetensors_embedding(path, "invalid_shape") }
     int rows = 1
-    int columns = st_parse_uint(header, shape + 9)
-    if comma >= 0 && comma < shape_end { rows = columns; columns = st_parse_uint(header, comma + 1) }
-    int offsets = st_find(header, "\"data_offsets\":[", shape_end)
-    int offset_comma = st_find(header, ",", offsets + 16)
-    int offsets_end = st_find(header, "]", offset_comma + 1)
-    if rows <= 0 || columns <= 0 || offsets < 0 || offset_comma < 0 || offsets_end < 0 { return invalid_safetensors_embedding(path, "invalid_metadata") }
-    int begin = st_parse_uint(header, offsets + 16)
+    int columns = st_parse_uint(header, shape + 1)
+    int cursor = st_uint_end(header, shape + 1)
+    if cursor < 0 || cursor >= object_end { return invalid_safetensors_embedding(path, "invalid_shape") }
+    if header[cursor] == 44 {
+        rows = columns
+        columns = st_parse_uint(header, cursor + 1)
+        cursor = st_uint_end(header, cursor + 1)
+    }
+    if cursor < 0 || cursor >= object_end || header[cursor] != 93 || rows <= 0 || columns <= 0 { return invalid_safetensors_embedding(path, "invalid_shape") }
+    if rows > 36028797018963967 / columns { return invalid_safetensors_embedding(path, "tensor_size_overflow") }
+    int offsets = st_field_value(header, "data_offsets", tensor, object_end)
+    if offsets < 0 || header[offsets] != 91 { return invalid_safetensors_embedding(path, "invalid_metadata") }
+    int begin = st_parse_uint(header, offsets + 1)
+    int offset_comma = st_uint_end(header, offsets + 1)
+    if offset_comma < 0 || offset_comma >= object_end || header[offset_comma] != 44 { return invalid_safetensors_embedding(path, "invalid_metadata") }
     int end = st_parse_uint(header, offset_comma + 1)
-    if begin < 0 || end <= begin || end - begin != rows * columns * element_bytes { return invalid_safetensors_embedding(path, "invalid_tensor_range") }
+    int offsets_end = st_uint_end(header, offset_comma + 1)
+    if offsets_end < 0 || offsets_end >= object_end || header[offsets_end] != 93 { return invalid_safetensors_embedding(path, "invalid_metadata") }
+    if begin < 0 || end <= begin || end > 9223372036854775807 - 8 - header_size || end - begin != rows * columns * element_bytes { return invalid_safetensors_embedding(path, "invalid_tensor_range") }
     safetensors_embedding { valid: true, path: path, rows: rows, columns: columns, data_offset: 8 + header_size + begin, data_bytes: end - begin, dtype: dtype, element_bytes: element_bytes, error_code: "" }
 }
 
@@ -161,24 +198,28 @@ func load_f32_embedding(string path, string tensor_name) safetensors_embedding {
     load_f32_tensor(path, tensor_name)
 }
 
+func st_read_error(int error) string {
+    if error == -61 { return "truncated_tensor" }
+    if error == -2 { return "tensor_file_not_found" }
+    if error == -75 { return "tensor_size_overflow" }
+    if error == -12 { return "tensor_allocation_failed" }
+    if error == -22 { return "invalid_tensor_read" }
+    "tensor_io_error"
+}
+
 func lookup_f32_embedding(safetensors_embedding embedding, int token_id) embedding_lookup_result {
     if !embedding.valid { return embedding_lookup_result { ok: false, values: [], error_code: embedding.error_code } }
     if token_id < 0 || token_id >= embedding.rows { return embedding_lookup_result { ok: false, values: [], error_code: "token_out_of_range" } }
-    int[] bytes = __host_read_binary_file_range(embedding.path, embedding.data_offset + token_id * embedding.columns * embedding.element_bytes, embedding.columns * embedding.element_bytes)
-    if len(bytes) != embedding.columns * embedding.element_bytes { return embedding_lookup_result { ok: false, values: [], error_code: "truncated_tensor" } }
-    float[] values = make(float[], embedding.columns)
-    int i = 0
-    for i < embedding.columns { values[i] = st_decode(bytes, i * embedding.element_bytes, embedding.dtype); i = i + 1 }
-    embedding_lookup_result { ok: true, values: values, error_code: "" }
+    float_construction_result decoded = read_float_tensor_range(embedding.path, embedding.data_offset + token_id * embedding.columns * embedding.element_bytes, embedding.columns, st_dtype_code(embedding.dtype))
+    if !decoded.ok { return embedding_lookup_result { ok: false, values: [], error_code: st_read_error(decoded.error) } }
+    embedding_lookup_result { ok: true, values: decoded.values, error_code: "" }
 }
 
 func read_f32_tensor(safetensors_embedding tensor) f32_tensor_result {
     if !tensor.valid { return f32_tensor_result { ok: false, tensor: tensor, values: [], error_code: tensor.error_code } }
-    int[] bytes = __host_read_binary_file_range(tensor.path, tensor.data_offset, tensor.data_bytes)
-    if len(bytes) != tensor.data_bytes { return f32_tensor_result { ok: false, tensor: tensor, values: [], error_code: "truncated_tensor" } }
+    if tensor.rows <= 0 || tensor.columns <= 0 || tensor.rows > 36028797018963967 / tensor.columns { return f32_tensor_result { ok: false, tensor: tensor, values: [], error_code: "invalid_tensor_shape" } }
     int count = tensor.rows * tensor.columns
-    float[] values = make(float[], count)
-    int i = 0
-    for i < count { values[i] = st_decode(bytes, i * tensor.element_bytes, tensor.dtype); i = i + 1 }
-    f32_tensor_result { ok: true, tensor: tensor, values: values, error_code: "" }
+    float_construction_result decoded = read_float_tensor_range(tensor.path, tensor.data_offset, count, st_dtype_code(tensor.dtype))
+    if !decoded.ok { return f32_tensor_result { ok: false, tensor: tensor, values: [], error_code: st_read_error(decoded.error) } }
+    f32_tensor_result { ok: true, tensor: tensor, values: decoded.values, error_code: "" }
 }

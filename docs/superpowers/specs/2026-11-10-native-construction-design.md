@@ -74,3 +74,43 @@ No compiler-generated validation is disabled. Runtime extension assembly is rege
 - Build using the installed compiler, then attempt the real checkpoint. Record complete loading, all 24 layers, genuine logits compared independently, >=32 generated tokens, TTFT/token latency/peak RSS. Python may generate/check independent test references but cannot replace native inference.
 
 Any failed gate preserves logs and yields NOT DONE. Passing builder benchmarks or compiler tests alone is insufficient.
+
+## Builder-check resolutions and exact internal contract
+
+Independent builder review found no architectural blocker and required the following precision:
+
+- Allocate/zero a descriptor, link it into the rooted registry, then allocate backing storage. A forced collection between the two allocations must retain the descriptor. The root is an actual slot named `s_native_tensor_builders` inside both emitted root-range variants.
+- Internal creation returns a positive ID or a negative error code; zero is never a valid ID. Reserve `INT64_MAX` as the last possible ID and fail further creation rather than wrap.
+- Finalization is an explicit checked two-step boundary: `seal(id,kind) -> int` returns 0 on success or a negative error and never consumes on kind mismatch; `take_float/int/string(id)` is used only after successful seal, unlinks the sealed entry and returns its existing backing pointer without allocation. S-facing finish wrappers return a typed `{ok, values, error}` result and never expose a failed take. This distinguishes valid empty arrays from failures. A copied handle cannot write once sealed or taken.
+- Bulk tensor read returns a positive unsealed float-builder ID or a negative error. It never returns a partially populated normal array; failures close the file and unlink the builder. The ordinary S result wrapper seals and takes it only on success.
+- Internal float slice/copy primitives are invoked after S-facing subtraction-based bounds validation; native code repeats all checks. No invalid/null output is used as a valid result by the wrapper.
+- Byte-array conversion intentionally takes the low 8 bits of each integer, matching existing `__std_byte_string` behavior, and preserves embedded NUL.
+- Decode tests cover independent IEEE signed-zero, subnormal, infinity and NaN reference values. Model-level finite-value policy is distinct from representation decoding.
+- Releasing an entry guarantees zero live registry references, not immediate OS RSS reduction under conservative GC. Measurements will identify requested bytes and GC size-class rounded bytes separately.
+
+Internal signatures (all exact MIR/SSA-checked):
+
+```
+__native_builder_new(int count, int kind) int
+__native_builder_set_float(int id, int index, float value) int
+__native_builder_set_int(int id, int index, int value) int
+__native_builder_set_string(int id, int index, string value) int
+__native_builder_fill_float(int id, float value) int
+__native_builder_copy_float(int id, int offset, float[] source) int
+__native_builder_seal(int id, int kind) int
+__native_builder_take_float(int id) float[]
+__native_builder_take_int(int id) int[]
+__native_builder_take_string(int id) string[]
+__native_builder_release(int id) int
+__native_builder_open(int id) bool
+__native_builder_stats(int metric) int
+__native_builder_stats_reset() int
+__native_tensor_read(string path, int offset, int count, int dtype) int
+__native_float_slice(float[] source, int offset, int count) float[]
+__native_float_patch(float[] target, int offset, float[] source) float[]
+__native_bytes_string(int[] bytes) string
+```
+
+Kinds: float=0, int=1, string=2. Tensor dtype codes: F32=0, BF16=1, F16=2. Statuses: invalid arguments/kind=-22, invalid/stale handle=-9, index/range=-34, already sealed=-114, overflow=-75, premature EOF=-61; syscall I/O failures retain their negative errno. Successful mutation/release/seal/reset returns 0. Wrong-kind seal leaves an open builder intact.
+
+The user delegated architecture choice and implementation in the mission and subsequently required main-only execution. This document records the implementer's selection; no additional architecture preference is being attributed to the user.

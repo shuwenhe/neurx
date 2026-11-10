@@ -1,8 +1,12 @@
 package neurx.backends.cpu.transformer_decode
 import (
+    "neurx.runtime.tensor_builder"
+    "neurx.runtime.command"
     "neurx.models.formats.safetensors_embedding"
     "neurx.models.loaders.hf_transformer"
 )
+
+extern "intrinsic" func __std_clock_ns(int kind) int
 
 struct hf_cpu_config {
     int hidden_size
@@ -132,35 +136,55 @@ func cpu_rms_norm(float[] input) float[] {
     output
 }
 
+func hf_finish_vector(int builder) float[] {
+    float_construction_result result = finish_float_builder(builder)
+    if !result.ok { release_builder(builder); return float[]{} }
+    result.values
+}
+func hf_add_vectors(float[] left, float[] right) float[] {
+    if len(left) != len(right) { return float[]{} }
+    int output = new_float_builder(len(left))
+    int i = 0
+    for i < len(left) { builder_set_float(output, i, left[i] + right[i]); i = i + 1 }
+    hf_finish_vector(output)
+}
+func hf_silu_product(float[] gate, float[] up) float[] {
+    if len(gate) != len(up) { return float[]{} }
+    int output = new_float_builder(len(gate))
+    int i = 0
+    for i < len(gate) { builder_set_float(output, i, hf_silu(gate[i]) * up[i]); i = i + 1 }
+    hf_finish_vector(output)
+}
+
 func hf_rms_norm(float[] input, float[] weight, float epsilon) float[] {
     if len(input) != len(weight) { return float[]{} }
-    float[] output = make(float[], len(input))
+    int output = new_float_builder(len(input))
     float squares = 0.0
     int i = 0
     for i < len(input) { squares = squares + input[i] * input[i]; i = i + 1 }
     float scale = 1.0 / cpu_sqrt(squares / (len(input) * 1.0) + epsilon)
     i = 0
-    for i < len(input) { output[i] = input[i] * scale * weight[i]; i = i + 1 }
-    output
+    for i < len(input) { builder_set_float(output, i, input[i] * scale * weight[i]); i = i + 1 }
+    hf_finish_vector(output)
 }
 
 func hf_matvec(float[] weight, int rows, int columns, float[] input) float[] {
     if len(weight) != rows * columns || len(input) != columns { return float[]{} }
-    float[] output = make(float[], rows)
+    int output = new_float_builder(rows)
     int row = 0
     for row < rows {
         float value = 0.0
         int column = 0
         for column < columns { value = value + weight[row * columns + column] * input[column]; column = column + 1 }
-        output[row] = value
+        builder_set_float(output, row, value)
         row = row + 1
     }
-    output
+    hf_finish_vector(output)
 }
 
 func hf_rope(float[] input, int heads, int head_dim, int position, float theta) float[] {
     if head_dim <= 0 || head_dim % 2 != 0 || len(input) != heads * head_dim || theta <= 0.0 { return float[]{} }
-    float[] output = make(float[], len(input))
+    int output = new_float_builder(len(input))
     int half = head_dim / 2
     float log_theta = hf_log(theta)
     int head = 0
@@ -173,13 +197,13 @@ func hf_rope(float[] input, int heads, int head_dim, int position, float theta) 
             int offset = head * head_dim + pair
             float left = input[offset]
             float right = input[offset + half]
-            output[offset] = left * cosine - right * sine
-            output[offset + half] = right * cosine + left * sine
+            builder_set_float(output, offset, left * cosine - right * sine)
+            builder_set_float(output, offset + half, right * cosine + left * sine)
             pair = pair + 1
         }
         head = head + 1
     }
-    output
+    hf_finish_vector(output)
 }
 
 func new_hf_kv_cache(int capacity, int kv_width) hf_kv_cache {
@@ -199,25 +223,25 @@ func hf_cpu_layer(hf_cpu_config config, hf_layer_weights weights, float[] input,
     float[] key = hf_matvec(weights.k_proj, config.kv_heads * config.head_dim, config.hidden_size, normalized)
     float[] value = hf_matvec(weights.v_proj, config.kv_heads * config.head_dim, config.hidden_size, normalized)
     if len(query) == 0 || len(key) == 0 || len(value) == 0 { return hf_layer_result { ok: false, hidden: [], cache: cache, error_code: "projection_shape_mismatch" } }
-    int bias_index = 0
     if len(weights.q_bias) > 0 {
         if len(weights.q_bias) != len(query) || len(weights.k_bias) != len(key) || len(weights.v_bias) != len(value) { return hf_layer_result { ok: false, hidden: [], cache: cache, error_code: "attention_bias_shape_mismatch" } }
-        for bias_index < len(query) { query[bias_index] = query[bias_index] + weights.q_bias[bias_index]; bias_index = bias_index + 1 }
-        bias_index = 0
-        for bias_index < len(key) { key[bias_index] = key[bias_index] + weights.k_bias[bias_index]; value[bias_index] = value[bias_index] + weights.v_bias[bias_index]; bias_index = bias_index + 1 }
+        query = hf_add_vectors(query, weights.q_bias)
+        key = hf_add_vectors(key, weights.k_bias)
+        value = hf_add_vectors(value, weights.v_bias)
     }
     query = hf_rope(query, config.attention_heads, config.head_dim, position, config.rope_theta)
     key = hf_rope(key, config.kv_heads, config.head_dim, position, config.rope_theta)
     int kv_width = config.kv_heads * config.head_dim
     int i = 0
-    for i < kv_width { cache.keys[cache.length * kv_width + i] = key[i]; cache.values[cache.length * kv_width + i] = value[i]; i = i + 1 }
+    cache.keys = hf_float_copy(cache.keys, cache.length * kv_width, key)
+    cache.values = hf_float_copy(cache.values, cache.length * kv_width, value)
     cache.length = cache.length + 1
-    float[] attended = make(float[], config.attention_heads * config.head_dim)
+    int attended_builder = new_float_builder(config.attention_heads * config.head_dim)
     int group_size = config.attention_heads / config.kv_heads
     int head = 0
     for head < config.attention_heads {
         int kv_head = head / group_size
-        float[] scores = make(float[], cache.length)
+        int score_builder = new_float_builder(cache.length)
         float maximum = -1000000.0
         int token = 0
         for token < cache.length {
@@ -228,35 +252,35 @@ func hf_cpu_layer(hf_cpu_config config, hf_layer_weights weights, float[] input,
                 dim = dim + 1
             }
             score = score / cpu_sqrt(config.head_dim * 1.0)
-            scores[token] = score
+            builder_set_float(score_builder, token, score)
             if score > maximum { maximum = score }
             token = token + 1
         }
+        float[] raw_scores = hf_finish_vector(score_builder)
+        int probability_builder = new_float_builder(cache.length)
         float denominator = 0.0
         token = 0
-        for token < cache.length { scores[token] = cpu_exp(scores[token] - maximum); denominator = denominator + scores[token]; token = token + 1 }
+        for token < cache.length { float probability = cpu_exp(raw_scores[token] - maximum); builder_set_float(probability_builder, token, probability); denominator = denominator + probability; token = token + 1 }
+        float[] scores = hf_finish_vector(probability_builder)
         int dim = 0
         for dim < config.head_dim {
             float sum = 0.0
             token = 0
             for token < cache.length { sum = sum + scores[token] / denominator * cache.values[token * kv_width + kv_head * config.head_dim + dim]; token = token + 1 }
-            attended[head * config.head_dim + dim] = sum
+            builder_set_float(attended_builder, head * config.head_dim + dim, sum)
             dim = dim + 1
         }
         head = head + 1
     }
+    float[] attended = hf_finish_vector(attended_builder)
     float[] projected = hf_matvec(weights.o_proj, config.hidden_size, config.attention_heads * config.head_dim, attended)
-    float[] residual = make(float[], config.hidden_size)
-    i = 0
-    for i < config.hidden_size { residual[i] = input[i] + projected[i]; i = i + 1 }
+    float[] residual = hf_add_vectors(input, projected)
     normalized = hf_rms_norm(residual, weights.post_norm, config.rms_epsilon)
     float[] gate = hf_matvec(weights.gate_proj, config.intermediate_size, config.hidden_size, normalized)
     float[] up = hf_matvec(weights.up_proj, config.intermediate_size, config.hidden_size, normalized)
-    i = 0
-    for i < config.intermediate_size { gate[i] = hf_silu(gate[i]) * up[i]; i = i + 1 }
+    gate = hf_silu_product(gate, up)
     float[] down = hf_matvec(weights.down_proj, config.hidden_size, config.intermediate_size, gate)
-    i = 0
-    for i < config.hidden_size { residual[i] = residual[i] + down[i]; i = i + 1 }
+    residual = hf_add_vectors(residual, down)
     hf_layer_result { ok: true, hidden: residual, cache: cache, error_code: "" }
 }
 
@@ -272,24 +296,44 @@ func hf_model_cpu_config(hf_model_weights model) hf_cpu_config {
     }
 }
 
-func hf_argmax_logits(hf_model_weights model, float[] hidden) int {
+func hf_logits(hf_model_weights model, float[] hidden) float[] {
     float[] normalized = hf_rms_norm(hidden, model.final_norm, model.config.rms_epsilon)
-    if len(normalized) != model.config.hidden_size || len(model.lm_head) != model.config.vocabulary_size * model.config.hidden_size { return -1 }
+    if len(normalized) != model.config.hidden_size || len(model.lm_head) != model.config.vocabulary_size * model.config.hidden_size { return float[]{} }
+    float[] logits = hf_matvec(model.lm_head, model.config.vocabulary_size, model.config.hidden_size, normalized)
+    int i = 0
+    for i < len(logits) {
+        // NaN and either infinity fail this check without finite-range clamping.
+        if logits[i] - logits[i] != 0.0 { return float[]{} }
+        i = i + 1
+    }
+    logits
+}
+
+func hf_argmax_values(float[] logits) int {
+    if len(logits) == 0 { return -1 }
     int best_token = 0
-    float best_logit = -1000000000.0
-    int token = 0
-    for token < model.config.vocabulary_size {
-        float logit = 0.0
-        int column = 0
-        for column < model.config.hidden_size {
-            logit = logit + model.lm_head[token * model.config.hidden_size + column] * normalized[column]
-            column = column + 1
-        }
-        if token == 0 || logit > best_logit { best_logit = logit; best_token = token }
+    int token = 1
+    for token < len(logits) {
+        if logits[token] > logits[best_token] { best_token = token }
         token = token + 1
     }
-    hf_trace("logits vocabulary=" + hf_int_string(model.config.vocabulary_size) + " argmax=" + hf_int_string(best_token) + " value_micro=" + hf_int_string(int(best_logit * 1000000.0)))
+    hf_trace("logits vocabulary=" + hf_int_string(len(logits)) + " argmax=" + hf_int_string(best_token) + " value_micro=" + hf_int_string(int(logits[best_token] * 1000000.0)))
     best_token
+}
+
+func hf_argmax_logits(hf_model_weights model, float[] hidden) int {
+    hf_argmax_values(hf_logits(model, hidden))
+}
+
+func hf_activation_trace(float[] hidden, int layer, int position, int elapsed) {
+    hf_trace("layer forward position=" + hf_int_string(position) + " layer=" + hf_int_string(layer) + " elapsed_ns=" + hf_int_string(elapsed))
+    if position == 0 && runtime_env_get("NEURX_TRACE_NUMERICS", "false") == "true" {
+        float sum = 0.0
+        float square = 0.0
+        int i = 0
+        for i < len(hidden) { sum = sum + hidden[i]; square = square + hidden[i] * hidden[i]; i = i + 1 }
+        println("[neurx-activation] layer=" + hf_int_string(layer) + " first_micro=" + hf_int_string(int(hidden[0] * 1000000.0)) + " middle_micro=" + hf_int_string(int(hidden[len(hidden) / 2] * 1000000.0)) + " last_micro=" + hf_int_string(int(hidden[len(hidden) - 1] * 1000000.0)) + " sum_micro=" + hf_int_string(int(sum * 1000000.0)) + " square_micro=" + hf_int_string(int(square * 1000000.0)))
+    }
 }
 
 func hf_forward_token(hf_model_weights model, int token_id, float[] cache_keys, float[] cache_values, int cache_capacity, int position) hf_layer_result {
@@ -300,6 +344,7 @@ func hf_forward_token(hf_model_weights model, int token_id, float[] cache_keys, 
     hf_cpu_config config = hf_model_cpu_config(model)
     int layer = 0
     for layer < model.config.layers {
+        int layer_started = __std_clock_ns(1)
         int hidden_square = config.hidden_size * config.hidden_size
         int kv_size = config.kv_heads * config.head_dim * config.hidden_size
         int mlp_size = config.intermediate_size * config.hidden_size
@@ -331,6 +376,7 @@ func hf_forward_token(hf_model_weights model, int token_id, float[] cache_keys, 
         hf_layer_result result = hf_cpu_layer(config, weights, hidden, layer_cache, position)
         if !result.ok { return result }
         hidden = result.hidden
+        hf_activation_trace(hidden, layer, position, __std_clock_ns(1) - layer_started)
         cache_keys = hf_float_copy(cache_keys, layer * cache_size, result.cache.keys)
         cache_values = hf_float_copy(cache_values, layer * cache_size, result.cache.values)
         layer = layer + 1
@@ -345,21 +391,20 @@ func hf_forward_token(hf_model_weights model, int token_id, float[] cache_keys, 
 }
 
 func hf_float_slice(float[] values, int offset, int count) float[] {
-    if offset < 0 || count < 0 || offset + count > len(values) { return float[]{} }
-    float[] output = make(float[], count)
-    int i = 0
-    for i < count { output[i] = values[offset + i]; i = i + 1 }
-    output
+    float_construction_result result = slice_float_array(values, offset, count)
+    if !result.ok { return float[]{} }
+    result.values
 }
 
 func hf_float_copy(float[] target, int offset, float[] source) float[] {
-    int i = 0
-    for i < len(source) { target[offset + i] = source[i]; i = i + 1 }
-    target
+    float_construction_result result = patch_float_array(target, offset, source)
+    if !result.ok { return float[]{} }
+    result.values
 }
 
 func hf_generate_until(hf_model_weights model, int[] prompt_tokens, int maximum_new_tokens, int eos_id) hf_generation_result {
     if !model.valid || len(prompt_tokens) == 0 || maximum_new_tokens <= 0 { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: "invalid_generation_input" } }
+    int generation_started = __std_clock_ns(1)
     int capacity = len(prompt_tokens) + maximum_new_tokens
     int cache_elements = model.config.layers * capacity * model.config.kv_heads * model.config.head_dim
     float[] cache_keys = make(float[], cache_elements)
@@ -377,7 +422,15 @@ func hf_generate_until(hf_model_weights model, int[] prompt_tokens, int maximum_
     int[] generated = make(int[], maximum_new_tokens)
     int step = 0
     for step < maximum_new_tokens {
-        int next_token = hf_argmax_logits(model, state.hidden)
+        int token_started = __std_clock_ns(1)
+        float[] logits = hf_logits(model, state.hidden)
+        int next_token = hf_argmax_values(logits)
+        int token_ready = __std_clock_ns(1)
+        hf_trace("token step=" + hf_int_string(step) + " id=" + hf_int_string(next_token) + " ready_ns=" + hf_int_string(token_ready - generation_started) + " logits_ns=" + hf_int_string(token_ready - token_started))
+        if step == 0 && runtime_env_get("NEURX_DUMP_LOGITS", "false") == "true" {
+            int index = 0
+            for index < len(logits) { println("[neurx-logit] index=" + hf_int_string(index) + " micro=" + hf_int_string(int(logits[index] * 1000000.0))); index = index + 1 }
+        }
         if next_token < 0 { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: "invalid_lm_head_shape" } }
         generated[step] = next_token
         step = step + 1

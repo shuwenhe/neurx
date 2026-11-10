@@ -1,6 +1,7 @@
 package neurx.inference.tokenizer.hf_bpe_tokenizer
 extern "intrinsic" func __std_byte_string(int value) string
 import (
+    "neurx.runtime.tensor_builder"
     "neurx.core.unicode.normalization"
 )
 extern "intrinsic" func __host_read_binary_file(string path) int[]
@@ -90,12 +91,7 @@ func bpe_utf8(int codepoint) string {
     output
 }
 
-func bpe_bytes_string(int[] bytes) string {
-    string output = ""
-    int i = 0
-    for i < len(bytes) { output = output + __std_byte_string(bytes[i]); i = i + 1 }
-    output
-}
+func bpe_bytes_string(int[] bytes) string { byte_array_string(bytes) }
 
 func bpe_find(string text, string pattern, int start) int {
     int i = start
@@ -302,15 +298,30 @@ func bpe_id_token(hf_bpe_tokenizer tokenizer, int id) string {
     ""
 }
 
+func invalid_bpe_tokenizer(string code) hf_bpe_tokenizer {
+    hf_bpe_tokenizer { valid: false, unicode_db: empty_unicode_database(), bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: code }
+}
+func bpe_construction_error(int[] builders, string code) hf_bpe_tokenizer {
+    int i = 0
+    for i < len(builders) { release_builder(builders[i]); i = i + 1 }
+    invalid_bpe_tokenizer(code)
+}
+
 func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     int[] bytes = __host_read_binary_file(model_dir + "/tokenizer.json")
-    if len(bytes) == 0 { return hf_bpe_tokenizer { valid: false, vocab_tokens: [], vocab_ids: [], vocab_count: 0, merge_left: [], merge_right: [], merge_count: 0, added_tokens: [], added_ids: [], added_count: 0, byte_level: false, bert_pre_tokenizer: false, metaspace_pre_tokenizer: false, normalizer_lowercase: false, normalizer_strip: false, bert_clean_text: false, bert_strip_accents: false, byte_level_trim_offsets: false, unicode_normalizer: "", unicode_db: empty_unicode_database(), metaspace_replacement: "", bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "tokenizer_not_found" } }
+    if len(bytes) == 0 { return invalid_bpe_tokenizer("tokenizer_not_found") }
     string json = bpe_bytes_string(bytes)
-    string[] vocab_tokens = make(string[], 200000)
-    int[] vocab_ids = make(int[], 200000)
+    int[] builders = int[]{new_string_builder(200000), new_int_builder(200000), new_string_builder(200000), new_string_builder(200000), new_string_builder(1024), new_int_builder(1024)}
+    int builder_index = 0
+    for builder_index < len(builders) {
+        if builders[builder_index] <= 0 { return bpe_construction_error(builders, "tokenizer_allocation_failed") }
+        builder_index = builder_index + 1
+    }
     int vocab_count = 0
     int vocab = bpe_find(json, "\"vocab\"", 0)
+    if vocab < 0 { return bpe_construction_error(builders, "missing_vocab") }
     int position = bpe_find(json, "{", vocab)
+    if position < 0 { return bpe_construction_error(builders, "invalid_vocab") }
     position = position + 1
     for position > 0 && position < len(json) && json[position] != 125 {
         position = bpe_skip_space(json, position)
@@ -318,14 +329,13 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
             bpe_string_result token = bpe_json_string(json, position)
             int colon = bpe_find(json, ":", token.next)
             bpe_int_result id = bpe_parse_int(json, colon + 1)
-            vocab_tokens[vocab_count] = token.value
-            vocab_ids[vocab_count] = id.value
+            if vocab_count >= 200000 || token.next > len(json) || colon < 0 || id.next <= colon + 1 { return bpe_construction_error(builders, "invalid_vocab") }
+            builder_set_string(builders[0], vocab_count, token.value)
+            builder_set_int(builders[1], vocab_count, id.value)
             vocab_count = vocab_count + 1
             position = id.next
         } else { position = position + 1 }
     }
-    string[] merge_left = make(string[], 200000)
-    string[] merge_right = make(string[], 200000)
     int merge_count = 0
     int merges = bpe_find(json, "\"merges\"", position)
     position = bpe_find(json, "[", merges) + 1
@@ -341,15 +351,14 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
                 for i < space { left = left + __std_byte_string(merge.value[i]); i = i + 1 }
                 i = space + 1
                 for i < len(merge.value) { right = right + __std_byte_string(merge.value[i]); i = i + 1 }
-                merge_left[merge_count] = left
-                merge_right[merge_count] = right
+                if merge_count >= 200000 { return bpe_construction_error(builders, "too_many_merges") }
+                builder_set_string(builders[2], merge_count, left)
+                builder_set_string(builders[3], merge_count, right)
                 merge_count = merge_count + 1
             }
             position = merge.next
         } else { position = position + 1 }
     }
-    string[] added_tokens = make(string[], 1024)
-    int[] added_ids = make(int[], 1024)
     int added_count = 0
     int added = bpe_find(json, "\"added_tokens\"", 0)
     position = bpe_find(json, "[", added) + 1
@@ -362,7 +371,12 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
             bpe_string_result content = bpe_json_string(json, content_quote)
             int id_key = bpe_find(json, "\"id\"", object)
             bpe_int_result id = bpe_parse_int(json, bpe_find(json, ":", id_key) + 1)
-            if content_key < object_end && id_key < object_end { added_tokens[added_count] = content.value; added_ids[added_count] = id.value; added_count = added_count + 1 }
+            if content_key >= 0 && id_key >= 0 && content_key < object_end && id_key < object_end {
+                if added_count >= 1024 { return bpe_construction_error(builders, "too_many_added_tokens") }
+                builder_set_string(builders[4], added_count, content.value)
+                builder_set_int(builders[5], added_count, id.value)
+                added_count = added_count + 1
+            }
             position = object_end + 1
         }
     }
@@ -377,10 +391,19 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     if bpe_find(json, "\"NFKC\"", 0) >= 0 { unicode_normalizer = "NFKC" } else if bpe_find(json, "\"NFC\"", 0) >= 0 { unicode_normalizer = "NFC" }
     unicode_database unicode_db = empty_unicode_database()
     if unicode_normalizer != "" { unicode_db = load_unicode_database("config/unicode") }
-    hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0 && (unicode_normalizer == "" || unicode_db.valid), vocab_tokens: vocab_tokens, vocab_ids: vocab_ids, vocab_count: vocab_count, merge_left: merge_left, merge_right: merge_right, merge_count: merge_count, added_tokens: added_tokens, added_ids: added_ids, added_count: added_count, byte_level: bpe_find(json, "\"ByteLevel\"", 0) >= 0, bert_pre_tokenizer: bpe_find(json, "\"BertPreTokenizer\"", 0) >= 0, metaspace_pre_tokenizer: bpe_find(json, "\"Metaspace\"", 0) >= 0, normalizer_lowercase: bpe_find(json, "\"Lowercase\"", 0) >= 0 || bpe_json_true(json, "\"lowercase\"", 0) || bpe_json_true(json, "\"lower_case\"", 0), normalizer_strip: bpe_find(json, "\"Strip\"", 0) >= 0, bert_clean_text: bpe_json_true(json, "\"clean_text\"", 0), bert_strip_accents: bpe_json_true(json, "\"strip_accents\"", 0), byte_level_trim_offsets: bpe_json_true(json, "\"trim_offsets\"", 0), unicode_normalizer: unicode_normalizer, unicode_db: unicode_db, metaspace_replacement: metaspace_replacement, bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "" }
+    if vocab_count == 0 { return bpe_construction_error(builders, "empty_vocab") }
+    string_construction_result vocab_tokens = finish_string_builder(builders[0])
+    int_construction_result vocab_ids = finish_int_builder(builders[1])
+    string_construction_result merge_left = finish_string_builder(builders[2])
+    string_construction_result merge_right = finish_string_builder(builders[3])
+    string_construction_result added_tokens = finish_string_builder(builders[4])
+    int_construction_result added_ids = finish_int_builder(builders[5])
+    if !vocab_tokens.ok || !vocab_ids.ok || !merge_left.ok || !merge_right.ok || !added_tokens.ok || !added_ids.ok { return bpe_construction_error(builders, "tokenizer_finalize_failed") }
+    hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0 && (unicode_normalizer == "" || unicode_db.valid), vocab_tokens: vocab_tokens.values, vocab_ids: vocab_ids.values, vocab_count: vocab_count, merge_left: merge_left.values, merge_right: merge_right.values, merge_count: merge_count, added_tokens: added_tokens.values, added_ids: added_ids.values, added_count: added_count, byte_level: bpe_find(json, "\"ByteLevel\"", 0) >= 0, bert_pre_tokenizer: bpe_find(json, "\"BertPreTokenizer\"", 0) >= 0, metaspace_pre_tokenizer: bpe_find(json, "\"Metaspace\"", 0) >= 0, normalizer_lowercase: bpe_find(json, "\"Lowercase\"", 0) >= 0 || bpe_json_true(json, "\"lowercase\"", 0) || bpe_json_true(json, "\"lower_case\"", 0), normalizer_strip: bpe_find(json, "\"Strip\"", 0) >= 0, bert_clean_text: bpe_json_true(json, "\"clean_text\"", 0), bert_strip_accents: bpe_json_true(json, "\"strip_accents\"", 0), byte_level_trim_offsets: bpe_json_true(json, "\"trim_offsets\"", 0), unicode_normalizer: unicode_normalizer, unicode_db: unicode_db, metaspace_replacement: metaspace_replacement, bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "" }
     tokenizer.unknown_id = bpe_vocab_id(tokenizer, "<unk>")
     tokenizer.bos_id = bpe_first_token_id(tokenizer, "<s>", "[CLS]", "<|begin_of_text|>")
-    tokenizer.eos_id = bpe_first_token_id(tokenizer, "</s>", "[SEP]", "<|endoftext|>")
+    tokenizer.eos_id = bpe_first_token_id(tokenizer, "<|im_end|>", "</s>", "[SEP]")
+    if tokenizer.eos_id < 0 { tokenizer.eos_id = bpe_first_token_id(tokenizer, "<|endoftext|>", "<|eot_id|>", "<|end_of_text|>") }
     if tokenizer.eos_id < 0 { tokenizer.eos_id = bpe_first_token_id(tokenizer, "<|eot_id|>", "<|end_of_text|>", "<eos>") }
     tokenizer.pad_id = bpe_first_token_id(tokenizer, "<pad>", "[PAD]", "<|pad|>")
     tokenizer

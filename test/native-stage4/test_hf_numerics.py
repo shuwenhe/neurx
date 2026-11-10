@@ -34,7 +34,7 @@ class NativeHFNumerics(unittest.TestCase):
 
     def probe(self, body):
         source = self.folder / 'probe.s'
-        source.write_text('package main\nimport ("neurx.backends.cpu.transformer_decode"; "neurx.models.loaders.hf_transformer"; "neurx.models.formats.hf_config")\nfunc main() int {\n' + body + '\nreturn 0\n}\n')
+        source.write_text('package main\nimport ("neurx.backends.cpu.transformer_decode"; "neurx.models.loaders.hf_transformer"; "neurx.models.formats.hf_config"; "neurx.runtime.tensor_builder")\nfunc main() int {\n' + body + '\nreturn 0\n}\n')
         assembly, executable = self.folder / 'probe.sasm', self.folder / 'probe'
         result = subprocess.run([str(COMPILER), '--compile-unit', str(assembly), str(source), *self.sources],
                                 capture_output=True, text=True, timeout=180)
@@ -44,6 +44,45 @@ class NativeHFNumerics(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         result = subprocess.run([str(executable)], capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, 'native probe exit=' + str(result.returncode) + result.stdout + result.stderr)
+
+    def test_weight_assembly_uses_bulk_construction(self):
+        model = self.folder / 'bulk-tiny'
+        shutil.copytree(ROOT / 'test/fixture/hf_tiny', model)
+        (model / 'model.safetensors').write_bytes(bytes.fromhex((model / 'model.safetensors.hex').read_text()))
+        self.probe(f'''reset_construction_stats()
+hf_model_weights model = load_hf_model("{model}")
+if !model.valid {{ return 100 }}
+if construction_stat(0) < 60 {{ return 101 }}
+if construction_stat(4) != 0 {{ return 105 }}
+if construction_stat(5) != 0 {{ return 102 }}
+if len(model.q_proj) != 4 {{ return 103 }}
+''')
+
+    def test_wrong_layer_dimensions_fail_closed(self):
+        model = self.folder / 'wrong-shape'
+        shutil.copytree(ROOT / 'test/fixture/hf_tiny', model)
+        raw = bytes.fromhex((model / 'model.safetensors.hex').read_text())
+        size = struct.unpack('<Q', raw[:8])[0]
+        header = json.loads(raw[8:8 + size])
+        header['model.layers.0.self_attn.q_proj.weight']['shape'] = [1, 4]
+        encoded = json.dumps(header, separators=(',', ':')).encode()
+        (model / 'model.safetensors').write_bytes(struct.pack('<Q', len(encoded)) + encoded + raw[8 + size:])
+        self.probe(f'hf_model_weights model = load_hf_model("{model}")\nif model.valid {{ return 104 }}')
+
+    def test_forward_array_operations_use_bulk_and_preserve_inputs(self):
+        self.probe('''float[] original = float[]{1.0, 2.0, 3.0, 4.0}
+reset_construction_stats()
+float[] sliced = hf_float_slice(original, 1, 3)
+if len(sliced) != 3 || sliced[0] != 2.0 { return 110 }
+if construction_stat(0) != 1 || construction_stat(3) != 24 { return 111 }
+float[] patched = hf_float_copy(original, 1, float[]{8.0, 9.0})
+if patched[1] != 8.0 || original[1] != 2.0 { return 112 }
+if construction_stat(0) != 2 || construction_stat(3) != 72 { return 113 }
+reset_construction_stats()
+float[] vector = hf_matvec(float[]{1.0, 0.0, 0.0, 1.0}, 2, 2, float[]{2.0, 3.0})
+if vector[0] != 2.0 || vector[1] != 3.0 { return 114 }
+if construction_stat(0) != 2 || construction_stat(4) != 2 || construction_stat(3) != 0 { return 115 }
+''')
 
     def test_qwen_rope_uses_split_halves_and_head_dimension_frequencies(self):
         body = 'float[] input = float[]{1.0, 2.0, 3.0, 4.0}\n'
@@ -151,6 +190,9 @@ class NativeHFNumerics(unittest.TestCase):
             body += f'if !state{position}.ok {{ return {51 + position} }}\n'
             for dimension, expected in enumerate(value):
                 body += f'if cpu_abs(state{position}.hidden[{dimension}] - ({expected:.16f})) > 0.000001 {{ return {60 + position * hidden + dimension} }}\n'
+            body += f'float[] logits{position} = hf_logits(model, state{position}.hidden)\nif len(logits{position}) != {vocabulary} {{ return 120 }}\n'
+            for dimension, expected in enumerate(logits):
+                body += f'if cpu_abs(logits{position}[{dimension}] - ({expected:.16f})) > 0.000001 {{ return {121 + dimension} }}\n'
             body += f'if hf_argmax_logits(model, state{position}.hidden) != {np.argmax(logits)} {{ return {80 + position} }}\n'
             body += f'keys = state{position}.cache.keys\nvalues = state{position}.cache.values\n'
         self.probe(body)

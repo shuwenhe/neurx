@@ -1,6 +1,7 @@
 package neurx.models.loaders.hf_transformer
 extern "intrinsic" func __std_byte_string(int value) string
 import (
+    "neurx.runtime.tensor_builder"
     "neurx.runtime.command"
     "neurx.models.formats.hf_config"
     "neurx.models.formats.safetensors_embedding"
@@ -63,12 +64,7 @@ func hf_load_values(string path, string name) f32_tensor_result {
     read_f32_tensor(tensor)
 }
 
-func hf_bytes_string(int[] bytes) string {
-    string output = ""
-    int i = 0
-    for i < len(bytes) { output = output + __std_byte_string(bytes[i]); i = i + 1 }
-    output
-}
+func hf_bytes_string(int[] bytes) string { byte_array_string(bytes) }
 
 func hf_find(string text, string pattern, int start) int {
     int i = start
@@ -150,6 +146,15 @@ func load_hf_model_layer(string model_dir, int layer) hf_layer_weights {
         return hf_layer_weights { valid: false, error_code: "missing_attention_bias" }
     }
     if !input_norm.ok || !q.ok || !k.ok || !v.ok || !o.ok || !post_norm.ok || !gate.ok || !up.ok || !down.ok { return hf_layer_weights { valid: false, input_norm: [], q_proj: [], k_proj: [], v_proj: [], q_bias: [], k_bias: [], v_bias: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], error_code: "missing_hf_layer_weight" } }
+    int hidden = config.hidden_size
+    int kv_width = config.kv_heads * config.head_dim
+    int intermediate = config.intermediate_size
+    if !hf_tensor_shape(input_norm, 1, hidden) || !hf_tensor_shape(post_norm, 1, hidden) || !hf_tensor_shape(q, hidden, hidden) || !hf_tensor_shape(o, hidden, hidden) || !hf_tensor_shape(k, kv_width, hidden) || !hf_tensor_shape(v, kv_width, hidden) || !hf_tensor_shape(gate, intermediate, hidden) || !hf_tensor_shape(up, intermediate, hidden) || !hf_tensor_shape(down, hidden, intermediate) {
+        return hf_layer_weights { valid: false, error_code: "layer_weight_shape_mismatch" }
+    }
+    if config.attention_bias && (!hf_tensor_shape(q_bias, 1, hidden) || !hf_tensor_shape(k_bias, 1, kv_width) || !hf_tensor_shape(v_bias, 1, kv_width)) {
+        return hf_layer_weights { valid: false, error_code: "attention_bias_shape_mismatch" }
+    }
     hf_layer_weights { valid: true, input_norm: input_norm.values, q_proj: q.values, k_proj: k.values, v_proj: v.values, q_bias: q_bias.values, k_bias: k_bias.values, v_bias: v_bias.values, o_proj: o.values, post_norm: post_norm.values, gate_proj: gate.values, up_proj: up.values, down_proj: down.values, error_code: "" }
 }
 
@@ -163,6 +168,18 @@ func hf_copy_layer(float[] target, int offset, float[] source) {
     for i < len(source) { target[offset + i] = source[i]; i = i + 1 }
 }
 
+func hf_tensor_shape(f32_tensor_result value, int rows, int columns) bool {
+    value.ok && value.tensor.rows == rows && value.tensor.columns == columns
+}
+func hf_safe_product(int left, int right) int {
+    if left <= 0 || right <= 0 || left > 36028797018963967 / right { return -1 }
+    left * right
+}
+func hf_release_builders(int[] builders) {
+    int i = 0
+    for i < len(builders) { release_builder(builders[i]); i = i + 1 }
+}
+
 func load_hf_model(string model_dir) hf_model_weights {
     hf_trace("loading model " + model_dir)
     hf_model_config config = load_hf_config(model_dir)
@@ -172,51 +189,57 @@ func load_hf_model(string model_dir) hf_model_weights {
     safetensors_embedding embedding = load_f32_tensor(path, "model.embed_tokens.weight")
     if !embedding.valid { return invalid_hf_model(config, "embedding_" + embedding.error_code) }
     hf_trace("config layers=" + hf_int_string(config.layers) + " hidden=" + hf_int_string(config.hidden_size) + " vocabulary=" + hf_int_string(config.vocabulary_size) + " dtype=" + embedding.dtype)
-    int hidden_square = config.hidden_size * config.hidden_size
-    int kv_size = config.kv_heads * config.head_dim * config.hidden_size
-    int mlp_size = config.intermediate_size * config.hidden_size
-    float[] q_bias = make(float[], config.layers * config.hidden_size)
-    int kv_width = config.kv_heads * config.head_dim
-    float[] k_bias = make(float[], config.layers * kv_width)
-    float[] v_bias = make(float[], config.layers * kv_width)
-    float[] input_norm = make(float[], config.layers * config.hidden_size)
-    float[] q_proj = make(float[], config.layers * hidden_square)
-    float[] k_proj = make(float[], config.layers * kv_size)
-    float[] v_proj = make(float[], config.layers * kv_size)
-    float[] o_proj = make(float[], config.layers * hidden_square)
-    float[] post_norm = make(float[], config.layers * config.hidden_size)
-    float[] gate_proj = make(float[], config.layers * mlp_size)
-    float[] up_proj = make(float[], config.layers * mlp_size)
-    float[] down_proj = make(float[], config.layers * mlp_size)
+    int hidden_square = hf_safe_product(config.hidden_size, config.hidden_size)
+    int kv_width = hf_safe_product(config.kv_heads, config.head_dim)
+    int kv_size = hf_safe_product(kv_width, config.hidden_size)
+    int mlp_size = hf_safe_product(config.intermediate_size, config.hidden_size)
+    if embedding.rows != config.vocabulary_size || embedding.columns != config.hidden_size { return invalid_hf_model(config, "embedding_shape_mismatch") }
+    if hf_safe_product(config.layers, hidden_square) < 0 || hf_safe_product(config.layers, kv_size) < 0 || hf_safe_product(config.layers, mlp_size) < 0 || hf_safe_product(config.layers, config.hidden_size) < 0 { return invalid_hf_model(config, "model_size_overflow") }
+    int[] builders = int[]{new_float_builder(config.layers * config.hidden_size), new_float_builder(config.layers * kv_width), new_float_builder(config.layers * kv_width), new_float_builder(config.layers * config.hidden_size), new_float_builder(config.layers * hidden_square), new_float_builder(config.layers * kv_size), new_float_builder(config.layers * kv_size), new_float_builder(config.layers * hidden_square), new_float_builder(config.layers * config.hidden_size), new_float_builder(config.layers * mlp_size), new_float_builder(config.layers * mlp_size), new_float_builder(config.layers * mlp_size)}
+    int index = 0
+    for index < len(builders) {
+        if builders[index] <= 0 { hf_release_builders(builders); return invalid_hf_model(config, "tensor_allocation_failed") }
+        index = index + 1
+    }
     int layer = 0
     for layer < config.layers {
         hf_layer_weights weights = load_hf_model_layer(model_dir, layer)
-        if !weights.valid { return invalid_hf_model(config, "layer_" + hf_int_string(layer) + "_" + weights.error_code) }
-        int i = 0
-        if config.attention_bias {
-            if len(weights.q_bias) != config.hidden_size || len(weights.k_bias) != kv_width || len(weights.v_bias) != kv_width { return invalid_hf_model(config, "attention_bias_shape_mismatch") }
-            for i < config.hidden_size { q_bias[layer * config.hidden_size + i] = weights.q_bias[i]; i = i + 1 }
-            i = 0
-            for i < kv_width { k_bias[layer * kv_width + i] = weights.k_bias[i]; v_bias[layer * kv_width + i] = weights.v_bias[i]; i = i + 1 }
-            i = 0
-        }
-        for i < config.hidden_size { input_norm[layer * config.hidden_size + i] = weights.input_norm[i]; post_norm[layer * config.hidden_size + i] = weights.post_norm[i]; i = i + 1 }
-        i = 0
-        for i < hidden_square { q_proj[layer * hidden_square + i] = weights.q_proj[i]; o_proj[layer * hidden_square + i] = weights.o_proj[i]; i = i + 1 }
-        i = 0
-        for i < kv_size { k_proj[layer * kv_size + i] = weights.k_proj[i]; v_proj[layer * kv_size + i] = weights.v_proj[i]; i = i + 1 }
-        i = 0
-        for i < mlp_size { gate_proj[layer * mlp_size + i] = weights.gate_proj[i]; up_proj[layer * mlp_size + i] = weights.up_proj[i]; down_proj[layer * mlp_size + i] = weights.down_proj[i]; i = i + 1 }
+        if !weights.valid { hf_release_builders(builders); return invalid_hf_model(config, "layer_" + hf_int_string(layer) + "_" + weights.error_code) }
+        int status = 0
+        if config.attention_bias { status = status + builder_copy_float(builders[0], layer * config.hidden_size, weights.q_bias) }
+        if config.attention_bias { status = status + builder_copy_float(builders[1], layer * kv_width, weights.k_bias) }
+        if config.attention_bias { status = status + builder_copy_float(builders[2], layer * kv_width, weights.v_bias) }
+        status = status + builder_copy_float(builders[3], layer * config.hidden_size, weights.input_norm)
+        status = status + builder_copy_float(builders[4], layer * hidden_square, weights.q_proj)
+        status = status + builder_copy_float(builders[5], layer * kv_size, weights.k_proj)
+        status = status + builder_copy_float(builders[6], layer * kv_size, weights.v_proj)
+        status = status + builder_copy_float(builders[7], layer * hidden_square, weights.o_proj)
+        status = status + builder_copy_float(builders[8], layer * config.hidden_size, weights.post_norm)
+        status = status + builder_copy_float(builders[9], layer * mlp_size, weights.gate_proj)
+        status = status + builder_copy_float(builders[10], layer * mlp_size, weights.up_proj)
+        status = status + builder_copy_float(builders[11], layer * mlp_size, weights.down_proj)
+        if status != 0 { hf_release_builders(builders); return invalid_hf_model(config, "tensor_copy_failed") }
         hf_trace("loaded layer=" + hf_int_string(layer))
         layer = layer + 1
     }
     f32_tensor_result final_norm = hf_load_model_values(model_dir, "model.norm.weight")
     f32_tensor_result lm_head = hf_load_model_values(model_dir, "lm_head.weight")
-    if !final_norm.ok { return invalid_hf_model(config, "missing_final_norm") }
-    if !lm_head.ok {
-        lm_head = read_f32_tensor(embedding)
-        if !lm_head.ok { return invalid_hf_model(config, "missing_lm_head") }
-    }
+    if !hf_tensor_shape(final_norm, 1, config.hidden_size) { hf_release_builders(builders); return invalid_hf_model(config, "invalid_final_norm") }
+    if !lm_head.ok { lm_head = read_f32_tensor(embedding) }
+    if !hf_tensor_shape(lm_head, config.vocabulary_size, config.hidden_size) { hf_release_builders(builders); return invalid_hf_model(config, "invalid_lm_head") }
+    float_construction_result q_bias = finish_float_builder(builders[0])
+    float_construction_result k_bias = finish_float_builder(builders[1])
+    float_construction_result v_bias = finish_float_builder(builders[2])
+    float_construction_result input_norm = finish_float_builder(builders[3])
+    float_construction_result q_proj = finish_float_builder(builders[4])
+    float_construction_result k_proj = finish_float_builder(builders[5])
+    float_construction_result v_proj = finish_float_builder(builders[6])
+    float_construction_result o_proj = finish_float_builder(builders[7])
+    float_construction_result post_norm = finish_float_builder(builders[8])
+    float_construction_result gate_proj = finish_float_builder(builders[9])
+    float_construction_result up_proj = finish_float_builder(builders[10])
+    float_construction_result down_proj = finish_float_builder(builders[11])
+    if !q_bias.ok || !k_bias.ok || !v_bias.ok || !input_norm.ok || !q_proj.ok || !k_proj.ok || !v_proj.ok || !o_proj.ok || !post_norm.ok || !gate_proj.ok || !up_proj.ok || !down_proj.ok { hf_release_builders(builders); return invalid_hf_model(config, "tensor_finalize_failed") }
     hf_trace("all model weights loaded")
-    hf_model_weights { valid: true, config: config, embedding: embedding, input_norm: input_norm, q_proj: q_proj, k_proj: k_proj, v_proj: v_proj, q_bias: q_bias, k_bias: k_bias, v_bias: v_bias, o_proj: o_proj, post_norm: post_norm, gate_proj: gate_proj, up_proj: up_proj, down_proj: down_proj, final_norm: final_norm.values, lm_head: lm_head.values, error_code: "" }
+    hf_model_weights { valid: true, config: config, embedding: embedding, q_bias: q_bias.values, k_bias: k_bias.values, v_bias: v_bias.values, input_norm: input_norm.values, q_proj: q_proj.values, k_proj: k_proj.values, v_proj: v_proj.values, o_proj: o_proj.values, post_norm: post_norm.values, gate_proj: gate_proj.values, up_proj: up_proj.values, down_proj: down_proj.values, final_norm: final_norm.values, lm_head: lm_head.values, error_code: "" }
 }
