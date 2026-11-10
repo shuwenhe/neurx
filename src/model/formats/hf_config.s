@@ -1,7 +1,54 @@
 package neurx.models.formats.hf_config
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-extern "intrinsic" func __std_byte_string(int value) string
 extern "intrinsic" func __host_read_binary_file(string path) int[]
+
+// Convert byte (0-255) to single-character string
+func byte_to_string(int b) string {
+    if b == 0 { return "\x00" }
+    if b == 10 { return "\n" }
+    if b == 13 { return "\r" }
+    if b == 9 { return "\t" }
+    if b >= 32 && b < 127 {
+        if b == 32 { return " " }
+        if b == 33 { return "!" }
+        if b == 34 { return "\"" }
+        if b == 35 { return "#" }
+        if b == 36 { return "$" }
+        if b == 37 { return "%" }
+        if b == 38 { return "&" }
+        if b == 39 { return "'" }
+        if b == 40 { return "(" }
+        if b == 41 { return ")" }
+        if b == 42 { return "*" }
+        if b == 43 { return "+" }
+        if b == 44 { return "," }
+        if b == 45 { return "-" }
+        if b == 46 { return "." }
+        if b == 47 { return "/" }
+        if b >= 48 && b <= 57 { return __host_slice("0123456789", b - 48, b - 47) }
+        if b == 58 { return ":" }
+        if b == 59 { return ";" }
+        if b == 60 { return "<" }
+        if b == 61 { return "=" }
+        if b == 62 { return ">" }
+        if b == 63 { return "?" }
+        if b == 64 { return "@" }
+        if b >= 65 && b <= 90 { return __host_slice("ABCDEFGHIJKLMNOPQRSTUVWXYZ", b - 65, b - 64) }
+        if b == 91 { return "[" }
+        if b == 92 { return "\\" }
+        if b == 93 { return "]" }
+        if b == 94 { return "^" }
+        if b == 95 { return "_" }
+        if b == 96 { return "`" }
+        if b >= 97 && b <= 122 { return __host_slice("abcdefghijklmnopqrstuvwxyz", b - 97, b - 96) }
+        if b == 123 { return "{" }
+        if b == 124 { return "|" }
+        if b == 125 { return "}" }
+        if b == 126 { return "~" }
+    }
+    // For non-ASCII, return placeholder
+    "?"
+}
 struct hf_model_config {
     bool valid
     int hidden_size
@@ -224,10 +271,10 @@ func parse_hf_config(string text) hf_model_config {
 }
 
 func load_hf_config(string model_dir) hf_model_config {
-    int[] bytes = __host_read_binary_file(model_dir + "/config.json")
+    bytes := __host_read_binary_file(model_dir + "/config.json")
     if len(bytes) == 0 { return invalid_hf_config("config_not_found") }
-    string content = ""
-    int i = 0
-    for i < len(bytes) { content = content + __std_byte_string(bytes[i]); i = i + 1 }
+    content := ""
+    i := 0
+    for i < len(bytes) { content = content + byte_to_string(bytes[i]); i = i + 1 }
     parse_hf_config(content)
 }
