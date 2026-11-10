@@ -94,6 +94,7 @@ func bpe_utf8(int codepoint) string {
 func bpe_bytes_string(int[] bytes) string { byte_array_string(bytes) }
 
 func bpe_find(string text, string pattern, int start) int {
+    if start < 0 { return -1 }
     int i = start
     for i + len(pattern) <= len(text) {
         int j = 0
@@ -325,6 +326,7 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     position = position + 1
     for position > 0 && position < len(json) && json[position] != 125 {
         position = bpe_skip_space(json, position)
+        if position >= len(json) || json[position] == 125 { break }
         if json[position] == 44 { position = position + 1 } else if json[position] == 34 {
             bpe_string_result token = bpe_json_string(json, position)
             int colon = bpe_find(json, ":", token.next)
@@ -336,11 +338,16 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
             position = id.next
         } else { position = position + 1 }
     }
+    if position >= len(json) || json[position] != 125 { return bpe_construction_error(builders, "truncated_vocab") }
     int merge_count = 0
     int merges = bpe_find(json, "\"merges\"", position)
-    position = bpe_find(json, "[", merges) + 1
+    if merges < 0 { return bpe_construction_error(builders, "missing_merges") }
+    int merge_array = bpe_find(json, "[", merges)
+    if merge_array < 0 { return bpe_construction_error(builders, "invalid_merges") }
+    position = merge_array + 1
     for position > 0 && position < len(json) && json[position] != 93 {
         position = bpe_skip_space(json, position)
+        if position >= len(json) || json[position] == 93 { break }
         if json[position] == 44 { position = position + 1 } else if json[position] == 34 {
             bpe_string_result merge = bpe_json_string(json, position)
             int space = bpe_find(merge.value, " ", 0)
@@ -359,27 +366,35 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
             position = merge.next
         } else { position = position + 1 }
     }
+    if position >= len(json) || json[position] != 93 { return bpe_construction_error(builders, "truncated_merges") }
     int added_count = 0
     int added = bpe_find(json, "\"added_tokens\"", 0)
-    position = bpe_find(json, "[", added) + 1
-    for position > 0 && position < len(json) && json[position] != 93 {
-        int object = bpe_find(json, "{", position)
-        if object < 0 || object > bpe_find(json, "]", position) { position = len(json) } else {
-            int object_end = bpe_find(json, "}", object)
-            int content_key = bpe_find(json, "\"content\"", object)
-            int content_quote = bpe_find(json, "\"", bpe_find(json, ":", content_key) + 1)
-            bpe_string_result content = bpe_json_string(json, content_quote)
-            int id_key = bpe_find(json, "\"id\"", object)
-            bpe_int_result id = bpe_parse_int(json, bpe_find(json, ":", id_key) + 1)
-            if content_key >= 0 && id_key >= 0 && content_key < object_end && id_key < object_end {
-                if added_count >= 1024 { return bpe_construction_error(builders, "too_many_added_tokens") }
-                builder_set_string(builders[4], added_count, content.value)
-                builder_set_int(builders[5], added_count, id.value)
-                added_count = added_count + 1
-            }
-            position = object_end + 1
-        }
+    position = len(json)
+    if added >= 0 {
+        int added_array = bpe_find(json, "[", added)
+        if added_array < 0 { return bpe_construction_error(builders, "invalid_added_tokens") }
+        position = added_array + 1
     }
+    for position < len(json) {
+        position = bpe_skip_space(json, position)
+        if position >= len(json) || json[position] == 93 { break }
+        if json[position] == 44 { position = position + 1; continue }
+        if json[position] != 123 { return bpe_construction_error(builders, "invalid_added_tokens") }
+        int object = position
+        int object_end = bpe_find(json, "}", object)
+        int content_key = bpe_find(json, "\"content\"", object)
+        int id_key = bpe_find(json, "\"id\"", object)
+        if object_end < 0 || content_key < 0 || id_key < 0 || content_key >= object_end || id_key >= object_end { return bpe_construction_error(builders, "invalid_added_tokens") }
+        int content_quote = bpe_find(json, "\"", bpe_find(json, ":", content_key) + 1)
+        bpe_string_result content = bpe_json_string(json, content_quote)
+        bpe_int_result id = bpe_parse_int(json, bpe_find(json, ":", id_key) + 1)
+        if content_quote < 0 || content.next > object_end || id.next > object_end || added_count >= 1024 { return bpe_construction_error(builders, "invalid_added_tokens") }
+        builder_set_string(builders[4], added_count, content.value)
+        builder_set_int(builders[5], added_count, id.value)
+        added_count = added_count + 1
+        position = object_end + 1
+    }
+    if added >= 0 && (position >= len(json) || json[position] != 93) { return bpe_construction_error(builders, "truncated_added_tokens") }
     string metaspace_replacement = bpe_utf8(9601)
     int replacement_key = bpe_find(json, "\"replacement\"", 0)
     if replacement_key >= 0 {

@@ -1,5 +1,6 @@
 package neurx.models.loaders.hf_transformer
 extern "intrinsic" func __std_byte_string(int value) string
+extern "intrinsic" func __std_clock_ns(int kind) int
 import (
     "neurx.runtime.tensor_builder"
     "neurx.runtime.command"
@@ -181,6 +182,9 @@ func hf_release_builders(int[] builders) {
 }
 
 func load_hf_model(string model_dir) hf_model_weights {
+    int loading_started = __std_clock_ns(1)
+    int loading_source_bytes = construction_stat(6)
+    int loading_elements = construction_stat(7)
     hf_trace("loading model " + model_dir)
     hf_model_config config = load_hf_config(model_dir)
     if !config.valid { return invalid_hf_model(config, config.error_code) }
@@ -225,7 +229,11 @@ func load_hf_model(string model_dir) hf_model_weights {
     f32_tensor_result final_norm = hf_load_model_values(model_dir, "model.norm.weight")
     f32_tensor_result lm_head = hf_load_model_values(model_dir, "lm_head.weight")
     if !hf_tensor_shape(final_norm, 1, config.hidden_size) { hf_release_builders(builders); return invalid_hf_model(config, "invalid_final_norm") }
-    if !lm_head.ok { lm_head = read_f32_tensor(embedding) }
+    if !lm_head.ok {
+        bool missing_head = lm_head.error_code == "tensor_not_found" || hf_resolve_tensor_path(model_dir, "lm_head.weight") == ""
+        if !config.tie_word_embeddings || !missing_head { hf_release_builders(builders); return invalid_hf_model(config, "invalid_lm_head") }
+        lm_head = read_f32_tensor(embedding)
+    }
     if !hf_tensor_shape(lm_head, config.vocabulary_size, config.hidden_size) { hf_release_builders(builders); return invalid_hf_model(config, "invalid_lm_head") }
     float_construction_result q_bias = finish_float_builder(builders[0])
     float_construction_result k_bias = finish_float_builder(builders[1])
@@ -240,6 +248,6 @@ func load_hf_model(string model_dir) hf_model_weights {
     float_construction_result up_proj = finish_float_builder(builders[10])
     float_construction_result down_proj = finish_float_builder(builders[11])
     if !q_bias.ok || !k_bias.ok || !v_bias.ok || !input_norm.ok || !q_proj.ok || !k_proj.ok || !v_proj.ok || !o_proj.ok || !post_norm.ok || !gate_proj.ok || !up_proj.ok || !down_proj.ok { hf_release_builders(builders); return invalid_hf_model(config, "tensor_finalize_failed") }
-    hf_trace("all model weights loaded")
+    hf_trace("all model weights loaded source_bytes=" + hf_int_string(construction_stat(6) - loading_source_bytes) + " elements=" + hf_int_string(construction_stat(7) - loading_elements) + " elapsed_ns=" + hf_int_string(__std_clock_ns(1) - loading_started))
     hf_model_weights { valid: true, config: config, embedding: embedding, q_bias: q_bias.values, k_bias: k_bias.values, v_bias: v_bias.values, input_norm: input_norm.values, q_proj: q_proj.values, k_proj: k_proj.values, v_proj: v_proj.values, o_proj: o_proj.values, post_norm: post_norm.values, gate_proj: gate_proj.values, up_proj: up_proj.values, down_proj: down_proj.values, final_norm: final_norm.values, lm_head: lm_head.values, error_code: "" }
 }

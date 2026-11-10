@@ -10,7 +10,7 @@ class NativeTokenizerConstruction(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='tokenizer-construction-') as temporary:
             folder=Path(temporary);model=folder/'model';model.mkdir()
             document=dict(model=dict(type='BPE',vocab={'<unk>':0,'a':1,'b':2,'ab':3},merges=['a b']),added_tokens=[dict(id=4,content='<|endoftext|>'),dict(id=5,content='<|im_end|>')],pre_tokenizer=dict(type='ByteLevel'))
-            (model/'tokenizer.json').write_text(json.dumps(document))
+            (model/'tokenizer.json').write_text(json.dumps(document, indent=2))
             bad=folder/'bad';bad.mkdir();(bad/'tokenizer.json').write_text('{}')
             source=folder/'test.s';source.write_text('''package main
 import ("neurx.inference.tokenizer.hf_bpe_tokenizer"; "neurx.runtime.tensor_builder")
