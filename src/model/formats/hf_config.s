@@ -173,6 +173,11 @@ func parse_hf_config(string text) hf_model_config {
     int layers = hf_json_int(text, "num_hidden_layers", 0)
     int vocabulary = hf_json_int(text, "vocab_size", 0)
     int context = hf_json_int(text, "max_position_embeddings", 0)
+    int model_type_start = hf_json_number_start(text, "model_type")
+    bool qwen_attention_bias = false
+    if model_type_start >= 0 && model_type_start + 7 <= len(text) {
+        qwen_attention_bias = __host_slice(text, model_type_start, model_type_start + 7) == "\"qwen2\""
+    }
     if hidden <= 0 || intermediate <= 0 || heads <= 0 || kv_heads <= 0 || layers <= 0 || vocabulary <= 0 || context <= 0 { return invalid_hf_config("invalid_hf_config") }
     if hidden % heads != 0 || heads % kv_heads != 0 { return invalid_hf_config("unsupported_head_layout") }
     hf_model_config {
@@ -189,7 +194,7 @@ func parse_hf_config(string text) hf_model_config {
         rope_theta: hf_json_float(text, "rope_theta", 10000.0),
         rms_epsilon_text: hf_json_number_text(text, "rms_norm_eps", "0.00001"),
         rope_theta_text: hf_json_number_text(text, "rope_theta", "10000.0"),
-        attention_bias: hf_json_bool(text, "attention_bias", true),
+        attention_bias: hf_json_bool(text, "attention_bias", qwen_attention_bias),
         mlp_bias: hf_json_bool(text, "mlp_bias", false),
         tie_word_embeddings: hf_json_bool(text, "tie_word_embeddings", false),
         error_code: "",

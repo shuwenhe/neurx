@@ -1134,9 +1134,10 @@ $(PRODUCTION_S_CHAT_IR): src/inference/llm/chat/production_chat.s | $(PRODUCTION
 	}
 	@echo "✓ Production Chat IR compiled: $(PRODUCTION_S_CHAT_IR)"
 
-$(PRODUCTION_S_CHAT_DIRECT_IR): src/inference/llm/chat/production_chat_direct.s | $(PRODUCTION_S_INFERENCE_DIR)
-	@echo "Compiling direct production chat (no HTTP backend)..."
-	@$(S_SEED_COMPILER) src/inference/llm/chat/production_chat_direct.s '$(PRODUCTION_S_CHAT_DIRECT_IR)' || { \
+$(PRODUCTION_S_CHAT_DIRECT_IR): src/inference/llm/chat/production_chat_direct.s tool/build_legacy_ir.py tool/build_native.py $(shell find src backend -name '*.s') | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling direct production chat with its complete import closure..."
+	@python3 tool/build_legacy_ir.py --s-root '$(S_REPO_ROOT)' --compiler '$(S_SEED_COMPILER)' \
+		--entry src/inference/llm/chat/production_chat_direct.s --output '$(PRODUCTION_S_CHAT_DIRECT_IR)' || { \
 		echo "❌ Production Chat Direct IR compilation failed!"; \
 		exit 1; \
 	}

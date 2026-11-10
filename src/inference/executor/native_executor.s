@@ -66,10 +66,13 @@ func execute_native_request(string request_id, string model, string prompt, int 
             if !hf_model.valid { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "cpu-hf-transformer", error_code: hf_model.error_code, error_message: "failed to load HF model directory" } }
             hf_bpe_tokenizer tokenizer = load_hf_bpe_tokenizer(model)
             if !tokenizer.valid { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "cpu-hf-transformer", error_code: tokenizer.error_code, error_message: "failed to load tokenizer.json" } }
+            hf_trace("tokenizer initialized vocabulary=" + native_int_string(tokenizer.vocab_count))
             hf_bpe_result hf_tokens = hf_bpe_encode(tokenizer, prompt, len(prompt) * 2)
             if !hf_tokens.ok { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "cpu-hf-transformer", error_code: hf_tokens.error_code, error_message: "BPE tokenization failed" } }
+            hf_trace("prompt tokens=" + native_token_ids(hf_tokens.token_ids))
             hf_generation_result hf_result = hf_generate_until(hf_model, hf_tokens.token_ids, decision.token_budget, tokenizer.eos_id)
             if !hf_result.ok { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "cpu-hf-transformer", error_code: hf_result.error_code, error_message: "HF Transformer generation failed" } }
+            hf_trace("generated tokens=" + native_token_ids(hf_result.token_ids))
             hf_bpe_decode_result decoded = hf_bpe_decode_generated(tokenizer, hf_result.token_ids)
             if !decoded.ok { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: hf_result.token_ids, finish_reason: "error", backend: "cpu-hf-transformer", error_code: decoded.error_code, error_message: "generated token decoding failed" } }
             return native_execution_result { ok: true, request_id: request_id, output: decoded.text, token_ids: hf_result.token_ids, finish_reason: hf_result.finish_reason, backend: "cpu-hf-transformer", error_code: "", error_message: "" }

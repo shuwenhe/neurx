@@ -55,7 +55,12 @@ func cpu_sqrt(float value) float {
     float estimate = value
     if estimate < 1.0 { estimate = 1.0 }
     int i = 0
-    for i < 12 { estimate = 0.5 * (estimate + value / estimate); i = i + 1 }
+    for i < 32 {
+        float next = 0.5 * (estimate + value / estimate)
+        if cpu_abs(next - estimate) <= next * 0.000000000000001 { return next }
+        estimate = next
+        i = i + 1
+    }
     estimate
 }
 
@@ -68,11 +73,52 @@ func cpu_exp_positive(float value) float {
 }
 
 func cpu_exp(float value) float {
-    float bounded = value
-    if bounded > 10.0 { bounded = 10.0 }
-    if bounded < -10.0 { bounded = -10.0 }
-    if bounded < 0.0 { return 1.0 / cpu_exp_positive(-bounded) }
-    cpu_exp_positive(bounded)
+    // Range reduction avoids truncating attention scores and SiLU inputs.
+    if value < -745.0 { return 0.0 }
+    if value > 709.0 { value = 709.0 }
+    int power = int(value / 0.6931471805599453)
+    float remainder = value - power * 0.6931471805599453
+    float term = 1.0
+    float result = 1.0
+    int i = 1
+    for i <= 18 { term = term * remainder / (i * 1.0); result = result + term; i = i + 1 }
+    for power > 0 { result = result * 2.0; power = power - 1 }
+    for power < 0 { result = result / 2.0; power = power + 1 }
+    result
+}
+
+func hf_log(float value) float {
+    int power = 0
+    for value >= 2.0 { value = value / 2.0; power = power + 1 }
+    for value < 1.0 { value = value * 2.0; power = power - 1 }
+    float y = (value - 1.0) / (value + 1.0)
+    float term = y
+    float result = 0.0
+    int divisor = 1
+    for divisor < 41 { result = result + term / (divisor * 1.0); term = term * y * y; divisor = divisor + 2 }
+    2.0 * result + power * 0.6931471805599453
+}
+
+func hf_sin(float value) float {
+    value = value - int(value / 6.283185307179586) * 6.283185307179586
+    if value > 3.141592653589793 { value = value - 6.283185307179586 }
+    if value < -3.141592653589793 { value = value + 6.283185307179586 }
+    float term = value
+    float result = value
+    int i = 1
+    for i <= 12 { term = -term * value * value / ((2 * i) * (2 * i + 1) * 1.0); result = result + term; i = i + 1 }
+    result
+}
+
+func hf_cos(float value) float {
+    value = value - int(value / 6.283185307179586) * 6.283185307179586
+    if value > 3.141592653589793 { value = value - 6.283185307179586 }
+    if value < -3.141592653589793 { value = value + 6.283185307179586 }
+    float term = 1.0
+    float result = 1.0
+    int i = 1
+    for i <= 12 { term = -term * value * value / ((2 * i - 1) * (2 * i) * 1.0); result = result + term; i = i + 1 }
+    result
 }
 
 func cpu_rms_norm(float[] input) float[] {
@@ -113,26 +159,23 @@ func hf_matvec(float[] weight, int rows, int columns, float[] input) float[] {
 }
 
 func hf_rope(float[] input, int heads, int head_dim, int position, float theta) float[] {
+    if head_dim <= 0 || head_dim % 2 != 0 || len(input) != heads * head_dim || theta <= 0.0 { return float[]{} }
     float[] output = make(float[], len(input))
-    int i = 0
-    for i < len(input) { output[i] = input[i]; i = i + 1 }
+    int half = head_dim / 2
+    float log_theta = hf_log(theta)
     int head = 0
     for head < heads {
         int pair = 0
-        for pair + 1 < head_dim {
-            float frequency = 1.0
-            int power = pair
-            for power > 0 { frequency = frequency / cpu_sqrt(theta); power = power - 1 }
-            float angle = position * 1.0 * frequency
-            float angle2 = angle * angle
-            float cosine = 1.0 - angle2 / 2.0 + angle2 * angle2 / 24.0
-            float sine = angle - angle * angle2 / 6.0 + angle * angle2 * angle2 / 120.0
+        for pair < half {
+            float angle = position * 1.0 * cpu_exp(-2.0 * pair * log_theta / (head_dim * 1.0))
+            float cosine = hf_cos(angle)
+            float sine = hf_sin(angle)
             int offset = head * head_dim + pair
-            float left = output[offset]
-            float right = output[offset + 1]
+            float left = input[offset]
+            float right = input[offset + half]
             output[offset] = left * cosine - right * sine
-            output[offset + 1] = left * sine + right * cosine
-            pair = pair + 2
+            output[offset + half] = right * cosine + left * sine
+            pair = pair + 1
         }
         head = head + 1
     }
@@ -156,6 +199,13 @@ func hf_cpu_layer(hf_cpu_config config, hf_layer_weights weights, float[] input,
     float[] key = hf_matvec(weights.k_proj, config.kv_heads * config.head_dim, config.hidden_size, normalized)
     float[] value = hf_matvec(weights.v_proj, config.kv_heads * config.head_dim, config.hidden_size, normalized)
     if len(query) == 0 || len(key) == 0 || len(value) == 0 { return hf_layer_result { ok: false, hidden: [], cache: cache, error_code: "projection_shape_mismatch" } }
+    int bias_index = 0
+    if len(weights.q_bias) > 0 {
+        if len(weights.q_bias) != len(query) || len(weights.k_bias) != len(key) || len(weights.v_bias) != len(value) { return hf_layer_result { ok: false, hidden: [], cache: cache, error_code: "attention_bias_shape_mismatch" } }
+        for bias_index < len(query) { query[bias_index] = query[bias_index] + weights.q_bias[bias_index]; bias_index = bias_index + 1 }
+        bias_index = 0
+        for bias_index < len(key) { key[bias_index] = key[bias_index] + weights.k_bias[bias_index]; value[bias_index] = value[bias_index] + weights.v_bias[bias_index]; bias_index = bias_index + 1 }
+    }
     query = hf_rope(query, config.attention_heads, config.head_dim, position, config.rope_theta)
     key = hf_rope(key, config.kv_heads, config.head_dim, position, config.rope_theta)
     int kv_width = config.kv_heads * config.head_dim
@@ -238,6 +288,7 @@ func hf_argmax_logits(hf_model_weights model, float[] hidden) int {
         if token == 0 || logit > best_logit { best_logit = logit; best_token = token }
         token = token + 1
     }
+    hf_trace("logits vocabulary=" + hf_int_string(model.config.vocabulary_size) + " argmax=" + hf_int_string(best_token) + " value_micro=" + hf_int_string(int(best_logit * 1000000.0)))
     best_token
 }
 
@@ -258,6 +309,9 @@ func hf_forward_token(hf_model_weights model, int token_id, float[] cache_keys, 
             q_proj: hf_float_slice(model.q_proj, layer * hidden_square, hidden_square),
             k_proj: hf_float_slice(model.k_proj, layer * kv_size, kv_size),
             v_proj: hf_float_slice(model.v_proj, layer * kv_size, kv_size),
+            q_bias: hf_float_slice(model.q_bias, layer * config.hidden_size, config.hidden_size),
+            k_bias: hf_float_slice(model.k_bias, layer * config.kv_heads * config.head_dim, config.kv_heads * config.head_dim),
+            v_bias: hf_float_slice(model.v_bias, layer * config.kv_heads * config.head_dim, config.kv_heads * config.head_dim),
             o_proj: hf_float_slice(model.o_proj, layer * hidden_square, hidden_square),
             post_norm: hf_float_slice(model.post_norm, layer * config.hidden_size, config.hidden_size),
             gate_proj: hf_float_slice(model.gate_proj, layer * mlp_size, mlp_size),
@@ -281,6 +335,7 @@ func hf_forward_token(hf_model_weights model, int token_id, float[] cache_keys, 
         cache_values = hf_float_copy(cache_values, layer * cache_size, result.cache.values)
         layer = layer + 1
     }
+    hf_trace("forward completed position=" + hf_int_string(position) + " layers=" + hf_int_string(model.config.layers))
     // Arrays have value semantics: return every layer's updated cache to the caller.
     hf_kv_cache updated_cache = hf_kv_cache {
         keys: cache_keys, values: cache_values, length: position + 1,

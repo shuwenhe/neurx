@@ -1,0 +1,98 @@
+diff --git a/makefile b/makefile
+index e5265d208..340dbd564 100644
+--- a/makefile
++++ b/makefile
+@@ -475,6 +475,7 @@ selfhost-canonical-production-check: compiler selfhost-canonical-parser-check
+ 	@python3 test/native-bootstrap-diagnostic/native_generic_enum_binding_check.py -v
+ 	@python3 test/native-bootstrap-diagnostic/native_seed_generic_template_check.py -v
+ 	@python3 test/stdlib-native/test_seed_borrow_integration.py -v
++	@python3 test/native-bootstrap-diagnostic/test_seed_string_index.py
+ 	@python3 test/native-bootstrap-diagnostic/native_seed_int64_check.py
+ 	@python3 test/native-bootstrap-diagnostic/native_seed_int64_memory_check.py
+ 	@python3 test/native-bootstrap-diagnostic/native_integer_differential_check.py --seed
+diff --git a/src/cmd/compile/seed/semantic/analyzer.c b/src/cmd/compile/seed/semantic/analyzer.c
+index c50039f99..d2624a32b 100644
+--- a/src/cmd/compile/seed/semantic/analyzer.c
++++ b/src/cmd/compile/seed/semantic/analyzer.c
+@@ -1802,8 +1802,9 @@ static int analyze_expr(semantic_ctx *ctx, ast_node *node, const char **out_type
+ 				return 0;
+ 			}
+ 			if (lhs_type && strcmp(lhs_type, TYPE_STRING) == 0) {
+-
+-				*out_type = TYPE_STRING;
++                /* String indexing yields an unsigned byte, matching __index_get
++                 * and the canonical self-hosted semantic analyzer. */
++				*out_type = TYPE_INT;
+ 				return 1;
+ 			}
+ 			{
+diff --git a/src/runtime/selfhost_linux_amd64.S b/src/runtime/selfhost_linux_amd64.S
+index 3e452cf5a..5d18c27ce 100644
+--- a/src/runtime/selfhost_linux_amd64.S
++++ b/src/runtime/selfhost_linux_amd64.S
+@@ -621,9 +621,9 @@ s_index_get:
+     test $1, %rdi
+     jnz .Lindex_fail
+     cmpq $2, (%rdi)
+-    je s_string_char_at
++    je s_string_byte_at
+     cmpq $6, (%rdi)
+-    je s_string_char_at
++    je s_string_byte_at
+     cmpq $4, (%rdi)
+     jne .Lindex_fail
+     S_UNTAG %rsi
+diff --git a/test/native-bootstrap-diagnostic/test_seed_string_index.py b/test/native-bootstrap-diagnostic/test_seed_string_index.py
+new file mode 100644
+index 000000000..0379aaa25
+--- /dev/null
++++ b/test/native-bootstrap-diagnostic/test_seed_string_index.py
+@@ -0,0 +1,48 @@
++"""String indexing has the same unsigned-byte type in seed analysis and execution."""
++from pathlib import Path
++import subprocess
++import tempfile
++import unittest
++
++ROOT = Path(__file__).resolve().parents[2]
++SEED = ROOT / 'bin/s_seed'
++
++
++class SeedStringIndex(unittest.TestCase):
++    def compile(self, source, folder):
++        entry = folder / 'main.s'
++        entry.write_text(source)
++        return subprocess.run([str(SEED), '--compile-unit', str(folder / 'main.ir'), str(entry)],
++                              capture_output=True, text=True, timeout=30, cwd=ROOT)
++
++    def test_byte_index_passes_integer_parameter_and_executes(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            folder = Path(temporary)
++            result = self.compile('''package main
++func identity(int value) int { return value }
++func main() int {
++    string text = "A9"
++    if identity(text[0]) != 65 { return 1 }
++    if text[1] != 57 { return 2 }
++    if identity("é"[0]) != 195 { return 3 }
++    return 0
++}
++''', folder)
++            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++            result = subprocess.run([str(SEED), '--emit-standalone-amd64', str(folder / 'main.ir'), str(folder / 'main')], capture_output=True, text=True, timeout=30, cwd=ROOT)
++            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++            result = subprocess.run([str(folder / 'main')], capture_output=True, text=True, timeout=10)
++            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++
++    def test_byte_index_is_rejected_for_string_parameter(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            result = self.compile('''package main
++func consume(string value) int { return len(value) }
++func main() int { string text = "A"; return consume(text[0]) }
++''', Path(temporary))
++            self.assertNotEqual(result.returncode, 0)
++            self.assertIn("expected 'string', got 'int'", result.stderr)
++
++
++if __name__ == '__main__':
++    unittest.main()

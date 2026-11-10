@@ -1,6 +1,7 @@
 package neurx.models.loaders.hf_transformer
 extern "intrinsic" func __std_byte_string(int value) string
 import (
+    "neurx.runtime.command"
     "neurx.models.formats.hf_config"
     "neurx.models.formats.safetensors_embedding"
 )
@@ -12,6 +13,9 @@ struct hf_layer_weights {
     float[] q_proj
     float[] k_proj
     float[] v_proj
+    float[] q_bias
+    float[] k_bias
+    float[] v_bias
     float[] o_proj
     float[] post_norm
     float[] gate_proj
@@ -28,6 +32,9 @@ struct hf_model_weights {
     float[] q_proj
     float[] k_proj
     float[] v_proj
+    float[] q_bias
+    float[] k_bias
+    float[] v_bias
     float[] o_proj
     float[] post_norm
     float[] gate_proj
@@ -38,7 +45,12 @@ struct hf_model_weights {
     string error_code
 }
 
+func hf_trace(string message) {
+    if runtime_env_get("NEURX_TRACE", "false") == "true" { println("[neurx-hf] " + message) }
+}
+
 func hf_int_string(int value) string {
+    if value < 0 { return "-" + hf_int_string(-value) }
     if value == 0 { return "0" }
     string output = ""
     int current = value
@@ -89,6 +101,7 @@ func hf_resolve_tensor_path(string model_dir, string name) string {
 }
 
 func hf_load_model_values(string model_dir, string name) f32_tensor_result {
+    hf_trace("weight " + name)
     string path = hf_resolve_tensor_path(model_dir, name)
     if path == "" { return hf_load_values(model_dir + "/model.safetensors", name) }
     hf_load_values(path, name)
@@ -104,15 +117,18 @@ func load_hf_layer(string path, int layer) hf_layer_weights {
     f32_tensor_result q = hf_load_values(path, prefix + "self_attn.q_proj.weight")
     f32_tensor_result k = hf_load_values(path, prefix + "self_attn.k_proj.weight")
     f32_tensor_result v = hf_load_values(path, prefix + "self_attn.v_proj.weight")
+    f32_tensor_result q_bias = hf_load_values(path, prefix + "self_attn.q_proj.bias")
+    f32_tensor_result k_bias = hf_load_values(path, prefix + "self_attn.k_proj.bias")
+    f32_tensor_result v_bias = hf_load_values(path, prefix + "self_attn.v_proj.bias")
     f32_tensor_result o = hf_load_values(path, prefix + "self_attn.o_proj.weight")
     f32_tensor_result post_norm = hf_load_values(path, prefix + "post_attention_layernorm.weight")
     f32_tensor_result gate = hf_load_values(path, prefix + "mlp.gate_proj.weight")
     f32_tensor_result up = hf_load_values(path, prefix + "mlp.up_proj.weight")
     f32_tensor_result down = hf_load_values(path, prefix + "mlp.down_proj.weight")
     if !input_norm.ok || !q.ok || !k.ok || !v.ok || !o.ok || !post_norm.ok || !gate.ok || !up.ok || !down.ok {
-        return hf_layer_weights { valid: false, input_norm: [], q_proj: [], k_proj: [], v_proj: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], error_code: "missing_hf_layer_weight" }
+        return hf_layer_weights { valid: false, input_norm: [], q_proj: [], k_proj: [], v_proj: [], q_bias: [], k_bias: [], v_bias: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], error_code: "missing_hf_layer_weight" }
     }
-    hf_layer_weights { valid: true, input_norm: input_norm.values, q_proj: q.values, k_proj: k.values, v_proj: v.values, o_proj: o.values, post_norm: post_norm.values, gate_proj: gate.values, up_proj: up.values, down_proj: down.values, error_code: "" }
+    hf_layer_weights { valid: true, input_norm: input_norm.values, q_proj: q.values, k_proj: k.values, v_proj: v.values, q_bias: q_bias.values, k_bias: k_bias.values, v_bias: v_bias.values, o_proj: o.values, post_norm: post_norm.values, gate_proj: gate.values, up_proj: up.values, down_proj: down.values, error_code: "" }
 }
 
 func load_hf_model_layer(string model_dir, int layer) hf_layer_weights {
@@ -121,18 +137,25 @@ func load_hf_model_layer(string model_dir, int layer) hf_layer_weights {
     f32_tensor_result q = hf_load_model_values(model_dir, prefix + "self_attn.q_proj.weight")
     f32_tensor_result k = hf_load_model_values(model_dir, prefix + "self_attn.k_proj.weight")
     f32_tensor_result v = hf_load_model_values(model_dir, prefix + "self_attn.v_proj.weight")
+    f32_tensor_result q_bias = hf_load_model_values(model_dir, prefix + "self_attn.q_proj.bias")
+    f32_tensor_result k_bias = hf_load_model_values(model_dir, prefix + "self_attn.k_proj.bias")
+    f32_tensor_result v_bias = hf_load_model_values(model_dir, prefix + "self_attn.v_proj.bias")
     f32_tensor_result o = hf_load_model_values(model_dir, prefix + "self_attn.o_proj.weight")
     f32_tensor_result post_norm = hf_load_model_values(model_dir, prefix + "post_attention_layernorm.weight")
     f32_tensor_result gate = hf_load_model_values(model_dir, prefix + "mlp.gate_proj.weight")
     f32_tensor_result up = hf_load_model_values(model_dir, prefix + "mlp.up_proj.weight")
     f32_tensor_result down = hf_load_model_values(model_dir, prefix + "mlp.down_proj.weight")
-    if !input_norm.ok || !q.ok || !k.ok || !v.ok || !o.ok || !post_norm.ok || !gate.ok || !up.ok || !down.ok { return hf_layer_weights { valid: false, input_norm: [], q_proj: [], k_proj: [], v_proj: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], error_code: "missing_hf_layer_weight" } }
-    hf_layer_weights { valid: true, input_norm: input_norm.values, q_proj: q.values, k_proj: k.values, v_proj: v.values, o_proj: o.values, post_norm: post_norm.values, gate_proj: gate.values, up_proj: up.values, down_proj: down.values, error_code: "" }
+    hf_model_config config = load_hf_config(model_dir)
+    if config.attention_bias && (!q_bias.ok || !k_bias.ok || !v_bias.ok) {
+        return hf_layer_weights { valid: false, error_code: "missing_attention_bias" }
+    }
+    if !input_norm.ok || !q.ok || !k.ok || !v.ok || !o.ok || !post_norm.ok || !gate.ok || !up.ok || !down.ok { return hf_layer_weights { valid: false, input_norm: [], q_proj: [], k_proj: [], v_proj: [], q_bias: [], k_bias: [], v_bias: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], error_code: "missing_hf_layer_weight" } }
+    hf_layer_weights { valid: true, input_norm: input_norm.values, q_proj: q.values, k_proj: k.values, v_proj: v.values, q_bias: q_bias.values, k_bias: k_bias.values, v_bias: v_bias.values, o_proj: o.values, post_norm: post_norm.values, gate_proj: gate.values, up_proj: up.values, down_proj: down.values, error_code: "" }
 }
 
 func invalid_hf_model(hf_model_config config, string code) hf_model_weights {
     safetensors_embedding empty = safetensors_embedding { valid: false, path: "", rows: 0, columns: 0, data_offset: 0, data_bytes: 0, dtype: "", element_bytes: 0, error_code: code }
-    hf_model_weights { valid: false, config: config, embedding: empty, input_norm: [], q_proj: [], k_proj: [], v_proj: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], final_norm: [], lm_head: [], error_code: code }
+    hf_model_weights { valid: false, config: config, embedding: empty, input_norm: [], q_proj: [], k_proj: [], v_proj: [], q_bias: [], k_bias: [], v_bias: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], final_norm: [], lm_head: [], error_code: code }
 }
 
 func hf_copy_layer(float[] target, int offset, float[] source) {
@@ -141,15 +164,21 @@ func hf_copy_layer(float[] target, int offset, float[] source) {
 }
 
 func load_hf_model(string model_dir) hf_model_weights {
+    hf_trace("loading model " + model_dir)
     hf_model_config config = load_hf_config(model_dir)
     if !config.valid { return invalid_hf_model(config, config.error_code) }
     string path = hf_resolve_tensor_path(model_dir, "model.embed_tokens.weight")
     if path == "" { return invalid_hf_model(config, "model_weights_not_found") }
     safetensors_embedding embedding = load_f32_tensor(path, "model.embed_tokens.weight")
     if !embedding.valid { return invalid_hf_model(config, "embedding_" + embedding.error_code) }
+    hf_trace("config layers=" + hf_int_string(config.layers) + " hidden=" + hf_int_string(config.hidden_size) + " vocabulary=" + hf_int_string(config.vocabulary_size) + " dtype=" + embedding.dtype)
     int hidden_square = config.hidden_size * config.hidden_size
     int kv_size = config.kv_heads * config.head_dim * config.hidden_size
     int mlp_size = config.intermediate_size * config.hidden_size
+    float[] q_bias = make(float[], config.layers * config.hidden_size)
+    int kv_width = config.kv_heads * config.head_dim
+    float[] k_bias = make(float[], config.layers * kv_width)
+    float[] v_bias = make(float[], config.layers * kv_width)
     float[] input_norm = make(float[], config.layers * config.hidden_size)
     float[] q_proj = make(float[], config.layers * hidden_square)
     float[] k_proj = make(float[], config.layers * kv_size)
@@ -164,6 +193,13 @@ func load_hf_model(string model_dir) hf_model_weights {
         hf_layer_weights weights = load_hf_model_layer(model_dir, layer)
         if !weights.valid { return invalid_hf_model(config, "layer_" + hf_int_string(layer) + "_" + weights.error_code) }
         int i = 0
+        if config.attention_bias {
+            if len(weights.q_bias) != config.hidden_size || len(weights.k_bias) != kv_width || len(weights.v_bias) != kv_width { return invalid_hf_model(config, "attention_bias_shape_mismatch") }
+            for i < config.hidden_size { q_bias[layer * config.hidden_size + i] = weights.q_bias[i]; i = i + 1 }
+            i = 0
+            for i < kv_width { k_bias[layer * kv_width + i] = weights.k_bias[i]; v_bias[layer * kv_width + i] = weights.v_bias[i]; i = i + 1 }
+            i = 0
+        }
         for i < config.hidden_size { input_norm[layer * config.hidden_size + i] = weights.input_norm[i]; post_norm[layer * config.hidden_size + i] = weights.post_norm[i]; i = i + 1 }
         i = 0
         for i < hidden_square { q_proj[layer * hidden_square + i] = weights.q_proj[i]; o_proj[layer * hidden_square + i] = weights.o_proj[i]; i = i + 1 }
@@ -171,6 +207,7 @@ func load_hf_model(string model_dir) hf_model_weights {
         for i < kv_size { k_proj[layer * kv_size + i] = weights.k_proj[i]; v_proj[layer * kv_size + i] = weights.v_proj[i]; i = i + 1 }
         i = 0
         for i < mlp_size { gate_proj[layer * mlp_size + i] = weights.gate_proj[i]; up_proj[layer * mlp_size + i] = weights.up_proj[i]; down_proj[layer * mlp_size + i] = weights.down_proj[i]; i = i + 1 }
+        hf_trace("loaded layer=" + hf_int_string(layer))
         layer = layer + 1
     }
     f32_tensor_result final_norm = hf_load_model_values(model_dir, "model.norm.weight")
@@ -180,5 +217,6 @@ func load_hf_model(string model_dir) hf_model_weights {
         lm_head = read_f32_tensor(embedding)
         if !lm_head.ok { return invalid_hf_model(config, "missing_lm_head") }
     }
-    hf_model_weights { valid: true, config: config, embedding: embedding, input_norm: input_norm, q_proj: q_proj, k_proj: k_proj, v_proj: v_proj, o_proj: o_proj, post_norm: post_norm, gate_proj: gate_proj, up_proj: up_proj, down_proj: down_proj, final_norm: final_norm.values, lm_head: lm_head.values, error_code: "" }
+    hf_trace("all model weights loaded")
+    hf_model_weights { valid: true, config: config, embedding: embedding, input_norm: input_norm, q_proj: q_proj, k_proj: k_proj, v_proj: v_proj, q_bias: q_bias, k_bias: k_bias, v_bias: v_bias, o_proj: o_proj, post_norm: post_norm, gate_proj: gate_proj, up_proj: up_proj, down_proj: down_proj, final_norm: final_norm.values, lm_head: lm_head.values, error_code: "" }
 }
