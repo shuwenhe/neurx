@@ -12,10 +12,10 @@ struct zero_config {
 }
 
 struct zero_state {
-    []float local_momentum
-    []float local_variance
-    []float params
-    []float grads
+    float[] local_momentum
+    float[] local_variance
+    float[] params
+    float[] grads
     int step
     int partition_id
     int world_size
@@ -48,11 +48,7 @@ func create_zero_state(int total_params, int world_size, int rank) zero_state {
     if rank < remainder {
         state.local_param_count = state.local_param_count + 1
     }
-    state.local_momentum = []
-    state.local_variance = []
-    state.params = []
-    state.grads = []
-    int i = 0
+    state.local_momentum = state.local_variance[] = state.params[] = state.grads[] = int[] i = 0
     for i < state.local_param_count {
         state.local_momentum = append(state.local_momentum, 0.0)
         state.local_variance = append(state.local_variance, 0.0)

@@ -6,7 +6,7 @@ import (
 
 struct merge_config {
     string merge_method
-    []float weights
+    float[] weights
     float lambda
     int top_k_percent
     float drop_rate
@@ -14,14 +14,14 @@ struct merge_config {
 }
 
 struct model_delta {
-    []tensor param_deltas
-    []string param_names
+    tensor[] param_deltas
+    string[] param_names
 }
 
 func new_merge_config() merge_config {
     merge_config {
         merge_method: "average",
-        weights: []float{},
+        weights: float[]{},
         lambda: 1.0,
         top_k_percent: 20,
         drop_rate: 0.5,
@@ -33,10 +33,10 @@ func compute_model_delta(
     module finetuned,
     module base
 ) model_delta {
-    []tensor ft_params = finetuned.parameters()
-    []tensor base_params = base.parameters()
-    []tensor deltas = make([]tensor, ft_params.len)
-    []string names = make([]string, ft_params.len)
+    tensor[] ft_params = finetuned.parameters()
+    tensor[] base_params = base.parameters()
+    tensor[] deltas = make(tensor[], ft_params.len)
+    string[] names = make(string[], ft_params.len)
     int i = 0
     for i < ft_params.len {
         tensor delta = tensor_ops.sub(ft_params[i], base_params[i])
@@ -51,8 +51,8 @@ func compute_model_delta(
 }
 
 func merge_models_average(
-    []module models,
-    []float weights
+    module[] models,
+    float[] weights
 ) module {
     if models.len == 0 {
         return module{}
@@ -63,20 +63,20 @@ func merge_models_average(
         weight_sum = weight_sum + weights[i]
         i = i + 1
     }
-    []float norm_weights = make([]float, weights.len)
+    float[] norm_weights = make(float[], weights.len)
     i = 0
     for i < weights.len {
         norm_weights[i] = weights[i] / weight_sum
         i = i + 1
     }
     module result = models[0].clone()
-    []tensor result_params = result.parameters()
+    tensor[] result_params = result.parameters()
     int p = 0
     for p < result_params.len {
         tensor avg_param = tensor_ops.zeros_like(result_params[p])
         int m = 0
         for m < models.len {
-            []tensor model_params = models[m].parameters()
+            tensor[] model_params = models[m].parameters()
             tensor weighted = tensor_ops.mul_scalar(
                 model_params[p],
                 norm_weights[m]
@@ -93,12 +93,12 @@ func merge_models_average(
 
 func merge_task_arithmetic(
     module base,
-    []model_delta deltas,
-    []float weights,
+    model_delta[] deltas,
+    float[] weights,
     float lambda
 ) module {
     module result = base.clone()
-    []tensor result_params = result.parameters()
+    tensor[] result_params = result.parameters()
     int p = 0
     for p < result_params.len {
         tensor merged_delta = tensor_ops.zeros_like(result_params[p])
@@ -124,15 +124,15 @@ func merge_task_arithmetic(
 
 func merge_ties(
     module base,
-    []model_delta deltas,
-    []float weights,
+    model_delta[] deltas,
+    float[] weights,
     int top_k_percent
 ) module {
     module result = base.clone()
-    []tensor result_params = result.parameters()
+    tensor[] result_params = result.parameters()
     int p = 0
     for p < result_params.len {
-        []tensor param_deltas = make([]tensor, deltas.len)
+        tensor[] param_deltas = make(tensor[], deltas.len)
         int d = 0
         for d < deltas.len {
             param_deltas[d] = deltas[d].param_deltas[p]
@@ -153,12 +153,12 @@ func merge_ties(
 
 func merge_dare(
     module base,
-    []model_delta deltas,
-    []float weights,
+    model_delta[] deltas,
+    float[] weights,
     float drop_rate
 ) module {
     module result = base.clone()
-    []tensor result_params = result.parameters()
+    tensor[] result_params = result.parameters()
     int p = 0
     for p < result_params.len {
         tensor merged_delta = tensor_ops.zeros_like(result_params[p])
@@ -183,7 +183,7 @@ func merge_dare(
     result
 }
 
-func trim_top_k([]tensor deltas, int top_k_percent) tensor {
+func trim_top_k(tensor[] deltas, int top_k_percent) tensor {
     if deltas.len == 0 {
         return tensor{}
     }
@@ -203,7 +203,7 @@ func elect_sign(tensor trimmed) tensor {
     signed
 }
 
-func weighted_average(tensor values, []float weights) tensor {
+func weighted_average(tensor values, float[] weights) tensor {
     tensor result = tensor_ops.zeros_like(values)
     int i = 0
     for i < weights.len {

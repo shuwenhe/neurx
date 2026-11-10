@@ -32,7 +32,7 @@ func compute_topk_kl_loss(
     int batch_size = size(student_logits, 0)
     int seq_len = size(student_logits, 1)
     int vocab_size = size(student_logits, 2)
-    tensor loss = zeros([]int{batch_size, seq_len})
+    tensor loss = zeros(int[]{batch_size, seq_len})
     int num_chunks = (vocab_size + config.chunk_size - 1) / config.chunk_size
     for int chunk_idx = 0; chunk_idx < num_chunks; chunk_idx = chunk_idx + 1 {
         int start_idx = chunk_idx * config.chunk_size
@@ -73,8 +73,8 @@ func chunked_topk_forward(
 ) (tensor, tensor) {
     int vocab_size = size(teacher_logits, 2)
     int num_chunks = (vocab_size + config.chunk_size - 1) / config.chunk_size
-    []tensor student_topk_chunks = make([]tensor, num_chunks)
-    []tensor teacher_topk_chunks = make([]tensor, num_chunks)
+    tensor[] student_topk_chunks = make(tensor[], num_chunks)
+    tensor[] teacher_topk_chunks = make(tensor[], num_chunks)
     for int chunk_idx = 0; chunk_idx < num_chunks; chunk_idx = chunk_idx + 1 {
         int start_idx = chunk_idx * config.chunk_size
         int end_idx = min_int(start_idx + config.chunk_size, vocab_size)

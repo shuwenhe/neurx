@@ -4,7 +4,7 @@ struct inference_pipeline {
     distributed_inference_state engine
     distributed_kv_cache kv_cache
     inference_coordinator_config coordinator_cfg
-    []inference_node_state node_states
+    inference_node_state[] node_states
     sharding_plan plan
 }
 
@@ -39,7 +39,7 @@ func create_inference_pipeline(
         cfg.hidden_dim,
         cfg.world_size,
         cfg.rank)
-    pipeline.node_states = []inference_node_state{}
+    pipeline.node_states = inference_node_state[]{}
     for i = 0; i < cfg.world_size; i = i + 1 {
         node := init_node_state(i)
         pipeline.node_states = append(pipeline.node_states, node)
@@ -49,10 +49,10 @@ func create_inference_pipeline(
 
 func process_batch(
     inference_pipeline pipeline,
-    []inference_request batch
-) []inference_response {
+    inference_request[] batch
+) inference_response[] {
     printf("Processing batch of %d requests\n", len(batch))
-    []inference_response responses = []inference_response{}
+    inference_response[] responses = inference_response[]{}
     for i = 0; i < len(batch); i = i + 1 {
         inference_request req = batch[i]
         int target_rank = schedule_request(
@@ -77,10 +77,10 @@ func handle_tensor_parallel(
     printf("TP Degree: %d\n", pipeline.config.tp_degree)
     printf("Local hidden dim: %d\n",
         pipeline.config.hidden_dim / pipeline.config.tp_degree)
-    []float test_data = []float{0.1, 0.2, 0.3, 0.4}
-    []float reduced = allreduce_inference(test_data, 0, pipeline.config.world_size, "nccl")
+    float[] test_data = float[]{0.1, 0.2, 0.3, 0.4}
+    float[] reduced = allreduce_inference(test_data, 0, pipeline.config.world_size, "nccl")
     printf("AllReduce result: %d elements\n", len(reduced))
-    []float[] gathered = allgather_attention_heads(test_data, 0, pipeline.config.world_size)
+    float[][] gathered = allgather_attention_heads(test_data, 0, pipeline.config.world_size)
     printf("AllGather result: %d heads\n", len(gathered))
 }
 
@@ -126,16 +126,16 @@ func run_inference_demo(
 ) {
     printf("\n[Distributed Inference Demo]\n")
     printf("============================\n")
-    []inference_request batch = []inference_request{}
+    inference_request[] batch = inference_request[]{}
     for i = 0; i < 3; i = i + 1 {
         inference_request req
         req.request_id = "req-" + string(i)
         req.seq_len = 256 + i * 128
-        req.input_ids = []int{1, 2, 3, 4, 5}
+        req.input_ids = int[]{1, 2, 3, 4, 5}
         req.batch_idx = i
         batch = append(batch, req)
     }
-    []inference_response responses = process_batch(pipeline, batch)
+    inference_response[] responses = process_batch(pipeline, batch)
     printf("Received %d responses\n", len(responses))
 }
 

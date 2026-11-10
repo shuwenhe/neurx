@@ -55,8 +55,8 @@ func parse_args() launcher_config {
     }
 }
 
-func query_gpu_info() []gpu_info {
-    []gpu_info gpus = make([]gpu_info, 16)
+func query_gpu_info() gpu_info[] {
+    gpu_info[] gpus = make(gpu_info[], 16)
     gpu_info gpu0 = gpu_info {
         device_id: 0,
         name: "NVIDIA RTX 4090",
@@ -68,7 +68,7 @@ func query_gpu_info() []gpu_info {
 }
 
 func check_gpu_availability(int num_gpus) (bool, int) {
-    []gpu_info gpus = query_gpu_info()
+    gpu_info[] gpus = query_gpu_info()
     int available_count = 0
     int i = 0
     for i < len(gpus) {
@@ -154,8 +154,8 @@ func launch_rank_process(
 func launch_all_processes(
     launcher_config config,
     int world_size,
-) []process_handle {
-    []process_handle handles = make([]process_handle, world_size)
+) process_handle[] {
+    process_handle[] handles = make(process_handle[], world_size)
     int rank = 0
     for rank < world_size {
         process_handle handle = launch_rank_process(config, rank, world_size)
@@ -169,7 +169,7 @@ func launch_all_processes(
 }
 
 func wait_all_processes(
-    []process_handle handles,
+    process_handle[] handles,
 ) int {
     int overall_exit_code = 0
     int rank = 0
@@ -190,7 +190,7 @@ func wait_all_processes(
     overall_exit_code
 }
 
-func aggregate_logs(launcher_config config, []process_handle handles) {
+func aggregate_logs(launcher_config config, process_handle[] handles) {
     print("[INFO] Aggregating logs from all ranks...")
     int rank = 0
     for rank < len(handles) {
@@ -235,7 +235,7 @@ func main() {
         exit(1)
     }
     print("[INFO] Launching " + itoa(config.num_gpus) + " training processes...")
-    []process_handle handles = launch_all_processes(config, config.num_gpus)
+    process_handle[] handles = launch_all_processes(config, config.num_gpus)
     print("[INFO] All processes started. Waiting for completion...")
     int exit_code = wait_all_processes(handles)
     aggregate_logs(config, handles)

@@ -2,8 +2,8 @@ package neurx.inference.runtime.backend_registry
 struct inference_backend_capability {
     string backend_name
     string device_type
-    []string attention_kernels
-    []string dtypes
+    string[] attention_kernels
+    string[] dtypes
     bool paged_attention
     bool graph_decode
     bool tensor_parallel
@@ -26,7 +26,7 @@ struct backend_requirement {
 }
 
 struct backend_registry_state {
-    []inference_backend_capability backends
+    inference_backend_capability[] backends
 }
 
 struct backend_selection_result {
@@ -39,9 +39,7 @@ func empty_backend_capability() inference_backend_capability {
     inference_backend_capability backend
     backend.backend_name = ""
     backend.device_type = ""
-    backend.attention_kernels = []
-    backend.dtypes = []
-    backend.paged_attention = false
+    backend.attention_kernels = backend.dtypes[] = backend.paged_attention[] = false
     backend.graph_decode = false
     backend.tensor_parallel = false
     backend.pipeline_parallel = false
@@ -62,7 +60,7 @@ func new_backend_selection_result(inference_backend_capability backend, bool sel
 
 func new_backend_registry() backend_registry_state {
     backend_registry_state state
-    state.backends = make([]inference_backend_capability, 16)
+    state.backends = make(inference_backend_capability[], 16)
     state
 }
 
@@ -70,11 +68,11 @@ func backend_capability_at(backend_registry_state state, int index) inference_ba
     state.backends[index]
 }
 
-func backend_string_at([]string values, int index) string {
+func backend_string_at(string[] values, int index) string {
     values[index]
 }
 
-func backend_contains([]string values, string expected) bool {
+func backend_contains(string[] values, string expected) bool {
     int i = 0
     for i < len(values) {
         string value = backend_string_at(values, i)

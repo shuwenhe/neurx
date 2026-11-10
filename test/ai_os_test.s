@@ -195,7 +195,7 @@ func run_all_tests() {
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
     
-    tests := [10]test_result{}
+    tests := test_result[10]{}
     
     tests[0] = test_syscall_context()
     tests[1] = test_syscall_names()

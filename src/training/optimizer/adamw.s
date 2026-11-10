@@ -9,15 +9,15 @@ struct adamw_config {
 }
 
 struct adamw_param_state {
-    []float momentum
-    []float variance
-    []float param
+    float[] momentum
+    float[] variance
+    float[] param
     int    step
 }
 
 struct adamw_optimizer {
     adamw_config config
-    []adamw_param_state param_states
+    adamw_param_state[] param_states
     int global_step
     float current_lr
 }
@@ -25,7 +25,7 @@ struct adamw_optimizer {
 func new_adamw(adamw_config cfg) adamw_optimizer {
     adamw_optimizer {
         config: cfg,
-        param_states: make([]adamw_param_state, 0),
+        param_states: make(adamw_param_state[], 0),
         global_step: 0,
         current_lr: cfg.learning_rate,
     }
@@ -33,7 +33,7 @@ func new_adamw(adamw_config cfg) adamw_optimizer {
 
 func adamw_register_param(
     adamw_optimizer opt,
-    []float param,
+    float[] param,
     int param_size
 ) adamw_optimizer {
     adamw_param_state state
@@ -63,7 +63,7 @@ func adamw_set_learning_rate(adamw_optimizer opt, float new_lr) adamw_optimizer 
 
 func adamw_update_param(
     adamw_param_state state,
-    []float gradients,
+    float[] gradients,
     float learning_rate,
     float beta1,
     float beta2,
@@ -95,8 +95,8 @@ func adamw_update_param(
 
 func adamw_step(
     adamw_optimizer opt,
-    []float[] gradients,
-    []int param_sizes
+    float[][] gradients,
+    int[] param_sizes
 ) adamw_optimizer {
     opt.current_lr = adamw_compute_lr(opt)
     opt.global_step = opt.global_step + 1
@@ -134,7 +134,7 @@ func adamw_get_step(adamw_optimizer opt) int {
 struct adamw_state_dict {
     int global_step
     float current_lr
-    []adamw_param_state param_states
+    adamw_param_state[] param_states
 }
 
 func adamw_state_dict(adamw_optimizer opt) adamw_state_dict {
@@ -155,8 +155,8 @@ func adamw_load_state_dict(
     return opt
 }
 
-func allocate_float_vector(int size, float init_val) []float {
-    []float v = make([]float, size)
+func allocate_float_vector(int size, float init_val) float[] {
+    float[] v = make(float[], size)
     i := 0
     for i < size {
         v = append(v, init_val)

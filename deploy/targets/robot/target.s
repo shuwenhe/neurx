@@ -5,8 +5,8 @@ struct robot_target_config {
     bool    ros2_enabled
     bool    sim_mode
     string  robot_type
-    []string actuators
-    []string sensors
+    string[] actuators
+    string[] sensors
 }
 
 func default_robot_target() robot_target_config {

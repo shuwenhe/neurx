@@ -77,7 +77,7 @@ struct gpu_topology_entry {
 
 struct orchestrator_state {
     training_orchestrator_config config
-    []gpu_topology_entry topology_map
+    gpu_topology_entry[] topology_map
     int my_global_rank
     int my_tp_rank
     int my_pp_rank
@@ -220,8 +220,8 @@ func init_orchestrator(training_orchestrator_config cfg, int global_rank) orches
     return state
 }
 
-func build_topology(int world_size, int tp, int pp, int dp) []gpu_topology_entry {
-    []gpu_topology_entry map = make([]gpu_topology_entry, world_size)
+func build_topology(int world_size, int tp, int pp, int dp) gpu_topology_entry[] {
+    gpu_topology_entry[] map = make(gpu_topology_entry[], world_size)
     int gpus_per_node = 8
     int rank = 0
     for rank < world_size {

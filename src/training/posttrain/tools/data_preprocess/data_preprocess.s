@@ -4,20 +4,20 @@ import (
 )
 
 struct conversation {
-    []message messages
+    message[] messages
     string conversation_id
 }
 
 struct message {
     string role
     string content
-    []string tool_calls
+    string[] tool_calls
 }
 
 struct rl_sample {
     string prompt
-    []string completions
-    []float rewards
+    string[] completions
+    float[] rewards
     int group_id
     string task_type
 }
@@ -47,12 +47,12 @@ func convert_conversation_to_prompt(conversation conv) string {
 }
 
 func create_grpo_groups(
-    []string prompts,
-    []string[] completions,
-    []float[] rewards,
+    string[] prompts,
+    string[][] completions,
+    float[][] rewards,
     int group_size
-) []rl_sample {
-    []rl_sample samples = []rl_sample{}
+) rl_sample[] {
+    rl_sample[] samples = rl_sample[]{}
     int i = 0
     for i < prompts.len {
         int group_id = i / group_size
@@ -71,11 +71,11 @@ func create_grpo_groups(
 
 func create_preference_pairs_from_rankings(
     string prompt,
-    []string completions,
-    []float scores
-) []preference_pair {
-    []preference_pair pairs = []preference_pair{}
-    []int indices = argsort_descending(scores)
+    string[] completions,
+    float[] scores
+) preference_pair[] {
+    preference_pair[] pairs = preference_pair[]{}
+    int[] indices = argsort_descending(scores)
     int i = 0
     for i < completions.len {
         int j = i + 1
@@ -98,7 +98,7 @@ func create_preference_pairs_from_rankings(
 
 func format_prompt_with_examples(
     string instruction,
-    []string examples,
+    string[] examples,
     string query
 ) string {
     string prompt = instruction + "\n\n"
@@ -130,16 +130,16 @@ func extract_code_from_response(string response) string {
 }
 
 func tokenize_with_padding(
-    []string texts,
+    string[] texts,
     int max_length,
     int pad_token_id
-) []int[] {
-    []int[] tokenized = intmake([][], texts.len)
+) int[][] {
+    int[][] tokenized = make(int[][], texts.len)
     int i = 0
     for i < texts.len {
-        []int tokens = tokenize_text(texts[i])
+        int[] tokens = tokenize_text(texts[i])
         if tokens.len > max_length {
-            []int truncated = make([]int, max_length)
+            int[] truncated = make(int[], max_length)
             int j = 0
             for j < max_length {
                 truncated[j] = tokens[j]
@@ -157,13 +157,13 @@ func tokenize_with_padding(
 }
 
 func create_attention_masks(
-    []int[] token_ids,
+    int[][] token_ids,
     int pad_token_id
-) []int[] {
-    []int[] masks = intmake([][], token_ids.len)
+) int[][] {
+    int[][] masks = make(int[][], token_ids.len)
     int i = 0
     for i < token_ids.len {
-        []int mask = make([]int, token_ids[i].len)
+        int[] mask = make(int[], token_ids[i].len)
         int j = 0
         for j < token_ids[i].len {
             if token_ids[i][j] == pad_token_id {
@@ -180,11 +180,11 @@ func create_attention_masks(
 }
 
 func batch_samples(
-    []rl_sample samples,
+    rl_sample[] samples,
     int batch_size
-) [][]rl_sample {
+) rl_sample[][] {
     int num_batches = (samples.len + batch_size - 1) / batch_size
-    [][]rl_sample batches = []make([]rl_sample, num_batches)
+    rl_sample[][] batches = make[](rl_sample[], num_batches)
     int b = 0
     for b < num_batches {
         int start = b * batch_size
@@ -192,7 +192,7 @@ func batch_samples(
         if end > samples.len {
             end = samples.len
         }
-        []rl_sample batch = make([]rl_sample, end - start)
+        rl_sample[] batch = make(rl_sample[], end - start)
         int i = start
         for i < end {
             batch[i - start] = samples[i]
@@ -204,7 +204,7 @@ func batch_samples(
     batches
 }
 
-func argsort_descending([]float arr) []int { []int{} }
+func argsort_descending(float[] arr) int[] { int[]{} }
 
 func int_to_string(int n) string { "" }
 
@@ -216,4 +216,4 @@ func index_of_from(string s, string sub, int from) int { 0 }
 
 func substring(string s, int start, int end) string { s }
 
-func tokenize_text(string text) []int { []int{} }
+func tokenize_text(string text) int[] { int[]{} }

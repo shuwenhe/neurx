@@ -26,7 +26,7 @@ struct inference_verification_report {
     int total_tests
     int passed_tests
     int failed_tests
-    []inference_test_result results
+    inference_test_result[] results
     float total_latency_ms
 }
 
@@ -68,8 +68,8 @@ func string_char_from_code(int code) string {
     ""
 }
 
-func create_test_cases() []inference_test_case {
-    []inference_test_case tests = make([]inference_test_case, 5)
+func create_test_cases() inference_test_case[] {
+    inference_test_case[] tests = make(inference_test_case[], 5)
 
     tests[0] = inference_test_case{
         name: "Basic Greeting",
@@ -185,13 +185,13 @@ func run_inference_test(inference_test_case test_case) inference_test_result {
     result
 }
 
-func run_all_tests([]inference_test_case test_cases) inference_verification_report {
+func run_all_tests(inference_test_case[] test_cases) inference_verification_report {
     inference_verification_report report = inference_verification_report{
         all_tests_passed: true,
         total_tests: 0,
         passed_tests: 0,
         failed_tests: 0,
-        results: make([]inference_test_result, len(test_cases)),
+        results: make(inference_test_result[], len(test_cases)),
         total_latency_ms: 0.0
     }
 
@@ -323,7 +323,7 @@ func main() {
     println("─────────────────────────────────────────────────────────────")
     println("")
 
-    []inference_test_case tests = create_test_cases()
+    inference_test_case[] tests = create_test_cases()
     inference_verification_report report = run_all_tests(tests)
 
     print_verification_report(report)

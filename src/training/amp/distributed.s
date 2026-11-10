@@ -48,15 +48,15 @@ func get_dtype_info(int dtype_id) dtype_info {
 }
 
 struct mp_tensor {
-    []double data
-    []int shape
+    double[] data
+    int[] shape
     int storage_dtype
     int compute_dtype
     int numel
     bool requires_grad
 }
 
-func make_mp_tensor([]double data, []int shape, int storage_dtype) mp_tensor {
+func make_mp_tensor(double[] data, int[] shape, int storage_dtype) mp_tensor {
     mp_tensor t
     t.data = data
     t.shape = shape
@@ -171,23 +171,23 @@ func update_loss_scaler(ref loss_scaler_state scaler, bool had_overflow) {
 }
 
 struct master_weight_state {
-    []double fp32_weights
-    []double low_precision_params
+    double[] fp32_weights
+    double[] low_precision_params
     int num_elements
     int storage_precision
 }
 
-func create_master_weights([]double initial_params, int storage_precision) master_weight_state {
+func create_master_weights(double[] initial_params, int storage_precision) master_weight_state {
     master_weight_state state
     state.num_elements = len(initial_params)
     state.storage_precision = storage_precision
-    state.fp32_weights = make([]double, state.num_elements)
+    state.fp32_weights = make(double[], state.num_elements)
     int i = 0
     for i < state.num_elements {
         state.fp32_weights[i] = initial_params[i]
         i = i + 1
     }
-    state.low_precision_params = make([]double, state.num_elements)
+    state.low_precision_params = make(double[], state.num_elements)
     i = 0
     for i < state.num_elements {
         state.low_precision_params[i] = cast_to_low_precision(initial_params[i], storage_precision)
@@ -240,7 +240,7 @@ func sync_master_from_lp(ref master_weight_state state) {
     }
 }
 
-func get_fp32_master(master_weight_state state) []double {
+func get_fp32_master(master_weight_state state) double[] {
     return state.fp32_weights
 }
 
@@ -268,7 +268,7 @@ struct mixed_precision_config {
 struct mixed_precision_training_state {
     mixed_precision_config config
     loss_scaler_state scaler
-    []master_weight_state param_master_weights
+    master_weight_state[] param_master_weights
     int num_parameter_groups
     double effective_loss_scale
     bool autocast_enabled

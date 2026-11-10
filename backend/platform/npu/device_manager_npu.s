@@ -19,7 +19,7 @@ struct npu_context {
     int64 acl_device_id
     int64 acl_context
     int allocated_memory_bytes
-    []npu_memory_allocation allocations
+    npu_memory_allocation[] allocations
 }
 
 struct npu_memory_allocation {
@@ -91,7 +91,7 @@ func npu_get_memory_info(npu_device device) [int64, int64] {
     [free, total]
 }
 
-func npu_chip_types() []string {
+func npu_chip_types() string[] {
     ["910a", "910b", "910c", "da", "d910"]
 }
 

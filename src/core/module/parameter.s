@@ -27,11 +27,11 @@ func parameter_list_append(nn.parameter_list list, nn.parameter p) nn.parameter_
     neurx.nn.parameter_list_append(list, p)
 }
 
-func parameter_list_tensors(nn.parameter_list list) []tensor {
+func parameter_list_tensors(nn.parameter_list list) tensor[] {
     neurx.nn.parameter_list_tensors(list)
 }
 
-func parameter_list_names(nn.parameter_list list) []string {
+func parameter_list_names(nn.parameter_list list) string[] {
     neurx.nn.parameter_list_names(list)
 }
 

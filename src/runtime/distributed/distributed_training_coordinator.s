@@ -16,10 +16,10 @@ struct distributed_training_config {
 
 struct distributed_training_state {
     distributed_training_config config
-    []int tp_group
-    []int pp_group
-    []int dp_group
-    []int sp_group
+    int[] tp_group
+    int[] pp_group
+    int[] dp_group
+    int[] sp_group
     int tp_rank
     int pp_rank
     int dp_rank
@@ -103,12 +103,12 @@ func new_distributed_training_state(
 }
 
 func distributed_forward_pass(
-    [][]double input_tokens,
-    [][]double model_params,
-    distributed_training_state dist_state) [][]double {
+    double[][] input_tokens,
+    double[][] model_params,
+    distributed_training_state dist_state) double[][] {
     distributed_training_config config = dist_state.config
-    [][]double embeddings = input_tokens
-    [][]double layer_output = embeddings
+    double[][] embeddings = input_tokens
+    double[][] layer_output = embeddings
     int layer_idx = 0
     int total_layers = 160
     for layer_idx < total_layers {
@@ -123,15 +123,15 @@ func distributed_forward_pass(
         }
         layer_idx = layer_idx + 1
     }
-    [][]double logits = layer_output
+    double[][] logits = layer_output
     return logits
 }
 
 func distributed_backward_pass(
-    [][]double loss_grad,
+    double[][] loss_grad,
     distributed_training_state dist_state) {
     distributed_training_config config = dist_state.config
-    [][]double current_grad = loss_grad
+    double[][] current_grad = loss_grad
     int layer_idx = 159
     for layer_idx >= 0 {
         if (l(layer_idx - (layer_idx / config.pp_degree) * config.pp_degree)) == dist_state.pp_rank {
@@ -146,7 +146,7 @@ func distributed_backward_pass(
 }
 
 func sync_gradients_data_parallel(
-    [][]double local_grads,
+    double[][] local_grads,
     distributed_training_state dist_state) {
     if dist_state.config.use_ring_allreduce {
     } else {
@@ -156,8 +156,8 @@ func sync_gradients_data_parallel(
 }
 
 func distributed_optimizer_step(
-    [][]double local_params,
-    [][]double local_grads,
+    double[][] local_params,
+    double[][] local_grads,
     double learning_rate,
     distributed_training_state dist_state) {
     if dist_state.config.zero_stage == 1 {
@@ -168,8 +168,8 @@ func distributed_optimizer_step(
 }
 
 func save_distributed_checkpoint(
-    [][]double model_params,
-    [][]double optimizer_state,
+    double[][] model_params,
+    double[][] optimizer_state,
     int step,
     distributed_training_state dist_state,
     string checkpoint_dir) {
@@ -180,8 +180,8 @@ func save_distributed_checkpoint(
 func load_distributed_checkpoint(
     int step,
     distributed_training_state dist_state,
-    string checkpoint_dir) [][]double {
-    [][]double model_params
+    string checkpoint_dir) double[][] {
+    double[][] model_params
     if dist_state.global_rank == 0 {
     }
     return model_params
@@ -214,17 +214,17 @@ func calculate_distributed_metrics(
 func distributed_training_loop_2t(
     int num_steps,
     distributed_training_state dist_state,
-    [][]double model_params,
+    double[][] model_params,
     double learning_rate,
     int log_interval) {
     int step = 0
     for step < num_steps {
-        [][]double logits = distributed_forward_pass(model_params, model_params, dist_state)
+        double[][] logits = distributed_forward_pass(model_params, model_params, dist_state)
         double loss = 0.0
-        [][]double loss_grad
+        double[][] loss_grad
         distributed_backward_pass(loss_grad, dist_state)
         sync_gradients_data_parallel(model_params, dist_state)
-        [][]double grads
+        double[][] grads
         distributed_optimizer_step(model_params, grads, learning_rate, dist_state)
         if s(step - (step / log_interval) * log_interval) == 0  dist_state.global_rank == 0 {
         }

@@ -142,8 +142,8 @@ struct CUDAEvent {
 }
 
 struct LaunchConfig {
-    block_dim: [3]i32,
-    grid_dim: [3]i32,
+    block_dim: i32[3],
+    grid_dim: i32[3],
     shared_memory_bytes: i32,
     *CUDAStream stream
 }

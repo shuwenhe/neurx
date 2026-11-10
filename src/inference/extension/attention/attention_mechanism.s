@@ -244,7 +244,7 @@ struct mask_builder {
     func build_prefix_lm_mask(
         int batch_size,
         int total_seq_len,
-        []int prefix_lengths,
+        int[] prefix_lengths,
         int kv_seq_len = -1
     ) {
         """
@@ -306,7 +306,7 @@ struct rope_cache {
 }
 
 func compute_rope_embeddings(
-    []int position_ids,
+    int[] position_ids,
     int head_dim,
     float base = 10000.0,
     int = 0 scaling_type,

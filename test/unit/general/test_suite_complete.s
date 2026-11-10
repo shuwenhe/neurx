@@ -19,7 +19,7 @@ struct test_result {
 
 struct test_suite {
     string name
-    []test_result results
+    test_result[] results
     int num_passed
     int num_failed
 }
@@ -62,7 +62,7 @@ func run_all_tests() {
 }
 
 func run_cuda_tests() test_suite {
-    suite := test_suite{name: "CUDA Device Management", results: make([]test_result, 0)}
+    suite := test_suite{name: "CUDA Device Management", results: make(test_result[], 0)}
     suite.results = append(suite.results, test_cuda_device_detection())
     suite.results = append(suite.results, test_cuda_device_selection())
     suite.results = append(suite.results, test_cuda_memory_allocation())
@@ -185,7 +185,7 @@ func test_cuda_synchronization() test_result {
 }
 
 func run_nccl_tests() test_suite {
-    suite := test_suite{name: "NCCL Communication", results: make([]test_result, 0)}
+    suite := test_suite{name: "NCCL Communication", results: make(test_result[], 0)}
     suite.results = append(suite.results, test_nccl_initialization())
     suite.results = append(suite.results, test_nccl_barrier())
     print_test_suite_results(*suite)
@@ -244,7 +244,7 @@ func test_nccl_barrier() test_result {
 }
 
 func run_model_tests() test_suite {
-    suite := test_suite{name: "model Architecture", results: make([]test_result, 0)}
+    suite := test_suite{name: "model Architecture", results: make(test_result[], 0)}
     suite.results = append(suite.results, test_transformer_forward_pass())
     suite.results = append(suite.results, test_transformer_backward_pass())
     suite.results = append(suite.results, test_attention_computation())
@@ -265,7 +265,7 @@ func test_transformer_forward_pass() test_result {
     model := create_transformer_model(cfg, ctx)
     batch_size := 2
     seq_length := 16
-    input_ids := make([]int[], batch_size)
+    input_ids := make(int[][], batch_size)
     logits := model.forward(input_ids)
     passed := logits != nil
     cleanup_cuda_context(ctx)
@@ -298,7 +298,7 @@ func test_attention_computation() test_result {
 }
 
 func run_optimizer_tests() test_suite {
-    suite := test_suite{name: "optimizer_2", results: make([]test_result, 0)}
+    suite := test_suite{name: "optimizer_2", results: make(test_result[], 0)}
     suite.results = append(suite.results, test_adamw_optimizer())
     suite.results = append(suite.results, test_learning_rate_schedule())
     print_test_suite_results(*suite)
@@ -343,7 +343,7 @@ func test_learning_rate_schedule() test_result {
 }
 
 func run_integration_tests() test_suite {
-    suite := test_suite{name: "Integration", results: make([]test_result, 0)}
+    suite := test_suite{name: "Integration", results: make(test_result[], 0)}
     suite.results = append(suite.results, test_end_to_end_training_step())
     suite.results = append(suite.results, test_checkpoint_save_load())
     suite.results = append(suite.results, test_mixed_precision())
@@ -352,7 +352,7 @@ func run_integration_tests() test_suite {
 }
 
 func run_industrial_training_tests() test_suite {
-    suite := test_suite{name: "Industrial Training", results: make([]test_result, 0)}
+    suite := test_suite{name: "Industrial Training", results: make(test_result[], 0)}
     suite.results = append(suite.results, test_industrial_training_smoke())
     print_test_suite_results(*suite)
     suite
@@ -471,7 +471,7 @@ func benchmark_model_inference() {
     }
     ctx, _ := init_cuda_context(0)
     model := create_transformer_model(cfg, ctx)
-    input_ids := make([]int[], 1)
+    input_ids := make(int[][], 1)
     for i := 0; i < 3; i += 1 {
         model.forward(input_ids)
     }

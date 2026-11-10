@@ -13,8 +13,8 @@ struct json_token {
     bool valid
 }
 
-func parse_tokenizer_json(string json_text) []json_token {
-    []json_token tokens = make([]json_token, 160000)
+func parse_tokenizer_json(string json_text) json_token[] {
+    json_token[] tokens = make(json_token[], 160000)
     int token_count = 0
 
     int i = 0
@@ -59,7 +59,7 @@ func parse_tokenizer_json(string json_text) []json_token {
         i = quote_end + 1
     }
 
-    []json_token result = make([]json_token, token_count)
+    json_token[] result = make(json_token[], token_count)
     int j = 0
     for j < token_count {
         result[j] = tokens[j]
@@ -137,7 +137,7 @@ func hex_char(int value) string {
     string(97 + value - 10)
 }
 
-func write_vocab_file([]json_token tokens, string output_file_path) bool {
+func write_vocab_file(json_token[] tokens, string output_file_path) bool {
 
     sort_tokens_by_id(tokens)
 
@@ -154,7 +154,7 @@ func write_vocab_file([]json_token tokens, string output_file_path) bool {
     true
 }
 
-func sort_tokens_by_id([]json_token tokens) {
+func sort_tokens_by_id(json_token[] tokens) {
     int n = len(tokens)
     int i = 0
 

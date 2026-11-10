@@ -5,7 +5,7 @@ import "src/training/posttrain/alignment/rollout_correction/importance_sampling.
 import "src/training/posttrain/alignment/rollout_correction/rejection_sampling.s"
 struct rollout_correction_result {
     ISWeights is_weights
-    rs_results: []rs_result
+    rs_results: rs_result[]
     Tensor corrected_mask
     Tensor corrected_advantages
     Tensor corrected_loss
@@ -156,7 +156,7 @@ func compute_policy_loss_decoupled_mode(
 
 func collect_statistics(
     ISWeights is_weights,
-    []rs_result rs_results,
+    rs_result[] rs_results,
     Tensor corrected_mask,
     Tensor original_mask
 ) . map[string]f32 {

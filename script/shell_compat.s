@@ -46,7 +46,7 @@ func read_file(string path) (string, error) {
 }
 
 func write_file(string path, string content) error {
-    err := os.WriteFile(path, []byte(content), 0644)
+    err := os.WriteFile(path, byte[](content), 0644)
     if err != nil {
         return fmt.Errorf("failed to write file %s: %w", path, err)
     }
@@ -78,20 +78,20 @@ func copy_file(string src, string dst) error {
     return nil
 }
 
-func list_dir(string path) ([]string, error) {
+func list_dir(string path) (string[], error) {
     entries, err := os.ReadDir(path)
     if err != nil {
-        return []string{}, fmt.Errorf("failed to list directory %s: %w", path, err)
+        return string[]{}, fmt.Errorf("failed to list directory %s: %w", path, err)
     }
-    var results []string
+    var results string[]
     for _, entry := range entries {
         results = append(results, entry.Name())
     }
     return results, nil
 }
 
-func find_files(string dir, string pattern) ([]string, error) {
-    var results []string
+func find_files(string dir, string pattern) (string[], error) {
+    var results string[]
     err := filepath.Walk(dir, func(path string, info os.file_info, err error) error {
         if err != nil {
             return err
@@ -286,7 +286,7 @@ func timestamp_full() string {
     return time.Now().Format("2006-01-02 15:04:05")
 }
 
-func contains([]string slice, string value) bool {
+func contains(string[] slice, string value) bool {
     for _, item := range slice {
         if item == value {
             return true
@@ -299,7 +299,7 @@ func join(string sep, strs ...string) string {
     return strings.Join(strs, sep)
 }
 
-func split(string str, string sep) []string {
+func split(string str, string sep) string[] {
     return strings.Split(str, sep)
 }
 

@@ -3,7 +3,7 @@ import "sync"
 import "time"
 struct model_registry {
 	map[string]model_info           models
-	[]string                     available_models
+	string[]                     available_models
 	string                          default_model
 	sync.Mutex                      mu
 }
@@ -11,7 +11,7 @@ struct model_registry {
 func create_model_registry() model_registry {
 	return model_registry{
 		models:           make(map[string]model_info),
-		available_models: make([]string, 0, 50),
+		available_models: make(string[], 0, 50),
 		default_model:    "",
 		mu:               sync.Mutex{},
 	}
@@ -61,7 +61,7 @@ func (r model_registry*) get_model(model_id string) (model_info, bool) {
 	return model, exists
 }
 
-func (r model_registry*) list_models() []model_info {
+func (r model_registry*) list_models() model_info[] {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	models := make(model_info[], 0, len(r.models))
@@ -73,10 +73,10 @@ func (r model_registry*) list_models() []model_info {
 	return models
 }
 
-func (r model_registry*) get_available_model_ids() []string {
+func (r model_registry*) get_available_model_ids() string[] {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	ids := make([]string, 0, len(r.available_models))
+	ids := make(string[], 0, len(r.available_models))
 	for id := range r.available_models {
 		ids = append(ids, id)
 	}
@@ -198,7 +198,7 @@ func (m model_status_monitor*) get_availability(model_id string) (model_availabi
 	return avail, exists
 }
 
-func (m model_status_monitor*) check_all_models() []model_availability {
+func (m model_status_monitor*) check_all_models() model_availability[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	models := m.registry.get_available_model_ids()
@@ -271,7 +271,7 @@ func (h model_list_handler*) check_model_status(model_id string) bool {
 	return h.monitor.check_model_status(model_id)
 }
 
-func (h model_list_handler*) check_all_models_status() []model_availability {
+func (h model_list_handler*) check_all_models_status() model_availability[] {
 	return h.monitor.check_all_models()
 }
 
@@ -281,7 +281,7 @@ func (h model_list_handler*) get_model_count() int32 {
 	return h.registry.get_model_count()
 }
 
-func (h model_list_handler*) list_available_model_ids() []string {
+func (h model_list_handler*) list_available_model_ids() string[] {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	return h.registry.get_available_model_ids()

@@ -35,18 +35,18 @@ struct scheduler_config {
 }
 
 struct scheduling_decision {
-    []int prefill_request_ids
-    []int decode_request_ids
-    []int preempt_request_ids
+    int[] prefill_request_ids
+    int[] decode_request_ids
+    int[] preempt_request_ids
     int iteration_number
     int total_token_budget_used
 }
 
 struct scheduler_state {
     scheduler_config config
-    []request_metrics pending_metrics
-    []request_metrics running_metrics
-    []request_metrics completed_metrics
+    request_metrics[] pending_metrics
+    request_metrics[] running_metrics
+    request_metrics[] completed_metrics
     int current_iteration
     long total_tokens_processed
 }

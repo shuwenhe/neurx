@@ -17,7 +17,7 @@ const (
     finish_reason_abort     finish_reason = "abort"
     finish_reason_prefix    finish_reason = "prefix"
 )
-type usage_log_probs = []float32
+type usage_log_probs = float32[]
 struct sampling_params {
     temperature             float32
     top_p                   float32
@@ -30,7 +30,7 @@ struct sampling_params {
     presence_penalty        float32
     length_penalty          float32
     early_stop              bool
-    stop                    []string
+    stop                    string[]
     skip_special_tokens     bool
     spaces_between_special  bool
     seed                    int64
@@ -47,23 +47,23 @@ struct log_prob_result {
 }
 
 struct usage_log_probs_result {
-    prompt_log_probs    []log_prob_result
-    output_log_probs    []log_prob_result
+    prompt_log_probs    log_prob_result[]
+    output_log_probs    log_prob_result[]
 }
 
 struct request_output {
     request_id              string
     prompt                  string
     prompt_tokens           int32
-    text                    []string
-    token_ids               []int[]32
+    text                    string[]
+    token_ids               int[][]32
     cumulative              bool
     finish_reason           finish_reason
     finish_reason_length    int32
     error_message           string
     output_tokens           int32
     total_tokens            int32
-    lm_probs                []interface{}
+    lm_probs                interface{}[]
     usage_log_probs         usage_log_probs_result
     created_time            int64
     latency_ms              float32
@@ -81,7 +81,7 @@ struct request_metadata {
 struct request {
     request_id              string
     prompt                  string
-    tokens                  []int32
+    tokens                  int32[]
     sampling_params         sampling_params
     priority                int32
     status                  request_status
@@ -91,7 +91,7 @@ struct request {
     updated_time            int64
     finished_time           int64
     abort_time              int64
-    output_tokens           []int32
+    output_tokens           int32[]
     error                   string
     num_scheduled_tokens    int32
     num_computed_tokens     int32
@@ -129,7 +129,7 @@ func new_sampling_params() sampling_params {
         presence_penalty: 0.0,
         length_penalty: 1.0,
         early_stop: false,
-        stop: []string{},
+        stop: string[]{},
         skip_special_tokens: false,
         spaces_between_special: false,
         seed: 0,
@@ -144,18 +144,18 @@ func new_request_output(request_id string) request_output {
         request_id: request_id,
         prompt: "",
         prompt_tokens: 0,
-        text: []string{},
-        token_ids: []int[]32{},
+        text: string[]{},
+        token_ids: int[][]32{},
         cumulative: false,
         finish_reason: finish_reason_length,
         finish_reason_length: 0,
         error_message: "",
         output_tokens: 0,
         total_tokens: 0,
-        lm_probs: []interface{}{},
+        lm_probs: interface{}[]{},
         usage_log_probs: usage_log_probs_result{
-            prompt_log_probs: []log_prob_result{},
-            output_log_probs: []log_prob_result{},
+            prompt_log_probs: log_prob_result[]{},
+            output_log_probs: log_prob_result[]{},
         },
         created_time: 0,
         latency_ms: 0.0,
@@ -167,7 +167,7 @@ func new_request(request_id string, prompt string) request {
     return request{
         request_id: request_id,
         prompt: prompt,
-        tokens: []int32{},
+        tokens: int32[]{},
         sampling_params: new_sampling_params(),
         priority: 0,
         status: request_status_pending,
@@ -177,7 +177,7 @@ func new_request(request_id string, prompt string) request {
         updated_time: 0,
         finished_time: 0,
         abort_time: 0,
-        output_tokens: []int32{},
+        output_tokens: int32[]{},
         error: "",
         num_scheduled_tokens: 0,
         num_computed_tokens: 0,
@@ -208,8 +208,8 @@ func new_log_prob_result(token_id int32, token_str string, logprob float32, rank
 
 func new_usage_log_probs_result() usage_log_probs_result {
     return usage_log_probs_result{
-        prompt_log_probs: []log_prob_result{},
-        output_log_probs: []log_prob_result{},
+        prompt_log_probs: log_prob_result[]{},
+        output_log_probs: log_prob_result[]{},
     }
 }
 

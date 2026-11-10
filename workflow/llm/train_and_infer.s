@@ -61,10 +61,10 @@ func format_large_number(i64 n) string {
 
 struct transformer_model {
     model_config config
-    embedding_table: [][]f64
-    attention_weights: [][]f64
-    ffn_weights: [][]f64
-    layer_norms: [][]f64
+    embedding_table: f64[][]
+    attention_weights: f64[][]
+    ffn_weights: f64[][]
+    layer_norms: f64[][]
 }
 
 func create_model(model_config config) transformer_model {
@@ -76,20 +76,20 @@ func create_model(model_config config) transformer_model {
     println("   Layers: " + strings.from_i32(config.num_layers))
     println("   Attention heads: " + strings.from_i32(config.num_heads))
     emb_size := i64(config.vocab_size) * i64(config.hidden_dim)
-    model.embedding_table = [][]f64{}
+    model.embedding_table = f64[][]{}
     attn_size := i64(config.num_heads) * i64(config.hidden_dim)
-    model.attention_weights = [][]f64{}
+    model.attention_weights = f64[][]{}
     ffn_size := i64(config.ffn_dim) * i64(config.hidden_dim)
-    model.ffn_weights = [][]f64{}
-    model.layer_norms = [][]f64{}
+    model.ffn_weights = f64[][]{}
+    model.layer_norms = f64[][]{}
     total_params := emb_size + attn_size + ffn_size
     println("   Total parameters: " + format_large_number(total_params))
     return model
 }
 
 struct data_batch {
-    input_ids: []i32
-    labels: []i32
+    input_ids: i32[]
+    labels: i32[]
     i32 batch_size
     i32 seq_len
 }
@@ -99,8 +99,8 @@ func create_dummy_batch(model_config config) data_batch {
     batch.batch_size = config.batch_size
     batch.seq_len = config.seq_len
     total_tokens := i32(config.batch_size) * config.seq_len
-    batch.input_ids = []i32{}
-    batch.labels = []i32{}
+    batch.input_ids = i32[]{}
+    batch.labels = i32[]{}
     for i := 0; i < total_tokens; i = i + 1 {
         token_id := i32((i * 7 + 13) % config.vocab_size)
         batch.input_ids = append(batch.input_ids, token_id)
@@ -193,7 +193,7 @@ func generate_text(transformer_model model, string prompt, i32 max_tokens) infer
     println("Prompt: " + prompt)
     start_time := time.now()
     generated := prompt
-    token_map := []string{
+    token_map := string[]{
         "the", "of", "to", "in", "a", "is", "and", "it", "for", "that",
         "you", "as", "this", "be", "was", "on", "are", "by", "from", "at"
     }

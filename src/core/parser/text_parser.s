@@ -3,8 +3,8 @@ import (
     "neurx.parser.types"
     "std.slices"
 )
-func tokenize(string input) []string {
-    tokens := []string{}
+func tokenize(string input) string[] {
+    tokens := string[]{}
     current_token := ""
     i := 0
     for i < len(input) {
@@ -45,8 +45,8 @@ func tokenize(string input) []string {
     return tokens
 }
 
-func split_lines(string text) []string {
-    lines := []string{}
+func split_lines(string text) string[] {
+    lines := string[]{}
     current_line := ""
     i := 0
     for i < len(text) {
@@ -74,9 +74,9 @@ func split_lines(string text) []string {
     return lines
 }
 
-func split_paragraphs(string text) []string {
+func split_paragraphs(string text) string[] {
     lines := split_lines(text)
-    paragraphs := []string{}
+    paragraphs := string[]{}
     current_para := ""
     i := 0
     for i < len(lines) {
@@ -130,8 +130,8 @@ func extract_between(string text, string open_delim, string close_delim) string 
     return text[open_pos:close_pos]
 }
 
-func find_all_substring(string text, string pattern) []int {
-    positions := []int{}
+func find_all_substring(string text, string pattern) int[] {
+    positions := int[]{}
     pos := 0
     for pos < len(text) {
         found_pos := find_substring(text, pattern, pos)
@@ -266,8 +266,8 @@ func is_whitespace(string ch) bool {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
 
-func extract_words(string text) []string {
-    words := []string{}
+func extract_words(string text) string[] {
+    words := string[]{}
     current_word := ""
     i := 0
     for i < len(text) {
@@ -304,9 +304,9 @@ func substring(string text, int start, int length) string {
     return text[start:end]
 }
 
-func split_string(string text, string delimiter) []string {
+func split_string(string text, string delimiter) string[] {
     if len(delimiter) == 0 {
-        chars := []string{}
+        chars := string[]{}
         i := 0
         for i < len(text) {
             chars = append(chars, string(text[i]))
@@ -314,7 +314,7 @@ func split_string(string text, string delimiter) []string {
         }
         return chars
     }
-    parts := []string{}
+    parts := string[]{}
     current_part := ""
     i := 0
     for i < len(text) {
@@ -331,7 +331,7 @@ func split_string(string text, string delimiter) []string {
     return parts
 }
 
-func join_strings([]string strings, string separator) string {
+func join_strings(string[] strings, string separator) string {
     result := ""
     i := 0
     for i < len(strings) {

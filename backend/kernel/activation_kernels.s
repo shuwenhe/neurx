@@ -15,8 +15,8 @@ func NewActivationKernels(types.KernelConfig config) *ActivationKernels {
 }
 
 func (ActivationKernels* k) ReLU(
-    input: []f32,
-    output: *[]f32
+    input: f32[],
+    output: *f32[]
 ) types.KernelResult {
 
     for i := 0; i < len(input); i += 1 {
@@ -45,7 +45,7 @@ func (ActivationKernels* k) ReLU(
 }
 
 func (ActivationKernels* k) ReLUInplace(
-    data: *[]f32
+    data: *f32[]
 ) types.KernelResult {
 
     for i := 0; i < len(*data); i += 1 {
@@ -72,9 +72,9 @@ func (ActivationKernels* k) ReLUInplace(
 }
 
 func (ActivationKernels* k) GELU(
-    input: []f32,
+    input: f32[],
     approximate: bool,
-    output: *[]f32
+    output: *f32[]
 ) types.KernelResult {
 
     const_cdf := f32(0.7978845608)
@@ -113,8 +113,8 @@ func (ActivationKernels* k) GELU(
 }
 
 func (ActivationKernels* k) SiLU(
-    input: []f32,
-    output: *[]f32
+    input: f32[],
+    output: *f32[]
 ) types.KernelResult {
 
     for i := 0; i < len(input); i += 1 {
@@ -141,8 +141,8 @@ func (ActivationKernels* k) SiLU(
 }
 
 func (ActivationKernels* k) Sigmoid(
-    input: []f32,
-    output: *[]f32
+    input: f32[],
+    output: *f32[]
 ) types.KernelResult {
 
     for i := 0; i < len(input); i += 1 {
@@ -168,8 +168,8 @@ func (ActivationKernels* k) Sigmoid(
 }
 
 func (ActivationKernels* k) Tanh(
-    input: []f32,
-    output: *[]f32
+    input: f32[],
+    output: *f32[]
 ) types.KernelResult {
 
     for i := 0; i < len(input); i += 1 {
@@ -197,9 +197,9 @@ func (ActivationKernels* k) Tanh(
 }
 
 func (ActivationKernels* k) Softmax(
-    input: []f32,
+    input: f32[],
     dim: i32,
-    output: *[]f32
+    output: *f32[]
 ) types.KernelResult {
 
     if dim < 0 || dim > 3 {
@@ -260,12 +260,12 @@ func (ActivationKernels* k) Softmax(
 }
 
 func (ActivationKernels* k) LogSoftmax(
-    input: []f32,
+    input: f32[],
     dim: i32,
-    output: *[]f32
+    output: *f32[]
 ) types.KernelResult {
 
-    softmax_result := make([]f32, len(input))
+    softmax_result := make(f32[], len(input))
     k.Softmax(input, dim, *softmax_result)
 
     const_ln2 := f32(0.693147180)
@@ -297,8 +297,8 @@ func (ActivationKernels* k) LogSoftmax(
 
 func (ActivationKernels* k) ApplyActivation(
     activation: types.ActivationType,
-    input: []f32,
-    output: *[]f32
+    input: f32[],
+    output: *f32[]
 ) types.KernelResult {
 
     switch activation {

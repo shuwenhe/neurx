@@ -3,7 +3,7 @@ import "executor_base.s"
 struct DecodeExecutor {
     base                BaseExecutor
     decode_config       DecodeConfig
-    active_sequences    []string
+    active_sequences    string[]
     beam_search_state   map[string]BeamSearchData
 }
 
@@ -11,8 +11,8 @@ struct BeamSearchData {
     sequence_id     string
     beam_width      i32
     current_length  i32
-    log_probs       []f64
-    token_ids       [][]i32
+    log_probs       f64[]
+    token_ids       i32[][]
 }
 
 func NewDecodeExecutor(config ExecutorConfig, decode_config DecodeConfig) *DecodeExecutor {
@@ -27,7 +27,7 @@ func (DecodeExecutor* de) Initialize() ExecutionResult {
     return de.base.Initialize()
 }
 
-func (DecodeExecutor* de) ProcessDecodeStep(sequences []string) ExecutionResult {
+func (DecodeExecutor* de) ProcessDecodeStep(sequences string[]) ExecutionResult {
     if de.base.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
             success: 0,
@@ -94,8 +94,8 @@ func (DecodeExecutor* de) compute_attention_step(sequence_id string) ExecutionRe
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DecodeExecutor* de) sample_next_tokens(sequences []string) []i32 {
-    output_tokens := make([]i32, len(sequences))
+func (DecodeExecutor* de) sample_next_tokens(sequences string[]) i32[] {
+    output_tokens := make(i32[], len(sequences))
     for i := 0; i < len(sequences); i++ {
         if de.decode_config.beam_width > 1 {
             output_tokens[i] = de.sample_beam_search(sequences[i])
@@ -130,7 +130,7 @@ func (DecodeExecutor* de) update_kv_cache(sequence_id string, token i32) Executi
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DecodeExecutor* de) ProcessBeamSearch(sequences []string, beam_width i32) ExecutionResult {
+func (DecodeExecutor* de) ProcessBeamSearch(sequences string[], beam_width i32) ExecutionResult {
     if beam_width <= 0 {
         return ExecutionResult{
             success: 0,
@@ -149,18 +149,18 @@ func (DecodeExecutor* de) ProcessBeamSearch(sequences []string, beam_width i32) 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DecodeExecutor* de) GetBeamHypotheses(sequence_id string) [][]i32 {
+func (DecodeExecutor* de) GetBeamHypotheses(sequence_id string) i32[][] {
     if data, exists := de.beam_search_state[sequence_id]; exists {
         return data.token_ids
     }
-    return [][]i32{}
+    return i32[][]{}
 }
 
 func (DecodeExecutor* de) SwapCache(sequence_id string, from_device i32, to_device i32) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DecodeExecutor* de) PrefixMatching(prompt_tokens []i32) ExecutionResult {
+func (DecodeExecutor* de) PrefixMatching(prompt_tokens i32[]) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 

@@ -8,13 +8,13 @@ func read_file(string path) string {
     runtime_read_text_file(path)
 }
 
-func list_ir_files() []string {
+func list_ir_files() string[] {
     string manifest = read_file("build/ir/manifest.json")
     if neurx.strings.strings_eq(manifest, "") {
-        []string out = []string{}
+        string[] out = string[]{}
         return out
     }
-    []string res = []string{}
+    string[] res = string[]{}
     int n = len(manifest)
     string current_line = ""
     int i = 0

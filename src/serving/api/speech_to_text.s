@@ -25,7 +25,7 @@ struct audio_config {
 }
 
 struct transcription_request {
-    []uint8 audio_data
+    uint8[] audio_data
     audio_config config
     audio_model model
     string language
@@ -46,7 +46,7 @@ struct transcription_segment {
 struct transcription_response {
     string id
     string text
-    []transcription_segment* segments
+    transcription_segment*[] segments
     int64 total_duration_ms
     float32 confidence_score
     string language
@@ -65,7 +65,7 @@ struct text_to_speech_request {
 
 struct text_to_speech_response {
     string id
-    []uint8 audio_data
+    uint8[] audio_data
     audio_config config
     int64 duration_ms
 }
@@ -102,16 +102,16 @@ func (speech_to_text_server* srv) load_audio_model(audio_model model) error {
     return nil
 }
 
-func (speech_to_text_server* srv) detect_audio_format([]uint8 data) audio_format {
+func (speech_to_text_server* srv) detect_audio_format(uint8[] data) audio_format {
     return audio_format_wav
 }
 
-func (speech_to_text_server* srv) resample_audio([]uint8 audio_data, int32 source_rate, int32 target_rate) ([]uint8, error) {
+func (speech_to_text_server* srv) resample_audio(uint8[] audio_data, int32 source_rate, int32 target_rate) (uint8[], error) {
     return audio_data, nil
 }
 
-func (speech_to_text_server* srv) extract_features([]uint8 audio_data, audio_config config) ([]float[]32, error) {
-    features := make([]float[]32, 0)
+func (speech_to_text_server* srv) extract_features(uint8[] audio_data, audio_config config) (float[][]32, error) {
+    features := make(float[][]32, 0)
     return features, nil
 }
 
@@ -126,7 +126,7 @@ func (speech_to_text_server* srv) transcribe(transcription_request* req) (transc
         return nil, err
     }
     _ = features
-    segments := make([]transcription_segment*, 0)
+    segments := make(transcription_segment*[], 0)
     segment := *transcription_segment{
         id: 0,
         start_time_ms: 0,
@@ -150,7 +150,7 @@ func (speech_to_text_server* srv) transcribe(transcription_request* req) (transc
 }
 
 func (speech_to_text_server* srv) synthesize(text_to_speech_request* req) (text_to_speech_response*, error) {
-    audio_data := make([]uint8, 0)
+    audio_data := make(uint8[], 0)
     resp := *text_to_speech_response{
         id: core.generate_uuid(),
         audio_data: audio_data,
@@ -166,8 +166,8 @@ func (speech_to_text_server* srv) synthesize(text_to_speech_request* req) (text_
     return resp, nil
 }
 
-func (speech_to_text_server* srv) batch_transcribe([]transcription_request* requests) ([]transcription_response*, error) {
-    results := make([]transcription_response*, 0)
+func (speech_to_text_server* srv) batch_transcribe(transcription_request*[] requests) (transcription_response*[], error) {
+    results := make(transcription_response*[], 0)
     for _, req := range requests {
         resp, err := srv.transcribe(req)
         if err != nil {
@@ -178,12 +178,12 @@ func (speech_to_text_server* srv) batch_transcribe([]transcription_request* requ
     return results, nil
 }
 
-func (speech_to_text_server* srv) speaker_diarization([]uint8 audio_data, audio_config config) ([]int32, error) {
-    speaker_ids := make([]int32, 0)
+func (speech_to_text_server* srv) speaker_diarization(uint8[] audio_data, audio_config config) (int32[], error) {
+    speaker_ids := make(int32[], 0)
     return speaker_ids, nil
 }
 
-func (speech_to_text_server* srv) language_detection([]uint8 audio_data) (string, float32, error) {
+func (speech_to_text_server* srv) language_detection(uint8[] audio_data) (string, float32, error) {
     return "en", 0.99, nil
 }
 
@@ -195,8 +195,8 @@ func (speech_to_text_server* srv) get_port() int32 {
     return srv.port
 }
 
-func (speech_to_text_server* srv) get_supported_formats() []audio_format {
-    return []audio_format{
+func (speech_to_text_server* srv) get_supported_formats() audio_format[] {
+    return audio_format[]{
         audio_format_wav,
         audio_format_mp3,
         audio_format_flac,
@@ -204,8 +204,8 @@ func (speech_to_text_server* srv) get_supported_formats() []audio_format {
     }
 }
 
-func (speech_to_text_server* srv) get_supported_models() []audio_model {
-    return []audio_model{
+func (speech_to_text_server* srv) get_supported_models() audio_model[] {
+    return audio_model[]{
         audio_model_whisper,
         audio_model_wav2vec,
         audio_model_conformer,

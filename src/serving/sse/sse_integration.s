@@ -33,7 +33,7 @@ struct sse_response_frame {
 	int32                       status_code
 	string                      stream_id
 	string                      client_id
-	[]string                 event_data_lines
+	string[]                 event_data_lines
 	int32                       line_count
 	int32                       content_length
 	map[string]string]          headers
@@ -231,7 +231,7 @@ func (sse_server* s) resume_connection(connection_id string, token resume_token)
 	return success
 }
 
-func (sse_server* s) get_connection_resume_events(connection_id string, from_event_id int32) []sse_event {
+func (sse_server* s) get_connection_resume_events(connection_id string, from_event_id int32) sse_event[] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	conn, exists := s.active_connections[connection_id]

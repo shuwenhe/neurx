@@ -149,7 +149,7 @@ func create_embedding_response(
 	}
 }
 
-func create_model_list_response(models []string) model_list_response {
+func create_model_list_response(models string[]) model_list_response {
 	data := make(model_info[], 0, len(models))
 	for model := range models {
 		data = append(data, model_info{
@@ -361,7 +361,7 @@ func format_chunk_response(chunk_id string, model string, choice choice) string 
 		"object": "chat.completion.chunk",
 		"created": time.Now().Unix(),
 		"model":   model,
-		"choices": []interface{}{
+		"choices": interface{}[]{
 			map[string]interface{}{
 				"index": choice.index,
 				"delta": choice.delta,

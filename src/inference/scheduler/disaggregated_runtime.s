@@ -58,9 +58,9 @@ struct kv_transfer_ticket {
 }
 
 struct disaggregated_runtime_state {
-    []inference_worker workers
-    []disaggregated_request requests
-    []kv_transfer_ticket transfers
+    inference_worker[] workers
+    disaggregated_request[] requests
+    kv_transfer_ticket[] transfers
     int kv_handoffs
     int transfer_failures
 }
@@ -125,9 +125,9 @@ func new_disaggregated_result(disaggregated_runtime_state state, disaggregated_r
 
 func new_disaggregated_runtime() disaggregated_runtime_state {
     disaggregated_runtime_state state
-    state.workers = make([]inference_worker, 64)
-    state.requests = make([]disaggregated_request, 1024)
-    state.transfers = make([]kv_transfer_ticket, 1024)
+    state.workers = make(inference_worker[], 64)
+    state.requests = make(disaggregated_request[], 1024)
+    state.transfers = make(kv_transfer_ticket[], 1024)
     state.kv_handoffs = 0
     state.transfer_failures = 0
     state

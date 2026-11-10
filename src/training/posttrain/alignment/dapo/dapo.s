@@ -41,12 +41,12 @@ struct dapo_state {
 }
 
 struct dapo_rollout_result {
-    []tensor states
-    []tensor actions
-    []tensor rewards
-    []tensor log_probs
-    []tensor values
-    []bool dones
+    tensor[] states
+    tensor[] actions
+    tensor[] rewards
+    tensor[] log_probs
+    tensor[] values
+    bool[] dones
     float avg_reward
     float max_reward
     int num_correct
@@ -75,15 +75,15 @@ func new_dapo_config() dapo_config {
 }
 
 func dapo_compute_advantages(
-    []tensor rewards,
-    []tensor values,
-    []bool dones,
+    tensor[] rewards,
+    tensor[] values,
+    bool[] dones,
     float gamma,
     float gae_lambda
-) ([]tensor, []tensor) {
+) (tensor[], tensor[]) {
     int T = rewards.len
-    []tensor advantages = make([]tensor, T)
-    []tensor returns = make([]tensor, T)
+    tensor[] advantages = make(tensor[], T)
+    tensor[] returns = make(tensor[], T)
     tensor gae = tensor_ops.zeros_like(values[T - 1])
     int t = T - 1
     for t >= 0 {
@@ -126,7 +126,7 @@ func dapo_select_top_k_trajectories(
     if k >= n {
         return rollouts
     }
-    []int indices = make([]int, n)
+    int[] indices = make(int[], n)
     int i = 0
     for i < n {
         indices[i] = i
@@ -149,12 +149,12 @@ func dapo_select_top_k_trajectories(
         indices[max_idx] = temp
         i = i + 1
     }
-    []tensor top_states = make([]tensor, k)
-    []tensor top_actions = make([]tensor, k)
-    []tensor top_rewards = make([]tensor, k)
-    []tensor top_log_probs = make([]tensor, k)
-    []tensor top_values = make([]tensor, k)
-    []bool top_dones = make([]bool, k)
+    tensor[] top_states = make(tensor[], k)
+    tensor[] top_actions = make(tensor[], k)
+    tensor[] top_rewards = make(tensor[], k)
+    tensor[] top_log_probs = make(tensor[], k)
+    tensor[] top_values = make(tensor[], k)
+    bool[] top_dones = make(bool[], k)
     i = 0
     for i < k {
         int idx = indices[i]
@@ -244,7 +244,7 @@ func dapo_step(
     dapo_rollout_result rollouts,
     dapo_config cfg
 ) dapo_state {
-    ([]tensor advantages, []tensor returns) = dapo_compute_advantages(
+    (tensor[] advantages, tensor[] returns) = dapo_compute_advantages(
         rollouts.rewards,
         rollouts.values,
         rollouts.dones,

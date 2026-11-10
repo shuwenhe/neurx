@@ -14,7 +14,7 @@ struct realtime_task {
 }
 
 struct realtime_scheduler {
-    []realtime_task tasks
+    realtime_task[] tasks
     int cycle_period_us
     int max_latency_us
     int current_cycle

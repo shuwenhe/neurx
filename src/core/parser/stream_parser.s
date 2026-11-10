@@ -179,13 +179,13 @@ func finalize_stream(IncrementalParseState state) ParseResult {
     return result
 }
 
-func extract_lines_from_stream(IncrementalParseState state, int max_lines) []string {
+func extract_lines_from_stream(IncrementalParseState state, int max_lines) string[] {
     partial := get_partial_output(state)
     lines := split_lines(partial)
     if len(lines) <= max_lines {
         return lines
     }
-    result := []string{}
+    result := string[]{}
     i := 0
     for i < max_lines && i < len(lines) {
         result = append(result, lines[i])
@@ -206,14 +206,13 @@ func estimate_progress(IncrementalParseState state) float {
 }
 
 struct StreamBuilder {
-    chunks: []StreamChunk
-    string full_output
+    chunks: string[] StreamChunk full_output
     IncrementalParseState current_state
 }
 
 func create_stream_builder() StreamBuilder {
     return StreamBuilder{
-        chunks: []StreamChunk{},
+        chunks: StreamChunk[]{},
         full_output: "",
         current_state: create_stream_state(),
     }
@@ -229,7 +228,7 @@ func (StreamBuilder sb) get_current_output() string {
     return get_partial_output(sb.current_state)
 }
 
-func (StreamBuilder sb) get_chunks() []StreamChunk {
+func (StreamBuilder sb) get_chunks() StreamChunk[] {
     return sb.chunks
 }
 
@@ -246,7 +245,7 @@ func (StreamBuilder sb) get_progress() float {
 }
 
 func (StreamBuilder* sb) reset() {
-    sb.chunks = []StreamChunk{}
+    sb.chunks = StreamChunk[]{}
     sb.full_output = ""
     reset_stream_state(*sb.current_state)
 }

@@ -52,12 +52,12 @@ func new_vapo_config() vapo_config {
 }
 
 func vapo_compute_value_augmented_advantages(
-    []tensor advantages,
-    []tensor values,
-    []tensor rewards,
+    tensor[] advantages,
+    tensor[] values,
+    tensor[] rewards,
     vapo_config cfg
-) []tensor {
-    []tensor augmented = make([]tensor, advantages.len)
+) tensor[] {
+    tensor[] augmented = make(tensor[], advantages.len)
     int i = 0
     for i < advantages.len {
         tensor adv = advantages[i]
@@ -76,15 +76,15 @@ func vapo_compute_value_augmented_advantages(
 }
 
 func vapo_compute_advantages_with_gae(
-    []tensor rewards,
-    []tensor values,
-    []bool dones,
+    tensor[] rewards,
+    tensor[] values,
+    bool[] dones,
     float gamma,
     float gae_lambda
-) ([]tensor, []tensor) {
+) (tensor[], tensor[]) {
     int T = rewards.len
-    []tensor advantages = make([]tensor, T)
-    []tensor returns = make([]tensor, T)
+    tensor[] advantages = make(tensor[], T)
+    tensor[] returns = make(tensor[], T)
     tensor gae = tensor_ops.zeros_like(values[T - 1])
     int t = T - 1
     for t >= 0 {
@@ -122,15 +122,15 @@ func vapo_compute_advantages_with_gae(
 func vapo_step(
     module policy,
     module value_model,
-    []tensor states,
-    []tensor actions,
-    []tensor rewards,
-    []tensor old_log_probs,
-    []tensor old_values,
-    []bool dones,
+    tensor[] states,
+    tensor[] actions,
+    tensor[] rewards,
+    tensor[] old_log_probs,
+    tensor[] old_values,
+    bool[] dones,
     vapo_config cfg
 ) vapo_state {
-    ([]tensor advantages, []tensor returns) = vapo_compute_advantages_with_gae(
+    (tensor[] advantages, tensor[] returns) = vapo_compute_advantages_with_gae(
         rewards,
         old_values,
         dones,

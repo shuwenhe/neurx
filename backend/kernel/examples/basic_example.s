@@ -25,9 +25,9 @@ func BasicMatrixExample() {
     n := i32(512)
     k := i32(512)
 
-    A := make([]f32, m * k)
-    B := make([]f32, k * n)
-    C := make([]f32, m * n)
+    A := make(f32[], m * k)
+    B := make(f32[], k * n)
+    C := make(f32[], m * n)
 
     for i := 0; i < len(A); i += 1 {
         A[i] = f32(1.0)
@@ -62,14 +62,14 @@ func ActivationExample() {
 
     activation_kernel := activation_kernels.NewActivationKernels(config)
 
-    input := make([]f32, 1024)
-    output := make([]f32, 1024)
+    input := make(f32[], 1024)
+    output := make(f32[], 1024)
 
     for i := 0; i < len(input); i += 1 {
         input[i] = f32(i) / 512.0 - f32(1.0)
     }
 
-    activations := [6]types.ActivationType{
+    activations := types.ActivationType[6]{
         types.ActivationType.relu,
         types.ActivationType.gelu,
         types.ActivationType.silu,
@@ -78,7 +78,7 @@ func ActivationExample() {
         types.ActivationType.softmax
     }
 
-    activation_names := [6]string{
+    activation_names := string[6]{
         "ReLU",
         "GELU",
         "SiLU",
@@ -115,10 +115,10 @@ func NormalizationExample() {
     m := i32(64)
     n := i32(256)
 
-    input := make([]f32, m * n)
-    output := make([]f32, m * n)
-    gamma := make([]f32, n)
-    beta := make([]f32, n)
+    input := make(f32[], m * n)
+    output := make(f32[], m * n)
+    gamma := make(f32[], n)
+    beta := make(f32[], n)
 
     for i := 0; i < len(input); i += 1 {
         input[i] = f32(i % 100) / 50.0 - 1.0

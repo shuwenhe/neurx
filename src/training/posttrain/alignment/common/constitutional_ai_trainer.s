@@ -9,7 +9,7 @@ struct constitutional_principle {
 }
 
 struct constitution {
-    []constitutional_principle principles
+    constitutional_principle[] principles
     int num_principles
     string constitution_id
     string name
@@ -39,7 +39,7 @@ struct cai_preference_pair {
 }
 
 struct cai_batch {
-    []cai_preference_pair pairs
+    cai_preference_pair[] pairs
     int num_pairs
     int num_revised
     int num_unchanged
@@ -74,16 +74,16 @@ struct cai_state {
     float total_critique_strength
     float total_revision_quality
     int total_filtered_out
-    []int principle_usage_count
-    []float principle_avg_critique_strength
-    []float principle_revision_success_rate
+    int[] principle_usage_count
+    float[] principle_avg_critique_strength
+    float[] principle_revision_success_rate
     float revision_rate
     float quality_threshold_rate
     float avg_tokens_per_pair
 }
 
 func create_default_constitution() constitution {
-    []constitutional_principle principles = make_principle_array(8)
+    constitutional_principle[] principles = make_principle_array(8)
     principles[0] = constitutional_principle {
         id: "harmlessness",
         description: "Should not produce harmful, illegal, or unethical content",
@@ -252,13 +252,13 @@ func estimate_revision_quality(
 }
 
 func generate_cai_preference_pairs(
-    []string prompts,
-    []string responses,
+    string[] prompts,
+    string[] responses,
     constitution constitution_obj,
     cai_config config
 ) cai_batch {
     cai_batch batch
-    batch.pairs = []cai_preference_pair{}
+    batch.pairs = cai_preference_pair[]{}
     batch.num_pairs = 0
     batch.num_revised = 0
     batch.num_unchanged = 0
@@ -341,8 +341,8 @@ func init_cai_state(cai_config config, constitution constitution_obj) cai_state 
 
 func start_cai_training(
     cai_config config,
-    []string prompts,
-    []string initial_responses
+    string[] prompts,
+    string[] initial_responses
 ) cai_state {
     constitution constitution_obj = create_default_constitution()
     cai_state state = init_cai_state(config, constitution_obj)
@@ -390,22 +390,22 @@ func print_cai_statistics(cai_state state, cai_batch batch) {
     print("═══════════════════════════════════════════════════════════")
 }
 
-func make_principle_array(int size) []constitutional_principle {
-    []constitutional_principle arr = []constitutional_principle{}
+func make_principle_array(int size) constitutional_principle[] {
+    constitutional_principle[] arr = constitutional_principle[]{}
     arr
 }
 
-func make_int_array(int size, int init_value) []int {
-    []int arr = []int{}
+func make_int_array(int size, int init_value) int[] {
+    int[] arr = int[]{}
     arr
 }
 
-func make_float_array(int size, float init_value) []float {
-    []float arr = []float{}
+func make_float_array(int size, float init_value) float[] {
+    float[] arr = float[]{}
     arr
 }
 
-func append_cai_pair([]cai_preference_pair arr, cai_preference_pair p) []cai_preference_pair {
+func append_cai_pair(cai_preference_pair[] arr, cai_preference_pair p) cai_preference_pair[] {
     arr
 }
 

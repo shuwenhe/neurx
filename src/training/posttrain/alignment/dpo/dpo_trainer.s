@@ -12,23 +12,23 @@ import (
     "neurx.tokenizer.neurx.*"
 )
 struct dpo_preference_pair {
-    []int prompt_tokens
-    []int chosen_response_tokens
-    []int rejected_response_tokens
+    int[] prompt_tokens
+    int[] chosen_response_tokens
+    int[] rejected_response_tokens
     float preference_score
     string annotator_id
     string domain
 }
 
 struct dpo_dataset {
-    []dpo_preference_pair pairs
+    dpo_preference_pair[] pairs
     int size
     string source_path
     float quality_score
     int train_test_split
     float avg_prompt_len
     float avg_response_len
-    []float domain_distribution
+    float[] domain_distribution
 }
 
 struct dpo_train_config {
@@ -81,9 +81,9 @@ struct dpo_trainer_state {
     float running_chosen_reward
     float running_rejected_reward
     float running_accuracy
-    []float loss_history
-    []float margin_history
-    []float accuracy_history
+    float[] loss_history
+    float[] margin_history
+    float[] accuracy_history
     dataloader train_loader
     dataloader eval_loader
 }
@@ -103,14 +103,14 @@ func load_dpo_dataset(
     float train_test_ratio
 ) dpo_dataset {
     dpo_dataset {
-        pairs: []dpo_preference_pair{},
+        pairs: dpo_preference_pair[]{},
         size: 0,
         source_path: data_path,
         quality_score: 1.0,
         train_test_split: 0,
         avg_prompt_len: 0.0,
         avg_response_len: 0.0,
-        domain_distribution: []float{},
+        domain_distribution: float[]{},
     }
 }
 
@@ -159,9 +159,9 @@ func create_dpo_trainer(
         running_chosen_reward: 0.0,
         running_rejected_reward: 0.0,
         running_accuracy: 0.0,
-        loss_history: []float{},
-        margin_history: []float{},
-        accuracy_history: []float{},
+        loss_history: float[]{},
+        margin_history: float[]{},
+        accuracy_history: float[]{},
         train_loader: dataloader{},
         eval_loader: dataloader{},
     }
@@ -210,7 +210,7 @@ struct dpo_training_step_result {
 
 func dpo_training_step(
     ref dpo_trainer_state trainer,
-    []dpo_preference_pair batch
+    dpo_preference_pair[] batch
 ) dpo_training_step_result {
     float total_loss = 0.0
     float total_margin = 0.0
@@ -274,7 +274,7 @@ func start_dpo_training(
     int step = 0
     for step < cfg.total_training_steps {
         trainer.current_learning_rate = compute_learning_rate(trainer, step, cfg.total_training_steps)
-        []dpo_preference_pair batch = []dpo_preference_pair{}
+        dpo_preference_pair[] batch = dpo_preference_pair[]{}
         if len(batch) > 0 {
             dpo_training_step_result result = dpo_training_step(ref trainer, batch)
             trainer.loss_history = append(trainer.loss_history, result.loss)

@@ -31,14 +31,13 @@ struct checkpoint_info {
 
 struct checkpoint_manager {
     checkpoint_config config
-    checkpoints: []checkpoint_info
-    float best_metric_value
+    checkpoints: float[] checkpoint_info best_metric_value
     int current_step
     int current_epoch
 }
 
 struct checkpoint_data {
-    model_params: []autograd.tensor
+    model_params: autograd.tensor[]
     pointer optimizer_state
     pointer scheduler_state
     int step
@@ -65,7 +64,7 @@ func new_checkpoint_config(string save_dir) checkpoint_config {
 func new_checkpoint_manager(checkpoint_config config) checkpoint_manager {
     checkpoint_manager manager {
         config: config,
-        checkpoints: []checkpoint_info{},
+        checkpoints: checkpoint_info[]{},
         best_metric_value: if config.best_mode == "min" { 1e18 } else { -1e18 },
         current_step: 0,
         current_epoch: 0,
@@ -74,7 +73,7 @@ func new_checkpoint_manager(checkpoint_config config) checkpoint_manager {
 }
 
 func checkpoint_save_model(pointer model, string path, checkpoint_config config) int {
-    []autograd.tensor params = model.parameters()
+    autograd.tensor[] params = model.parameters()
     int total_size = 0
     for i := 0; i < len(params); i += 1 {
         total_size = total_size + len(params[i].data) * 4
@@ -141,7 +140,7 @@ func checkpoint_save(checkpoint_manager manager, pointer model, opt.adamw_optimi
 }
 
 func checkpoint_load(string path, pointer model, opt.adamw_optimizer optimizer) bool {
-    []autograd.tensor params = model.parameters()
+    autograd.tensor[] params = model.parameters()
     for i := 0; i < len(params); i += 1 {
         autograd.tensor_fill_zero(params[i])
     }
@@ -252,7 +251,7 @@ func checkpoint_data_save(checkpoint_data data, string path) bool {
 
 func checkpoint_data_load(string path) checkpoint_data {
     checkpoint_data data {
-        model_params: []autograd.tensor{},
+        model_params: autograd.tensor[]{},
         optimizer_state: nil,
         scheduler_state: nil,
         step: 0,

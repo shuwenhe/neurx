@@ -96,7 +96,7 @@ func (DistributedExecutor* de) synchronize_results() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) SendToRank(rank i32, data []u8) ExecutionResult {
+func (DistributedExecutor* de) SendToRank(rank i32, data u8[]) ExecutionResult {
     if rank < 0 || rank >= de.distributed_config.world_size {
         return ExecutionResult{
             success: 0,
@@ -118,24 +118,24 @@ func (DistributedExecutor* de) ReceiveFromRank(rank i32) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) BroadcastFromRank(rank i32, data []u8) ExecutionResult {
+func (DistributedExecutor* de) BroadcastFromRank(rank i32, data u8[]) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) AllGather(local_data []u8) ExecutionResult {
+func (DistributedExecutor* de) AllGather(local_data u8[]) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) TensorParallelForward(input []f32) ExecutionResult {
+func (DistributedExecutor* de) TensorParallelForward(input f32[]) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) PipelineParallelForward(layers []string) ExecutionResult {
+func (DistributedExecutor* de) PipelineParallelForward(layers string[]) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) LoadBalance(sequences []string) []string[] {
-    result := make([]string[], de.distributed_config.world_size)
+func (DistributedExecutor* de) LoadBalance(sequences string[]) string[][] {
+    result := make(string[][], de.distributed_config.world_size)
     for i := 0; i < len(sequences); i++ {
         rank := i % int(de.distributed_config.world_size)
         result[rank] = append(result[rank], sequences[i])

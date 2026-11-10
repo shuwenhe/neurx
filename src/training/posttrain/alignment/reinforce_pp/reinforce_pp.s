@@ -49,13 +49,13 @@ func new_reinforce_pp_config() reinforce_pp_config {
 }
 
 func reinforce_pp_compute_baseline(
-    []tensor rewards,
+    tensor[] rewards,
     int num_samples_per_prompt,
     float ema_baseline,
     float momentum
 ) (tensor, float) {
     int n = rewards.len
-    []tensor group_means = make([]tensor, n)
+    tensor[] group_means = make(tensor[], n)
     int i = 0
     for i < n {
         int group_idx = i / num_samples_per_prompt
@@ -81,10 +81,10 @@ func reinforce_pp_compute_baseline(
 func reinforce_pp_step(
     module policy,
     module reference_policy,
-    []tensor states,
-    []tensor actions,
-    []tensor rewards,
-    []tensor old_log_probs,
+    tensor[] states,
+    tensor[] actions,
+    tensor[] rewards,
+    tensor[] old_log_probs,
     float ema_baseline,
     reinforce_pp_config cfg
 ) reinforce_pp_state {

@@ -18,7 +18,7 @@ struct model_spec {
     bool use_cache
     bool tie_word_embeddings
     f32 initializer_range
-    architectures: []string
+    architectures: string[]
 }
 
 func create_llama_7b() model_spec {
@@ -596,7 +596,7 @@ func create_neural_chat_7b() model_spec {
     }
 }
 
-func get_all_models() []model_spec {
+func get_all_models() model_spec[] {
     [
         create_llama_7b(),
         create_llama_13b(),
@@ -641,7 +641,7 @@ func get_model_by_name(string name) option[model_spec] {
     none
 }
 
-func get_model_by_type(string model_type) []model_spec {
+func get_model_by_type(string model_type) model_spec[] {
     models := get_all_models()
     result := []()
     for model in models.iter() {
@@ -652,7 +652,7 @@ func get_model_by_type(string model_type) []model_spec {
     result
 }
 
-func list_all_model_names() []string {
+func list_all_model_names() string[] {
     models := get_all_models()
     names := []()
     for model in models.iter() {

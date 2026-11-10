@@ -90,13 +90,13 @@ func create_multimodal_system(model_system* model_sys) *multimodal_system {
 	return ms
 }
 
-func (multimodal_system* ms) load_audio(audio_id string, samples []float32, metadata *audio_metadata) error {
+func (multimodal_system* ms) load_audio(audio_id string, samples float32[], metadata *audio_metadata) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.audio_proc.load_audio(audio_id, samples, metadata)
 }
 
-func (multimodal_system* ms) load_video(video_id string, frames []video_frame, metadata *video_metadata) error {
+func (multimodal_system* ms) load_video(video_id string, frames video_frame[], metadata *video_metadata) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return ms.video_proc.load_video(video_id, frames, metadata)
@@ -190,11 +190,11 @@ func (multimodal_system* ms) infer(multimodal_inference_request* request) (*mult
 	return response, err
 }
 
-func (multimodal_system* ms) batch_infer(requests []*multimodal_inference_request) ([]*multimodal_inference_response, error) {
+func (multimodal_system* ms) batch_infer(requests multimodal_inference_request*[]) (multimodal_inference_response*[], error) {
 	if len(requests) == 0 {
 		return nil, fmt.Errorf("no inference requests provided")
 	}
-	responses := make([]*multimodal_inference_response, 0, len(requests))
+	responses := make(multimodal_inference_response*[], 0, len(requests))
 	for _, request := range requests {
 		response, err := ms.infer(request)
 		if err == nil && response != nil {

@@ -20,7 +20,7 @@ struct musa_context {
     int64 muDNN_handle
     int64 muBLAS_handle
     int allocated_memory_bytes
-    []musa_memory_allocation allocations
+    musa_memory_allocation[] allocations
 }
 
 struct musa_memory_allocation {

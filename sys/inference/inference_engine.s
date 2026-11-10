@@ -8,8 +8,8 @@ struct model_config {
     string model_id
     int version
     int batch_size
-    []int input_shapes
-    []int output_shapes
+    int[] input_shapes
+    int[] output_shapes
 }
 
 struct inference_request {
@@ -35,9 +35,9 @@ struct inference_engine {
 
 func create_inference_engine() inference_engine {
     engine := inference_engine {
-        model_registry: []model_config{},
-        active_requests: []inference_request{},
-        result_queue: []inference_result{},
+        model_registry: model_config[]{},
+        active_requests: inference_request[]{},
+        result_queue: inference_result[]{},
         next_request_id: 1
     }
     engine
@@ -48,8 +48,8 @@ func register_model(inference_engine* engine, model_id: string, version: int) bo
         model_id: model_id,
         version: version,
         batch_size: 1,
-        input_shapes: []int{},
-        output_shapes: []int{}
+        input_shapes: int[]{},
+        output_shapes: int[]{}
     }
     engine.model_registry = append(engine.model_registry, model)
     true
@@ -141,11 +141,11 @@ func unload_model(inference_engine* engine, model_id: string) bool {
 }
 
 func clear_result_queue(inference_engine* engine) {
-    engine.result_queue = []inference_result{}
+    engine.result_queue = inference_result[]{}
 }
 
 func shutdown_inference_engine(inference_engine* engine) {
-    engine.active_requests = []inference_request{}
-    engine.result_queue = []inference_result{}
-    engine.model_registry = []model_config{}
+    engine.active_requests = inference_request[]{}
+    engine.result_queue = inference_result[]{}
+    engine.model_registry = model_config[]{}
 }

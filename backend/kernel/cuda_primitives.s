@@ -6,7 +6,7 @@ import (
 )
 
 struct CUDADeviceManager {
-    devices: []types.DeviceType,
+    devices: types.DeviceType[],
     active_device: types.DeviceType,
     device_properties: map[i32, CUDADeviceProperties],
     streams: map[i32, *types.CUDAStream]
@@ -25,7 +25,7 @@ struct CUDADeviceProperties {
 
 func NewCUDADeviceManager() *CUDADeviceManager {
     return *CUDADeviceManager{
-        devices: make([]types.DeviceType, 0),
+        devices: make(types.DeviceType[], 0),
         active_device: types.DeviceType.cuda,
         device_properties: make(map[i32, CUDADeviceProperties]),
         streams: make(map[i32, *types.CUDAStream])

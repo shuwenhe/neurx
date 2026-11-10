@@ -64,7 +64,7 @@ interface i_device_properties {
 interface i_device_factory {
     create_device(device_type: DeviceType, i64 device_id) . device
     get_device(device_type: DeviceType, i64 device_id) . device
-    list_devices(device_type: DeviceType) . []device
+    list_devices(device_type: DeviceType) . device[]
     get_device_count(device_type: DeviceType) . i64
 }
 interface i_device_registry {

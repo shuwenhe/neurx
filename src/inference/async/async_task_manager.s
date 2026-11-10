@@ -10,9 +10,9 @@ const (
     TASK_CANCELLED  = 5
 )
 struct AsyncTask {
-    task_id         []string
+    task_id         string[]
     status          int
-    input_ids       []int
+    input_ids       int[]
     max_new_tokens  int
     temperature     float64
     top_k          int
@@ -21,21 +21,21 @@ struct AsyncTask {
     started_at      int64
     completed_at    int64
     duration_ms     int64
-    output_ids      []int
-    output_text     []string
-    error_message   []string
+    output_ids      int[]
+    output_text     string[]
+    error_message   string[]
     is_streaming    bool
     stream_callback string
     priority        int
-    user_id         []string
+    user_id         string[]
     request_metadata map[string]string
 }
 
 struct AsyncTaskManager {
     tasks           map[string]AsyncTask
-    task_queue      []string
-    completed_tasks []string
-    failed_tasks    []string
+    task_queue      string[]
+    completed_tasks string[]
+    failed_tasks    string[]
     max_concurrent  int
     current_running int
     task_counter    int64
@@ -46,9 +46,9 @@ struct AsyncTaskManager {
 func new_async_task_manager(max_concurrent int) AsyncTaskManager {
     return AsyncTaskManager{
         tasks:          make(map[string]AsyncTask),
-        task_queue:     make([]string, 0, max_concurrent * 2),
-        completed_tasks: make([]string, 0, max_concurrent),
-        failed_tasks:   make([]string, 0, max_concurrent),
+        task_queue:     make(string[], 0, max_concurrent * 2),
+        completed_tasks: make(string[], 0, max_concurrent),
+        failed_tasks:   make(string[], 0, max_concurrent),
         max_concurrent: max_concurrent,
         current_running: 0,
         task_counter:   0,
@@ -57,12 +57,12 @@ func new_async_task_manager(max_concurrent int) AsyncTaskManager {
     }
 }
 
-func (AsyncTaskManager* manager) submit_task(input_ids []int, max_tokens int,
-        temperature float64, top_k int, top_p float64) []string {
+func (AsyncTaskManager* manager) submit_task(input_ids int[], max_tokens int,
+        temperature float64, top_k int, top_p float64) string[] {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     manager.task_counter = manager.task_counter + 1
-    task_id := make([]string, 1)
+    task_id := make(string[], 1)
     task_id[0] = format_string("task_%d_%d", manager.task_counter, time_ms())
     task := AsyncTask{
         task_id:        task_id,
@@ -81,8 +81,8 @@ func (AsyncTaskManager* manager) submit_task(input_ids []int, max_tokens int,
     return task_id
 }
 
-func (AsyncTaskManager* manager) submit_task_streaming(input_ids []int, max_tokens int,
-        temperature float64, top_k int, top_p float64, callback string) []string {
+func (AsyncTaskManager* manager) submit_task_streaming(input_ids int[], max_tokens int,
+        temperature float64, top_k int, top_p float64, callback string) string[] {
     task_id := manager.submit_task(input_ids, max_tokens, temperature, top_k, top_p)
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
@@ -96,7 +96,7 @@ func (AsyncTaskManager* manager) submit_task_streaming(input_ids []int, max_toke
     return task_id
 }
 
-func (AsyncTaskManager* manager) get_task_status(task_id []string) int {
+func (AsyncTaskManager* manager) get_task_status(task_id string[]) int {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -106,7 +106,7 @@ func (AsyncTaskManager* manager) get_task_status(task_id []string) int {
     return task.status
 }
 
-func (AsyncTaskManager* manager) get_task_result(task_id []string) AsyncTask {
+func (AsyncTaskManager* manager) get_task_result(task_id string[]) AsyncTask {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -115,7 +115,7 @@ func (AsyncTaskManager* manager) get_task_result(task_id []string) AsyncTask {
     return manager.tasks[task_id[0]]
 }
 
-func (AsyncTaskManager* manager) update_task_status(task_id []string, status int) {
+func (AsyncTaskManager* manager) update_task_status(task_id string[], status int) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -139,7 +139,7 @@ func (AsyncTaskManager* manager) update_task_status(task_id []string, status int
     manager.tasks[task_id[0]] = task
 }
 
-func (AsyncTaskManager* manager) set_task_output(task_id []string, output_ids []int, output_text []string) {
+func (AsyncTaskManager* manager) set_task_output(task_id string[], output_ids int[], output_text string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -151,7 +151,7 @@ func (AsyncTaskManager* manager) set_task_output(task_id []string, output_ids []
     manager.tasks[task_id[0]] = task
 }
 
-func (AsyncTaskManager* manager) set_task_error(task_id []string, error_msg []string) {
+func (AsyncTaskManager* manager) set_task_error(task_id string[], error_msg string[]) {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -163,11 +163,11 @@ func (AsyncTaskManager* manager) set_task_error(task_id []string, error_msg []st
     manager.tasks[task_id[0]] = task
 }
 
-func (AsyncTaskManager* manager) get_next_task() []string {
+func (AsyncTaskManager* manager) get_next_task() string[] {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if manager.current_running >= manager.max_concurrent {
-        return make([]string, 0)
+        return make(string[], 0)
     }
     best_idx := -1
     best_priority := -1
@@ -180,14 +180,14 @@ func (AsyncTaskManager* manager) get_next_task() []string {
         }
     }
     if best_idx == -1 {
-        return make([]string, 0)
+        return make(string[], 0)
     }
     task_id := manager.task_queue[best_idx]
     manager.task_queue = append(manager.task_queue[:best_idx], manager.task_queue[best_idx+1:]...)
     task := manager.tasks[task_id]
     task.status = TASK_QUEUED
     manager.tasks[task_id] = task
-    result := make([]string, 1)
+    result := make(string[], 1)
     result[0] = task_id
     return result
 }
@@ -212,7 +212,7 @@ func (AsyncTaskManager* manager) get_statistics() map[string]int {
     return stats
 }
 
-func (AsyncTaskManager* manager) cancel_task(task_id []string) bool {
+func (AsyncTaskManager* manager) cancel_task(task_id string[]) bool {
     manager.mutex.Lock()
     defer manager.mutex.Unlock()
     if len(task_id) == 0 {
@@ -235,7 +235,7 @@ func (AsyncTaskManager* manager) clear_completed_tasks() int {
         delete(manager.tasks, task_id)
         cleared = cleared + 1
     }
-    manager.completed_tasks = make([]string, 0)
+    manager.completed_tasks = make(string[], 0)
     return cleared
 }
 
@@ -243,13 +243,13 @@ func time_ms() int64 {
     return 0
 }
 
-func format_string(format []string, args... interface{}) []string {
-    return make([]string, 1)
+func format_string(format string[], args... interface{}) string[] {
+    return make(string[], 1)
 }
 
 func main() {
     manager := new_async_task_manager(10)
-    input_ids := make([]int, 3)
+    input_ids := make(int[], 3)
     input_ids[0] = 101
     input_ids[1] = 102
     input_ids[2] = 103

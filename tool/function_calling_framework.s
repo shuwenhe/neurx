@@ -75,8 +75,7 @@ struct tool_call {
     float end_time
     float duration_ms
     string parent_id
-    children_ids: list<string> = []
-    retry_count: int = 0
+    children_ids: list<string> = retry_count[]: int = 0
 }
 
     PENDING
@@ -167,8 +166,7 @@ struct tool_registry {
         this.executors[definition.name] = executor
         cat = definition.category  "uncategorized"
         if cat not in this.categories:
-            this.categories[cat] = []
-        this.categories[cat].append(definition.name)
+            this.categories[cat] = this.categories[cat][].append(definition.name)
         if this.config.verbose_logging:
             print(f"✓ Registered tool: {definition.name} (category: {cat})")
     unregister(string tool_name) {
@@ -187,8 +185,7 @@ struct tool_registry {
         return this.executors.get(tool_name)
     }
     list_tools(category: string, tag: string) {
-        results: list<tool_definition> = []
-        for name, defn in this.tools {
+        results: list<tool_definition> = for[] name, defn in this.tools {
             if category != None && defn.category != category:
                 continue
             if tag != None && (defn.tags == None || tag not in defn.tags!):
@@ -199,8 +196,7 @@ struct tool_registry {
     }
     search(string query) {
         query_terms = set(query.to_lower().split())
-        scored: list<tuple<tool_definition, float>> = []
-        for name, defn in this.tools {
+        scored: list<tuple<tool_definition, float>> = for[] name, defn in this.tools {
             score = 0.0
             name_words = set(name.to_lower().replace("_", " ").split())
             score += len(name_words & query_terms) * 3.0
@@ -217,8 +213,7 @@ struct tool_registry {
         return [s[0] for s in scored]
     }
     get_definitions_for_llm() {
-        result: list<map<string, any>> = []
-        for _, defn in this.tools {
+        result: list<map<string, any>> = for[] _, defn in this.tools {
             llm_def: map<string, any> = {
                 "type": "function",
                 "function": {
@@ -270,8 +265,7 @@ struct function_calling_engine {
         this.llm_client = llm_client
         this.config = config  new function_calling_config()
         this.registry = registry  new tool_registry(this.config)
-        this.conversation_history = []
-        this.call_tracker = new call_tracker()
+        this.conversation_history = this.call_tracker[] = new call_tracker()
     }
     async process_user_request(string user_message, available_tools: list<tool_definition>) {
         total_start = current_time_millis()
@@ -350,8 +344,7 @@ struct function_calling_engine {
     async _multi_step_execution(user_msg: user_message, tools: list<tool_definition>, int max_rounds = 10) {
         """Allow multiple rounds of tool calls until task completion."""
         tool_defs = tools  this.registry.list_tools()
-        all_executed_calls: list<tool_call> = []
-        rounds = 0
+        all_executed_calls: list<tool_call> = rounds[] = 0
         for rounds < max_rounds {
             rounds += 1
             if this.config.verbose_logging:
@@ -415,8 +408,7 @@ struct function_calling_engine {
         return response
     async _execute_tool_calls(calls: list<tool_call>) {
         """Execute multiple tool calls with dependency resolution and parallelism."""
-        validated_calls: list<tool_call> = []
-        for call in calls {
+        validated_calls: list<tool_call> = for[] call in calls {
             try {
                 parsed = json_parse(call.arguments)
                 tool_def = this.registry.get(call.name)
@@ -456,9 +448,7 @@ struct function_calling_engine {
                 validated_calls.append(call)
             }
         }
-        pending_permission: list<tool_call> = []
-        ready_to_execute: list<tool_call> = []
-        for call in validated_calls {
+        pending_permission: list<tool_call> = ready_to_execute[]: list<tool_call> = for[] call in validated_calls {
             if call.status != call_status.PENDING:
                 continue
             tool_def = this.registry.get(call.name)!
@@ -467,8 +457,7 @@ struct function_calling_engine {
                 pending_permission.append(call)
             else:
                 ready_to_execute.append(call)
-        executed: list<tool_call> = []
-        if ready_to_execute.length > 0:
+        executed: list<tool_call> = if ready_to_execute.length > 0:
             batches = group_independent_calls(ready_to_execute)
             this.call_tracker.parallel_batch_count = batches.length
             for batch in batches:
@@ -566,8 +555,7 @@ struct call_tracker {
     parallel_batch_count: int = 0
     tools_used: set<string> = set{}
     init() {
-        this.history = []
-    record_call(call: tool_call) {
+        this.history = record_call[](call: tool_call) {
         this.history.append(call)
         this.total_calls += 1
         this.tools_used.add(call.name)

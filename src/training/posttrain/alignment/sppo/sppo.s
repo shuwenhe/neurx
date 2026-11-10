@@ -19,8 +19,8 @@ struct sppo_trainer {
     *model reference_model
     *optimizer optimizer
     i32 iteration
-    win_rates: []f32
-    trajectory_buffer: []trajectory
+    win_rates: f32[]
+    trajectory_buffer: trajectory[]
 }
 
 struct trajectory {
@@ -44,9 +44,8 @@ func new_sppo_trainer(sppo_config config, *model model, *model ref_model) . sppo
     }
 }
 
-func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) . []trajectory {
-    trajectories := []
-    for i in 0..prompts.shape[0] {
+func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) . trajectory[] {
+    trajectories := for[] i in 0..prompts.shape[0] {
         prompt := prompts[i]
         for j in 0..num_samples {
             response, log_probs  := trainer.policy_model.generate(
@@ -76,7 +75,7 @@ func (sppo_trainer* trainer) compute_self_play_reward(tensor prompt, tensor resp
     return -kl_div
 }
 
-func (sppo_trainer* trainer) compute_win_rates([]trajectory trajectories) . []trajectory {
+func (sppo_trainer* trainer) compute_win_rates(trajectory[] trajectories) . trajectory[] {
     n := len(trajectories)
     for i in 0..n {
         wins := 0
@@ -99,10 +98,8 @@ func (sppo_trainer* trainer) compute_win_rates([]trajectory trajectories) . []tr
     return trajectories
 }
 
-func (sppo_trainer* trainer) create_preference_pairs([]trajectory trajectories) . ([]trajectory, []trajectory) {
-    chosen := []
-    rejected := []
-    prompt_groups := {}
+func (sppo_trainer* trainer) create_preference_pairs(trajectory[] trajectories) . (trajectory[], trajectory[]) {
+    chosen := rejected[] := prompt_groups[] := {}
     for traj in trajectories {
         key := traj.prompt.to_string()
         if key not in prompt_groups {
@@ -122,8 +119,8 @@ func (sppo_trainer* trainer) create_preference_pairs([]trajectory trajectories) 
 }
 
 func (sppo_trainer* trainer) compute_sppo_loss(
-    []trajectory chosen,
-    []trajectory rejected
+    trajectory[] chosen,
+    trajectory[] rejected
 ) . tensor {
     batch_size := len(chosen)
     total_loss := tensor_zeros([1])
@@ -158,9 +155,7 @@ func (sppo_trainer* trainer) train_step(tensor prompts) . f32 {
     trajectories := trainer.self_play_rollout(prompts, num_samples: 4)
     trajectories = trainer.compute_win_rates(trajectories)
     chosen, rejected  := trainer.create_preference_pairs(trajectories)
-    filtered_chosen := []
-    filtered_rejected := []
-    for i in len(0..chosen) {
+    filtered_chosen := filtered_rejected[] := for[] i in len(0..chosen) {
         if chosen[i].win_rate >= trainer.config.win_rate_threshold {
             filtered_chosen = append(filtered_chosen, chosen[i])
             filtered_rejected = append(filtered_rejected, rejected[i])
@@ -178,9 +173,8 @@ func (sppo_trainer* trainer) train_step(tensor prompts) . f32 {
     return loss.item()
 }
 
-func (sppo_trainer* trainer) train(DataLoader train_data) . []f32 {
-    losses := []
-    for batch in train_data {
+func (sppo_trainer* trainer) train(DataLoader train_data) . f32[] {
+    losses := for[] batch in train_data {
         prompts := batch.prompts
         loss := trainer.train_step(prompts)
         losses = append(losses, loss)

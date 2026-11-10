@@ -4,20 +4,20 @@ import (
 )
 struct grad_record {
     int id
-    []int shape
+    int[] shape
     bool requires_grad
-    []float grad
+    float[] grad
 }
 
 struct autograd_state {
     bool grad_enabled
     bool grad_accumulation
-    []grad_record records
+    grad_record[] records
 }
 
-func copy_float([]float data) []float {
+func copy_float(float[] data) float[] {
     int n = len(data)
-    []float out = make([]float, n)
+    float[] out = make(float[], n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -26,9 +26,9 @@ func copy_float([]float data) []float {
     out
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     int n = len(data)
-    []int out = make([]int, n)
+    int[] out = make(int[], n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -46,8 +46,8 @@ func copy_record(grad_record record) grad_record {
     }
 }
 
-func copy_records([]grad_record records) []grad_record {
-    []grad_record out = make([]grad_record, len(records))
+func copy_records(grad_record[] records) grad_record[] {
+    grad_record[] out = make(grad_record[], len(records))
     int i = 0
     for i < len(records) {
         out[i] = copy_record(records[i])
@@ -109,18 +109,18 @@ func set_detect_anomaly(autograd_state state, bool enabled) autograd_state {
     state
 }
 
-func zeros_like([]float data) []float {
+func zeros_like(float[] data) float[] {
     int n = len(data)
-    []float out = make([]float, n)
+    float[] out = make(float[], n)
     for i in 0..n {
         out[i] = 0.0
     }
     out
 }
 
-func ones_like([]float data) []float {
+func ones_like(float[] data) float[] {
     int n = len(data)
-    []float out = make([]float, n)
+    float[] out = make(float[], n)
     for i in 0..n {
         out[i] = 1.0
     }
@@ -128,7 +128,7 @@ func ones_like([]float data) []float {
 }
 
 func register_tensor(autograd_state state, int id, tensor value) autograd_state {
-    []grad_record records = state.records
+    grad_record[] records = state.records
     records.push(
         grad_record {
             id: id,
@@ -159,8 +159,8 @@ func has_record(autograd_state state, int id) bool {
     false
 }
 
-func set_grad(autograd_state state, int id, []float grad) autograd_state {
-    []grad_record records = state.records
+func set_grad(autograd_state state, int id, float[] grad) autograd_state {
+    grad_record[] records = state.records
     for i in 0..len(records) {
         if records[i].id == id {
             records[i].grad = grad
@@ -175,7 +175,7 @@ func set_grad(autograd_state state, int id, []float grad) autograd_state {
 }
 
 func clear_grad(autograd_state state, int id) autograd_state {
-    []grad_record records = state.records
+    grad_record[] records = state.records
     int i = 0
     for i < len(records) {
         if records[i].id == id {
@@ -191,7 +191,7 @@ func clear_grad(autograd_state state, int id) autograd_state {
 }
 
 func zero_grad(autograd_state state) autograd_state {
-    []grad_record records = state.records
+    grad_record[] records = state.records
     int i = 0
     for i < len(records) {
         records[i].grad = zeros_like(records[i].grad)
@@ -204,8 +204,8 @@ func zero_grad(autograd_state state) autograd_state {
     }
 }
 
-func accumulate_grad(autograd_state state, int id, []float grad) autograd_state {
-    []grad_record records = state.records
+func accumulate_grad(autograd_state state, int id, float[] grad) autograd_state {
+    grad_record[] records = state.records
     for i in 0..len(records) {
         if records[i].id == id {
             int m = len(records[i].grad)
@@ -223,7 +223,7 @@ func accumulate_grad(autograd_state state, int id, []float grad) autograd_state 
     }
 }
 
-func grad_of(autograd_state state, int id) []float {
+func grad_of(autograd_state state, int id) float[] {
     int n = len(state.records)
     for i in 0..n {
         if state.records[i].id == id {

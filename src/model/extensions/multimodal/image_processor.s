@@ -6,8 +6,8 @@ import (
 )
 struct ImageProcessor {
     target_size: (i32, i32),
-    mean: [3]f32,
-    std: [3]f32,
+    mean: f32[3],
+    std: f32[3],
     interpolation: string,
     bool normalize
 }
@@ -15,8 +15,8 @@ struct ImageProcessor {
 func NewImageProcessor(
     width: i32,
     height: i32,
-    mean: [3]f32,
-    std: [3]f32
+    mean: f32[3],
+    std: f32[3]
 ) *ImageProcessor {
     return *ImageProcessor{
         target_size: (width, height),
@@ -63,7 +63,7 @@ func (ImageProcessor* p) Pad(
         return img
     }
     padded_size := target_w * target_h * img.channels
-    padded_data := make([]i8, padded_size)
+    padded_data := make(i8[], padded_size)
     pad_top := (target_h - img.height) / 2
     pad_left := (target_w - img.width) / 2
     for y := 0; y < img.height; y += 1 {
@@ -92,7 +92,7 @@ func (ImageProcessor* p) Normalize(
     img: *types.ImageData
 ) *types.Tensor {
     size := len(img.raw_data)
-    normalized := make([]f32, size)
+    normalized := make(f32[], size)
     for i := 0; i < size; i += 1 {
         pixel_val := f32(img.raw_data[i]) / 255.0
         channel := i % img.channels
@@ -104,7 +104,7 @@ func (ImageProcessor* p) Normalize(
     }
     return *types.Tensor{
         data: normalized,
-        shape: [3]i32{img.height, img.width, img.channels},
+        shape: i32[3]{img.height, img.width, img.channels},
         dtype: "float32"
     }
 }
@@ -118,7 +118,7 @@ func (ImageProcessor* p) CenterCrop(
     }
     crop_left := (img.width - target_w) / 2
     crop_top := (img.height - target_h) / 2
-    cropped_data := make([]i8, target_w * target_h * img.channels)
+    cropped_data := make(i8[], target_w * target_h * img.channels)
     for y := 0; y < target_h; y += 1 {
         for x := 0; x < target_w; x += 1 {
             src_idx := ((crop_top + y) * img.width + (crop_left + x)) * img.channels
@@ -149,9 +149,9 @@ func (ImageProcessor* p) Process(
 }
 
 func (ImageProcessor* p) ProcessBatch(
-    images: []types.ImageData
-) []types.Tensor {
-    results := make([]types.Tensor, len(images))
+    images: types.ImageData[]
+) types.Tensor[] {
+    results := make(types.Tensor[], len(images))
     for i := 0; i < len(images); i += 1 {
         results[i] = *p.Process(*images[i])
     }
@@ -159,13 +159,13 @@ func (ImageProcessor* p) ProcessBatch(
 }
 
 func resizeImage(
-    data: []i8,
+    data: i8[],
     src_w: i32,
     src_h: i32,
     dst_w: i32,
     i32 dst_h
-) []i8 {
-    result := make([]i8, dst_w * dst_h * 3)
+) i8[] {
+    result := make(i8[], dst_w * dst_h * 3)
     for y := 0; y < dst_h; y += 1 {
         for x := 0; x < dst_w; x += 1 {
             src_x := f32(x) * f32(src_w) / f32(dst_w)

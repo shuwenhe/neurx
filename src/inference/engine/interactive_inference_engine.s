@@ -3,8 +3,8 @@ import (
     "neurx.runtime.io."
 )
 
-func get_token_embedding(int token_id) []float32 {
-    []float32 embedding = make([]float32, 896)
+func get_token_embedding(int token_id) float32[] {
+    float32[] embedding = make(float32[], 896)
     int seed = token_id + 42
     int i = 0
     for i < 896 {
@@ -20,8 +20,8 @@ func get_token_embedding(int token_id) []float32 {
     return embedding
 }
 
-func layer_norm([]float32 x) []float32 {
-    []float32 normalized = make([]float32, len(x))
+func layer_norm(float32[] x) float32[] {
+    float32[] normalized = make(float32[], len(x))
     float mean = 0.0
     int i = 0
     for i < len(x) {
@@ -46,8 +46,8 @@ func layer_norm([]float32 x) []float32 {
     return normalized
 }
 
-func attention([]float32 hidden) []float32 {
-    []float32 attention_output = make([]float32, len(hidden))
+func attention(float32[] hidden) float32[] {
+    float32[] attention_output = make(float32[], len(hidden))
     int i = 0
     for i < len(hidden) {
         attention_output[i] = hidden[i] * 0.9
@@ -56,8 +56,8 @@ func attention([]float32 hidden) []float32 {
     return attention_output
 }
 
-func feed_forward_network([]float32 hidden) []float32 {
-    []float32 ffn_output = make([]float32, len(hidden))
+func feed_forward_network(float32[] hidden) float32[] {
+    float32[] ffn_output = make(float32[], len(hidden))
     int i = 0
     for i < len(hidden) {
         float value = hidden[i]
@@ -71,18 +71,18 @@ func feed_forward_network([]float32 hidden) []float32 {
     return ffn_output
 }
 
-func transformer_layer([]float32 hidden) []float32 {
-    []float32 normed = layer_norm(hidden)
-    []float32 attended = attention(normed)
-    []float32 after_attention = make([]float32, len(hidden))
+func transformer_layer(float32[] hidden) float32[] {
+    float32[] normed = layer_norm(hidden)
+    float32[] attended = attention(normed)
+    float32[] after_attention = make(float32[], len(hidden))
     int i = 0
     for i < len(hidden) {
         after_attention[i] = attended[i] + hidden[i]
         i = i + 1
     }
     normed = layer_norm(after_attention)
-    []float32 ffn_out = feed_forward_network(normed)
-    []float32 output = make([]float32, len(hidden))
+    float32[] ffn_out = feed_forward_network(normed)
+    float32[] output = make(float32[], len(hidden))
     i = 0
     for i < len(hidden) {
         output[i] = ffn_out[i] + after_attention[i]
@@ -91,8 +91,8 @@ func transformer_layer([]float32 hidden) []float32 {
     return output
 }
 
-func forward([]int input_tokens) []float32 {
-    []float32 hidden = make([]float32, 896)
+func forward(int[] input_tokens) float32[] {
+    float32[] hidden = make(float32[], 896)
     if len(input_tokens) > 0 {
         hidden = get_token_embedding(input_tokens[0])
     }
@@ -101,7 +101,7 @@ func forward([]int input_tokens) []float32 {
         hidden = transformer_layer(hidden)
         layer = layer + 1
     }
-    []float32 logits = make([]float32, 151936)
+    float32[] logits = make(float32[], 151936)
     int i = 0
     for i < 151936 {
         int hidden_idx = i % 896
@@ -111,7 +111,7 @@ func forward([]int input_tokens) []float32 {
     return logits
 }
 
-func argmax([]float32 logits) int {
+func argmax(float32[] logits) int {
     float max_val = logits[0]
     int max_idx = 0
     int i = 1
@@ -157,8 +157,8 @@ func decode_token(int token_id) string {
     return result
 }
 
-func generate_tokens(int input_hash, int num_tokens) []int {
-    []int tokens = make([]int, 0)
+func generate_tokens(int input_hash, int num_tokens) int[] {
+    int[] tokens = make(int[], 0)
     int seed = input_hash + 1337
     int i = 0
     for i < num_tokens {
@@ -203,17 +203,17 @@ func main() {
     print("    Input hash: ")
     print_int(input_hash)
     print("\n")
-    []int input_tokens = make([]int, 0)
+    int[] input_tokens = make(int[], 0)
     input_tokens = append(input_tokens, 151643)
     input_tokens = append(input_tokens, 100)
     input_tokens = append(input_tokens, 101)
     input_tokens = append(input_tokens, 2002)
     input_tokens = append(input_tokens, 151645)
     print("[2] transformer_2 Forward Pass (24 layers)...\n")
-    []float32 logits = forward(input_tokens)
+    float32[] logits = forward(input_tokens)
     print("    ✓ Forward pass complete\n\n")
     print("[3] Token Generation...\n")
-    []int output_tokens = generate_tokens(input_hash, 5)
+    int[] output_tokens = generate_tokens(input_hash, 5)
     print("    Generated ")
     print_int(len(output_tokens))
     print(" tokens\n\n")
@@ -237,7 +237,7 @@ func main() {
     print("Input 2: Health care\n")
     print("═══════════════════════════════════════════════════════\n\n")
     input_hash = hash_input("Health care")
-    input_tokens = make([]int, 0)
+    input_tokens = make(int[], 0)
     input_tokens = append(input_tokens, 151643)
     input_tokens = append(input_tokens, 2005)
     input_tokens = append(input_tokens, 2004)
@@ -273,7 +273,7 @@ func print_int(int value) {
         print("0")
         return
     }
-    []int digits = make([]int, 0)
+    int[] digits = make(int[], 0)
     int temp = value
     for temp > 0 {
         digits = append(digits, temp % 10)

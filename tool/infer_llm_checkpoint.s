@@ -99,7 +99,7 @@ func pad_float(float val, int w, int d) string {
     s
 }
 
-func split_lines(string s) []string {
+func split_lines(string s) string[] {
     int capacity = 1
     int j = 0
     for j < len(s) {
@@ -108,7 +108,7 @@ func split_lines(string s) []string {
         }
         j = j + 1
     }
-    []string out = make([]string, capacity)
+    string[] out = make(string[], capacity)
     string line = ""
     int idx = 0
     int i = 0
@@ -131,7 +131,7 @@ func split_lines(string s) []string {
     out
 }
 
-func parse_csv_floats(string s) []float {
+func parse_csv_floats(string s) float[] {
     int capacity = 1
     int j = 0
     for j < len(s) {
@@ -140,7 +140,7 @@ func parse_csv_floats(string s) []float {
         }
         j = j + 1
     }
-    []float out = make([]float, capacity)
+    float[] out = make(float[], capacity)
     string cur = ""
     int idx = 0
     int i = 0
@@ -162,7 +162,7 @@ func parse_csv_floats(string s) []float {
     out
 }
 
-func parse_csv_ints(string s) []int {
+func parse_csv_ints(string s) int[] {
     int capacity = 1
     int j = 0
     for j < len(s) {
@@ -171,7 +171,7 @@ func parse_csv_ints(string s) []int {
         }
         j = j + 1
     }
-    []int out = make([]int, capacity)
+    int[] out = make(int[], capacity)
     string cur = ""
     int idx = 0
     int i = 0
@@ -322,7 +322,7 @@ func csv_second_int(string s) int {
     str_to_int(trim(cur), 0)
 }
 
-func argmax_next_row([]float weights_row, []float bias, int vocab_size) int {
+func argmax_next_row(float[] weights_row, float[] bias, int vocab_size) int {
     int best_id = 0
     float best_logit = weights_row[0] + bias[0]
     int i = 1
@@ -360,7 +360,7 @@ func main() {
     int weight_rows = csv_first_int(weight_shape_text)
     int weight_cols = csv_second_int(weight_shape_text)
     int bias_size = csv_first_int(bias_shape_text)
-    []float bias = parse_csv_floats(substr(bias_data_line, 12, len(bias_data_line)))
+    float[] bias = parse_csv_floats(substr(bias_data_line, 12, len(bias_data_line)))
     int vocab = 256
     if bias_size > 0 {
         vocab = bias_size
@@ -392,7 +392,7 @@ func main() {
         prev_id = seed[len(seed) - 1] - (seed[len(seed) - 1] / vocab) * vocab
     }
     int cached_row_id = -1
-    []float cached_row = []float{}
+    float[] cached_row = float[]{}
     int token = 0
     for token < max_new {
         if cached_row_id != prev_id {

@@ -20,7 +20,7 @@ struct inference_node_state {
 }
 
 struct request_batch {
-    []inference_request requests
+    inference_request[] requests
     int batch_id
     int target_ranks
     int start_layer
@@ -33,7 +33,7 @@ struct coordinator_stats {
     int active_requests
     float avg_latency_ms
     float throughput_req_per_sec
-    []inference_node_state node_states
+    inference_node_state[] node_states
 }
 
 func init_coordinator_config(
@@ -67,7 +67,7 @@ func init_node_state(
 }
 
 func create_request_batch(
-    []inference_request requests,
+    inference_request[] requests,
     int batch_id,
     int num_ranks,
     string strategy
@@ -90,7 +90,7 @@ func create_request_batch(
 
 func schedule_request_round_robin(
     inference_request req,
-    []inference_node_state nodes
+    inference_node_state[] nodes
 ) int {
     int best_rank = 0
     int min_load = nodes[0].num_pending_requests
@@ -105,7 +105,7 @@ func schedule_request_round_robin(
 
 func schedule_request_min_latency(
     inference_request req,
-    []inference_node_state nodes
+    inference_node_state[] nodes
 ) int {
     int best_rank = 0
     float min_latency = nodes[0].queue_time_ms
@@ -120,7 +120,7 @@ func schedule_request_min_latency(
 
 func schedule_request(
     inference_request req,
-    []inference_node_state nodes,
+    inference_node_state[] nodes,
     string policy
 ) int {
     if policy == "round_robin" {
@@ -134,7 +134,7 @@ func schedule_request(
 
 func broadcast_request_to_ranks(
     inference_request req,
-    []int target_ranks
+    int[] target_ranks
 ) {
     printf("Broadcasting request %s to %d ranks\n", req.request_id, len(target_ranks))
     for i = 0; i < len(target_ranks); i = i + 1 {
@@ -143,11 +143,11 @@ func broadcast_request_to_ranks(
 }
 
 func collect_results_from_ranks(
-    []int source_ranks,
+    int[] source_ranks,
     string reduce_op
-) []float {
+) float[] {
     printf("Collecting results from %d ranks with %s\n", len(source_ranks), reduce_op)
-    []float result = []float{}
+    float[] result = float[]{}
     for i = 0; i < 10; i = i + 1 {
         result = append(result, 0.5)
     }
@@ -161,7 +161,7 @@ func check_node_health(
 }
 
 func update_node_utilization(
-    []inference_node_state nodes
+    inference_node_state[] nodes
 ) {
     for i = 0; i < len(nodes); i = i + 1 {
         float utilization = float(nodes[i].num_pending_requests) / 100.0
@@ -174,7 +174,7 @@ func update_node_utilization(
 }
 
 func trigger_load_balancing(
-    []inference_node_state nodes
+    inference_node_state[] nodes
 ) {
     float max_util = 0.0
     float min_util = 1.0
@@ -193,7 +193,7 @@ func trigger_load_balancing(
 }
 
 func get_coordinator_stats(
-    []inference_node_state nodes
+    inference_node_state[] nodes
 ) coordinator_stats {
     coordinator_stats stats
     stats.node_states = nodes
@@ -233,7 +233,7 @@ func main() {
     println("=================================")
     inference_coordinator_config cfg = init_coordinator_config(4, 0, "min_latency")
     printf("Coordinator rank %d (master=%v)\n", cfg.rank, cfg.is_master)
-    []inference_node_state nodes = []inference_node_state{}
+    inference_node_state[] nodes = inference_node_state[]{}
     for i = 0; i < 4; i = i + 1 {
         node := init_node_state(i)
         nodes = append(nodes, node)

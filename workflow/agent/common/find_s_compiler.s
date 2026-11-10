@@ -33,7 +33,7 @@ func find_s_binary(string root_dir) string {
     if s_path, err := exec.LookPath("s"); err == nil {
         return s_path
     }
-    candidates := []string{
+    candidates := string[]{
         core.ExpandHome("${S_ROOT}/bin/s.cmd"),
         core.ExpandHome("${S_ROOT}/bin/s.exe"),
         core.ExpandHome("${S_ROOT}/bin/s"),

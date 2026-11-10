@@ -115,7 +115,7 @@ func medmcqa_to_sft(string line) sft_example {
     input = input + "C) " + opt_c + "\n"
     input = input + "D) " + opt_d
     string output = ""
-    []string labels = []string{"A", "B", "C", "D"}
+    string[] labels = string[]{"A", "B", "C", "D"}
     if correct >= 0 && correct < 4 {
         output = "Answer: " + labels[correct]
     }
@@ -173,7 +173,7 @@ func main() {
     }
     println("✓ Read " + len(content) + " bytes")
     println("Parsing JSONL...")
-    []string lines = []string{}
+    string[] lines = string[]{}
     string current = ""
     for i in 0..len(content)-1 {
         if content[i] == 10 {

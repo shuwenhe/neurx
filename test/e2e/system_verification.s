@@ -21,7 +21,7 @@ struct system_health_check {
     i32 ready_components
     f64 health_score
     component_status[] components
-    recommendations: []string
+    recommendations: string[]
 }
 
 func verify_component(string name, string file_path, i32 expected_lines) component_status {
@@ -37,8 +37,8 @@ func verify_component(string name, string file_path, i32 expected_lines) compone
     return component
 }
 
-func check_all_components() []component_status {
-    components := []component_status{}
+func check_all_components() component_status[] {
+    components := component_status[]{}
     scaled := verify_component(
         "Scaled Training System",
         "src/training/orchestration/scaled_training_system.s",
@@ -138,7 +138,7 @@ func perform_system_check() system_health_check {
     println("Ready components: " + strings.from_i32(ready) + "/" + strings.from_i32(len(components)))
     println("Health score: " + strings.format("%.1f", health_score) + "%")
     println("")
-    recommendations := []string{}
+    recommendations := string[]{}
     if health_score < 100.0 {
         recommendations = append(recommendations, "All components should be present for production deployment")
     }

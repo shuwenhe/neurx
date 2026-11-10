@@ -16,8 +16,8 @@ struct metric_gauge {
 struct metric_histogram {
     string name
     string help
-    []float buckets
-    []int bucket_counts
+    float[] buckets
+    int[] bucket_counts
     map[string]string labels
 }
 
@@ -46,9 +46,9 @@ struct inference_metrics {
 }
 
 struct prometheus_registry {
-    []metric_counter counters
-    []metric_gauge gauges
-    []metric_histogram histograms
+    metric_counter[] counters
+    metric_gauge[] gauges
+    metric_histogram[] histograms
 }
 
 func init_inference_metrics() inference_metrics {
@@ -80,8 +80,8 @@ func init_inference_metrics() inference_metrics {
         request_latency_ms: metric_histogram{
             name: "neurx_request_latency_ms",
             help: "Request latency distribution",
-            buckets: []float{1.0, 10.0, 50.0, 100.0, 500.0, 1000.0, 5000.0},
-            bucket_counts: []int{0, 0, 0, 0, 0, 0, 0},
+            buckets: float[]{1.0, 10.0, 50.0, 100.0, 500.0, 1000.0, 5000.0},
+            bucket_counts: int[]{0, 0, 0, 0, 0, 0, 0},
             labels: map[string]string{},
         },
         avg_latency_ms: metric_gauge{

@@ -20,16 +20,16 @@ struct amp_state {
     float scale
     int growth_step
     bool last_overflow
-    fp16_params: []autograd.tensor
-    fp16_grads: []autograd.tensor
-    fp32_params: []autograd.tensor
+    fp16_params: autograd.tensor[]
+    fp16_grads: autograd.tensor[]
+    fp32_params: autograd.tensor[]
 }
 
 struct mixed_precision_model {
     pointer model
     amp_config amp_config
     amp_state amp_state
-    param_groups: [][]autograd.tensor
+    param_groups: autograd.tensor[][]
 }
 
 struct autocast_state {
@@ -122,14 +122,14 @@ func new_amp_state(amp_config config, int num_params) amp_state {
         scale: config.initial_scale,
         growth_step: 0,
         last_overflow: false,
-        fp16_params: make([]autograd.tensor, num_params),
-        fp16_grads: make([]autograd.tensor, num_params),
-        fp32_params: make([]autograd.tensor, num_params),
+        fp16_params: make(autograd.tensor[], num_params),
+        fp16_grads: make(autograd.tensor[], num_params),
+        fp32_params: make(autograd.tensor[], num_params),
     }
     state
 }
 
-func amp_init_params([]autograd.tensor params, amp_config config) amp_state {
+func amp_init_params(autograd.tensor[] params, amp_config config) amp_state {
     int n = len(params)
     amp_state state = new_amp_state(config, n)
     for i := 0; i < n; i += 1 {
@@ -173,7 +173,7 @@ func amp_scale_loss(float loss, amp_state state) float {
     loss * state.scale
 }
 
-func amp_check_overflow([]autograd.tensor grads) bool {
+func amp_check_overflow(autograd.tensor[] grads) bool {
     for i := 0; i < len(grads); i += 1 {
         if autograd.tensor_has_nan(grads[i]) || autograd.tensor_has_inf(grads[i]) {
             return true

@@ -5,7 +5,7 @@ import (
 struct irq_desc {
     int irq_num
     string name
-    []string handler_names
+    string[] handler_names
     int cpu_affinity
     int count
     int depth
@@ -27,8 +27,7 @@ struct irq_chip {
     int eoi
 }
 irq_desc g_irq_descriptors[]
-irq_chip g_irq_chips[]
-int g_nr_irqs
+irq_chip int[] g_irq_chips g_nr_irqs
 func init_irq_system(int nr_irqs) int {
     g_nr_irqs = nr_irqs
     g_irq_descriptors = new irq_desc[nr_irqs]

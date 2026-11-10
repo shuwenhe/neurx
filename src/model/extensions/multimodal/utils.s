@@ -8,7 +8,7 @@ struct ImageValidator {
     min_height: i32,
     max_width: i32,
     max_height: i32,
-    supported_formats: []types.ImageFormat
+    supported_formats: types.ImageFormat[]
 }
 
 func NewImageValidator() *ImageValidator {
@@ -17,7 +17,7 @@ func NewImageValidator() *ImageValidator {
         min_height: 32,
         max_width: 4096,
         max_height: 4096,
-        supported_formats: []types.ImageFormat{
+        supported_formats: types.ImageFormat[]{
             types.ImageFormat.rgb,
             types.ImageFormat.rgba,
             types.ImageFormat.bgr
@@ -177,14 +177,14 @@ struct TensorUtils {
 }
 
 func TensorStackTensors(
-    tensors: []types.Tensor
+    tensors: types.Tensor[]
 ) *types.Tensor {
     if len(tensors) == 0 {
         return nil
     }
     batch_size := i32(len(tensors))
     feature_dim := tensors[0].shape[len(tensors[0].shape) - 1]
-    stacked := make([]f32, batch_size * feature_dim)
+    stacked := make(f32[], batch_size * feature_dim)
     idx := 0
     for i := 0; i < len(tensors); i += 1 {
         for j := 0; j < len(tensors[i].data); j += 1 {
@@ -194,13 +194,13 @@ func TensorStackTensors(
     }
     return *types.Tensor{
         data: stacked,
-        shape: [2]i32{batch_size, feature_dim},
+        shape: i32[2]{batch_size, feature_dim},
         dtype: "float32"
     }
 }
 
 func ConcatenateEmbeddings(
-    embeddings: []*types.Tensor
+    embeddings: types.Tensor*[]
 ) *types.Tensor {
     if len(embeddings) == 0 {
         return nil
@@ -210,7 +210,7 @@ func ConcatenateEmbeddings(
     for i := 0; i < len(embeddings); i += 1 {
         total_dim += embeddings[i].shape[1]
     }
-    concatenated := make([]f32, seq_len * total_dim)
+    concatenated := make(f32[], seq_len * total_dim)
     col_idx := 0
     for i := 0; i < len(embeddings); i += 1 {
         emb_dim := embeddings[i].shape[1]
@@ -223,7 +223,7 @@ func ConcatenateEmbeddings(
     }
     return *types.Tensor{
         data: concatenated,
-        shape: [2]i32{seq_len, total_dim},
+        shape: i32[2]{seq_len, total_dim},
         dtype: "float32"
     }
 }
@@ -271,7 +271,7 @@ func NormalizeEmbedding(
     if norm == 0.0 {
         return embedding
     }
-    normalized := make([]f32, len(embedding.data))
+    normalized := make(f32[], len(embedding.data))
     for i := 0; i < len(embedding.data); i += 1 {
         normalized[i] = embedding.data[i] / norm
     }

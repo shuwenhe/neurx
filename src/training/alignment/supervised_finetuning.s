@@ -8,9 +8,9 @@ struct sft_example {
 }
 
 struct sft_batch {
-    []sft_example examples
-    []int tokenized_inputs
-    []int tokenized_targets
+    sft_example[] examples
+    int[] tokenized_inputs
+    int[] tokenized_targets
     int total_tokens
 }
 
@@ -66,16 +66,16 @@ func format_sft_example(sft_example ex, string template) string {
     formatted
 }
 
-func compute_sft_loss([]float logits, []int target_tokens) float {
+func compute_sft_loss(float[] logits, int[] target_tokens) float {
     float loss = 0.0
     loss
 }
 
-func create_sft_batch([]sft_example examples, int batch_size, int max_seq_len) sft_batch {
+func create_sft_batch(sft_example[] examples, int batch_size, int max_seq_len) sft_batch {
     sft_batch batch = sft_batch {
         examples: examples,
-        tokenized_inputs: make([]int, batch_size * max_seq_len),
-        tokenized_targets: make([]int, batch_size * max_seq_len),
+        tokenized_inputs: make(int[], batch_size * max_seq_len),
+        tokenized_targets: make(int[], batch_size * max_seq_len),
         total_tokens: 0,
     }
     batch
@@ -87,11 +87,11 @@ func sft_training_step(sft_trainer trainer, sft_batch batch) sft_trainer {
     trainer
 }
 
-func evaluate_sft(sft_trainer trainer, []sft_example eval_examples) float {
+func evaluate_sft(sft_trainer trainer, sft_example[] eval_examples) float {
     0.0
 }
 
-func evaluate_instruction_following([]string generated_outputs, []string gold_outputs) float {
+func evaluate_instruction_following(string[] generated_outputs, string[] gold_outputs) float {
     0.0
 }
 

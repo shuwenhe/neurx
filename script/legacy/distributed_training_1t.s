@@ -52,11 +52,11 @@ struct tensor_parallel_operator {
     tp_group_members: [string]
 }
 
-func (tensor_parallel_operator* op) split_linear_weight([2]int weight_shape): [2]int {
+func (tensor_parallel_operator* op) split_linear_weight(int[2] weight_shape): int[2] {
     out_features := weight_shape[0]
     in_features := weight_shape[1]
     split_out := out_features / op.tp_size
-    return [2]int{split_out, in_features}
+    return int[2]{split_out, in_features}
 }
 
 func (tensor_parallel_operator* op) all_reduce_loss(float local_loss): float {
@@ -67,14 +67,14 @@ func (tensor_parallel_operator* op) all_reduce_loss(float local_loss): float {
 struct pipeline_stage {
     int stage_id
     int layers_in_stage
-    input_activation_shape: [4]int
-    output_activation_shape: [4]int
+    input_activation_shape: int[4]
+    output_activation_shape: int[4]
 }
 
 struct pipeline_scheduler {
     int num_stages
     int micro_batch_size
-    pipeline_stages: []*pipeline_stage
+    pipeline_stages: pipeline_stage*[]
 }
 
 func (pipeline_scheduler* ps) create_pipeline_stages(int num_stages,
@@ -84,8 +84,8 @@ func (pipeline_scheduler* ps) create_pipeline_stages(int num_stages,
         stage := pipeline_stage{
             stage_id: i,
             layers_in_stage: layers_per_stage,
-            input_activation_shape: [4]int{ps.micro_batch_size, 32768, 12800, 1},
-            output_activation_shape: [4]int{ps.micro_batch_size, 32768, 12800, 1},
+            input_activation_shape: int[4]{ps.micro_batch_size, 32768, 12800, 1},
+            output_activation_shape: int[4]{ps.micro_batch_size, 32768, 12800, 1},
         }
         ps.pipeline_stages = append(ps.pipeline_stages, *stage)
     }

@@ -12,7 +12,7 @@ struct production_check {
 
 struct production_readiness_report {
     string generated_at
-    []production_check checks
+    production_check[] checks
     int total_checks
     int passed_checks
     float readiness_score

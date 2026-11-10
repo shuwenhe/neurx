@@ -34,8 +34,8 @@ struct plugin_metadata {
 	string                  author
 	string                  description
 	plugin_type             plugin_category
-	[]string             dependencies
-	[]string             capabilities
+	string[]             dependencies
+	string[]             capabilities
 	int32                   priority
 	bool                    required
 	string                  config_schema
@@ -77,8 +77,8 @@ struct plugin_error {
 struct plugin_capability {
 	string                  capability_name
 	string                  capability_version
-	[]string             provided_methods
-	[]string             required_interfaces
+	string[]             provided_methods
+	string[]             required_interfaces
 	map[string]interface{}  capability_config
 }
 
@@ -98,8 +98,8 @@ func create_plugin_metadata(id string, name string, category plugin_type) plugin
 		author:          "",
 		description:     "",
 		plugin_category: category,
-		dependencies:    make([]string, 0),
-		capabilities:    make([]string, 0),
+		dependencies:    make(string[], 0),
+		capabilities:    make(string[], 0),
 		priority:        100,
 		required:        false,
 		config_schema:   "",
@@ -169,7 +169,7 @@ func (plugin_interface* p) clear_context() {
 	p.context_data = make(map[string]interface{})
 }
 
-func (plugin_interface* p) get_hooks_by_type(event plugin_hook_type) []plugin_hook {
+func (plugin_interface* p) get_hooks_by_type(event plugin_hook_type) plugin_hook[] {
 	result := make(plugin_hook[], 0)
 	for hook := range p.hooks {
 		if hook.hook_event == event {
@@ -192,7 +192,7 @@ func (plugin_interface* p) add_dependency(dep_id string) {
 	p.metadata.dependencies = append(p.metadata.dependencies, dep_id)
 }
 
-func (plugin_interface* p) get_dependencies() []string {
+func (plugin_interface* p) get_dependencies() string[] {
 	return p.metadata.dependencies
 }
 

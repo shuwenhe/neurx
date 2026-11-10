@@ -18,12 +18,12 @@ struct parallel_tool_result {
 }
 
 struct parallel_tool_batch {
-    []parallel_tool_call calls
+    parallel_tool_call[] calls
     int count
 }
 
 struct parallel_tool_batch_result {
-    []parallel_tool_result results
+    parallel_tool_result[] results
     int count
     int ok_count
     int fail_count
@@ -39,14 +39,14 @@ func new_parallel_tool_call(string id, string tool_name, string input) parallel_
 
 func new_parallel_tool_batch() parallel_tool_batch {
     parallel_tool_batch {
-        calls: make([]parallel_tool_call, 8),
+        calls: make(parallel_tool_call[], 8),
         count: 0,
     }
 }
 
 func parallel_tool_batch_add(parallel_tool_batch batch, string tool_name, string input) parallel_tool_batch {
     int n = batch.count
-    []parallel_tool_call next = make([]parallel_tool_call, n + 1)
+    parallel_tool_call[] next = make(parallel_tool_call[], n + 1)
     int i = 0
     for i < n {
         next[i] = batch.calls[i]
@@ -62,7 +62,7 @@ func parallel_tool_batch_add(parallel_tool_batch batch, string tool_name, string
 
 func new_parallel_tool_batch_result() parallel_tool_batch_result {
     parallel_tool_batch_result {
-        results:    make([]parallel_tool_result, 8),
+        results:    make(parallel_tool_result[], 8),
         count:      0,
         ok_count:   0,
         fail_count: 0,
@@ -119,7 +119,7 @@ func parallel_tool_dispatch_one(parallel_tool_call call, agent_tool_registry_sta
 
 func parallel_tool_dispatch(parallel_tool_batch batch, agent_tool_registry_state tools) parallel_tool_batch_result {
     int n = batch.count
-    []parallel_tool_result results = make([]parallel_tool_result, n)
+    parallel_tool_result[] results = make(parallel_tool_result[], n)
     int ok_count = 0
     int fail_count = 0
     int i = 0

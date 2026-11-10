@@ -9,7 +9,7 @@ func format_as_json(string obj) string {
     return obj
 }
 
-func create_json_object([]json_field fields) string {
+func create_json_object(json_field[] fields) string {
     result := "{"
     i := 0
     for i < len(fields) {
@@ -24,7 +24,7 @@ func create_json_object([]json_field fields) string {
     return result
 }
 
-func create_json_array([]string items) string {
+func create_json_array(string[] items) string {
     result := "["
     i := 0
     for i < len(items) {

@@ -14,7 +14,7 @@ struct TestResult {
     message: string,
     f32 duration_ms
 }
-test_results := make([]TestResult, 0)
+test_results := make(TestResult[], 0)
 func assert(bool condition, string message) {
     if !condition {
         println(fmt("❌ ASSERTION FAILED: %s", message))
@@ -30,11 +30,11 @@ func assertEqual(i32 expected, i32 actual, string message) {
 func TestImageProcessor() {
     println("\n▶ Testing ImageProcessor...")
     processor := image_processor.NewImageProcessor(224, 224,
-        [3]f32{0.485, 0.456, 0.406},
-        [3]f32{0.229, 0.224, 0.225})
+        f32[3]{0.485, 0.456, 0.406},
+        f32[3]{0.229, 0.224, 0.225})
     img := types.ImageData{
         id: "test_img_1",
-        raw_data: make([]i8, 224 * 224 * 3),
+        raw_data: make(i8[], 224 * 224 * 3),
         width: 224,
         height: 224,
         channels: 3,
@@ -45,7 +45,7 @@ func TestImageProcessor() {
     println("  ✓ Image creation test passed")
     small_img := types.ImageData{
         id: "test_img_2",
-        raw_data: make([]i8, 128 * 128 * 3),
+        raw_data: make(i8[], 128 * 128 * 3),
         width: 128,
         height: 128,
         channels: 3,
@@ -66,7 +66,7 @@ func TestAudioProcessor() {
     processor := audio_encoder.NewAudioProcessor(16000, 400, 128)
     audio := types.AudioData{
         id: "test_audio_1",
-        samples: make([]f32, 16000),
+        samples: make(f32[], 16000),
         sample_rate: 16000,
         num_channels: 1,
         duration_ms: 1000,
@@ -87,13 +87,13 @@ func TestVisionEncoder() {
     println("\n▶ Testing VisionEncoder...")
     encoder := vision_encoder.NewVisionEncoder("clip-vit", 768, 16, "cuda")
     img_tensor := *types.Tensor{
-        data: make([]f32, 224 * 224 * 3),
-        shape: [3]i32{224, 224, 3},
+        data: make(f32[], 224 * 224 * 3),
+        shape: i32[3]{224, 224, 3},
         dtype: "float32"
     }
     img_data := types.ImageData{
         id: "test_vision_1",
-        raw_data: make([]i8, 224 * 224 * 3),
+        raw_data: make(i8[], 224 * 224 * 3),
         width: 224,
         height: 224,
         channels: 3,
@@ -131,14 +131,14 @@ func TestFeatureFusion() {
     fusion := feature_fusion.NewFeatureFusion(512, feature_fusion.FusionStrategy.concatenation)
     embeddings := make(map[types.Modality, *types.Tensor])
     vision_emb := *types.Tensor{
-        data: make([]f32, 577 * 768),
-        shape: [2]i32{577, 768},
+        data: make(f32[], 577 * 768),
+        shape: i32[2]{577, 768},
         dtype: "float32"
     }
     embeddings[types.Modality.image] = vision_emb
     audio_emb := *types.Tensor{
-        data: make([]f32, 100 * 256),
-        shape: [2]i32{100, 256},
+        data: make(f32[], 100 * 256),
+        shape: i32[2]{100, 256},
         dtype: "float32"
     }
     embeddings[types.Modality.audio] = audio_emb
@@ -157,7 +157,7 @@ func TestValidation() {
     audio_validator := utils.NewAudioValidator()
     valid_img := types.ImageData{
         id: "valid_img",
-        raw_data: make([]i8, 256 * 256 * 3),
+        raw_data: make(i8[], 256 * 256 * 3),
         width: 256,
         height: 256,
         channels: 3,
@@ -168,7 +168,7 @@ func TestValidation() {
     println("  ✓ Image validation test passed")
     valid_audio := types.AudioData{
         id: "valid_audio",
-        samples: make([]f32, 160000),
+        samples: make(f32[], 160000),
         sample_rate: 16000,
         num_channels: 1,
         duration_ms: 10000,
@@ -180,11 +180,11 @@ func TestValidation() {
 
 func TestUtils() {
     println("\n▶ Testing Utils...")
-    tensors := make([]types.Tensor, 3)
+    tensors := make(types.Tensor[], 3)
     for i := 0; i < 3; i += 1 {
         tensors[i] = types.Tensor{
-            data: make([]f32, 768),
-            shape: [2]i32{1, 768},
+            data: make(f32[], 768),
+            shape: i32[2]{1, 768},
             dtype: "float32"
         }
     }
@@ -193,8 +193,8 @@ func TestUtils() {
     assert(stacked.shape[0] == 3, "Stacked tensor has correct batch size")
     println("  ✓ Tensor stacking test passed")
     emb := *types.Tensor{
-        data: make([]f32, 768),
-        shape: [2]i32{1, 768},
+        data: make(f32[], 768),
+        shape: i32[2]{1, 768},
         dtype: "float32"
     }
     for i := 0; i < 768; i += 1 {

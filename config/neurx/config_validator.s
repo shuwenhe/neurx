@@ -30,7 +30,7 @@ struct validation_report {
     bool is_valid
     validation_error[] errors
     validation_error[] warnings
-    []string suggestions
+    string[] suggestions
     int64 validation_time_ms
 }
 
@@ -118,9 +118,9 @@ func (config_validator_impl* v) validate(cfg device_config_full*, hw_info hardwa
 func (config_validator_impl* v) validate_with_level(cfg device_config_full*, hw_info hardware_info*, level validation_level) (validation_report*) {
     report := *validation_report{
         is_valid: true,
-        errors: []validation_error{},
-        warnings: []validation_error{},
-        suggestions: []string{},
+        errors: validation_error[]{},
+        warnings: validation_error[]{},
+        suggestions: string[]{},
         validation_time_ms: 0,
     }
 
@@ -192,7 +192,7 @@ func (config_validator_impl* v) add_custom_rule(rule validation_rule*) (bool) {
 }
 
 func (config_validator_impl* v) validate_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (validation_error[]) {
-    errors := []validation_error{}
+    errors := validation_error[]{}
 
     if cfg.mem_cfg == nil {
         return errors
@@ -233,7 +233,7 @@ func (config_validator_impl* v) validate_memory_constraints(cfg device_config_fu
 }
 
 func (config_validator_impl* v) validate_compute_capabilities(cfg device_config_full*, hw_info hardware_info*) (validation_error[]) {
-    errors := []validation_error{}
+    errors := validation_error[]{}
 
     if hw_info.device == device_type.cpu && cfg.comp_cfg != nil {
         if cfg.comp_cfg.enable_flash_attn {
@@ -273,7 +273,7 @@ func (config_validator_impl* v) validate_compute_capabilities(cfg device_config_
 }
 
 func (config_validator_impl* v) validate_feature_support(cfg device_config_full*, hw_info hardware_info*) (validation_error[]) {
-    errors := []validation_error{}
+    errors := validation_error[]{}
 
     if hw_info.gpu_props != nil {
         if cfg.dev_cfg != nil && cfg.dev_cfg.use_managed_memory && !hw_info.gpu_props.supports_managed_memory {

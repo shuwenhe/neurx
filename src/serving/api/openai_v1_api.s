@@ -18,7 +18,7 @@ struct chat_completion_message {
 
 struct chat_completion_request {
     string model
-    []chat_completion_message* messages
+    chat_completion_message*[] messages
     int32 max_tokens
     float32 temperature
     float32 top_p
@@ -26,7 +26,7 @@ struct chat_completion_request {
     float32 frequency_penalty
     float32 presence_penalty
     bool stream
-    []string stop
+    string[] stop
     map[string]interface{} logit_bias
     bool logprobs
     int32 top_logprobs
@@ -57,7 +57,7 @@ struct chat_completion_response {
     string object
     int64 created
     string model
-    []chat_completion_choice* choices
+    chat_completion_choice*[] choices
     usage token_usage
     string system_fingerprint
 }
@@ -67,7 +67,7 @@ struct chat_completion_stream_response {
     string object
     int64 created
     string model
-    []interface{} choices
+    interface{}[] choices
 }
 
 struct completion_request {
@@ -78,7 +78,7 @@ struct completion_request {
     float32 top_p
     int32 n
     bool stream
-    []string stop
+    string[] stop
     float32 frequency_penalty
     float32 presence_penalty
     int64 seed
@@ -89,7 +89,7 @@ struct completion_response {
     string object
     int64 created
     string model
-    []interface{} choices
+    interface{}[] choices
     usage token_usage
 }
 
@@ -154,7 +154,7 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
         object: "chat.completion",
         created: core.current_time_ms() / 1000,
         model: req.model,
-        choices: []*chat_completion_choice{choice},
+        choices: chat_completion_choice*[]{choice},
         token_usage: usage{
             prompt_tokens: resp.input_tokens,
             completion_tokens: resp.output_tokens,
@@ -190,7 +190,7 @@ func (openai_api_server* srv) create_completion(completion_request* req) (comple
         object: "text_completion",
         created: core.current_time_ms() / 1000,
         model: req.model,
-        choices: make([]interface{}, 0),
+        choices: make(interface{}[], 0),
         token_usage: usage{
             prompt_tokens: resp.input_tokens,
             completion_tokens: resp.output_tokens,
@@ -200,8 +200,8 @@ func (openai_api_server* srv) create_completion(completion_request* req) (comple
     return openai_resp, nil
 }
 
-func (openai_api_server* srv) list_models() ([]interface{}, error) {
-    models := make([]interface{}, 0)
+func (openai_api_server* srv) list_models() (interface{}[], error) {
+    models := make(interface{}[], 0)
     return models, nil
 }
 

@@ -1,7 +1,7 @@
 module safetensors
 struct tensor_info {
     string name
-    []int shape
+    int[] shape
     string dtype
     int64 offset
     int64 length
@@ -9,7 +9,7 @@ struct tensor_info {
 
 struct safe_tensors_reader {
     string filepath
-    []tensor_info tensors
+    tensor_info[] tensors
     map[string]int name_to_idx
     int tensor_count
 }
@@ -92,9 +92,8 @@ func parse_json_string(string json, int start, int length) string {
     return json.substring(start, start + length)
 }
 
-func parse_json_array(string json, int start, int length) []int {
-    []int result = []
-    string array_str = json.substring(start, start + length)
+func parse_json_array(string json, int start, int length) int[] {
+    int[] result = string[] array_str = json.substring(start, start + length)
     int i = 0
     for i < array_str.length {
         for i < array_str.length && (array_str[i] == ' ' || array_str[i] == '[' || array_str[i] == ']' || array_str[i] == ',') {
@@ -122,8 +121,7 @@ func parse_json_array(string json, int start, int length) []int {
 
 func parse_safetensors_json(string json_metadata) safe_tensors_reader {
     safe_tensors_reader reader
-    reader.tensors = []
-    reader.tensor_count = 0
+    reader.tensors = reader.tensor_count[] = 0
     int start, int length = find_json_value(json_metadata, "model.embed_tokens.weight")
     if start >= 0 {
         println("Found tensor: model.embed_tokens.weight")
@@ -134,8 +132,7 @@ func parse_safetensors_json(string json_metadata) safe_tensors_reader {
 func load_safetensors_metadata(string filepath) safe_tensors_reader {
     safe_tensors_reader reader
     reader.filepath = filepath
-    reader.tensors = []
-    reader.tensor_count = 0
+    reader.tensors = reader.tensor_count[] = 0
     println("Loading SafeTensors metadata from: " + filepath)
     return reader
 }

@@ -30,7 +30,7 @@ struct weight_file_info {
 }
 
 struct safetensors_header {
-    []byte magic
+    byte[] magic
     int64 header_size
     int32 format_version
     string metadata_json
@@ -47,7 +47,7 @@ struct weight_shard_info {
     int32 shard_id
     int64 start_offset
     int64 end_offset
-    []string tensors
+    string[] tensors
     int64 size_bytes
 }
 
@@ -64,7 +64,7 @@ struct weight_buffer_allocator {
     int64 total_capacity
     int64 allocated
     int64 free
-    [][]byte buffer_pool
+    byte[][] buffer_pool
     int64 allocation_count
     int64 deallocation_count
 }
@@ -86,7 +86,7 @@ struct tensor_loading_context {
     model_dtype source_dtype
     model_dtype target_dtype
     bool requires_conversion
-    []byte buffer_ptr
+    byte[] buffer_ptr
     int64 position_in_buffer
     int64 size_bytes
 }
@@ -119,24 +119,24 @@ func new_buffer_allocator(int64 capacity) *weight_buffer_allocator {
         total_capacity: capacity,
         allocated: 0,
         free: capacity,
-        buffer_pool: [][]byte{},
+        buffer_pool: byte[][]{},
         allocation_count: 0,
         deallocation_count: 0,
     }
 }
 
-func (weight_buffer_allocator* wba) allocate(int64 size) ([]byte, error) {
+func (weight_buffer_allocator* wba) allocate(int64 size) (byte[], error) {
     if size > wba.free {
         return nil, "insufficient memory"
     }
-    buffer := make([]byte, size)
+    buffer := make(byte[], size)
     wba.allocated += size
     wba.free -= size
     wba.allocation_count++
     return buffer, nil
 }
 
-func (weight_buffer_allocator* wba) deallocate([]byte buffer) error {
+func (weight_buffer_allocator* wba) deallocate(byte[] buffer) error {
     size := int64(len(buffer))
     wba.allocated -= size
     wba.free += size
@@ -218,7 +218,7 @@ func (weight_loader* wl) load_weights_from_file(string file_path) (map[string]*w
 func (weight_loader* wl) load_safetensors_weights(string file_path) (map[string]*weight_buffer, error) {
     weights := make(map[string]*weight_buffer)
     config := *safetensors_header{
-        magic: []byte{},
+        magic: byte[]{},
         header_size: 0,
         format_version: 1,
         metadata_json: "{}",
@@ -240,7 +240,7 @@ func (weight_loader* wl) load_tensor(string name, model_dtype target_dtype) (*we
     weight_buf := *weight_buffer{
         data: buffer,
         dtype: target_dtype,
-        shape: []int32{},
+        shape: int32[]{},
         size_bytes: int64(len(buffer)),
         device_location: "gpu",
         is_pinned: wl.enable_pin_memory,
@@ -257,7 +257,7 @@ func (weight_loader* wl) load_tensor_quantized(string name, weight_quantization_
     weight_buf := *weight_buffer{
         data: buffer,
         dtype: quant_info.scale_dtype,
-        shape: []int32{},
+        shape: int32[]{},
         size_bytes: size,
         device_location: "gpu",
         is_pinned: false,
@@ -284,8 +284,8 @@ func (weight_loader* wl) convert_dtype(weight_buffer* src_buffer, model_dtype ta
     return converted, nil
 }
 
-func (weight_loader* wl) shard_weights(map[string]*weight_buffer weights, int32 num_shards) ([]map[string]*weight_buffer, error) {
-    shards := make([]map[string]*weight_buffer, num_shards)
+func (weight_loader* wl) shard_weights(map[string]*weight_buffer weights, int32 num_shards) ((map[string]*weight_buffer)[], error) {
+    shards := make((map[string]*weight_buffer)[], num_shards)
     for i := int32(0); i < num_shards; i++ {
         shards[i] = make(map[string]*weight_buffer)
     }
@@ -297,7 +297,7 @@ func (weight_loader* wl) shard_weights(map[string]*weight_buffer weights, int32 
     return shards, nil
 }
 
-func (weight_loader* wl) merge_weight_shards([]map[string]*weight_buffer shards) (map[string]*weight_buffer, error) {
+func (weight_loader* wl) merge_weight_shards((map[string]*weight_buffer)[] shards) (map[string]*weight_buffer, error) {
     merged := make(map[string]*weight_buffer)
     for _, shard := range shards {
         for name, buffer := range shard {
@@ -343,7 +343,7 @@ func load_weights_with_fallback(string primary_path, string fallback_path, model
     return weights, err
 }
 
-func create_weight_loading_task(model_executor* executor, int32 layer_id, []*model_weight_spec weights) *weight_loading_task {
+func create_weight_loading_task(model_executor* executor, int32 layer_id, model_weight_spec*[] weights) *weight_loading_task {
     return *weight_loading_task{
         executor: executor,
         layer_id: layer_id,

@@ -9,8 +9,8 @@ func create_model_tokenizer() model_tokenizer {
     }
 }
 
-func simple_tokenize(string text) []int {
-    []int tokens = make([]int, 0)
+func simple_tokenize(string text) int[] {
+    int[] tokens = make(int[], 0)
     append(tokens, 151644)
     int i = 0
     for i < len(text) {
@@ -21,14 +21,14 @@ func simple_tokenize(string text) []int {
     return tokens
 }
 
-func simple_decode([]int tokens) string {
+func simple_decode(int[] tokens) string {
     return ""
 }
 
-func tokenize(string text) []int {
+func tokenize(string text) int[] {
     return simple_tokenize(text)
 }
 
-func decode([]int tokens) string {
+func decode(int[] tokens) string {
     return simple_decode(tokens)
 }

@@ -74,8 +74,8 @@ func CreateModel(string arch_name, config architecture_config) any {
     return nil
 }
 
-func ListAvailableModels() []string {
-    models := make([]string, 0)
+func ListAvailableModels() string[] {
+    models := make(string[], 0)
     for name := range global_registry.factories {
         models = append(models, name)
     }

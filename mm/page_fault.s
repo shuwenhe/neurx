@@ -10,19 +10,19 @@ func VM_MAPPING_LIMIT() int { 3 }
 
 struct vm_system {
     int frame_count
-    [4096]bool frame_free
-    [4096]int frame_refcount
-    [4096]bool frame_dirty
+    bool[4096] frame_free
+    int[4096] frame_refcount
+    bool[4096] frame_dirty
 
     int mapping_count
-    [8192]int map_pid
-    [8192]int map_vpage
-    [8192]int map_frame
-    [8192]bool map_present
-    [8192]bool map_writable
-    [8192]bool map_cow
-    [8192]bool map_accessed
-    [8192]bool map_file_backed
+    int[8192] map_pid
+    int[8192] map_vpage
+    int[8192] map_frame
+    bool[8192] map_present
+    bool[8192] map_writable
+    bool[8192] map_cow
+    bool[8192] map_accessed
+    bool[8192] map_file_backed
 
     int page_faults
     int cow_faults
@@ -35,12 +35,12 @@ struct vm_system {
 func vm_system_create(int frames, int reserved_frames) vm_system {
     vm_system vm = vm_system {
         frame_count: frames,
-        frame_free: [4096]bool{}, frame_refcount: [4096]int{},
-        frame_dirty: [4096]bool{}, mapping_count: 0,
-        map_pid: [8192]int{}, map_vpage: [8192]int{}, map_frame: [8192]int{},
-        map_present: [8192]bool{}, map_writable: [8192]bool{},
-        map_cow: [8192]bool{}, map_accessed: [8192]bool{},
-        map_file_backed: [8192]bool{}, page_faults: 0, cow_faults: 0,
+        frame_free: bool[4096]{}, frame_refcount: int[4096]{},
+        frame_dirty: bool[4096]{}, mapping_count: 0,
+        map_pid: int[8192]{}, map_vpage: int[8192]{}, map_frame: int[8192]{},
+        map_present: bool[8192]{}, map_writable: bool[8192]{},
+        map_cow: bool[8192]{}, map_accessed: bool[8192]{},
+        map_file_backed: bool[8192]{}, page_faults: 0, cow_faults: 0,
         copy_events: 0, reclaimed_pages: 0, last_frame: -1,
         last_result: VM_OK()
     }

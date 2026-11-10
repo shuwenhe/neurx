@@ -68,7 +68,7 @@ struct frontier_capability {
 }
 
 struct frontier_audit {
-    []frontier_capability capabilities
+    frontier_capability[] capabilities
     int total
     int ready
     int partial
@@ -164,8 +164,8 @@ func make_capability(
     }
 }
 
-func current_neurx_frontier_capabilities() []frontier_capability {
-    []frontier_capability caps = make([]frontier_capability, 16)
+func current_neurx_frontier_capabilities() frontier_capability[] {
+    frontier_capability[] caps = make(frontier_capability[], 16)
     caps[0] = make_capability(
         "real_corpus_pipeline",
         "data",
@@ -323,7 +323,7 @@ func frontier_status_score(string status) int {
     0
 }
 
-func audit_frontier_readiness([]frontier_capability caps) frontier_audit {
+func audit_frontier_readiness(frontier_capability[] caps) frontier_audit {
     int total = len(caps)
     int ready = 0
     int partial = 0
@@ -375,8 +375,8 @@ func frontier_launch_decision(frontier_audit audit) string {
     "launch_blocked_foundation_incomplete"
 }
 
-func next_frontier_p0_work(frontier_audit audit) []frontier_capability {
-    []frontier_capability work = make([]frontier_capability, audit.total)
+func next_frontier_p0_work(frontier_audit audit) frontier_capability[] {
+    frontier_capability[] work = make(frontier_capability[], audit.total)
     int out = 0
     int i = 0
     for i < audit.total {

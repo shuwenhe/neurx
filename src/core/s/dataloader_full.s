@@ -21,7 +21,7 @@ struct dataloader {
     int current_epoch
     int total_batches
     int batches_served
-    []batch prefetch_buffer
+    batch[] prefetch_buffer
 }
 
 func new_dataloader(
@@ -64,8 +64,7 @@ func reset_epoch(dataloader dl) dataloader {
     } else {
         dl.samp = reset_sequential(dl.samp)
     }
-    dl.prefetch_buffer = []
-    dl = fill_prefetch_buffer(dl)
+    dl.prefetch_buffer = dl[] = fill_prefetch_buffer(dl)
     dl
 }
 
@@ -80,19 +79,19 @@ func next_batch(dataloader dl) (batch, bool) {
     } else if dl.batches_served >= dl.total_batches {
         (empty_batch(), true)
     } else {
-        ([]int indices, bool has_data) = next_batch_sequential(dl.samp)
+        (int[] indices, bool has_data) = next_batch_sequential(dl.samp)
         if !has_data || len(indices) == 0 {
             (empty_batch(), true)
         }
-        []sample samples = load_samples_for_indices(dl.ds, indices)
+        sample[] samples = load_samples_for_indices(dl.ds, indices)
         batch b = collate_fn(samples, dl.config.collator)
         dl.batches_served = dl.batches_served + 1
         (b, false)
     }
 }
 
-func load_samples_for_indices(dataset ds, []int indices) []sample {
-    []sample samples = make([]int, len(indices))
+func load_samples_for_indices(dataset ds, int[] indices) sample[] {
+    sample[] samples = make(int[], len(indices))
     for idx in indices {
         (sample s, error err) = get_sample(ds, idx)
         if err == nil {
@@ -108,11 +107,11 @@ func fill_prefetch_buffer(dataloader dl) dataloader {
     int target_count = dl.config.prefetch_factor * 2
     for len(dl.prefetch_buffer) < target_count
           dl.batches_served + len(dl.prefetch_buffer) < dl.total_batches {
-        ([]int indices, bool has_data) = next_batch_sequential(dl.samp)
+        (int[] indices, bool has_data) = next_batch_sequential(dl.samp)
         if !has_data || len(indices) == 0 {
             break
         }
-        []sample samples = load_samples_for_indices(dl.ds, indices)
+        sample[] samples = load_samples_for_indices(dl.ds, indices)
         batch b = collate_fn(samples, dl.config.collator)
         dl.prefetch_buffer = append(dl.prefetch_buffer, b)
     }
@@ -129,8 +128,8 @@ struct bucket_config {
 struct bucketed_dataloader {
     dataloader base_dl
     bucket_config bconfig
-    map[int][]int length_to_samples
-    []int current_bucket_order
+    map[int]int[] length_to_samples
+    int[] current_bucket_order
 }
 
 func create_bucketed_dataloader(
@@ -138,7 +137,7 @@ func create_bucketed_dataloader(
     dataloader_config dl_cfg,
     bucket_config bcfg
 ) bucketed_dataloader {
-    map[int][]int buckets = {}
+    map[int]int[] buckets = {}
     for i in 0..len(ds.samples) {
         int len = len(ds.samples[i].token_ids)
         int bucket_idx = assign_to_bucket(len, bcfg)
@@ -165,9 +164,8 @@ func assign_to_bucket(int seq_len, bucket_config bcfg) int {
     bucket
 }
 
-func generate_bucket_order(map[int][]int buckets) []int {
-    []int order = []
-    for key in buckets {
+func generate_bucket_order(map[int]int[] buckets) int[] {
+    int[] order = for[] key in buckets {
         order = append(order, key)
     }
     for i in 0..len(order)-1 {

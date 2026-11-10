@@ -18,19 +18,19 @@ struct compile_state {
     bool fullgraph
     bool debug
     int node_count
-    []string nodes
-    []string ops
-    []string params
-    []string inputs
-    []string outputs
-    []string edges
-    []string passes
-    []string cache_keys
-    []string tags
+    string[] nodes
+    string[] ops
+    string[] params
+    string[] inputs
+    string[] outputs
+    string[] edges
+    string[] passes
+    string[] cache_keys
+    string[] tags
     machine_code_blob_state native_blob
 }
 
-func join_strings([]string values) string {
+func join_strings(string[] values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -216,7 +216,7 @@ func compile_is_activation_op(string op) bool {
 }
 
 func compile_add_edge(compile_state state, string edge) compile_state {
-    []string edges = copy_strings(state.edges)
+    string[] edges = copy_strings(state.edges)
     edges = append(edges, edge)
     compile_state {
         name: state.name,
@@ -245,12 +245,12 @@ func compile_add_edge(compile_state state, string edge) compile_state {
     }
 }
 
-func compile_add_node_with_io(compile_state state, string node, string op, []string params, []string inputs, []string outputs) compile_state {
-    []string nodes = copy_strings(state.nodes)
-    []string ops = copy_strings(state.ops)
-    []string param_list = copy_strings(state.params)
-    []string input_list = copy_strings(state.inputs)
-    []string output_list = copy_strings(state.outputs)
+func compile_add_node_with_io(compile_state state, string node, string op, string[] params, string[] inputs, string[] outputs) compile_state {
+    string[] nodes = copy_strings(state.nodes)
+    string[] ops = copy_strings(state.ops)
+    string[] param_list = copy_strings(state.params)
+    string[] input_list = copy_strings(state.inputs)
+    string[] output_list = copy_strings(state.outputs)
     nodes = append(nodes, node)
     ops = append(ops, op)
     param_list = append(param_list, join_strings(params))
@@ -296,7 +296,7 @@ func compile_add_node(compile_state state, string node, string op) compile_state
 }
 
 func compile_add_input(compile_state state, string input) compile_state {
-    []string inputs = copy_strings(state.inputs)
+    string[] inputs = copy_strings(state.inputs)
     inputs = append(inputs, input)
     compile_state {
         name: state.name,
@@ -326,7 +326,7 @@ func compile_add_input(compile_state state, string input) compile_state {
 }
 
 func compile_add_output(compile_state state, string output) compile_state {
-    []string outputs = copy_strings(state.outputs)
+    string[] outputs = copy_strings(state.outputs)
     outputs = append(outputs, output)
     compile_state {
         name: state.name,
@@ -356,7 +356,7 @@ func compile_add_output(compile_state state, string output) compile_state {
 }
 
 func compile_add_pass(compile_state state, string pass) compile_state {
-    []string passes = copy_strings(state.passes)
+    string[] passes = copy_strings(state.passes)
     passes = append(passes, pass)
     compile_state {
         name: state.name,
@@ -440,7 +440,7 @@ func compile_set_linearized(compile_state state, bool linearized) compile_state 
 }
 
 func compile_add_param(compile_state state, string param) compile_state {
-    []string params = copy_strings(state.params)
+    string[] params = copy_strings(state.params)
     params = append(params, param)
     compile_state {
         name: state.name,
@@ -470,7 +470,7 @@ func compile_add_param(compile_state state, string param) compile_state {
 }
 
 func compile_add_cache_key(compile_state state, string key) compile_state {
-    []string cache_keys = copy_strings(state.cache_keys)
+    string[] cache_keys = copy_strings(state.cache_keys)
     cache_keys = append(cache_keys, key)
     compile_state {
         name: state.name,
@@ -499,7 +499,7 @@ func compile_add_cache_key(compile_state state, string key) compile_state {
 }
 
 func compile_add_tag(compile_state state, string tag) compile_state {
-    []string tags = copy_strings(state.tags)
+    string[] tags = copy_strings(state.tags)
     tags = append(tags, tag)
     compile_state {
         name: state.name,

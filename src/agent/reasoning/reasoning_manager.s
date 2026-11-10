@@ -91,8 +91,8 @@ func (reasoning_manager* mgr) get_chain(string chain_id) reasoning_chain {
     reasoning_chain{}
 }
 
-func (reasoning_manager* mgr) get_active_chains() []reasoning_chain {
-    chains := []reasoning_chain{}
+func (reasoning_manager* mgr) get_active_chains() reasoning_chain[] {
+    chains := reasoning_chain[]{}
     for _, chain := range mgr.chains {
         if chain.state == chain_state.running {
             chains = append(chains, chain)
@@ -150,7 +150,7 @@ func (reasoning_manager* mgr) get_reasoning_summary(string chain_id) string {
 }
 
 func (reasoning_manager* mgr) cleanup_completed_chains() int {
-    to_delete := []string{}
+    to_delete := string[]{}
     for chain_id, chain := range mgr.chains {
         if chain.state == chain_state.completed || chain.state == chain_state.failed {
             to_delete = append(to_delete, chain_id)
@@ -205,8 +205,8 @@ func (reasoning_manager* mgr) get_statistics() map[string]string {
     stats
 }
 
-func (reasoning_manager* mgr) batch_start_reasoning([]string prompts, cot_config config) []reasoning_chain {
-    chains := []reasoning_chain{}
+func (reasoning_manager* mgr) batch_start_reasoning(string[] prompts, cot_config config) reasoning_chain[] {
+    chains := reasoning_chain[]{}
     i := 0
     for i < len(prompts) {
         chain := mgr.start_reasoning_chain(prompts[i], config)
@@ -222,8 +222,8 @@ func (reasoning_manager* mgr) clear_all() {
     mgr.next_chain_id = 1
 }
 
-func map_values[K comparable, V any](m map[K]V) []V {
-    values := []V{}
+func map_values[K comparable, V any](m map[K]V) V[] {
+    values := V[]{}
     for _, v := range m {
         values = append(values, v)
     }

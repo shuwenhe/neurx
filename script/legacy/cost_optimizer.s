@@ -29,7 +29,7 @@ struct optimization_strategy {
 }
 
 struct resource_allocation {
-    gpu_ids             []string
+    gpu_ids             string[]
     batch_size          int
     sequence_length     int
     gradient_accumulation int
@@ -39,9 +39,9 @@ struct resource_allocation {
 struct cost_optimizer {
     config              cost_model
     current_allocation  resource_allocation
-    metrics_history     []resource_metrics
+    metrics_history     resource_metrics[]
     total_cost          float64
-    optimization_strategies []optimization_strategy
+    optimization_strategies optimization_strategy[]
 }
 
 func (cost_optimizer* co) initialize(config cost_model) {
@@ -50,8 +50,8 @@ func (cost_optimizer* co) initialize(config cost_model) {
     fmt.Println("║  Minimize costs while maintaining performance         ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
     co.config = config
-    co.metrics_history = make([]resource_metrics, 0)
-    co.optimization_strategies = make([]optimization_strategy, 0)
+    co.metrics_history = make(resource_metrics[], 0)
+    co.optimization_strategies = make(optimization_strategy[], 0)
     co.total_cost = 0.0
     fmt.Printf("Pricing Configuration:\n")
     fmt.Printf("  GPU: $%.2f/hour\n", config.gpu_price_per_hour)
@@ -70,7 +70,7 @@ func (cost_optimizer* co) set_resource_allocation(
     fmt.Printf("  batch_2 Size: %d\n", batch_size)
     fmt.Printf("  Sequence Length: %d\n", sequence_length)
     fmt.Printf("  Precision: %s\n", precision)
-    gpu_ids := make([]string, 0)
+    gpu_ids := make(string[], 0)
     for i := 0; i < gpu_count; i++ {
         gpu_ids = append(gpu_ids, fmt.Sprintf("gpu_%d", i))
     }
@@ -154,9 +154,9 @@ func (cost_optimizer* co) optimize_batch_size(
     return optimal_batch_size
 }
 
-func (cost_optimizer* co) optimize_gpu_utilization() []optimization_strategy {
+func (cost_optimizer* co) optimize_gpu_utilization() optimization_strategy[] {
     fmt.Printf("\n[Optimization] GPU Utilization Optimization Strategies\n")
-    strategies := []optimization_strategy{
+    strategies := optimization_strategy[]{
         {
             strategy_name:  "Mixed Precision Training",
             target_metric:  "memory",
@@ -204,7 +204,7 @@ func (cost_optimizer* co) analyze_cost_benefit() {
     if len(co.metrics_history) == 0 {
         return
     }
-    scenarios := [][2]interface{}{
+    scenarios := interface{}[2][]{
         {"Configuration", "GPU Hours"},
         {"4 GPU, FP32", 48000},
         {"4 GPU, FP16", 24000},
@@ -271,8 +271,8 @@ func (cost_optimizer* co) get_cost_report() {
 
 func new_cost_optimizer() *cost_optimizer {
     return *cost_optimizer{
-        metrics_history: make([]resource_metrics, 0),
-        optimization_strategies: make([]optimization_strategy, 0),
+        metrics_history: make(resource_metrics[], 0),
+        optimization_strategies: make(optimization_strategy[], 0),
     }
 }
 

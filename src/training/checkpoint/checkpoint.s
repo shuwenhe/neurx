@@ -5,7 +5,7 @@ import (
 struct checkpoint {
     int step
     float loss
-    []tensor params
+    tensor[] params
     string path
 }
 
@@ -16,7 +16,7 @@ struct checkpoint_ref {
     bool resumable
 }
 
-func new_checkpoint(int step, float loss, []tensor params) checkpoint {
+func new_checkpoint(int step, float loss, tensor[] params) checkpoint {
     checkpoint {
         step: step,
         loss: loss,
@@ -51,7 +51,7 @@ func checkpoint_load_state_dict(checkpoint ckpt, checkpoint other) checkpoint {
     other
 }
 
-func checkpoint_params(checkpoint ckpt) []tensor {
+func checkpoint_params(checkpoint ckpt) tensor[] {
     ckpt.params
 }
 

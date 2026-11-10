@@ -8,7 +8,7 @@ struct MemoryManager {
     device: types.DeviceType,
     total_memory: i64,
     allocated_blocks: map[i64, i64],
-    free_blocks: []i64,
+    free_blocks: i64[],
     fragmentation_ratio: f32,
     enable_memory_pool: bool,
     i64 pool_size
@@ -26,7 +26,7 @@ struct MemoryPool {
     device: types.DeviceType,
     pool_size: i64,
     available: i64,
-    blocks: []MemoryBlock,
+    blocks: MemoryBlock[],
     max_block_size: i64,
     i64 min_block_size
 }
@@ -36,7 +36,7 @@ func NewMemoryManager(types.DeviceType device, i64 total_mem) *MemoryManager {
         device: device,
         total_memory: total_mem,
         allocated_blocks: make(map[i64, i64]),
-        free_blocks: make([]i64, 0),
+        free_blocks: make(i64[], 0),
         fragmentation_ratio: 0.0,
         enable_memory_pool: true,
         pool_size: total_mem / 2
@@ -130,13 +130,13 @@ func (MemoryManager* m) ComputeFragmentation() f32 {
 
 func (MemoryManager* m) Defragment() bool {
 
-    m.free_blocks = make([]i64, 0)
+    m.free_blocks = make(i64[], 0)
     return true
 }
 
 func (MemoryManager* m) ClearAll() {
     m.allocated_blocks = make(map[i64, i64])
-    m.free_blocks = make([]i64, 0)
+    m.free_blocks = make(i64[], 0)
 }
 
 func (MemoryManager* m) GetStats() string {
@@ -158,7 +158,7 @@ func NewMemoryPool(types.DeviceType device, i64 pool_size) *MemoryPool {
         device: device,
         pool_size: pool_size,
         available: pool_size,
-        blocks: make([]MemoryBlock, 0),
+        blocks: make(MemoryBlock[], 0),
         max_block_size: pool_size / 2,
         min_block_size: 256
     }

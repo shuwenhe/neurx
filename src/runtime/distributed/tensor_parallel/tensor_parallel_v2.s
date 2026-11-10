@@ -16,15 +16,15 @@ struct tp_v2_state {
     int local_num_kv_heads
     int head_dim
     int local_ffn_dim
-    [][]double w_q_local
-    [][]double w_k_local
-    [][]double w_v_local
-    [][]double w_o_local
-    [][]double w_gate_local
-    [][]double w_up_local
-    [][]double w_down_local
-    []double norm1_gamma
-    []double norm2_gamma
+    double[][] w_q_local
+    double[][] w_k_local
+    double[][] w_v_local
+    double[][] w_o_local
+    double[][] w_gate_local
+    double[][] w_up_local
+    double[][] w_down_local
+    double[] norm1_gamma
+    double[] norm2_gamma
     double time_attn_ms
     double time_mlp_ms
     double time_comm_ms
@@ -58,8 +58,8 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     state.w_gate_local = alloc_matrix(lffn, h)
     state.w_up_local = alloc_matrix(lffn, h)
     state.w_down_local = alloc_matrix(h, lffn)
-    state.norm1_gamma = make([]double, h)
-    state.norm2_gamma = make([]double, h)
+    state.norm1_gamma = make(double[], h)
+    state.norm2_gamma = make(double[], h)
     int i = 0
     for i < h {
         state.norm1_gamma[i] = 1.0
@@ -72,11 +72,11 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     return state
 }
 
-func alloc_matrix(int rows, int cols) [][]double {
-    [][]double m = [][]make([]double, rows)
+func alloc_matrix(int rows, int cols) double[][] {
+    double[][] m = make[][](double[], rows)
     int i = 0
     for i < rows {
-        m[i] = make([]double, cols)
+        m[i] = make(double[], cols)
         i = i + 1
     }
     return m
@@ -84,8 +84,8 @@ func alloc_matrix(int rows, int cols) [][]double {
 
 func tp_attention_forward(
     tp_v2_state state,
-    [][]double input,
-    bool causal_mask) [][]double {
+    double[][] input,
+    bool causal_mask) double[][] {
     int batch_size = len(input)
     int seq_len = 0
     if batch_size > 0 { seq_len = len(input[0]) }
@@ -94,80 +94,80 @@ func tp_attention_forward(
     int nh = state.local_num_heads
     int nkh = state.local_num_kv_heads
     int d = state.head_dim
-    [][]double normalized = rmsnorm_forward(input, state.norm1_gamma, 1e-6)
-    [][]double q_local = matmul2d(normalized, transpose_matrix(state.w_q_local))
-    [][]double k_local = matmul2d(normalized, transpose_matrix(state.w_k_local))
-    [][]double v_local = matmul2d(normalized, transpose_matrix(state.w_v_local))
-    [][]double q_heads = reshape_to_heads(q_local, batch_size, seq_len, nh, d)
-    [][]double k_heads = reshape_to_heads(k_local, batch_size, seq_len, nkh, d)
-    [][]double v_heads = reshape_to_heads(v_local, batch_size, seq_len, nkh, d)
+    double[][] normalized = rmsnorm_forward(input, state.norm1_gamma, 1e-6)
+    double[][] q_local = matmul2d(normalized, transpose_matrix(state.w_q_local))
+    double[][] k_local = matmul2d(normalized, transpose_matrix(state.w_k_local))
+    double[][] v_local = matmul2d(normalized, transpose_matrix(state.w_v_local))
+    double[][] q_heads = reshape_to_heads(q_local, batch_size, seq_len, nh, d)
+    double[][] k_heads = reshape_to_heads(k_local, batch_size, seq_len, nkh, d)
+    double[][] v_heads = reshape_to_heads(v_local, batch_size, seq_len, nkh, d)
     q_heads = apply_rope(q_heads, batch_size, seq_len, nh, d, state.config)
     k_heads = apply_rope(k_heads, batch_size, seq_len, nkh, d, state.config)
     int n_kv_groups = nh / nkh
-    [][]double attn_out = [][]make([]double, batch_size)
+    double[][] attn_out = make[][](double[], batch_size)
     int b = 0
     for b < batch_size {
-        attn_out[b] = [][]make([]double, nh)
+        attn_out[b] = make[][](double[], nh)
         int h_idx = 0
         for h_idx < nh {
             int kv_h_idx = h_idx / n_kv_groups
-            [][]double scores = compute_attn_scores(q_heads[b][h_idx], k_heads[b][kv_h_idx], seq_len, d)
+            double[][] scores = compute_attn_scores(q_heads[b][h_idx], k_heads[b][kv_h_idx], seq_len, d)
             double scale = 1.0 / sqrt_double(double(d))
             scores = scale_matrix(scores, scale)
             if causal_mask {
                 scores = apply_causal_mask(scores, seq_len)
             }
-            [][]double attn_weights = softmax_2d(scores, 1)
+            double[][] attn_weights = softmax_2d(scores, 1)
             attn_out[b][h_idx] = matmul2d(attn_weights, v_heads[b][kv_h_idx])
             h_idx = h_idx + 1
         }
         b = b + 1
     }
-    [][]double concat_out = concat_heads(attn_out, batch_size, seq_len, nh, d)
-    [][]double attn_proj = matmul2d(concat_out, transpose_matrix(state.w_o_local))
+    double[][] concat_out = concat_heads(attn_out, batch_size, seq_len, nh, d)
+    double[][] attn_proj = matmul2d(concat_out, transpose_matrix(state.w_o_local))
     attn_proj = tp_allreduce_sum(attn_proj, state)
-    [][]double output = add_matrices(input, attn_proj)
+    double[][] output = add_matrices(input, attn_proj)
     return output
 }
 
 func tp_mlp_forward(
     tp_v2_state state,
-    [][]double input) [][]double {
+    double[][] input) double[][] {
     int batch_size = len(input)
     int seq_len = 0
     if batch_size > 0 { seq_len = len(input[0]) }
     int H = state.config.hidden_dim
     int lffn = state.local_ffn_dim
-    [][]double normalized = rmsnorm_forward(input, state.norm2_gamma, 1e-6)
-    [][]double gate = matmul2d(normalized, transpose_matrix(state.w_gate_local))
-    [][]double up = matmul2d(normalized, transpose_matrix(state.w_up_local))
-    [][]double activated = silu_activation(gate)
-    [][]double gated = elementwise_mul(activated, up)
-    [][]double proj = matmul2d(gated, transpose_matrix(state.w_down_local))
+    double[][] normalized = rmsnorm_forward(input, state.norm2_gamma, 1e-6)
+    double[][] gate = matmul2d(normalized, transpose_matrix(state.w_gate_local))
+    double[][] up = matmul2d(normalized, transpose_matrix(state.w_up_local))
+    double[][] activated = silu_activation(gate)
+    double[][] gated = elementwise_mul(activated, up)
+    double[][] proj = matmul2d(gated, transpose_matrix(state.w_down_local))
     proj = tp_allreduce_sum(proj, state)
-    [][]double output = add_matrices(input, proj)
+    double[][] output = add_matrices(input, proj)
     return output
 }
 
 func tp_transformer_block_forward(
     ref tp_v2_state state,
-    [][]double input,
-    bool causal_mask) [][]double {
-    [][]double attn_out = tp_attention_forward(state, input, causal_mask)
-    [][]double mlp_out = tp_mlp_forward(state, attn_out)
+    double[][] input,
+    bool causal_mask) double[][] {
+    double[][] attn_out = tp_attention_forward(state, input, causal_mask)
+    double[][] mlp_out = tp_mlp_forward(state, attn_out)
     return mlp_out
 }
 
-func tp_allreduce_sum([][][]double tensor, tp_v2_state state) [][][]double {
+func tp_allreduce_sum(double[][][] tensor, tp_v2_state state) double[][][] {
     return tensor
 }
 
-func matmul2d([][]double a, [][]double b) [][]double {
+func matmul2d(double[][] a, double[][] b) double[][] {
     int M = len(a)
     int K = 0
     if M > 0 { K = len(a[0]) }
     int N = len(b)
-    [][]double c = alloc_matrix(M, N)
+    double[][] c = alloc_matrix(M, N)
     int i = 0
     for i < M {
         int j = 0
@@ -186,11 +186,11 @@ func matmul2d([][]double a, [][]double b) [][]double {
     return c
 }
 
-func transpose_matrix([][]double m) [][]double {
+func transpose_matrix(double[][] m) double[][] {
     int rows = len(m)
     int cols = 0
     if rows > 0 { cols = len(m[0]) }
-    [][]double t = alloc_matrix(cols, rows)
+    double[][] t = alloc_matrix(cols, rows)
     int i = 0
     for i < rows {
         int j = 0
@@ -203,11 +203,11 @@ func transpose_matrix([][]double m) [][]double {
     return t
 }
 
-func add_matrices([][]double a, [][]double b) [][]double {
+func add_matrices(double[][] a, double[][] b) double[][] {
     int rows = len(a)
     int cols = 0
     if rows > 0 { cols = len(a[0]) }
-    [][]double c = alloc_matrix(rows, cols)
+    double[][] c = alloc_matrix(rows, cols)
     int i = 0
     for i < rows {
         int j = 0
@@ -220,11 +220,11 @@ func add_matrices([][]double a, [][]double b) [][]double {
     return c
 }
 
-func elementwise_mul([][]double a, [][]double b) [][]double {
+func elementwise_mul(double[][] a, double[][] b) double[][] {
     int rows = len(a)
     int cols = 0
     if rows > 0 { cols = len(a[0]) }
-    [][]double c = alloc_matrix(rows, cols)
+    double[][] c = alloc_matrix(rows, cols)
     int i = 0
     for i < rows {
         int j = 0
@@ -237,7 +237,7 @@ func elementwise_mul([][]double a, [][]double b) [][]double {
     return c
 }
 
-func scale_matrix([][]double m, double scalar) [][]double {
+func scale_matrix(double[][] m, double scalar) double[][] {
     int rows = len(m)
     int i = 0
     for i < rows {
@@ -251,11 +251,11 @@ func scale_matrix([][]double m, double scalar) [][]double {
     return m
 }
 
-func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
+func rmsnorm_forward(double[][] input, double[] gamma, double eps) double[][] {
     int rows = len(input)
     int cols = 0
     if rows > 0 { cols = len(input[0]) }
-    [][]double output = alloc_matrix(rows, cols)
+    double[][] output = alloc_matrix(rows, cols)
     int i = 0
     for i < rows {
         double sum_sq = 0.0
@@ -276,7 +276,7 @@ func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
     return output
 }
 
-func silu_activation([][]double m) [][]double {
+func silu_activation(double[][] m) double[][] {
     int rows = len(m)
     int i = 0
     for i < rows {
@@ -319,11 +319,11 @@ func sqrt_double(double x) double {
     return g
 }
 
-func softmax_2d([][]double logits, int axis) [][]double {
+func softmax_2d(double[][] logits, int axis) double[][] {
     int rows = len(logits)
     int cols = 0
     if rows > 0 { cols = len(logits[0]) }
-    [][]double output = alloc_matrix(rows, cols)
+    double[][] output = alloc_matrix(rows, cols)
     int i = 0
     for i < rows {
         double max_val = logits[i][0]
@@ -349,17 +349,17 @@ func softmax_2d([][]double logits, int axis) [][]double {
     return output
 }
 
-func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
-    [][][]double result = [][]make([]double, B)
+func reshape_to_heads(double[][] x, int B, int S, int nh, int d) double[][][] {
+    double[][][] result = make[][](double[], B)
     int b = 0
     for b < B {
-        result[b] = [][]make([]double, nh)
+        result[b] = make[][](double[], nh)
         int h = 0
         for h < nh {
-            result[b][h] = []make([]double, S)
+            result[b][h] = make[](double[], S)
             int s = 0
             for s < S {
-                result[b][h][s] = make([]double, d)
+                result[b][h][s] = make(double[], d)
                 int dd = 0
                 for dd < d {
                     int src_idx = s * (nh * d) + h * d + dd
@@ -377,8 +377,8 @@ func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
     return result
 }
 
-func concat_heads([][][]double x, int B, int S, int nh, int d) [][]double {
-    [][]double result = alloc_matrix(B, S * nh * d)
+func concat_heads(double[][][] x, int B, int S, int nh, int d) double[][] {
+    double[][] result = alloc_matrix(B, S * nh * d)
     int b = 0
     for b < B {
         int h = 0
@@ -402,7 +402,7 @@ func concat_heads([][][]double x, int B, int S, int nh, int d) [][]double {
     return result
 }
 
-func apply_causal_mask([][]double scores, int seq_len) [][]double {
+func apply_causal_mask(double[][] scores, int seq_len) double[][] {
     int i = 0
     for i < seq_len {
         int j = 0
@@ -417,8 +417,8 @@ func apply_causal_mask([][]double scores, int seq_len) [][]double {
     return scores
 }
 
-func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int d) [][]double {
-    [][]double scores = alloc_matrix(seq_len, seq_len)
+func compute_attn_scores(double[][] q_head, double[][] k_head, int seq_len, int d) double[][] {
+    double[][] scores = alloc_matrix(seq_len, seq_len)
     int i = 0
     for i < seq_len {
         int j = 0
@@ -437,7 +437,7 @@ func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int 
     return scores
 }
 
-func apply_rope([][][]double x, int B, int S, int nh, int d, tp_v2_config cfg) [][][]double {
+func apply_rope(double[][][] x, int B, int S, int nh, int d, tp_v2_config cfg) double[][][] {
     int half_d = d / 2
     int b = 0
     for b < B {

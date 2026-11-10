@@ -9,17 +9,17 @@ struct jsonl_document {
     string text
     string source
     long document_id
-    []string metadata_keys
-    []string metadata_values
+    string[] metadata_keys
+    string[] metadata_values
 }
 
-func read_jsonl_file(string filepath) []jsonl_document {
-    []jsonl_document docs = make([]jsonl_document, 0)
+func read_jsonl_file(string filepath) jsonl_document[] {
+    jsonl_document[] docs = make(jsonl_document[], 0)
     if !runtime_file_exists(filepath) {
         return docs
     }
     string content = runtime_read_text_file(filepath)
-    []string lines = split_lines(content)
+    string[] lines = split_lines(content)
     int i = 0
     long doc_id = 0
     for i < len(lines) {
@@ -41,8 +41,8 @@ func parse_json_document(string json_line) jsonl_document {
         text: "",
         source: "unknown",
         document_id: 0,
-        metadata_keys: []string{},
-        metadata_values: []string{},
+        metadata_keys: string[]{},
+        metadata_values: string[]{},
     }
     string extracted = extract_json_string_field(json_line, "text")
     if len(extracted) > 0 {
@@ -66,10 +66,10 @@ struct jsonl_data_config {
 }
 
 struct jsonl_batch {
-    []int token_ids
-    []int attention_mask
-    []long document_ids
-    []string metadata
+    int[] token_ids
+    int[] attention_mask
+    long[] document_ids
+    string[] metadata
 }
 
 struct jsonl_data_loader {
@@ -77,8 +77,8 @@ struct jsonl_data_loader {
     bpe_tokenizer tokenizer
     int current_shard_idx
     int current_doc_idx
-    []jsonl_document current_shard_docs
-    []int token_buffer
+    jsonl_document[] current_shard_docs
+    int[] token_buffer
     int buffer_start_idx
     int buffer_end_idx
     long total_tokens_processed
@@ -110,8 +110,8 @@ func jsonl_data_loader_new(
         tokenizer: tok,
         current_shard_idx: 0,
         current_doc_idx: 0,
-        current_shard_docs: make([]jsonl_document, 0),
-        token_buffer: []int{},
+        current_shard_docs: make(jsonl_document[], 0),
+        token_buffer: int[]{},
         buffer_start_idx: 0,
         buffer_end_idx: 0,
         total_tokens_processed: 0,
@@ -125,8 +125,8 @@ func get_shard_indices_for_rank(
     int dp_rank,
     int dp_size,
     int num_shards
-) []int {
-    []int shard_indices = []int{}
+) int[] {
+    int[] shard_indices = int[]{}
     int shard = dp_rank
     for shard < num_shards {
         shard_indices = append_int(shard_indices, shard)
@@ -137,16 +137,16 @@ func get_shard_indices_for_rank(
 
 func pack_tokens_into_batch(
     jsonl_data_loader loader,
-    []int token_sequence,
+    int[] token_sequence,
     int batch_size,
     int seq_len
 ) jsonl_batch {
-    []int batch_token_ids = make([]int, batch_size * seq_len)
-    []int batch_attention_mask = make([]int, batch_size * seq_len)
+    int[] batch_token_ids = make(int[], batch_size * seq_len)
+    int[] batch_attention_mask = make(int[], batch_size * seq_len)
     int i = 0
     for i < batch_size {
-        []int tokens = make([]int, seq_len)
-        []int mask = make([]int, seq_len)
+        int[] tokens = make(int[], seq_len)
+        int[] mask = make(int[], seq_len)
         int j = 0
         for j < seq_len {
             int token_idx = i * seq_len + j
@@ -171,8 +171,8 @@ func pack_tokens_into_batch(
     jsonl_batch batch = jsonl_batch {
         token_ids: batch_token_ids,
         attention_mask: batch_attention_mask,
-        document_ids: make([]long, 0),
-        metadata: []string{},
+        document_ids: make(long[], 0),
+        metadata: string[]{},
     }
     batch
 }
@@ -183,7 +183,7 @@ func get_next_batch(
     if loader.current_doc_idx >= len(loader.current_shard_docs) {
         load_next_shard(loader)
     }
-    []int accumulated_tokens = []int{}
+    int[] accumulated_tokens = int[]{}
     for len(accumulated_tokens) < (loader.config.batch_size * loader.config.seq_len) {
         if loader.current_doc_idx >= len(loader.current_shard_docs) {
             load_next_shard(loader)
@@ -192,8 +192,8 @@ func get_next_batch(
             }
         }
         jsonl_document doc = loader.current_shard_docs[loader.current_doc_idx]
-        []int tokens = encode(loader.tokenizer, doc.text)
-        []int doc_tokens = []int{}
+        int[] tokens = encode(loader.tokenizer, doc.text)
+        int[] doc_tokens = int[]{}
         doc_tokens = append_int(doc_tokens, loader.tokenizer.bos_token_id)
         int i = 0
         for i < len(tokens) {
@@ -221,18 +221,18 @@ func get_next_batch(
 }
 
 func load_next_shard(jsonl_data_loader loader) {
-    []int shard_indices = get_shard_indices_for_rank(
+    int[] shard_indices = get_shard_indices_for_rank(
         loader.config.dp_rank,
         loader.config.dp_size,
         loader.config.num_shards
     )
     if loader.current_shard_idx >= len(shard_indices) {
-        loader.current_shard_docs = make([]jsonl_document, 0)
+        loader.current_shard_docs = make(jsonl_document[], 0)
         return
     }
     int shard_id = shard_indices[loader.current_shard_idx]
     string filepath = loader.config.data_dir + "/shard_" + int_to_string(shard_id) + ".jsonl"
-    []jsonl_document docs = read_jsonl_file(filepath)
+    jsonl_document[] docs = read_jsonl_file(filepath)
     loader.current_shard_docs = docs
     loader.current_doc_idx = 0
     loader.current_shard_idx = loader.current_shard_idx + 1
@@ -246,8 +246,8 @@ func get_loader_stats(jsonl_data_loader loader) string {
     stats
 }
 
-func append_int([]int arr, int val) []int {
-    []int out = make([]int, len(arr) + 1)
+func append_int(int[] arr, int val) int[] {
+    int[] out = make(int[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         out = append(out, arr[i])
@@ -257,8 +257,8 @@ func append_int([]int arr, int val) []int {
     out
 }
 
-func append_string([]string arr, string val) []string {
-    []string out = make([]string, len(arr) + 1)
+func append_string(string[] arr, string val) string[] {
+    string[] out = make(string[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         out = append(out, arr[i])
@@ -295,8 +295,8 @@ func long_to_string(long x) string {
     int_to_string(value)
 }
 
-func split_lines(string text) []string {
-    []string lines = []string{}
+func split_lines(string text) string[] {
+    string[] lines = string[]{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -425,8 +425,8 @@ func find_substring(string text, string pattern) int {
     -1
 }
 
-func build_default_vocab() []string {
-    []string vocab = []string{}
+func build_default_vocab() string[] {
+    string[] vocab = string[]{}
     vocab = append(vocab, "<pad>")
     vocab = append(vocab, "<bos>")
     vocab = append(vocab, "<eos>")

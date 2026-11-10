@@ -13,8 +13,8 @@ import (
 
 struct request_state {
     int request_id
-    []int prompt_tokens
-    []int generated_tokens
+    int[] prompt_tokens
+    int[] generated_tokens
     int max_new_tokens
     int kv_cache_block_id
     int current_position
@@ -37,17 +37,17 @@ struct batch_config {
 
 struct phase_state {
     phase_type phase
-    []request_state requests
+    request_state[] requests
     int token_count
     int compute_time_ms
 }
 
 struct prefill_decode_engine {
     batch_config config
-    []request_state pending_requests
-    []request_state prefilling_requests
-    []request_state decoding_requests
-    []request_state finished_requests
+    request_state[] pending_requests
+    request_state[] prefilling_requests
+    request_state[] decoding_requests
+    request_state[] finished_requests
     int current_iteration
     int total_prefilled_tokens
     int total_decoded_tokens

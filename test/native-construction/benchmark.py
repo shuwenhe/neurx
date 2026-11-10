@@ -7,7 +7,11 @@ SIZES=(4096,8192,16384,32768,1000000,10000000)
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--compiler',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);ap.add_argument('--mode',choices=('bf16','indexed'),default='bf16')
     args=ap.parse_args();out=args.output.resolve();out.mkdir(parents=True,exist_ok=False)
-    data=out/'bf16.bin';data.write_bytes(b'\x80\x3f'*max(SIZES))
+    data=out/'bf16.bin'
+    with data.open('wb') as stream:
+        remaining=max(SIZES)
+        while remaining:
+            count=min(remaining,4096);stream.write(b'\x80\x3f'*count);remaining-=count
     source=out/'bulk.s'
     source.write_text('''package main
 import ("neurx.runtime.tensor_builder")

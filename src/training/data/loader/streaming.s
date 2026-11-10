@@ -13,8 +13,8 @@ struct streaming_config {
 }
 
 struct streaming_buffer {
-    []string raw_lines
-    []int token_ids
+    string[] raw_lines
+    int[] token_ids
     int read_pos
     int write_pos
     int capacity
@@ -22,7 +22,7 @@ struct streaming_buffer {
 }
 
 struct streaming_reader {
-    []string file_paths
+    string[] file_paths
     int current_file_idx
     int line_idx
     streaming_buffer buffer
@@ -30,16 +30,16 @@ struct streaming_reader {
 }
 
 struct batch_data {
-    []int[] input_ids
-    []int[] labels
-    []int[] attention_mask
+    int[][] input_ids
+    int[][] labels
+    int[][] attention_mask
     int num_tokens
 }
 
 struct streaming_dataloader {
     streaming_config config
     streaming_reader reader
-    []batch_data prefetch_queue
+    batch_data[] prefetch_queue
     int queue_size
     int total_batches
     int processed_batches
@@ -60,8 +60,8 @@ func new_streaming_config(string data_dir) streaming_config {
     }
 }
 
-func list_files(string dir, string pattern) []string {
-    []string files = []string{}
+func list_files(string dir, string pattern) string[] {
+    string[] files = string[]{}
     files
 }
 
@@ -71,8 +71,8 @@ func read_line_from_file(string path, int line_idx) string {
 
 func new_streaming_buffer(int capacity) streaming_buffer {
     streaming_buffer {
-        raw_lines: make([]string, capacity),
-        token_ids: make([]int, capacity * 2048),
+        raw_lines: make(string[], capacity),
+        token_ids: make(int[], capacity * 2048),
         read_pos: 0,
         write_pos: 0,
         capacity: capacity,
@@ -81,7 +81,7 @@ func new_streaming_buffer(int capacity) streaming_buffer {
 }
 
 func new_streaming_reader(streaming_config config) streaming_reader {
-    []string files = list_files(config.data_dir, config.file_pattern)
+    string[] files = list_files(config.data_dir, config.file_pattern)
     streaming_reader {
         file_paths: files,
         current_file_idx: 0,
@@ -95,7 +95,7 @@ func new_streaming_dataloader(streaming_config config) streaming_dataloader {
     streaming_dataloader {
         config: config,
         reader: new_streaming_reader(config),
-        prefetch_queue: make([]batch_data, config.prefetch_size),
+        prefetch_queue: make(batch_data[], config.prefetch_size),
         queue_size: 0,
         total_batches: 0,
         processed_batches: 0,
@@ -130,8 +130,8 @@ func buffer_read(streaming_buffer buf) (string, streaming_buffer) {
     (line, buf)
 }
 
-func tokenize_line(string line, int seq_len) []int {
-    []int tokens = make([]int, seq_len)
+func tokenize_line(string line, int seq_len) int[] {
+    int[] tokens = make(int[], seq_len)
     int i = 0
     for i < seq_len {
         tokens = append(tokens, i % 10000)
@@ -161,11 +161,11 @@ func fill_buffer(streaming_reader reader, func tokenizer) streaming_reader {
     reader
 }
 
-func build_document_stream(streaming_reader reader, func tokenizer) []int {
-    []int stream = []int{}
+func build_document_stream(streaming_reader reader, func tokenizer) int[] {
+    int[] stream = int[]{}
     (string line, reader.buffer) = buffer_read(reader.buffer)
     for line != "" {
-        []int tokens = tokenizer(line)
+        int[] tokens = tokenizer(line)
         stream = stream + tokens
         (line, reader.buffer) = buffer_read(reader.buffer)
     }
@@ -173,11 +173,11 @@ func build_document_stream(streaming_reader reader, func tokenizer) []int {
     stream
 }
 
-func create_batch_from_stream([]int stream, int batch_size, int seq_len) (batch_data, []int) {
+func create_batch_from_stream(int[] stream, int batch_size, int seq_len) (batch_data, int[]) {
     batch_data batch {
-        input_ids: intmake([][], batch_size),
-        labels: intmake([][], batch_size),
-        attention_mask: intmake([][], batch_size),
+        input_ids: make(int[][], batch_size),
+        labels: make(int[][], batch_size),
+        attention_mask: make(int[][], batch_size),
         num_tokens: 0,
     }
     int tokens_per_batch = batch_size * seq_len
@@ -186,8 +186,8 @@ func create_batch_from_stream([]int stream, int batch_size, int seq_len) (batch_
     }
     int b = 0
     for b < batch_size {
-        []int input = stream[b * seq_len..(b+1) * seq_len]
-        []int label = stream[b * seq_len + 1..(b+1) * seq_len + 1]
+        int[] input = stream[b * seq_len..(b+1) * seq_len]
+        int[] label = stream[b * seq_len + 1..(b+1) * seq_len + 1]
         if len(label) < seq_len {
             int pad_len = seq_len - len(label)
             int i = 0
@@ -196,7 +196,7 @@ func create_batch_from_stream([]int stream, int batch_size, int seq_len) (batch_
                 i = i + 1
             }
         }
-        []int mask = make([]int, seq_len)
+        int[] mask = make(int[], seq_len)
         int i = 0
         for i < seq_len {
             mask = append(mask, 1)
@@ -230,7 +230,7 @@ func dataloader_next_batch(streaming_dataloader loader, func tokenizer) (batch_d
 }
 
 func prefetch_batches(streaming_dataloader loader, func tokenizer) streaming_dataloader {
-    []int stream = build_document_stream(loader.reader, tokenizer)
+    int[] stream = build_document_stream(loader.reader, tokenizer)
     for loader.queue_size < loader.config.prefetch_size {
         (batch_data batch, stream) = create_batch_from_stream(stream, loader.config.batch_size, loader.config.seq_len)
         if len(batch.input_ids) == 0 {
@@ -244,7 +244,7 @@ func prefetch_batches(streaming_dataloader loader, func tokenizer) streaming_dat
 
 func dataloader_reset(streaming_dataloader loader) streaming_dataloader {
     loader.reader = new_streaming_reader(loader.config)
-    loader.prefetch_queue = make([]batch_data, loader.config.prefetch_size)
+    loader.prefetch_queue = make(batch_data[], loader.config.prefetch_size)
     loader.queue_size = 0
     loader.processed_batches = 0
     loader
@@ -271,7 +271,7 @@ func random_int(int min, int max) int {
 
 func count_total_batches(streaming_config config) int {
     int total_tokens = 0
-    []string files = list_files(config.data_dir, config.file_pattern)
+    string[] files = list_files(config.data_dir, config.file_pattern)
     for i := 0; i < len(files); i += 1 {
         int file_tokens = count_tokens_in_file(files[i])
         total_tokens = total_tokens + file_tokens
@@ -301,8 +301,8 @@ func dataloader_statistics(streaming_dataloader loader) string {
     stats
 }
 
-func split_long_sequence([]int tokens, int max_len) []int[] {
-    []int[] chunks = []int[]{}
+func split_long_sequence(int[] tokens, int max_len) int[][] {
+    int[][] chunks = int[][]{}
     int i = 0
     for i < len(tokens) {
         int end = min(i + max_len, len(tokens))
@@ -319,20 +319,20 @@ func min(int a, int b) int {
     b
 }
 
-func pad_sequence([]int seq, int length) []int {
+func pad_sequence(int[] seq, int length) int[] {
     if len(seq) >= length {
         return seq[0..length]
     }
-    []int padded = copy_int(seq)
+    int[] padded = copy_int(seq)
     for len(padded) < length {
         padded = append(padded, 0)
     }
     padded
 }
 
-func copy_int([]int src) []int {
+func copy_int(int[] src) int[] {
     int n = len(src)
-    []int out = make([]int, n)
+    int[] out = make(int[], n)
     for i := 0; i < n; i += 1 {
         out[i] = src[i]
     }

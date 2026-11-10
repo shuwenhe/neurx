@@ -34,7 +34,7 @@ struct grpo_pass_k_trainer {
     *model value_model
     *model reference_model
     *optimizer optimizer
-    passk_history: []f32
+    passk_history: f32[]
     f32 success_rate
     i64 step_count
 }
@@ -62,7 +62,7 @@ func new_grpo_passk_trainer(
     }
 }
 
-func evaluate_code(string code, []test_case test_cases) . CodeEvaluation {
+func evaluate_code(string code, test_case[] test_cases) . CodeEvaluation {
     return code_evaluation{
         compiles: true,
         passes_tests: true,
@@ -74,7 +74,7 @@ func evaluate_code(string code, []test_case test_cases) . CodeEvaluation {
     }
 }
 
-func compute_passk([]code_evaluation evaluations, i32 k) . f32 {
+func compute_passk(code_evaluation[] evaluations, i32 k) . f32 {
     num_passed := 0
     for eval in evaluations {
         if eval.passes_tests {
@@ -99,13 +99,12 @@ func (grpo_pass_k_trainer* trainer) compute_code_reward(CodeEvaluation eval) . f
 }
 
 func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
-    [][]code_evaluation evaluations,
-    [][]f32 rewards
-) . [][]f32 {
+    code_evaluation[][] evaluations,
+    f32[][] rewards
+) . f32[][] {
     batch_size := len(evaluations)
     k := trainer.config.k_samples
-    advantages := []
-    for b in 0..batch_size {
+    advantages := for[] b in 0..batch_size {
         group_evals := evaluations[b]
         group_rewards := rewards[b]
         passk := compute_passk(group_evals, k)
@@ -116,8 +115,7 @@ func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
         } else {
             baseline = compute_mean(group_rewards)
         }
-        group_advantages := []
-        for i in 0..k {
+        group_advantages := for[] i in 0..k {
             adv := group_rewards[i] - baseline
             if trainer.config.use_passk_advantage && group_evals[i].passes_tests {
                 adv *= (1.0 + passk)
@@ -130,23 +128,20 @@ func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
 }
 
 func (grpo_pass_k_trainer* trainer) normalize_advantages(
-    [][]f32 advantages
-) . [][]f32 {
+    f32[][] advantages
+) . f32[][] {
     if !trainer.config.normalize_advantages {
         return advantages
     }
-    all_advantages := []
-    for group in advantages {
+    all_advantages := for[] group in advantages {
         for adv in group {
             all_advantages = append(all_advantages, adv)
         }
     }
     mean := compute_mean(all_advantages)
     std := compute_std(all_advantages, mean)
-    normalized := []
-    for group in advantages {
-        norm_group := []
-        for adv in group {
+    normalized := for[] group in advantages {
+        norm_group := for[] adv in group {
             norm_adv := (adv - mean) / (std + 1e-8)
             if trainer.config.advantage_clip > 0.0 {
                 norm_adv = clamp_scalar(norm_adv, -trainer.config.advantage_clip, trainer.config.advantage_clip)
@@ -159,17 +154,13 @@ func (grpo_pass_k_trainer* trainer) normalize_advantages(
 }
 
 func (grpo_pass_k_trainer* trainer) train_step(
-    []string prompts,
-    [][]test_case test_cases
+    string[] prompts,
+    test_case[][] test_cases
 ) . (f32, f32, f32) {
     batch_size := len(prompts)
     k := trainer.config.k_samples
-    all_codes := []
-    all_log_probs := []
-    for prompt in prompts {
-        codes := []
-        log_probs := []
-        for i in 0..k {
+    all_codes := all_log_probs[] := for[] prompt in prompts {
+        codes := log_probs[] := for[] i in 0..k {
             code, log_prob  := trainer.policy_model.generate(
                 prompt,
                 temperature: trainer.config.passk_temperature,
@@ -181,12 +172,8 @@ func (grpo_pass_k_trainer* trainer) train_step(
         all_codes = append(all_codes, codes)
         all_log_probs = append(all_log_probs, log_probs)
     }
-    all_evaluations := []
-    all_rewards := []
-    for b in 0..batch_size {
-        evaluations := []
-        rewards := []
-        for i in 0..k {
+    all_evaluations := all_rewards[] := for[] b in 0..batch_size {
+        evaluations := rewards[] := for[] i in 0..k {
             eval := evaluate_code(all_codes[b][i], test_cases[b])
             reward := trainer.compute_code_reward(eval)
             evaluations = append(evaluations, eval)
@@ -243,7 +230,7 @@ func (grpo_pass_k_trainer* trainer) train_step(
     )
 }
 
-func compute_mean([]f32 values) . f32 {
+func compute_mean(f32[] values) . f32 {
     if len(values) == 0 {
         return 0.0
     }
@@ -254,7 +241,7 @@ func compute_mean([]f32 values) . f32 {
     return sum / f32(len(values))
 }
 
-func compute_std([]f32 values, f32 mean) . f32 {
+func compute_std(f32[] values, f32 mean) . f32 {
     if len(values) == 0 {
         return 1.0
     }
@@ -275,7 +262,7 @@ func clamp_scalar(f32 x, f32 min_val, f32 max_val) . f32 {
     return x
 }
 
-func sort([]f32 values) . []f32 {
+func sort(f32[] values) . f32[] {
     return values
 }
 

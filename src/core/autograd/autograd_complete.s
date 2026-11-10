@@ -7,25 +7,25 @@ struct gradient_node {
     int id
     tensor value
     string operation
-    []int inputs
+    int[] inputs
     tensor grad
 }
 
 struct gradient_tape {
-    []gradient_node nodes
+    gradient_node[] nodes
     int node_counter
     bool recording
 }
 
 func create_tape() gradient_tape {
     gradient_tape {
-        nodes: make([]gradient_node, 1000),
+        nodes: make(gradient_node[], 1000),
         node_counter: 0,
         recording: true,
     }
 }
 
-func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradient_tape, int) {
+func add_node(gradient_tape tape, tensor value, string op, int[] inputs) (gradient_tape, int) {
     if !tape.recording {
         return tape, -1
     }
@@ -267,9 +267,9 @@ func backward_relu(tensor grad, tensor x, tensor grad_input) tensor {
 func backward_tape(
     gradient_tape tape,
     tensor final_grad
-) []tensor {
+) tensor[] {
     int num_nodes = tape.node_counter
-    []tensor gradients = make([]tensor, num_nodes)
+    tensor[] gradients = make(tensor[], num_nodes)
     int i = 0
     for i < num_nodes {
         gradients = append(gradients, zeros(tape.nodes[i].value.shape))

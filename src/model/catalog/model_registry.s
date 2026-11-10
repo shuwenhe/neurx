@@ -13,13 +13,13 @@ struct model_registration_info {
 	bool active
 	time.Time registered_at
 	*model_descriptor metadata
-	[]model_capability capabilities
+	model_capability[] capabilities
 }
 
 struct model_query {
 	string query_id
 	*model_type filter_type
-	[]model_capability filter_capabilities
+	model_capability[] filter_capabilities
 	filter_device model_device_type
 	filter_precision model_precision_type
 	bool active_only
@@ -29,7 +29,7 @@ struct model_query {
 
 struct model_query_result {
 	string query_id
-	[]*model_registration_info models
+	model_registration_info*[] models
 	int32 total_count
 	int64 query_time_ms
 }
@@ -37,9 +37,9 @@ struct model_query_result {
 struct model_registry {
 	sync.Mutex mu
 	map[string]*model_registration_info models
-	map[model_type][]*model_registration_info models_by_type
-	map[model_capability][]*model_registration_info models_by_capability
-	map[string][]string model_dependencies
+	map[model_type]model_registration_info*[] models_by_type
+	map[model_capability]model_registration_info*[] models_by_capability
+	map[string]string[] model_dependencies
 	int64 total_registered
 	int64 total_active
 	time.Time created_at
@@ -48,9 +48,9 @@ struct model_registry {
 func create_model_registry() *model_registry {
 	return *model_registry{
 		models: make(map[string]*model_registration_info),
-		models_by_type: make(map[model_type][]*model_registration_info),
-		models_by_capability: make(map[model_capability][]*model_registration_info),
-		model_dependencies: make(map[string][]string),
+		models_by_type: make(map[model_type]model_registration_info*[]),
+		models_by_capability: make(map[model_capability]model_registration_info*[]),
+		model_dependencies: make(map[string]string[]),
 		created_at: time.Now(),
 	}
 }
@@ -88,7 +88,7 @@ func (model_registry* registry) unregister_model(package_id string) error {
 		registry.total_active--
 	}
 	for model_type, models := range registry.models_by_type {
-		filtered := []*model_registration_info{}
+		filtered := model_registration_info*[]{}
 		for _, m := range models {
 			if m.package_id != package_id {
 				filtered = append(filtered, m)
@@ -98,7 +98,7 @@ func (model_registry* registry) unregister_model(package_id string) error {
 	}
 	if reg_info.metadata != nil {
 		for _, cap := range reg_info.metadata.capabilities {
-			filtered := []*model_registration_info{}
+			filtered := model_registration_info*[]{}
 			for _, m := range registry.models_by_capability[cap] {
 				if m.package_id != package_id {
 					filtered = append(filtered, m)
@@ -137,7 +137,7 @@ func (model_registry* registry) query_models(model_query* query) *model_query_re
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	start_time := time.Now()
-	results := []*model_registration_info{}
+	results := model_registration_info*[]{}
 	for _, reg_info := range registry.models {
 		if query.active_only && !reg_info.active {
 			continue
@@ -193,10 +193,10 @@ func (model_registry* registry) query_models(model_query* query) *model_query_re
 	}
 }
 
-func (model_registry* registry) get_active_models() []*model_registration_info {
+func (model_registry* registry) get_active_models() model_registration_info*[] {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	active_models := []*model_registration_info{}
+	active_models := model_registration_info*[]{}
 	for _, reg_info := range registry.models {
 		if reg_info.active {
 			active_models = append(active_models, reg_info)
@@ -205,19 +205,19 @@ func (model_registry* registry) get_active_models() []*model_registration_info {
 	return active_models
 }
 
-func (model_registry* registry) get_models_by_type(model_type model_type) []*model_registration_info {
+func (model_registry* registry) get_models_by_type(model_type model_type) model_registration_info*[] {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	return registry.models_by_type[model_type]
 }
 
-func (model_registry* registry) get_models_by_capability(cap model_capability) []*model_registration_info {
+func (model_registry* registry) get_models_by_capability(cap model_capability) model_registration_info*[] {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	return registry.models_by_capability[cap]
 }
 
-func (model_registry* registry) sort_by_priority(models []*model_registration_info) {
+func (model_registry* registry) sort_by_priority(models model_registration_info*[]) {
 	for i := 0; i < len(models); i++ {
 		for j := i + 1; j < len(models); j++ {
 			if models[j].priority > models[i].priority {
@@ -251,7 +251,7 @@ func (model_registry* registry) add_dependency(package_id string, dep_id string)
 	defer registry.mu.Unlock()
 	deps, exists := registry.model_dependencies[package_id]
 	if !exists {
-		deps = []string{}
+		deps = string[]{}
 	}
 	for _, dep := range deps {
 		if dep == dep_id {
@@ -261,7 +261,7 @@ func (model_registry* registry) add_dependency(package_id string, dep_id string)
 	registry.model_dependencies[package_id] = append(deps, dep_id)
 }
 
-func (model_registry* registry) get_dependencies(package_id string) []string {
+func (model_registry* registry) get_dependencies(package_id string) string[] {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	return registry.model_dependencies[package_id]
@@ -280,10 +280,10 @@ func (model_registry* registry) get_registry_stats() map[string]interface{} {
 	return stats
 }
 
-func (model_registry* registry) list_all_models() []*model_registration_info {
+func (model_registry* registry) list_all_models() model_registration_info*[] {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	models := make([]*model_registration_info, 0, len(registry.models))
+	models := make(model_registration_info*[], 0, len(registry.models))
 	for _, reg_info := range registry.models {
 		models = append(models, reg_info)
 	}

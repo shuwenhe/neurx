@@ -1,6 +1,6 @@
 package neurx.data
 struct sample {
-    []int token_ids
+    int[] token_ids
     string text
     int label
     float weight
@@ -22,13 +22,13 @@ struct dataset_stats {
     float avg_length
     int min_length
     int max_length
-    []int length_distribution
+    int[] length_distribution
 }
 
 struct dataset {
     dataset_config config
     dataset_stats stats
-    []sample samples
+    sample[] samples
     bool is_loaded
 }
 

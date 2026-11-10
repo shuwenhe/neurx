@@ -26,7 +26,7 @@ import "neurx.tensor.types"
 
 struct ImageData {
     id: string,
-    raw_data: []i8,
+    raw_data: i8[],
     width: i32,
     height: i32,
     channels: i32,
@@ -36,7 +36,7 @@ struct ImageData {
 
 struct AudioData {
     id: string,
-    samples: []f32,
+    samples: f32[],
     sample_rate: i32,
     num_channels: i32,
     duration_ms: i32,
@@ -45,7 +45,7 @@ struct AudioData {
 
 struct VideoData {
     id: string,
-    frames: []ImageData,
+    frames: ImageData[],
     fps: f32,
     duration_ms: i32,
     i32 total_frames
@@ -54,7 +54,7 @@ struct VideoData {
 struct DepthData {
     id: string,
     depth_map: *types.Tensor,
-    intrinsics: [9]f32,
+    intrinsics: f32[9],
     min_depth: f32,
     f32 max_depth
 }
@@ -62,12 +62,12 @@ struct DepthData {
 struct MultimodalInput {
     id: string,
     text: string,
-    images: []ImageData,
-    audios: []AudioData,
-    videos: []VideoData,
+    images: ImageData[],
+    audios: AudioData[],
+    videos: VideoData[],
     depth: DepthData,
     timestamp: i64,
-    sequence_order: []i32
+    sequence_order: i32[]
 }
 
 struct ImageFeatures {
@@ -97,7 +97,7 @@ struct AudioFeatures {
 
 struct VideoFeatures {
     id: string,
-    frame_features: []ImageFeatures,
+    frame_features: ImageFeatures[],
     temporal_embeddings: *types.Tensor,
     video_embedding: *types.Tensor
 }
@@ -134,6 +134,6 @@ struct ProcessingState {
     stage: string,
     start_time: i64,
     processing_times: map[string, f32],
-    error_messages: []string,
+    error_messages: string[],
     bool is_cached
 }

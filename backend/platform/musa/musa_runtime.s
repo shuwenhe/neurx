@@ -72,6 +72,6 @@ func mublas_sgemm(mublas_handle handle, int m, int n, int k,
 }
 
 func musa_launch_kernel(string kernel_name, int grid_size, int block_size,
-                       musa_stream stream, []musa_memory_ptr args) int {
+                       musa_stream stream, musa_memory_ptr[] args) int {
     0
 }

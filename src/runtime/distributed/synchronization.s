@@ -17,7 +17,7 @@ struct sync_config {
 }
 
 struct synchronization_state {
-    []rank_state ranks
+    rank_state[] ranks
     sync_config config
     int pending_allreduces
     int completed_allreduces
@@ -26,7 +26,7 @@ struct synchronization_state {
 }
 
 func new_synchronization_state(int world_size, string backend) synchronization_state {
-    []rank_state ranks = make([]rank_state, world_size)
+    rank_state[] ranks = make(rank_state[], world_size)
     int i = 0
     for i < world_size {
         ranks[i] = rank_state {

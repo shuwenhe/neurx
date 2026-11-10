@@ -15,15 +15,15 @@ struct sft_example {
 }
 
 struct sft_batch {
-    []string texts
+    string[] texts
     int batch_size
     int seq_len
     int total_tokens
 }
 
 struct sft_dataset {
-    []sft_example train_examples
-    []sft_example eval_examples
+    sft_example[] train_examples
+    sft_example[] eval_examples
     int train_size
     int eval_size
     float quality_threshold
@@ -80,9 +80,9 @@ struct sft_trainer_state {
     float running_loss
     float running_perplexity
     float avg_token_accuracy
-    []float loss_history
-    []float eval_loss_history
-    []float perplexity_history
+    float[] loss_history
+    float[] eval_loss_history
+    float[] perplexity_history
 }
 
 struct sft_eval_metrics {
@@ -163,8 +163,8 @@ func load_sft_dataset(string source_path) sft_dataset {
     create_sft_dataset(source_path)
 }
 
-func builtin_sft_examples() []sft_example {
-    []sft_example examples = make([]sft_example, 4)
+func builtin_sft_examples() sft_example[] {
+    sft_example[] examples = make(sft_example[], 4)
     examples[0] = sft_example {
         instruction: "Explain gradient descent",
         input_context: "",
@@ -226,9 +226,9 @@ func create_sft_trainer(
         running_loss: 0.0,
         running_perplexity: 0.0,
         avg_token_accuracy: 0.0,
-        loss_history: []float{},
-        eval_loss_history: []float{},
-        perplexity_history: []float{},
+        loss_history: float[]{},
+        eval_loss_history: float[]{},
+        perplexity_history: float[]{},
     }
 }
 
@@ -270,11 +270,11 @@ func format_sft_example_llama2(sft_example example) string {
 }
 
 func prepare_sft_batch(
-    []sft_example examples,
+    sft_example[] examples,
     tokenizer_state tokenizer,
     sft_train_config config
 ) sft_batch {
-    []string texts = make([]string, len(examples))
+    string[] texts = make(string[], len(examples))
     int total_tokens = 0
     int i = 0
     for i < len(examples) {
@@ -292,7 +292,7 @@ func prepare_sft_batch(
     }
 }
 
-func compute_sft_loss([]float logits, []int target_tokens, int vocab_size) float {
+func compute_sft_loss(float[] logits, int[] target_tokens, int vocab_size) float {
     0.0
 }
 
@@ -335,7 +335,7 @@ func sft_training_step(
 
 func evaluate_sft(
     sft_trainer_state trainer,
-    []sft_example eval_examples
+    sft_example[] eval_examples
 ) sft_eval_metrics {
     float loss = (len(eval_examples) as float) / 120.0
     sft_eval_metrics {
@@ -379,9 +379,9 @@ func load_sft_checkpoint(string checkpoint_path) sft_trainer_state {
         running_loss: 0.0,
         running_perplexity: 0.0,
         avg_token_accuracy: 0.0,
-        loss_history: []float{},
-        eval_loss_history: []float{},
-        perplexity_history: []float{},
+        loss_history: float[]{},
+        eval_loss_history: float[]{},
+        perplexity_history: float[]{},
     }
 }
 
@@ -406,7 +406,7 @@ func start_sft_training(
             if batch_end > len(trainer.dataset.train_examples) {
                 batch_end = len(trainer.dataset.train_examples)
             }
-            []sft_example batch_examples = make([]sft_example, batch_end - step_in_epoch)
+            sft_example[] batch_examples = make(sft_example[], batch_end - step_in_epoch)
             int i = step_in_epoch
             int j = 0
             for i < batch_end {

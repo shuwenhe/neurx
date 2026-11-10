@@ -20,17 +20,17 @@ struct training_config {
 }
 
 struct lora_weights {
-    []float lora_a
-    []float lora_b
+    float[] lora_a
+    float[] lora_b
     int rank
     int hidden_size
 }
 
 struct optimizer_state {
-    []float m_a
-    []float v_a
-    []float m_b
-    []float v_b
+    float[] m_a
+    float[] v_a
+    float[] m_b
+    float[] v_b
     float beta1
     float beta2
     float epsilon
@@ -42,7 +42,7 @@ struct training_state {
     float current_loss
     float best_loss
     int best_step
-    []lora_weights layer_loras
+    lora_weights[] layer_loras
     optimizer_state optimizer
 }
 
@@ -127,7 +127,7 @@ func init_lora_weights(int rank, int hidden_size, int layer_idx) lora_weights {
     lora.rank = rank
     lora.hidden_size = hidden_size
     int size_a = rank * hidden_size
-    lora.lora_A = make([]float, size_A)
+    lora.lora_A = make(float[], size_A)
     int seed = 42 + layer_idx * 1000
     float std_a = sqrt_approx(2.0 / float(hidden_size))
     int i = 0
@@ -139,7 +139,7 @@ func init_lora_weights(int rank, int hidden_size, int layer_idx) lora_weights {
         i = i + 1
     }
     int size_b = hidden_size * rank
-    lora.lora_B = make([]float, size_B)
+    lora.lora_B = make(float[], size_B)
     i = 0
     for i < size_b {
         lora.lora_B = append(lora.lora_B, 0.0)
@@ -160,8 +160,8 @@ func sqrt_approx(float x) float {
     return guess
 }
 
-func matmul([]float A, []float B, int m, int k, int n) []float {
-    []float C = make([]float, m * n)
+func matmul(float[] A, float[] B, int m, int k, int n) float[] {
+    float[] C = make(float[], m * n)
     int i = 0
     for i < m * n {
         C = append(C, 0.0)
@@ -185,14 +185,14 @@ func matmul([]float A, []float B, int m, int k, int n) []float {
     return C
 }
 
-func apply_lora([]float hidden, lora_weights lora, int batch_size, int seq_len) []float {
+func apply_lora(float[] hidden, lora_weights lora, int batch_size, int seq_len) float[] {
     int tokens = batch_size * seq_len
     int h = lora.hidden_size
     int r = lora.rank
-    []float intermediate = matmul(hidden, lora.lora_A, tokens, h, r)
-    []float lora_output = matmul(intermediate, lora.lora_B, tokens, r, h)
+    float[] intermediate = matmul(hidden, lora.lora_A, tokens, h, r)
+    float[] lora_output = matmul(intermediate, lora.lora_B, tokens, r, h)
     float scale = lora.rank / lora.hidden_size
-    []float result = make([]float, tokens * h)
+    float[] result = make(float[], tokens * h)
     int i = 0
     for i < tokens * h {
         result = append(result, hidden[i] + lora_output[i] * scale)
@@ -201,11 +201,11 @@ func apply_lora([]float hidden, lora_weights lora, int batch_size, int seq_len) 
     return result
 }
 
-func transformer_layer_forward([]float hidden, lora_weights lora, int batch_size, int seq_len) []float {
+func transformer_layer_forward(float[] hidden, lora_weights lora, int batch_size, int seq_len) float[] {
     return apply_lora(hidden, lora, batch_size, seq_len)
 }
 
-func compute_loss([]float logits, []int labels, int vocab_size, int num_tokens) float {
+func compute_loss(float[] logits, int[] labels, int vocab_size, int num_tokens) float {
     float total_loss = 0.0
     int i = 0
     for i < num_tokens {
@@ -264,13 +264,13 @@ func log_approx(float x) float {
 }
 
 struct gradient_pair {
-    []float grad_a
-    []float grad_b
+    float[] grad_a
+    float[] grad_b
 }
 
 func compute_lora_gradients(
-    []float hidden_input,
-    []float grad_output,
+    float[] hidden_input,
+    float[] grad_output,
     lora_weights lora,
     int batch_size,
     int seq_len
@@ -278,8 +278,8 @@ func compute_lora_gradients(
     int tokens = batch_size * seq_len
     int h = lora.hidden_size
     int r = lora.rank
-    []float grad_a = make([]float, r * h)
-    []float grad_b = make([]float, h * r)
+    float[] grad_a = make(float[], r * h)
+    float[] grad_b = make(float[], h * r)
     int seed = 999
     int i = 0
     for i < r * h {
@@ -304,10 +304,10 @@ func init_optimizer(int size_a, int size_b) optimizer_state {
     opt.beta1 = 0.9
     opt.beta2 = 0.999
     opt.epsilon = 0.00000001
-    opt.m_A = make([]float, size_A)
-    opt.v_A = make([]float, size_A)
-    opt.m_B = make([]float, size_B)
-    opt.v_B = make([]float, size_B)
+    opt.m_A = make(float[], size_A)
+    opt.v_A = make(float[], size_A)
+    opt.m_B = make(float[], size_B)
+    opt.v_B = make(float[], size_B)
     int i = 0
     for i < size_a {
         opt.m_A = append(opt.m_A, 0.0)
@@ -330,8 +330,8 @@ struct optimizer_result {
 
 func optimizer_step(
     lora_weights lora,
-    []float grad_a,
-    []float grad_b,
+    float[] grad_a,
+    float[] grad_b,
     optimizer_state opt,
     float lr,
     int step
@@ -371,12 +371,12 @@ func pow_approx(float base, float exp) float {
     return result
 }
 
-func save_lora_adapter([]lora_weights loras, training_config config) bool {
+func save_lora_adapter(lora_weights[] loras, training_config config) bool {
     println("\n[Saving Adapter]")
     println("Output Directory: " + config.output_dir)
     runtime_make_dirs(config.output_dir)
     string safetensors_path = config.output_dir + "/adapter_model.safetensors"
-    []byte data = serialize_lora_to_safetensors(loras, config)
+    byte[] data = serialize_lora_to_safetensors(loras, config)
     runtime_write_binary_file(safetensors_path, data)
     println("✓ Saved adapter_model.safetensors (" + int_to_str(len(data)) + " bytes)")
     string config_json = create_adapter_config_json(config)
@@ -388,7 +388,7 @@ func save_lora_adapter([]lora_weights loras, training_config config) bool {
     return true
 }
 
-func serialize_lora_to_safetensors([]lora_weights loras, training_config config) []byte {
+func serialize_lora_to_safetensors(lora_weights[] loras, training_config config) byte[] {
     int total_params = 0
     int layer_idx = 0
     for layer_idx < len(loras) {
@@ -396,7 +396,7 @@ func serialize_lora_to_safetensors([]lora_weights loras, training_config config)
         layer_idx = layer_idx + 1
     }
     int data_size = total_params * 4
-    []byte buffer = make([]byte, 8 + data_size)
+    byte[] buffer = make(byte[], 8 + data_size)
     int i = 0
     for i < 8 {
         buffer = append(buffer, byte(0))
@@ -406,7 +406,7 @@ func serialize_lora_to_safetensors([]lora_weights loras, training_config config)
     for layer_idx < len(loras) {
         int j = 0
         for j < len(loras[layer_idx].lora_A) {
-            []byte float_bytes = float32_to_bytes(loras[layer_idx].lora_A[j])
+            byte[] float_bytes = float32_to_bytes(loras[layer_idx].lora_A[j])
             int k = 0
             for k < 4 {
                 buffer = append(buffer, float_bytes[k])
@@ -416,7 +416,7 @@ func serialize_lora_to_safetensors([]lora_weights loras, training_config config)
         }
         j = 0
         for j < len(loras[layer_idx].lora_B) {
-            []byte float_bytes = float32_to_bytes(loras[layer_idx].lora_B[j])
+            byte[] float_bytes = float32_to_bytes(loras[layer_idx].lora_B[j])
             int k = 0
             for k < 4 {
                 buffer = append(buffer, float_bytes[k])
@@ -429,9 +429,9 @@ func serialize_lora_to_safetensors([]lora_weights loras, training_config config)
     return buffer
 }
 
-func float32_to_bytes(float value) []byte {
+func float32_to_bytes(float value) byte[] {
     int int_bits = int(value * 1000000.0)
-    []byte bytes = make([]byte, 4)
+    byte[] bytes = make(byte[], 4)
     int divisor = 256 * 256 * 256
     int byte3 = int_bits / divisor
     int_bits = int_bits - byte3 * divisor
@@ -449,8 +449,8 @@ func float32_to_bytes(float value) []byte {
     return bytes
 }
 
-func string_to_bytes(string s) []byte {
-    []byte bytes = make([]byte, len(s))
+func string_to_bytes(string s) byte[] {
+    byte[] bytes = make(byte[], len(s))
     int i = 0
     for i < len(s) {
         bytes = append(bytes, byte(s[i]))
@@ -511,7 +511,7 @@ func run_real_training(training_config config) training_state {
     println("  Total Steps: " + int_to_str(config.total_steps))
     println("")
     println("[Initializing LoRA Weights]")
-    []lora_weights layer_loras = make([]lora_weights, config.num_layers)
+    lora_weights[] layer_loras = make(lora_weights[], config.num_layers)
     int layer_idx = 0
     for layer_idx < config.num_layers {
         lora_weights lora = init_lora_weights(config.lora_rank, config.hidden_size, layer_idx)
@@ -544,7 +544,7 @@ func run_real_training(training_config config) training_state {
             int batch_size = config.batch_size
             int seq_len = 128
             int tokens = batch_size * seq_len
-            []float hidden = make([]float, tokens * config.hidden_size)
+            float[] hidden = make(float[], tokens * config.hidden_size)
             int i = 0
             int seed = state.current_step * 12345
             for i < tokens * config.hidden_size {
@@ -552,9 +552,9 @@ func run_real_training(training_config config) training_state {
                 hidden = append(hidden, random_float(seed) * 0.1)
                 i = i + 1
             }
-            []float output = transformer_layer_forward(hidden, state.layer_loras[0], batch_size, seq_len)
-            []float logits = make([]float, tokens * config.vocab_size)
-            []int labels = make([]int, tokens)
+            float[] output = transformer_layer_forward(hidden, state.layer_loras[0], batch_size, seq_len)
+            float[] logits = make(float[], tokens * config.vocab_size)
+            int[] labels = make(int[], tokens)
             i = 0
             for i < tokens {
                 int label = i - (i / config.vocab_size) * config.vocab_size
@@ -569,7 +569,7 @@ func run_real_training(training_config config) training_state {
             }
             float loss = compute_loss(logits, labels, config.vocab_size, tokens)
             state.current_loss = loss
-            []float grad_output = make([]float, tokens * config.hidden_size)
+            float[] grad_output = make(float[], tokens * config.hidden_size)
             i = 0
             for i < tokens * config.hidden_size {
                 seed = random_seed(seed + i)

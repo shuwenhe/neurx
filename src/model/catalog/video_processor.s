@@ -39,18 +39,18 @@ struct video_metadata {
 struct video_frame {
 	int32 frame_index
 	float64 timestamp
-	[]byte frame_data
+	byte[] frame_data
 	int32 width
 	int32 height
 	float32 motion_score
 	float32 content_importance
 	bool is_keyframe
-	[]float32 features
+	float32[] features
 }
 
 struct video_data {
 	sync.Mutex mu
-	[]video_frame frames
+	video_frame[] frames
 	*video_metadata metadata
 	string video_id
 	int64 loaded_timestamp
@@ -66,7 +66,7 @@ struct motion_vector {
 }
 
 struct optical_flow_result {
-	[][]motion_vector flow_field
+	motion_vector[][] flow_field
 	int32 width
 	int32 height
 	float32 average_magnitude
@@ -83,9 +83,9 @@ struct video_analysis_result {
 	int32 total_frames
 	float64 total_duration
 	int32 num_keyframes
-	[]scene_change_detection scene_changes
+	scene_change_detection[] scene_changes
 	float32 average_motion_magnitude
-	[]float32 frame_importance_scores
+	float32[] frame_importance_scores
 	time.Time analyzed_at
 }
 
@@ -124,7 +124,7 @@ func create_video_processor() *video_processor {
 	return vp
 }
 
-func (video_processor* vp) load_video(video_id string, frames []video_frame, metadata *video_metadata) error {
+func (video_processor* vp) load_video(video_id string, frames video_frame[], metadata *video_metadata) error {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 	if len(frames) == 0 {
@@ -168,7 +168,7 @@ func (video_processor* vp) unload_video(video_id string) error {
 	return nil
 }
 
-func (video_processor* vp) extract_frames_uniform(video_id string, num_frames int32) ([]video_frame, error) {
+func (video_processor* vp) extract_frames_uniform(video_id string, num_frames int32) (video_frame[], error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
@@ -182,7 +182,7 @@ func (video_processor* vp) extract_frames_uniform(video_id string, num_frames in
 	if step < 1 {
 		step = 1
 	}
-	selected_frames := make([]video_frame, 0)
+	selected_frames := make(video_frame[], 0)
 	for i := 0; i < len(video.frames); i += step {
 		if len(selected_frames) >= int(num_frames) {
 			break
@@ -192,14 +192,14 @@ func (video_processor* vp) extract_frames_uniform(video_id string, num_frames in
 	return selected_frames, nil
 }
 
-func (video_processor* vp) extract_frames_keyframe(video_id string) ([]video_frame, error) {
+func (video_processor* vp) extract_frames_keyframe(video_id string) (video_frame[], error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
 	if !exists {
 		return nil, fmt.Errorf("video %s not found", video_id)
 	}
-	keyframes := make([]video_frame, 0)
+	keyframes := make(video_frame[], 0)
 	for i := 0; i < len(video.frames); i++ {
 		if video.frames[i].is_keyframe {
 			keyframes = append(keyframes, video.frames[i])
@@ -214,7 +214,7 @@ func (video_processor* vp) extract_frames_keyframe(video_id string) ([]video_fra
 	return keyframes, nil
 }
 
-func (video_processor* vp) extract_frames_adaptive(video_id string, target_frames int32) ([]video_frame, error) {
+func (video_processor* vp) extract_frames_adaptive(video_id string, target_frames int32) (video_frame[], error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
@@ -225,7 +225,7 @@ func (video_processor* vp) extract_frames_adaptive(video_id string, target_frame
 	if len(keyframes) >= int(target_frames) {
 		return keyframes[:target_frames], nil
 	}
-	selected := make([]video_frame, len(keyframes))
+	selected := make(video_frame[], len(keyframes))
 	copy(selected, keyframes)
 	remaining := int(target_frames) - len(keyframes)
 	if remaining > 0 {
@@ -249,14 +249,14 @@ func (video_processor* vp) extract_frames_adaptive(video_id string, target_frame
 	return selected, nil
 }
 
-func (video_processor* vp) detect_scene_changes(video_id string) ([]scene_change_detection, error) {
+func (video_processor* vp) detect_scene_changes(video_id string) (scene_change_detection[], error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
 	if !exists {
 		return nil, fmt.Errorf("video %s not found", video_id)
 	}
-	scenes := make([]scene_change_detection, 0)
+	scenes := make(scene_change_detection[], 0)
 	for i := 1; i < len(video.frames); i++ {
 		frame_current := video.frames[i]
 		frame_prev := video.frames[i-1]
@@ -291,9 +291,9 @@ func (video_processor* vp) compute_optical_flow(video_id string) (*optical_flow_
 	}
 	width := video.metadata.width
 	height := video.metadata.height
-	flow_field := make([][]motion_vector, height)
+	flow_field := make(motion_vector[][], height)
 	for i := 0; i < int(height); i++ {
-		flow_field[i] = make([]motion_vector, width)
+		flow_field[i] = make(motion_vector[], width)
 	}
 	total_magnitude := float32(0)
 	num_vectors := 0
@@ -349,7 +349,7 @@ func (video_processor* vp) analyze_video(video_id string) (*video_analysis_resul
 		}
 	}
 	scenes, _ := vp.detect_scene_changes(video_id)
-	importance_scores := make([]float32, len(video.frames))
+	importance_scores := make(float32[], len(video.frames))
 	avg_motion := float32(0)
 	for i := 0; i < len(video.frames); i++ {
 		importance_scores[i] = video.frames[i].content_importance
@@ -380,10 +380,10 @@ func (video_processor* vp) get_video(video_id string) (*video_data, error) {
 	return video, nil
 }
 
-func (video_processor* vp) list_loaded_videos() []string {
+func (video_processor* vp) list_loaded_videos() string[] {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
-	ids := make([]string, 0, len(vp.loaded_videos))
+	ids := make(string[], 0, len(vp.loaded_videos))
 	for id := range vp.loaded_videos {
 		ids = append(ids, id)
 	}

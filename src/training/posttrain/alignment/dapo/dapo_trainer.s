@@ -14,7 +14,7 @@ struct dapo_trainer {
     optimizer value_optimizer
     dapo_config config
     int global_step
-    []dapo_state history
+    dapo_state[] history
 }
 
 struct dapo_train_result {
@@ -42,7 +42,7 @@ func new_dapo_trainer(
         value_optimizer: value_opt,
         config: new_dapo_config(),
         global_step: 0,
-        history: make([]dapo_state, 1000),
+        history: make(dapo_state[], 1000),
     }
 }
 
@@ -62,7 +62,7 @@ func dapo_trainer_with_config(
         value_optimizer: value_opt,
         config: cfg,
         global_step: 0,
-        history: make([]dapo_state, 1000),
+        history: make(dapo_state[], 1000),
     }
 }
 
@@ -125,17 +125,17 @@ func dapo_trainer_train_step(
 func dapo_trainer_train(
     dapo_trainer trainer,
     int num_iterations
-) (dapo_trainer, []dapo_train_result) {
-    []dapo_train_result results = make([]dapo_train_result, num_iterations)
+) (dapo_trainer, dapo_train_result[]) {
+    dapo_train_result[] results = make(dapo_train_result[], num_iterations)
     int iteration = 0
     for iteration < num_iterations {
         dapo_rollout_result rollouts = dapo_rollout_result {
-            states: []tensor{},
-            actions: []tensor{},
-            rewards: []tensor{},
-            log_probs: []tensor{},
-            values: []tensor{},
-            dones: []bool{},
+            states: tensor[]{},
+            actions: tensor[]{},
+            rewards: tensor[]{},
+            log_probs: tensor[]{},
+            values: tensor[]{},
+            dones: bool[]{},
             avg_reward: 0.0,
             max_reward: 0.0,
             num_correct: 0,

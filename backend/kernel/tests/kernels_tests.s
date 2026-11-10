@@ -15,7 +15,7 @@ struct TestResult {
     f32 execution_time
 }
 
-test_results := make([]TestResult, 0)
+test_results := make(TestResult[], 0)
 
 func LogTest(string name, bool passed, string message, f32 time) {
     result := TestResult{
@@ -54,9 +54,9 @@ func TestMatrixGEMM() {
     n := i32(128)
     k := i32(128)
 
-    A := make([]f32, m * k)
-    B := make([]f32, k * n)
-    C := make([]f32, m * n)
+    A := make(f32[], m * k)
+    B := make(f32[], k * n)
+    C := make(f32[], m * n)
 
     for i := 0; i < len(A); i += 1 {
         A[i] = 1.0
@@ -84,8 +84,8 @@ func TestMatrixTranspose() {
     m := i32(64)
     n := i32(64)
 
-    A := make([]f32, m * n)
-    B := make([]f32, m * n)
+    A := make(f32[], m * n)
+    B := make(f32[], m * n)
 
     for i := 0; i < m; i += 1 {
         for j := 0; j < n; j += 1 {
@@ -120,8 +120,8 @@ func TestReLU() {
 
     kernel := activation_kernels.NewActivationKernels(config)
 
-    input := make([]f32, 1000)
-    output := make([]f32, 1000)
+    input := make(f32[], 1000)
+    output := make(f32[], 1000)
 
     for i := 0; i < len(input); i += 1 {
         input[i] = f32(i) / 500.0 - 1.0
@@ -158,8 +158,8 @@ func TestGELU() {
 
     kernel := activation_kernels.NewActivationKernels(config)
 
-    input := make([]f32, 1000)
-    output := make([]f32, 1000)
+    input := make(f32[], 1000)
+    output := make(f32[], 1000)
 
     for i := 0; i < len(input); i += 1 {
         input[i] = f32(i) / 500.0 - 1.0
@@ -184,8 +184,8 @@ func TestSoftmax() {
 
     kernel := activation_kernels.NewActivationKernels(config)
 
-    input := make([]f32, 100)
-    output := make([]f32, 100)
+    input := make(f32[], 100)
+    output := make(f32[], 100)
 
     for i := 0; i < len(input); i += 1 {
         input[i] = f32(i) / 100.0
@@ -218,10 +218,10 @@ func TestLayerNorm() {
     m := i32(32)
     n := i32(256)
 
-    input := make([]f32, m * n)
-    output := make([]f32, m * n)
-    gamma := make([]f32, n)
-    beta := make([]f32, n)
+    input := make(f32[], m * n)
+    output := make(f32[], m * n)
+    gamma := make(f32[], n)
+    beta := make(f32[], n)
 
     for i := 0; i < len(input); i += 1 {
         input[i] = f32(i % 100) / 50.0 - 1.0
@@ -260,9 +260,9 @@ func TestRMSNorm() {
     m := i32(32)
     n := i32(256)
 
-    input := make([]f32, m * n)
-    output := make([]f32, m * n)
-    weight := make([]f32, n)
+    input := make(f32[], m * n)
+    output := make(f32[], m * n)
+    weight := make(f32[], n)
 
     for i := 0; i < len(input); i += 1 {
         input[i] = f32(i % 100) / 50.0 - 1.0
@@ -282,7 +282,7 @@ func TestUtilityFunctions() {
 
     utils := utils.NewKernelUtils()
 
-    valid_shape := []i32{4, 64, 256}
+    valid_shape := i32[]{4, 64, 256}
     valid := utils.ValidateTensorShape(valid_shape)
     LogTest("ValidateShape", valid, "", 0.0)
 
@@ -294,8 +294,8 @@ func TestUtilityFunctions() {
     f16_size := utils.GetDataTypeSize(types.DataType.float16)
     LogTest("GetDataTypeSize", f32_size == 4 && f16_size == 2, "", 0.0)
 
-    shape1 := []i32{4, 64, 256}
-    shape2 := []i32{1, 64, 256}
+    shape1 := i32[]{4, 64, 256}
+    shape2 := i32[]{1, 64, 256}
     broadcast := utils.BroadcastShapes(shape1, shape2)
     compatible := len(broadcast) == 3 && broadcast[0] == 4
     LogTest("BroadcastShapes", compatible, "", 0.0)

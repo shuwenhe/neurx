@@ -19,17 +19,15 @@ struct reward_request {
 struct batch_reward_manager {
     batch_reward_manager_config config
     *model reward_model
-    request_queue: []reward_request
+    request_queue: reward_request[]
     mutex queue_mutex
-    workers: []worker
-    i64 total_requests
+    workers: i64[] worker total_requests
     i64 total_batches
     f32 avg_batch_size
 }
 
 func new_batch_reward_manager(batch_reward_manager_config config, *model model) . batch_reward_manager {
-    workers := []
-    for i in 0..config.num_workers {
+    workers := for[] i in 0..config.num_workers {
         workers = append(workers, new_worker(i))
     }
     return batch_reward_manager{
@@ -74,9 +72,7 @@ func (batch_reward_manager* manager) process_batch() {
     batch_requests := manager.request_queue[..batch_size]
     manager.request_queue = manager.request_queue[batch_size..]
     manager.queue_mutex.unlock()
-    prompts := []
-    responses := []
-    for req in batch_requests {
+    prompts := responses[] := for[] req in batch_requests {
         prompts = append(prompts, req.prompt)
         responses = append(responses, req.response)
     }
@@ -110,8 +106,7 @@ struct rate_limited_reward_manager {
     *model reward_model
     f32 tokens
     i64 last_refill_time
-    delayed_queue: []delayed_request
-    i64 total_requests
+    delayed_queue: i64[] delayed_request total_requests
     i64 rate_limited_count
 }
 
@@ -253,10 +248,9 @@ func new_prime_reward_manager(
 func (prime_reward_manager* manager) compute_reward(
     tensor prompt,
     tensor response,
-    []string steps
-) . (f32, []f32) {
-    step_rewards := []
-    for step_text in steps {
+    string[] steps
+) . (f32, f32[]) {
+    step_rewards := for[] step_text in steps {
         step_tokens := encode_text(step_text)
         step_input := concat(prompt, step_tokens)
         step_reward := manager.step_reward_model.forward(step_input).item()
@@ -272,15 +266,14 @@ func (prime_reward_manager* manager) compute_reward(
     return total_reward, step_rewards
 }
 
-func stack_and_pad([]tensor tensors) . tensor {
+func stack_and_pad(tensor[] tensors) . tensor {
     max_len := 0
     for t in tensors {
         if t.shape[0] > max_len {
             max_len = t.shape[0]
         }
     }
-    padded := []
-    for t in tensors {
+    padded := for[] t in tensors {
         if t.shape[0] < max_len {
             padding := tensor_zeros([max_len - t.shape[0]])
             padded = append(padded, concat(t, padding))
@@ -302,7 +295,7 @@ func get_time_ms() . i64 {
 func sleep_ms(i64 duration) {
 }
 
-func compute_mean([]f32 values) . f32 {
+func compute_mean(f32[] values) . f32 {
     if len(values) == 0 {
         return 0.0
     }

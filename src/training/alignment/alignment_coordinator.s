@@ -31,8 +31,8 @@ struct alignment_config {
 
 struct alignment_trainer {
     alignment_config config
-    []alignment_stage stages
-    []alignment_checkpoint checkpoints
+    alignment_stage[] stages
+    alignment_checkpoint[] checkpoints
     int current_stage_index
     [string:float cumulative_metrics
 }
@@ -50,7 +50,7 @@ func new_alignment_config(string base_model_path) alignment_config {
 }
 
 func new_alignment_trainer(alignment_config cfg) alignment_trainer {
-    []alignment_stage stages = make([]alignment_stage, 3)
+    alignment_stage[] stages = make(alignment_stage[], 3)
     stages[0] = alignment_stage {
         stage_name: "sft",
         steps_total: 0,
@@ -66,13 +66,13 @@ func new_alignment_trainer(alignment_config cfg) alignment_trainer {
     alignment_trainer {
         config: cfg,
         stages: stages,
-        checkpoints: make([]alignment_checkpoint, 100),
+        checkpoints: make(alignment_checkpoint[], 100),
         current_stage_index: 0,
         cumulative_metrics: [string:float{},
     }
 }
 
-func run_sft_stage(alignment_trainer trainer, []string sft_data) alignment_trainer {
+func run_sft_stage(alignment_trainer trainer, string[] sft_data) alignment_trainer {
     int epoch = 0
     for epoch < trainer.config.num_sft_epochs {
         epoch = epoch + 1
@@ -81,7 +81,7 @@ func run_sft_stage(alignment_trainer trainer, []string sft_data) alignment_train
     trainer
 }
 
-func run_rlhf_stage(alignment_trainer trainer, []string preference_data) alignment_trainer {
+func run_rlhf_stage(alignment_trainer trainer, string[] preference_data) alignment_trainer {
     int iteration = 0
     for iteration < trainer.config.num_rlhf_iterations {
         iteration = iteration + 1
@@ -90,7 +90,7 @@ func run_rlhf_stage(alignment_trainer trainer, []string preference_data) alignme
     trainer
 }
 
-func evaluate_alignment(string model_path, []string test_prompts) [float string {
+func evaluate_alignment(string model_path, string[] test_prompts) [float string {
     [string:float metrics = [string:float{}
     metrics["instruction_following"] = 0.0
     metrics["coherence"] = 0.0
@@ -129,8 +129,8 @@ func save_alignment_checkpoint(alignment_trainer trainer, string checkpoint_dir)
 func resume_from_checkpoint(string checkpoint_path) alignment_trainer {
     alignment_trainer {
         config: new_alignment_config(""),
-        stages: make([]alignment_stage, 3),
-        checkpoints: make([]alignment_checkpoint, 100),
+        stages: make(alignment_stage[], 3),
+        checkpoints: make(alignment_checkpoint[], 100),
         current_stage_index: 0,
         cumulative_metrics: [string:float{},
     }
@@ -140,7 +140,7 @@ func create_model_version(alignment_trainer trainer, string version_tag) string 
     version_tag
 }
 
-func compare_model_versions([]string version_ids) [float string {
+func compare_model_versions(string[] version_ids) [float string {
     [string:float comparison = [string:float{}
     comparison
 }

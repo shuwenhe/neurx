@@ -1,6 +1,6 @@
 package neurx.trainer.production
 struct matrix_2d {
-    []float[] data
+    float[][] data
 }
 
 struct training_system_config {
@@ -36,25 +36,25 @@ struct training_system_config {
 }
 
 struct model_state {
-    []float[] embeddings
-    []layer_weights layers
-    []float output_weights
+    float[][] embeddings
+    layer_weights[] layers
+    float[] output_weights
     int total_params
 }
 
 struct layer_weights {
-    []float[] attention_qkv
-    []float[] attention_output
-    []float[] ffn_gate
-    []float[] ffn_up
-    []float[] ffn_down
-    []float layernorm_1_weight
-    []float layernorm_2_weight
+    float[][] attention_qkv
+    float[][] attention_output
+    float[][] ffn_gate
+    float[][] ffn_up
+    float[][] ffn_down
+    float[] layernorm_1_weight
+    float[] layernorm_2_weight
 }
 
 struct optimizer_state {
-    []float[] param_momentum
-    []float[] param_variance
+    float[][] param_momentum
+    float[][] param_variance
     int step
     float learning_rate
     float beta1
@@ -71,15 +71,15 @@ struct training_state {
     float current_loss
     float best_loss
     int best_step
-    []float loss_history
-    []float lr_history
+    float[] loss_history
+    float[] lr_history
     bool is_training
 }
 
 struct ddp_state {
     int rank
     int world_size
-    []int ranks
+    int[] ranks
     bool is_initialized
 }
 
@@ -87,9 +87,9 @@ struct zero_state {
     int stage
     int rank
     int world_size
-    []float[] sharded_params
-    []float[] sharded_grads
-    []int param_partition_sizes
+    float[][] sharded_params
+    float[][] sharded_grads
+    int[] param_partition_sizes
 }
 
 struct checkpoint_metadata {
@@ -147,11 +147,9 @@ func new_training_system_config() training_system_config {
 
 func initialize_model(training_system_config cfg) model_state {
     int total_params = 0
-    []float[] embeddings = []
-    int i = 0
+    float[][] embeddings = int[] i = 0
     for i < cfg.vocab_size {
-        []float emb = []
-        int j = 0
+        float[] emb = int[] j = 0
         for j < cfg.hidden_dim {
             emb = append(emb, randn() * 0.02)
             j = j + 1
@@ -160,16 +158,14 @@ func initialize_model(training_system_config cfg) model_state {
         i = i + 1
     }
     total_params = total_params + cfg.vocab_size * cfg.hidden_dim
-    []layer_weights layers = []
-    int layer_idx = 0
+    layer_weights[] layers = int[] layer_idx = 0
     for layer_idx < cfg.num_layers {
         layer_weights layer = initialize_layer_weights(cfg)
         layers = append(layers, layer)
         total_params = total_params + count_layer_params(cfg)
         layer_idx = layer_idx + 1
     }
-    []float output_weights = []
-    i = 0
+    float[] output_weights = i[] = 0
     for i < cfg.hidden_dim * cfg.vocab_size {
         output_weights = append(output_weights, randn() * 0.02)
         i = i + 1
@@ -185,30 +181,24 @@ func initialize_model(training_system_config cfg) model_state {
 
 func initialize_layer_weights(training_system_config cfg) layer_weights {
     int qkv_size = cfg.hidden_dim * cfg.hidden_dim * 3
-    []float[] attention_qkv = []
-    int i = 0
+    float[][] attention_qkv = int[] i = 0
     for i < qkv_size {
-        []float row = []
-        row = append(row, randn() * 0.02)
+        float[] row = row[] = append(row, randn() * 0.02)
         attention_qkv = append(attention_qkv, row)
         i = i + 1
     }
     int attn_out_size = cfg.hidden_dim * cfg.hidden_dim
-    []float[] attention_output = []
-    i = 0
+    float[][] attention_output = i[] = 0
     for i < attn_out_size {
-        []float row = []
-        row = append(row, randn() * 0.02)
+        float[] row = row[] = append(row, randn() * 0.02)
         attention_output = append(attention_output, row)
         i = i + 1
     }
     int ffn_size = cfg.hidden_dim * cfg.ffn_dim
-    []float[] ffn_gate = create_weight_matrix(ffn_size)
-    []float[] ffn_up = create_weight_matrix(ffn_size)
-    []float[] ffn_down = create_weight_matrix(cfg.ffn_dim * cfg.hidden_dim)
-    []float layernorm_1 = []
-    []float layernorm_2 = []
-    i = 0
+    float[][] ffn_gate = create_weight_matrix(ffn_size)
+    float[][] ffn_up = create_weight_matrix(ffn_size)
+    float[][] ffn_down = create_weight_matrix(cfg.ffn_dim * cfg.hidden_dim)
+    float[] layernorm_1 = float[][] layernorm_2 = i[] = 0
     for i < cfg.hidden_dim {
         layernorm_1 = append(layernorm_1, 1.0)
         layernorm_2 = append(layernorm_2, 1.0)
@@ -225,12 +215,10 @@ func initialize_layer_weights(training_system_config cfg) layer_weights {
     }
 }
 
-func create_weight_matrix(int size) []float[] {
-    []float[] matrix = []
-    int i = 0
+func create_weight_matrix(int size) float[][] {
+    float[][] matrix = int[] i = 0
     for i < size {
-        []float row = []
-        row = append(row, randn() * 0.02)
+        float[] row = row[] = append(row, randn() * 0.02)
         matrix = append(matrix, row)
         i = i + 1
     }
@@ -250,13 +238,9 @@ func initialize_optimizer(
     model_state model,
     training_system_config cfg) optimizer_state {
     int total_params = model.total_params
-    []float[] param_momentum = []
-    []float[] param_variance = []
-    int i = 0
+    float[][] param_momentum = float[][][] param_variance = int[] i = 0
     for i < total_params {
-        []float m = []
-        []float v = []
-        m = append(m, 0.0)
+        float[] m = float[][] v = m[] = append(m, 0.0)
         v = append(v, 0.0)
         param_momentum = append(param_momentum, m)
         param_variance = append(param_variance, v)
@@ -275,15 +259,13 @@ func initialize_optimizer(
 
 func forward_pass(
     model_state model,
-    []int[] input_ids,
+    int[][] input_ids,
     training_system_config cfg) forward_result {
     int batch_size = len(input_ids)
     int seq_len = len(input_ids[0])
-    []float[] hidden = []
-    int b = 0
+    float[][] hidden = int[] b = 0
     for b < batch_size {
-        []float h = []
-        int t = 0
+        float[] h = int[] t = 0
         for t < seq_len {
             int token_id = input_ids[b][t]
             int d = 0
@@ -301,7 +283,7 @@ func forward_pass(
         hidden = layer_forward(hidden, model.layers[layer_idx], cfg)
         layer_idx = layer_idx + 1
     }
-    []float[] logits = compute_logits(hidden, model.output_weights, cfg)
+    float[][] logits = compute_logits(hidden, model.output_weights, cfg)
     return forward_result {
         logits: logits,
         hidden_states: hidden,
@@ -309,41 +291,39 @@ func forward_pass(
 }
 
 struct forward_result {
-    []float[] logits
-    []float[] hidden_states
+    float[][] logits
+    float[][] hidden_states
 }
 
 func layer_forward(
-    []float[] hidden,
+    float[][] hidden,
     layer_weights layer,
-    training_system_config cfg) []float[] {
-    []float[] attn_out = attention_forward(hidden, layer, cfg)
-    []float[] residual_1 = add_residual(hidden, attn_out)
-    []float[] ffn_out = ffn_forward(residual_1, layer, cfg)
-    []float[] output = add_residual(residual_1, ffn_out)
+    training_system_config cfg) float[][] {
+    float[][] attn_out = attention_forward(hidden, layer, cfg)
+    float[][] residual_1 = add_residual(hidden, attn_out)
+    float[][] ffn_out = ffn_forward(residual_1, layer, cfg)
+    float[][] output = add_residual(residual_1, ffn_out)
     return output
 }
 
 func attention_forward(
-    []float[] hidden,
+    float[][] hidden,
     layer_weights layer,
-    training_system_config cfg) []float[] {
+    training_system_config cfg) float[][] {
     return hidden
 }
 
 func ffn_forward(
-    []float[] hidden,
+    float[][] hidden,
     layer_weights layer,
-    training_system_config cfg) []float[] {
+    training_system_config cfg) float[][] {
     return hidden
 }
 
-func add_residual([]float[] x, []float[] y) []float[] {
-    []float[] result = []
-    int i = 0
+func add_residual(float[][] x, float[][] y) float[][] {
+    float[][] result = int[] i = 0
     for i < len(x) {
-        []float row = []
-        int j = 0
+        float[] row = int[] j = 0
         for j < len(x[i]) {
             row = append(row, x[i][j] + y[i][j])
             j = j + 1
@@ -355,14 +335,12 @@ func add_residual([]float[] x, []float[] y) []float[] {
 }
 
 func compute_logits(
-    []float[] hidden,
-    []float output_weights,
-    training_system_config cfg) []float[] {
-    []float[] logits = []
-    int i = 0
+    float[][] hidden,
+    float[] output_weights,
+    training_system_config cfg) float[][] {
+    float[][] logits = int[] i = 0
     for i < len(hidden) {
-        []float logit_row = []
-        int v = 0
+        float[] logit_row = int[] v = 0
         for v < cfg.vocab_size {
             logit_row = append(logit_row, 0.0)
             v = v + 1
@@ -374,8 +352,8 @@ func compute_logits(
 }
 
 func compute_loss(
-    []float[] logits,
-    []int[] labels) float {
+    float[][] logits,
+    int[][] labels) float {
     float total_loss = 0.0
     int count = 0
     int b = 0
@@ -394,7 +372,7 @@ func compute_loss(
     return total_loss / float(count)
 }
 
-func softmax_single([]float logits, int idx) float {
+func softmax_single(float[] logits, int idx) float {
     float max_logit = logits[0]
     int i = 1
     for i < len(logits) {
@@ -415,12 +393,10 @@ func softmax_single([]float logits, int idx) float {
 func backward_pass(
     model_state model,
     float loss,
-    training_system_config cfg) []float[] {
-    []float[] gradients = []
-    int i = 0
+    training_system_config cfg) float[][] {
+    float[][] gradients = int[] i = 0
     for i < model.total_params {
-        []float g = []
-        g = append(g, randn() * 0.01)
+        float[] g = g[] = append(g, randn() * 0.01)
         gradients = append(gradients, g)
         i = i + 1
     }
@@ -430,7 +406,7 @@ func backward_pass(
 func optimizer_step(
     model_state model,
     optimizer_state optimizer,
-    []float[] gradients,
+    float[][] gradients,
     training_system_config cfg) optimizer_state {
     optimizer.step = optimizer.step + 1
     float lr = get_learning_rate(optimizer.step, cfg)
@@ -464,7 +440,7 @@ func get_learning_rate(int step, training_system_config cfg) float {
     return cfg.learning_rate * cosine_decay
 }
 
-func clip_gradients([]float[] gradients, float max_norm) float {
+func clip_gradients(float[][] gradients, float max_norm) float {
     float total_norm = 0.0
     int i = 0
     for i < len(gradients) {
@@ -538,8 +514,8 @@ func initialize_ddp(training_system_config cfg) ddp_state {
 }
 
 func ddp_all_reduce_gradients(
-    []float[] gradients,
-    ddp_state ddp) []float[] {
+    float[][] gradients,
+    ddp_state ddp) float[][] {
     if !ddp.is_initialized || ddp.world_size <= 1 {
         return gradients
     }
@@ -564,16 +540,15 @@ func initialize_zero(training_system_config cfg, model_state model) zero_state {
 }
 
 func zero_reduce_scatter_gradients(
-    []float[] gradients,
-    zero_state zero) []float[] {
+    float[][] gradients,
+    zero_state zero) float[][] {
     if zero.stage == 0 {
         return gradients
     }
     int shard_size = len(gradients) / zero.world_size
     int start_idx = zero.rank * shard_size
     int end_idx = start_idx + shard_size
-    []float[] sharded_grads = []
-    int i = start_idx
+    float[][] sharded_grads = int[] i = start_idx
     for i < end_idx {
         sharded_grads = append(sharded_grads, gradients[i])
         i = i + 1
@@ -622,19 +597,19 @@ func training_loop(training_system_config cfg) {
     int start_time = get_time_ms()
     for state.global_step < cfg.max_steps && state.is_training {
         int step_start = get_time_ms()
-        []int[] input_batch = generate_dummy_batch(cfg)
-        []int[] label_batch = generate_dummy_labels(cfg)
+        int[][] input_batch = generate_dummy_batch(cfg)
+        int[][] label_batch = generate_dummy_labels(cfg)
         float accumulated_loss = 0.0
         int micro_idx = 0
         for micro_idx < cfg.gradient_accumulation_steps {
             forward_result fwd = forward_pass(state.model, input_batch, cfg)
             float loss = compute_loss(fwd.logits, label_batch)
             accumulated_loss = accumulated_loss + loss
-            []float[] gradients = backward_pass(state.model, loss, cfg)
+            float[][] gradients = backward_pass(state.model, loss, cfg)
             micro_idx = micro_idx + 1
         }
         accumulated_loss = accumulated_loss / float(cfg.gradient_accumulation_steps)
-        []float[] gradients = backward_pass(state.model, accumulated_loss, cfg)
+        float[][] gradients = backward_pass(state.model, accumulated_loss, cfg)
         if cfg.enable_ddp {
             gradients = ddp_all_reduce_gradients(gradients, ddp)
         }
@@ -679,12 +654,10 @@ func training_loop(training_system_config cfg) {
     println("Total Time: " + float_to_string_2(float(total_time) / 1000.0) + "s")
 }
 
-func generate_dummy_batch(training_system_config cfg) []int[] {
-    []int[] batch = []
-    int b = 0
+func generate_dummy_batch(training_system_config cfg) int[][] {
+    int[][] batch = int[] b = 0
     for b < cfg.batch_size {
-        []int seq = []
-        int t = 0
+        int[] seq = int[] t = 0
         for t < cfg.max_seq_len {
             seq = append(seq, rand_int(cfg.vocab_size))
             t = t + 1
@@ -695,7 +668,7 @@ func generate_dummy_batch(training_system_config cfg) []int[] {
     return batch
 }
 
-func generate_dummy_labels(training_system_config cfg) []int[] {
+func generate_dummy_labels(training_system_config cfg) int[][] {
     return generate_dummy_batch(cfg)
 }
 

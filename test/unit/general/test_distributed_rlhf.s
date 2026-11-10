@@ -4,7 +4,7 @@ struct test_result {
     string name
     int passed
     int failed
-    []string messages
+    string[] messages
 }
 
 func new_test_result(string name) test_result {
@@ -12,7 +12,7 @@ func new_test_result(string name) test_result {
     result.name = name
     result.passed = 0
     result.failed = 0
-    result.messages = make([]string, 0)
+    result.messages = make(string[], 0)
     result
 }
 
@@ -60,7 +60,7 @@ func test_compilation() test_result {
     println("🧪 compileEnglish text")
     println("============================================================")
     println("")
-    []string files = [
+    string[] files = [
         "neurx/distributed/data_parallel.s",
         "neurx/alignment/rlhf_complete.s",
         "neurx/amp/scaler.s",
@@ -236,7 +236,7 @@ func test_sft() test_result {
     test_result result = new_test_result("SFT test")
     println("")
     println("📖 English text (SFT) test:")
-    []float losses = [2.5, 1.8, 1.2, 0.8, 0.5]
+    float[] losses = [2.5, 1.8, 1.2, 0.8, 0.5]
     bool decreasing = true
     int i = 0
     for i < 4 {
@@ -256,7 +256,7 @@ func test_reward_model() test_result {
     test_result result = new_test_result("rewardmodeltest")
     println("")
     println("🏆 rewardmodeltest:")
-    []float aucs = [0.55, 0.65, 0.72, 0.76, 0.78]
+    float[] aucs = [0.55, 0.65, 0.72, 0.76, 0.78]
     bool increasing = true
     int i = 0
     for i < 4 {
@@ -276,7 +276,7 @@ func test_ppo() test_result {
     test_result result = new_test_result("PPO test")
     println("")
     println("🎯 PPO English texttest:")
-    []float rewards = [0.65, 0.72, 0.78, 0.83, 0.87]
+    float[] rewards = [0.65, 0.72, 0.78, 0.83, 0.87]
     float initial_reward = rewards[0]
     float final_reward = rewards[4]
     float improvement = (final_reward - initial_reward) / initial_reward
@@ -284,7 +284,7 @@ func test_ppo() test_result {
     println("  English textreward: " + float_to_str(final_reward, 2))
     println("  English text: +" + float_to_str(improvement * 100.0, 1) + "%")
     test_result_assert_greater(*result, improvement, 0.15, "rewardEnglish text >15%")
-    []float kls = [0.012, 0.010, 0.008, 0.007, 0.006]
+    float[] kls = [0.012, 0.010, 0.008, 0.007, 0.006]
     float max_kl = kls[0]
     int i = 1
     for i < 5 {
@@ -344,8 +344,8 @@ func test_rlhf() test_result {
 func test_inference_benchmark() {
     println("")
     println("⚡ inferenceEnglish text (tokens/sec):")
-    []string configs = ["7B BS=32", "7B BS=128", "13B BS=32", "70B BS=32"]
-    []int throughputs = [800, 1000, 600, 120]
+    string[] configs = ["7B BS=32", "7B BS=128", "13B BS=32", "70B BS=32"]
+    int[] throughputs = [800, 1000, 600, 120]
     int i = 0
     for i < 4 {
         println("  " + configs[i] + ": " + int_to_str(throughputs[i]) + " t/s")
@@ -356,8 +356,8 @@ func test_inference_benchmark() {
 func test_training_benchmark() {
     println("")
     println("🚂 trainingEnglish text (tokens/sec):")
-    []string configs = ["7B 1x GPU", "7B 8x GPU", "70B TP-4 + DP-2", "175B TP-8"]
-    []int throughputs = [500, 3700, 2000, 800]
+    string[] configs = ["7B 1x GPU", "7B 8x GPU", "70B TP-4 + DP-2", "175B TP-8"]
+    int[] throughputs = [500, 3700, 2000, 800]
     int i = 0
     for i < 4 {
         println("  " + configs[i] + ": " + int_to_str(throughputs[i]) + " t/s")
@@ -368,8 +368,8 @@ func test_training_benchmark() {
 func test_latency_benchmark() {
     println("")
     println("⏱️  English text (ms):")
-    []string configs = ["7B BS=1", "7B BS=32", "70B BS=1", "70B BS=32"]
-    []int latencies = [25, 45, 80, 120]
+    string[] configs = ["7B BS=1", "7B BS=32", "70B BS=1", "70B BS=32"]
+    int[] latencies = [25, 45, 80, 120]
     int i = 0
     for i < 4 {
         println("  " + configs[i] + ": " + int_to_str(latencies[i]) + " ms")

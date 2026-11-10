@@ -38,7 +38,7 @@ struct inference_request {
 	repeat_penalty   float64  `json:"repeat_penalty"`
 	frequency_penalty float64  `json:"frequency_penalty"`
 	presence_penalty float64  `json:"presence_penalty"`
-	stop_sequences   []string `json:"stop_sequences"`
+	stop_sequences   string[] `json:"stop_sequences"`
 	return_logprobs  bool     `json:"return_logprobs"`
 }
 
@@ -50,7 +50,7 @@ struct inference_response {
 	throughput_ms float64   `json:"throughput_ms"`
 	model_used    string    `json:"model_used"`
 	finish_reason string    `json:"finish_reason"`
-	logprobs     []float64 `json:"logprobs,omitempty"`
+	logprobs     float64[] `json:"logprobs,omitempty"`
 	timestamp    string    `json:"timestamp"`
 }
 
@@ -211,7 +211,7 @@ func process_inference_request(inference_request* req) (*inference_response, err
 	return response, nil
 }
 
-func handle_inference_request(json_data []byte) ([]byte, error) {
+func handle_inference_request(json_data byte[]) (byte[], error) {
 	var req inference_request
 	err := json.Unmarshal(json_data, *req)
 	if err != nil {
@@ -229,7 +229,7 @@ func handle_inference_request(json_data []byte) ([]byte, error) {
 	return resp_data, nil
 }
 
-func handle_metrics_request() ([]byte) {
+func handle_metrics_request() (byte[]) {
 	g_metrics.UptimeSeconds = int64(time.Since(g_server_start_time).Seconds())
 	data, err := json.MarshalIndent(g_metrics, "", "  ")
 	if err != nil {
@@ -238,7 +238,7 @@ func handle_metrics_request() ([]byte) {
 	return data, nil
 }
 
-func handle_health_check() ([]byte) {
+func handle_health_check() (byte[]) {
 	health := map[string]interface{}{
 		"status": "healthy",
 	"model": filepath.Base(g_config.model_path),
@@ -282,7 +282,7 @@ func start_server() error {
 func run_interactive_mode() {
 	log_info("entering interactive mode (simulation)...")
 	log_info("type 'quit' to exit")
-	requests := []string{
+	requests := string[]{
 		`{"prompt":"what is artificial intelligence","max_tokens":100}`,
 		`{"prompt":"explain machine learning in one sentence","max_tokens":50}`,
 		`{"prompt":"how does neural networks work","max_tokens":150}`,
@@ -290,7 +290,7 @@ func run_interactive_mode() {
 	for i, reqStr := range requests {
 		fmt.Printf("\n[request %d]\n", i+1)
 		fmt.Printf("input: %s\n", reqStr)
-		resp, err := handle_inference_request([]byte(reqStr))
+		resp, err := handle_inference_request(byte[](reqStr))
 		if err != nil {
 			log_error("request failed: " + err.Error())
 		} else {
@@ -334,7 +334,7 @@ func print_config() {
 
 func run_benchmark() {
 	log_info("Running inference benchmark...")
-	test_requests := []inference_request{
+	test_requests := inference_request[]{
 		{prompt: "Short prompt", max_tokens: 50, temperature: 0.7},
 		{prompt: "Medium length prompt for testing inference server capabilities", max_tokens: 100, temperature: 0.8},
 		{prompt: "Very long prompt: " + strings.Repeat("word ", 50), max_tokens: 200, temperature: 0.9},

@@ -59,7 +59,7 @@ func (h embeddings_handler*) compute_embeddings(
 	return response, nil
 }
 
-func (h embeddings_handler*) compute_text_embedding(text string) []float32 {
+func (h embeddings_handler*) compute_text_embedding(text string) float32[] {
 	embedding_dim := 768
 	embedding := make(float32[], 0, embedding_dim)
 	for i := int32(0); i < int32(embedding_dim); i++ {
@@ -73,7 +73,7 @@ func (h embeddings_handler*) count_tokens(text string) int32 {
 }
 
 func (h embeddings_handler*) batch_compute_embeddings(
-	texts []string,
+	texts string[],
 ) float32[][]] {
 	embeddings := make(float32[][]], 0, len(texts))
 	for text := range texts {
@@ -84,7 +84,7 @@ func (h embeddings_handler*) batch_compute_embeddings(
 }
 
 func (h embeddings_handler*) compute_similarity(
-	embedding1 []float32,
+	embedding1 float32[],
 	embedding2 float32[],
 ) float32 {
 	if int32(len(embedding1)) != int32(len(embedding2)) {
@@ -108,7 +108,7 @@ func (h embeddings_handler*) compute_similarity(
 struct embedding_cache {
 	map[string]float32[]     text_to_embedding
 	float32[][]]           embeddings
-	[]string                 texts
+	string[]                 texts
 	int32                       max_cache_size
 	sync.Mutex                  mu
 }
@@ -117,7 +117,7 @@ func create_embedding_cache(max_size int32) embedding_cache {
 	return embedding_cache{
 		text_to_embedding: make(map[string]float32[]),
 		embeddings:        make(float32[][]], 0, max_size),
-		texts:             make([]string, 0, max_size),
+		texts:             make(string[], 0, max_size),
 		max_cache_size:    max_size,
 		mu:                sync.Mutex{},
 	}
@@ -149,7 +149,7 @@ func (c embedding_cache*) clear_cache() {
 	defer c.mu.Unlock()
 	c.text_to_embedding = make(map[string]float32[])
 	c.embeddings = make(float32[][]], 0, c.max_cache_size)
-	c.texts = make([]string, 0, c.max_cache_size)
+	c.texts = make(string[], 0, c.max_cache_size)
 }
 
 func (c embedding_cache*) get_cache_size() int32 {
@@ -225,7 +225,7 @@ func (bp batch_embeddings_processor*) process_batch_with_cache() int32 {
 	processed := int32(0)
 	for req := range reqs {
 		cached_embeddings := make(float32[][]], 0, len(req.input))
-		uncached_texts := make([]string, 0)
+		uncached_texts := make(string[], 0)
 		text_indices := make(int32[], 0)
 		for i := int32(0); i < int32(len(req.input)); i++ {
 			text := req.input[i]
@@ -248,7 +248,7 @@ func (bp batch_embeddings_processor*) process_batch_with_cache() int32 {
 	return processed
 }
 
-func (bp batch_embeddings_processor*) get_results() []embedding_response {
+func (bp batch_embeddings_processor*) get_results() embedding_response[] {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 	results := make(embedding_response[], 0, len(bp.results))

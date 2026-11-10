@@ -14,7 +14,7 @@ func NewKernelUtils() *KernelUtils {
     }
 }
 
-func (KernelUtils* u) ValidateTensorShape([]i32 shape) bool {
+func (KernelUtils* u) ValidateTensorShape(i32[] shape) bool {
     if len(shape) == 0 {
         return false
     }
@@ -28,7 +28,7 @@ func (KernelUtils* u) ValidateTensorShape([]i32 shape) bool {
     return true
 }
 
-func (KernelUtils* u) ComputeTensorSize([]i32 shape) i64 {
+func (KernelUtils* u) ComputeTensorSize(i32[] shape) i64 {
     if !u.ValidateTensorShape(shape) {
         return 0
     }
@@ -61,7 +61,7 @@ func (KernelUtils* u) GetDataTypeSize(types.DataType dtype) i32 {
 }
 
 func (KernelUtils* u) ComputeMemorySize(
-    shape: []i32,
+    shape: i32[],
     dtype: types.DataType
 ) i64 {
 
@@ -72,8 +72,8 @@ func (KernelUtils* u) ComputeMemorySize(
 }
 
 func (KernelUtils* u) GetLinearIndex(
-    shape: []i32,
-    indices: []i32
+    shape: i32[],
+    indices: i32[]
 ) i64 {
 
     if len(shape) != len(indices) {
@@ -95,11 +95,11 @@ func (KernelUtils* u) GetLinearIndex(
 }
 
 func (KernelUtils* u) GetMultiDimensionalIndex(
-    shape: []i32,
+    shape: i32[],
     i64 linear_index
-) []i32 {
+) i32[] {
 
-    indices := make([]i32, len(shape))
+    indices := make(i32[], len(shape))
 
     remaining := linear_index
     for i := len(shape) - 1; i >= 0; i -= 1 {
@@ -111,16 +111,16 @@ func (KernelUtils* u) GetMultiDimensionalIndex(
 }
 
 func (KernelUtils* u) BroadcastShapes(
-    shape1: []i32,
-    shape2: []i32
-) []i32 {
+    shape1: i32[],
+    shape2: i32[]
+) i32[] {
 
     max_len := len(shape1)
     if len(shape2) > max_len {
         max_len = len(shape2)
     }
 
-    result := make([]i32, max_len)
+    result := make(i32[], max_len)
 
     idx1 := len(shape1) - 1
     idx2 := len(shape2) - 1
@@ -147,7 +147,7 @@ func (KernelUtils* u) BroadcastShapes(
             result[i] = dim1
         } else {
 
-            return []i32{}
+            return i32[]{}
         }
     }
 
@@ -155,8 +155,8 @@ func (KernelUtils* u) BroadcastShapes(
 }
 
 func (KernelUtils* u) AreShapesCompatible(
-    shape1: []i32,
-    shape2: []i32
+    shape1: i32[],
+    shape2: i32[]
 ) bool {
 
     if len(shape1) != len(shape2) {
@@ -174,8 +174,8 @@ func (KernelUtils* u) AreShapesCompatible(
     return true
 }
 
-func (KernelUtils* u) TransposeShape([]i32 shape) []i32 {
-    result := make([]i32, len(shape))
+func (KernelUtils* u) TransposeShape(i32[] shape) i32[] {
+    result := make(i32[], len(shape))
 
     for i := 0; i < len(shape); i += 1 {
         result[i] = shape[len(shape) - 1 - i]
@@ -185,21 +185,21 @@ func (KernelUtils* u) TransposeShape([]i32 shape) []i32 {
 }
 
 func (KernelUtils* u) ChunkShape(
-    shape: []i32,
+    shape: i32[],
     chunk_size: i32,
     i32 dim
-) [][]i32 {
+) i32[][] {
 
     if dim < 0 || dim >= i32(len(shape)) {
-        return [][]i32{}
+        return i32[][]{}
     }
 
-    chunks := make([][]i32, 0)
+    chunks := make(i32[][], 0)
     dim_size := shape[dim]
     num_chunks := (dim_size + chunk_size - 1) / chunk_size
 
     for c := i32(0); c < num_chunks; c += 1 {
-        chunk_shape := make([]i32, len(shape))
+        chunk_shape := make(i32[], len(shape))
 
         for i := 0; i < len(shape); i += 1 {
             if i == int(dim) {
@@ -220,8 +220,8 @@ func (KernelUtils* u) ChunkShape(
     return chunks
 }
 
-func (KernelUtils* u) ComputeStrides([]i32 shape) []i64 {
-    strides := make([]i64, len(shape))
+func (KernelUtils* u) ComputeStrides(i32[] shape) i64[] {
+    strides := make(i64[], len(shape))
 
     stride := i64(1)
     for i := len(shape) - 1; i >= 0; i -= 1 {
@@ -234,7 +234,7 @@ func (KernelUtils* u) ComputeStrides([]i32 shape) []i64 {
 
 func (KernelUtils* u) FormatTensorInfo(
     name: string,
-    shape: []i32,
+    shape: i32[],
     dtype: types.DataType
 ) string {
 
@@ -277,7 +277,7 @@ func (KernelUtils* u) FormatTensorInfo(
     return result
 }
 
-func (KernelUtils* u) HasNanOrInf([]f32 data) bool {
+func (KernelUtils* u) HasNanOrInf(f32[] data) bool {
     for i := 0; i < len(data); i += 1 {
         x := data[i]
 
@@ -288,7 +288,7 @@ func (KernelUtils* u) HasNanOrInf([]f32 data) bool {
     return false
 }
 
-func (KernelUtils* u) ComputeStats([]f32 data) (f32, f32, f32, f32) {
+func (KernelUtils* u) ComputeStats(f32[] data) (f32, f32, f32, f32) {
     if len(data) == 0 {
         return 0.0, 0.0, 0.0, 0.0
     }

@@ -1,7 +1,7 @@
 import "types.s"
 import "worker_base.s"
 struct WorkerManager {
-    workers             []WorkerState
+    workers             WorkerState[]
     worker_count        i32
     max_workers         i32
     scheduling_policy   SchedulingPolicy
@@ -9,7 +9,7 @@ struct WorkerManager {
     request_counter     i64
     batch_counter       i64
     last_schedule_time  i64
-    pending_requests    []RequestMetadata
+    pending_requests    RequestMetadata[]
     pending_count       i32
 }
 

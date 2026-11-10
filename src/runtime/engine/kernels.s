@@ -36,7 +36,7 @@ struct kernel_config {
 struct kernel_registry_entry {
     string kernel_name
     kernel_type kernel_type
-    []compute_capability compute_caps
+    compute_capability[] compute_caps
     int32 priority
     interface{} kernel_fn
 }
@@ -137,7 +137,7 @@ func create_kernel_registry() kernel_registry* {
     }
 }
 
-func (kernel_registry* kr) register_kernel(string name, kernel_type kt, []compute_capability caps, interface{} fn) error {
+func (kernel_registry* kr) register_kernel(string name, kernel_type kt, compute_capability[] caps, interface{} fn) error {
     entry := *kernel_registry_entry{
         kernel_name: name,
         kernel_type: kt,
@@ -162,7 +162,7 @@ func (kernel_registry* kr) get_kernel(kernel_type kt, compute_capability cap) (i
     return nil, nil
 }
 
-func (kernel_registry* kr) select_best_kernel(kernel_type kt, []compute_capability available_caps) interface{} {
+func (kernel_registry* kr) select_best_kernel(kernel_type kt, compute_capability[] available_caps) interface{} {
     best_priority := int32(-1)
     best_kernel := nil
     for _, entry := range kr.kernels {
@@ -220,7 +220,7 @@ func (kernel_registry* kr) grouped_query_attention(attention_kernel_config* conf
     return nil, nil
 }
 
-func (kernel_registry* kr) paged_attention(attention_kernel_config* config, interface{} query, interface{} key_cache, interface{} value_cache, []int32 slot_mapping) (interface{}, error) {
+func (kernel_registry* kr) paged_attention(attention_kernel_config* config, interface{} query, interface{} key_cache, interface{} value_cache, int32[] slot_mapping) (interface{}, error) {
     return nil, nil
 }
 
@@ -232,11 +232,11 @@ func (kernel_registry* kr) apply_rope(rope_config* config, interface{} x, int32 
     return x, nil
 }
 
-func (kernel_registry* kr) rope_forward(rope_config* config, interface{} x, []int32 positions) (interface{}, error) {
+func (kernel_registry* kr) rope_forward(rope_config* config, interface{} x, int32[] positions) (interface{}, error) {
     return x, nil
 }
 
-func (kernel_registry* kr) rope_backward(rope_config* config, interface{} grad_output, []int32 positions) (interface{}, error) {
+func (kernel_registry* kr) rope_backward(rope_config* config, interface{} grad_output, int32[] positions) (interface{}, error) {
     return grad_output, nil
 }
 
@@ -320,7 +320,7 @@ func (kernel_registry* kr) reduce_min(reduce_kernel_config* config, interface{} 
     return x, nil
 }
 
-func (kernel_registry* kr) fuse_kernels([]kernel_type kernels_to_fuse) (interface{}, error) {
+func (kernel_registry* kr) fuse_kernels(kernel_type[] kernels_to_fuse) (interface{}, error) {
     return nil, nil
 }
 

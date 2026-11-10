@@ -146,8 +146,7 @@ struct google_search_engine implements search_engine_interface {
                 items=[], total_estimated=0, query_time_ms=current_time_millis() - start_time,
                 has_more=false, error=data["error"]["message"]
             }
-        items: list<search_result_item> = []
-        for i, item in enumerate(data.get("items", [])) {
+        items: list<search_result_item> = for[] i, item in enumerate(data.get("items", [])) {
             items.append(search_result_item{
                 url=item["link"],
                 title=item.get("title", ""),
@@ -184,8 +183,7 @@ struct google_search_engine implements search_engine_interface {
         }
         response = http_get("https:
         data = json_decode(response.body)
-        items: list<search_result_item> = []
-        if "abstract" in data and not data["abstract"].empty():
+        items: list<search_result_item> = if "abstract" in data and not data["abstract"].empty():
             items.append(search_result_item{
                 url=data.get("abstract_url", ""),
                 title=data.get("heading", ""),
@@ -242,8 +240,7 @@ struct bing_search_engine implements search_engine_interface {
             params=params
         )
         data = json_decode(response.body)
-        items: list<search_result_item> = []
-        for i, item in enumerate(data.get("webPages", {}).get("value", [])):
+        items: list<search_result_item> = for[] i, item in enumerate(data.get("webPages", {}).get("value", [])):
             items.append(search_result_item{
                 url=item["url"],
                 title=item.get("name", ""),
@@ -417,8 +414,7 @@ struct main_content_extractor {
         return meta
     }
     _find_main_content(soup: any) {
-        candidates: list<{element: any, score: float}> = []
-        for elem in soup.find_all(["div", "article", "main", "section"]):
+        candidates: list<{element: any, score: float}> = for[] elem in soup.find_all(["div", "article", "main", "section"]):
             score = 0.0
             text_len = len(elem.get_text())
             if text_len < 150:
@@ -456,9 +452,7 @@ struct main_content_extractor {
         return None
     }
     _extract_structured(element: any) {
-        sections: list<page_section> = []
-        content_parts: list<string> = []
-        def process_node(node: any, depth: int = 0) {
+        sections: list<page_section> = content_parts[]: list<string> = def[] process_node(node: any, depth: int = 0) {
             if node.name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
                 level = int(node.name[1])
                 text = node.get_text().strip()
@@ -470,8 +464,7 @@ struct main_content_extractor {
                     sections.append(page_section{heading=null, level=0, content=text})
                     content_parts.append(text + "\n\n")
             elif node.name in ["ul", "ol"]:
-                items: list<string> = []
-                for li in node.find_all("li", recursive=False):
+                items: list<string> = for[] li in node.find_all("li", recursive=False):
                     item_text = clean_whitespace(li.get_text())
                     if !item_text.empty():
                         items.append(item_text)
@@ -541,10 +534,8 @@ struct web_search_system {
         opts = options  new search_options()
         start_total = current_time_millis()
         print(f"🔍 Searching: {query}")
-        all_items: list<search_result_item> = []
-        engine_times: map<string, float> = {}
-        used_engines: list<string> = []
-        tasks: list<tuple<string, ()
+        all_items: list<search_result_item> = engine_times[]: map<string, float> = {}
+        used_engines: list<string> = tasks[]: list<tuple<string, ()
         for eng_name, engine in this.engines {
             tasks.append((eng_name, () => engine.search(query, this.config)))
         }
@@ -569,8 +560,7 @@ struct web_search_system {
             all_items = this.result_aggregator.score_and_rank(all_items, query)
         if len(all_items) > this.config.total_max_results:
             all_items = all_items[:this.config.total_max_results]
-        crawl_times: list<float> = []
-        crawl_success = 0
+        crawl_times: list<float> = crawl_success[] = 0
         crawl_fail = 0
         if this.config.enable_crawling and opts.crawl_results:
             urls_to_crawl = [item.url for item in all_items[:min(this.config.max_pages_to_crawl, len(all_items))]]
@@ -630,8 +620,7 @@ struct web_search_system {
         }
     }
     _build_context_for_llm(string query, top_results: list<search_result_item>) {
-        parts: list<string> = []
-        parts.append(f"Query: {query}\n")
+        parts: list<string> = parts.append[](f"Query: {query}\n")
         parts.append("=" * 60 + "\n")
         for i, result in enumerate(top_results):
             parts.append(f"[{i+1}] {result.title}")
@@ -665,8 +654,7 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         findings_match = regex.search(r'## Key Findings\n(.*)(=\Z)', response.text, regex.DOTALL)
         indices_match = regex.search(r'indices:\s*\[(.*)\]', response.text)
         summary = summary_match.group(1).trim() if summary_match else ""
-        key_findings: list<string> = []
-        if findings_match != None:
+        key_findings: list<string> = if findings_match != None:
             findings_text = findings_match.group(1)
             key_findings = [line.strip().lstrip("- ") for line in findings_text.split("\n")
                            if line.trim().starts_with("-")]
@@ -689,8 +677,7 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         list<int> reranked_indices
     }
     export_results(response: search_response, string format = "markdown", output_path: string) {
-        output: list<string> = []
-        output.append(f"# Search Results: {response.query}\n")
+        output: list<string> = output.append[](f"# Search Results: {response.query}\n")
         output.append(f"**Total Results**: {response.total_results_found}\n")
         output.append(f"**Time**: {response.search_time_ms:.0f}ms\n")
         output.append(f"**Sources**: {', '.join(response.aggregated_from_engines)}\n")
@@ -744,8 +731,7 @@ struct result_aggregator {
     }
     deduplicate(items: list<search_result_item>) {
         seen_urls: set<string> = set{}
-        unique_items: list<search_result_item> = []
-        for item in items:
+        unique_items: list<search_result_item> = for[] item in items:
             normalized = self._normalize_url(item.url)
             if normalized not in seen_urls:
                 seen_urls.add(normalized)
@@ -753,8 +739,7 @@ struct result_aggregator {
         return unique_items
     }
     score_and_rank(items: list<search_result_item>, string query) {
-        scored_items: list<tuple<search_result_item, float>> = []
-        query_terms = set(query.to_lower().split_whitespace())
+        scored_items: list<tuple<search_result_item, float>> = query_terms[] = set(query.to_lower().split_whitespace())
         for item in items {
             score = 0.0
             title_lower = item.title.to_lower()

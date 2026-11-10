@@ -35,12 +35,12 @@ struct ProxyResponse {
     latency_ms: int
 }
 
-var tunnels: SSHTunnel[] = []SSHTunnel{}
-var nodes: SSHNode[] = []SSHNode{}
+var tunnels: SSHTunnel[] = SSHTunnel[]{}
+var nodes: SSHNode[] = SSHNode[]{}
 var tunnel_pids: map[string, int] = {}
 
 func init_ssh_nodes() {
-    nodes = []SSHNode{
+    nodes = SSHNode[]{
         SSHNode{
             name: "Controller",
             ip: "192.168.10.39",

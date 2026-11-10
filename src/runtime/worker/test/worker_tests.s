@@ -12,8 +12,7 @@ struct TestResult {
     execution_time  i32
 }
 
-var test_results []TestResult
-i32 total_tests = 0
+var test_results i32[] TestResult total_tests = 0
 i32 passed_tests = 0
 func LogTest(test_name string, condition i32, error_msg string) {
     total_tests++
@@ -106,7 +105,7 @@ func TestGPUWorkerDeviceManagement() {
     config := WorkerConfig{
         worker_id: 3,
         worker_type: WORKER_TYPE_GPU,
-        gpus: []i32{0, 1},
+        gpus: i32[]{0, 1},
         gpu_memory_mb: 24576,
         max_batch_size: 256,
     }
@@ -179,7 +178,7 @@ func TestWorkerCommunication() {
         sender_id: 0,
         payload_size: 512,
     }
-    targets := []i32{1, 2, 3}
+    targets := i32[]{1, 2, 3}
     success := handler.BroadcastMessage(broadcast_msg, targets)
     LogTest("Broadcast sent to workers", success > 0, "Broadcast failed")
     handler.Shutdown()
@@ -192,7 +191,7 @@ func TestBatchProcessing() {
         batch_timeout_ms: 5000,
     }
     processor := NewBatchProcessor(256, policy)
-    requests := make([]RequestMetadata, 0)
+    requests := make(RequestMetadata[], 0)
     for i := 0; i < 32; i++ {
         req := RequestMetadata{
             request_id: "proc_" + string(i),
@@ -235,7 +234,7 @@ func TestWorkerHealthMonitoring() {
 func TestSynchronizationBarrier() {
     println("\n--- Test: Synchronization Barrier ---")
     sync_mgr := NewSynchronizationManager()
-    workers := []i32{0, 1, 2, 3}
+    workers := i32[]{0, 1, 2, 3}
     result := sync_mgr.InitiateSync(0, workers)
     LogTest("Sync initiated", result.success, "Initiation failed")
     result = sync_mgr.WaitForSync(0, 5000)
@@ -250,11 +249,11 @@ func TestAllReduceOperation() {
         buffer_size: 2048,
     }
     handler := NewCommunicationHandler(config, 4)
-    data := make([]f32, 1024)
+    data := make(f32[], 1024)
     for i := 0; i < 1024; i++ {
         data[i] = f32(i)
     }
-    workers := []i32{0, 1, 2, 3}
+    workers := i32[]{0, 1, 2, 3}
     result := handler.AllReduce(data, workers)
     LogTest("AllReduce succeeds", result.success, "AllReduce failed")
     handler.Shutdown()
@@ -266,7 +265,7 @@ func TestDynamicBatching() {
         policy_type: 1,
         batch_timeout_ms: 5000,
     })
-    requests := make([]RequestMetadata, 0)
+    requests := make(RequestMetadata[], 0)
     for i := 0; i < 64; i++ {
         size := i32(64 + (i % 4) * 256)
         req := RequestMetadata{
@@ -280,7 +279,7 @@ func TestDynamicBatching() {
     batch := processor.CreateBatch(requests[:32])
     LogTest("Dynamic batch created", batch.request_count > 0, "Batch not created")
     batch2 := processor.CreateBatch(requests[32:])
-    merged := processor.MergeBatches([]Batch{batch, batch2})
+    merged := processor.MergeBatches(Batch[]{batch, batch2})
     LogTest("Batches merged", merged.request_count > batch.request_count, "Merge failed")
 }
 
@@ -290,7 +289,7 @@ func TestBatchSplitting() {
         policy_type: 1,
         batch_timeout_ms: 5000,
     })
-    requests := make([]RequestMetadata, 0)
+    requests := make(RequestMetadata[], 0)
     for i := 0; i < 256; i++ {
         req := RequestMetadata{
             request_id: "split_" + string(i),

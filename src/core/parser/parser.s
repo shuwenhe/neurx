@@ -138,8 +138,8 @@ func parse_auto_format(string text) ParseResult {
     return parse_with_format(text, detection.detected_format)
 }
 
-func (ParserInstance* p) parse_stream([]string chunks) []ParseResult {
-    results := []ParseResult{}
+func (ParserInstance* p) parse_stream(string[] chunks) ParseResult[] {
+    results := ParseResult[]{}
     builder := create_stream_builder()
     for chunk in chunks {
         builder.add_chunk(chunk)
@@ -243,8 +243,8 @@ func (ParserInstance* p) parse_and_get(string text, string key) string {
     return ""
 }
 
-func (ParserInstance* p) parse_batch([]string texts) []ParseResult {
-    results := []ParseResult{}
+func (ParserInstance* p) parse_batch(string[] texts) ParseResult[] {
+    results := ParseResult[]{}
     for text in texts {
         results = append(results, p.parse(text))
     }

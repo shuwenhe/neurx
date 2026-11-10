@@ -137,12 +137,12 @@ struct model_metadata {
 	int64 parameters_count
 	int32 vocabulary_size
 	int32 max_seq_length
-	[]model_quantization_type supported_quantizations
-	[]model_precision_type supported_precisions
-	[]model_device_type supported_devices
-	[]model_capability capabilities
-	[]string dependencies
-	[]string tags
+	model_quantization_type[] supported_quantizations
+	model_precision_type[] supported_precisions
+	model_device_type[] supported_devices
+	model_capability[] capabilities
+	string[] dependencies
+	string[] tags
 	map[string]interface{} capabilities_map
 }
 
@@ -182,25 +182,25 @@ struct model_interface {
 struct model_input {
 	string input_type
 	string prompt
-	[]interface{} messages
-	[]byte image_data
-	[]byte audio_data
-	[]byte video_data
+	interface{}[] messages
+	byte[] image_data
+	byte[] audio_data
+	byte[] video_data
 	map[string]interface{} additional_params
 }
 
 struct model_output {
 	string output_type
 	string text
-	[]int32 tokens
-	[]float32 logits
-	[]float32 embedding
+	int32[] tokens
+	float32[] logits
+	float32[] embedding
 	map[string]interface{} metadata
 }
 
 struct model_batch {
 	string batch_id
-	[]*model_input inputs
+	model_input*[] inputs
 	int32 batch_size
 	time.Time created_at
 }
@@ -376,7 +376,7 @@ func (model_interface* m) set_max_batch_size(size int32) {
 	m.max_batch_size = size
 }
 
-func (model_interface* m) get_capabilities() []model_capability {
+func (model_interface* m) get_capabilities() model_capability[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.metadata.capabilities

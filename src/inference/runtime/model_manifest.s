@@ -3,7 +3,7 @@ import (
     "neurx.runtime.io."
     "std.encoding.bytes_to_string"
 )
-extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
+extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) int[]
 struct hf_model_config {
     string architecture
     string model_type
@@ -28,7 +28,7 @@ struct hf_model_config {
 struct safetensors_tensor_manifest {
     string name
     string dtype
-    []int shape
+    int[] shape
     int data_start
     int data_end
     int byte_count
@@ -39,7 +39,7 @@ struct safetensors_archive_manifest {
     int file_size
     int header_size
     int data_start
-    []safetensors_tensor_manifest tensors
+    safetensors_tensor_manifest[] tensors
     bool valid
     string error_message
 }
@@ -47,7 +47,7 @@ struct safetensors_archive_manifest {
 struct hf_model_manifest {
     string model_directory
     hf_model_config config
-    []safetensors_archive_manifest archives
+    safetensors_archive_manifest[] archives
     int tensor_count
     int weight_bytes
     bool valid
@@ -83,8 +83,7 @@ func model_empty_archive(string path) safetensors_archive_manifest {
     archive.file_size = 0
     archive.header_size = 0
     archive.data_start = 0
-    archive.tensors = []
-    archive.valid = false
+    archive.tensors = archive.valid[] = false
     archive.error_message = ""
     archive
 }
@@ -93,8 +92,7 @@ func model_empty_manifest(string directory) hf_model_manifest {
     hf_model_manifest manifest
     manifest.model_directory = directory
     manifest.config = model_empty_config()
-    manifest.archives = []
-    manifest.tensor_count = 0
+    manifest.archives = manifest.tensor_count[] = 0
     manifest.weight_bytes = 0
     manifest.valid = false
     manifest.error_message = ""
@@ -326,7 +324,7 @@ func model_file_size(string path) int {
     model_parse_positive_int(output)
 }
 
-func model_u64_le([]int bytes, int offset) int {
+func model_u64_le(int[] bytes, int offset) int {
     if offset < 0 || offset + 8 > len(bytes) { return -1 }
     int value = 0
     int multiplier = 1
@@ -369,8 +367,8 @@ func model_matching_end(string text, int start, int open_char, int close_char) i
     -1
 }
 
-func model_json_int_array(string object_text, string key) []int {
-    []int values = make([]int, 8)
+func model_json_int_array(string object_text, string key) int[] {
+    int[] values = make(int[], 8)
     int start = model_json_value_start(object_text, key)
     if start < 0 || start >= len(object_text) || object_text[start] != 91 { return [] }
     int end = model_matching_end(object_text, start, 91, 93)
@@ -394,7 +392,7 @@ func model_json_int_array(string object_text, string key) []int {
 }
 
 func model_parse_tensor(string name, string object_text, int data_start) safetensors_tensor_manifest {
-    []int offsets = model_json_int_array(object_text, "data_offsets")
+    int[] offsets = model_json_int_array(object_text, "data_offsets")
     safetensors_tensor_manifest tensor
     tensor.name = name
     tensor.dtype = model_json_string(object_text, "dtype")

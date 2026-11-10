@@ -43,7 +43,7 @@ struct manifest {
     total_documents      int64            `json:"total_documents"`
     total_size_bytes      int64            `json:"total_size_bytes"`
     average_docs_per_shard int64            `json:"average_docs_per_shard"`
-    shards              []shard_metadata  `json:"shards"`
+    shards              shard_metadata[]  `json:"shards"`
 }
 
 func main() {
@@ -303,7 +303,7 @@ func generate_shards(config shard_config) error {
     fmt.Printf("  • Lines per shard: %d\n", lines_per_shard)
     fmt.Println("")
     fmt.Println("✂️ Generating shards...")
-    var shards []shard_metadata
+    var shards shard_metadata[]
     current_shard := 0
     current_data := ""
     current_count := int64(0)
@@ -350,7 +350,7 @@ func generate_shards(config shard_config) error {
 }
 
 func write_shard_file(string path, string content) (int64, error) {
-    err := ioutil.WriteFile(path, []byte(content), 0644)
+    err := ioutil.WriteFile(path, byte[](content), 0644)
     if err != nil {
         return 0, err
     }
@@ -361,8 +361,8 @@ func write_shard_file(string path, string content) (int64, error) {
     return info.Size(), nil
 }
 
-func find_source_files(string dir) ([]string, error) {
-    var files []string
+func find_source_files(string dir) (string[], error) {
+    var files string[]
     entries, err := ioutil.ReadDir(dir)
     if err != nil {
         return files, err
@@ -413,7 +413,7 @@ func normalize_text(string text) string {
 
 func hash_key(string text) string {
     h := sha256.New()
-    h.Write([]byte(text))
+    h.Write(byte[](text))
     return hex.EncodeToString(h.Sum(nil))
 }
 
@@ -438,7 +438,7 @@ func format_shard_filename(string dir, int index) string {
     return filepath.Join(dir, format_shard_id(index)+".jsonl")
 }
 
-func write_shard_manifest(string path, shards []shard_metadata) error {
+func write_shard_manifest(string path, shards shard_metadata[]) error {
     total_docs := int64()
     total_size := int64()
     for _, shard := range shards {

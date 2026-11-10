@@ -16,20 +16,20 @@ struct gptq_config {
 }
 
 struct awq_quantized_weight {
-    []int qweight
-    []int qzeros
-    []float scales
+    int[] qweight
+    int[] qzeros
+    float[] scales
     int bits
     int group_size
 }
 
 struct gptq_quantized_weight {
-    []int qweight
-    []int qzeros
-    []float scales
+    int[] qweight
+    int[] qzeros
+    float[] scales
     int bits
     int group_size
-    []float h
+    float[] h
 }
 
 func new_awq_config(int bits, int group_size) awq_config {
@@ -53,7 +53,7 @@ func new_gptq_config(int bits, int group_size) gptq_config {
 }
 
 func quantize_with_awq(
-    []float weights,
+    float[] weights,
     awq_config config,
 ) awq_quantized_weight {
     group_size := config.group_size
@@ -62,9 +62,9 @@ func quantize_with_awq(
     if weights.len % group_size != 0 {
         num_groups = num_groups + 1
     }
-    qweight := []int{}
-    qzeros := []int{}
-    scales := []float{}
+    qweight := int[]{}
+    qzeros := int[]{}
+    scales := float[]{}
     g := 0
     for g < num_groups {
         start := g * group_size
@@ -119,7 +119,7 @@ func quantize_with_awq(
 }
 
 func quantize_with_gptq(
-    []float weights,
+    float[] weights,
     gptq_config config,
 ) gptq_quantized_weight {
     group_size := config.group_size
@@ -128,10 +128,10 @@ func quantize_with_gptq(
     if weights.len % group_size != 0 {
         num_groups = num_groups + 1
     }
-    qweight := []int{}
-    qzeros := []int{}
-    scales := []float{}
-    h := []float{}
+    qweight := int[]{}
+    qzeros := int[]{}
+    scales := float[]{}
+    h := float[]{}
     g := 0
     for g < num_groups {
         start := g * group_size
@@ -182,8 +182,8 @@ func quantize_with_gptq(
     }
 }
 
-func dequantize_awq(awq_quantized_weight quant) []float {
-    deq := []float{}
+func dequantize_awq(awq_quantized_weight quant) float[] {
+    deq := float[]{}
     group_idx := 0
     i := 0
     for i < quant.qweight.len {
@@ -199,8 +199,8 @@ func dequantize_awq(awq_quantized_weight quant) []float {
     deq
 }
 
-func dequantize_gptq(gptq_quantized_weight quant) []float {
-    deq := []float{}
+func dequantize_gptq(gptq_quantized_weight quant) float[] {
+    deq := float[]{}
     group_idx := 0
     i := 0
     for i < quant.qweight.len {
@@ -228,8 +228,8 @@ func get_gptq_compression_ratio(gptq_quantized_weight quant) float {
     original_bits / quantized_bits
 }
 
-func append_float([]float slice, float elem) []float {
-    new_slice := []float{}
+func append_float(float[] slice, float elem) float[] {
+    new_slice := float[]{}
     i := 0
     for i < slice.len {
         new_slice = append_float(new_slice, slice[i])
@@ -239,8 +239,8 @@ func append_float([]float slice, float elem) []float {
     new_slice
 }
 
-func append_int([]int slice, int elem) []int {
-    new_slice := []int{}
+func append_int(int[] slice, int elem) int[] {
+    new_slice := int[]{}
     i := 0
     for i < slice.len {
         new_slice = append_int(new_slice, slice[i])

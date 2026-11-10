@@ -28,7 +28,7 @@ func tb_write_scalar(
     int step
 ) {
     if !writer.initialized { return }
-    []byte summary_data = encode_scalar_summary(tag, value, step)
+    byte[] summary_data = encode_scalar_summary(tag, value, step)
     write_event(writer.output_file, step, summary_data)
     writer.events_written = writer.events_written + 1
 }

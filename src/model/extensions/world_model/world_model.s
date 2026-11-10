@@ -1,12 +1,12 @@
 struct world_state {
     string                 snapshot_id
-    []string               entity_ids
-    []string               entity_types
-    []string               entity_values
-    []string               relation_ids
-    []string               relation_types
-    []string               relation_src
-    []string               relation_dst
+    string[]               entity_ids
+    string[]               entity_types
+    string[]               entity_values
+    string[]               relation_ids
+    string[]               relation_types
+    string[]               relation_src
+    string[]               relation_dst
     int                    step
     string                 last_action
     string                 last_observation
@@ -14,7 +14,7 @@ struct world_state {
 
 struct world_model_state {
     world_state            current
-    []world_state          history
+    world_state[]          history
     int                    max_history
     bool                   initialized
 }
@@ -47,7 +47,7 @@ func world_model_update(wm world_model_state, string action, string observation)
     next.last_action      = action
     next.last_observation = observation
     next.snapshot_id      = "step_" + string(next.step)
-    []world_state hist = wm.history
+    world_state[] hist = wm.history
     hist = append(hist, wm.current)
     if len(hist) > wm.max_history {
         hist = hist[len(hist) - wm.max_history:]

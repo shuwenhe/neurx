@@ -31,6 +31,6 @@ interface i_memory_pool {
 interface i_memory_debug {
     enable_tracking() . void
     disable_tracking() . void
-    get_memory_leaks() . []memory_ptr
+    get_memory_leaks() . memory_ptr[]
     print_memory_usage() . string
 }

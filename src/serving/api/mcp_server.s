@@ -25,8 +25,8 @@ struct resource {
 struct prompt_definition {
     string name
     string description
-    []string arguments
-    []string instructions
+    string[] arguments
+    string[] instructions
 }
 
 struct mcp_request {
@@ -62,10 +62,10 @@ struct tool_call_result {
 }
 
 struct message_with_context {
-    []chat_message* messages
-    []tool_definition* available_tools
-    []resource* available_resources
-    []prompt_definition* available_prompts
+    chat_message*[] messages
+    tool_definition*[] available_tools
+    resource*[] available_resources
+    prompt_definition*[] available_prompts
 }
 
 func create_mcp_server(llm_engine* engine, int32 port) mcp_server* {
@@ -106,24 +106,24 @@ func (mcp_server* srv) register_prompt(prompt_definition* prompt) error {
     return nil
 }
 
-func (mcp_server* srv) list_tools() ([]tool_definition*, error) {
-    tools := make([]tool_definition*, 0)
+func (mcp_server* srv) list_tools() (tool_definition*[], error) {
+    tools := make(tool_definition*[], 0)
     for _, tool := range srv.tools {
         tools = append(tools, tool)
     }
     return tools, nil
 }
 
-func (mcp_server* srv) list_resources() ([]resource*, error) {
-    resources := make([]resource*, 0)
+func (mcp_server* srv) list_resources() (resource*[], error) {
+    resources := make(resource*[], 0)
     for _, res := range srv.resources {
         resources = append(resources, res)
     }
     return resources, nil
 }
 
-func (mcp_server* srv) list_prompts() ([]prompt_definition*, error) {
-    prompts := make([]prompt_definition*, 0)
+func (mcp_server* srv) list_prompts() (prompt_definition*[], error) {
+    prompts := make(prompt_definition*[], 0)
     for _, prompt := range srv.prompts {
         prompts = append(prompts, prompt)
     }

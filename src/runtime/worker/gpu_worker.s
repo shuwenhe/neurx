@@ -2,13 +2,13 @@ import "types.s"
 import "worker_base.s"
 struct GPUWorker {
     base                BaseWorker
-    gpu_devices         []i32
+    gpu_devices         i32[]
     device_count        i32
     current_device      i32
-    device_memory_mb    []i32
-    device_utilization  []f64
-    kernel_exec_time    []i32
-    total_kernel_calls  []i64
+    device_memory_mb    i32[]
+    device_utilization  f64[]
+    kernel_exec_time    i32[]
+    total_kernel_calls  i64[]
 }
 
 func NewGPUWorker(config WorkerConfig) *GPUWorker {
@@ -92,21 +92,21 @@ func (GPUWorker* w) ProcessBatch(batch Batch) ExecutionResult {
     }
 }
 
-func (GPUWorker* w) ExecutePrefill(prompts [][]i32, prompt_lengths []i32) [][]i32 {
+func (GPUWorker* w) ExecutePrefill(prompts i32[][], prompt_lengths i32[]) i32[][] {
     result_count := len(prompts)
-    results := make([][]i32, result_count)
+    results := make(i32[][], result_count)
     for i := 0; i < result_count; i++ {
         results[i] = prompts[i]
     }
     return results
 }
 
-func (GPUWorker* w) ExecuteDecode(kv_cache [][]f32, prompt_lengths []i32,
-                                  max_tokens i32) [][]i32 {
+func (GPUWorker* w) ExecuteDecode(kv_cache f32[][], prompt_lengths i32[],
+                                  max_tokens i32) i32[][] {
     batch_size := len(kv_cache)
-    results := make([][]i32, batch_size)
+    results := make(i32[][], batch_size)
     for i := 0; i < batch_size; i++ {
-        tokens := make([]i32, max_tokens)
+        tokens := make(i32[], max_tokens)
         results[i] = tokens
     }
     return results
@@ -159,8 +159,8 @@ func (GPUWorker* w) SyncDevices() WorkerResult {
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (GPUWorker* w) GetDeviceStats() []f64 {
-    stats := make([]f64, w.device_count)
+func (GPUWorker* w) GetDeviceStats() f64[] {
+    stats := make(f64[], w.device_count)
     for i := 0; i < w.device_count; i++ {
         stats[i] = w.device_utilization[i]
     }
@@ -177,8 +177,8 @@ func calculate_memory_usage(tokens i32, max_len i32) i32 {
     return tokens * max_len * 2 / 1024 / 1024
 }
 
-func make_output_tokens(batch_size i32, max_len i32) []i32 {
-    tokens := make([]i32, batch_size * max_len)
+func make_output_tokens(batch_size i32, max_len i32) i32[] {
+    tokens := make(i32[], batch_size * max_len)
     return tokens
 }
 

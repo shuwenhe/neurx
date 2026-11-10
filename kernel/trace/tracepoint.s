@@ -28,7 +28,7 @@ struct tracepoint {
 }
 
 struct trace_session {
-    tracepo[]int tracepoints
+    tracepoint[] tracepoints
     trace_buffer buffer
     int session_id
     int recording

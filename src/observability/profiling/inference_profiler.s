@@ -7,8 +7,8 @@ struct layer_profile {
     layer_type       string
     time_ms          float32
     memory_bytes     int64
-    input_shape      []int32
-    output_shape     []int32
+    input_shape      int32[]
+    output_shape     int32[]
     num_parameters   int64
     flops           int64
 }
@@ -41,7 +41,7 @@ struct engine_profile {
 
 struct profiler {
     is_enabled       bool
-    profiles        []*engine_profile
+    profiles        engine_profile*[]
     request_profiles map[string]*request_profile
     layer_profiles   map[string]*layer_profile
     start_time       int64
@@ -51,7 +51,7 @@ struct profiler {
 func new_profiler() *profiler {
     return *profiler{
         is_enabled:       false,
-        profiles:        make([]*engine_profile, 0),
+        profiles:        make(engine_profile*[], 0),
         request_profiles: make(map[string]*request_profile),
         layer_profiles:   make(map[string]*layer_profile),
     }
@@ -113,7 +113,7 @@ func (profiler* p) record_request_profile(request_id string, prefill_time_ms, de
     p.request_profiles[request_id] = profile
 }
 
-func (profiler* p) record_layer_profile(layer_id, layer_name, layer_type string, time_ms float32, memory_bytes int64, input_shape, output_shape []int32, num_params, flops int64) {
+func (profiler* p) record_layer_profile(layer_id, layer_name, layer_type string, time_ms float32, memory_bytes int64, input_shape, output_shape int32[], num_params, flops int64) {
     if !p.is_enabled {
         return
     }
@@ -136,7 +136,7 @@ func (profiler* p) get_engine_stats() map[string]interface{} {
     if len(p.profiles) == 0 {
         return stats
     }
-    latencies := make([]float32, 0)
+    latencies := make(float32[], 0)
     total_latency := float32(0)
     max_latency := float32(0)
     min_latency := float32(1e9)
@@ -190,7 +190,7 @@ func (profiler* p) get_layer_stats() map[string]interface{} {
     total_time_ms := float32(0)
     total_memory := int64(0)
     total_flops := int64(0)
-    layer_stats := make([]map[string]interface{}, 0)
+    layer_stats := make((map[string]interface{})[], 0)
     for _, profile := range p.layer_profiles {
         total_time_ms = total_time_ms + profile.time_ms
         total_memory = total_memory + profile.memory_bytes
@@ -251,7 +251,7 @@ func (profiler* p) print_summary() {
 }
 
 func (profiler* p) reset() {
-    p.profiles = make([]*engine_profile, 0)
+    p.profiles = make(engine_profile*[], 0)
     p.request_profiles = make(map[string]*request_profile)
     p.layer_profiles = make(map[string]*layer_profile)
     core.Println("Profiler reset")

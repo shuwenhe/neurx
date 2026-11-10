@@ -5,7 +5,7 @@ import (
 struct lora_request {
     string request_id
     string adapter_id
-    []float input_hidden
+    float[] input_hidden
     int batch_size
     int seq_len
     int hidden_dim
@@ -15,7 +15,7 @@ struct lora_request {
 
 struct lora_inference_result {
     string request_id
-    []float output
+    float[] output
     string adapter_id
     long inference_time_ms
     bool success
@@ -24,12 +24,12 @@ struct lora_inference_result {
 
 struct adapter_queue {
     string adapter_id
-    []lora_request requests
+    lora_request[] requests
     int priority
 }
 
 struct lora_request_router {
-    []adapter_queue queues
+    adapter_queue[] queues
     lora_adapter_manager adapter_mgr
     int max_queue_depth
     int total_requests_processed
@@ -45,7 +45,7 @@ func new_lora_request_router(
         max_queue_depth = 1024
     }
     lora_request_router{
-        queues: []adapter_queue{},
+        queues: adapter_queue[]{},
         adapter_mgr: mgr,
         max_queue_depth: max_queue_depth,
         total_requests_processed: 0,
@@ -70,7 +70,7 @@ func (lora_request_router* router) submit_request(req lora_request) bool {
     if queue_idx < 0 {
         new_queue := adapter_queue{
             adapter_id: req.adapter_id,
-            requests: []lora_request{},
+            requests: lora_request[]{},
             priority: 0,
         }
         router.queues = append_queue(router.queues, new_queue)
@@ -86,8 +86,8 @@ func (lora_request_router* router) submit_request(req lora_request) bool {
     return true
 }
 
-func (lora_request_router* router) process_request_batch() []lora_inference_result {
-    results := []lora_inference_result{}
+func (lora_request_router* router) process_request_batch() lora_inference_result[] {
+    results := lora_inference_result[]{}
     sort_queues_by_priority(router.queues)
     int q = 0
     for q < len(router.queues) {
@@ -104,7 +104,7 @@ func (lora_request_router* router) process_request_batch() []lora_inference_resu
             }
             req_idx = req_idx + 1
         }
-        router.queues[q].requests = []lora_request{}
+        router.queues[q].requests = lora_request[]{}
         q = q + 1
     }
     return results
@@ -114,7 +114,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if !router.adapter_mgr.switch_adapter(req.adapter_id) {
         return lora_inference_result{
             request_id: req.request_id,
-            output: []float{},
+            output: float[]{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,
@@ -125,7 +125,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if lora.rank <= 0 {
         return lora_inference_result{
             request_id: req.request_id,
-            output: []float{},
+            output: float[]{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,
@@ -142,7 +142,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if len(output) != len(req.input_hidden) {
         return lora_inference_result{
             request_id: req.request_id,
-            output: []float{},
+            output: float[]{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,
@@ -171,7 +171,7 @@ func (lora_request_router* router) adjust_queue_priorities() {
     }
 }
 
-func sort_queues_by_priority([]adapter_queue queues) {
+func sort_queues_by_priority(adapter_queue[] queues) {
     int n = len(queues)
     int i = 0
     for i < n {
@@ -206,9 +206,9 @@ func create_adaptive_batch_config() adaptive_batch_config {
 
 func (lora_request_router* router) create_adaptive_batches(
     config adaptive_batch_config
-) [][]lora_request {
-    batches := [][]lora_request{}
-    adapter_to_requests := map[string][]lora_request{}
+) lora_request[][] {
+    batches := lora_request[][]{}
+    adapter_to_requests := map[string]lora_request[]{}
     int q = 0
     for q < len(router.queues) {
         adapter_id := router.queues[q].adapter_id
@@ -217,7 +217,7 @@ func (lora_request_router* router) create_adaptive_batches(
     }
     int batch_idx = 0
     for batch_idx < config.max_adapters_per_batch {
-        batch := []lora_request{}
+        batch := lora_request[]{}
         for adapter_id in adapter_to_requests {
             requests := adapter_to_requests[adapter_id]
             int req_count = 0
@@ -245,7 +245,7 @@ struct load_balance_strategy {
 }
 
 func (lora_request_router* router) get_best_adapter_for_loading(
-    []string candidate_adapters
+    string[] candidate_adapters
 ) string {
     if len(candidate_adapters) == 0 {
         return ""
@@ -276,7 +276,7 @@ func (lora_request_router* router) find_queue_for_adapter(adapter_id string) ada
     }
     return adapter_queue{
         adapter_id: adapter_id,
-        requests: []lora_request{},
+        requests: lora_request[]{},
         priority: 0,
     }
 }
@@ -305,8 +305,8 @@ func (lora_request_router* router) clear_cache() {
     router.results_cache = map[string]lora_inference_result{}
 }
 
-func append_queue([]adapter_queue arr, adapter_queue val) []adapter_queue {
-    []adapter_queue new_arr = make([]adapter_queue, len(arr) + 1)
+func append_queue(adapter_queue[] arr, adapter_queue val) adapter_queue[] {
+    adapter_queue[] new_arr = make(adapter_queue[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]
@@ -316,8 +316,8 @@ func append_queue([]adapter_queue arr, adapter_queue val) []adapter_queue {
     return new_arr
 }
 
-func append_request([]lora_request arr, lora_request val) []lora_request {
-    []lora_request new_arr = make([]lora_request, len(arr) + 1)
+func append_request(lora_request[] arr, lora_request val) lora_request[] {
+    lora_request[] new_arr = make(lora_request[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]
@@ -327,8 +327,8 @@ func append_request([]lora_request arr, lora_request val) []lora_request {
     return new_arr
 }
 
-func append_result([]lora_inference_result arr, lora_inference_result val) []lora_inference_result {
-    []lora_inference_result new_arr = make([]lora_inference_result, len(arr) + 1)
+func append_result(lora_inference_result[] arr, lora_inference_result val) lora_inference_result[] {
+    lora_inference_result[] new_arr = make(lora_inference_result[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]
@@ -338,8 +338,8 @@ func append_result([]lora_inference_result arr, lora_inference_result val) []lor
     return new_arr
 }
 
-func append_batch([][]lora_request arr, []lora_request val) [][]lora_request {
-    [][]lora_request new_arr = make([][]lora_request, len(arr) + 1)
+func append_batch(lora_request[][] arr, lora_request[] val) lora_request[][] {
+    lora_request[][] new_arr = make(lora_request[][], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]

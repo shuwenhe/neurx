@@ -54,9 +54,9 @@ func new_check_result(string name, bool passed, string detail) check_result {
     }
 }
 
-func doctor(bool require_cuda, bool require_mps) []check_result {
+func doctor(bool require_cuda, bool require_mps) check_result[] {
     runtime_info_state info = runtime_info()
-    []check_result out = []check_result{}
+    check_result[] out = check_result[]{}
     out = append(out, new_check_result("runtime", true, info.runtime_name))
     out = append(out, new_check_result("config.default_device", true, info.default_device))
     out = append(out, new_check_result("cuda.extension", info.cuda_available, "available=" + string(info.cuda_available)))
@@ -75,7 +75,7 @@ func doctor(bool require_cuda, bool require_mps) []check_result {
     out
 }
 
-func format_doctor_report([]check_result results) string {
+func format_doctor_report(check_result[] results) string {
     string out = "neurx doctor report"
     int i = 0
     for i < len(results) {

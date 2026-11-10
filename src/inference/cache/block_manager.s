@@ -12,7 +12,7 @@ struct kv_cache_block {
 
 struct request_block_table {
     string request_id
-    []int block_ids
+    int[] block_ids
     int token_count
     int computed_tokens
     int preemptions
@@ -22,10 +22,10 @@ struct block_manager_state {
     int block_size
     int total_blocks
     int watermark_blocks
-    []kv_cache_block blocks
-    []int free_block_ids
-    []int deferred_free_ids
-    []request_block_table tables
+    kv_cache_block[] blocks
+    int[] free_block_ids
+    int[] deferred_free_ids
+    request_block_table[] tables
     int tick
     int cache_hits
     int cache_misses
@@ -36,7 +36,7 @@ struct block_manager_state {
 struct block_allocation_result {
     block_manager_state state
     request_block_table table
-    []int new_block_ids
+    int[] new_block_ids
     bool success
     string error_message
 }
@@ -57,14 +57,13 @@ struct block_reset_result {
 func empty_request_block_table() request_block_table {
     request_block_table table
     table.request_id = ""
-    table.block_ids = []
-    table.token_count = 0
+    table.block_ids = table.token_count[] = 0
     table.computed_tokens = 0
     table.preemptions = 0
     table
 }
 
-func new_block_allocation_result(block_manager_state state, request_block_table table, []int new_block_ids, bool success, string error_message) block_allocation_result {
+func new_block_allocation_result(block_manager_state state, request_block_table table, int[] new_block_ids, bool success, string error_message) block_allocation_result {
     block_allocation_result result
     result.state = state
     result.table = table
@@ -104,11 +103,9 @@ func new_block_manager(int total_blocks, int block_size, int watermark_blocks) b
     state.block_size = normalized_size
     state.total_blocks = normalized_total
     state.watermark_blocks = normalized_watermark
-    state.blocks = make([]kv_cache_block, normalized_total)
-    state.free_block_ids = make([]int, normalized_total)
-    state.deferred_free_ids = []
-    state.tables = []
-    state.tick = 0
+    state.blocks = make(kv_cache_block[], normalized_total)
+    state.free_block_ids = make(int[], normalized_total)
+    state.deferred_free_ids = state.tables[] = state.tick[] = 0
     state.cache_hits = 0
     state.cache_misses = 0
     state.evictions = 0
@@ -181,8 +178,8 @@ func block_manager_upsert_table(block_manager_state state, request_block_table t
     state
 }
 
-func block_manager_remove_int([]int values, int expected) []int {
-    []int result = make([]int, len(values))
+func block_manager_remove_int(int[] values, int expected) int[] {
+    int[] result = make(int[], len(values))
     int i = 0
     for i < len(values) {
         if values[i] != expected {
@@ -193,7 +190,7 @@ func block_manager_remove_int([]int values, int expected) []int {
     result
 }
 
-func block_manager_contains_int([]int values, int expected) bool {
+func block_manager_contains_int(int[] values, int expected) bool {
     int i = 0
     for i < len(values) {
         if values[i] == expected {
@@ -204,8 +201,8 @@ func block_manager_contains_int([]int values, int expected) bool {
     false
 }
 
-func block_manager_prepend_int([]int values, int value) []int {
-    []int result = make([]int, len(values) + 1)
+func block_manager_prepend_int(int[] values, int value) int[] {
+    int[] result = make(int[], len(values) + 1)
     result = append(result, value)
     int i = 0
     for i < len(values) {
@@ -217,7 +214,7 @@ func block_manager_prepend_int([]int values, int value) []int {
     result
 }
 
-func block_manager_append_unique([]int values, int value) []int {
+func block_manager_append_unique(int[] values, int value) int[] {
     if block_manager_contains_int(values, value) {
         return values
     }
@@ -225,7 +222,7 @@ func block_manager_append_unique([]int values, int value) []int {
 }
 
 func block_manager_remove_table(block_manager_state state, int remove_index) block_manager_state {
-    []request_block_table tables = make([]request_block_table, len(state.tables))
+    request_block_table[] tables = make(request_block_table[], len(state.tables))
     int i = 0
     for i < len(state.tables) {
         if i != remove_index {
@@ -275,7 +272,7 @@ func block_manager_mod(int value, int divisor) int {
     value - (value / divisor) * divisor
 }
 
-func block_manager_hash_tokens([]int token_ids, int start, int token_count, string parent_hash, string adapter_key, string multimodal_key) string {
+func block_manager_hash_tokens(int[] token_ids, int start, int token_count, string parent_hash, string adapter_key, string multimodal_key) string {
     int hash_value = 216613
     int i = 0
     for i < len(parent_hash) {
@@ -308,7 +305,7 @@ func block_manager_hash_tokens([]int token_ids, int start, int token_count, stri
     int_to_str(hash_value) + ":" + int_to_str(token_count)
 }
 
-func block_manager_match_prefix(block_manager_state state, string request_id, []string block_hashes) prefix_match_result {
+func block_manager_match_prefix(block_manager_state state, string request_id, string[] block_hashes) prefix_match_result {
     request_block_table table = block_manager_get_table(state, request_id)
     if len(table.block_ids) > 0 {
         return new_prefix_match_result(state, table, table.computed_tokens, len(table.block_ids), true)
@@ -356,8 +353,7 @@ func block_manager_can_allocate(block_manager_state state, request_block_table t
 }
 
 func block_manager_pop_free(block_manager_state state) block_allocation_result {
-    []int allocated = []
-    request_block_table table = empty_request_block_table()
+    int[] allocated = request_block_table[] table = empty_request_block_table()
     if len(state.free_block_ids) == 0 {
         state.allocation_failures = state.allocation_failures + 1
         return new_block_allocation_result(state, table, allocated, false, "no free KV blocks")
@@ -403,8 +399,7 @@ func block_manager_release_block(block_manager_state state, int block_id) block_
 }
 
 func block_manager_allocate(block_manager_state state, string request_id, int new_tokens, int lookahead_tokens, bool apply_watermark) block_allocation_result {
-    []int allocation_ids = []
-    request_block_table allocation_table = block_manager_get_allocation_table(state, request_id)
+    int[] allocation_ids = request_block_table[] allocation_table = block_manager_get_allocation_table(state, request_id)
     int required = block_manager_required_blocks(state, allocation_table, new_tokens, lookahead_tokens)
     if !block_manager_can_allocate(state, allocation_table, new_tokens, lookahead_tokens, apply_watermark) {
         state.allocation_failures = state.allocation_failures + 1
@@ -436,7 +431,7 @@ func block_manager_allocate(block_manager_state state, string request_id, int ne
     new_block_allocation_result(state, allocation_table, allocation_ids, true, "")
 }
 
-func block_manager_cache_full_blocks(block_manager_state state, string request_id, []string block_hashes) block_manager_state {
+func block_manager_cache_full_blocks(block_manager_state state, string request_id, string[] block_hashes) block_manager_state {
     int table_index = block_manager_find_table(state, request_id)
     if table_index < 0 {
         return state
@@ -507,9 +502,8 @@ func block_manager_free_request(block_manager_state state, string request_id, bo
 }
 
 func block_manager_flush_deferred(block_manager_state state) block_manager_state {
-    []int pending = state.deferred_free_ids
-    state.deferred_free_ids = []
-    int i = 0
+    int[] pending = state.deferred_free_ids
+    state.deferred_free_ids = int[] i = 0
     for i < len(pending) {
         state = block_manager_release_block(state, pending[i])
         i = i + 1
@@ -529,8 +523,7 @@ func block_manager_preempt_request(block_manager_state state, string request_id)
         state = block_manager_release_block(state, table.block_ids[i])
         i = i - 1
     }
-    table.block_ids = []
-    table.token_count = 0
+    table.block_ids = table.token_count[] = 0
     table.computed_tokens = 0
     state.tables[table_index] = table
     state
@@ -548,8 +541,7 @@ func block_manager_reset_prefix_cache(block_manager_state state) block_reset_res
         }
         i = i + 1
     }
-    state.free_block_ids = []
-    i = 0
+    state.free_block_ids = i[] = 0
     for i < len(state.blocks) {
         kv_cache_block block = block_manager_block_at(state, i)
         block.cached = false
@@ -560,8 +552,7 @@ func block_manager_reset_prefix_cache(block_manager_state state) block_reset_res
         state.free_block_ids = append(state.free_block_ids, i)
         i = i + 1
     }
-    state.deferred_free_ids = []
-    block_reset_result result
+    state.deferred_free_ids = block_reset_result[] result
     result.state = state
     result.success = true
     result

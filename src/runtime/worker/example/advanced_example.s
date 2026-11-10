@@ -84,7 +84,7 @@ func DynamicBatchSizingExample() {
         policy_type: 1,
         batch_timeout_ms: 5000,
     })
-    requests := make([]RequestMetadata, 0)
+    requests := make(RequestMetadata[], 0)
     for i := 0; i < 128; i++ {
         size := i32(64 + (i % 4) * 256)
         req := RequestMetadata{
@@ -96,7 +96,7 @@ func DynamicBatchSizingExample() {
         }
         requests = append(requests, req)
     }
-    batch_sizes := []i32{64, 128, 256, 512}
+    batch_sizes := i32[]{64, 128, 256, 512}
     for idx := 0; idx < len(batch_sizes); idx++ {
         size := batch_sizes[idx]
         if len(requests) == 0 {
@@ -131,17 +131,17 @@ func DistributedCommPatternsExample() {
     }
     handler := NewCommunicationHandler(comm_config, 4)
     println("Ring AllReduce pattern:")
-    ring_data := make([]f32, 1024)
+    ring_data := make(f32[], 1024)
     for i := 0; i < 1024; i++ {
         ring_data[i] = f32(i)
     }
-    worker_ids := []i32{0, 1, 2, 3}
+    worker_ids := i32[]{0, 1, 2, 3}
     result := handler.AllReduce(ring_data, worker_ids)
     if result.success == 1 {
         println("AllReduce completed")
     }
     println("Tree AllGather pattern:")
-    local_data := make([]f32, 256)
+    local_data := make(f32[], 256)
     gathered := handler.AllGather(local_data, worker_ids)
     println("Gathered", len(gathered), "elements from all workers")
     println("Broadcast pattern:")
@@ -194,7 +194,7 @@ func PipelineParallelismExample() {
         }
         manager.RegisterWorker(state)
     }
-    requests := make([]RequestMetadata, 0)
+    requests := make(RequestMetadata[], 0)
     for i := 0; i < 64; i++ {
         req := RequestMetadata{
             request_id: "req_" + string(i),
@@ -240,7 +240,7 @@ func AdaptiveBatchingExample() {
     println("Target latency: 100ms")
     println("Starting batch size: 128")
     for iteration := 0; iteration < 5; iteration++ {
-        requests := make([]RequestMetadata, 0)
+        requests := make(RequestMetadata[], 0)
         for i := 0; i < current_batch_size; i++ {
             req := RequestMetadata{
                 request_id: "req_" + string(i),

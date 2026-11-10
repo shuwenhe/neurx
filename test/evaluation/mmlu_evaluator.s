@@ -7,7 +7,7 @@ import (
 )
 
 struct mmlu_fewshot_prompt {
-    []mmlu_data.mmlu_question examples
+    mmlu_data.mmlu_question[] examples
     mmlu_data.mmlu_question test_q
 }
 
@@ -42,7 +42,7 @@ func format_mmlu_question(mmlu_data.mmlu_question q, bool include_answer) string
 }
 
 func build_mmlu_fewshot_prompt(
-    []mmlu_data.mmlu_question examples,
+    mmlu_data.mmlu_question[] examples,
     mmlu_data.mmlu_question test_q
 ) string {
     string prompt = ""
@@ -57,8 +57,8 @@ func build_mmlu_fewshot_prompt(
     prompt
 }
 
-func mmlu_get_choice_tokens(string choice, bool for_answer) []int {
-    []int tokens = []int{}
+func mmlu_get_choice_tokens(string choice, bool for_answer) int[] {
+    int[] tokens = int[]{}
     if choice == "A" {
         tokens = append(tokens, 362)
     } else if choice == "B" {
@@ -82,7 +82,7 @@ struct mmlu_task_result {
 
 struct mmlu_eval_result {
     float overall_accuracy
-    []mmlu_task_result task_results
+    mmlu_task_result[] task_results
     int total_questions
     int total_correct
     string timestamp
@@ -91,8 +91,8 @@ struct mmlu_eval_result {
 func evaluate_mmlu_task(
     gpt.language_model model,
     string task_name,
-    []mmlu_data.mmlu_question test_questions,
-    []mmlu_data.mmlu_question dev_examples,
+    mmlu_data.mmlu_question[] test_questions,
+    mmlu_data.mmlu_question[] dev_examples,
     mmlu_eval_config cfg
 ) mmlu_task_result {
     int total = 0
@@ -101,14 +101,14 @@ func evaluate_mmlu_task(
     for q_idx < len(test_questions) {
         mmlu_data.mmlu_question test_q = test_questions[q_idx]
         string prompt = build_mmlu_fewshot_prompt(dev_examples, test_q)
-        []int prompt_tokens = tokenize_prompt(prompt)
+        int[] prompt_tokens = tokenize_prompt(prompt)
         float best_score = -1000000000.0
         string best_choice = "A"
         string choice = "A"
         int choice_idx = 0
         for choice_idx < 4 {
-            []int choice_tokens = mmlu_get_choice_tokens(choice, true)
-            []int full_seq = concat_token_sequences(prompt_tokens, choice_tokens)
+            int[] choice_tokens = mmlu_get_choice_tokens(choice, true)
+            int[] full_seq = concat_token_sequences(prompt_tokens, choice_tokens)
             benchmark_eval.logprob_result lp = benchmark_eval.gpt_sequence_logprob(
                 model,
                 full_seq,
@@ -158,16 +158,16 @@ func evaluate_mmlu_benchmark(
     println("Shots: " + int_to_str(cfg.num_shots))
     println("Seq length: " + int_to_str(cfg.max_seq_len))
     println("")
-    []mmlu_task_result results = []mmlu_task_result{}
+    mmlu_task_result[] results = mmlu_task_result[]{}
     int total_questions = 0
     int total_correct = 0
-    []mmlu_data.mmlu_task tasks = mmlu_data.mmlu_task_list()
+    mmlu_data.mmlu_task[] tasks = mmlu_data.mmlu_task_list()
     int task_idx = 0
     for task_idx < len(tasks) {
         mmlu_data.mmlu_task t = tasks[task_idx]
         if t.is_included {
-            []mmlu_data.mmlu_question dev = dataset.dev_by_task[t.name]
-            []mmlu_data.mmlu_question test = dataset.questions_by_task[t.name]
+            mmlu_data.mmlu_question[] dev = dataset.dev_by_task[t.name]
+            mmlu_data.mmlu_question[] test = dataset.questions_by_task[t.name]
             if len(test) > 0 {
                 println("[Eval] " + t.name + " (" + t.category + ")...")
                 mmlu_task_result tr = evaluate_mmlu_task(
@@ -254,8 +254,8 @@ func evaluate_mmlu_benchmark(
     }
 }
 
-func tokenize_prompt(string prompt) []int {
-    []int tokens = []int{}
+func tokenize_prompt(string prompt) int[] {
+    int[] tokens = int[]{}
     int i = 0
     for i < len(prompt) && i < 4096 {
         tokens = append(tokens, i)
@@ -264,8 +264,8 @@ func tokenize_prompt(string prompt) []int {
     tokens
 }
 
-func concat_token_sequences([]int a, []int b) []int {
-    []int result = []int{}
+func concat_token_sequences(int[] a, int[] b) int[] {
+    int[] result = int[]{}
     int i = 0
     for i < len(a) {
         result = append(result, a[i])

@@ -13,7 +13,7 @@ struct dt_property {
 struct dt_node {
     string node_name
     dt_property[] properties
-    []int child_node_ids
+    int[] child_node_ids
     int parent_id
 }
 
@@ -48,7 +48,7 @@ func create_dt_node(string name) dt_node {
     node := dt_node {
         node_name: name,
         properties: dt_property[](),
-        child_node_ids: []int(),
+        child_node_ids: int[](),
         parent_id: 0
     }
     node

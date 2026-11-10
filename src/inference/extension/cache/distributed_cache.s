@@ -10,7 +10,7 @@ struct remote_cache_node {
 }
 
 struct distributed_cache {
-    []remote_cache_node peers
+    remote_cache_node[] peers
     int num_peers
     int max_peers
     string local_node_id
@@ -27,7 +27,7 @@ func create_distributed_cache(string node_id, int64 replication, int64 consisten
     dc.consistency_level = consistency
     dc.num_peers = 0
     dc.max_peers = 16
-    dc.peers = make([]remote_cache_node, 16)
+    dc.peers = make(remote_cache_node[], 16)
     dc.current_time = 0
     dc.partition_id = 0
     print("[DistributedCache] Initialized node: " + node_id + ", replication=" + int_to_string(replication) + "\n")
@@ -54,8 +54,8 @@ func distributed_cache_add_peer(distributed_cache dc, string peer_id, string hos
     return 1
 }
 
-func distributed_cache_compute_replica_nodes(distributed_cache dc, string cache_key) []string {
-    []string replicas = make([]string, 8)
+func distributed_cache_compute_replica_nodes(distributed_cache dc, string cache_key) string[] {
+    string[] replicas = make(string[], 8)
     int hash = 0
     int i = 0
     for i < len(cache_key) {
@@ -139,7 +139,7 @@ func distributed_cache_update_peer_capacity(distributed_cache dc, string peer_id
     }
 }
 
-func distributed_cache_find_best_replica_node(distributed_cache dc, []string replicas) string {
+func distributed_cache_find_best_replica_node(distributed_cache dc, string[] replicas) string {
     if len(replicas) == 0 {
         return dc.local_node_id
     }

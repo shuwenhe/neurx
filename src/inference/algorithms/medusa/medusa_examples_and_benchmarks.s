@@ -8,7 +8,7 @@ func create_medusa_config_small() medusa_heads_config {
         num_heads: 4,
         base_hidden_dim: 4096,
         vocab_size: 32000,
-        attach_layers: []int{8, 12, 16, 20},
+        attach_layers: int[]{8, 12, 16, 20},
         temperature: 0.8,
         top_k: 10,
         top_p: 0.95,
@@ -21,7 +21,7 @@ func create_medusa_config_medium() medusa_heads_config {
         num_heads: 8,
         base_hidden_dim: 4096,
         vocab_size: 32000,
-        attach_layers: []int{6, 10, 14, 18, 22, 24, 28, 30},
+        attach_layers: int[]{6, 10, 14, 18, 22, 24, 28, 30},
         temperature: 0.9,
         top_k: 20,
         top_p: 0.96,
@@ -34,7 +34,7 @@ func create_medusa_config_large() medusa_heads_config {
         num_heads: 12,
         base_hidden_dim: 4096,
         vocab_size: 32000,
-        attach_layers: []int{4, 8, 12, 16, 20, 22, 24, 26, 28, 30, 31, 32},
+        attach_layers: int[]{4, 8, 12, 16, 20, 22, 24, 26, 28, 30, 31, 32},
         temperature: 0.95,
         top_k: 30,
         top_p: 0.97,
@@ -53,10 +53,10 @@ func example_basic_medusa_generation() string {
         max_length: 512,
     }
     pipeline := new_medusa_pipeline(medusa_config)
-    hidden_states := []float[]{}
+    hidden_states := float[][]{}
     i := 0
     for i < 10 {
-        hidden := []float{}
+        hidden := float[]{}
         j := 0
         for j < 4096 {
             hidden = append(hidden, 0.1)
@@ -65,7 +65,7 @@ func example_basic_medusa_generation() string {
         hidden_states = append(hidden_states, hidden)
         i = i + 1
     }
-    (prefill_pipeline, last_hidden) := pipeline.prefill(pipeline, hidden_states, []int{1, 2, 3, 4, 5})
+    (prefill_pipeline, last_hidden) := pipeline.prefill(pipeline, hidden_states, int[]{1, 2, 3, 4, 5})
     draft_count := 0
     accepted_count := 0
     position := 0
@@ -88,15 +88,15 @@ func example_batch_inference_with_medusa() string {
     medusa_config := create_medusa_config_medium()
     batch := inference_batch_with_medusa{
         batch_id: 1,
-        input_ids: []int[]{
-            []int{1, 2, 3, 4, 5},
-            []int{10, 11, 12, 13},
-            []int{20, 21, 22, 23, 24, 25},
+        input_ids: int[][]{
+            int[]{1, 2, 3, 4, 5},
+            int[]{10, 11, 12, 13},
+            int[]{20, 21, 22, 23, 24, 25},
         },
-        attention_mask: []bool[]{
-            []bool{true, true, true, true, true},
-            []bool{true, true, true, true},
-            []bool{true, true, true, true, true, true},
+        attention_mask: bool[][]{
+            bool[]{true, true, true, true, true},
+            bool[]{true, true, true, true},
+            bool[]{true, true, true, true, true, true},
         },
         use_medusa: true,
         max_draft_tokens: 8,
@@ -131,8 +131,8 @@ func example_batch_inference_with_medusa() string {
 func example_adaptive_temperature() string {
     medusa_config := create_medusa_config_medium()
     pipeline := new_medusa_pipeline(medusa_config)
-    acceptance_rates := []float{}
-    temperatures := []float{0.7, 0.8, 0.9, 1.0, 1.1}
+    acceptance_rates := float[]{}
+    temperatures := float[]{0.7, 0.8, 0.9, 1.0, 1.1}
     temp_idx := 0
     for temp_idx < temperatures.len {
         temp := temperatures[temp_idx]
@@ -184,14 +184,14 @@ func example_progressive_medusa_training() string {
 }
 
 func example_quality_vs_speed_tradeoff() string {
-    configs := []medusa_heads_config{
+    configs := medusa_heads_config[]{
         create_medusa_config_small(),
         create_medusa_config_medium(),
         create_medusa_config_large(),
     }
-    config_names := []string{"Small", "Medium", "Large"}
-    expected_speedups := []float{2.5, 3.5, 4.5}
-    expected_quality := []float{0.95, 0.98, 0.99}
+    config_names := string[]{"Small", "Medium", "Large"}
+    expected_speedups := float[]{2.5, 3.5, 4.5}
+    expected_quality := float[]{0.95, 0.98, 0.99}
     result := "Medusa Configuration Trade-offs:\n\n"
     i := 0
     for i < configs.len {
@@ -224,7 +224,7 @@ func benchmark_medusa_vs_standard(
 ) medusa_benchmark_result {
     total_time_medusa := 0.0
     total_time_standard := 0.0
-    acceptance_rates := []float{}
+    acceptance_rates := float[]{}
     iter := 0
     for iter < num_iterations {
         latency_standard := 100.0
@@ -306,11 +306,11 @@ func float_string(float val) string {
 
 func medusa_prefill(
     medusa_generation_pipeline pipeline,
-    []float[] hidden_states,
-    []int input_ids
-) (medusa_generation_pipeline, []float) {
+    float[][] hidden_states,
+    int[] input_ids
+) (medusa_generation_pipeline, float[]) {
     updated := pipeline
-    last_hidden := []float{}
+    last_hidden := float[]{}
     if hidden_states.len > 0 {
         last_hidden = hidden_states[hidden_states.len - 1]
     }

@@ -16,7 +16,7 @@ struct zen_platform_config {
     zen_cpu_info cpu_info
     bool numa_enabled
     int num_numa_nodes
-    []int cores_per_node
+    int[] cores_per_node
     string frequency_mode
     bool power_management_enabled
 }
@@ -78,7 +78,7 @@ func zen_numa_get_node_count() int {
     2
 }
 
-func zen_numa_get_cores_for_node(int node_id) []int {
+func zen_numa_get_cores_for_node(int node_id) int[] {
     config = create_zen_platform_config()
     if node_id == 0 {
         return [0, 1, 2, 3, 4, 5, 6, 7]
@@ -89,7 +89,7 @@ func zen_numa_get_cores_for_node(int node_id) []int {
     []
 }
 
-func zen_get_supported_simd_widths() []int {
+func zen_get_supported_simd_widths() int[] {
     [16, 32, 64]
 }
 

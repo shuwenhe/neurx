@@ -32,13 +32,13 @@ struct dpometrics {
 
 struct trajectory_reward {
     trajectory_id       string
-    responses           []string
-    rewards             []float64
+    responses           string[]
+    rewards             float64[]
     avg_reward          float64
 }
 
 struct dpodataset {
-    preference_pairs    []preference_pair
+    preference_pairs    preference_pair[]
     size                int
     source              string
     quality_score       float64
@@ -49,7 +49,7 @@ struct dpotrainer {
     dataset             dpodataset
     model_logits        map[string]float64
     reference_logits    map[string]float64
-    metrics_history     []dpometrics
+    metrics_history     dpometrics[]
     best_loss           float64
 }
 
@@ -61,7 +61,7 @@ func (dpotrainer* trainer) initialize(config dpoconfig) {
     trainer.config = config
     trainer.model_logits = make(map[string]float64)
     trainer.reference_logits = make(map[string]float64)
-    trainer.metrics_history = make([]dpometrics, 0)
+    trainer.metrics_history = make(dpometrics[], 0)
     trainer.best_loss = math.MaxFloat64
     fmt.Printf("Configuration:\n")
     fmt.Printf("  Learning Rate: %.2e\n", config.learning_rate)
@@ -78,7 +78,7 @@ func (dpotrainer* trainer) load_preference_data(
     fmt.Printf("  Pairs: %d\n", size)
     fmt.Printf("  Quality: %.2f%%\n\n", quality_score*100)
     trainer.dataset = dpodataset{
-        preference_pairs: make([]preference_pair, 0),
+        preference_pairs: make(preference_pair[], 0),
         size:             size,
         source:           "human_feedback",
         quality_score:    quality_score,
@@ -111,7 +111,7 @@ func sigmoid(x float64) float64 {
     return 1.0 / (1.0 + math.Exp(-x))
 }
 
-func (dpotrainer* trainer) compute_batch_loss(batch []preference_pair) float64 {
+func (dpotrainer* trainer) compute_batch_loss(batch preference_pair[]) float64 {
     total_loss := 0.0
     for _, pair := range batch {
         loss := trainer.compute_dpo_loss(pair)
@@ -123,7 +123,7 @@ func (dpotrainer* trainer) compute_batch_loss(batch []preference_pair) float64 {
 
 func (dpotrainer* trainer) train_dpo_step(
     step int64,
-    batch []preference_pair) {
+    batch preference_pair[]) {
     loss := trainer.compute_batch_loss(batch)
     var chosen_logit, rejected_logit, margin float64 = 0, 0, 0
     if len(batch) > 0 {
@@ -158,7 +158,7 @@ func (dpotrainer* trainer) train_dpo_step(
     }
 }
 
-func (dpotrainer* trainer) evaluate_dpo(test_pairs []preference_pair) float64 {
+func (dpotrainer* trainer) evaluate_dpo(test_pairs preference_pair[]) float64 {
     fmt.Printf("\n[Evaluation] Evaluating DPO model\n")
     fmt.Printf("  Test Pairs: %d\n", len(test_pairs))
     correct := 0
@@ -181,7 +181,7 @@ func (dpotrainer* trainer) compare_with_rlhf() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  DPO vs RLHF Comparison                │\n")
     fmt.Printf("└────────────────────────────────────────┘\n\n")
-    comparison := [][3]interface{}{
+    comparison := interface{}[3][]{
         {"Aspect", "RLHF", "DPO"},
         {"Training Stability", "Medium", "High"},
         {"Convergence Speed", "Slow (5-7 days)", "Fast (2-3 days)"},
@@ -233,7 +233,7 @@ func new_dpo_trainer() *dpotrainer {
     return *dpotrainer{
         model_logits:    make(map[string]float64),
         reference_logits: make(map[string]float64),
-        metrics_history: make([]dpometrics, 0),
+        metrics_history: make(dpometrics[], 0),
         best_loss:       math.MaxFloat64,
     }
 }

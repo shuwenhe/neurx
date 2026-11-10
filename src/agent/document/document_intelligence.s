@@ -162,8 +162,7 @@ struct document_parser {
         }
     }
     parse_batch(file_paths: list<string>) {
-        results: list<parsed_document> = []
-        for path in file_paths {
+        results: list<parsed_document> = for[] path in file_paths {
             try {
                 doc := this.parse(path)
                 results.append(doc)
@@ -201,8 +200,7 @@ struct document_parser {
     }
     _parse_csv(string file_path) {
         data = read_csv_file(file_path)
-        headers = data[0] if data.length > 0 else []
-        rows = data[1:]
+        headers = data[0] if data.length > 0 else rows[] = data[1:]
         table = extracted_table{
             id="table_0",
             headers=headers,
@@ -246,8 +244,7 @@ struct document_parser {
     _parse_plain_text_string(string content, source_path: string) {
         stats = compute_statistics(content)
         raw_sections = content.split("\n\n")
-        sections: list<document_section> = []
-        pos = 0
+        sections: list<document_section> = pos[] = 0
         for i, sec_content in enumerate(raw_sections) {
             sec_len = sec_content.length
             sections.append(document_section{
@@ -287,18 +284,13 @@ struct pdf_parser {
     }
     parse(string file_path) {
         doc = open_pdf(file_path)
-        full_text_parts: list<string> = []
-        all_sections: list<document_section> = []
-        all_tables: list<extracted_table> = []
-        all_images: list<extracted_image> = []
-        current_pos = 0
+        full_text_parts: list<string> = all_sections[]: list<document_section> = all_tables[]: list<extracted_table> = all_images[]: list<extracted_image> = current_pos[] = 0
         for page_num in range(doc.page_count):
             page = doc.load_page(page_num)
             if this.config.pdf_preserve_layout {
                 text_dict = page.get_text("dict")
                 blocks = text_dict["blocks"]
-                page_text_parts: list<string> = []
-                for block in blocks:
+                page_text_parts: list<string> = for[] block in blocks:
                     if block["type"] == 0:
                         lines_text = ""
                         for line in block["lines"]:
@@ -421,8 +413,7 @@ struct html_parser {
         }
     }
     _extract_main_content(soup: any) {
-        candidates: list<{element: any, score: float}> = []
-        for elem in soup.find_all(["div", "article", "main", "section"]) {
+        candidates: list<{element: any, score: float}> = for[] elem in soup.find_all(["div", "article", "main", "section"]) {
             score = 0.0
             text_length = len(elem.get_text())
             if text_length > 100:
@@ -453,13 +444,7 @@ struct html_parser {
         return soup.body  soup
     }
     _convert_element(element: any, base_url: string) {
-        sections: list<document_section> = []
-        tables: list<extracted_table> = []
-        images: list<extracted_image> = []
-        links: list<extracted_link> = []
-        code_blocks: list<code_block> = []
-        content_parts: list<string> = []
-        pos = 0
+        sections: list<document_section> = tables[]: list<extracted_table> = images[]: list<extracted_image> = links[]: list<extracted_link> = code_blocks[]: list<code_block> = content_parts[]: list<string> = pos[] = 0
         def process_node(node: any, int depth = 0) {
             nonlocal pos
             if node.name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
@@ -533,8 +518,7 @@ struct html_parser {
                 content_parts.append(f"\n```{lang}\n{code_text}\n```\n\n")
                 pos += len(f"\n```{lang}\n{code_text}\n```\n\n")
             elif node.name in ["ul", "ol"]:
-                list_items = []
-                for li in node.find_all("li", recursive=false):
+                list_items = for[] li in node.find_all("li", recursive=false):
                     list_items.append(li.get_text().strip())
                 marker = "-" if node.name == "ul" else "1."
                 list_text = "\n".join(f"{marker} {item}" for item in list_items) + "\n\n"
@@ -553,9 +537,7 @@ struct html_parser {
         }
     }
     _extract_table(table_elem: any) {
-        headers: list<string> = []
-        rows: list<list<string>> = []
-        thead = table_elem.find("thead")
+        headers: list<string> = rows[]: list<list<string>> = thead[] = table_elem.find("thead")
         if thead:
             header_row = thead.find("tr")
             if header_row:
@@ -574,8 +556,7 @@ struct html_parser {
                         headers = [td.get_text().strip() for td in td_cells]
         tbody = table_elem.find("tbody")  table_elem
         for tr in tbody.find_all("tr")[1 if (headers.length > 0 and !thead) else 0:]:
-            cells: list<string> = []
-            for td in tr.find_all(["td", "th"]):
+            cells: list<string> = for[] td in tr.find_all(["td", "th"]):
                 cells.append(td.get_text().strip().replace("\n", " "))
             if cells.length > 0:
                 rows.append(cells)
@@ -616,21 +597,12 @@ struct markdown_parser {
     }
     parse_string(string markdown_content, source_path: string) {
         lines = markdown_content.split("\n")
-        sections: list<document_section> = []
-        tables: list<extracted_table> = []
-        code_blocks: list<code_block> = []
-        images: list<extracted_image> = []
-        links: list<extracted_link> = []
-        content_parts: list<string> = []
-        current_section: document_section = null
+        sections: list<document_section> = tables[]: list<extracted_table> = code_blocks[]: list<code_block> = images[]: list<extracted_image> = links[]: list<extracted_link> = content_parts[]: list<string> = current_section[]: document_section = null
         in_code_block = false
         code_lang = ""
-        code_lines: list<string> = []
-        code_start_line = 0
+        code_lines: list<string> = code_start_line[] = 0
         in_table = false
-        table_rows: list<list<string>> = []
-        table_headers: list<string> = []
-        table_start_idx = 0
+        table_rows: list<list<string>> = table_headers[]: list<string> = table_start_idx[] = 0
         pos = 0
         i = 0
         for i < lines.length {
@@ -639,8 +611,7 @@ struct markdown_parser {
                 if !in_code_block:
                     in_code_block = true
                     code_lang = line[3:].strip()
-                    code_lines = []
-                    code_start_line = i + 1
+                    code_lines = code_start_line[] = i + 1
                 } else:
                     code_blocks.append(code_block{
                         language=code_lang,
@@ -702,9 +673,7 @@ struct markdown_parser {
                     content_parts.append(md_table + "\n\n")
                     pos += len(md_table) + 2
                 in_table = false
-                table_rows = []
-                table_headers = []
-            img_match = regex.match(r'!\[([^\]]*)\]\(([^)]+)\)', line)
+                table_rows = table_headers[] = img_match[] = regex.match(r'!\[([^\]]*)\]\(([^)]+)\)', line)
             if img_match != null {
                 alt = img_match.group(1)
                 url = img_match.group(2)
@@ -768,11 +737,7 @@ struct office_document_parser {
     }
     parse_docx(string file_path) {
         doc = load_docx(file_path)
-        sections: list<document_section> = []
-        tables: list<extracted_table> = []
-        images: list<extracted_image> = []
-        content_parts: list<string> = []
-        pos = 0
+        sections: list<document_section> = tables[]: list<extracted_table> = images[]: list<extracted_image> = content_parts[]: list<string> = pos[] = 0
         para_idx = 0
         for para in doc.paragraphs:
             style_name = para.style.name if para.style else "Normal"
@@ -802,11 +767,8 @@ struct office_document_parser {
                 pos += len(text) + 2
             para_idx++
         for t_idx, table in enumerate(doc.tables) {
-            headers: list<string> = []
-            rows: list<list<string>> = []
-            for r_idx, row in enumerate(table.rows):
-                cells: list<string> = []
-                for cell in row.cells:
+            headers: list<string> = rows[]: list<list<string>> = for[] r_idx, row in enumerate(table.rows):
+                cells: list<string> = for[] cell in row.cells:
                     cells.append(cell.text.trim())
                 if r_idx == 0:
                     headers = cells
@@ -848,13 +810,10 @@ struct office_document_parser {
     }
     parse_pptx(string file_path) {
         pptx = load_pptx(file_path)
-        sections: list<document_section> = []
-        content_parts: list<string> = []
-        pos = 0
+        sections: list<document_section> = content_parts[]: list<string> = pos[] = 0
         for slide_idx, slide in enumerate(pptx.slides):
             slide_title = slide.shapes.title.text.trim()  f"Slide {slide_idx + 1}"
-            shape_texts: list<string> = []
-            for shape in slide.shapes:
+            shape_texts: list<string> = for[] shape in slide.shapes:
                 if hasattr(shape, "text") and shape.text.trim() != "":
                     shape_texts.append(shape.text.trim())
             slide_content = "\n".join(shape_texts)
@@ -885,9 +844,7 @@ struct office_document_parser {
     }
     parse_xlsx(string file_path) {
         wb = load_excel(file_path)
-        sheets_content: list<string> = []
-        all_tables: list<extracted_table> = []
-        for sheet_name, sheet in wb.items():
+        sheets_content: list<string> = all_tables[]: list<extracted_table> = for[] sheet_name, sheet in wb.items():
             sheet_data = sheet.values
             rows_list = list(sheet_data)
             if rows_list.length == 0 { continue }
@@ -927,8 +884,7 @@ struct office_document_parser {
 
 function format_table_as_markdown(headers: list<string>, rows: list<list<string>>) {
     if headers.length == 0 { return "" }
-    col_widths: list<int> = []
-    for h_idx, h in enumerate(headers) {
+    col_widths: list<int> = for[] h_idx, h in enumerate(headers) {
         max_w = h.length
         for row in rows:
             if h_idx < row.length:
@@ -942,8 +898,7 @@ function format_table_as_markdown(headers: list<string>, rows: list<list<string>
     for w in col_widths:
         sep_line += "-".repeat(w) + " | "
     sep_line = sep_line.trim() + "|"
-    data_lines: list<string> = []
-    for row in rows:
+    data_lines: list<string> = for[] row in rows:
         row_line = "| "
         for c_idx, cell in enumerate(row) {
             if c_idx < col_widths.length:

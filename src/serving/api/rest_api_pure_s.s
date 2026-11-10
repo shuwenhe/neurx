@@ -2,20 +2,20 @@ package neurx.inference.api
 struct http_request {
     string method
     string path
-    []string headers
+    string[] headers
     string body
 }
 
 struct http_response {
     int status_code
     string status_message
-    []string headers
+    string[] headers
     string body
 }
 
 struct inference_request {
     string model
-    []string messages
+    string[] messages
     int max_tokens
     float temperature
 }
@@ -137,8 +137,7 @@ func extract_float_field(string body, string field_name) float {
             continue
         }
         if c >= "0" && c <= "9" {
-            int digit = c[0] - '0'[0]
-            if has_dot {
+            int digit = c[0] - '0'if[0] has_dot {
                 decimal_places = decimal_places * 10.0
                 result = result + float(digit) / decimal_places
             } else {

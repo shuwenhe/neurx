@@ -6,8 +6,8 @@ import (
     "neurx.models.loaders.hf_transformer."
 )
 
-func matrix(int rows, int columns, float diagonal, float other) []float {
-    []float values = make([]float, rows * columns)
+func matrix(int rows, int columns, float diagonal, float other) float[] {
+    float[] values = make(float[], rows * columns)
     int row = 0
     for row < rows {
         int column = 0
@@ -21,8 +21,8 @@ func matrix(int rows, int columns, float diagonal, float other) []float {
     values
 }
 
-func ones(int count) []float {
-    []float values = make([]float, count)
+func ones(int count) float[] {
+    float[] values = make(float[], count)
     int i = 0
     for i < count { values[i] = 1.0; i = i + 1 }
     values
@@ -43,11 +43,11 @@ func main() {
         down_proj: matrix(4, 4, 1.0, 0.0),
         error_code: "",
     }
-    []float first = ones(4)
+    float[] first = ones(4)
     hf_kv_cache cache = new_hf_kv_cache(4, 2)
     hf_layer_result result = hf_cpu_layer(config, weights, first, cache, 0)
     if !result.ok || result.cache.length != 1 || len(result.hidden) != 4 { return 1 }
-    []float second = make([]float, 4)
+    float[] second = make(float[], 4)
     second[0] = 2.0
     second[1] = 1.0
     second[2] = 0.5
@@ -60,7 +60,7 @@ func main() {
     safetensors_embedding embedding = load_f32_embedding("artifact/build/commands/native-test/embedding.safetensors", "embedding.weight")
     f32_tensor_result embedding_values = read_f32_tensor(embedding)
     hf_model_weights model = hf_model_weights { valid: true, config: parsed, embedding: embedding, input_norm: ones(8), q_proj: matrix(8, 4, 1.0, 0.0), k_proj: matrix(4, 4, 1.0, 0.0), v_proj: matrix(4, 4, 1.0, 0.0), o_proj: matrix(8, 4, 1.0, 0.0), post_norm: ones(8), gate_proj: matrix(8, 4, 1.0, 0.0), up_proj: matrix(8, 4, 1.0, 0.0), down_proj: matrix(8, 4, 1.0, 0.0), final_norm: ones(4), lm_head: embedding_values.values, error_code: "" }
-    []int prompt = make([]int, 2)
+    int[] prompt = make(int[], 2)
     prompt[0] = 0
     prompt[1] = 1
     hf_generation_result generation = hf_generate(model, prompt, 2)

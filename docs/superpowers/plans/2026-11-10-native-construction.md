@@ -37,16 +37,16 @@
 - [x] Measure 4096, 8192, 16384, 32768, 1M and 10M using indexed writes and bulk paths, with wall/CPU/RSS/allocation/copy counters.
 
 ### Task 3: NeurX loading/forward integration
-- [ ] Replace tensor decode, model field assembly, weight slicing/cache patching and output construction with builder/bulk calls.
-- [ ] Replace tokenizer bulk text/table construction; close builders on errors.
-- [ ] Add negative/shape and alias regressions; rerun existing numerical and serving tests using the diagnostic compiler.
-- [ ] Preserve a reproducible incremental compiler patch and integration report.
+- [x] Replace tensor decode, model field assembly, weight slicing/cache patching and output construction with builder/bulk calls.
+- [x] Replace tokenizer bulk text/table construction; close builders on errors.
+- [x] Add negative/shape and alias regressions; rerun existing numerical and serving tests using the diagnostic compiler.
+- [x] Preserve a reproducible incremental compiler patch and integration report.
 
 ### Task 4: Official toolchain and real checkpoint
-- [ ] After earlier gates pass, run full official bootstrap in a fresh directory and official installation inside NeurX.
-- [ ] Verify all stage identities, convergence/execution logs and installed binary identity.
-- [ ] Build NeurX with installed Stage4, load/validate all tensor dimensions and all 24 layers.
-- [ ] Compare real logits independently; generate >=32 native tokens and record loading/TTFT/token latency/RSS.
+- [x] After earlier gates pass, run full official bootstrap in a fresh directory and official installation inside NeurX.
+- [x] Verify all stage identities, convergence/execution logs and installed binary identity.
+- [x] Build NeurX with installed Stage4, load/validate all tensor dimensions and all 24 layers.
+- [x] Compare real logits independently; generate >=32 native tokens and record loading/TTFT/token latency/RSS.
 - [ ] Run final regression and independent review. Report DONE only if every acceptance gate passes; otherwise preserve concrete failed-gate evidence and report NOT DONE.
 
 ## Ledger
@@ -63,3 +63,10 @@
 - Forward integration GREEN: 7/7 in 279.162s, before full-logit API addition. Metadata RED exit1 on valid whitespace JSON; GREEN includes whitespace, rank3 rejection, integer overflow rejection, empty file/EOF/missing file distinctions.
 - Full-logits RED: unknown initializer type at `hf_logits`, confirming no full-logit vector API existed. Added real native LM-head matvec result and fail-closed nonfinite detection, plus opt-in full-logit/activation tracing and monotonic generation timings; complete native suite now running.
 - Generator regression harness note: unittest discovery imported script successfully but reported zero unittest methods (exit5); direct execution of `extensions_generate_test.py` passed. Logs preserved separately.
+
+- Final specified native acceptance: official Stage1–4 bootstrap, convergence/execution checks and official install passed. Final compiler hash892ee7893469ee702e663663cdd1c33653d22bbfffa449f8f498e87ebb2fd92c. Installer development certification remains NOT CERTIFIED, recorded without alteration.
+- Final: fixed independent review findings — absent untied/truncated tied LM heads fail closed; missing merges and missing optional added tokens handled; truncated arrays rejected. Corrected actual missing-head fixture RED on preserved pre-fix loader → GREEN current installed compiler. Initial fixture error diagnosed and preserved. Final construction 7/7 in6.123s; full native regression27/27 in75.401s.
+- Supersedes earlier LM-head ruling: fallback retained only for explicit tying and truly absent head. Original tiny fixture already had an explicit head; no fixture changes remain.
+- Final real run: 290 tensors/988065536source bytes/494032768elements,24layers,40forwards,960layer executions,32tokens. All32match independent C++;151936logits maximum absolute error<1e-6 at micro quantization;120first-token intermediate statistics maximum error<1e-6. See real-qwen-final/numerical-verification.json.
+- Final: specified inference acceptance passed, but whole-repository testing NOT DONE — three historical C++ Make targets reference missing source files; make -k failure preserved. Remaining general tokenizer Split-regex parity and scalar CPU performance limitations recorded. No blanket PASS.
+- Final: Ruling: keep recovery/evidence and work on main only as explicitly instructed; do not delete the skill workspace or create a branch. Cost is retained artifact disk use, rather than lost recoverability.

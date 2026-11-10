@@ -9,7 +9,7 @@ struct test_result_2 {
     bool passed
     string message
 }
-[]test_result_2 test_results = make([]test_result_2, 0)
+test_result_2[] test_results = make(test_result_2[], 0)
 
 func run_all_tests() int {
     println("=== W1.1 Tokenizer Unit Tests ===")

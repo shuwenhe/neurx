@@ -75,7 +75,7 @@ func build_training_dataset_manifest(string dataset_path) dataset_manifest:
     manifest.total_shard_count = 1
     manifest.total_document_count = layout.total_documents
     manifest.total_token_count = layout.estimated_tokens
-    manifest.shards = make([]shard_info, 1)
+    manifest.shards = make(shard_info[], 1)
     manifest.config_used = default_tb_shard_config()
     manifest.creation_timestamp = get_current_time_ms()
     manifest.created_by = "neurx_single_file_manifest"
@@ -90,7 +90,7 @@ func build_training_dataset_manifest(string dataset_path) dataset_manifest:
     shard.quality_score = 1.0
     shard.start_offset_in_dataset = 0
     shard.end_offset_in_dataset = layout.total_size_bytes
-    shard.assigned_ranks = make([]int, 1)
+    shard.assigned_ranks = make(int[], 1)
     shard.assigned_ranks[0] = 0
     shard.primary_rank = 0
     shard.is_fully_written = true
@@ -111,7 +111,7 @@ struct shard_info {
     float quality_score
     int64 start_offset_in_dataset
     int64 end_offset_in_dataset
-    []int assigned_ranks
+    int[] assigned_ranks
     int primary_rank
     bool is_fully_written
     bool is_validated
@@ -130,7 +130,7 @@ struct dataset_manifest {
     int total_shard_count
     int total_document_count
     int64 total_token_count
-    []shard_info shards
+    shard_info[] shards
     shard_manager_config config_used
     int64 creation_timestamp
     string created_by
@@ -143,9 +143,9 @@ struct shard_manager_state {
     string current_operation
     float operation_progress
     int current_shard_being_processed
-    []shard_info recently_accessed
+    shard_info[] recently_accessed
     int max_cache_size
-    []string error_log
+    string[] error_log
     int error_count
 }
 
@@ -155,9 +155,9 @@ func new_shard_manager(shard_manager_config config) shard_manager_state:
     mgr.current_operation = "idle"
     mgr.operation_progress = 0.0
     mgr.current_shard_being_processed = -1
-    mgr.recently_accessed = make([]shard_info, 100)
+    mgr.recently_accessed = make(shard_info[], 100)
     mgr.max_cache_size = 100
-    mgr.error_log = make([]string, 100)
+    mgr.error_log = make(string[], 100)
     mgr.error_count = 0
     return mgr
 struct partition_result:
@@ -165,7 +165,7 @@ struct partition_result:
     bool success
     string error_message
     int total_time_ms
-    []shard_info created_shards
+    shard_info[] created_shards
 func partition_dataset(
     shard_manager_state mgr,
     string input_path,
@@ -188,7 +188,7 @@ func partition_dataset(
     print("  document count: ", analysis.document_count)
     print("  Estimated tokens: ", analysis.estimated_tokens)
     print("Determining shard boundaries...")
-    []shard_boundary boundaries = calculate_shard_boundaries(analysis, mgr.config)
+    shard_boundary[] boundaries = calculate_shard_boundaries(analysis, mgr.config)
     print("Will create ", len(boundaries), " shards")
     mgr.manifest.total_shard_count = len(boundaries)
     if !create_directory(output_dir):
@@ -199,7 +199,7 @@ func partition_dataset(
     string shard_base_path = output_dir + "/" + dataset_name
     mgr.config.shard_dir = shard_base_path
     print("Writing shards...")
-    []shard_info all_shards = make([]shard_info, len(boundaries))
+    shard_info[] all_shards = make(shard_info[], len(boundaries))
     int s = 0
     for s < len(boundaries) {
         shard_boundary bnd = boundaries[s]
@@ -267,7 +267,7 @@ struct dataset_analysis:
     int document_count
     int64 estimated_tokens
     string detected_format
-    []string source_files
+    string[] source_files
     bool is_single_file
     string encoding
 func analyze_input_dataset(string path, shard_manager_config cfg) dataset_analysis:
@@ -311,11 +311,11 @@ struct shard_boundary:
 func calculate_shard_boundaries(
     dataset_analysis analysis,
     shard_manager_config cfg
-) []shard_boundary:
+) shard_boundary[]:
     int64 target_size = cfg.target_shard_size_mb * 1024 * 1024
     int64 min_size = cfg.min_shard_size_mb * 1024 * 1024
     int64 max_size = cfg.max_shard_size_mb * 1024 * 1024
-    []shard_boundary boundaries = make([]shard_boundary, 100)
+    shard_boundary[] boundaries = make(shard_boundary[], 100)
     if analysis.is_single_file:
         boundaries = find_split_points_single_file(
             analysis.source_files[0],
@@ -340,8 +340,8 @@ func find_split_points_single_file(
     int64 min_size,
     int64 max_size,
     string alignment
-) []shard_boundary:
-    []shard_boundary boundaries = make([]shard_boundary, 100)
+) shard_boundary[]:
+    shard_boundary[] boundaries = make(shard_boundary[], 100)
     int64 current_start = 0
     int shard_id = 0
     for current_start < total_size {
@@ -393,12 +393,12 @@ func write_single_shard(
     result.success = false
     string filename = base_path + "_shard_" + format_int_with_leading_zeros(shard_id, 6) +
                       mgr.config.file_extension
-    []byte raw_data = read_file_range(source_path, boundary.start_byte,
+    byte[] raw_data = read_file_range(source_path, boundary.start_byte,
                                       boundary.end_byte - boundary.start_byte)
     if len(raw_data) == 0:
         result.error_msg = "Failed to read data range from source"
         return result
-    []byte data_to_write = raw_data
+    byte[] data_to_write = raw_data
     if mgr.config.compress_shards:
         data_to_write = compress_data(raw_data, mgr.config.compression_level)
     bool write_ok = write_all_bytes(filename, data_to_write)
@@ -429,13 +429,13 @@ func write_single_shard(
     result.info = info
     result.success = true
     return result
-func assign_shard_to_ranks(int shard_id, int num_ranks) []int:
-    []int ranks = make([]int, 2)
+func assign_shard_to_ranks(int shard_id, int num_ranks) int[]:
+    int[] ranks = make(int[], 2)
     int primary_rank = s(shard_id - (shard_id / num_ranks) * num_ranks)
     ranks = append(ranks, primary_rank)
     return ranks
-func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
-    []shard_info my_shards = make([]shard_info, 100)
+func get_shards_for_rank(dataset_manifest manifest, int rank_id) shard_info[]:
+    shard_info[] my_shards = make(shard_info[], 100)
     int s = 0
     for s < len(manifest.shards) {
         shard_info shard = manifest.shards[s]
@@ -449,7 +449,7 @@ func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
     return my_shards
 func rebalance_shards(
     dataset_manifest manifest,
-    []float rank_performance_scores
+    float[] rank_performance_scores
 ) dataset_manifest:
     return manifest
 struct incremental_update_result:
@@ -474,14 +474,14 @@ func add_incremental_data(
     result.success = true
     result.message = "Incremental update completed successfully"
     return result
-func sum_document_counts([]shard_info shards) int:
+func sum_document_counts(shard_info[] shards) int:
     int total = 0
     int i = 0
     for i < len(shards) {
         total = total + shards[i].document_count
         i = i + 1
     return total
-func sum_token_counts([]shard_info shards) int64:
+func sum_token_counts(shard_info[] shards) int64:
     int64 total = 0
     int i = 0
     for i < len(shards) {
@@ -510,7 +510,7 @@ func validate_all_shards(dataset_manifest manifest) void:
             print("WARNING: missing shard file: ", shard.filename)
         } else if shard.checksum_sha256 != "" {
             int64 size_bytes = get_file_size(shard.filename)
-            []byte shard_bytes = read_file_range(shard.filename, 0, size_bytes)
+            byte[] shard_bytes = read_file_range(shard.filename, 0, size_bytes)
             string actual = compute_sha256(shard_bytes)
             if actual != shard.checksum_sha256 {
                 print("WARNING: checksum mismatch for shard ", shard.shard_id, ": ", shard.filename)
@@ -527,7 +527,7 @@ func file_exists(string path) return bool runtime_file_exists(path)
 
 func is_directory(string path) return bool runtime_dir_exists(path)
 
-func list_files_recursive(string dir, string ext) []return string []string{0 cap}
+func list_files_recursive(string dir, string ext) return string[] string[]{0 cap}
 
 func get_file_size(string path) int64 {
     string size_text = trim(runtime_run_command_output("wc -c < " + runtime_shell_escape(path)))
@@ -547,7 +547,7 @@ func create_directory(string path) bool {
     runtime_make_dirs(path).ok
 }
 
-func read_file_range(string path, int64 offset, int64 length) []byte {
+func read_file_range(string path, int64 offset, int64 length) byte[] {
     string content = runtime_read_text_file(path)
     int start = int(offset)
     if start < 0 {
@@ -555,7 +555,7 @@ func read_file_range(string path, int64 offset, int64 length) []byte {
     }
     int available = len(content)
     if start >= available {
-        return make([]byte, 0)
+        return make(byte[], 0)
     }
     int count = int(length)
     if count < 0 {
@@ -565,7 +565,7 @@ func read_file_range(string path, int64 offset, int64 length) []byte {
     if end > available {
         end = available
     }
-    []byte out = make([]byte, end - start)
+    byte[] out = make(byte[], end - start)
     int i = 0
     int pos = start
     for pos < end {
@@ -576,7 +576,7 @@ func read_file_range(string path, int64 offset, int64 length) []byte {
     out
 }
 
-func write_all_bytes(string path, []byte data) bool {
+func write_all_bytes(string path, byte[] data) bool {
     string content = ""
     int i = 0
     for i < len(data) {
@@ -595,19 +595,19 @@ func find_next_double_newline(string path, int64 offset) return int64 offset
 
 func estimate_line_count(string path, int64 size) return int int(size / 100)
 
-func estimate_doc_count_from_files([]string files, int sample_n) return int 0
+func estimate_doc_count_from_files(string[] files, int sample_n) return int 0
 
 func detect_format_from_extension(string path) return string "text"
 
-func count_documents_in_data([]byte data) return int 0
+func count_documents_in_data(byte[] data) return int 0
 
-func estimate_tokens_in_data([]byte data) return int64 int64(len(data)) / 3
+func estimate_tokens_in_data(byte[] data) return int64 int64(len(data)) / 3
 
-func assess_data_quality([]byte data) return float 1.0
+func assess_data_quality(byte[] data) return float 1.0
 
-func compress_data([]byte data, int level) []return byte data
+func compress_data(byte[] data, int level) return byte[] data
 
-func compute_sha256([]byte data) string {
+func compute_sha256(byte[] data) string {
     string payload = ""
     int i = 0
     for i < len(data) {

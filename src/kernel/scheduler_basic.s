@@ -9,7 +9,7 @@ struct task {
 }
 task[] run_queue
 func init_scheduler() int {
-    run_queue = []task{}
+    run_queue = task[]{}
     0
 }
 

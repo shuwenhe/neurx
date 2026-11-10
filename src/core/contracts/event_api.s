@@ -32,6 +32,6 @@ interface i_event_pool {
     available_events() . i64
 }
 interface i_multi_stream_synchronization {
-    wait_multiple_events(stream: stream, events: []event) . void
-    wait_any_event(stream: stream, events: []event) . i64
+    wait_multiple_events(stream: stream, events: event[]) . void
+    wait_any_event(stream: stream, events: event[]) . i64
 }

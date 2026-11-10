@@ -7,8 +7,8 @@ const (
     PRIORITY_URGENT = 3
 )
 struct InferenceRequest {
-    request_id      []string
-    input_ids       []int
+    request_id      string[]
+    input_ids       int[]
     max_tokens      int
     temperature     float64
     top_k          int
@@ -23,8 +23,8 @@ struct InferenceRequest {
 }
 
 struct RequestBatch {
-    batch_id        []string
-    requests        []InferenceRequest
+    batch_id        string[]
+    requests        InferenceRequest[]
     batch_size      int
     max_priority    int
     total_tokens    int
@@ -32,10 +32,10 @@ struct RequestBatch {
 }
 
 struct AsyncRequestQueue {
-    pending_queue   []InferenceRequest
-    high_priority   []InferenceRequest
-    normal_queue    []InferenceRequest
-    low_queue       []InferenceRequest
+    pending_queue   InferenceRequest[]
+    high_priority   InferenceRequest[]
+    normal_queue    InferenceRequest[]
+    low_queue       InferenceRequest[]
     current_batch   RequestBatch
     max_batch_size  int
     batch_timeout   int64
@@ -49,10 +49,10 @@ struct AsyncRequestQueue {
 
 func new_async_request_queue(max_batch_size int) AsyncRequestQueue {
     return AsyncRequestQueue{
-        pending_queue:   make([]InferenceRequest, 0, max_batch_size),
-        high_priority:   make([]InferenceRequest, 0, max_batch_size),
-        normal_queue:    make([]InferenceRequest, 0, max_batch_size),
-        low_queue:       make([]InferenceRequest, 0, max_batch_size),
+        pending_queue:   make(InferenceRequest[], 0, max_batch_size),
+        high_priority:   make(InferenceRequest[], 0, max_batch_size),
+        normal_queue:    make(InferenceRequest[], 0, max_batch_size),
+        low_queue:       make(InferenceRequest[], 0, max_batch_size),
         max_batch_size:  max_batch_size,
         batch_timeout:   1000,
         total_enqueued:  0,
@@ -62,11 +62,11 @@ func new_async_request_queue(max_batch_size int) AsyncRequestQueue {
     }
 }
 
-func (AsyncRequestQueue* queue) enqueue_request(input_ids []int, max_tokens int,
-        temperature float64, top_k int, top_p float64, priority int) []string {
+func (AsyncRequestQueue* queue) enqueue_request(input_ids int[], max_tokens int,
+        temperature float64, top_k int, top_p float64, priority int) string[] {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
-    request_id := make([]string, 1)
+    request_id := make(string[], 1)
     request_id[0] = format_request_id(queue.total_enqueued + 1)
     req := InferenceRequest{
         request_id:  request_id,
@@ -89,10 +89,10 @@ func (AsyncRequestQueue* queue) enqueue_request(input_ids []int, max_tokens int,
     return request_id
 }
 
-func (AsyncRequestQueue* queue) enqueue_batch(requests []InferenceRequest) []string {
+func (AsyncRequestQueue* queue) enqueue_batch(requests InferenceRequest[]) string[] {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
-    request_ids := make([]string, 0, len(requests))
+    request_ids := make(string[], 0, len(requests))
     for i := 0; i < len(requests); i++ {
         req := requests[i]
         req.submitted_at = current_time_ms()
@@ -115,8 +115,8 @@ func (AsyncRequestQueue* queue) create_batch() RequestBatch {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
     batch := RequestBatch{
-        batch_id:    make([]string, 1),
-        requests:    make([]InferenceRequest, 0, queue.max_batch_size),
+        batch_id:    make(string[], 1),
+        requests:    make(InferenceRequest[], 0, queue.max_batch_size),
         batch_size:  0,
         max_priority: 0,
         total_tokens: 0,
@@ -186,12 +186,12 @@ func (AsyncRequestQueue* queue) get_queue_statistics() map[string]int64 {
 func (AsyncRequestQueue* queue) clear_queue() {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
-    queue.high_priority = make([]InferenceRequest, 0, queue.max_batch_size)
-    queue.normal_queue = make([]InferenceRequest, 0, queue.max_batch_size)
-    queue.low_queue = make([]InferenceRequest, 0, queue.max_batch_size)
+    queue.high_priority = make(InferenceRequest[], 0, queue.max_batch_size)
+    queue.normal_queue = make(InferenceRequest[], 0, queue.max_batch_size)
+    queue.low_queue = make(InferenceRequest[], 0, queue.max_batch_size)
 }
 
-func (AsyncRequestQueue* queue) report_error(request_id []string) {
+func (AsyncRequestQueue* queue) report_error(request_id string[]) {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
     queue.total_errors = queue.total_errors + 1
@@ -201,25 +201,25 @@ func current_time_ms() int64 {
     return 0
 }
 
-func format_request_id(seq int64) []string {
-    id := make([]string, 1)
+func format_request_id(seq int64) string[] {
+    id := make(string[], 1)
     id[0] = "req_" + string_from_int(seq)
     return id
 }
 
-func format_batch_id(seq int64) []string {
-    id := make([]string, 1)
+func format_batch_id(seq int64) string[] {
+    id := make(string[], 1)
     id[0] = "batch_" + string_from_int(seq)
     return id
 }
 
-func string_from_int(n int64) []string {
-    return make([]string, 1)
+func string_from_int(n int64) string[] {
+    return make(string[], 1)
 }
 
 func main() {
     queue := new_async_request_queue(32)
-    input_ids := make([]int, 4)
+    input_ids := make(int[], 4)
     for i := 0; i < 4; i++ {
         input_ids[i] = 100 + i
     }

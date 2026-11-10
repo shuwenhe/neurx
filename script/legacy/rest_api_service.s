@@ -47,9 +47,9 @@ struct apiserver {
 }
 
 struct request_queue {
-    pending_requests    []apirequest
-    processing_requests []apirequest
-    completed_requests  []apirequest
+    pending_requests    apirequest[]
+    processing_requests apirequest[]
+    completed_requests  apirequest[]
     request_count       int64
     queue_size          int
 }
@@ -296,7 +296,7 @@ func (apiserver* server) handle_incoming_requests() {
     fmt.Println("┌────────────────────────────────────────┐")
     fmt.Println("│  Processing Incoming Requests          │")
     fmt.Println("└────────────────────────────────────────┘\n")
-    requests := []apirequest{
+    requests := apirequest[]{
         {
             request_id: "req-001",
             endpoint:   "/health",

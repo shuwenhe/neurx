@@ -26,7 +26,7 @@ func (active_request* req) transition_state(request_state new_state) bool {
     return false
 }
 
-func get_valid_transitions(request_state from_state) []request_state {
+func get_valid_transitions(request_state from_state) request_state[] {
     transitions := make(request_state[])
     if from_state == req_state_submitted {
         transitions = append(transitions, req_state_waiting)
@@ -202,18 +202,18 @@ func (request_batch* batch) is_empty() bool {
 
 struct request_pool {
     map[string, active_request] all_requests
-    []string pending_ids
-    []string running_ids
-    []string completed_ids
+    string[] pending_ids
+    string[] running_ids
+    string[] completed_ids
     int32 max_pool_size
 }
 
 func create_request_pool(int32 max_size) request_pool* {
     return *request_pool{
         all_requests: make(map[string, active_request]),
-        pending_ids: make([]string),
-        running_ids: make([]string),
-        completed_ids: make([]string),
+        pending_ids: make(string[]),
+        running_ids: make(string[]),
+        completed_ids: make(string[]),
         max_pool_size: max_size,
     }
 }

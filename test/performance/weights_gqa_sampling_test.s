@@ -63,7 +63,7 @@ func expect(bool cond, string name) int {
 
 func test_header_json_parse() int {
     string json = "{\"embedding.weight\":{\"dtype\":\"F32\",\"shape\":[100,8],\"data_offsets\":[0,3200]},\"lm_head.weight\":{\"dtype\":\"F32\",\"shape\":[8,100],\"data_offsets\":[3200,6400]}}"
-    []tensor_meta tensors = parse_header_json(json)
+    tensor_meta[] tensors = parse_header_json(json)
     int fail = 0
     fail = fail + expect(len(tensors) == 2, "parsed 2 tensors from header json")
     if len(tensors) >= 2 {
@@ -120,8 +120,8 @@ func test_gqa_attention_matches_mqa() int {
     int seq_len = 3
     cache = reserve_tokens(cache, seq_len)
     int kv_stride = num_kv_heads * head_size
-    []float keys = make([]float, seq_len * kv_stride)
-    []float values = make([]float, seq_len * kv_stride)
+    float[] keys = make(float[], seq_len * kv_stride)
+    float[] values = make(float[], seq_len * kv_stride)
     int t = 0
     for t < seq_len {
         int d = 0
@@ -134,14 +134,14 @@ func test_gqa_attention_matches_mqa() int {
     }
     cache = write_kv_to_cache(cache, keys, values, 0)
     int q_stride = num_heads * head_size
-    []float queries = make([]float, seq_len * q_stride)
+    float[] queries = make(float[], seq_len * q_stride)
     int qi = 0
     for qi < len(queries) {
         queries[qi] = 0.1
         qi = qi + 1
     }
-    []float out_gqa = make([]float, seq_len * q_stride)
-    []slot_mapping slots = cache.token_to_slot
+    float[] out_gqa = make(float[], seq_len * q_stride)
+    slot_mapping[] slots = cache.token_to_slot
     out_gqa = compute_paged_attention_gqa(cache, queries, out_gqa, slots, num_heads, num_kv_heads, head_size, scale)
     int fail = 0
     fail = fail + expect(len(out_gqa) >= seq_len * q_stride, "gqa output length covers all query tokens")
@@ -166,12 +166,12 @@ func test_gqa_group_assignment() int {
 }
 
 func test_softmax_sums_to_one() int {
-    []float logits = make([]float, 4)
+    float[] logits = make(float[], 4)
     logits[0] = 1.0
     logits[1] = 2.0
     logits[2] = 3.0
     logits[3] = 0.5
-    []float probs = softmax(logits, 4)
+    float[] probs = softmax(logits, 4)
     int fail = 0
     float sum = 0.0
     int i = 0
@@ -185,11 +185,11 @@ func test_softmax_sums_to_one() int {
 }
 
 func test_temperature_scaling() int {
-    []float logits = make([]float, 3)
+    float[] logits = make(float[], 3)
     logits[0] = 1.0
     logits[1] = 2.0
     logits[2] = 3.0
-    []float scaled = apply_temperature(logits, 0.5, 3)
+    float[] scaled = apply_temperature(logits, 0.5, 3)
     int fail = 0
     fail = fail + expect(approx(scaled[0], 2.0, 1.0e-6), "temp 0.5 scales logit 1.0 to 2.0")
     fail = fail + expect(approx(scaled[1], 4.0, 1.0e-6), "temp 0.5 scales logit 2.0 to 4.0")
@@ -198,13 +198,13 @@ func test_temperature_scaling() int {
 }
 
 func test_top_k_filter_keeps_top() int {
-    []float logits = make([]float, 5)
+    float[] logits = make(float[], 5)
     logits[0] = 1.0
     logits[1] = 5.0
     logits[2] = 3.0
     logits[3] = 4.0
     logits[4] = 2.0
-    []float filtered = top_k_filter(logits, 5, 2)
+    float[] filtered = top_k_filter(logits, 5, 2)
     int fail = 0
     fail = fail + expect(approx(filtered[1], 5.0, 1.0e-6), "top_k keeps logit 5.0 at index 1")
     fail = fail + expect(approx(filtered[3], 4.0, 1.0e-6), "top_k keeps logit 4.0 at index 3")
@@ -213,12 +213,12 @@ func test_top_k_filter_keeps_top() int {
 }
 
 func test_top_p_filter_nucleus() int {
-    []float logits = make([]float, 4)
+    float[] logits = make(float[], 4)
     logits[0] = 0.0
     logits[1] = 10.0
     logits[2] = 9.0
     logits[3] = -5.0
-    []float filtered = top_p_filter(logits, 4, 0.9)
+    float[] filtered = top_p_filter(logits, 4, 0.9)
     int fail = 0
     fail = fail + expect(filtered[1] > -1.0e29, "top_p keeps index 1 (highest prob)")
     fail = fail + expect(filtered[3] < -1.0e29, "top_p filters out index 3 (low prob)")
@@ -226,7 +226,7 @@ func test_top_p_filter_nucleus() int {
 }
 
 func test_argmax() int {
-    []float arr = make([]float, 4)
+    float[] arr = make(float[], 4)
     arr[0] = 1.0
     arr[1] = 5.0
     arr[2] = 3.0
@@ -238,7 +238,7 @@ func test_argmax() int {
 }
 
 func test_greedy_sample() int {
-    []float logits = make([]float, 4)
+    float[] logits = make(float[], 4)
     logits[0] = 1.0
     logits[1] = 5.0
     logits[2] = 3.0
@@ -250,7 +250,7 @@ func test_greedy_sample() int {
 }
 
 func test_sample_deterministic_with_seed() int {
-    []float logits = make([]float, 4)
+    float[] logits = make(float[], 4)
     logits[0] = 1.0
     logits[1] = 2.0
     logits[2] = 3.0

@@ -12,7 +12,7 @@ struct num_microbatches_calculator {
     int micro_batch_size
     int data_parallel_size
     int micro_batch_times_dp
-    []schedule_entry schedule
+    schedule_entry[] schedule
 }
 
 func round_down(int batch_size, int divisor) int {
@@ -46,14 +46,14 @@ func new_constant_calculator(
         micro_batch_size: micro_batch_size,
         data_parallel_size: data_parallel_size,
         micro_batch_times_dp: micro_times_dp,
-        schedule: make([]schedule_entry, 0),
+        schedule: make(schedule_entry[], 0),
     }
 }
 
 func new_rampup_calculator(
     int micro_batch_size,
     int data_parallel_size,
-    []schedule_entry schedule
+    schedule_entry[] schedule
 ) num_microbatches_calculator {
     int micro_times_dp = micro_batch_size * data_parallel_size
     int first_gbs = schedule[0].batch_size
@@ -114,7 +114,7 @@ func get_current_global_batch_size(num_microbatches_calculator calc) int {
     return calc.current_global_batch_size
 }
 
-func validate_schedule([]schedule_entry schedule) bool {
+func validate_schedule(schedule_entry[] schedule) bool {
     if len(schedule) == 0 {
         return false
     }

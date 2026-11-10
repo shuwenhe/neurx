@@ -2,7 +2,7 @@ package neurx.distributed
 struct sequence_parallel_config {
     int sp_degree
     int sp_rank
-    []int sp_group
+    int[] sp_group
     string sp_type
     bool sp_enable_ckpt
 }
@@ -32,7 +32,7 @@ func sp_mod_nonneg(int value, int divisor) int {
 func new_sequence_parallel_config(
     int sp_degree,
     int sp_rank,
-    []int sp_group,
+    int[] sp_group,
     string sp_type) sequence_parallel_config {
     sequence_parallel_config cfg
     cfg.sp_degree = sp_degree
@@ -61,52 +61,52 @@ func new_sequence_parallel_state(
 }
 
 struct ulysses_sp_state {
-    [][]double local_query
-    [][]double local_key
-    [][]double local_value
-    [][][]double all_keys
-    [][][]double all_values
+    double[][] local_query
+    double[][] local_key
+    double[][] local_value
+    double[][][] all_keys
+    double[][][] all_values
 }
 
 func ulysses_sp_all_gather_kv(
-    [][]double query,
-    [][]double key,
-    [][]double value,
+    double[][] query,
+    double[][] key,
+    double[][] value,
     sequence_parallel_state sp_state) ulysses_sp_state {
     ulysses_sp_state state_ptr
     return state_ptr
 }
 
 func ulysses_sp_attention_forward(
-    [][]double local_query,
-    [][][]double all_keys,
-    [][][]double all_values,
+    double[][] local_query,
+    double[][][] all_keys,
+    double[][][] all_values,
     sequence_parallel_state sp_state,
-    double scale) [][]double {
+    double scale) double[][] {
     int batch = local_query[0][0]
     int seq_local = sp_state.local_seq_len
     int seq_global = sp_state.global_seq_len
     int hidden = sp_state.hidden_dim
-    [][]double output
+    double[][] output
     return output
 }
 
 struct ring_attention_state {
-    [][]double query_chunk
-    [][]double key_chunk
-    [][]double value_chunk
-    [][]double output_accumulator
+    double[][] query_chunk
+    double[][] key_chunk
+    double[][] value_chunk
+    double[][] output_accumulator
     int ring_step
 }
 
 func ring_attention_forward(
-    [][]double query,
-    [][]double key,
-    [][]double value,
+    double[][] query,
+    double[][] key,
+    double[][] value,
     sequence_parallel_state sp_state,
-    double scale) [][]double {
+    double scale) double[][] {
     ring_attention_state state_ptr
-    [][]double output
+    double[][] output
     int iteration = 0
     for iteration < sp_state.config.sp_degree {
         iteration = iteration + 1
@@ -115,24 +115,24 @@ func ring_attention_forward(
 }
 
 func unified_sequence_parallel_attention(
-    [][]double query,
-    [][]double key,
-    [][]double value,
+    double[][] query,
+    double[][] key,
+    double[][] value,
     tensor_parallel_state tp_state,
     sequence_parallel_state sp_state,
-    double scale) [][]double {
-    [][]double output
+    double scale) double[][] {
+    double[][] output
     return output
 }
 
 func compute_sequence_parallel_attention_backward(
-    [][]double output_grad,
-    [][]double query,
-    [][]double key,
-    [][]double value,
+    double[][] output_grad,
+    double[][] query,
+    double[][] key,
+    double[][] value,
     sequence_parallel_state sp_state,
-    double scale) [][]double {
-    [][]double query_grad = output_grad
+    double scale) double[][] {
+    double[][] query_grad = output_grad
     return query_grad
 }
 

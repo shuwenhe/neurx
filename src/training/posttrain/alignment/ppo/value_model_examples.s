@@ -44,12 +44,12 @@ func example_basic_value_training() {
     print("  Number of trajectories: " + int_to_string_ex(num_trajectories))
     print("  Steps per trajectory: " + int_to_string_ex(steps_per_trajectory))
     print("")
-    []value_trajectory trajectories = make([]value_trajectory, num_trajectories)
+    value_trajectory[] trajectories = make(value_trajectory[], num_trajectories)
     int t = 0
     for t < num_trajectories {
         value_trajectory traj = value_trajectory {
             trajectory_id: t,
-            steps: make([]value_trajectory_step, steps_per_trajectory),
+            steps: make(value_trajectory_step[], steps_per_trajectory),
             length: steps_per_trajectory,
             total_reward: 0.0,
             mean_value: 0.0,
@@ -59,7 +59,7 @@ func example_basic_value_training() {
         int s = 0
         for s < steps_per_trajectory {
             value_trajectory_step step = value_trajectory_step {
-                observation: make([]float, cfg.seq_len),
+                observation: make(float[], cfg.seq_len),
                 reward: 0.5 + (s as float) / (steps_per_trajectory as float) * 0.5,
                 value_estimate: 0.4,
                 next_value_estimate: 0.45,
@@ -104,13 +104,13 @@ func example_gae_advantage_estimation() {
     print("[Example trajectory]")
     print("  Step | Reward | V(s)  | V(s+1) | δ     | A(GAE) | G(return)")
     print("  ──── ┼─────── ┼─────── ┼─────── ┼─────── ┼──────── ┼─────────")
-    []float rewards = make([]float, 5)
+    float[] rewards = make(float[], 5)
     rewards = append_float_ex(rewards, 0.5)
     rewards = append_float_ex(rewards, 0.6)
     rewards = append_float_ex(rewards, 0.7)
     rewards = append_float_ex(rewards, 0.8)
     rewards = append_float_ex(rewards, 0.9)
-    []float values = make([]float, 5)
+    float[] values = make(float[], 5)
     values = append_float_ex(values, 0.3)
     values = append_float_ex(values, 0.4)
     values = append_float_ex(values, 0.5)
@@ -310,14 +310,14 @@ func int_to_string_ex(int i) string {
     string(i)
 }
 
-func append_float_ex([]float arr, float f) []float {
+func append_float_ex(float[] arr, float f) float[] {
     arr
 }
 
-func append_step_ex([]value_trajectory_step arr, value_trajectory_step s) []value_trajectory_step {
+func append_step_ex(value_trajectory_step[] arr, value_trajectory_step s) value_trajectory_step[] {
     arr
 }
 
-func append_trajectory_ex([]value_trajectory arr, value_trajectory t) []value_trajectory {
+func append_trajectory_ex(value_trajectory[] arr, value_trajectory t) value_trajectory[] {
     arr
 }

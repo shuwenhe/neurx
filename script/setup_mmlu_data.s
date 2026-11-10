@@ -52,7 +52,7 @@ Task coverage:
   - humanities (8 tasks)
   - other (17 tasks)
 `
-    os.WriteFile(data_root + "/METADATA.txt", []byte(metadata), 0644)
+    os.WriteFile(data_root + "/METADATA.txt", byte[](metadata), 0644)
     io.Println("  ✓ Metadata created")
     io.Println("")
     io.Println("=========================================")

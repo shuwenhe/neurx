@@ -55,7 +55,7 @@ struct WorkerConfig {
     worker_id       i32
     worker_type     i32
     device_id       i32
-    gpus            []i32
+    gpus            i32[]
     max_batch_size  i32
     max_model_len   i32
     gpu_memory_mb   i32
@@ -101,7 +101,7 @@ struct WorkerState {
 
 struct BatchRequest {
     request_id      string
-    prompt_tokens   []i32
+    prompt_tokens   i32[]
     prompt_len      i32
     max_tokens      i32
     batch_type      i32
@@ -112,7 +112,7 @@ struct BatchRequest {
 
 struct Batch {
     batch_id        i32
-    requests        []BatchRequest
+    requests        BatchRequest[]
     request_count   i32
     batch_type      i32
     total_tokens    i32
@@ -128,7 +128,7 @@ struct ExecutionResult {
     batch_id        i32
     worker_id       i32
     state           i32
-    output_tokens   []i32
+    output_tokens   i32[]
     output_len      i32
     completion_tokens i32
     total_tokens    i32
@@ -143,7 +143,7 @@ struct WorkerMessage {
     sender_id       i32
     receiver_id     i32
     message_type    i32
-    payload         []u8
+    payload         u8[]
     payload_size    i32
     timestamp       i64
     requires_ack    i32
@@ -180,9 +180,9 @@ struct WorkerPool {
 struct SyncState {
     sync_id         i64
     source_worker   i32
-    target_workers  []i32
+    target_workers  i32[]
     target_count    i32
-    state_data      []u8
+    state_data      u8[]
     state_size      i32
     timestamp       i64
     is_distributed  i32
@@ -192,7 +192,7 @@ struct WorkerResult {
     success         i32
     error_code      i32
     error_message   string
-    data            []u8
+    data            u8[]
     data_size       i32
     execution_time  i32
 }

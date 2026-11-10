@@ -59,7 +59,7 @@ struct model_checkpoint {
     int version
     int training_step
     int epoch
-    []tensor_shard param_shards
+    tensor_shard[] param_shards
     int total_parameters
     int64 total_bytes
     optimizer_state opt_state
@@ -72,10 +72,10 @@ struct model_checkpoint {
 
 struct tensor_shard {
     string name
-    []int shape
+    int[] shape
     int num_elements
     int dtype
-    []float data
+    float[] data
     int global_offset
     int local_size
     string prev_checksum
@@ -84,8 +84,8 @@ struct tensor_shard {
 
 struct optimizer_state {
     int step_count
-    []float exp_avg
-    []float exp_avg_sq
+    float[] exp_avg
+    float[] exp_avg_sq
 }
 
 struct training_metadata {
@@ -96,8 +96,8 @@ struct training_metadata {
     int seen_samples
     float throughput_samples_per_sec
     string config_snapshot
-    []uint64 cuda_rng_state
-    []uint64 cpu_rng_state
+    uint64[] cuda_rng_state
+    uint64[] cpu_rng_state
     data_iterator_state data_iter_state
 }
 
@@ -123,7 +123,7 @@ struct checkpoint_manager {
     checkpoint_buffer front_buffer
     checkpoint_buffer back_buffer
     bool buffer_locked
-    []checkpoint_task task_queue
+    checkpoint_task[] task_queue
     int queue_front
     int queue_rear
     checkpoint_stats stats
@@ -180,7 +180,7 @@ func init_checkpoint_manager(checkpoint_config cfg) checkpoint_manager {
         front_buffer: empty_buf,
         back_buffer: empty_buf,
         buffer_locked: false,
-        task_queue: make([]checkpoint_task, cfg.async_queue_depth),
+        task_queue: make(checkpoint_task[], cfg.async_queue_depth),
         queue_front: 0,
         queue_rear: 0,
         stats: init_stats,
@@ -448,7 +448,7 @@ func background_writer_loop(ref checkpoint_manager mgr) {
 func cleanup_old_checkpoints(ref checkpoint_manager mgr) {
     int keep_n = mgr.config.keep_last_n_checkpoints
     if keep_n <= 0 { return }
-    []string all_ckpts = list_all_checkpoints(mgr.config.base_directory)
+    string[] all_ckpts = list_all_checkpoints(mgr.config.base_directory)
     sort_checkpoints_by_step_desc(all_ckpts)
     int idx = keep_n
     for idx < len(all_ckpts) {
@@ -460,7 +460,7 @@ func cleanup_old_checkpoints(ref checkpoint_manager mgr) {
 }
 
 func find_latest_checkpoint(string base_dir) string {
-    []string all_ckpts = list_all_checkpoints(base_dir)
+    string[] all_ckpts = list_all_checkpoints(base_dir)
     if len(all_ckpts) == 0 { return "" }
     string latest = all_ckpts[0]
     int latest_step = -1
@@ -551,19 +551,19 @@ func empty_checkpoint() model_checkpoint {
 
 func is_valid_checkpoint(model_checkpoint c) bool { return true }
 
-func restore_parameters_to_model([]tensor_shard shards) {}
+func restore_parameters_to_model(tensor_shard[] shards) {}
 
 func restore_optimizer_state(optimizer_state opt) {}
 
-func restore_rng_states([]uint64 cuda, []uint64 cpu) {}
+func restore_rng_states(uint64[] cuda, uint64[] cpu) {}
 
 func restore_data_iterator(data_iterator_state iter) {}
 
 func find_best_checkpoint(string base_dir) string { return "" }
 
-func list_all_checkpoints(string base_dir) []string { return []string{} }
+func list_all_checkpoints(string base_dir) string[] { return string[]{} }
 
-func sort_checkpoints_by_step_desc(ref []string paths) {}
+func sort_checkpoints_by_step_desc(ref string[] paths) {}
 
 func extract_step_from_path(string path) int { return 0 }
 

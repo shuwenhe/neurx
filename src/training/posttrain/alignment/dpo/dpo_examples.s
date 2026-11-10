@@ -37,14 +37,14 @@ func create_dpo_example_config() dpo_train_config {
 
 func create_dpo_example_dataset() dpo_dataset {
     dpo_dataset {
-        pairs: []dpo_preference_pair{},
+        pairs: dpo_preference_pair[]{},
         size: 50000,
         source_path: "./data/dpo/preferences.jsonl",
         quality_score: 0.95,
         train_test_split: 45000,
         avg_prompt_len: 256.0,
         avg_response_len: 512.0,
-        domain_distribution: []float{0.4, 0.3, 0.2, 0.1},
+        domain_distribution: float[]{0.4, 0.3, 0.2, 0.1},
     }
 }
 
@@ -118,7 +118,7 @@ func example_dpo_with_different_betas() {
     print("║     Example 3: DPO with Different Beta Values             ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    []float betas = []float{0.05, 0.1, 0.2, 0.5}
+    float[] betas = float[]{0.05, 0.1, 0.2, 0.5}
     neurx_model model = load_pretrained_model("neurx_200b")
     neurx_model reference_model = load_pretrained_model("neurx_200b")
     tokenizer_state tokenizer = load_tokenizer()

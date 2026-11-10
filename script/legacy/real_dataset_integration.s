@@ -14,7 +14,7 @@ struct data_source {
 }
 
 struct dataset_config {
-    sources             []data_source
+    sources             data_source[]
     batch_size          int
     shuffle             bool
     num_workers         int
@@ -24,15 +24,15 @@ struct dataset_config {
 }
 
 struct data_sample {
-    input_ids           []int
-    attention_mask      []int
-    token_type_ids      []int
-    labels              []int
+    input_ids           int[]
+    attention_mask      int[]
+    token_type_ids      int[]
+    labels              int[]
 }
 
 struct data_loader {
     config              dataset_config
-    loaded_samples      []data_sample
+    loaded_samples      data_sample[]
     current_index       int
     total_samples       int
     samples_loaded      int64
@@ -62,15 +62,15 @@ func (data_loader* loader) validate_sources() bool {
     return true
 }
 
-func (data_loader* loader) load_from_huggingface(source data_source) []data_sample {
+func (data_loader* loader) load_from_huggingface(source data_source) data_sample[] {
     fmt.Printf("[HuggingFace] Loading: %s/%s\n", source.name, source.split)
-    samples := make([]data_sample, 0)
+    samples := make(data_sample[], 0)
     for i := 0; i < source.size; i++ {
         sample := data_sample{
-            input_ids:      make([]int, 512),
-            attention_mask: make([]int, 512),
-            token_type_ids: make([]int, 512),
-            labels:         make([]int, 512),
+            input_ids:      make(int[], 512),
+            attention_mask: make(int[], 512),
+            token_type_ids: make(int[], 512),
+            labels:         make(int[], 512),
         }
         for j := 0; j < 512; j++ {
             val := (i*512 + j) % 128000
@@ -85,15 +85,15 @@ func (data_loader* loader) load_from_huggingface(source data_source) []data_samp
     return samples
 }
 
-func (data_loader* loader) load_from_local(source data_source) []data_sample {
+func (data_loader* loader) load_from_local(source data_source) data_sample[] {
     fmt.Printf("[Local] Loading: %s\n", source.path)
-    samples := make([]data_sample, 0)
+    samples := make(data_sample[], 0)
     for i := 0; i < source.size; i++ {
         sample := data_sample{
-            input_ids:      make([]int, 512),
-            attention_mask: make([]int, 512),
-            token_type_ids: make([]int, 512),
-            labels:         make([]int, 512),
+            input_ids:      make(int[], 512),
+            attention_mask: make(int[], 512),
+            token_type_ids: make(int[], 512),
+            labels:         make(int[], 512),
         }
         for j := 0; j < 512; j++ {
             sample.input_ids[j] = (i + j) % 128000
@@ -105,15 +105,15 @@ func (data_loader* loader) load_from_local(source data_source) []data_sample {
     return samples
 }
 
-func (data_loader* loader) load_from_s3(source data_source) []data_sample {
+func (data_loader* loader) load_from_s3(source data_source) data_sample[] {
     fmt.Printf("[S3] Loading: %s\n", source.url)
-    samples := make([]data_sample, 0)
+    samples := make(data_sample[], 0)
     for i := 0; i < source.size; i++ {
         sample := data_sample{
-            input_ids:      make([]int, 512),
-            attention_mask: make([]int, 512),
-            token_type_ids: make([]int, 512),
-            labels:         make([]int, 512),
+            input_ids:      make(int[], 512),
+            attention_mask: make(int[], 512),
+            token_type_ids: make(int[], 512),
+            labels:         make(int[], 512),
         }
         for j := 0; j < 512; j++ {
             sample.input_ids[j] = (i*2 + j) % 128000
@@ -136,7 +136,7 @@ func (data_loader* loader) load_all_sources() {
     }
     total_start := 0.0
     for _, source := range loader.config.sources {
-        var samples []data_sample
+        var samples data_sample[]
         switch source.source_type {
         case "huggingface":
             samples = loader.load_from_huggingface(source)
@@ -155,8 +155,8 @@ func (data_loader* loader) load_all_sources() {
     loader.load_time_ms = total_start
 }
 
-func (data_loader* loader) create_batches() [][]data_sample {
-    batches := make([][]data_sample, 0)
+func (data_loader* loader) create_batches() data_sample[][] {
+    batches := make(data_sample[][], 0)
     for i := 0; i < len(loader.loaded_samples); i += loader.config.batch_size {
         end := i + loader.config.batch_size
         if end > len(loader.loaded_samples) {
@@ -222,9 +222,9 @@ func (data_loader* loader) setup_cache() {
     }
 }
 
-func (data_loader* loader) get_next_batch() []data_sample {
+func (data_loader* loader) get_next_batch() data_sample[] {
     if loader.current_index >= len(loader.loaded_samples) {
-        return []data_sample{}
+        return data_sample[]{}
     }
     end := loader.current_index + loader.config.batch_size
     if end > len(loader.loaded_samples) {
@@ -238,7 +238,7 @@ func (data_loader* loader) get_next_batch() []data_sample {
 func new_data_loader(config dataset_config) *data_loader {
     return *data_loader{
         config:          config,
-        loaded_samples:  []data_sample{},
+        loaded_samples:  data_sample[]{},
         current_index:   0,
         total_samples:   0,
         samples_loaded:  0,

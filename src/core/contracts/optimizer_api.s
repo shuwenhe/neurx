@@ -26,8 +26,8 @@ interface i_optimizer {
     step_with_closure(closure: func() . f64) . void
     state_dict() . map[string]tensor
     load_state_dict(map state[string]tensor) . void
-    add_param_group([]string param_names, f64 lr, f64 weight_decay) . void
-    get_param_groups() . []map[string]f64
+    add_param_group(string[] param_names, f64 lr, f64 weight_decay) . void
+    get_param_groups() . (map[string]f64)[]
 }
 interface isgd_optimizer {
     get_momentum() . f64
@@ -36,7 +36,7 @@ interface isgd_optimizer {
     set_nesterov(bool nesterov) . void
 }
 interface i_adam_optimizer {
-    get_betas() . [2]f64
+    get_betas() . f64[2]
     set_betas(f64 beta1, f64 beta2) . void
     get_epsilon() . f64
     set_epsilon(f64 eps) . void
@@ -46,7 +46,7 @@ interface i_adam_w_optimizer {
     set_weight_decay(f64 wd) . void
 }
 interface ilamb_optimizer {
-    get_betas() . [2]f64
+    get_betas() . f64[2]
     set_betas(f64 beta1, f64 beta2) . void
 }
 interface ilr_scheduler {

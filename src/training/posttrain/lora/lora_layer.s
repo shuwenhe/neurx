@@ -4,9 +4,9 @@ import (
 )
 
 struct lora_linear {
-    []float base_weight
-    []float lora_a
-    []float lora_b
+    float[] base_weight
+    float[] lora_a
+    float[] lora_b
     int in_dim
     int out_dim
     int rank
@@ -16,13 +16,13 @@ struct lora_linear {
 }
 
 struct lora_adapter {
-    []lora_linear q_proj_lora
-    []lora_linear k_proj_lora
-    []lora_linear v_proj_lora
-    []lora_linear o_proj_lora
-    []lora_linear gate_proj_lora
-    []lora_linear up_proj_lora
-    []lora_linear down_proj_lora
+    lora_linear[] q_proj_lora
+    lora_linear[] k_proj_lora
+    lora_linear[] v_proj_lora
+    lora_linear[] o_proj_lora
+    lora_linear[] gate_proj_lora
+    lora_linear[] up_proj_lora
+    lora_linear[] down_proj_lora
     int num_layers
     int rank
     float alpha
@@ -34,7 +34,7 @@ struct lora_config {
     int rank
     float alpha
     float dropout_rate
-    []string target_modules
+    string[] target_modules
 }
 
 func create_lora_linear(int in_dim, int out_dim, int rank, float alpha, float dropout_rate) lora_linear {
@@ -51,8 +51,8 @@ func create_lora_linear(int in_dim, int out_dim, int rank, float alpha, float dr
     return layer
 }
 
-func lora_linear_forward(lora_linear layer, []float input) []float {
-    []float output = fill_model_tensor(layer.out_dim, 0.0)
+func lora_linear_forward(lora_linear layer, float[] input) float[] {
+    float[] output = fill_model_tensor(layer.out_dim, 0.0)
     int out_idx = 0
     for out_idx < layer.out_dim {
         float sum = 0.0
@@ -87,7 +87,7 @@ func lora_linear_forward(lora_linear layer, []float input) []float {
     return output
 }
 
-func lora_linear_backward(lora_linear layer, []float input, []float grad_output) float {
+func lora_linear_backward(lora_linear layer, float[] input, float[] grad_output) float {
     float loss = 0.0
     int out_idx = 0
     for out_idx < len(grad_output) {
@@ -97,7 +97,7 @@ func lora_linear_backward(lora_linear layer, []float input, []float grad_output)
     return loss
 }
 
-func update_lora_weights(lora_linear layer, []float gradients, float learning_rate) lora_linear {
+func update_lora_weights(lora_linear layer, float[] gradients, float learning_rate) lora_linear {
     int i = 0
     for i < len(layer.lora_a) && i < len(gradients) {
         layer.lora_a[i] = layer.lora_a[i] - learning_rate * gradients[i]
@@ -121,13 +121,13 @@ func create_lora_adapter(int num_layers, int hidden_size, int intermediate_size,
     adapter.alpha = alpha
     adapter.hidden_size = hidden_size
     adapter.intermediate_size = intermediate_size
-    adapter.q_proj_lora = []lora_linear{}
-    adapter.k_proj_lora = []lora_linear{}
-    adapter.v_proj_lora = []lora_linear{}
-    adapter.o_proj_lora = []lora_linear{}
-    adapter.gate_proj_lora = []lora_linear{}
-    adapter.up_proj_lora = []lora_linear{}
-    adapter.down_proj_lora = []lora_linear{}
+    adapter.q_proj_lora = lora_linear[]{}
+    adapter.k_proj_lora = lora_linear[]{}
+    adapter.v_proj_lora = lora_linear[]{}
+    adapter.o_proj_lora = lora_linear[]{}
+    adapter.gate_proj_lora = lora_linear[]{}
+    adapter.up_proj_lora = lora_linear[]{}
+    adapter.down_proj_lora = lora_linear[]{}
     int i = 0
     for i < num_layers {
         adapter.q_proj_lora = append(adapter.q_proj_lora, create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
@@ -159,7 +159,7 @@ func get_total_lora_params(lora_adapter adapter) int {
     return total
 }
 
-func lora_adapter_forward(lora_adapter adapter, int layer_idx, []float hidden_state, string module_name) []float {
+func lora_adapter_forward(lora_adapter adapter, int layer_idx, float[] hidden_state, string module_name) float[] {
     if layer_idx < 0 || layer_idx >= adapter.num_layers {
         return hidden_state
     }

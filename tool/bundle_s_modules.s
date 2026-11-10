@@ -8,7 +8,7 @@ import (
 
 func strip_package_and_imports(string content) string {
     lines := strings.Split(content, "\n")
-    result := []string{}
+    result := string[]{}
     for _, line := range lines {
         trimmed := strings.TrimSpace(line)
         if strings.HasPrefix(trimmed, "package ") {
@@ -51,7 +51,7 @@ func main() {
     }
     processed := strip_package_and_imports(string(entry_content))
     bundled += processed
-    err = os.WriteFile(output, []byte(bundled), 0644)
+    err = os.WriteFile(output, byte[](bundled), 0644)
     if err != nil {
         os.Stderr.WriteString("error writing " + output + ": " + err.Error() + "\n")
         os.Exit(1)

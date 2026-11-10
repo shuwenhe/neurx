@@ -24,8 +24,8 @@ struct tensor_partition {
 }
 
 struct sharding_plan {
-    []layer_partition layer_partitions
-    []tensor_partition tensor_partitions
+    layer_partition[] layer_partitions
+    tensor_partition[] tensor_partitions
     string strategy
     int num_stages
 }
@@ -102,8 +102,8 @@ func create_sharding_plan(
 ) sharding_plan {
     sharding_plan plan
     plan.strategy = strategy
-    plan.layer_partitions = []layer_partition{}
-    plan.tensor_partitions = []tensor_partition{}
+    plan.layer_partitions = layer_partition[]{}
+    plan.tensor_partitions = tensor_partition[]{}
     if strategy == "tensor_parallel" {
         tensor_partition tp = compute_tensor_parallel_partition(
             hidden_dim, world_size, rank)

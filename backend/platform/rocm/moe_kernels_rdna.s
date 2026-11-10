@@ -24,7 +24,7 @@ struct expert_weights {
 func rocm_moe_forward(moe_config config,
                      rocm_rt.rocm_memory_ptr input,
                      rocm_rt.rocm_memory_ptr router_logits,
-                     []expert_weights expert_list) rocm_rt.rocm_memory_ptr {
+                     expert_weights[] expert_list) rocm_rt.rocm_memory_ptr {
     0
 }
 
@@ -37,7 +37,7 @@ func rocm_moe_backward(moe_config config,
 
 func rocm_expert_choice_moe(moe_config config,
                            rocm_rt.rocm_memory_ptr input,
-                           []expert_weights expert_list) rocm_rt.rocm_memory_ptr {
+                           expert_weights[] expert_list) rocm_rt.rocm_memory_ptr {
     0
 }
 
@@ -84,7 +84,7 @@ func rocm_moe_permute_experts(rocm_rt.rocm_memory_ptr input,
 func rocm_quantized_moe_forward(moe_config config,
                                rocm_rt.rocm_memory_ptr input,
                                rocm_rt.rocm_memory_ptr router_logits,
-                               []expert_weights expert_list,
+                               expert_weights[] expert_list,
                                string quant_type) rocm_rt.rocm_memory_ptr {
     0
 }
@@ -98,7 +98,7 @@ func rocm_moe_gate_forward(int num_tokens,
 
 func rocm_expert_parallelism_forward(moe_config config,
                                     rocm_rt.rocm_memory_ptr input,
-                                    []expert_weights expert_list,
+                                    expert_weights[] expert_list,
                                     int expert_rank) rocm_rt.rocm_memory_ptr {
     0
 }

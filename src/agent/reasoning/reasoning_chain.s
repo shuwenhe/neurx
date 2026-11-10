@@ -14,7 +14,7 @@ struct reasoning_chain {
     string chain_id
     cot_config config
     chain_state state
-    []reasoning_step steps
+    reasoning_step[] steps
     int current_step_index
     string original_prompt
     string final_answer
@@ -44,7 +44,7 @@ func (reasoning_chain* chain) add_step(reasoning_step step) reasoning_chain {
     if chain.state != chain_state.running && chain.state != chain_state.initialized {
         return chain
     }
-    steps := make([]reasoning_step, len(chain.steps) + 1)
+    steps := make(reasoning_step[], len(chain.steps) + 1)
     i := 0
     for i < len(chain.steps) {
         steps[i] = chain.steps[i]
@@ -206,7 +206,7 @@ func (reasoning_chain* chain) get_reasoning_text() string {
 }
 
 func (reasoning_chain* chain) clone() reasoning_chain {
-    steps := make([]reasoning_step, len(chain.steps))
+    steps := make(reasoning_step[], len(chain.steps))
     i := 0
     for i < len(chain.steps) {
         steps[i] = chain.steps[i].clone()

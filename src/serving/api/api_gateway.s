@@ -343,8 +343,8 @@ func (api_gateway* gw) health_check() bool {
     return true
 }
 
-func (api_gateway* gw) list_available_apis() []api_protocol {
-    apis := make([]api_protocol, 0)
+func (api_gateway* gw) list_available_apis() api_protocol[] {
+    apis := make(api_protocol[], 0)
     for protocol, _ := range gw.server_info {
         apis = append(apis, protocol)
     }

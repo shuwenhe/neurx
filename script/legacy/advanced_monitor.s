@@ -32,12 +32,10 @@ struct training_metrics {
 
 struct advanced_training_monitor {
     start_time: time.Time
-    steps: []training_metrics
-    int total_steps
+    steps: int[] training_metrics total_steps
     string log_file
     int update_interval
-    ppl_history: []perplexity_metrics
-    float best_val_ppl
+    ppl_history: float[] perplexity_metrics best_val_ppl
     int best_step
     int convergence_window
     float convergence_threshold
@@ -49,8 +47,8 @@ func (advanced_training_monitor* atm) init(
     int update_interval,
     int convergence_window) error {
     atm.start_time = time.Now()
-    atm.steps = make([]training_metrics, 0)
-    atm.ppl_history = make([]perplexity_metrics, 0)
+    atm.steps = make(training_metrics[], 0)
+    atm.ppl_history = make(perplexity_metrics[], 0)
     atm.total_steps = total_steps
     atm.log_file = log_file
     atm.update_interval = update_interval

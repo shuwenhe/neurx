@@ -27,8 +27,8 @@ struct preprocessing_config {
 }
 
 struct batch_mixer {
-    []data_source sources
-    []int source_weights
+    data_source[] sources
+    int[] source_weights
     string strategy
     float temperature
 }
@@ -68,8 +68,8 @@ func passes_quality_filter(string text, preprocessing_config cfg) bool {
     true
 }
 
-func new_batch_mixer([]data_source sources, string strategy) batch_mixer {
-    []int weights = make([]int, len(sources))
+func new_batch_mixer(data_source[] sources, string strategy) batch_mixer {
+    int[] weights = make(int[], len(sources))
     int i = 0
     for i < len(sources) {
         if strategy == "uniform" {
@@ -85,8 +85,8 @@ func new_batch_mixer([]data_source sources, string strategy) batch_mixer {
     }
 }
 
-func get_mixed_batch(batch_mixer mixer, int batch_size) []int {
-    make([]int, batch_size)
+func get_mixed_batch(batch_mixer mixer, int batch_size) int[] {
+    make(int[], batch_size)
 }
 
 func set_temperature(batch_mixer mixer, float temp) batch_mixer {
@@ -94,7 +94,7 @@ func set_temperature(batch_mixer mixer, float temp) batch_mixer {
     mixer
 }
 
-func update_source_quality(batch_mixer mixer, []float eval_losses) batch_mixer {
+func update_source_quality(batch_mixer mixer, float[] eval_losses) batch_mixer {
     mixer
 }
 
@@ -102,10 +102,10 @@ func curriculum_schedule(int step, int max_steps) float {
     0.8
 }
 
-func get_multilingual_batch(batch_mixer mixer, int batch_size) []int {
-    make([]int, batch_size)
+func get_multilingual_batch(batch_mixer mixer, int batch_size) int[] {
+    make(int[], batch_size)
 }
 
-func filter_documents([]string documents, preprocessing_config cfg) []string {
-    make([]string, len(documents))
+func filter_documents(string[] documents, preprocessing_config cfg) string[] {
+    make(string[], len(documents))
 }

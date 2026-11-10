@@ -6,8 +6,8 @@ import (
     "std.json"
 )
 struct tensor_2 {
-    []float data
-    []int shape
+    float[] data
+    int[] shape
     int dtype
 }
 
@@ -37,7 +37,7 @@ struct training_state {
     int total_steps
     float total_loss
     float best_loss
-    []float loss_history
+    float[] loss_history
 }
 
 func load_model_config(string model_path) training_config {
@@ -86,7 +86,7 @@ struct transformer_block {
 
 struct base_model {
     tensor_2 embedding
-    []transformer_block blocks
+    transformer_block[] blocks
     tensor_2 output_proj
     int hidden_dim
     int vocab_size
@@ -99,8 +99,7 @@ func init_base_model(training_config config) base_model {
     model.vocab_size = 151936
     model.num_blocks = config.num_layers
     model.embedding = create_vector(model.vocab_size, 0.1)
-    model.blocks = []
-    for i in 0..config.num_layers {
+    model.blocks = for[] i in 0..config.num_layers {
         transformer_block block
         block.ln1_weight = create_vector(model.hidden_dim, 1.0)
         block.ln2_weight = create_vector(model.hidden_dim, 1.0)
@@ -232,8 +231,7 @@ func train_model(
     state.total_steps = 0
     state.best_loss = 999999.0
     state.total_loss = 0.0
-    state.loss_history = []
-    println("\n" + "="*50)
+    state.loss_history = println[]("\n" + "="*50)
     println("🚀 开始 LoRA SFT 训练")
     println("="*50)
     println("configuration: rank=" + int_to_string(config.lora_rank) +

@@ -14,8 +14,8 @@ struct oom_killer {
     int threshold_percent
     bool oom_kill_enabled
     int last_kill_time_ms
-    []process_info processes
-    []int kill_history
+    process_info[] processes
+    int[] kill_history
 }
 
 func new_oom_killer() oom_killer {
@@ -25,8 +25,8 @@ func new_oom_killer() oom_killer {
         threshold_percent: 85,
         oom_kill_enabled: true,
         last_kill_time_ms: 0,
-        processes: []process_info{},
-        kill_history: []int{}
+        processes: process_info[]{},
+        kill_history: int[]{}
     }
 }
 

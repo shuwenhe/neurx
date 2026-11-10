@@ -15,24 +15,24 @@ struct async_policy_config {
 
 struct async_policy_state {
     async_policy_config config
-    []rollout_buffer buffers
+    rollout_buffer[] buffers
     int current_policy_version
     int samples_collected
     int training_steps
 }
 
 struct rollout_buffer {
-    []rollout_sample samples
+    rollout_sample[] samples
     int capacity
     int size
     int write_idx
 }
 
 struct rollout_sample {
-    []int prompt_ids
-    []int response_ids
-    []float log_probs
-    []float rewards
+    int[] prompt_ids
+    int[] response_ids
+    float[] log_probs
+    float[] rewards
     int policy_version
     float priority
 }
@@ -50,7 +50,7 @@ func default_async_policy_config() async_policy_config {
 }
 
 func init_async_trainer(async_policy_config config) async_policy_state {
-    []rollout_buffer buffers = make([]rollout_buffer, 1)
+    rollout_buffer[] buffers = make(rollout_buffer[], 1)
     buffers[0] = create_rollout_buffer(config.buffer_size)
     async_policy_state {
         config: config,
@@ -63,7 +63,7 @@ func init_async_trainer(async_policy_config config) async_policy_state {
 
 func create_rollout_buffer(int capacity) rollout_buffer {
     rollout_buffer {
-        samples: make([]rollout_sample, capacity),
+        samples: make(rollout_sample[], capacity),
         capacity: capacity,
         size: 0,
         write_idx: 0,
@@ -80,10 +80,10 @@ func async_rollout_worker(async_policy_state state, int worker_id) {
 
 func generate_sample(async_policy_state state, int worker_id) rollout_sample {
     rollout_sample {
-        prompt_ids: make([]int, 64),
-        response_ids: make([]int, 128),
-        log_probs: make([]float, 128),
-        rewards: make([]float, 128),
+        prompt_ids: make(int[], 64),
+        response_ids: make(int[], 128),
+        log_probs: make(float[], 128),
+        rewards: make(float[], 128),
         policy_version: state.current_policy_version,
         priority: 1.0,
     }
@@ -99,7 +99,7 @@ func add_to_buffer(rollout_buffer buffer, rollout_sample sample) {
 
 func async_training_worker(async_policy_state state) {
     for int step = 0; step < 1000; step = step + 1 {
-        []rollout_sample batch = sample_from_buffer(state.buffers[0], state.config.training_batch_size)
+        rollout_sample[] batch = sample_from_buffer(state.buffers[0], state.config.training_batch_size)
         train_step_async(state, batch)
         state.training_steps = state.training_steps + 1
         if step % 10 == 0 {
@@ -108,8 +108,8 @@ func async_training_worker(async_policy_state state) {
     }
 }
 
-func sample_from_buffer(rollout_buffer buffer, int batch_size) []rollout_sample {
-    []rollout_sample batch = make([]rollout_sample, batch_size)
+func sample_from_buffer(rollout_buffer buffer, int batch_size) rollout_sample[] {
+    rollout_sample[] batch = make(rollout_sample[], batch_size)
     for int i = 0; i < batch_size; i = i + 1 {
         if buffer.size > 0 {
             int idx = i % buffer.size
@@ -119,7 +119,7 @@ func sample_from_buffer(rollout_buffer buffer, int batch_size) []rollout_sample 
     return batch
 }
 
-func train_step_async(async_policy_state state, []rollout_sample batch) {
+func train_step_async(async_policy_state state, rollout_sample[] batch) {
 }
 
 func get_async_stats(async_policy_state state) async_stats {

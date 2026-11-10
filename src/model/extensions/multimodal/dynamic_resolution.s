@@ -70,20 +70,20 @@ func (DynamicResolutionProcessor* p) GetPatchCount(
 
 func (DynamicResolutionProcessor* p) CreateVariableResolutionPatches(
     image_tensor: *types.Tensor
-) []ResolutionPatch {
+) ResolutionPatch[] {
     h := image_tensor.shape[0]
     w := image_tensor.shape[1]
     c := image_tensor.shape[2]
     target_h, target_w := p.CalculateTargetResolution(h, w)
     patch_h := target_h / p.patch_size
     patch_w := target_w / p.patch_size
-    patches := make([]ResolutionPatch, patch_h * patch_w)
+    patches := make(ResolutionPatch[], patch_h * patch_w)
     patch_idx := 0
     for ph := 0; ph < patch_h; ph += 1 {
         for pw := 0; pw < patch_w; pw += 1 {
             orig_y := (ph * h) / patch_h
             orig_x := (pw * w) / patch_w
-            patch_data := make([]f32, p.patch_size * p.patch_size * c)
+            patch_data := make(f32[], p.patch_size * p.patch_size * c)
             idx := 0
             for y := 0; y < p.patch_size; y += 1 {
                 for x := 0; x < p.patch_size; x += 1 {
@@ -111,7 +111,7 @@ func (DynamicResolutionProcessor* p) CreateVariableResolutionPatches(
 }
 
 struct ResolutionPatch {
-    data: []f32,
+    data: f32[],
     position: (i32, i32),
     resolution: (i32, i32),
     f32 scale_factor
@@ -120,12 +120,12 @@ struct ResolutionPatch {
 func (DynamicResolutionProcessor* p) MultiCropProcess(
     image_tensor: *types.Tensor,
     i32 num_crops
-) []*types.Tensor {
+) types.Tensor*[] {
     h := image_tensor.shape[0]
     w := image_tensor.shape[1]
     c := image_tensor.shape[2]
     target_h, target_w := p.CalculateTargetResolution(h, w)
-    crops := make([]*types.Tensor, num_crops)
+    crops := make(types.Tensor*[], num_crops)
     for crop_idx := 0; crop_idx < num_crops; crop_idx += 1 {
         crop_type := crop_idx % 5
         var crop_y, crop_x i32
@@ -157,7 +157,7 @@ func (DynamicResolutionProcessor* p) MultiCropProcess(
         if crop_x + target_w > w {
             crop_x = w - target_w
         }
-        crop_data := make([]f32, target_h * target_w * c)
+        crop_data := make(f32[], target_h * target_w * c)
         idx := 0
         for y := 0; y < target_h; y += 1 {
             for x := 0; x < target_w; x += 1 {
@@ -170,7 +170,7 @@ func (DynamicResolutionProcessor* p) MultiCropProcess(
         }
         crops[crop_idx] = *types.Tensor{
             data: crop_data,
-            shape: [3]i32{target_h, target_w, c},
+            shape: i32[3]{target_h, target_w, c},
             dtype: "float32"
         }
     }

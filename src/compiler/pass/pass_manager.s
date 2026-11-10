@@ -4,15 +4,14 @@ import (
     "neurx.strings"
 )
 struct pass_plan_state {
-    []string passes
+    string[] passes
     bool has_shape_infer
     bool has_fusion
     bool has_lowering
 }
 
-func default_passes(string mode, bool dynamic, bool fullgraph) []string {
-    []string passes = []
-    passes = append(passes, "normalize")
+func default_passes(string mode, bool dynamic, bool fullgraph) string[] {
+    string[] passes = passes[] = append(passes, "normalize")
     passes = append(passes, "shape_infer")
     passes = append(passes, "const_fold")
     passes = append(passes, "dead_code_elim")
@@ -30,7 +29,7 @@ func default_passes(string mode, bool dynamic, bool fullgraph) []string {
 }
 
 func new_pass_plan_state(string mode, bool dynamic, bool fullgraph) pass_plan_state {
-    []string passes = default_passes(mode, dynamic, fullgraph)
+    string[] passes = default_passes(mode, dynamic, fullgraph)
     pass_plan_state {
         passes: passes,
         has_shape_infer: true,

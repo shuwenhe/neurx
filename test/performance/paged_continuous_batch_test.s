@@ -65,8 +65,8 @@ func test_paged_kv_free() bool {
 
 func test_paged_kv_block_copy() bool {
     mgr := paged_attention_memory.new_paged_kv_cache_manager(100, 16, 24, 32, 4096)
-    src_blocks := []int{0, 1, 2, 3}
-    dst_blocks := []int{10, 11, 12, 13}
+    src_blocks := int[]{0, 1, 2, 3}
+    dst_blocks := int[]{10, 11, 12, 13}
     mgr = paged_attention_memory.copy_blocks(mgr, src_blocks, dst_blocks)
     if mgr.cache_hits != 4 {
         return false
@@ -100,7 +100,7 @@ func test_continuous_batch_creation() bool {
 
 func test_continuous_batch_add_request() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
-    input_ids := []int{1, 2, 3, 4, 5}
+    input_ids := int[]{1, 2, 3, 4, 5}
     sched = continuous_batch_scheduler.add_request(
         sched,
         0,
@@ -121,9 +121,9 @@ func test_continuous_batch_add_request() bool {
 
 func test_continuous_batch_schedule() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
-    input1 := []int{1, 2, 3, 4, 5}
+    input1 := int[]{1, 2, 3, 4, 5}
     sched = continuous_batch_scheduler.add_request(sched, 0, input1, 50, 0.7, 0.9, 40)
-    input2 := []int{10, 11, 12}
+    input2 := int[]{10, 11, 12}
     sched = continuous_batch_scheduler.add_request(sched, 1, input2, 40, 0.8, 0.85, 50)
     sched = continuous_batch_scheduler.schedule_batch(sched)
     prefill := continuous_batch_scheduler.get_prefill_batch(sched)
@@ -138,7 +138,7 @@ func test_continuous_batch_schedule() bool {
 
 func test_continuous_batch_decode_step() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
-    input := []int{1, 2, 3}
+    input := int[]{1, 2, 3}
     sched = continuous_batch_scheduler.add_request(sched, 0, input, 50, 0.7, 0.9, 40)
     sched = continuous_batch_scheduler.schedule_batch(sched)
     sched = continuous_batch_scheduler.record_decode_step(sched, 0, 100)
@@ -160,7 +160,7 @@ func test_continuous_batch_multiple_requests() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(64)
     i := 0
     for i < 5 {
-        input := []int{i + 1, i + 2, i + 3}
+        input := int[]{i + 1, i + 2, i + 3}
         sched = continuous_batch_scheduler.add_request(
             sched,
             i,
@@ -185,7 +185,7 @@ func test_continuous_batch_multiple_requests() bool {
 
 func test_continuous_batch_prefill_decode_separation() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
-    input1 := []int{1, 2, 3}
+    input1 := int[]{1, 2, 3}
     sched = continuous_batch_scheduler.add_request(sched, 0, input1, 50, 0.7, 0.9, 40)
     sched = continuous_batch_scheduler.schedule_batch(sched)
     prefill := continuous_batch_scheduler.get_prefill_batch(sched)
@@ -193,7 +193,7 @@ func test_continuous_batch_prefill_decode_separation() bool {
         return false
     }
     sched = continuous_batch_scheduler.record_decode_step(sched, 0, 100)
-    input2 := []int{10, 11, 12, 13}
+    input2 := int[]{10, 11, 12, 13}
     sched = continuous_batch_scheduler.add_request(sched, 1, input2, 40, 0.8, 0.85, 50)
     sched = continuous_batch_scheduler.schedule_batch(sched)
     prefill = continuous_batch_scheduler.get_prefill_batch(sched)
@@ -209,7 +209,7 @@ func test_continuous_batch_prefill_decode_separation() bool {
 
 func test_continuous_batch_max_tokens_limit() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
-    input := []int{1, 2}
+    input := int[]{1, 2}
     sched = continuous_batch_scheduler.add_request(sched, 0, input, 5, 0.7, 0.9, 40)
     sched = continuous_batch_scheduler.schedule_batch(sched)
     i := 0
@@ -226,7 +226,7 @@ func test_continuous_batch_max_tokens_limit() bool {
 
 func test_continuous_batch_stats() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
-    input := []int{1, 2, 3}
+    input := int[]{1, 2, 3}
     sched = continuous_batch_scheduler.add_request(sched, 0, input, 50, 0.7, 0.9, 40)
     sched = continuous_batch_scheduler.schedule_batch(sched)
     stats := continuous_batch_scheduler.get_scheduler_stats(sched)
@@ -238,7 +238,7 @@ func test_continuous_batch_stats() bool {
 
 func test_continuous_batch_reset() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
-    input := []int{1, 2}
+    input := int[]{1, 2}
     sched = continuous_batch_scheduler.add_request(sched, 0, input, 50, 0.7, 0.9, 40)
     if sched.total_prefill_tokens != 2 {
         return false
@@ -258,7 +258,7 @@ func test_paged_attention_with_scheduling() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(64)
     i := 0
     for i < 3 {
-        input := make([]int, i + 2)
+        input := make(int[], i + 2)
         j := 0
         for j < i + 2 {
             input[j] = j + 1
@@ -290,7 +290,7 @@ func test_paged_attention_with_scheduling() bool {
 }
 
 func run_all_tests() bool {
-    tests := []string{
+    tests := string[]{
         "test_paged_kv_allocation",
         "test_paged_kv_multiple_sequences",
         "test_paged_kv_free",

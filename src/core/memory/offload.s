@@ -9,7 +9,7 @@ struct offload_config {
 
 struct tensor_metadata {
     string tensor_name
-    []int shape
+    int[] shape
     string dtype
     int size_bytes
     bool on_gpu
@@ -29,7 +29,7 @@ struct offload_memory_pool {
     int total_available_cpu
     int allocated_gpu
     int allocated_cpu
-    []layer_offload_state layer_states
+    layer_offload_state[] layer_states
 }
 
 func new_offload_config(
@@ -51,13 +51,13 @@ func new_offload_memory_pool(offload_config config) offload_memory_pool {
         total_available_cpu: config.total_cpu_memory_bytes,
         allocated_gpu: 0,
         allocated_cpu: 0,
-        layer_states: []layer_offload_state{},
+        layer_states: layer_offload_state[]{},
     }
 }
 
 func create_tensor_metadata(
     string name,
-    []int shape,
+    int[] shape,
     string dtype,
 ) tensor_metadata {
     size := compute_tensor_size(shape, dtype)
@@ -198,7 +198,7 @@ func print_memory_stats(offload_memory_pool pool) string {
     "GPU: " + float_to_str(gpu_usage) + "% | CPU: " + float_to_str(cpu_usage) + "%"
 }
 
-func compute_tensor_size([]int shape, string dtype) int {
+func compute_tensor_size(int[] shape, string dtype) int {
     size := 1
     i := 0
     for i < shape.len {
@@ -217,8 +217,8 @@ func compute_tensor_size([]int shape, string dtype) int {
     size
 }
 
-func append_layer_state([]layer_offload_state slice, layer_offload_state elem) []layer_offload_state {
-    new_slice := []layer_offload_state{}
+func append_layer_state(layer_offload_state[] slice, layer_offload_state elem) layer_offload_state[] {
+    new_slice := layer_offload_state[]{}
     i := 0
     for i < slice.len {
         new_slice = append_layer_state(new_slice, slice[i])

@@ -33,7 +33,7 @@ struct constraint_check {
 struct constraint_report {
     bool all_satisfied
     constraint_check[] checks
-    []string recommendations
+    string[] recommendations
     int64 check_time_ms
 }
 
@@ -143,8 +143,8 @@ func create_default_thermal_constraints() (thermal_constraints*) {
 func (resource_constraint_checker_impl* c) check_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_report*) {
     report := *constraint_report{
         all_satisfied: true,
-        checks: []constraint_check{},
-        recommendations: []string{},
+        checks: constraint_check[]{},
+        recommendations: string[]{},
         check_time_ms: 0,
     }
 
@@ -182,7 +182,7 @@ func (resource_constraint_checker_impl* c) check_constraints(cfg device_config_f
 }
 
 func (resource_constraint_checker_impl* c) check_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[]) {
-    checks := []constraint_check{}
+    checks := constraint_check[]{}
 
     if cfg.mem_cfg == nil {
         return checks
@@ -225,7 +225,7 @@ func (resource_constraint_checker_impl* c) check_memory_constraints(cfg device_c
 }
 
 func (resource_constraint_checker_impl* c) check_compute_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[]) {
-    checks := []constraint_check{}
+    checks := constraint_check[]{}
 
     if cfg.comp_cfg == nil {
         return checks
@@ -250,7 +250,7 @@ func (resource_constraint_checker_impl* c) check_compute_constraints(cfg device_
 }
 
 func (resource_constraint_checker_impl* c) check_bandwidth_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[]) {
-    checks := []constraint_check{}
+    checks := constraint_check[]{}
 
     check1 := constraint_check{
         constraint_name: "memory_bandwidth",
@@ -359,8 +359,8 @@ func (resource_constraint_checker_impl* c) apply_conservative_limits(cfg device_
     return conservative
 }
 
-func (resource_constraint_checker_impl* c) generate_recommendations(checks []constraint_check) ([]string) {
-    recommendations := []string{}
+func (resource_constraint_checker_impl* c) generate_recommendations(checks constraint_check[]) (string[]) {
+    recommendations := string[]{}
 
     for check in checks {
         if check.status == constraint_status.warning || check.status == constraint_status.violated {

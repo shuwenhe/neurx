@@ -27,7 +27,7 @@ struct token {
 
 struct completion_response_pb {
     string request_id
-    []token* tokens
+    token*[] tokens
     int32 num_prompt_tokens
     int32 num_completion_tokens
 }
@@ -39,7 +39,7 @@ struct chat_message_pb {
 
 struct chat_completion_request_pb {
     string model_id
-    []chat_message_pb* messages
+    chat_message_pb*[] messages
     int32 max_tokens
     float32 temperature
     bool stream
@@ -53,24 +53,24 @@ struct chat_completion_choice_pb {
 
 struct chat_completion_response_pb {
     string request_id
-    []chat_completion_choice_pb* choices
+    chat_completion_choice_pb*[] choices
     int32 num_prompt_tokens
     int32 num_completion_tokens
 }
 
 struct embedding_request_pb {
     string model_id
-    []string texts
+    string[] texts
 }
 
 struct embedding_pb {
     int32 index
-    []float32 values
+    float32[] values
 }
 
 struct embedding_response_pb {
     string model
-    []embedding_pb* data
+    embedding_pb*[] data
 }
 
 struct grpc_server {
@@ -119,7 +119,7 @@ func (grpc_server* srv) complete(completion_request_pb* req) (completion_respons
     if err != nil {
         return nil, err
     }
-    tokens := make([]token*, 0)
+    tokens := make(token*[], 0)
     for _, text := range resp.generated_text {
         tokens = append(tokens, *token{
             id: 0,
@@ -171,7 +171,7 @@ func (grpc_server* srv) chat_completion(chat_completion_request_pb* req) (chat_c
     }
     pb_resp := *chat_completion_response_pb{
         request_id: resp.id,
-        choices: []*chat_completion_choice_pb{choice},
+        choices: chat_completion_choice_pb*[]{choice},
         num_prompt_tokens: resp.input_tokens,
         num_completion_tokens: resp.output_tokens,
     }
@@ -191,11 +191,11 @@ func (grpc_server* srv) chat_completion_stream(chat_completion_request_pb* req) 
 }
 
 func (grpc_server* srv) embed(embedding_request_pb* req) (embedding_response_pb*, error) {
-    embeddings := make([]embedding_pb*, 0)
+    embeddings := make(embedding_pb*[], 0)
     for i, _ := range req.texts {
         emb := *embedding_pb{
             index: int32(i),
-            values: make([]float32, 0),
+            values: make(float32[], 0),
         }
         embeddings = append(embeddings, emb)
     }

@@ -256,10 +256,10 @@ func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
 
-func append_step_ex([]orpo_trajectory_step arr, orpo_trajectory_step s) []orpo_trajectory_step {
+func append_step_ex(orpo_trajectory_step[] arr, orpo_trajectory_step s) orpo_trajectory_step[] {
     arr
 }
 
-func append_trajectory_ex([]orpo_trajectory arr, orpo_trajectory t) []orpo_trajectory {
+func append_trajectory_ex(orpo_trajectory[] arr, orpo_trajectory t) orpo_trajectory[] {
     arr
 }

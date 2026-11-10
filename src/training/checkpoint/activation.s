@@ -7,7 +7,7 @@ func save_checkpoint(
     checkpoint_manager mgr,
     int layer_id,
     tensor input,
-    []tensor cheap_intermediates
+    tensor[] cheap_intermediates
 ) (checkpoint_manager, bool) {
     if !mgr.config.enabled {
         return mgr, false
@@ -59,7 +59,7 @@ func estimate_full_layer_memory(int layer_id) int {
     base_size * 5
 }
 
-func size_of_dimensions([]int shape) int {
+func size_of_dimensions(int[] shape) int {
     if len(shape) == 0 { return 1 }
     int size = 1
     for s in shape { size = size * s }
@@ -90,8 +90,8 @@ func restore_activation(
 func recompute_layer(
     layer_checkpoint ckpt,
     layer_forward_fn forward_fn
-) []tensor {
+) tensor[] {
     tensor input = ckpt.input_activation
-    []tensor recomputed = forward_fn(input)
+    tensor[] recomputed = forward_fn(input)
     recomputed
 }

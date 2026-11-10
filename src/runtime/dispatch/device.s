@@ -14,7 +14,7 @@ struct device_info {
 }
 
 struct dispatch_state {
-    []device_info devices
+    device_info[] devices
     int           next_dev_id
     string        default_cpu
     string        default_gpu

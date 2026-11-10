@@ -16,7 +16,7 @@ struct monitoring_config {
     string experiment_name
     string run_id
     log_backend primary_backend
-    []log_backend additional_backends
+    log_backend[] additional_backends
     string tensorboard_log_dir
     string wandb_project
     int scalar_log_interval
@@ -29,7 +29,7 @@ struct monitoring_config {
     float gpu_memory_warning_pct
     float gpu_memory_critical_pct
     int consecutive_loss_spikes_to_alert
-    []alert_channel alert_channels
+    alert_channel[] alert_channels
     string webhook_url
     bool enable_profiling
     bool track_per_layer_stats
@@ -80,8 +80,8 @@ struct histogram_metric {
     string name
     int step
     int64 timestamp_ms
-    []float bins
-    []int counts
+    float[] bins
+    int[] counts
     float min_val
     float max_val
     float mean
@@ -134,7 +134,7 @@ struct training_health_snapshot {
     bool is_gpu_near_oom
     bool is_stagnating
     bool is_diverging
-    []alert_info active_alerts
+    alert_info[] active_alerts
     diagnosis_result auto_diagnosis
 }
 
@@ -157,8 +157,8 @@ struct alert_info {
 struct diagnosis_result {
     string overall_status
     string summary
-    []diagnosis_issue issues
-    []recommendation recommendations
+    diagnosis_issue[] issues
+    recommendation[] recommendations
     float confidence_score
 }
 
@@ -179,15 +179,15 @@ struct recommendation {
 struct monitoring_manager {
     monitoring_config config
     bool is_running
-    []metric_record scalar_history
-    []histogram_metric histogram_history
-    []performance_snapshot perf_snapshots
-    []training_health_snapshot health_snapshots
+    metric_record[] scalar_history
+    histogram_metric[] histogram_history
+    performance_snapshot[] perf_snapshots
+    training_health_snapshot[] health_snapshots
     training_health_snapshot current_health
     performance_snapshot current_perf
     moving_window loss_window
     moving_window grad_window
-    []alert_info alert_history
+    alert_info[] alert_history
     int consecutive_loss_spike_count
     profiler_state profiler
     tensorboard_writer tb_writer
@@ -196,7 +196,7 @@ struct monitoring_manager {
 }
 
 struct moving_window {
-    []float values
+    float[] values
     int window_size
     int current_index
     bool is_filled_once
@@ -225,7 +225,7 @@ func init_monitoring(monitoring_config cfg) monitoring_manager {
     console_writer cw
     cw.verbose = true
     moving_window lw
-    lw.values = make([]float, 100)
+    lw.values = make(float[], 100)
     lw.window_size = 100
     lw.current_index = 0
     lw.is_filled_once = false
@@ -233,13 +233,13 @@ func init_monitoring(monitoring_config cfg) monitoring_manager {
     monitoring_manager mgr
     mgr.config = cfg
     mgr.is_running = false
-    mgr.scalar_history = []metric_record{}
-    mgr.histogram_history = []histogram_metric{}
-    mgr.perf_snapshots = []performance_snapshot{}
-    mgr.health_snapshots = []training_health_snapshot{}
+    mgr.scalar_history = metric_record[]{}
+    mgr.histogram_history = histogram_metric[]{}
+    mgr.perf_snapshots = performance_snapshot[]{}
+    mgr.health_snapshots = training_health_snapshot[]{}
     mgr.loss_window = lw
     mgr.grad_window = gw
-    mgr.alert_history = []alert_info{}
+    mgr.alert_history = alert_info[]{}
     mgr.consecutive_loss_spike_count = 0
     mgr.profiler.is_active = false
     mgr.tb_writer = tbw
@@ -288,7 +288,7 @@ func log_scalar(
 func log_histogram(
     ref monitoring_manager mgr,
     string name,
-    []float values,
+    float[] values,
     int step
 ) {
     if !mgr.is_running || !should_log_at_step(step, mgr.config.histogram_log_interval) {
@@ -352,9 +352,7 @@ func run_auto_diagnosis(
     monitoring_manager mgr,
     performance_snapshot perf
 ) diagnosis_result {
-    []diagnosis_issue issues = []
-    []recommendation recs = []
-    float confidence = 0.9
+    diagnosis_issue[] issues = recommendation[][] recs = float[] confidence = 0.9
     if perf.gpu_sm_utilization_pct < 50.0 {
         diagnosis_issue issue
         issue.category = "performance"
@@ -618,17 +616,17 @@ func should_log_at_step(int step, int interval) bool {
     return step % interval == 0
 }
 
-func append_ref([]metric_record arr, metric_record r) {}
+func append_ref(metric_record[] arr, metric_record r) {}
 
-func append_hist([]histogram_metric arr, histogram_metric h) {}
+func append_hist(histogram_metric[] arr, histogram_metric h) {}
 
-func append_perf([]performance_snapshot arr, performance_snapshot p) {}
+func append_perf(performance_snapshot[] arr, performance_snapshot p) {}
 
-func append_health([]training_health_snapshot arr, training_health_snapshot h) {}
+func append_health(training_health_snapshot[] arr, training_health_snapshot h) {}
 
-func append_issues([]diagnosis_issue arr, diagnosis_issue i) {}
+func append_issues(diagnosis_issue[] arr, diagnosis_issue i) {}
 
-function append_recs([]recommendation arr, recommendation r) {}
+function append_recs(recommendation[] arr, recommendation r) {}
 
 func update_moving_window(ref moving_window win, float val) {
     win.values[win.current_index] = val
@@ -704,7 +702,7 @@ func detect_divergence(moving_window win) bool {
     return recent_avg > early_avg * 2.0 && early_avg > 0.01
 }
 
-func compute_histogram_statistics([]float values, ref histogram_metric hist) {
+func compute_histogram_statistics(float[] values, ref histogram_metric hist) {
     int n = len(values)
     if n == 0 { return }
     float sum = 0.0
@@ -731,8 +729,8 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     hist.mean = mean
     hist.std_dev = std
     int num_bins = 50
-    hist.bins = make([]float, num_bins + 1)
-    hist.counts = make([]int, num_bins)
+    hist.bins = make(float[], num_bins + 1)
+    hist.counts = make(int[], num_bins)
     float range = max_val - min_val
     if range == 0 { range = 1.0 }
     float bin_width = range / float_of_int(num_bins)
@@ -757,7 +755,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     hist.p99 = values[n * 99 / 100]
 }
 
-func sort_float_array(ref []float arr) {
+func sort_float_array(ref float[] arr) {
     int n = len(arr)
     int i = 0
     for i < n - 1 {

@@ -154,7 +154,7 @@ func mm_struct_add_vma(mm_struct* mm, vma vm) bool {
 
 func tlb_create() tlb {
     t := tlb {
-        entries: [256]tlb_entry{},
+        entries: tlb_entry[256]{},
         entry_count: 0,
         hits: 0,
         misses: 0

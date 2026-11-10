@@ -35,19 +35,19 @@ struct fsdp_param_shard {
 }
 
 struct fsdp_optimizer_state {
-    []double exp_avg
-    []double exp_avg_sq
+    double[] exp_avg
+    double[] exp_avg_sq
     int step_count
 }
 
 struct fsdp_unit_state {
     fsdp_config config
-    []double local_param_shard
-    []double local_grad_shard
+    double[] local_param_shard
+    double[] local_grad_shard
     fsdp_optimizer_state optimizer
-    []double full_param_buffer
+    double[] full_param_buffer
     bool full_buffer_is_valid
-    []fsdp_param_shard param_shards
+    fsdp_param_shard[] param_shards
     int total_local_elements
     int total_global_elements
     int pg_world_size
@@ -89,10 +89,10 @@ func default_fsdp_config_2t(int dp_degree, int dp_rank) fsdp_config {
 
 func init_fsdp(
     fsdp_config cfg,
-    []double initial_model_params,
-    []string param_names,
-    []int param_sizes,
-    []bool param_requires_grad) fsdp_unit_state {
+    double[] initial_model_params,
+    string[] param_names,
+    int[] param_sizes,
+    bool[] param_requires_grad) fsdp_unit_state {
     fsdp_unit_state state
     state.config = cfg
     state.pg_world_size = cfg.dp_degree
@@ -124,8 +124,8 @@ func init_fsdp(
         my_start_offset = my_start_offset + cnt
         j = j + 1
     }
-    state.local_param_shard = make([]double, my_local_count)
-    state.local_grad_shard = make([]double, my_local_count)
+    state.local_param_shard = make(double[], my_local_count)
+    state.local_grad_shard = make(double[], my_local_count)
     int k = 0
     for k < my_local_count {
         if cfg.dp_rank == 0 {
@@ -135,7 +135,7 @@ func init_fsdp(
         }
         k = k + 1
     }
-    state.param_shards = make([]fsdp_param_shard, len(param_sizes))
+    state.param_shards = make(fsdp_param_shard[], len(param_sizes))
     int running_global_offset = 0
     int running_local_offset = 0
     int m = 0
@@ -161,16 +161,16 @@ func init_fsdp(
         }
         m = m + 1
     }
-    state.full_param_buffer = make([]double, total_global)
-    state.optimizer.exp_avg = make([]double, my_local_count)
-    state.optimizer.exp_avg_sq = make([]double, my_local_count)
+    state.full_param_buffer = make(double[], total_global)
+    state.optimizer.exp_avg = make(double[], my_local_count)
+    state.optimizer.exp_avg_sq = make(double[], my_local_count)
     state.optimizer.step_count = 0
     return state
 }
 
 func pre_forward_allgather(
     ref fsdp_unit_state state,
-    []string param_names_needed) {
+    string[] param_names_needed) {
     if state.config.sharding_policy != SHARDING_FULL_SHARD { return }
     double t_start = 0.0
     int idx = 0
@@ -192,7 +192,7 @@ func pre_forward_allgather(
 
 func post_forward_unshard(
     ref fsdp_unit_state state,
-    []string param_names_released) {
+    string[] param_names_released) {
     if state.config.sharding_policy != SHARDING_FULL_SHARD { return }
     int idx = 0
     for idx < len(param_names_released) {
@@ -217,15 +217,15 @@ func post_forward_unshard(
     }
 }
 
-func get_full_param(fsdp_unit_state state, string param_name) []double {
+func get_full_param(fsdp_unit_state state, string param_name) double[] {
     int pidx = find_param_idx(state, param_name)
-    if pidx < 0 { return []double{} }
+    if pidx < 0 { return double[]{} }
     fsdp_param_shard ps = state.param_shards[pidx]
     if !state.full_buffer_is_valid || !ps.is_currently_gathered {
         perform_allgather(state)
         state.full_buffer_is_valid = true
     }
-    []double result = make([]double, ps.num_elements)
+    double[] result = make(double[], ps.num_elements)
     int k = 0
     for k < ps.num_elements {
         result[k] = state.full_param_buffer[ps.global_offset + k]
@@ -236,8 +236,8 @@ func get_full_param(fsdp_unit_state state, string param_name) []double {
 
 func post_backward_reducescatter(
     ref fsdp_unit_state state,
-    []string param_names_with_grads,
-    [][]double full_grad_tensors) {
+    string[] param_names_with_grads,
+    double[][] full_grad_tensors) {
     if state.config.sharding_policy == SHARDING_NO_SHARD { return }
     double t_start = 0.0
     int idx = 0
@@ -331,7 +331,7 @@ func perform_allgather(ref fsdp_unit_state state) {
     }
 }
 
-func perform_reducescatter(ref fsdp_unit_state state, [][]double full_grads) {
+func perform_reducescatter(ref fsdp_unit_state state, double[][] full_grads) {
     int world_size = state.pg_world_size
     int rank = state.pg_my_rank
     int local_n = state.total_local_elements

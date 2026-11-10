@@ -84,17 +84,17 @@ func remax_compute_policy_loss(
 func remax_step(
     module policy,
     module value_model,
-    []tensor states,
-    []tensor actions,
-    []tensor rewards,
-    []tensor old_log_probs,
-    []tensor old_values,
-    []bool dones,
+    tensor[] states,
+    tensor[] actions,
+    tensor[] rewards,
+    tensor[] old_log_probs,
+    tensor[] old_values,
+    bool[] dones,
     remax_config cfg
 ) remax_state {
     int T = rewards.len
-    []tensor advantages = make([]tensor, T)
-    []tensor returns = make([]tensor, T)
+    tensor[] advantages = make(tensor[], T)
+    tensor[] returns = make(tensor[], T)
     tensor gae = tensor_ops.zeros_like(old_values[T - 1])
     int t = T - 1
     for t >= 0 {

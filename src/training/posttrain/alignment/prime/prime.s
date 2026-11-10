@@ -33,7 +33,7 @@ struct prime_state {
 
 struct process_reward_model {
     module backbone
-    []module step_heads
+    module[] step_heads
     int num_steps
 }
 
@@ -55,10 +55,10 @@ func new_prime_config() prime_config {
 
 func prime_compute_process_rewards(
     process_reward_model rm,
-    []tensor states,
-    []tensor actions
-) []tensor {
-    []tensor step_rewards = make([]tensor, states.len)
+    tensor[] states,
+    tensor[] actions
+) tensor[] {
+    tensor[] step_rewards = make(tensor[], states.len)
     int i = 0
     for i < states.len {
         int step_idx = i % rm.num_steps
@@ -71,12 +71,12 @@ func prime_compute_process_rewards(
 }
 
 func prime_compute_cumulative_rewards(
-    []tensor step_rewards,
+    tensor[] step_rewards,
     float gamma,
     float intermediate_weight
-) []tensor {
+) tensor[] {
     int n = step_rewards.len
-    []tensor cumulative = make([]tensor, n)
+    tensor[] cumulative = make(tensor[], n)
     tensor running_reward = tensor_ops.zeros_like(step_rewards[n - 1])
     int i = n - 1
     for i >= 0 {
@@ -94,14 +94,14 @@ func prime_step(
     module policy,
     module value_model,
     process_reward_model reward_model,
-    []tensor states,
-    []tensor actions,
-    []tensor old_log_probs,
-    []tensor old_values,
-    []bool dones,
+    tensor[] states,
+    tensor[] actions,
+    tensor[] old_log_probs,
+    tensor[] old_values,
+    bool[] dones,
     prime_config cfg
 ) prime_state {
-    []tensor step_rewards = []tensor{}
+    tensor[] step_rewards = tensor[]{}
     if cfg.use_process_supervision {
         step_rewards = prime_compute_process_rewards(
             reward_model,
@@ -115,13 +115,13 @@ func prime_step(
             i = i + 1
         }
     }
-    []tensor cumulative_rewards = prime_compute_cumulative_rewards(
+    tensor[] cumulative_rewards = prime_compute_cumulative_rewards(
         step_rewards,
         cfg.gamma,
         cfg.intermediate_reward_weight
     )
-    []tensor advantages = make([]tensor, states.len)
-    []tensor returns = make([]tensor, states.len)
+    tensor[] advantages = make(tensor[], states.len)
+    tensor[] returns = make(tensor[], states.len)
     tensor gae = tensor_ops.zeros_like(old_values[states.len - 1])
     int t = states.len - 1
     for t >= 0 {

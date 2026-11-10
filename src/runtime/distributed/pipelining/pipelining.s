@@ -11,8 +11,8 @@ struct pipeline_stage {
     string device
     bool first
     bool last
-    []string inputs
-    []string outputs
+    string[] inputs
+    string[] outputs
 }
 
 struct pipeline_plan {
@@ -20,8 +20,8 @@ struct pipeline_plan {
     string strategy
     int num_stages
     int chunks
-    []string split_points
-    []pipeline_stage stages
+    string[] split_points
+    pipeline_stage[] stages
 }
 
 struct pipeline_schedule_state {
@@ -29,7 +29,7 @@ struct pipeline_schedule_state {
     int stage_index
     int step
     int microbatch_id
-    []string ops
+    string[] ops
     bool warmup_done
     bool flush_done
     bool active
@@ -50,8 +50,8 @@ func copy_stage(pipeline_stage stage) pipeline_stage {
     }
 }
 
-func copy_stages([]pipeline_stage values) []pipeline_stage {
-    []pipeline_stage out = make([]pipeline_stage, len(values))
+func copy_stages(pipeline_stage[] values) pipeline_stage[] {
+    pipeline_stage[] out = make(pipeline_stage[], len(values))
     int i = 0
     for i < len(values) {
         out[i] = copy_stage(values[i])
@@ -151,7 +151,7 @@ func pipeline_stage_is_last(pipeline_stage stage) bool {
 }
 
 func pipeline_stage_add_input(pipeline_stage stage, string value) pipeline_stage {
-    []string inputs = copy_strings(stage.inputs)
+    string[] inputs = copy_strings(stage.inputs)
     inputs = append(inputs, value)
     pipeline_stage {
         name: stage.name,
@@ -168,7 +168,7 @@ func pipeline_stage_add_input(pipeline_stage stage, string value) pipeline_stage
 }
 
 func pipeline_stage_add_output(pipeline_stage stage, string value) pipeline_stage {
-    []string outputs = copy_strings(stage.outputs)
+    string[] outputs = copy_strings(stage.outputs)
     outputs = append(outputs, value)
     pipeline_stage {
         name: stage.name,
@@ -242,7 +242,7 @@ func pipeline_stage_count(pipeline_plan plan) int {
 }
 
 func pipeline_add_split_point(pipeline_plan plan, string split_point) pipeline_plan {
-    []string split_points = copy_strings(plan.split_points)
+    string[] split_points = copy_strings(plan.split_points)
     split_points = append(split_points, split_point)
     pipeline_plan {
         name: plan.name,
@@ -260,7 +260,7 @@ func build_stage(pipeline_plan plan, int stage_index, int rank, int world_size, 
 }
 
 func pipeline_add_stage(pipeline_plan plan, pipeline_stage stage) pipeline_plan {
-    []pipeline_stage stages = copy_stages(plan.stages)
+    pipeline_stage[] stages = copy_stages(plan.stages)
     stages = append(stages, copy_stage(stage))
     pipeline_plan {
         name: plan.name,
@@ -297,7 +297,7 @@ func schedule_pipeline_depth(pipeline_plan plan) int {
     plan.num_stages + plan.chunks - 1
 }
 
-func new_schedule_state(pipeline_plan plan, []string ops) pipeline_schedule_state {
+func new_schedule_state(pipeline_plan plan, string[] ops) pipeline_schedule_state {
     pipeline_schedule_state {
         plan: pipeline_plan_state_dict(plan),
         stage_index: 0,
@@ -310,7 +310,7 @@ func new_schedule_state(pipeline_plan plan, []string ops) pipeline_schedule_stat
     }
 }
 
-func new_schedule_state_for_stage(pipeline_plan plan, int stage_index, []string ops) pipeline_schedule_state {
+func new_schedule_state_for_stage(pipeline_plan plan, int stage_index, string[] ops) pipeline_schedule_state {
     pipeline_schedule_state {
         plan: pipeline_plan_state_dict(plan),
         stage_index: clamp_stage_index(stage_index, plan.num_stages),
@@ -411,7 +411,7 @@ func schedule_current_op(pipeline_schedule_state state) string {
 
 func new_schedule_gpipe(pipeline_plan plan) pipeline_schedule_state {
     int n = plan.chunks
-    []string ops = make([]string, 2 * n)
+    string[] ops = make(string[], 2 * n)
     int i = 0
     for i < n {
         ops[i] = "forward"
@@ -427,7 +427,7 @@ func new_schedule_gpipe(pipeline_plan plan) pipeline_schedule_state {
 
 func new_schedule_gpipe_for_stage(pipeline_plan plan, int stage_index) pipeline_schedule_state {
     int n = plan.chunks
-    []string ops = make([]string, 2 * n)
+    string[] ops = make(string[], 2 * n)
     int i = 0
     for i < n {
         ops[i] = "forward"
@@ -450,7 +450,7 @@ func new_schedule_1f1b_for_stage(pipeline_plan plan, int stage_index) pipeline_s
     int warmup = schedule_warmup_steps(plan, stage_index)
     int steady = schedule_steady_steps(plan, stage_index)
     int flush = schedule_flush_steps(plan, stage_index)
-    []string ops = make([]string, warmup + steady + flush)
+    string[] ops = make(string[], warmup + steady + flush)
     int i = 0
     for i < warmup {
         ops[i] = "forward"

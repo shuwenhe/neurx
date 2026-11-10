@@ -32,9 +32,9 @@ func get_default_config() train_config {
     config
 }
 
-func load_shard_data(string shard_path) []int {
+func load_shard_data(string shard_path) int[] {
     content, _ := os.ReadFile(shard_path)
-    tokens := make([]int, 0)
+    tokens := make(int[], 0)
     for i := 0; i < len(content); i += 1 {
         tokens = append(tokens, int(content[i]) % 256)
     }
@@ -70,8 +70,8 @@ func main() {
         fmt.Printf("[Slice 1/%d] %s | loading\n", len(shards), shard_entry.Name())
         tokens := load_shard_data(shard_path)
         if len(tokens) > config.seq_len + 1 {
-            input_tokens := make([]int, config.seq_len)
-            target_tokens := make([]int, config.seq_len)
+            input_tokens := make(int[], config.seq_len)
+            target_tokens := make(int[], config.seq_len)
             for i := 0; i < config.seq_len; i += 1 {
                 input_tokens[i] = tokens[i]
                 target_tokens[i] = tokens[i + 1]

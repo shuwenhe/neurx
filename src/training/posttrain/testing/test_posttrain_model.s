@@ -18,11 +18,11 @@ struct test_result {
     string status
     float duration
     string message
-    []string details
+    string[] details
 }
 
 struct test_results {
-    []test_result results
+    test_result[] results
     string start_time
     string end_time
     int passed

@@ -45,11 +45,11 @@ struct dynamic_model_loader {
     model_load_config config
     model_loader_options options
     map[string]*model_executor executors
-    []*model_executor loading_queue
+    model_executor*[] loading_queue
     map[string]*weight_buffer model_cache
-    map[string][]*weight_buffer layer_cache
+    map[string]weight_buffer*[] layer_cache
     model_loader_metrics metrics
-    []loader_callback callbacks
+    loader_callback[] callbacks
     bool running
     interface{} lock
 }
@@ -57,7 +57,7 @@ struct dynamic_model_loader {
 struct weight_loading_task {
     *model_executor executor
     int32 layer_id
-    []*model_weight_spec weights
+    model_weight_spec*[] weights
     loader_status status
     int64 start_time
     int64 completion_time
@@ -85,11 +85,11 @@ func new_dynamic_model_loader(model_load_config config, model_loader_options opt
         config: config,
         options: options,
         executors: make(map[string]*model_executor),
-        loading_queue: []*model_executor{},
+        loading_queue: model_executor*[]{},
         model_cache: make(map[string]*weight_buffer),
-        layer_cache: make(map[string][]*weight_buffer),
+        layer_cache: make(map[string]weight_buffer*[]),
         metrics: model_loader_metrics{},
-        callbacks: []loader_callback{},
+        callbacks: loader_callback[]{},
         running: false,
     }
 }
@@ -104,7 +104,7 @@ func (dynamic_model_loader* dml) start() error {
 
 func (dynamic_model_loader* dml) stop() error {
     dml.running = false
-    dml.loading_queue = []*model_executor{}
+    dml.loading_queue = model_executor*[]{}
     return nil
 }
 
@@ -143,7 +143,7 @@ func (dynamic_model_loader* dml) load_model_lazy(string model_id) (*model_execut
             activations: make(map[string]interface{}),
             kv_cache: make(map[string]interface{}),
         },
-        layer_executors: []*model_layer_executor{},
+        layer_executors: model_layer_executor*[]{},
         initialized: false,
         ready: false,
     }
@@ -170,7 +170,7 @@ func (dynamic_model_loader* dml) load_model_with_strategy(string model_id, weigh
             activations: make(map[string]interface{}),
             kv_cache: make(map[string]interface{}),
         },
-        layer_executors: []*model_layer_executor{},
+        layer_executors: model_layer_executor*[]{},
         initialized: false,
         ready: false,
     }
@@ -255,12 +255,12 @@ func (dynamic_model_loader* dml) load_weights_eager(model_executor* executor) er
     executor.loading_state.estimated_completion_ms = 5000
     executor.loading_state.progress_percent = 50
     for i := int32(0); i < num_layers; i++ {
-        layer_weights := []*model_weight_spec{}
+        layer_weights := model_weight_spec*[]{}
         for j := int32(0); j < weight_spec_per_layer; j++ {
             weight_name := "layers." + string(i) + ".weights." + string(j)
             spec := *model_weight_spec{
                 name: weight_name,
-                shape: []int32{config.hidden_size, config.hidden_size},
+                shape: int32[]{config.hidden_size, config.hidden_size},
                 dtype: executor.load_config.dtype,
                 offset: 0,
                 size_bytes: int64(config.hidden_size * config.hidden_size * 2),
@@ -305,7 +305,7 @@ func (dynamic_model_loader* dml) load_weights_mmap(model_executor* executor) err
 
 func (dynamic_model_loader* dml) initialize_layers(model_executor* executor) error {
     executor.loading_state.current_stage = "initializing_layers"
-    executor.layer_executors = []*model_layer_executor{}
+    executor.layer_executors = model_layer_executor*[]{}
     for i := int32(0); i < executor.config.num_hidden_layers; i++ {
         layer := *model_layer_executor{
             layer_id: i,
@@ -354,8 +354,8 @@ func (dynamic_model_loader* dml) get_metrics() *model_loader_metrics {
     return *dml.metrics
 }
 
-func (dynamic_model_loader* dml) get_loaded_models() []string {
-    models := []string{}
+func (dynamic_model_loader* dml) get_loaded_models() string[] {
+    models := string[]{}
     for model_id := range dml.executors {
         models = append(models, model_id)
     }

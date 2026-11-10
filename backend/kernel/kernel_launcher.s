@@ -13,7 +13,7 @@ struct KernelLauncher {
     device_manager: *cuda_primitives.CUDADeviceManager,
     event_manager: *cuda_primitives.CUDAEventManager,
     kernel_cache: map[string, i32],
-    execution_queue: []string,
+    execution_queue: string[],
     kernel_stats: map[string, types.KernelStats]
 }
 
@@ -25,7 +25,7 @@ func NewKernelLauncher(i32 device_id) *KernelLauncher {
         device_manager: device_mgr,
         event_manager: cuda_primitives.NewCUDAEventManager(device_mgr),
         kernel_cache: make(map[string, i32]),
-        execution_queue: make([]string, 0),
+        execution_queue: make(string[], 0),
         kernel_stats: make(map[string, types.KernelStats])
     }
 }
@@ -35,7 +35,7 @@ func (KernelLauncher* l) ComputeOptimalBlockSize(
     i32 threads_per_element
 ) i32 {
 
-    optimal_block_sizes := [6]i32{32, 64, 128, 256, 512, 1024}
+    optimal_block_sizes := i32[6]{32, 64, 128, 256, 512, 1024}
 
     for i := 5; i >= 0; i -= 1 {
         block_size := optimal_block_sizes[i]
@@ -75,8 +75,8 @@ func (KernelLauncher* l) CreateLaunchConfig(
     stream := l.device_manager.CreateStream(0)
 
     return types.LaunchConfig{
-        block_dim: [3]i32{block_size, 1, 1},
-        grid_dim: [3]i32{grid_size, 1, 1},
+        block_dim: i32[3]{block_size, 1, 1},
+        grid_dim: i32[3]{grid_size, 1, 1},
         shared_memory_bytes: 0,
         stream stream
     }
@@ -152,11 +152,11 @@ func (KernelLauncher* l) LaunchAttentionKernel(
 }
 
 func (KernelLauncher* l) LaunchBatch(
-    kernel_names: []string,
-    configs: []types.KernelConfig
-) []types.KernelResult {
+    kernel_names: string[],
+    configs: types.KernelConfig[]
+) types.KernelResult[] {
 
-    results := make([]types.KernelResult, len(kernel_names))
+    results := make(types.KernelResult[], len(kernel_names))
 
     for i := 0; i < len(kernel_names); i += 1 {
 
@@ -203,7 +203,7 @@ func (KernelLauncher* l) Synchronize() types.KernelResult {
         }
     }
 
-    l.execution_queue = make([]string, 0)
+    l.execution_queue = make(string[], 0)
 
     return types.KernelResult{
         success: true,
@@ -256,7 +256,7 @@ func (KernelLauncher* l) RecordStats(types.KernelStats stats) {
 func (KernelLauncher* l) ClearCache() {
     l.kernel_cache = make(map[string, i32])
     l.kernel_stats = make(map[string, types.KernelStats])
-    l.execution_queue = make([]string, 0)
+    l.execution_queue = make(string[], 0)
 }
 
 func (KernelLauncher* l) GetPerformanceReport() string {

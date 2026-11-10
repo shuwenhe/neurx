@@ -111,7 +111,7 @@ func float_to_str_uf(float f) string {
     ""
 }
 
-func range_func(int n) []int {
-    []int r = make([]int, n)
+func range_func(int n) int[] {
+    int[] r = make(int[], n)
     r
 }

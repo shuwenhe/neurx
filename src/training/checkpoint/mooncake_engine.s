@@ -17,11 +17,10 @@ struct mooncake_engine {
     mooncake_config config
     i32 prev_rank
     i32 next_rank
-    send_streams: []cuda_stream
-    recv_streams: []cuda_stream
-    send_buffers: []tensor
-    recv_buffers: []tensor
-    i64 bytes_transferred
+    send_streams: cuda_stream[]
+    recv_streams: cuda_stream[]
+    send_buffers: tensor[]
+    recv_buffers: i64[] tensor bytes_transferred
     i64 transfer_count
     f64 total_transfer_time
 }
@@ -29,9 +28,7 @@ struct mooncake_engine {
 func new_mooncake_engine(mooncake_config config) . mooncake_engine {
     prev_rank := (config.rank - 1 + config.world_size) % config.world_size
     next_rank := (config.rank + 1) % config.world_size
-    send_streams := []
-    recv_streams := []
-    for i in 0..config.num_streams {
+    send_streams := recv_streams[] := for[] i in 0..config.num_streams {
         send_streams = append(send_streams, cuda_stream_create())
         recv_streams = append(recv_streams, cuda_stream_create())
     }
@@ -51,8 +48,8 @@ func new_mooncake_engine(mooncake_config config) . mooncake_engine {
 
 func (mooncake_engine* engine) sync_weights(
     map[string]tensor model_state,
-    []i32 source_ranks,
-    []i32 target_ranks
+    i32[] source_ranks,
+    i32[] target_ranks
 ) {
     start_time := get_time()
     if engine.config.rank in source_ranks {
@@ -67,7 +64,7 @@ func (mooncake_engine* engine) sync_weights(
 
 func (mooncake_engine* engine) send_weights(
     map[string]tensor model_state,
-    []i32 target_ranks
+    i32[] target_ranks
 ) {
     flat_params := engine.flatten_state(model_state)
     if engine.config.enable_compression {
@@ -88,7 +85,7 @@ func (mooncake_engine* engine) send_weights(
 
 func (mooncake_engine* engine) receive_weights(
     map[string]tensor model_state,
-    []i32 source_ranks
+    i32[] source_ranks
 ) {
     total_size := engine.compute_state_size(model_state)
     flat_params := tensor_zeros([total_size])
@@ -107,7 +104,7 @@ func (mooncake_engine* engine) receive_weights(
     engine.unflatten_state(flat_params, model_state)
 }
 
-func (mooncake_engine* engine) ring_send(tensor params, []i32 target_ranks) {
+func (mooncake_engine* engine) ring_send(tensor params, i32[] target_ranks) {
     num_chunks := (params.numel() * params.element_size() + engine.config.chunk_size - 1) /
                      engine.config.chunk_size
     chunk_elems := engine.config.chunk_size / params.element_size()
@@ -129,7 +126,7 @@ func (mooncake_engine* engine) ring_send(tensor params, []i32 target_ranks) {
     }
 }
 
-func (mooncake_engine* engine) ring_recv(tensor params, []i32 source_ranks) {
+func (mooncake_engine* engine) ring_recv(tensor params, i32[] source_ranks) {
     num_chunks := (params.numel() * params.element_size() + engine.config.chunk_size - 1) /
                      engine.config.chunk_size
     chunk_elems := engine.config.chunk_size / params.element_size()
@@ -173,8 +170,7 @@ func (mooncake_engine* engine) p2p_recv(tensor params, i32 source_rank) {
 
 func (mooncake_engine* engine) flatten_state(map state[string]tensor) . tensor {
     total_size := 0
-    param_list := []
-    for name, param in state {
+    param_list := for[] name, param in state {
         total_size += param.numel()
         param_list = append(param_list, param.flatten())
     }
@@ -199,7 +195,7 @@ func (mooncake_engine* engine) compute_state_size(map state[string]tensor) . i64
     return total
 }
 
-func (mooncake_engine* engine) is_same_node([]i32 ranks) . bool {
+func (mooncake_engine* engine) is_same_node(i32[] ranks) . bool {
     for rank in ranks {
         if abs(rank - engine.config.rank) > 8 {
             return false

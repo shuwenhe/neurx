@@ -5,30 +5,30 @@ import (
     "neurx.tensor.tensor"
 )
 struct optimizer_param_group {
-    []tensor params
+    tensor[] params
     float lr
     float weight_decay
     float beta1
     float beta2
     float eps
     string kind
-    []tensor first_moments
-    []tensor second_moments
-    []int param_steps
-    []float beta1_pows
-    []float beta2_pows
+    tensor[] first_moments
+    tensor[] second_moments
+    int[] param_steps
+    float[] beta1_pows
+    float[] beta2_pows
 }
 
 struct optimizer {
     string kind
     int step
-    []optimizer_param_group param_groups
+    optimizer_param_group[] param_groups
     lr_scheduler scheduler
     bool has_scheduler
 }
 
-func copy_tensors([]tensor values) []tensor {
-    []tensor out = make([]tensor, len(values))
+func copy_tensors(tensor[] values) tensor[] {
+    tensor[] out = make(tensor[], len(values))
     int i = 0
     for i < len(values) {
         out[i] = neurx.tensor.clone(values[i])
@@ -37,8 +37,8 @@ func copy_tensors([]tensor values) []tensor {
     return out
 }
 
-func copy_float([]float data) []float {
-    []float out = make([]float, len(data))
+func copy_float(float[] data) float[] {
+    float[] out = make(float[], len(data))
     int i = 0
     for i < len(data) {
         out[i] = data[i]
@@ -47,8 +47,8 @@ func copy_float([]float data) []float {
     return out
 }
 
-func copy_int([]int data) []int {
-    []int out = make([]int, len(data))
+func copy_int(int[] data) int[] {
+    int[] out = make(int[], len(data))
     int i = 0
     for i < len(data) {
         out[i] = data[i]
@@ -59,7 +59,7 @@ func copy_int([]int data) []int {
 
 func optimizer_zero_moment(tensor value) tensor {
     int n = len(value.data)
-    []float data = make([]float, n)
+    float[] data = make(float[], n)
     int i = 0
     for i < n {
         data[i] = 0.0
@@ -85,8 +85,8 @@ func copy_param_group(optimizer_param_group group) optimizer_param_group {
     }
 }
 
-func copy_param_groups([]optimizer_param_group groups) []optimizer_param_group {
-    []optimizer_param_group out = make([]optimizer_param_group, len(groups))
+func copy_param_groups(optimizer_param_group[] groups) optimizer_param_group[] {
+    optimizer_param_group[] out = make(optimizer_param_group[], len(groups))
     int i = 0
     for i < len(groups) {
         out[i] = copy_param_group(groups[i])
@@ -99,19 +99,19 @@ func new_optimizer() optimizer {
     return optimizer {
         kind: "none",
         step: 0,
-        param_groups: make([]optimizer_param_group, 0),
+        param_groups: make(optimizer_param_group[], 0),
         scheduler: new_lr_scheduler(0.0),
         has_scheduler: false,
     }
 }
 
-func optimizer_make_group([]tensor params, float lr, float weight_decay, float beta1, float beta2, float eps, string kind) optimizer_param_group {
+func optimizer_make_group(tensor[] params, float lr, float weight_decay, float beta1, float beta2, float eps, string kind) optimizer_param_group {
     int n = len(params)
-    []tensor first_moments = make([]tensor, n)
-    []tensor second_moments = make([]tensor, n)
-    []int param_steps = make([]int, n)
-    []float beta1_pows = make([]float, n)
-    []float beta2_pows = make([]float, n)
+    tensor[] first_moments = make(tensor[], n)
+    tensor[] second_moments = make(tensor[], n)
+    int[] param_steps = make(int[], n)
+    float[] beta1_pows = make(float[], n)
+    float[] beta2_pows = make(float[], n)
     int i = 0
     for i < n {
         first_moments[i] = optimizer_zero_moment(params[i])
@@ -146,7 +146,7 @@ func optimizer_with_group(optimizer opt, optimizer_param_group group) optimizer 
     return next
 }
 
-func optimizer_add_param_group(optimizer opt, []tensor params, float lr, float weight_decay, float beta1, float beta2, float eps, string kind) optimizer {
+func optimizer_add_param_group(optimizer opt, tensor[] params, float lr, float weight_decay, float beta1, float beta2, float eps, string kind) optimizer {
     return optimizer_with_group(opt, optimizer_make_group(params, lr, weight_decay, beta1, beta2, eps, kind))
 }
 
@@ -221,11 +221,11 @@ func optimizer_zero_grad(optimizer opt) optimizer {
     return next
 }
 
-func optimizer_step_tensor_group(optimizer_param_group group, []tensor grads, float lr_override) optimizer_param_group {
+func optimizer_step_tensor_group(optimizer_param_group group, tensor[] grads, float lr_override) optimizer_param_group {
     return optimizer_step_tensor_group_from(group, grads, 0, lr_override)
 }
 
-func optimizer_step_tensor_group_from(optimizer_param_group group, []tensor grads, int start, float lr_override) optimizer_param_group {
+func optimizer_step_tensor_group_from(optimizer_param_group group, tensor[] grads, int start, float lr_override) optimizer_param_group {
     optimizer_param_group next = copy_param_group(group)
     int i = 0
     int g = start
@@ -285,7 +285,7 @@ func optimizer_step_tensor_group_from(optimizer_param_group group, []tensor grad
     return next
 }
 
-func optimizer_step_group(optimizer opt, int group_index, []tensor grads) optimizer {
+func optimizer_step_group(optimizer opt, int group_index, tensor[] grads) optimizer {
     if group_index < 0 || group_index >= len(opt.param_groups) {
         return opt
     }
@@ -296,7 +296,7 @@ func optimizer_step_group(optimizer opt, int group_index, []tensor grads) optimi
     return next
 }
 
-func optimizer_step(optimizer opt, []tensor grads) optimizer {
+func optimizer_step(optimizer opt, tensor[] grads) optimizer {
     optimizer next = optimizer_state_dict(opt)
     float lr_override = optimizer_current_lr(next)
     int offset = 0
@@ -310,17 +310,17 @@ func optimizer_step(optimizer opt, []tensor grads) optimizer {
     return next
 }
 
-func optimizer_step_with_scheduler(optimizer opt, int epoch, []tensor grads) optimizer {
+func optimizer_step_with_scheduler(optimizer opt, int epoch, tensor[] grads) optimizer {
     optimizer next = optimizer_step_scheduler(opt, epoch)
     return optimizer_step(next, grads)
 }
 
-func optimizer_step_with_scheduler_and_zero_grad(optimizer opt, int epoch, []tensor grads) optimizer {
+func optimizer_step_with_scheduler_and_zero_grad(optimizer opt, int epoch, tensor[] grads) optimizer {
     optimizer next = optimizer_step_with_scheduler(opt, epoch, grads)
     return optimizer_zero_grad(next)
 }
 
-func optimizer_step_group_with_scheduler(optimizer opt, int epoch, int group_index, []tensor grads) optimizer {
+func optimizer_step_group_with_scheduler(optimizer opt, int epoch, int group_index, tensor[] grads) optimizer {
     optimizer next = optimizer_step_scheduler(opt, epoch)
     return optimizer_step_group(next, group_index, grads)
 }
@@ -369,21 +369,21 @@ func optimizer_num_parameters(optimizer opt) int {
     return total
 }
 
-func new_sgd_optimizer([]tensor params, float lr) optimizer {
+func new_sgd_optimizer(tensor[] params, float lr) optimizer {
     optimizer opt = new_optimizer()
     opt.kind = "sgd"
     opt = optimizer_add_param_group(opt, params, lr, 0.0, 0.9, 0.999, 1e-8, "sgd")
     return opt
 }
 
-func new_adam_optimizer([]tensor params, float lr, float beta1, float beta2, float eps) optimizer {
+func new_adam_optimizer(tensor[] params, float lr, float beta1, float beta2, float eps) optimizer {
     optimizer opt = new_optimizer()
     opt.kind = "adam"
     opt = optimizer_add_param_group(opt, params, lr, 0.0, beta1, beta2, eps, "adam")
     return opt
 }
 
-func new_adamw_optimizer([]tensor params, float lr, float beta1, float beta2, float eps, float weight_decay) optimizer {
+func new_adamw_optimizer(tensor[] params, float lr, float beta1, float beta2, float eps, float weight_decay) optimizer {
     optimizer opt = new_optimizer()
     opt.kind = "adamw"
     opt = optimizer_add_param_group(opt, params, lr, weight_decay, beta1, beta2, eps, "adamw")

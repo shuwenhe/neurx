@@ -6,14 +6,14 @@ import (
 struct safetensors_header {
     string name
     string dtype
-    []int shape
+    int[] shape
     int64 offset_start
     int64 offset_end
 }
 
 struct safetensors_index {
     string path
-    []safetensors_header tensors
+    safetensors_header[] tensors
     map[string]safetensors_header tensor_map
 }
 
@@ -75,14 +75,14 @@ func apply_lora_scale(float value, float lora_a, float lora_b, float alpha, int 
     value + delta
 }
 
-func parse_safetensors_metadata(string json_str) []safetensors_header {
-    []safetensors_header{}
+func parse_safetensors_metadata(string json_str) safetensors_header[] {
+    safetensors_header[]{}
 }
 
 func load_safetensors_index(string filepath) safetensors_index {
     safetensors_index {
         path: filepath,
-        tensors: []safetensors_header{},
+        tensors: safetensors_header[]{},
         tensor_map: map[string]safetensors_header{},
     }
 }

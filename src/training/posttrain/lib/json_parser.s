@@ -8,7 +8,7 @@ struct json_value {
     bool bool_value
     float number_value
     string string_value
-    []json_value array_value
+    json_value[] array_value
     map[string]json_value object_value
 }
 
@@ -68,7 +68,7 @@ func (j json_value) as_string() string {
     return j.string_value
 }
 
-func (j json_value) as_array() []json_value {
+func (j json_value) as_array() json_value[] {
     if j.type != 4 {
         panic("JSON value is not an array")
     }
@@ -290,11 +290,11 @@ func parser_parse_number(json_parser* p) float {
     return parse_float(num_str)
 }
 
-func parser_parse_array(json_parser* p) []json_value {
+func parser_parse_array(json_parser* p) json_value[] {
     if parser_advance(p) != '[' {
         panic("expected '['")
     }
-    result := make([]json_value, 0)
+    result := make(json_value[], 0)
     parser_skip_whitespace(p)
     if parser_peek(p) == ']' {
         parser_advance(p)

@@ -163,8 +163,7 @@ struct vi_t_encoder_blocks {
     bool gradient_checkpointing
     init(int hidden_size, int num_layers, int num_heads, int intermediate_size) {
         this.gradient_checkpointing = false
-        this.layers = []
-        for i in range(num_layers) {
+        this.layers = for[] i in range(num_layers) {
             this.layers.append(new vi_t_layer(
                 hidden_size=hidden_size,
                 num_attention_heads=num_heads,
@@ -174,8 +173,7 @@ struct vi_t_encoder_blocks {
         }
     }
     forward(hidden_states: tensor, attention_mask: tensor) {
-        all attentions: list<tensor> = []
-        for layer in this.layers {
+        all attentions: list<tensor> = for[] layer in this.layers {
             if this.gradient_checkpointing {
                 layer_output = checkpoint(layer.forward, hidden_states, attention_mask)
             } else {
@@ -465,8 +463,7 @@ struct clip_text_encoder {
         this.embed_dim = embed_dim
         this.token_embedding = embedding(num_embeddings=vocab_size, embedding_dim=embed_dim)
         this.positional_embedding = parameter(shape=(this.max_position_embeddings, embed_dim))
-        this.transformer_blocks = []
-        for i in range(transformer_layers) {
+        this.transformer_blocks = for[] i in range(transformer_layers) {
             this.transformer_blocks.append(new clip_transformer_block(
                 embed_dim=embed_dim,
                 num_heads=transformer_heads,
@@ -488,8 +485,7 @@ struct clip_text_encoder {
         return this.text_projection.forward(text_features)
     }
     _tokenize(string text) {
-        tokens = [49406]
-        tokens.append(49407)
+        tokens = tokens.append[49406](49407)
         for tokens.length < 77 {
             tokens.append(0)
         return tensor(tokens[:77])
@@ -542,8 +538,7 @@ struct video_processor {
     }
     process_video(video_input: video_input, vit_encoder: ViTEncoder) {
         sampled_frames := this.frame_sampler.sample_frames(video_input)
-        frame_features: list<tensor> = []
-        for frame in sampled_frames {
+        frame_features: list<tensor> = for[] frame in sampled_frames {
             frame_batch := frame.unsqueeze(0)
             vit_output := vit_encoder.forward(frame_batch)
             frame_features.append(vit_output.pooled_features.squeeze(0))
@@ -578,23 +573,20 @@ struct frame_sampler {
     }
     sample_frames(video: video_input) {
         total_frames = video.frames.length
-        timestamps: list<float> = []
-        if total_frames <= this.max_frames {
+        timestamps: list<float> = if total_frames <= this.max_frames {
             sampled_indices = range(total_frames)
         } else {
             step = total_frames / this.max_frames
             sampled_indices = [int(i * step) for i in range(this.max_frames)]
         }
-        sampled_frames = []
-        for idx in sampled_indices {
+        sampled_frames = for[] idx in sampled_indices {
             sampled_frames.append(video.frames[idx])
             timestamps.append(idx / video.fps)
         }
         this.cached_timestamps = timestamps
         return sampled_frames
     }
-    cached_timestamps: list<float> = []
-    get_timestamps() {
+    cached_timestamps: list<float> = get_timestamps[]() {
         return this.cached_timestamps
     }
 }
@@ -605,8 +597,7 @@ struct temporal_encoder {
     layer_norm layer_norm
     init(int input_dim, int num_temporal_layers, int num_heads) {
         this.position_embedding = parameter(shape=(256, input_dim))
-        this.transformer_layers = []
-        for i in range(num_temporal_layers) {
+        this.transformer_layers = for[] i in range(num_temporal_layers) {
             this.transformer_layers.append(new temporal_transformer_block(
                 embed_dim=input_dim,
                 num_heads=num_heads,
@@ -668,13 +659,11 @@ struct multi_image_processor {
     }
     process_multiple_images(images: list<image_input>) {
         assert images.length <= this.config.max_images, "Too many images"
-        image_results: list<vision_output> = []
-        for img in images {
+        image_results: list<vision_output> = for[] img in images {
             result := this.vit_encoder.forward(img.pixel_values)
             image_results.append(result)
         }
-        adapted_features: list<tensor> = []
-        for result in image_results {
+        adapted_features: list<tensor> = for[] result in image_results {
             if result.spatial_features != null {
                 adapted := this.visual_adapter.forward(result.spatial_features!)
                 adapted_features.append(adapted)
@@ -763,8 +752,7 @@ struct image_preprocessor {
         }
     }
     preprocess_batch(images: list<string>, bool adaptive_resolution = false) {
-        processed: list<tensor> = []
-        for path in images {
+        processed: list<tensor> = for[] path in images {
             img_input := this.preprocess(path)
             processed.append(img_input.pixel_values)
             if adaptive_resolution && this.config.image_resolution_adaptive {
@@ -819,8 +807,7 @@ struct multimodal_vision_model {
     }
     reason_over_multiple_images(image_paths: list<string>, string question) {
         assert this.multi_image_processor != null, "Multi-image processing not enabled"
-        images: list<image_input> = []
-        for path in image_paths {
+        images: list<image_input> = for[] path in image_paths {
             img := this.image_preprocessor.preprocess(path)
             images.append(img)
         }
@@ -854,8 +841,7 @@ struct multimodal_vision_model {
         return "<image>\n" + question
     }
     _build_multi_image_prompt(string question, multi_result: multimodal_embedding_result) {
-        prompt_parts: list<string> = []
-        for i in range(multi_result.num_images) {
+        prompt_parts: list<string> = for[] i in range(multi_result.num_images) {
             prompt_parts.append(f"<image{i}>")
         }
         prompt_parts.append(question)

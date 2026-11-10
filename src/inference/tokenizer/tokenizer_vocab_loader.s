@@ -10,13 +10,13 @@ struct vocab_entry {
 }
 
 struct vocab_database {
-    []vocab_entry entries
+    vocab_entry[] entries
     int total_count
     bool loaded
 }
-vocab_database global_vocab = vocab_database{entries: []vocab_entry{}, total_count: 0, loaded: false}
+vocab_database global_vocab = vocab_database{entries: vocab_entry[]{}, total_count: 0, loaded: false}
 
-func binary_search_vocab([]vocab_entry entries, int token_id) vocab_entry {
+func binary_search_vocab(vocab_entry[] entries, int token_id) vocab_entry {
     int left = 0
     int right = len(entries) - 1
     for left <= right {
@@ -48,7 +48,7 @@ func load_vocab_from_file(string vocab_file_path) bool {
     if len(content) == 0 {
         return false
     }
-    []vocab_entry entries = make([]vocab_entry, 160000)
+    vocab_entry[] entries = make(vocab_entry[], 160000)
     int entry_count = 0
     int line_start = 0
     int i = 0

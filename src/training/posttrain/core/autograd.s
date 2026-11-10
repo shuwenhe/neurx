@@ -5,40 +5,40 @@ import (
 struct computation_node_s {
     string op_name
     tensor_s output
-    []tensor_s inputs
+    tensor_s[] inputs
     int node_id
     bool requires_grad
 }
 
 struct gradient_tape_s {
-    []computation_node_s operations
+    computation_node_s[] operations
     int op_count
     bool is_recording
 }
 
 struct backward_context_s {
     tensor_s grad_output
-    []tensor_s grad_inputs
+    tensor_s[] grad_inputs
     string op_type
     int tensor_id
 }
 
 struct autograd_state_s {
     gradient_tape_s tape
-    []tensor_s gradient_buffer
+    tensor_s[] gradient_buffer
     bool grad_enabled
     int tape_depth
 }
 
 func new_gradient_tape_s() gradient_tape_s {
     gradient_tape_s {
-        operations: make([]computation_node_s, 0),
+        operations: make(computation_node_s[], 0),
         op_count: 0,
         is_recording: true,
     }
 }
 
-func new_computation_node_s(string op, tensor_s out, []tensor_s ins) computation_node_s {
+func new_computation_node_s(string op, tensor_s out, tensor_s[] ins) computation_node_s {
     computation_node_s {
         op_name: op,
         output: out,
@@ -48,7 +48,7 @@ func new_computation_node_s(string op, tensor_s out, []tensor_s ins) computation
     }
 }
 
-func record_operation_s(gradient_tape_s tape, string op_name, tensor_s output, []tensor_s inputs) gradient_tape_s {
+func record_operation_s(gradient_tape_s tape, string op_name, tensor_s output, tensor_s[] inputs) gradient_tape_s {
     computation_node_s node = new_computation_node_s(op_name, output, inputs)
     node.node_id = tape.op_count
     gradient_tape_s {
@@ -66,8 +66,8 @@ func disable_grad_s() {
     println("[Autograd] Gradient tracking disabled")
 }
 
-func backward_matmul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
-    []tensor_s grads
+func backward_matmul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) tensor_s[] {
+    tensor_s[] grads
     tensor_s grad_a = make_zeros_like_s(input_a)
     tensor_s grad_b = make_zeros_like_s(input_b)
     grads = append(grads, grad_a)
@@ -75,8 +75,8 @@ func backward_matmul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b)
     grads
 }
 
-func backward_add_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
-    []tensor_s grads
+func backward_add_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) tensor_s[] {
+    tensor_s[] grads
     tensor_s grad_a = copy_tensor_s(grad_output)
     tensor_s grad_b = copy_tensor_s(grad_output)
     grads = append(grads, grad_a)
@@ -84,8 +84,8 @@ func backward_add_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []
     grads
 }
 
-func backward_mul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
-    []tensor_s grads
+func backward_mul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) tensor_s[] {
+    tensor_s[] grads
     tensor_s grad_a = mul_tensors_s(grad_output, input_b)
     tensor_s grad_b = mul_tensors_s(grad_output, input_a)
     grads = append(grads, grad_a)
@@ -104,7 +104,7 @@ func backward_layer_norm_s(tensor_s grad_output, tensor_s input, float epsilon) 
 }
 
 func backward_relu_s(tensor_s grad_output, tensor_s input) tensor_s {
-    []float grad_data = make([]float, 0)
+    float[] grad_data = make(float[], 0)
     int i = 0
     for i < len(input.data) {
         if input.data[i] > 0.0 {
@@ -125,8 +125,8 @@ func backward_relu_s(tensor_s grad_output, tensor_s input) tensor_s {
     }
 }
 
-func backward_linear_s(tensor_s grad_output, tensor_s input, tensor_s weight) []tensor_s {
-    []tensor_s grads
+func backward_linear_s(tensor_s grad_output, tensor_s input, tensor_s weight) tensor_s[] {
+    tensor_s[] grads
     tensor_s grad_input = matmul_s(grad_output, transpose_s(weight))
     tensor_s grad_weight = matmul_s(transpose_s(input), grad_output)
     grads = append(grads, grad_input)
@@ -142,7 +142,7 @@ func chain_rule_s(tensor_s upstream_grad, string op_type, tensor_s input) tensor
 }
 
 func make_zeros_like_s(tensor_s t) tensor_s {
-    []float zeros = make([]float, 0)
+    float[] zeros = make(float[], 0)
     int i = 0
     for i < t.total_elements {
         zeros = append(zeros, 0.0)
@@ -160,7 +160,7 @@ func make_zeros_like_s(tensor_s t) tensor_s {
 }
 
 func copy_tensor_s(tensor_s t) tensor_s {
-    []float copied = make([]float, 0)
+    float[] copied = make(float[], 0)
     int i = 0
     for i < len(t.data) {
         copied = append(copied, t.data[i])
@@ -178,7 +178,7 @@ func copy_tensor_s(tensor_s t) tensor_s {
 }
 
 func mul_tensors_s(tensor_s a, tensor_s b) tensor_s {
-    []float result = make([]float, 0)
+    float[] result = make(float[], 0)
     int i = 0
     for i < len(a.data) {
         result = append(result, a.data[i] * b.data[i])
@@ -196,11 +196,11 @@ func mul_tensors_s(tensor_s a, tensor_s b) tensor_s {
 }
 
 func matmul_s(tensor_s a, tensor_s b) tensor_s {
-    []float result = make([]float, 0)
+    float[] result = make(float[], 0)
     tensor_s {
         data: result,
-        shape: make([]int, 0),
-        strides: make([]int, 0),
+        shape: make(int[], 0),
+        strides: make(int[], 0),
         rank: 2,
         total_elements: 0,
         dtype: "float32",

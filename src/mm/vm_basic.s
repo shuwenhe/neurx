@@ -9,7 +9,7 @@ struct vm_region {
 }
 vm_region[] regions
 func init_vm() int {
-    regions = []vm_region{}
+    regions = vm_region[]{}
     0
 }
 

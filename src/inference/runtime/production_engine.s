@@ -61,8 +61,8 @@ struct gpu_execution_command {
     bool prefill
     int token_count
     int computed_tokens
-    []int block_ids
-    []string worker_ids
+    int[] block_ids
+    string[] worker_ids
     int data_rank
     int model_generation
     int status
@@ -70,7 +70,7 @@ struct gpu_execution_command {
 
 struct gpu_execution_batch {
     int batch_id
-    []gpu_execution_command commands
+    gpu_execution_command[] commands
     int scheduled_tokens
     bool ready
     string error_message
@@ -102,7 +102,7 @@ struct kv_transfer_ticket {
     string request_id
     string source_worker_id
     string target_worker_id
-    []int block_ids
+    int[] block_ids
     int byte_count
     int checksum
     int status
@@ -116,10 +116,10 @@ struct production_engine_state {
     int scheduler_state
     engine_lifecycle_state lifecycle
     inference_observability_state metrics
-    []production_request requests
-    []gpu_execution_command inflight
-    []inference_stream_event events
-    []kv_transfer_ticket kv_transfers
+    production_request[] requests
+    gpu_execution_command[] inflight
+    inference_stream_event[] events
+    kv_transfer_ticket[] kv_transfers
     int model_generation
     int next_execution_id
     int next_batch_id
@@ -158,8 +158,7 @@ func engine_empty_request() production_request {
 func engine_empty_batch() gpu_execution_batch {
     gpu_execution_batch batch
     batch.batch_id = 0
-    batch.commands = []
-    batch.scheduled_tokens = 0
+    batch.commands = batch.scheduled_tokens[] = 0
     batch.ready = false
     batch.error_message = ""
     batch
@@ -193,11 +192,7 @@ func new_production_engine(production_engine_config config) production_engine_st
     state.scheduler_state = 0
     state.lifecycle = new_engine_lifecycle(true, state.config.backend_name, true, true)
     state.metrics = new_inference_observability()
-    state.requests = []
-    state.inflight = []
-    state.events = []
-    state.kv_transfers = []
-    state.model_generation = 1
+    state.requests = state.inflight[] = state.events[] = state.kv_transfers[] = state.model_generation[] = 1
     state.next_execution_id = 1
     state.next_batch_id = 1
     state.next_event_sequence = 1
@@ -252,8 +247,8 @@ func engine_execution_at(production_engine_state state, int index) gpu_execution
     state.inflight[index]
 }
 
-func engine_remove_execution([]gpu_execution_command commands, int remove_index) []gpu_execution_command {
-    []gpu_execution_command filtered = make([]gpu_execution_command, len(commands))
+func engine_remove_execution(gpu_execution_command[] commands, int remove_index) gpu_execution_command[] {
+    gpu_execution_command[] filtered = make(gpu_execution_command[], len(commands))
     int i = 0
     for i < len(commands) {
         if i != remove_index { filtered = append(filtered, commands[i]) }
@@ -290,7 +285,7 @@ func engine_ready(production_engine_state state) bool {
     state.initialized && engine_is_available(state.lifecycle) && worker_ready_count(state.cluster) >= state.config.topology.tensor_parallel_size * state.config.topology.pipeline_parallel_size
 }
 
-func engine_submit(production_engine_state state, string request_id, string model, int prompt_tokens, int max_new_tokens, int priority, []string prefix_hashes, bool stream, int now_ms) production_engine_result {
+func engine_submit(production_engine_state state, string request_id, string model, int prompt_tokens, int max_new_tokens, int priority, string[] prefix_hashes, bool stream, int now_ms) production_engine_result {
     if !engine_ready(state) { return engine_result(state, engine_empty_request(), false, "engine is not ready") }
     if model != "" && model != state.config.served_model_name { return engine_result(state, engine_empty_request(), false, "model is not served") }
     if engine_find_request(state, request_id) >= 0 { return engine_result(state, engine_empty_request(), false, "duplicate request") }
@@ -328,8 +323,8 @@ func engine_select_data_rank(production_engine_state state) int {
     -1
 }
 
-func engine_replica_worker_ids(production_engine_state state, int data_rank) []string {
-    []string worker_ids = make([]string, state.config.topology.tensor_parallel_size * state.config.topology.pipeline_parallel_size)
+func engine_replica_worker_ids(production_engine_state state, int data_rank) string[] {
+    string[] worker_ids = make(string[], state.config.topology.tensor_parallel_size * state.config.topology.pipeline_parallel_size)
     int i = 0
     for i < len(state.cluster.workers) {
         inference_worker worker = state.cluster.workers[i]
@@ -341,7 +336,7 @@ func engine_replica_worker_ids(production_engine_state state, int data_rank) []s
     worker_ids
 }
 
-func engine_assign_workers(production_engine_state state, []string worker_ids, string request_id) production_engine_result {
+func engine_assign_workers(production_engine_state state, string[] worker_ids, string request_id) production_engine_result {
     int i = 0
     for i < len(worker_ids) {
         worker_cluster_result assigned = worker_assign(state.cluster, worker_ids[i], request_id)
@@ -352,7 +347,7 @@ func engine_assign_workers(production_engine_state state, []string worker_ids, s
     engine_result(state, engine_empty_request(), true, "")
 }
 
-func engine_build_command(production_engine_state state, scheduled_request scheduled, int data_rank, []string worker_ids) gpu_execution_command {
+func engine_build_command(production_engine_state state, scheduled_request scheduled, int data_rank, string[] worker_ids) gpu_execution_command {
     gpu_execution_command command
     command.execution_id = state.next_execution_id
     command.request_id = scheduled.request_id
@@ -389,7 +384,7 @@ func engine_schedule(production_engine_state state, int now_ms) production_engin
             result.error_message = batch.error_message
             return result
         }
-        []string worker_ids = engine_replica_worker_ids(state, data_rank)
+        string[] worker_ids = engine_replica_worker_ids(state, data_rank)
         production_engine_result assigned = engine_assign_workers(state, worker_ids, request.request_id)
         state = assigned.state
         if !assigned.success {
@@ -428,7 +423,7 @@ func engine_release_command_workers(production_engine_state state, gpu_execution
 }
 
 func engine_invalidate_request_executions(production_engine_state state, string request_id) production_engine_state {
-    []gpu_execution_command retained = make([]gpu_execution_command, len(state.inflight))
+    gpu_execution_command[] retained = make(gpu_execution_command[], len(state.inflight))
     int i = 0
     for i < len(state.inflight) {
         gpu_execution_command command = engine_execution_at(state, i)
@@ -557,7 +552,7 @@ func engine_cancel(production_engine_state state, string request_id, int now_ms)
     engine_result(state, request, true, "")
 }
 
-func engine_create_kv_transfer(production_engine_state state, string request_id, string source_worker_id, string target_worker_id, []int block_ids, int byte_count, int checksum) production_engine_result {
+func engine_create_kv_transfer(production_engine_state state, string request_id, string source_worker_id, string target_worker_id, int[] block_ids, int byte_count, int checksum) production_engine_result {
     if worker_find(state.cluster, source_worker_id) < 0 || worker_find(state.cluster, target_worker_id) < 0 {
         return engine_result(state, engine_empty_request(), false, "KV transfer worker not found")
     }
@@ -603,6 +598,5 @@ func engine_complete_kv_transfer(production_engine_state state, int ticket_id, i
 }
 
 func engine_drain_events(production_engine_state state) production_engine_state {
-    state.events = []
-    state
+    state.events = state[]
 }

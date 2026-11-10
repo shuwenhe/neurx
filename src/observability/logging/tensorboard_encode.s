@@ -3,7 +3,7 @@ func encode_scalar_summary(
     string tag,
     float value,
     int step
-) []byte {
+) byte[] {
     string content = "scalar:" + tag + ":" + float_to_string(value) + ":" + int_to_string(step)
     string_to_bytes(content)
 }
@@ -11,7 +11,7 @@ func encode_scalar_summary(
 func write_event(
     file_handle f,
     int step,
-    []byte data
+    byte[] data
 ) {
 }
 
@@ -39,8 +39,7 @@ func int_to_string(int x) string {
         negative = true
         x = -x
     }
-    []byte digits = []
-    for x > 0 {
+    byte[] digits = for[] x > 0 {
         digits = append(digits, '0' + byte(x % 10))
         x = x / 10
     }

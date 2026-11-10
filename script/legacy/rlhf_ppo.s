@@ -10,17 +10,17 @@ import (
 
 struct trajectory_step {
     step_id         int
-    tokens          []int
-    log_probs       []float64
-    values          []float64
-    rewards         []float64
-    advantages      []float64
-    gae_advantages  []float64
+    tokens          int[]
+    log_probs       float64[]
+    values          float64[]
+    rewards         float64[]
+    advantages      float64[]
+    gae_advantages  float64[]
     is_terminal     bool
 }
 
 struct trajectory {
-    steps           []trajectory_step
+    steps           trajectory_step[]
     episode_return  float64
     episode_length  int
     policy_loss     float64
@@ -53,11 +53,11 @@ struct ppotrainer {
     value_model         value_model
     reward_model        reward_model
     optimizer           optimizer_2
-    trajectories        []trajectory
+    trajectories        trajectory[]
     step_count          int
     episode_count       int
     total_reward        float64
-    performance_history []performance_metric
+    performance_history performance_metric[]
 }
 
 struct performance_metric {
@@ -107,15 +107,15 @@ struct optimizer {
     grad_accumulation   int
 }
 
-func (ppotrainer* trainer) collect_trajectories(num_trajectories int) []trajectory {
+func (ppotrainer* trainer) collect_trajectories(num_trajectories int) trajectory[] {
     fmt.Println("[PPO] Collecting trajectories...")
-    trajectories := []trajectory{}
+    trajectories := trajectory[]{}
     for i := 0; i < num_trajectories; i++ {
         trajectory := trainer.generate_trajectory()
         trajectory.reward_sum = 0
         for j, step := range trajectory.steps {
             reward := trainer.reward_model.predict_reward(step.tokens)
-            trajectory.steps[j].rewards = []float64{reward}
+            trajectory.steps[j].rewards = float64[]{reward}
             trajectory.reward_sum += reward
         }
         trajectory.steps = trainer.calculate_advantages(trajectory.steps)
@@ -129,11 +129,11 @@ func (ppotrainer* trainer) collect_trajectories(num_trajectories int) []trajecto
 
 func (ppotrainer* trainer) generate_trajectory() trajectory {
     trajectory := trajectory{
-        steps: []trajectory_step{},
+        steps: trajectory_step[]{},
         timestamp: time.Now().Unix(),
     }
     max_length := 512
-    current_tokens := []int{}
+    current_tokens := int[]{}
     for len(current_tokens) < max_length {
         log_probs := trainer.policy_model.forward(current_tokens)
         next_token := trainer.sample_from_logits(log_probs)
@@ -142,8 +142,8 @@ func (ppotrainer* trainer) generate_trajectory() trajectory {
         step := trajectory_step{
             step_id: len(trajectory.steps),
             tokens: append(current_tokens, next_token),
-            log_probs: []float64{log_prob},
-            values: []float64{value},
+            log_probs: float64[]{log_prob},
+            values: float64[]{value},
         }
         trajectory.steps = append(trajectory.steps, step)
         current_tokens = append(current_tokens, next_token)
@@ -161,10 +161,10 @@ func (ppotrainer* trainer) generate_trajectory() trajectory {
     return trajectory
 }
 
-func (ppotrainer* trainer) calculate_advantages(steps []trajectory_step) []trajectory_step {
+func (ppotrainer* trainer) calculate_advantages(steps trajectory_step[]) trajectory_step[] {
     gae := 0.0
-    advantages := make([]float64, len(steps))
-    returns := make([]float64, len(steps))
+    advantages := make(float64[], len(steps))
+    returns := make(float64[], len(steps))
     for t := len(steps) - 1; t >= 0; t-- {
         if t == len(steps)-1 {
             next_value := 0.0
@@ -177,22 +177,22 @@ func (ppotrainer* trainer) calculate_advantages(steps []trajectory_step) []traje
         gae = delta + trainer.config.gamma*trainer.config.gae_lambda*gae
         advantages[t] = gae
         returns[t] = gae + value
-        steps[t].advantages = []float64{gae}
-        steps[t].gae_advantages = []float64{returns[t]}
+        steps[t].advantages = float64[]{gae}
+        steps[t].gae_advantages = float64[]{returns[t]}
     }
     return steps
 }
 
-func (ppotrainer* trainer) calculate_ppo_loss(old_log_probs []float64, new_log_probs []float64, advantages []float64) float64 {
-    ratio := []float64{}
+func (ppotrainer* trainer) calculate_ppo_loss(old_log_probs float64[], new_log_probs float64[], advantages float64[]) float64 {
+    ratio := float64[]{}
     for i := range old_log_probs {
         ratio = append(ratio, math.Exp(new_log_probs[i] - old_log_probs[i]))
     }
-    surrogate1 := []float64{}
+    surrogate1 := float64[]{}
     for i, r := range ratio {
         surrogate1 = append(surrogate1, r*advantages[i])
     }
-    surrogate2 := []float64{}
+    surrogate2 := float64[]{}
     for i, r := range ratio {
         clipped := math.Max(1-trainer.config.clip_ratio,
                            math.Min(1+trainer.config.clip_ratio, r))
@@ -205,7 +205,7 @@ func (ppotrainer* trainer) calculate_ppo_loss(old_log_probs []float64, new_log_p
     return loss / float64(len(surrogate1))
 }
 
-func (ppotrainer* trainer) calculate_value_loss(returns []float64, predictions []float64) float64 {
+func (ppotrainer* trainer) calculate_value_loss(returns float64[], predictions float64[]) float64 {
     loss := 0.0
     for i := range returns {
         diff := returns[i] - predictions[i]
@@ -214,7 +214,7 @@ func (ppotrainer* trainer) calculate_value_loss(returns []float64, predictions [
     return loss / float64(len(returns))
 }
 
-func (ppotrainer* trainer) calculate_entropy(log_probs []float64, probs []float64) float64 {
+func (ppotrainer* trainer) calculate_entropy(log_probs float64[], probs float64[]) float64 {
     entropy := 0.0
     for i, logp := range log_probs {
         if probs[i] > 1e-8 {
@@ -224,7 +224,7 @@ func (ppotrainer* trainer) calculate_entropy(log_probs []float64, probs []float6
     return entropy
 }
 
-func (ppotrainer* trainer) calculate_kl_divergence(old_logits []float64, new_logits []float64) float64 {
+func (ppotrainer* trainer) calculate_kl_divergence(old_logits float64[], new_logits float64[]) float64 {
     kl := 0.0
     for i := range old_logits {
         old_prob := math.Exp(old_logits[i])
@@ -236,7 +236,7 @@ func (ppotrainer* trainer) calculate_kl_divergence(old_logits []float64, new_log
     return kl
 }
 
-func (ppotrainer* trainer) train_step(trajectories []trajectory) performance_metric {
+func (ppotrainer* trainer) train_step(trajectories trajectory[]) performance_metric {
     fmt.Println("[PPO] Training step...")
     total_policy_loss := 0.0
     total_value_loss := 0.0
@@ -259,18 +259,18 @@ func (ppotrainer* trainer) train_step(trajectories []trajectory) performance_met
                     advantage := step.advantages[0]
                     ret := step.gae_advantages[0]
                     ppo_loss := trainer.calculate_ppo_loss(
-                        []float64{old_log_prob},
-                        []float64{new_log_prob},
-                        []float64{advantage},
+                        float64[]{old_log_prob},
+                        float64[]{new_log_prob},
+                        float64[]{advantage},
                     )
                     new_value := trainer.value_model.predict_value(step.tokens)
                     value_loss := trainer.calculate_value_loss(
-                        []float64{ret},
-                        []float64{new_value},
+                        float64[]{ret},
+                        float64[]{new_value},
                     )
                     kl := trainer.calculate_kl_divergence(
-                        []float64{old_log_prob},
-                        []float64{new_log_prob},
+                        float64[]{old_log_prob},
+                        float64[]{new_log_prob},
                     )
                     total_loss := ppo_loss +
                                  trainer.config.value_coeff*value_loss +
@@ -301,7 +301,7 @@ func (ppotrainer* trainer) train_step(trajectories []trajectory) performance_met
     return metric
 }
 
-func (ppotrainer* trainer) sample_from_logits(logits []float64) int {
+func (ppotrainer* trainer) sample_from_logits(logits float64[]) int {
     max_logit := logits[0]
     for _, l := range logits {
         if l > max_logit {
@@ -309,7 +309,7 @@ func (ppotrainer* trainer) sample_from_logits(logits []float64) int {
         }
     }
     sum_exp := 0.0
-    probs := []float64{}
+    probs := float64[]{}
     for _, l := range logits {
         exp_l := math.Exp(l - max_logit)
         sum_exp += exp_l
@@ -329,15 +329,15 @@ func (ppotrainer* trainer) sample_from_logits(logits []float64) int {
     return len(probs) - 1
 }
 
-func (policy_model* model) forward(tokens []int) []float64 {
-    logits := make([]float64, model.vocab_size)
+func (policy_model* model) forward(tokens int[]) float64[] {
+    logits := make(float64[], model.vocab_size)
     for i := range logits {
         logits[i] = math.Sin(float64(i) / float64(model.vocab_size))
     }
     return logits
 }
 
-func (value_model* model) predict_value(tokens []int) float64 {
+func (value_model* model) predict_value(tokens int[]) float64 {
     sum := 0.0
     for i, t := range tokens {
         sum += float64((t + i) % 100) / 100.0
@@ -345,7 +345,7 @@ func (value_model* model) predict_value(tokens []int) float64 {
     return sum / float64(len(tokens))
 }
 
-func (reward_model* model) predict_reward(tokens []int) float64 {
+func (reward_model* model) predict_reward(tokens int[]) float64 {
     if len(tokens) == 0 {
         return 0.0
     }
@@ -382,11 +382,11 @@ func new_ppo_trainer(config ppoconfig) *ppotrainer {
             epsilon: 1e-8,
             weight_decay: 0.01,
         },
-        trajectories: []trajectory{},
+        trajectories: trajectory[]{},
         step_count: 0,
         episode_count: 0,
         total_reward: 0,
-        performance_history: []performance_metric{},
+        performance_history: performance_metric[]{},
     }
 }
 

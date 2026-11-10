@@ -24,7 +24,7 @@ struct batch_item {
 }
 
 struct request_batch {
-    []batch_item items
+    batch_item[] items
     int batch_size
     int max_batch_size
     int created_time
@@ -34,9 +34,9 @@ struct request_batch {
 }
 
 struct request_queue {
-    []inference_request pending_requests
-    []request_batch active_batches
-    []request_batch completed_batches
+    inference_request[] pending_requests
+    request_batch[] active_batches
+    request_batch[] completed_batches
     int queue_max_size
     int batch_max_size
     int total_requests_processed

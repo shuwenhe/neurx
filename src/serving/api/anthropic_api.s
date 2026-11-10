@@ -14,9 +14,9 @@ struct content_block {
 
 struct message_input {
     string model
-    []content_block* messages
+    content_block*[] messages
     int32 max_tokens
-    []interface{} system
+    interface{}[] system
     float32 temperature
     bool stream
     map[string]interface{} metadata
@@ -35,7 +35,7 @@ struct message_response {
     string id
     string type
     string role
-    []message_content_block* content
+    message_content_block*[] content
     string model
     string stop_reason
     int32 stop_sequence
@@ -109,7 +109,7 @@ func (anthropic_api_server* srv) create_message(message_input* req) (message_res
         id: "msg-" + core.generate_uuid(),
         type: "message",
         role: "assistant",
-        content: []*message_content_block{content_block},
+        content: message_content_block*[]{content_block},
         model: req.model,
         stop_reason: "end_turn",
         stop_sequence: 0,
@@ -139,8 +139,8 @@ func (anthropic_api_server* srv) count_message_tokens(message_input* req) (int32
     return token_count, nil
 }
 
-func (anthropic_api_server* srv) batch_create_messages([]message_input* requests) ([]message_response*, error) {
-    results := make([]message_response*, 0)
+func (anthropic_api_server* srv) batch_create_messages(message_input*[] requests) (message_response*[], error) {
+    results := make(message_response*[], 0)
     for _, req := range requests {
         resp, err := srv.create_message(req)
         if err != nil {

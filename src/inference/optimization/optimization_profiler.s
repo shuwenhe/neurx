@@ -29,7 +29,7 @@ struct inference_profile {
     float tokens_per_second
     float memory_peak_mb
     float memory_average_mb
-    []kernel_profile kernels
+    kernel_profile[] kernels
 }
 
 struct optimization_config {
@@ -47,8 +47,8 @@ struct optimization_config {
 }
 
 struct profiler_state {
-    []inference_profile profiles
-    []performance_metric metrics
+    inference_profile[] profiles
+    performance_metric[] metrics
     optimization_config config
     int total_inferences
     float total_prefill_time
@@ -73,8 +73,8 @@ func new_optimization_config() optimization_config {
 
 func new_profiler_state() profiler_state {
     profiler_state {
-        profiles: []inference_profile{},
-        metrics: []performance_metric{},
+        profiles: inference_profile[]{},
+        metrics: performance_metric[]{},
         config: new_optimization_config(),
         total_inferences: 0,
         total_prefill_time: 0.0,
@@ -104,7 +104,7 @@ func record_inference_profile(
         tokens_per_second: tokens_per_sec,
         memory_peak_mb: memory_peak,
         memory_average_mb: memory_peak * 0.8,
-        kernels: []kernel_profile{},
+        kernels: kernel_profile[]{},
     }
     new_profiler = profiler
     new_profiler.profiles = append(profiler.profiles, profile)

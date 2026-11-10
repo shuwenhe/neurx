@@ -52,10 +52,10 @@ struct gpu_fence {
 }
 
 struct gpu_state {
-    []gpu_device devices
-    []gpu_stream  streams
-    []gpu_job     jobs
-    []gpu_fence   fences
+    gpu_device[] devices
+    gpu_stream[]  streams
+    gpu_job[]     jobs
+    gpu_fence[]   fences
     int           next_stream_id
     int           next_job_id
     int           next_fence_id

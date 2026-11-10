@@ -10,9 +10,9 @@ struct adam_state {
     float epsilon
     float weight_decay
     int timestep
-    []tensor m
-    []tensor v
-    []tensor param
+    tensor[] m
+    tensor[] v
+    tensor[] param
 }
 
 struct optimizer_config {
@@ -26,11 +26,11 @@ struct optimizer_config {
 }
 
 func init_adam_state(
-    []tensor parameters,
+    tensor[] parameters,
     optimizer_config config
 ) adam_state {
-    []tensor m_states = make([]tensor, len(parameters))
-    []tensor v_states = make([]tensor, len(parameters))
+    tensor[] m_states = make(tensor[], len(parameters))
+    tensor[] v_states = make(tensor[], len(parameters))
     int i = 0
     for i < len(parameters) {
         m_states = append(m_states, zeros(parameters[i].shape))
@@ -75,7 +75,7 @@ func get_learning_rate(
     base_lr
 }
 
-func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
+func clip_grad_norm(tensor[] gradients, float max_norm) tensor[] {
     float total_norm = 0.0
     int i = 0
     for i < len(gradients) {
@@ -134,7 +134,7 @@ func adam_step_param(
 
 func adam_step(
     adam_state state,
-    []tensor gradients,
+    tensor[] gradients,
     string lr_schedule,
     int total_steps,
     int warmup_steps,
@@ -148,7 +148,7 @@ func adam_step(
         total_steps,
         warmup_steps
     )
-    []tensor clipped_grads = clip_grad_norm(gradients, max_grad_norm)
+    tensor[] clipped_grads = clip_grad_norm(gradients, max_grad_norm)
     int i = 0
     for i < len(state.param) {
         (state.param[i], state.m[i], state.v[i]) = adam_step_param(

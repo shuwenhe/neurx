@@ -44,8 +44,8 @@ func default_logger_config() logger_config {
 struct logger {
     logger_config config
     int current_step
-    []metric_entry metric_buffer
-    []log_entry message_buffer
+    metric_entry[] metric_buffer
+    log_entry[] message_buffer
     tensorboard_writer tb_writer
     wandb_run wb_run
 }

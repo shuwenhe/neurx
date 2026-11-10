@@ -20,15 +20,15 @@ struct data_load_config {
 
 struct data_batch {
     int batch_id
-    []string input_ids
-    []string labels
+    string[] input_ids
+    string[] labels
     int num_samples
     int num_tokens
 }
 
 struct data_pipeline_state {
     data_load_config config
-    []data_batch prefetch_buffer
+    data_batch[] prefetch_buffer
     int current_batch_id
     int total_batches_loaded
     int total_samples_loaded
@@ -48,7 +48,7 @@ func new_data_pipeline(int batch_size, int num_workers, prefetch_strategy strate
             shuffle: true,
             strategy: strategy,
         },
-        prefetch_buffer: make([]data_batch, 100),
+        prefetch_buffer: make(data_batch[], 100),
         current_batch_id: 0,
         total_batches_loaded: 0,
         total_samples_loaded: 0,
@@ -77,7 +77,7 @@ func pipeline_enable_prefetch(data_pipeline_state state, prefetch_strategy strat
 
 func pipeline_prefetch_batch(data_pipeline_state state, data_batch batch) data_pipeline_state {
     if len(state.prefetch_buffer) < state.config.prefetch_size {
-        state.prefetch_buffer += []data_batch{batch}
+        state.prefetch_buffer += data_batch[]{batch}
         eprintln("[DataPipeline] Prefetched batch #" + int_to_string_3(batch.batch_id) + " (samples: " + int_to_string_3(batch.num_samples) + ", tokens: " + int_to_string_3(batch.num_tokens) + ")")
     } else {
         eprintln("[DataPipeline] Prefetch buffer full, dropping batch")
@@ -88,8 +88,8 @@ func pipeline_prefetch_batch(data_pipeline_state state, data_batch batch) data_p
 func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, data_batch) {
     data_batch empty_batch = data_batch {
         batch_id: -1,
-        input_ids: []string{},
-        labels: []string{},
+        input_ids: string[]{},
+        labels: string[]{},
         num_samples: 0,
         num_tokens: 0,
     }
@@ -98,11 +98,11 @@ func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, da
         return state, empty_batch
     }
     data_batch batch = state.prefetch_buffer[0]
-    []data_batch new_buffer = make([]data_batch, len(state.prefetch_buffer) - 1)
+    data_batch[] new_buffer = make(data_batch[], len(state.prefetch_buffer) - 1)
     int buf_len = len(state.prefetch_buffer)
     for i in range(buf_len) {
         if i > 0 {
-            new_buffer += []data_batch{state.prefetch_buffer[i]}
+            new_buffer += data_batch[]{state.prefetch_buffer[i]}
         }
     }
     state.prefetch_buffer = new_buffer
@@ -116,16 +116,16 @@ func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, da
 func pipeline_create_batch(batch_id, num_samples, int num_tokens) data_batch {
     data_batch {
         batch_id: batch_id,
-        input_ids: make([]string, num_samples),
-        labels: make([]string, num_samples),
+        input_ids: make(string[], num_samples),
+        labels: make(string[], num_samples),
         num_samples: num_samples,
         num_tokens: num_tokens,
     }
 }
 
 func batch_add_sample(data_batch batch, string input, string label) data_batch {
-    batch.input_ids += []string{input}
-    batch.labels += []string{label}
+    batch.input_ids += string[]{input}
+    batch.labels += string[]{label}
     batch
 }
 
@@ -145,7 +145,7 @@ func pipeline_apply_augmentation(data_batch batch, bool enable_augmentation) dat
     int original_size = len(batch.input_ids)
     for i in range(original_size) {
         string augmented_input = batch.input_ids[i] + "_augmented"
-        batch.input_ids += []string{augmented_input}
+        batch.input_ids += string[]{augmented_input}
     }
     batch.num_samples = len(batch.input_ids)
     eprintln("[DataPipeline] Applied augmentation, new batch size: " + int_to_string_3(batch.num_samples))
@@ -202,7 +202,7 @@ func float_to_string_3(float f) string {
     ""
 }
 
-func range_helper(int end) []int {
-    []int r = make([]int, end)
+func range_helper(int end) int[] {
+    int[] r = make(int[], end)
     r
 }

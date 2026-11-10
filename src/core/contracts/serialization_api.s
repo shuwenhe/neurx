@@ -32,17 +32,17 @@ interface i_state_dict {
     get_tensor(string name) . tensor
     add_param(string name, param: tensor) . void
     get_param(string name) . tensor
-    keys() . []string
+    keys() . string[]
     merge(other: state_dict) . state_dict
 }
 interface i_serializer {
-    serialize(state_dict: state_dict, config: serialization_config) . []i8
-    deserialize(data: []i8, format: SerializationFormat) . state_dict
+    serialize(state_dict: state_dict, config: serialization_config) . i8[]
+    deserialize(data: i8[], format: SerializationFormat) . state_dict
     write_file(string path, state_dict: state_dict, config: serialization_config) . void
     read_file(string path) . state_dict
 }
 interface i_format_converter {
-    convert(input_format: SerializationFormat, output_format: SerializationFormat, data: []i8) . []i8
+    convert(input_format: SerializationFormat, output_format: SerializationFormat, data: i8[]) . i8[]
     can_convert(from_format: SerializationFormat, to_format: SerializationFormat) . bool
 }
 interface i_tensor_io {
@@ -55,7 +55,7 @@ interface i_checkpoint_manager {
     save_checkpoint(string path, state_dict: state_dict, i64 step) . void
     load_checkpoint(string path) . state_dict
     load_checkpoint_by_step(string path, i64 step) . state_dict
-    list_checkpoints(string path) . []string
+    list_checkpoints(string path) . string[]
     cleanup_old_checkpoints(string path, i64 keep_last) . void
 }
 interface i_metadata_io {

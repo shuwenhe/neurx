@@ -21,8 +21,8 @@ struct mmlu_question {
     int qid
 }
 
-func mmlu_task_list() []mmlu_task {
-    []mmlu_task tasks = []mmlu_task{}
+func mmlu_task_list() mmlu_task[] {
+    mmlu_task[] tasks = mmlu_task[]{}
     tasks = append(tasks, mmlu_task{name: "abstract_algebra", category: "STEM", num_questions: 100, is_included: true})
     tasks = append(tasks, mmlu_task{name: "anatomy", category: "STEM", num_questions: 135, is_included: true})
     tasks = append(tasks, mmlu_task{name: "astronomy", category: "STEM", num_questions: 152, is_included: true})
@@ -75,8 +75,8 @@ func mmlu_task_list() []mmlu_task {
 }
 
 struct mmlu_dataset_state {
-    map[string][]mmlu_question questions_by_task
-    map[string][]mmlu_question dev_by_task
+    map[string]mmlu_question[] questions_by_task
+    map[string]mmlu_question[] dev_by_task
     string data_root
     int total_questions
     int total_dev
@@ -85,8 +85,8 @@ struct mmlu_dataset_state {
 
 func new_mmlu_dataset_state(string data_root) mmlu_dataset_state {
     mmlu_dataset_state {
-        questions_by_task: map[string][]mmlu_question{},
-        dev_by_task: map[string][]mmlu_question{},
+        questions_by_task: map[string]mmlu_question[]{},
+        dev_by_task: map[string]mmlu_question[]{},
         data_root: data_root,
         total_questions: 0,
         total_dev: 0,
@@ -107,8 +107,8 @@ func parse_mmlu_csv_line(string line, string task_name, int qid) mmlu_question {
     }
 }
 
-func load_mmlu_dev_examples(string data_root, string task_name, int num_examples) []mmlu_question {
-    []mmlu_question dev = []mmlu_question{}
+func load_mmlu_dev_examples(string data_root, string task_name, int num_examples) mmlu_question[] {
+    mmlu_question[] dev = mmlu_question[]{}
     int i = 0
     for i < num_examples {
         dev = append(dev, mmlu_question{
@@ -126,8 +126,8 @@ func load_mmlu_dev_examples(string data_root, string task_name, int num_examples
     dev
 }
 
-func load_mmlu_test_questions(string data_root, string task_name) []mmlu_question {
-    []mmlu_question test = []mmlu_question{}
+func load_mmlu_test_questions(string data_root, string task_name) mmlu_question[] {
+    mmlu_question[] test = mmlu_question[]{}
     int i = 0
     for i < 10 {
         test = append(test, mmlu_question{
@@ -148,15 +148,15 @@ func load_mmlu_test_questions(string data_root, string task_name) []mmlu_questio
 func load_mmlu_dataset(string data_root) mmlu_dataset_state {
     mmlu_dataset_state state = new_mmlu_dataset_state(data_root)
     println("[MMLU Loader] Loading MMLU dataset from " + data_root)
-    []mmlu_task tasks = mmlu_task_list()
+    mmlu_task[] tasks = mmlu_task_list()
     int task_idx = 0
     for task_idx < len(tasks) {
         mmlu_task t = tasks[task_idx]
         if t.is_included {
-            []mmlu_question dev = load_mmlu_dev_examples(data_root, t.name, 5)
+            mmlu_question[] dev = load_mmlu_dev_examples(data_root, t.name, 5)
             state.dev_by_task[t.name] = dev
             state.total_dev = state.total_dev + len(dev)
-            []mmlu_question test = load_mmlu_test_questions(data_root, t.name)
+            mmlu_question[] test = load_mmlu_test_questions(data_root, t.name)
             state.questions_by_task[t.name] = test
             state.total_questions = state.total_questions + len(test)
             println("  ✓ Loaded " + t.name + ": " + int_to_str(len(test)) + " test, " + int_to_str(len(dev)) + " dev")

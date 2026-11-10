@@ -38,7 +38,7 @@ func main() {
         os.Stderr.WriteString("error: 310P3 eight-card launcher requires exactly 8 visible devices\n")
         os.Exit(2)
     }
-    var pids []os.Process
+    var pids os.Process[]
     for index, device := range device_list {
         device = strings.TrimSpace(device)
         port := base_port + string(index)

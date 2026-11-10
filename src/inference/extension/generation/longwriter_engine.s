@@ -392,8 +392,7 @@ Now write the content for "{section.title}":
             return 0.7
     }
     _post_process(string raw_text, section: outline_node) {
-        changes: list<string> = []
-        processed = raw_text
+        changes: list<string> = processed[] = raw_text
         heading_pattern = regex.match(r'^#{1,6}\s+.+\n*', processed)
         if heading_pattern != None:
             processed = processed[heading_pattern.end():].lstrip("\n")
@@ -548,8 +547,7 @@ struct long_writer_engine {
     async write_document(string topic, requirements: string) {
         total_start = current_time_millis()
         api_calls = 0
-        errors = []
-        print(f"\n{'='*60}")
+        errors = print[](f"\n{'='*60}")
         print(f"📝 NEURX LONGWRITER Engine")
         print(f"Topic: {topic}")
         print(f"Mode: {config.writing_mode}")
@@ -560,8 +558,7 @@ struct long_writer_engine {
         display_outline(plan.outline)
         print(f"\n--- PHASE 2: CONTENT GENERATION ---\n")
         flat_sections = flatten_outline(plan.outline).filter(s => s.level > 0)
-        generated_sections: list<generated_section> = []
-        tokens_used = 0
+        generated_sections: list<generated_section> = tokens_used[] = 0
         revised_count = 0
         quality_passes = 0
         quality_fails = 0
@@ -665,8 +662,7 @@ struct long_writer_engine {
 }
 
 function flatten_outline(root: outline_node) {
-    result: list<outline_node> = []
-    def traverse(node: outline_node) {
+    result: list<outline_node> = def[] traverse(node: outline_node) {
         if node.id != "root" or node.children.empty():
             result.append(node)
         for child in node.children:
@@ -790,8 +786,7 @@ struct mock_llm_client {
                 ]
             }), usage=usage_info(prompt_tokens=len(prompt.split()), completion_tokens=200))
         else:
-            paragraphs: list<string> = []
-            words_written = 0
+            paragraphs: list<string> = words_written[] = 0
             for words_written < content_length {
                 para = f"This is sample generated content for testing purposes. It demonstrates the LongWriter's ability to produce coherent text. The content discusses relevant topics in detail. Each paragraph adds value to the overall document structure. "
                 paragraphs.append(para.trim())

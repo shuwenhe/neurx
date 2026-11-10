@@ -46,7 +46,7 @@ func GPUWorkerExample() {
         worker_id: 1,
         worker_type: WORKER_TYPE_GPU,
         device_id: 0,
-        gpus: []i32{0, 1, 2},
+        gpus: i32[]{0, 1, 2},
         max_batch_size: 512,
         max_model_len: 8192,
         gpu_memory_mb: 24576,
@@ -168,7 +168,7 @@ func WorkerCommunicationExample() {
         message_type: 2,
         payload_size: 512,
     }
-    target_workers := []i32{1, 2, 3, 4}
+    target_workers := i32[]{1, 2, 3, 4}
     success := handler.BroadcastMessage(broadcast_msg, target_workers)
     println("Broadcast sent to", success, "workers")
     handler.Shutdown()
@@ -183,7 +183,7 @@ func BatchProcessingExample() {
     }
     processor := NewBatchProcessor(256, policy)
     println("Created batch processor with max size 256")
-    requests := make([]RequestMetadata, 0)
+    requests := make(RequestMetadata[], 0)
     for i := 0; i < 64; i++ {
         req := RequestMetadata{
             request_id: "req_" + string(i),
@@ -217,7 +217,7 @@ func DistributedSyncExample() {
     sync_mgr := NewSynchronizationManager()
     println("Created synchronization manager")
     source := i32(0)
-    targets := []i32{1, 2, 3}
+    targets := i32[]{1, 2, 3}
     result := sync_mgr.InitiateSync(source, targets)
     if result.success == 1 {
         println("Initiated distributed sync from worker", source)

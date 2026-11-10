@@ -33,13 +33,13 @@ struct inference_worker {
     int generation
     int last_heartbeat_ms
     int restart_count
-    []string request_ids
+    string[] request_ids
     string failure_reason
 }
 
 struct worker_cluster_state {
     parallel_topology topology
-    []inference_worker workers
+    inference_worker[] workers
     int heartbeat_timeout_ms
     int max_restarts
     int failures
@@ -51,7 +51,7 @@ struct worker_cluster_state {
 struct worker_cluster_result {
     worker_cluster_state state
     inference_worker worker
-    []string affected_request_ids
+    string[] affected_request_ids
     bool success
     string error_message
 }
@@ -71,8 +71,7 @@ func worker_empty() inference_worker {
     worker.generation = 0
     worker.last_heartbeat_ms = 0
     worker.restart_count = 0
-    worker.request_ids = []
-    worker.failure_reason = ""
+    worker.request_ids = worker.failure_reason[] = ""
     worker
 }
 
@@ -80,8 +79,7 @@ func worker_new_result(worker_cluster_state state, inference_worker worker, bool
     worker_cluster_result result
     result.state = state
     result.worker = worker
-    result.affected_request_ids = []
-    result.success = success
+    result.affected_request_ids = result.success[] = success
     result.error_message = error_message
     result
 }
@@ -105,8 +103,7 @@ func worker_topology_valid(parallel_topology topology) bool {
 func new_worker_cluster(parallel_topology topology, int heartbeat_timeout_ms, int max_restarts) worker_cluster_state {
     worker_cluster_state state
     state.topology = worker_normalize_topology(topology)
-    state.workers = []
-    state.heartbeat_timeout_ms = heartbeat_timeout_ms
+    state.workers = state.heartbeat_timeout_ms[] = heartbeat_timeout_ms
     if state.heartbeat_timeout_ms <= 0 { state.heartbeat_timeout_ms = 30000 }
     state.max_restarts = max_restarts
     if state.max_restarts < 0 { state.max_restarts = 0 }
@@ -140,7 +137,7 @@ func worker_find_rank(worker_cluster_state state, int global_rank) int {
     -1
 }
 
-func worker_string_contains([]string values, string value) bool {
+func worker_string_contains(string[] values, string value) bool {
     int i = 0
     for i < len(values) {
         if values[i] == value { return true }
@@ -149,12 +146,12 @@ func worker_string_contains([]string values, string value) bool {
     false
 }
 
-func worker_string_at([]string values, int index) string {
+func worker_string_at(string[] values, int index) string {
     values[index]
 }
 
-func worker_string_remove([]string values, string value) []string {
-    []string filtered = make([]string, len(values))
+func worker_string_remove(string[] values, string value) string[] {
+    string[] filtered = make(string[], len(values))
     int i = 0
     for i < len(values) {
         if values[i] != value { filtered = append(filtered, values[i]) }
@@ -181,8 +178,7 @@ func worker_build(string worker_id, string node_id, int global_rank, int local_r
     worker.generation = 1
     worker.last_heartbeat_ms = now_ms
     worker.restart_count = 0
-    worker.request_ids = []
-    worker.failure_reason = ""
+    worker.request_ids = worker.failure_reason[] = ""
     worker
 }
 
@@ -259,8 +255,7 @@ func worker_fail(worker_cluster_state state, string worker_id, string reason) wo
     result.affected_request_ids = worker.request_ids
     worker.status = worker_failed_status()
     worker.failure_reason = reason
-    worker.request_ids = []
-    state.failures = state.failures + 1
+    worker.request_ids = state.failures[] = state.failures + 1
     state.workers[index] = worker
     result.state = state
     result.worker = worker
@@ -303,8 +298,7 @@ func worker_expire_heartbeats(worker_cluster_state state, int now_ms) worker_clu
             }
             worker.status = worker_failed_status()
             worker.failure_reason = "worker heartbeat timeout"
-            worker.request_ids = []
-            state.workers[i] = worker
+            worker.request_ids = state.workers[i][] = worker
             state.failures = state.failures + 1
         }
         i = i + 1

@@ -32,13 +32,13 @@ struct deployment_spec {
     replica_count       int
     resource_request    map[string]string
     env_vars            map[string]string
-    volumes             []string
+    volumes             string[]
 }
 
 struct cluster_manager {
     config              cluster_config
-    nodes               []node_spec
-    deployments         []deployment_spec
+    nodes               node_spec[]
+    deployments         deployment_spec[]
     cluster_status      string
     total_gpus          int
     healthy_nodes       int
@@ -47,16 +47,16 @@ struct cluster_manager {
 struct cluster_monitor {
     manager             *cluster_manager
     metrics             map[string]float64
-    alerts              []string
+    alerts              string[]
     health_status       string
 }
 
 struct job_scheduler {
-    pending_jobs        []string
-    running_jobs        []string
-    completed_jobs      []string
-    failed_jobs         []string
-    job_queue           []map[string]string
+    pending_jobs        string[]
+    running_jobs        string[]
+    completed_jobs      string[]
+    failed_jobs         string[]
+    job_queue           (map[string]string)[]
 }
 
 func (cluster_manager* manager) initialize_cluster() {
@@ -229,7 +229,7 @@ func (job_scheduler* scheduler) schedule_jobs(cluster_manager* manager) {
             fmt.Printf("[Scheduler] Job %s → Node %d\n", job, i)
         }
     }
-    scheduler.pending_jobs = []string{}
+    scheduler.pending_jobs = string[]{}
 }
 
 func (job_scheduler* scheduler) complete_jobs() {
@@ -238,7 +238,7 @@ func (job_scheduler* scheduler) complete_jobs() {
         scheduler.completed_jobs = append(scheduler.completed_jobs, job)
         fmt.Printf("[Scheduler] Completed: %s\n", job)
     }
-    scheduler.running_jobs = []string{}
+    scheduler.running_jobs = string[]{}
 }
 
 func (cluster_manager* manager) handle_node_failure(node_id int) {
@@ -256,8 +256,8 @@ func (cluster_manager* manager) handle_node_failure(node_id int) {
 func new_cluster_manager(config cluster_config) *cluster_manager {
     return *cluster_manager{
         config:        config,
-        nodes:         []node_spec{},
-        deployments:   []deployment_spec{},
+        nodes:         node_spec[]{},
+        deployments:   deployment_spec[]{},
         cluster_status: "initializing",
         total_gpus:    0,
         healthy_nodes: 0,
@@ -304,16 +304,16 @@ func (cluster_manager* manager) run_full_deployment() {
     monitor := *cluster_monitor{
         manager:    manager,
         metrics:    make(map[string]float64),
-        alerts:     []string{},
+        alerts:     string[]{},
         health_status: "unknown",
     }
     monitor.collect_metrics()
     monitor.assess_health()
     scheduler := *job_scheduler{
-        pending_jobs:   []string{},
-        running_jobs:   []string{},
-        completed_jobs: []string{},
-        failed_jobs:    []string{},
+        pending_jobs:   string[]{},
+        running_jobs:   string[]{},
+        completed_jobs: string[]{},
+        failed_jobs:    string[]{},
     }
     scheduler.submit_job("training-job-1")
     scheduler.schedule_jobs(manager)

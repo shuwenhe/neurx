@@ -42,7 +42,7 @@ struct inference_engine {
 	sync.Mutex mu
 	string model_id
 	*model_interface model
-	[]*inference_request request_queue
+	inference_request*[] request_queue
 	map[string]*inference_response response_map
 	int32 max_queue_size
 	int32 current_queue_size
@@ -58,8 +58,8 @@ struct inference_engine {
 struct batch_inference_request {
 	string batch_id
 	string model_id
-	[]*model_input inputs
-	[]*model_generation_config generation_configs
+	model_input*[] inputs
+	model_generation_config*[] generation_configs
 	time.Time timestamp
 	int32 batch_size
 }
@@ -67,8 +67,8 @@ struct batch_inference_request {
 struct batch_inference_response {
 	string batch_id
 	string model_id
-	[]*model_output outputs
-	[]int64 latencies
+	model_output*[] outputs
+	int64[] latencies
 	bool success
 	string error_message
 	int32 batch_size
@@ -79,7 +79,7 @@ func create_inference_engine(model_id string, model *model_interface) *inference
 	return *inference_engine{
 		model_id: model_id,
 		model: model,
-		request_queue: []*inference_request{},
+		request_queue: inference_request*[]{},
 		response_map: make(map[string]*inference_response),
 		max_queue_size: 1000,
 		stats: *inference_statistics{},
@@ -124,7 +124,7 @@ func (inference_engine* engine) execute_inference(inference_request* request) *i
 	output := *model_output{
 		output_type: "text",
 		text: fmt.Sprintf("Generated output for: %s", request.input.prompt),
-		tokens: make([]int32, tokens_generated),
+		tokens: make(int32[], tokens_generated),
 		metadata: make(map[string]interface{}),
 	}
 	engine.mu.Lock()
@@ -160,8 +160,8 @@ func (inference_engine* engine) submit_batch_inference(batch_inference_request* 
 		}
 	}
 	engine.mu.Unlock()
-	outputs := make([]*model_output, len(batch_request.inputs))
-	latencies := make([]int64, len(batch_request.inputs))
+	outputs := make(model_output*[], len(batch_request.inputs))
+	latencies := make(int64[], len(batch_request.inputs))
 	for i, input := range batch_request.inputs {
 		item_start := time.Now()
 		output := *model_output{
@@ -207,9 +207,9 @@ func (inference_engine* engine) process_queue() int32 {
 	if batch_size > engine.max_batch_size {
 		batch_size = engine.max_batch_size
 	}
-	requests_to_process := make([]*inference_request, batch_size)
+	requests_to_process := make(inference_request*[], batch_size)
 	copy(requests_to_process, engine.request_queue[:batch_size])
-	remaining := make([]*inference_request, 0)
+	remaining := make(inference_request*[], 0)
 	remaining = append(remaining, engine.request_queue[batch_size:]...)
 	engine.request_queue = remaining
 	engine.current_queue_size -= batch_size
@@ -266,7 +266,7 @@ func (inference_engine* engine) set_batch_timeout(timeout_ms int32) {
 	engine.batch_timeout_ms = timeout_ms
 }
 
-func (inference_engine* engine) drain_queue() []*inference_response {
+func (inference_engine* engine) drain_queue() inference_response*[] {
 	engine.mu.Lock()
 	for {
 		if engine.current_queue_size == 0 {
@@ -276,9 +276,9 @@ func (inference_engine* engine) drain_queue() []*inference_response {
 		if batch_size > engine.max_batch_size {
 			batch_size = engine.max_batch_size
 		}
-		requests := make([]*inference_request, batch_size)
+		requests := make(inference_request*[], batch_size)
 		copy(requests, engine.request_queue[:batch_size])
-		remaining := make([]*inference_request, 0)
+		remaining := make(inference_request*[], 0)
 		remaining = append(remaining, engine.request_queue[batch_size:]...)
 		engine.request_queue = remaining
 		engine.current_queue_size -= batch_size
@@ -291,7 +291,7 @@ func (inference_engine* engine) drain_queue() []*inference_response {
 		}
 		engine.mu.Lock()
 	}
-	responses := make([]*inference_response, 0, len(engine.response_map))
+	responses := make(inference_response*[], 0, len(engine.response_map))
 	for _, resp := range engine.response_map {
 		responses = append(responses, resp)
 	}

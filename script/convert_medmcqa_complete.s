@@ -8,7 +8,7 @@ import (
 struct question_data {
     string qid
     string question
-    []string options
+    string[] options
     int correct_answer
     string category
     string explanation
@@ -24,7 +24,7 @@ func parse_jsonl_question(string line) question_data {
     question_data q = question_data{
         qid: "",
         question: "",
-        options: []string{},
+        options: string[]{},
         correct_answer: 0,
         category: "medical",
         explanation: ""
@@ -67,11 +67,11 @@ func parse_jsonl_question(string line) question_data {
     q
 }
 
-func extract_options_from_json(string line) []string {
-    []string opts = []string{}
+func extract_options_from_json(string line) string[] {
+    string[] opts = string[]{}
     int opt_start = find_substring(line, "\"options\":[")
     if opt_start < 0 {
-        opts = []string{"Option A", "Option B", "Option C", "Option D"}
+        opts = string[]{"Option A", "Option B", "Option C", "Option D"}
         return opts
     }
     opt_start = opt_start + 11
@@ -211,7 +211,7 @@ func parse_int(string s) int {
 func question_to_sft(question_data q) sft_record {
     string instruction = "Answer the following medical multiple-choice question accurately."
     string input = q.question + "\n\nOptions:\n"
-    []string labels = []string{"A", "B", "C", "D"}
+    string[] labels = string[]{"A", "B", "C", "D"}
     for i in 0..len(q.options)-1 {
         input = input + labels[i] + ") " + q.options[i] + "\n"
     }
@@ -296,7 +296,7 @@ func main() {
     }
     println("✓ Read " + len(file_content) + " bytes")
     println("Parsing questions...")
-    []string lines = []string{}
+    string[] lines = string[]{}
     string current_line = ""
     for i in 0..len(file_content)-1 {
         if file_content[i] == 10 {
@@ -315,8 +315,8 @@ func main() {
     println("✓ Parsed " + total_questions as string + " questions")
     println("")
     println("Converting to SFT format...")
-    []sft_record train_records = []sft_record{}
-    []sft_record val_records = []sft_record{}
+    sft_record[] train_records = sft_record[]{}
+    sft_record[] val_records = sft_record[]{}
     int train_count = (total_questions * 95 / 100)
     for i in 0..total_questions-1 {
         question_data q = parse_jsonl_question(lines[i])

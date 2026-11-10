@@ -8,7 +8,7 @@ import (
 struct validation_result {
     bool is_valid
     string message
-    []string issues
+    string[] issues
     float confidence_score
     int severity_level
 }
@@ -58,7 +58,7 @@ func (reasoning_validator* validator) validate_chain(reasoning_chain chain) vali
 }
 
 func (reasoning_validator* validator) validate_consistency(reasoning_chain chain) validation_result {
-    []string issues = []string{}
+    string[] issues = string[]{}
     float min_confidence = 1.0
     i := 0
     for i < len(chain.steps) {
@@ -91,7 +91,7 @@ func (reasoning_validator* validator) validate_consistency(reasoning_chain chain
 
 func (reasoning_validator* validator) validate_logical_flow(reasoning_chain chain) validation_result {
     result := validator.validate_consistency(chain)
-    []string additional_issues = []string{}
+    string[] additional_issues = string[]{}
     i := 0
     for i < len(chain.steps) {
         if chain.steps[i].order != i {
@@ -156,7 +156,7 @@ func (reasoning_validator* validator) is_reasoning_complete(reasoning_chain chai
 }
 
 func (reasoning_validator* validator) validate_step(reasoning_step step) validation_result {
-    []string issues = []string{}
+    string[] issues = string[]{}
     if step.reasoning == "" {
         issues = append(issues, "Step has no reasoning content")
     }
@@ -180,7 +180,7 @@ func (reasoning_validator* validator) validate_step(reasoning_step step) validat
 }
 
 func (reasoning_validator* validator) check_limits(reasoning_chain chain) validation_result {
-    []string issues = []string{}
+    string[] issues = string[]{}
     if chain.has_exceeded_max_steps() {
         issues = append(issues, "Exceeded maximum number of steps: " + string(chain.get_step_count()))
     }
@@ -216,7 +216,7 @@ func (reasoning_validator* validator) generate_report(reasoning_chain chain) str
 }
 
 func (reasoning_validator* validator) auto_fix_issues(reasoning_chain chain) reasoning_chain {
-    valid_steps := []reasoning_step{}
+    valid_steps := reasoning_step[]{}
     i := 0
     for i < len(chain.steps) {
         if chain.steps[i].state != step_state.failed {

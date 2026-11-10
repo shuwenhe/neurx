@@ -55,10 +55,10 @@ struct process_table {
 
 func process_table_create() process_table {
     table := process_table {
-        processes: [4096]task_struct{},
+        processes: task_struct[4096]{},
         process_count: 0,
         next_pid: 100,
-        parent_pids: [4096]int{}
+        parent_pids: int[4096]{}
     }
     return table
 }
@@ -231,7 +231,7 @@ func get_task_by_pid(process_table* ptable, int pid) task_struct* {
     return nil
 }
 
-func find_child_processes(process_table* ptable, int parent_pid) ([]int, int) {
+func find_child_processes(process_table* ptable, int parent_pid) (int[], int) {
     children := int[128]{}
     count := 0
     

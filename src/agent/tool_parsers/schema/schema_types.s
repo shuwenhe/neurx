@@ -13,8 +13,8 @@ struct json_schema {
     string title
     string description
     string type_name
-    properties: []json_property
-    required: []string
+    properties: json_property[]
+    required: string[]
     bool additional_properties
     int min_properties
     int max_properties
@@ -25,14 +25,14 @@ struct json_schema {
     string pattern
     int min_length
     int max_length
-    enum_values: []string
+    enum_values: string[]
     float minimum
     float maximum
     bool exclusive_minimum
     bool exclusive_maximum
     float multiple_of
     string default_value
-    examples: []string
+    examples: string[]
 }
 
 struct json_property {
@@ -43,8 +43,8 @@ struct json_property {
 }
 
 struct token_constraint {
-    allowed_tokens: []int
-    forbidden_tokens: []int
+    allowed_tokens: int[]
+    forbidden_tokens: int[]
     int state
     string context
     bool is_terminal
@@ -52,9 +52,8 @@ struct token_constraint {
 
 struct dfa_state {
     int state_id
-    transitions: []dfa_transition
-    bool is_accepting
-    token_set: []int
+    transitions: bool[] dfa_transition is_accepting
+    token_set: int[]
 }
 
 struct dfa_transition {
@@ -64,7 +63,7 @@ struct dfa_transition {
 }
 
 struct parse_context {
-    current_path: []string
+    current_path: string[]
     string current_value
     int depth
     bool in_string
@@ -79,9 +78,9 @@ struct sampler_state {
     string mode
     *json_schema schema
     parse_context context
-    allowed_next: []int
+    allowed_next: int[]
     int rejected_count
-    warnings: []string
+    warnings: string[]
 }
 
 func is_valid_json_type(string type_name) bool {

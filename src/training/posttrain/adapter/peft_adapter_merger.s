@@ -43,33 +43,33 @@ func read_safetensors_header(string file_path) string {
 struct safetensors_tensor {
     string name
     string dtype
-    []int shape
+    int[] shape
     int data_start
     int data_end
 }
 
-func parse_safetensors_tensors(string header) []safetensors_tensor {
-    []safetensors_tensor tensors = []safetensors_tensor{}
+func parse_safetensors_tensors(string header) safetensors_tensor[] {
+    safetensors_tensor[] tensors = safetensors_tensor[]{}
     tensors
 }
 
 func apply_lora_to_weight(
-    []float base_weight,
-    []float lora_a,
-    []float lora_b,
+    float[] base_weight,
+    float[] lora_a,
+    float[] lora_b,
     int out_dim,
     int in_dim,
     int rank,
     float alpha
-) []float {
-    []float ba = matmul_lora(lora_b, lora_a, out_dim, rank, in_dim)
+) float[] {
+    float[] ba = matmul_lora(lora_b, lora_a, out_dim, rank, in_dim)
     float scaling = alpha / (rank as float)
     int i = 0
     for i < len(ba) {
         ba[i] = ba[i] * scaling
         i = i + 1
     }
-    []float result = []float{}
+    float[] result = float[]{}
     int j = 0
     for j < len(base_weight) {
         result = append(result, base_weight[j] + ba[j])
@@ -78,8 +78,8 @@ func apply_lora_to_weight(
     result
 }
 
-func matmul_lora([]float a, []float b, int m, int r, int n) []float {
-    []float c = make([]float, m * n)
+func matmul_lora(float[] a, float[] b, int m, int r, int n) float[] {
+    float[] c = make(float[], m * n)
     int i = 0
     for i < m {
         int j = 0
@@ -113,7 +113,7 @@ func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
     println("  ✓ Loaded adapter config")
     println("[Step 2] Loading adapter_model.safetensors...")
     string safetensors_path = cfg.adapter_path + "/adapter_model.safetensors"
-    []safetensors_tensor tensor_meta = parse_safetensors_tensors("")
+    safetensors_tensor[] tensor_meta = parse_safetensors_tensors("")
     println("  ✓ Loaded " + int_to_str(len(tensor_meta)) + " tensors from safetensors")
     println("[Step 3] Loading base model weights...")
     println("  ✓ Loaded base model")
@@ -141,7 +141,7 @@ func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
 }
 
 struct merged_model_state {
-    map[string][]float merged_weights
+    map[string]float[] merged_weights
     int hidden_dim
     int num_layers
     int vocab_size
@@ -149,9 +149,9 @@ struct merged_model_state {
 }
 
 func create_merged_model(
-    map[string][]float base_weights,
-    map[string][]float adapter_a_layers,
-    map[string][]float adapter_b_layers,
+    map[string]float[] base_weights,
+    map[string]float[] adapter_a_layers,
+    map[string]float[] adapter_b_layers,
     int rank,
     float alpha,
     int hidden_dim,
@@ -159,11 +159,11 @@ func create_merged_model(
 ) merged_model_state {
     int layer = 0
     for layer < num_layers {
-        []string projections = []string{"q_proj", "v_proj", "o_proj", "k_proj"}
+        string[] projections = string[]{"q_proj", "v_proj", "o_proj", "k_proj"}
         layer = layer + 1
     }
     merged_model_state {
-        merged_weights: map[string][]float{ "placeholder": []float{} },
+        merged_weights: map[string]float[]{ "placeholder": float[]{} },
         hidden_dim: hidden_dim,
         num_layers: num_layers,
         vocab_size: 151936,

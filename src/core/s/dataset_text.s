@@ -5,16 +5,16 @@ import (
 struct text_corpus_state {
     string path
     string raw_text
-    []string lines
-    []string vocab
-    []int token_ids
+    string[] lines
+    string[] vocab
+    int[] token_ids
     int line_count
     int char_count
     int token_count
 }
 
-func copy_ints([]int values) []int {
-    []int out = make([]int, len(values))
+func copy_ints(int[] values) int[] {
+    int[] out = make(int[], len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -23,7 +23,7 @@ func copy_ints([]int values) []int {
     out
 }
 
-func has_string([]string values, string target) bool {
+func has_string(string[] values, string target) bool {
     int i = 0
     for i < len(values) {
         if strings_eq(string_at(values, i), target) {
@@ -55,13 +55,13 @@ func count_lines(string text) int {
     lines
 }
 
-func split_lines(string text) []string {
+func split_lines(string text) string[] {
     int n = len(text)
     int lines_cap = count_lines(text)
     if lines_cap <= 0 {
         lines_cap = 1
     }
-    []string lines = make([]string, lines_cap)
+    string[] lines = make(string[], lines_cap)
     string current = ""
     int i = 0
     int line_idx = 0
@@ -85,13 +85,13 @@ func split_lines(string text) []string {
         line_idx = line_idx + 1
     }
     if line_idx == 0 {
-        []string empty = []string{}
+        string[] empty = string[]{}
         return empty
     }
     if line_idx == lines_cap {
         return lines
     }
-    []string out = make([]string, line_idx)
+    string[] out = make(string[], line_idx)
     int j = 0
     for j < line_idx {
         string_set(out, j, string_at(lines, j))
@@ -100,9 +100,9 @@ func split_lines(string text) []string {
     out
 }
 
-func build_vocab(string text) []string {
+func build_vocab(string text) string[] {
     int n = len(text)
-    []string vocab = make([]string, n)
+    string[] vocab = make(string[], n)
     int i = 0
     int vocab_len = 0
     for i < n {
@@ -116,7 +116,7 @@ func build_vocab(string text) []string {
     vocab
 }
 
-func vocab_index([]string vocab, string ch) int {
+func vocab_index(string[] vocab, string ch) int {
     int i = 0
     for i < len(vocab) {
         if strings_eq(string_at(vocab, i), ch) {
@@ -127,9 +127,9 @@ func vocab_index([]string vocab, string ch) int {
     -1
 }
 
-func encode_text(string text, []string vocab) []int {
+func encode_text(string text, string[] vocab) int[] {
     int n = len(text)
-    []int token_ids = make([]int, n)
+    int[] token_ids = make(int[], n)
     int i = 0
     int token_idx = 0
     for i < n {
@@ -152,9 +152,9 @@ func load_text_corpus(string path) text_corpus_state {
         text_corpus_state empty_state = text_corpus_state {
             path: path,
             raw_text: "",
-            lines: []string{},
-            vocab: []string{},
-            token_ids: []int{},
+            lines: string[]{},
+            vocab: string[]{},
+            token_ids: int[]{},
             line_count: 0,
             char_count: 0,
             token_count: 0,
@@ -163,9 +163,9 @@ func load_text_corpus(string path) text_corpus_state {
         state
     }
     string raw = neurx.runtime.io.runtime_read_text_file(path)
-    []string lines = split_lines(raw)
-    []string vocab = build_vocab(raw)
-    []int token_ids = encode_text(raw, vocab)
+    string[] lines = split_lines(raw)
+    string[] vocab = build_vocab(raw)
+    int[] token_ids = encode_text(raw, vocab)
     text_corpus_state state = text_corpus_state {
         path: path,
         raw_text: raw,

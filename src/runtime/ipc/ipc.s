@@ -10,12 +10,12 @@ struct ipc_message {
 struct msg_queue {
     int            qid
     string         name
-    []ipc_message  messages
+    ipc_message[]  messages
     int            max_depth
 }
 
 struct ipc_state {
-    []msg_queue  queues
+    msg_queue[]  queues
     int          next_qid
     int          next_msg_id
 }
@@ -67,8 +67,7 @@ func msgrcv(is ipc_state, int qid, int to_pid) (ipc_state, ipc_message, bool) {
             for mi < len(is.queues[qi].messages) {
                 ipc_message m = is.queues[qi].messages[mi]
                 if m.to_pid == to_pid || m.to_pid == -1 {
-                    []ipc_message remaining = []
-                    int k = 0
+                    ipc_message[] remaining = int[] k = 0
                     for k < len(is.queues[qi].messages) {
                         if k != mi {
                             remaining = append(remaining, is.queues[qi].messages[k])
@@ -94,7 +93,7 @@ struct semaphore {
 }
 
 struct sem_state {
-    []semaphore sems
+    semaphore[] sems
     int         next_sem_id
 }
 

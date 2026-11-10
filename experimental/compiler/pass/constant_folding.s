@@ -26,7 +26,7 @@ func can_fold_operation(*operation op) bool {
     }
 }
 
-func find_folding_candidates(*computation_graph g) []folding_candidate {
+func find_folding_candidates(*computation_graph g) folding_candidate[] {
     candidates = folding_candidate[]()
 
     for op in g.operations {

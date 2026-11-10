@@ -34,11 +34,11 @@ struct hf_transformers_rollout {
 struct hf_model {
     string model_type
     model_config config
-    layers: []transformer_layer
-    *linear lm_head
+    layers: transformer_layer
+    *linear[] lm_head
     *embedding token_embeddings
     *embedding position_embeddings
-    past_key_values: [][]tensor
+    past_key_values: tensor[][]
 }
 
 struct hf_tokenizer {
@@ -77,8 +77,8 @@ func new_hf_transformers_rollout(hf_transformers_config config) . hf_transformer
 }
 
 func (hf_transformers_rollout* rollout) generate_batch(
-    []string prompts
-) . ([]string, [][]f32) {
+    string[] prompts
+) . (string[], f32[][]) {
     start_time := get_time_ms()
     rollout.total_prompts += i64(len(prompts))
     input_ids, attention_mask  := rollout.tokenize_batch(prompts)
@@ -87,8 +87,7 @@ func (hf_transformers_rollout* rollout) generate_batch(
         attention_mask,
         rollout.config.max_new_tokens
     )
-    responses := []
-    for i in 0..output_ids.shape[0] {
+    responses := for[] i in 0..output_ids.shape[0] {
         output_seq := output_ids[i]
         response := rollout.tokenizer.decode(output_seq)
         responses = append(responses, response)
@@ -103,19 +102,17 @@ func (hf_transformers_rollout* rollout) generate(
     tensor input_ids,
     tensor attention_mask,
     i32 max_new_tokens
-) . (tensor, [][]f32) {
+) . (tensor, f32[][]) {
     batch_size := input_ids.shape[0]
     input_length := input_ids.shape[1]
     max_length := input_length + max_new_tokens
     output_ids := tensor_zeros([batch_size, max_length], i64 dtype)
     output_ids[.., ..input_length] = input_ids
     finished := tensor_zeros([batch_size], bool dtype)
-    all_log_probs := []
-    for i in 0..batch_size {
+    all_log_probs := for[] i in 0..batch_size {
         all_log_probs = append(all_log_probs, [])
     }
-    rollout.model.past_key_values = []
-    for step in 0..max_new_tokens {
+    rollout.model.past_key_values = for[] step in 0..max_new_tokens {
         if finished.all() {
             break
         }
@@ -162,13 +159,12 @@ func (hf_transformers_rollout* rollout) generate(
 func (hf_transformers_rollout* rollout) sample_next_tokens(
     tensor logits,
     tensor finished
-) . (tensor, []f32) {
+) . (tensor, f32[]) {
     batch_size := logits.shape[0]
     if !rollout.config.do_sample {
         next_tokens := logits.argmax(dim: -1)
         log_probs := log_softmax(logits, dim: -1)
-        token_log_probs := []
-        for i in 0..batch_size {
+        token_log_probs := for[] i in 0..batch_size {
             token_id := next_tokens[i].item()
             log_prob := log_probs[i, token_id].item()
             token_log_probs = append(token_log_probs, log_prob)
@@ -187,8 +183,7 @@ func (hf_transformers_rollout* rollout) sample_next_tokens(
     probs := softmax(scaled_logits, dim: -1)
     next_tokens := multinomial(probs, num_samples: 1).squeeze(1)
     log_probs := log_softmax(scaled_logits, dim: -1)
-    token_log_probs := []
-    for i in 0..batch_size {
+    token_log_probs := for[] i in 0..batch_size {
         if !finished[i].item() {
             token_id := next_tokens[i].item()
             log_prob := log_probs[i, token_id].item()
@@ -201,10 +196,9 @@ func (hf_transformers_rollout* rollout) sample_next_tokens(
 }
 
 func (hf_transformers_rollout* rollout) tokenize_batch(
-    []string prompts
+    string[] prompts
 ) . (tensor, tensor) {
-    all_input_ids := []
-    max_length := 0
+    all_input_ids := max_length[] := 0
     for prompt in prompts {
         input_ids := rollout.tokenizer.encode(prompt)
         all_input_ids = append(all_input_ids, input_ids)

@@ -20,31 +20,31 @@ struct hybrid_moe_config {
 
 struct gated_mla_weights {
     hybrid_moe_config config
-    []float w_dq
-    []float w_uq
-    []float w_dkv
-    []float w_uk
-    []float w_uv
-    []float w_gate
-    []float w_output
+    float[] w_dq
+    float[] w_uq
+    float[] w_dkv
+    float[] w_uk
+    float[] w_uv
+    float[] w_gate
+    float[] w_output
 }
 
 struct gated_mla_result {
-    []float output
-    []float attention
-    []float gate
+    float[] output
+    float[] attention
+    float[] gate
 }
 
 struct attnres_weights {
     hybrid_moe_config config
-    []float query_scale
-    []float depth_keys
-    []float depth_bias
+    float[] query_scale
+    float[] depth_keys
+    float[] depth_bias
 }
 
 struct attnres_result {
-    []float output
-    []float weights
+    float[] output
+    float[] weights
 }
 
 struct hybrid_moe_model {
@@ -56,11 +56,11 @@ struct hybrid_moe_model {
 }
 
 struct hybrid_moe_forward_result {
-    []float output
-    []float nda_state
-    []float last_residual_weights
-    []int last_expert_indices
-    []float last_expert_weights
+    float[] output
+    float[] nda_state
+    float[] last_residual_weights
+    int[] last_expert_indices
+    float[] last_expert_weights
     int history_count
 }
 
@@ -96,8 +96,8 @@ func production_hybrid_moe_shape() hybrid_moe_config {
     }
 }
 
-func zeros(int n) []float {
-    []float out = make([]float, n)
+func zeros(int n) float[] {
+    float[] out = make(float[], n)
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -106,8 +106,8 @@ func zeros(int n) []float {
     out
 }
 
-func zeros_int(int n) []int {
-    []int out = make([]int, n)
+func zeros_int(int n) int[] {
+    int[] out = make(int[], n)
     int i = 0
     for i < n {
         out[i] = 0
@@ -116,8 +116,8 @@ func zeros_int(int n) []int {
     out
 }
 
-func deterministic_weights(int n, int salt, float scale) []float {
-    []float out = zeros(n)
+func deterministic_weights(int n, int salt, float scale) float[] {
+    float[] out = zeros(n)
     int i = 0
     for i < n {
         int raw = (i * 37 + salt * 19 + 11)
@@ -128,8 +128,8 @@ func deterministic_weights(int n, int salt, float scale) []float {
     out
 }
 
-func copy_floats([]float values) []float {
-    []float out = zeros(len(values))
+func copy_floats(float[] values) float[] {
+    float[] out = zeros(len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -191,8 +191,8 @@ func situ(float x) float {
     s * t
 }
 
-func rms_norm_tokens([]float input, int tokens, int hidden) []float {
-    []float out = zeros(tokens * hidden)
+func rms_norm_tokens(float[] input, int tokens, int hidden) float[] {
+    float[] out = zeros(tokens * hidden)
     int t = 0
     for t < tokens {
         float sum_sq = 0.0
@@ -213,8 +213,8 @@ func rms_norm_tokens([]float input, int tokens, int hidden) []float {
     out
 }
 
-func linear([]float input, []float weight, int rows, int in_dim, int out_dim) []float {
-    []float out = zeros(rows * out_dim)
+func linear(float[] input, float[] weight, int rows, int in_dim, int out_dim) float[] {
+    float[] out = zeros(rows * out_dim)
     int r = 0
     for r < rows {
         int o = 0
@@ -233,8 +233,8 @@ func linear([]float input, []float weight, int rows, int in_dim, int out_dim) []
     out
 }
 
-func add_arrays([]float a, []float b) []float {
-    []float out = zeros(len(a))
+func add_arrays(float[] a, float[] b) float[] {
+    float[] out = zeros(len(a))
     int i = 0
     for i < len(a) {
         out[i] = a[i] + b[i]
@@ -258,20 +258,20 @@ func new_gated_mla_weights(hybrid_moe_config cfg) gated_mla_weights {
     }
 }
 
-func gated_mla_forward(gated_mla_weights weights, []float input, int tokens) gated_mla_result {
+func gated_mla_forward(gated_mla_weights weights, float[] input, int tokens) gated_mla_result {
     hybrid_moe_config cfg = weights.config
     int h = cfg.hidden_dim
     int l = cfg.latent_dim
-    []float q = linear(linear(input, weights.w_dq, tokens, h, l), weights.w_uq, tokens, l, h)
-    []float kv_latent = linear(input, weights.w_dkv, tokens, h, l)
-    []float k = linear(kv_latent, weights.w_uk, tokens, l, h)
-    []float v = linear(kv_latent, weights.w_uv, tokens, l, h)
-    []float attention = zeros(tokens * tokens)
-    []float context = zeros(tokens * h)
+    float[] q = linear(linear(input, weights.w_dq, tokens, h, l), weights.w_uq, tokens, l, h)
+    float[] kv_latent = linear(input, weights.w_dkv, tokens, h, l)
+    float[] k = linear(kv_latent, weights.w_uk, tokens, l, h)
+    float[] v = linear(kv_latent, weights.w_uv, tokens, l, h)
+    float[] attention = zeros(tokens * tokens)
+    float[] context = zeros(tokens * h)
     float scale = 1.0 / sqrt_approx(h as float)
     int t = 0
     for t < tokens {
-        []float scores = zeros(tokens)
+        float[] scores = zeros(tokens)
         float max_score = -1000000.0
         int s = 0
         for s <= t {
@@ -305,8 +305,8 @@ func gated_mla_forward(gated_mla_weights weights, []float input, int tokens) gat
         }
         t = t + 1
     }
-    []float gate_logits = linear(input, weights.w_gate, tokens, h, h)
-    []float gated = zeros(tokens * h)
+    float[] gate_logits = linear(input, weights.w_gate, tokens, h, h)
+    float[] gated = zeros(tokens * h)
     int i = 0
     for i < tokens * h {
         gated[i] = context[i] * sigmoid(gate_logits[i])
@@ -330,17 +330,17 @@ func new_attnres_weights(hybrid_moe_config cfg) attnres_weights {
 
 func attention_residual(
     attnres_weights weights,
-    []float query,
-    []float history,
+    float[] query,
+    float[] history,
     int history_count,
     int tokens
 ) attnres_result {
     int h = weights.config.hidden_dim
-    []float output = zeros(tokens * h)
-    []float probabilities = zeros(tokens * history_count)
+    float[] output = zeros(tokens * h)
+    float[] probabilities = zeros(tokens * history_count)
     int t = 0
     for t < tokens {
-        []float scores = zeros(history_count)
+        float[] scores = zeros(history_count)
         float max_score = -1000000.0
         int depth = 0
         for depth < history_count {
@@ -385,8 +385,8 @@ func attention_residual(
     }
 }
 
-func store_history([]float history, []float values, int depth, int width) []float {
-    []float out = copy_floats(history)
+func store_history(float[] history, float[] values, int depth, int width) float[] {
+    float[] out = copy_floats(history)
     int i = 0
     for i < width {
         out[depth * width + i] = values[i]
@@ -419,18 +419,15 @@ func new_hybrid_moe_model(hybrid_moe_config cfg) hybrid_moe_model {
     }
 }
 
-func hybrid_moe_forward(hybrid_moe_model model, []float embeddings, int tokens) hybrid_moe_forward_result {
+func hybrid_moe_forward(hybrid_moe_model model, float[] embeddings, int tokens) hybrid_moe_forward_result {
     hybrid_moe_config cfg = model.config
     int history_width = tokens * cfg.hidden_dim
-    []float history = zeros(cfg.max_history * history_width)
+    float[] history = zeros(cfg.max_history * history_width)
     history = store_history(history, embeddings, 0, history_width)
     int history_count = 1
-    []float current = copy_floats(embeddings)
-    []float state = zeros(cfg.state_dim * cfg.state_dim)
-    []float last_residual_weights = []
-    []int last_indices = []
-    []float last_expert_weights = []
-    int group = 0
+    float[] current = copy_floats(embeddings)
+    float[] state = zeros(cfg.state_dim * cfg.state_dim)
+    float[] last_residual_weights = int[][] last_indices = float[][] last_expert_weights = int[] group = 0
     for group < cfg.groups {
         int layer = 0
         for layer < cfg.nda_per_group {
@@ -476,7 +473,7 @@ func hybrid_moe_forward(hybrid_moe_model model, []float embeddings, int tokens) 
     }
 }
 
-func finite_array([]float values) bool {
+func finite_array(float[] values) bool {
     int i = 0
     for i < len(values) {
         if values[i] != values[i] || values[i] > 1000000000.0 || values[i] < -1000000000.0 {
@@ -487,7 +484,7 @@ func finite_array([]float values) bool {
     true
 }
 
-func sum_range([]float values, int offset, int count) float {
+func sum_range(float[] values, int offset, int count) float {
     float sum = 0.0
     int i = 0
     for i < count {
@@ -516,7 +513,7 @@ func main() {
     hybrid_moe_config cfg = tiny_hybrid_moe_config()
     hybrid_moe_model model = new_hybrid_moe_model(cfg)
     int tokens = 4
-    []float embeddings = deterministic_weights(tokens * cfg.hidden_dim, 50, 0.03)
+    float[] embeddings = deterministic_weights(tokens * cfg.hidden_dim, 50, 0.03)
     nda_result nda = nda_forward(model.nda, embeddings, tokens, zeros(cfg.state_dim * cfg.state_dim))
     int failures = 0
     failures = failures + assert_true(len(nda.output) == tokens * cfg.hidden_dim, "NDA output shape")

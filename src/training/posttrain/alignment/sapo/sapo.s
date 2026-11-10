@@ -30,7 +30,7 @@ struct advantage_stats {
     f32 mean
     f32 std
     f32 max_abs
-    history: []f32
+    history: f32[]
 }
 
 func new_sapo_trainer(
@@ -88,14 +88,12 @@ func (sapo_trainer* trainer) compute_smooth_surrogate(
 }
 
 func (sapo_trainer* trainer) compute_gae(
-    []tensor rewards,
-    []tensor values,
-    []tensor dones
-) . ([]tensor, []tensor) {
+    tensor[] rewards,
+    tensor[] values,
+    tensor[] dones
+) . (tensor[], tensor[]) {
     batch_size := len(rewards)
-    advantages := []
-    returns := []
-    for b in 0..batch_size {
+    advantages := returns[] := for[] b in 0..batch_size {
         seq_len := rewards[b].shape[0]
         seq_advantages := tensor_zeros([seq_len])
         seq_returns := tensor_zeros([seq_len])
@@ -117,12 +115,11 @@ func (sapo_trainer* trainer) compute_gae(
     return advantages, returns
 }
 
-func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) . []tensor {
+func (sapo_trainer* trainer) normalize_advantages(tensor[] advantages) . tensor[] {
     if !trainer.config.normalize_advantages {
         return advantages
     }
-    all_advantages := []
-    for adv in advantages {
+    all_advantages := for[] adv in advantages {
         for i in 0..adv.numel() {
             all_advantages = append(all_advantages, adv.flatten()[i].item())
         }
@@ -136,8 +133,7 @@ func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) . []tenso
         }
     }
     trainer.advantage_stats.max_abs = max_abs
-    normalized := []
-    for adv in advantages {
+    normalized := for[] adv in advantages {
         norm_adv := (adv - trainer.advantage_stats.mean) /
                        (trainer.advantage_stats.std + trainer.config.advantage_epsilon)
         normalized = append(normalized, norm_adv)
@@ -146,22 +142,19 @@ func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) . []tenso
 }
 
 func (sapo_trainer* trainer) train_step(
-    []tensor prompts,
-    []tensor responses,
-    []tensor rewards
+    tensor[] prompts,
+    tensor[] responses,
+    tensor[] rewards
 ) . (f32, f32, f32) {
     batch_size := len(prompts)
-    inputs := []
-    for i in 0..batch_size {
+    inputs := for[] i in 0..batch_size {
         inputs = append(inputs, concat(prompts[i], responses[i]))
     }
-    values := []
-    for input in inputs {
+    values := for[] input in inputs {
         value := trainer.value_model.forward(input)
         values = append(values, value)
     }
-    dones := []
-    for resp in responses {
+    dones := for[] resp in responses {
         seq_len := resp.shape[0]
         done := tensor_zeros([seq_len])
         done[-1] = tensor_scalar(1.0)
@@ -169,14 +162,12 @@ func (sapo_trainer* trainer) train_step(
     }
     advantages, returns  := trainer.compute_gae(rewards, values, dones)
     normalized_advantages := trainer.normalize_advantages(advantages)
-    old_log_probs := []
-    for input in inputs {
+    old_log_probs := for[] input in inputs {
         logits := trainer.policy_model.forward(input)
         log_probs := log_softmax(logits, dim: -1)
         old_log_probs = append(old_log_probs, log_probs)
     }
-    ref_log_probs := []
-    for input in inputs {
+    ref_log_probs := for[] input in inputs {
         logits := trainer.reference_model.forward(input)
         log_probs := log_softmax(logits, dim: -1)
         ref_log_probs = append(ref_log_probs, log_probs)
@@ -227,10 +218,8 @@ func (sapo_trainer* trainer) train_step(
     )
 }
 
-func (sapo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
-    policy_losses := []
-    value_losses := []
-    for batch in train_data {
+func (sapo_trainer* trainer) train(DataLoader train_data) . (f32[], f32[]) {
+    policy_losses := value_losses[] := for[] batch in train_data {
         policy_loss, value_loss, kl  := trainer.train_step(
             batch.prompts,
             batch.responses,
@@ -255,7 +244,7 @@ func sigmoid(Tensor x) . Tensor {
     return 1.0 / (1.0 + exp(-x))
 }
 
-func compute_mean([]f32 values) . f32 {
+func compute_mean(f32[] values) . f32 {
     if len(values) == 0 {
         return 0.0
     }
@@ -266,7 +255,7 @@ func compute_mean([]f32 values) . f32 {
     return sum / f32(len(values))
 }
 
-func compute_std([]f32 values, f32 mean) . f32 {
+func compute_std(f32[] values, f32 mean) . f32 {
     if len(values) == 0 {
         return 1.0
     }

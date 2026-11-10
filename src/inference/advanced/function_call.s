@@ -12,7 +12,7 @@ struct function_parameter {
 
 struct function_def {
     string function_name
-    []function_parameter parameters
+    function_parameter[] parameters
     string description
     string return_type
 }
@@ -25,10 +25,10 @@ struct argument_value {
 
 struct detected_function_call {
     string function_name
-    []argument_value arguments
+    argument_value[] arguments
     int format_type
     bool valid
-    []string validation_errors
+    string[] validation_errors
 }
 
 struct open_ai_function_call {
@@ -63,8 +63,8 @@ func (function_registry* registry) RegisterFunction(
     registry.functions[fn.function_name] = fn
 }
 
-func (function_registry* registry) ListFunctions() []string {
-    functions := make([]string, 0)
+func (function_registry* registry) ListFunctions() string[] {
+    functions := make(string[], 0)
     for name := range registry.functions {
         functions = append(functions, name)
     }
@@ -99,9 +99,9 @@ func detect_openai_function_call(
 ) (detected_function_call, bool) {
     call := detected_function_call {
         format_type: FORMAT_OPENAI,
-        arguments: make([]argument_value, 0),
+        arguments: make(argument_value[], 0),
         valid: false,
-        validation_errors: make([]string, 0),
+        validation_errors: make(string[], 0),
     }
     if !contains_substring(text, "<function_call>") {
         return call, false
@@ -145,9 +145,9 @@ func detect_anthropic_tool_use(
 ) (detected_function_call, bool) {
     call := detected_function_call {
         format_type: FORMAT_ANTHROPIC,
-        arguments: make([]argument_value, 0),
+        arguments: make(argument_value[], 0),
         valid: false,
-        validation_errors: make([]string, 0),
+        validation_errors: make(string[], 0),
     }
     if !contains_substring(text, "<tool_use>") {
         return call, false
@@ -188,9 +188,9 @@ func detect_deepseek_function_call(
 ) (detected_function_call, bool) {
     call := detected_function_call {
         format_type: FORMAT_DEEPSEEK,
-        arguments: make([]argument_value, 0),
+        arguments: make(argument_value[], 0),
         valid: false,
-        validation_errors: make([]string, 0),
+        validation_errors: make(string[], 0),
     }
     if !contains_substring(text, "<tool_call>") {
         return call, false
@@ -336,7 +336,7 @@ func main() {
     registry := NewFunctionRegistry()
     registry.RegisterFunction(function_def {
         function_name: "get_patient_info",
-        parameters: []function_parameter{
+        parameters: function_parameter[]{
             function_parameter {
                 parameter_name: "patient_id",
                 parameter_type: "string",
@@ -348,7 +348,7 @@ func main() {
     })
     registry.RegisterFunction(function_def {
         function_name: "prescribe_medication",
-        parameters: []function_parameter{
+        parameters: function_parameter[]{
             function_parameter {
                 parameter_name: "patient_id",
                 parameter_type: "string",

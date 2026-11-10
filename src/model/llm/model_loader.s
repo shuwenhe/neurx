@@ -24,7 +24,7 @@ struct gptmodel {
     config         gptconfig
     token_embedding *tensor.tensor_2
     pos_embedding   *tensor.tensor_2
-    layers         []*transformer.transformer_block
+    layers         transformer.transformer_block*[]
     output_proj     *tensor.tensor_2
     final_norm      *tensor.tensor_2
     optimizer      *optimizer_2
@@ -46,7 +46,7 @@ func new_gpt(config gptconfig) (*gptmodel, error) {
     }
     model := *gptmodel{
         config: config,
-        layers: make([]*transformer.transformer_block, config.num_layers),
+        layers: make(transformer.transformer_block*[], config.num_layers),
         optimizer: *optimizer_2{
             learning_rate: config.learning_rate,
             adam_beta_1:    0.9,
@@ -193,8 +193,8 @@ func load_checkpoint(string path) (*gptmodel, error) {
     return model, nil
 }
 
-func serialize_config(config gptconfig) []byte {
-    return []byte{}
+func serialize_config(config gptconfig) byte[] {
+    return byte[]{}
 }
 
 func deserialize_config(file *os.File) gptconfig {

@@ -23,16 +23,16 @@ struct machine_reg_state {
 
 struct machine_instruction_state {
     string op
-    []string operands
+    string[] operands
     string encoding_class
 }
 
 struct machine_code_blob_state {
     string target
-    []string sections
-    []string symbols
-    []string relocation_records
-    []string bytes_hex
+    string[] sections
+    string[] symbols
+    string[] relocation_records
+    string[] bytes_hex
     bool executable
     string object_format
     string abi
@@ -55,7 +55,7 @@ struct direct_codegen_plan_state {
 
 struct direct_codegen_result_state {
     machine_code_blob_state blob
-    []machine_instruction_state instructions
+    machine_instruction_state[] instructions
     bool ok
     string error_message
 }
@@ -103,7 +103,7 @@ func new_machine_code_blob_state(string target_name) machine_code_blob_state {
     }
 }
 
-func new_machine_instruction_state(string op, []string operands, string encoding_class) machine_instruction_state {
+func new_machine_instruction_state(string op, string[] operands, string encoding_class) machine_instruction_state {
     machine_instruction_state {
         op: op,
         operands: copy_strings(operands),
@@ -115,20 +115,17 @@ func direct_codegen_supported(target_arch_state target) bool {
     target.name == "x86_64"
 }
 
-func direct_codegen_emit_prologue(target_arch_state target) []machine_instruction_state {
+func direct_codegen_emit_prologue(target_arch_state target) machine_instruction_state[] {
 
-    []machine_instruction_state out = []
-    return out
+    machine_instruction_state[] out = return[] out
 }
 
-func direct_codegen_emit_epilogue(target_arch_state target) []machine_instruction_state {
-    []machine_instruction_state out = []
-    return out
+func direct_codegen_emit_epilogue(target_arch_state target) machine_instruction_state[] {
+    machine_instruction_state[] out = return[] out
 }
 
-func direct_codegen_lower_ir_node(ir_node_state node) []machine_instruction_state {
-    []machine_instruction_state out = []
-    if node.op == "module_entry" {
+func direct_codegen_lower_ir_node(ir_node_state node) machine_instruction_state[] {
+    machine_instruction_state[] out = if node.op == "module_entry" {
         out = append(out, new_machine_instruction_state("label", node.inputs, "label"))
         return out
     }
@@ -154,9 +151,8 @@ func direct_codegen_lower_ir_node(ir_node_state node) []machine_instruction_stat
     out
 }
 
-func direct_codegen_select_instructions(ir_graph_state graph, direct_codegen_plan_state plan) []machine_instruction_state {
-    []machine_instruction_state out = []
-    []machine_instruction_state prologue = direct_codegen_emit_prologue(plan.target)
+func direct_codegen_select_instructions(ir_graph_state graph, direct_codegen_plan_state plan) machine_instruction_state[] {
+    machine_instruction_state[] out = machine_instruction_state[][] prologue = direct_codegen_emit_prologue(plan.target)
     int p = 0
     for p < len(prologue) {
         out = append(out, prologue[p])
@@ -164,7 +160,7 @@ func direct_codegen_select_instructions(ir_graph_state graph, direct_codegen_pla
     }
     int i = 0
     for i < len(graph.nodes) {
-        []machine_instruction_state lowered = direct_codegen_lower_ir_node(graph.nodes[i])
+        machine_instruction_state[] lowered = direct_codegen_lower_ir_node(graph.nodes[i])
         int j = 0
         for j < len(lowered) {
             out = append(out, lowered[j])
@@ -172,7 +168,7 @@ func direct_codegen_select_instructions(ir_graph_state graph, direct_codegen_pla
         }
         i = i + 1
     }
-    []machine_instruction_state epilogue = direct_codegen_emit_epilogue(plan.target)
+    machine_instruction_state[] epilogue = direct_codegen_emit_epilogue(plan.target)
     int q = 0
     for q < len(epilogue) {
         out = append(out, epilogue[q])
@@ -181,9 +177,8 @@ func direct_codegen_select_instructions(ir_graph_state graph, direct_codegen_pla
     out
 }
 
-func direct_codegen_allocate_registers([]machine_instruction_state instructions, target_arch_state target) []machine_instruction_state {
-    []machine_instruction_state out = []
-    int i = 0
+func direct_codegen_allocate_registers(machine_instruction_state[] instructions, target_arch_state target) machine_instruction_state[] {
+    machine_instruction_state[] out = int[] i = 0
     for i < len(instructions) {
         machine_instruction_state inst = instructions[i]
 
@@ -230,7 +225,7 @@ func direct_codegen_encode_instruction(machine_instruction_state inst) string {
     ""
 }
 
-func direct_codegen_emit_blob(string target_name, []machine_instruction_state instructions, direct_codegen_plan_state plan) machine_code_blob_state {
+func direct_codegen_emit_blob(string target_name, machine_instruction_state[] instructions, direct_codegen_plan_state plan) machine_code_blob_state {
     machine_code_blob_state blob = new_machine_code_blob_state(target_name)
     blob.sections = append(blob.sections, ".text")
     blob.symbols = append(blob.symbols, plan.entry_symbol)
@@ -282,7 +277,7 @@ func direct_codegen_instruction_to_asm(machine_instruction_state inst) string {
     "    # " + inst.op
 }
 
-func direct_codegen_instructions_to_asm([]machine_instruction_state instructions, string entry_symbol) string {
+func direct_codegen_instructions_to_asm(machine_instruction_state[] instructions, string entry_symbol) string {
     string out = ""
     out = out + ".section .text\n"
     out = out + ".globl " + entry_symbol + "\n"
@@ -350,8 +345,8 @@ func direct_codegen_hex_digit(byte value) int {
     -1
 }
 
-func direct_codegen_text_bytes(machine_code_blob_state blob) []byte {
-    []byte out = []byte{}
+func direct_codegen_text_bytes(machine_code_blob_state blob) byte[] {
+    byte[] out = byte[]{}
     int i = 0
     while i < len(blob.bytes_hex) {
         string encoded = blob.bytes_hex[i]
@@ -373,8 +368,8 @@ func direct_codegen_text_bytes(machine_code_blob_state blob) []byte {
     out
 }
 
-func direct_codegen_append_u16_le([]byte out, int value) []byte {
-    []byte result = out
+func direct_codegen_append_u16_le(byte[] out, int value) byte[] {
+    byte[] result = out
     result = append(result, byte(value % 256))
     result = append(result, byte((value / 256) % 256))
     result
@@ -390,8 +385,8 @@ func direct_codegen_byte_divisor(int byte_index) int {
     divisor
 }
 
-func direct_codegen_append_u32_le([]byte out, int value) []byte {
-    []byte result = out
+func direct_codegen_append_u32_le(byte[] out, int value) byte[] {
+    byte[] result = out
     int i = 0
     while i < 4 {
         result = append(result, byte((value / direct_codegen_byte_divisor(i)) % 256))
@@ -400,8 +395,8 @@ func direct_codegen_append_u32_le([]byte out, int value) []byte {
     result
 }
 
-func direct_codegen_append_u64_le([]byte out, int value) []byte {
-    []byte result = out
+func direct_codegen_append_u64_le(byte[] out, int value) byte[] {
+    byte[] result = out
     int i = 0
     while i < 8 {
         result = append(result, byte((value / direct_codegen_byte_divisor(i)) % 256))
@@ -410,14 +405,14 @@ func direct_codegen_append_u64_le([]byte out, int value) []byte {
     result
 }
 
-func direct_codegen_align([]byte out, int alignment) []byte {
-    []byte result = out
+func direct_codegen_align(byte[] out, int alignment) byte[] {
+    byte[] result = out
     while len(result) % alignment != 0 { result = append(result, byte(0)) }
     result
 }
 
-func direct_codegen_append_section_header([]byte out, int name, int kind, int flags, int offset, int size, int link, int info, int alignment, int entry_size) []byte {
-    []byte result = out
+func direct_codegen_append_section_header(byte[] out, int name, int kind, int flags, int offset, int size, int link, int info, int alignment, int entry_size) byte[] {
+    byte[] result = out
     result = direct_codegen_append_u32_le(result, name)
     result = direct_codegen_append_u32_le(result, kind)
     result = direct_codegen_append_u64_le(result, flags)
@@ -430,8 +425,8 @@ func direct_codegen_append_section_header([]byte out, int name, int kind, int fl
     direct_codegen_append_u64_le(result, entry_size)
 }
 
-func direct_codegen_elf_object(machine_code_blob_state blob, string entry_symbol) []byte {
-    []byte text = direct_codegen_text_bytes(blob)
+func direct_codegen_elf_object(machine_code_blob_state blob, string entry_symbol) byte[] {
+    byte[] text = direct_codegen_text_bytes(blob)
     string strtab = "\u0000" + entry_symbol + "\u0000"
     string shstrtab = "\u0000.text\u0000.symtab\u0000.strtab\u0000.shstrtab\u0000"
     int text_offset = 64
@@ -442,7 +437,7 @@ func direct_codegen_elf_object(machine_code_blob_state blob, string entry_symbol
     int section_offset = shstrtab_offset + len(shstrtab)
     if section_offset % 8 != 0 { section_offset = section_offset + (8 - section_offset % 8) }
 
-    []byte out = []byte{}
+    byte[] out = byte[]{}
     out = append(out, byte(127), byte(69), byte(76), byte(70), byte(2), byte(1), byte(1), byte(0))
     int ident_padding = 0
     while ident_padding < 8 { out = append(out, byte(0)); ident_padding = ident_padding + 1 }
@@ -531,8 +526,8 @@ func direct_codegen_compile_ir(ir_graph_state graph, direct_codegen_plan_state p
             error_message: "unsupported target architecture: " + plan.target.name,
         }
     }
-    []machine_instruction_state selected = direct_codegen_select_instructions(graph, plan)
-    []machine_instruction_state allocated = direct_codegen_allocate_registers(selected, plan.target)
+    machine_instruction_state[] selected = direct_codegen_select_instructions(graph, plan)
+    machine_instruction_state[] allocated = direct_codegen_allocate_registers(selected, plan.target)
     int i = 0
     while i < len(allocated) {
         if allocated[i].op != "label" && direct_codegen_encode_instruction(allocated[i]) == "" {

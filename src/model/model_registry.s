@@ -37,7 +37,7 @@ struct model_adapter {
 }
 
 struct model_registry {
-    models: []model_adapter
+    models: model_adapter[]
 }
 
 func create_llama_adapter(model_spec spec) model_adapter {
@@ -241,8 +241,8 @@ func get_weight_loading_config_for_model(
 
 struct compatibility_report {
     bool is_compatible
-    warnings: []string
-    requirements: []string
+    warnings: string[]
+    requirements: string[]
 }
 
 func check_model_compatibility(

@@ -38,7 +38,7 @@ struct device {
     
     device_resource[] resources
     int irq_count
-    []int irq_numbers
+    int[] irq_numbers
     
     int driver_private
     
@@ -48,7 +48,7 @@ struct device {
     bool is_suspended
     
     string parent_device_id
-    []string child_devices
+    string[] child_devices
     
     int attach_count
     int error_count
@@ -62,7 +62,7 @@ struct device_tree {
 }
 
 device_tree global_device_tree = device_tree {
-    devices: make([]device, 128),
+    devices: make(device[], 128),
     device_count: 0,
     root_device_id: "root",
 }
@@ -123,8 +123,8 @@ func device_get(string device_id) device {
     }
 }
 
-func device_list_by_class(string device_class) []string {
-    []string result = make([]string, 64)
+func device_list_by_class(string device_class) string[] {
+    string[] result = make(string[], 64)
     int count = 0
     
     int i = 0
@@ -139,8 +139,8 @@ func device_list_by_class(string device_class) []string {
     return result
 }
 
-func device_list_by_type(string device_type) []string {
-    []string result = make([]string, 64)
+func device_list_by_type(string device_type) string[] {
+    string[] result = make(string[], 64)
     int count = 0
     
     int i = 0
@@ -155,11 +155,11 @@ func device_list_by_type(string device_type) []string {
     return result
 }
 
-func device_get_all_gpus() []string {
+func device_get_all_gpus() string[] {
     return device_list_by_class("gpu")
 }
 
-func device_get_all_npus() []string {
+func device_get_all_npus() string[] {
     return device_list_by_class("npu")
 }
 

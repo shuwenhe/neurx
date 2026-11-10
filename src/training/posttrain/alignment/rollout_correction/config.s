@@ -35,9 +35,8 @@ struct rollout_correction_config {
     ISAggregationLevel is_level
     ISThreshold is_threshold
     bool is_batch_normalize
-    rs_modes: []rejection_mode
-    rs_thresholds: []rs_threshold
-    bool bypass_mode
+    rs_modes: rejection_mode[]
+    rs_thresholds: bool[] rs_threshold bypass_mode
     LossType loss_type
 }
 

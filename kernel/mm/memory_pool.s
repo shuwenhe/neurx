@@ -60,7 +60,7 @@ struct pool_registry {
 }
 
 pool_registry global_pools = pool_registry {
-    pools: make([]memory_pool, 16),
+    pools: make(memory_pool[], 16),
     pool_count: 0,
 }
 
@@ -90,7 +90,7 @@ func pool_create(
         total_bytes: total_bytes,
         used_bytes: 0,
         free_bytes: total_bytes,
-        blocks: make([]memory_block, 1024),
+        blocks: make(memory_block[], 1024),
         block_count: 0,
         alignment_bytes: alignment_bytes,
         enable_defrag: true,
@@ -383,8 +383,8 @@ func pool_dump_info(string pool_name) string {
     return output
 }
 
-func pool_list_all() []string {
-    []string result = make([]string, 16)
+func pool_list_all() string[] {
+    string[] result = make(string[], 16)
     int i = 0
     for i < global_pools.pool_count {
         result[i] = global_pools.pools[i].pool_name

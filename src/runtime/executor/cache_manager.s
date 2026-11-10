@@ -2,8 +2,8 @@ import "types.s"
 struct KVCacheBlockAllocator {
     total_blocks    i32
     allocated_blocks i32
-    free_blocks     []KVCacheBlock
-    allocated_map   map[string][]i32
+    free_blocks     KVCacheBlock[]
+    allocated_map   map[string]i32[]
     eviction_policy CacheEvictionPolicy
 }
 
@@ -241,7 +241,7 @@ func (KVCacheManager* m) Shutdown() ExecutionResult {
     m.allocated_mb = 0
     m.free_mb = i32(m.total_size_gb * 1024)
     m.block_count = 0
-    m.blocks = []KVCacheBlock{}
+    m.blocks = KVCacheBlock[]{}
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 

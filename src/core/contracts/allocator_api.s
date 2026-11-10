@@ -33,7 +33,7 @@ interface i_allocator {
 }
 interface i_caching_allocator {
     empty_cache() . void
-    cached_blocks() . []i64
+    cached_blocks() . i64[]
     defragment() . void
     set_caching_enabled(bool enabled) . void
     is_caching_enabled() . bool

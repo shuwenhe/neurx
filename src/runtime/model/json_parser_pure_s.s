@@ -16,8 +16,8 @@ struct json_value {
     string string_value
     float number_value
     bool bool_value
-    []json_value array_elements
-    []json_pair object_members
+    json_value[] array_elements
+    json_pair[] object_members
 }
 
 struct json_pair {

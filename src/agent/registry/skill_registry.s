@@ -6,7 +6,7 @@ import (
 )
 
 struct agent_skill_registry_state {
-    []agent_skill_record records
+    agent_skill_record[] records
     int active_index
     int version
     int promote_count
@@ -27,8 +27,8 @@ func agent_skill_registry_count(agent_skill_registry_state state) int {
     len(state.records)
 }
 
-func agent_skill_registry_copy_records([]agent_skill_record records) []agent_skill_record {
-    []agent_skill_record out = make([]agent_skill_record, len(records))
+func agent_skill_registry_copy_records(agent_skill_record[] records) agent_skill_record[] {
+    agent_skill_record[] out = make(agent_skill_record[], len(records))
     int i = 0
     for i < len(records) {
         out[i] = agent_skill_record_state_dict(records[i])
@@ -39,7 +39,7 @@ func agent_skill_registry_copy_records([]agent_skill_record records) []agent_ski
 
 func agent_skill_registry_add(agent_skill_registry_state state, agent_skill_record record) agent_skill_registry_state {
     int size = len(state.records)
-    []agent_skill_record records = make([]agent_skill_record, size + 1)
+    agent_skill_record[] records = make(agent_skill_record[], size + 1)
     int i = 0
     for i < size {
         records[i] = state.records[i]
@@ -99,7 +99,7 @@ func agent_skill_registry_upsert(agent_skill_registry_state state, agent_skill_r
     if index < 0 {
         return agent_skill_registry_add(state, record)
     }
-    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record[] records = agent_skill_registry_copy_records(state.records)
     records[index] = agent_skill_record_state_dict(record)
     agent_skill_registry_state {
         records: records,
@@ -115,7 +115,7 @@ func agent_skill_registry_record_success(agent_skill_registry_state state, strin
     if index < 0 {
         return state
     }
-    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record[] records = agent_skill_registry_copy_records(state.records)
     agent_skill_record rec = records[index]
     rec.success_count = rec.success_count + 1
     rec.last_updated_step = step
@@ -154,7 +154,7 @@ func agent_skill_registry_record_failure(agent_skill_registry_state state, strin
     if retire_threshold <= 0 {
         retire_threshold = 3
     }
-    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record[] records = agent_skill_registry_copy_records(state.records)
     agent_skill_record rec = records[index]
     rec.fail_count = rec.fail_count + 1
     rec.last_updated_step = step
@@ -187,7 +187,7 @@ func agent_skill_registry_promote(agent_skill_registry_state state, string name)
     if index < 0 {
         return state
     }
-    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record[] records = agent_skill_registry_copy_records(state.records)
     records[index].promoted = true
     records[index].spec.status = "promoted"
     agent_skill_registry_state {
@@ -204,7 +204,7 @@ func agent_skill_registry_retire(agent_skill_registry_state state, string name) 
     if index < 0 {
         return state
     }
-    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record[] records = agent_skill_registry_copy_records(state.records)
     records[index].retired = true
     records[index].spec.status = "retired"
     agent_skill_registry_state {
@@ -271,7 +271,7 @@ func agent_skill_registry_set_score(agent_skill_registry_state state, string nam
     if index < 0 {
         return state
     }
-    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record[] records = agent_skill_registry_copy_records(state.records)
     records[index].score = score
     agent_skill_registry_state {
         records: records,
@@ -316,8 +316,8 @@ func agent_skill_registry_load_state_dict(agent_skill_registry_state state, agen
     }
 }
 
-func agent_skill_registry_names(agent_skill_registry_state state) []string {
-    []string names = make([]string, len(state.records))
+func agent_skill_registry_names(agent_skill_registry_state state) string[] {
+    string[] names = make(string[], len(state.records))
     int i = 0
     for i < len(state.records) {
         names[i] = state.records[i].spec.name
@@ -339,7 +339,7 @@ func agent_skill_registry_success_rate(agent_skill_registry_state state, string 
     float(rec.success_count) / float(total)
 }
 
-func agent_skill_registry_promoted_names(agent_skill_registry_state state) []string {
+func agent_skill_registry_promoted_names(agent_skill_registry_state state) string[] {
     int count = 0
     int i = 0
     for i < len(state.records) {
@@ -348,7 +348,7 @@ func agent_skill_registry_promoted_names(agent_skill_registry_state state) []str
         }
         i = i + 1
     }
-    []string names = make([]string, count)
+    string[] names = make(string[], count)
     i = 0
     int out_i = 0
     for i < len(state.records) {
@@ -370,7 +370,7 @@ func agent_skill_registry_prune(agent_skill_registry_state state) agent_skill_re
         }
         i = i + 1
     }
-    []agent_skill_record records = make([]agent_skill_record, keep)
+    agent_skill_record[] records = make(agent_skill_record[], keep)
     i = 0
     int out_i = 0
     int active_index = -1
@@ -398,7 +398,7 @@ func agent_skill_registry_force_retire(agent_skill_registry_state state, string 
     if index < 0 {
         return state
     }
-    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record[] records = agent_skill_registry_copy_records(state.records)
     records[index].retired = true
     records[index].spec.status = "retired"
     int active_index = state.active_index

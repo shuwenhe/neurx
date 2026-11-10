@@ -37,30 +37,30 @@ func default_2t_packing_config() packing_config:
     cfg.prefetch_queue_size = 3
     return cfg
 struct packed_batch:
-    []int input_ids
-    []int attention_masks
-    []int position_ids
-    []int sample_boundaries
-    []float loss_weights
+    int[] input_ids
+    int[] attention_masks
+    int[] position_ids
+    int[] sample_boundaries
+    float[] loss_weights
     int num_sequences
     int total_tokens
     int total_slots
     float utilization_ratio
     int max_sequence_in_batch
-    []int original_lengths
-    []int sequence_indices
+    int[] original_lengths
+    int[] sequence_indices
     float avg_quality_score
     int batch_id
     bool is_final_in_epoch
 struct sequence_buffer:
     int sequence_id
-    []int token_ids
+    int[] token_ids
     int original_length
     float quality_score
     bool should_truncate
 struct bin_packer_state:
     packing_config config
-    []sequence_buffer current_bin_contents
+    sequence_buffer[] current_bin_contents
     int current_bin_used_tokens
     int current_bin_capacity
     int total_batches_produced
@@ -68,12 +68,12 @@ struct bin_packer_state:
     float cumulative_utilization
     int total_padding_wasted
     int total_real_tokens
-    []packed_batch output_queue
+    packed_batch[] output_queue
     int max_queue_size
 func new_bin_packer(packing_config config) bin_packer_state:
     bin_packer_state packer
     packer.config = config
-    packer.current_bin_contents = make([]sequence_buffer, config.max_sequences_per_batch)
+    packer.current_bin_contents = make(sequence_buffer[], config.max_sequences_per_batch)
     packer.current_bin_used_tokens = 0
     packer.current_bin_capacity = config.max_seq_len * config.max_sequences_per_batch
     packer.total_batches_produced = 0
@@ -81,7 +81,7 @@ func new_bin_packer(packing_config config) bin_packer_state:
     packer.cumulative_utilization = 0.0
     packer.total_padding_wasted = 0
     packer.total_real_tokens = 0
-    packer.output_queue = make([]packed_batch, config.prefetch_queue_size)
+    packer.output_queue = make(packed_batch[], config.prefetch_queue_size)
     packer.max_queue_size = config.prefetch_queue_size
     return packer
 struct add_sequence_result:
@@ -111,7 +111,7 @@ func add_sequence(
                 result.batch_completed = true
                 result.completed_batch = completed
                 packer = update_statistics(packer, completed)
-        packer.current_bin_contents = make([]sequence_buffer, packer.config.max_sequences_per_batch)
+        packer.current_bin_contents = make(sequence_buffer[], packer.config.max_sequences_per_batch)
         packer.current_bin_used_tokens = 0
     packer.current_bin_contents = append(packer.current_bin_contents, seq)
     packer.current_bin_used_tokens = packer.current_bin_used_tokens + seq_len
@@ -123,7 +123,7 @@ func add_sequence(
             result.batch_completed = true
             result.completed_batch = completed
             packer = update_statistics(packer, completed)
-            packer.current_bin_contents = make([]sequence_buffer, packer.config.max_sequences_per_batch)
+            packer.current_bin_contents = make(sequence_buffer[], packer.config.max_sequences_per_batch)
             packer.current_bin_used_tokens = 0
     result.updated_state = packer
     return result
@@ -165,13 +165,13 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
         if max_len > packer.config.max_seq_len:
             max_len = packer.config.max_seq_len
     int total_slots = num_seqs * max_len
-    []int input_ids = make([]int, total_slots)
-    []int attention_masks = make([]int, total_slots)
-    []int position_ids = make([]int, total_slots)
-    []int sample_boundaries = make([]int, num_seqs + 1)
-    []float loss_weights = make([]float, num_seqs)
-    []int original_lengths = make([]int, num_seqs)
-    []int sequence_indices = make([]int, num_seqs)
+    int[] input_ids = make(int[], total_slots)
+    int[] attention_masks = make(int[], total_slots)
+    int[] position_ids = make(int[], total_slots)
+    int[] sample_boundaries = make(int[], num_seqs + 1)
+    float[] loss_weights = make(float[], num_seqs)
+    int[] original_lengths = make(int[], num_seqs)
+    int[] sequence_indices = make(int[], num_seqs)
     int boundary_pos = 0
     sample_boundaries[0] = boundary_pos
     float total_quality = 0.0
@@ -247,26 +247,26 @@ func calculate_current_utilization(bin_packer_state packer) float:
         return 0.0
     return float(packer.current_bin_used_tokens) / float(estimated_total_slots)
 struct cross_packed_batch:
-    []int input_ids
-    []int attention_masks
-    []int segment_ids
-    []int sample_boundaries
-    []float loss_weights
+    int[] input_ids
+    int[] attention_masks
+    int[] segment_ids
+    int[] sample_boundaries
+    float[] loss_weights
     int num_original_samples
     int total_tokens
     int total_allocated
     float utilization_ratio
 func pack_samples_crosswise(
-    []sequence_buffer sequences,
+    sequence_buffer[] sequences,
     packing_config config,
     int max_combined_length
 ) cross_packed_batch:
     cross_packed_batch result
-    result.input_ids = make([]int, max_combined_length)
-    result.attention_masks = make([]int, max_combined_length)
-    result.segment_ids = make([]int, max_combined_length)
-    result.sample_boundaries = make([]int, len(sequences) + 1)
-    result.loss_weights = make([]float, len(sequences))
+    result.input_ids = make(int[], max_combined_length)
+    result.attention_masks = make(int[], max_combined_length)
+    result.segment_ids = make(int[], max_combined_length)
+    result.sample_boundaries = make(int[], len(sequences) + 1)
+    result.loss_weights = make(float[], len(sequences))
     int current_pos = 0
     int sample_idx = 0
     int total_real = 0
@@ -357,18 +357,18 @@ func print_packing_report(packing_statistics stats) void:
         print("  status: POOR (review configuration)")
 func empty_packed_batch() packed_batch:
     return packed_batch{
-        input_ids: []int{},
-        attention_masks: []int{},
-        position_ids: []int{},
-        sample_boundaries: []int{},
-        loss_weights: []float{},
+        input_ids: int[]{},
+        attention_masks: int[]{},
+        position_ids: int[]{},
+        sample_boundaries: int[]{},
+        loss_weights: float[]{},
         num_sequences: 0,
         total_tokens: 0,
         total_slots: 0,
         utilization_ratio: 0.0,
         max_sequence_in_batch: 0,
-        original_lengths: []int{},
-        sequence_indices: []int{},
+        original_lengths: int[]{},
+        sequence_indices: int[]{},
         avg_quality_score: 0.0,
         batch_id: -1,
         false is_final_in_epoch

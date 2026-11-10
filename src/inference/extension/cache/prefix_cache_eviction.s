@@ -9,14 +9,14 @@ struct cache_entry {
 }
 
 struct lru_cache_eviction {
-    []cache_entry entries
+    cache_entry[] entries
     int max_cache_size
     int current_size
     int eviction_count
 }
 
 struct lfu_cache_eviction {
-    []cache_entry entries
+    cache_entry[] entries
     int max_cache_size
     int current_size
     int eviction_count
@@ -24,7 +24,7 @@ struct lfu_cache_eviction {
 
 func new_lru_eviction(int max_cache_size) lru_cache_eviction {
     lru_cache_eviction {
-        entries: []cache_entry{},
+        entries: cache_entry[]{},
         max_cache_size: max_cache_size,
         current_size: 0,
         eviction_count: 0,
@@ -33,7 +33,7 @@ func new_lru_eviction(int max_cache_size) lru_cache_eviction {
 
 func new_lfu_eviction(int max_cache_size) lfu_cache_eviction {
     lfu_cache_eviction {
-        entries: []cache_entry{},
+        entries: cache_entry[]{},
         max_cache_size: max_cache_size,
         current_size: 0,
         eviction_count: 0,
@@ -133,7 +133,7 @@ func evict_lru(lru_cache_eviction cache) lru_cache_eviction {
     removed_entry := cache.entries[lru_idx]
     cache.current_size = cache.current_size - removed_entry.memory_bytes
     cache.eviction_count = cache.eviction_count + 1
-    new_entries := []cache_entry{}
+    new_entries := cache_entry[]{}
     i = 0
     for i < cache.entries.len {
         if i != lru_idx {
@@ -162,7 +162,7 @@ func evict_lfu_strategy(lfu_cache_eviction cache) lfu_cache_eviction {
     removed_entry := cache.entries[lfu_idx]
     cache.current_size = cache.current_size - removed_entry.memory_bytes
     cache.eviction_count = cache.eviction_count + 1
-    new_entries := []cache_entry{}
+    new_entries := cache_entry[]{}
     i = 0
     for i < cache.entries.len {
         if i != lfu_idx {
@@ -190,8 +190,8 @@ func get_cache_stats_lfu(lfu_cache_eviction cache) string {
     "LFU Cache: " + int_to_str(cache.entries.len) + " entries, " + int_to_str(cache.current_size) + " bytes, " + int_to_str(cache.eviction_count) + " evictions, hit_rate=" + hit_rate
 }
 
-func append_cache_entry([]cache_entry slice, cache_entry elem) []cache_entry {
-    new_slice := []cache_entry{}
+func append_cache_entry(cache_entry[] slice, cache_entry elem) cache_entry[] {
+    new_slice := cache_entry[]{}
     i := 0
     for i < slice.len {
         new_slice = append_cache_entry(new_slice, slice[i])
@@ -201,8 +201,8 @@ func append_cache_entry([]cache_entry slice, cache_entry elem) []cache_entry {
     new_slice
 }
 
-func append_cache_entry_lfu([]cache_entry slice, cache_entry elem) []cache_entry {
-    new_slice := []cache_entry{}
+func append_cache_entry_lfu(cache_entry[] slice, cache_entry elem) cache_entry[] {
+    new_slice := cache_entry[]{}
     i := 0
     for i < slice.len {
         new_slice = append_cache_entry_lfu(new_slice, slice[i])

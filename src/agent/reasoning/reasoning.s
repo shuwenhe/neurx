@@ -9,7 +9,7 @@ struct agent_reasoning_step {
 }
 
 struct agent_reasoning_state {
-    []agent_reasoning_step steps
+    agent_reasoning_step[] steps
     int count
     string scratchpad
     bool chain_complete
@@ -34,7 +34,7 @@ func new_agent_reasoning_state() agent_reasoning_state {
 
 func agent_reasoning_append(agent_reasoning_state state, string thought, string conclusion) agent_reasoning_state {
     int n = state.count
-    []agent_reasoning_step steps = make([]agent_reasoning_step, n + 1)
+    agent_reasoning_step[] steps = make(agent_reasoning_step[], n + 1)
     int i = 0
     for i < n {
         steps[i] = state.steps[i]

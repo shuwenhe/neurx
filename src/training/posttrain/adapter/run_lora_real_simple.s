@@ -1,7 +1,7 @@
 module main
 struct tensor_2 {
-    []float data
-    []int shape
+    float[] data
+    int[] shape
 }
 
 struct lora_weights {
@@ -104,8 +104,7 @@ func repeat_string(string s, int count) string {
 
 func create_vector(int size, float value) tensor_2 {
     tensor_2 t
-    t.data = []
-    int i = 0
+    t.data = int[] i = 0
     for i < size {
         t.data = append(t.data, value)
         i = i + 1
@@ -116,8 +115,7 @@ func create_vector(int size, float value) tensor_2 {
 
 func create_matrix(int rows, int cols, float value) tensor_2 {
     tensor_2 t
-    t.data = []
-    int total = rows * cols
+    t.data = int[] total = rows * cols
     int i = 0
     for i < total {
         t.data = append(t.data, value)

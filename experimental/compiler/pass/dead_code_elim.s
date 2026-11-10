@@ -14,7 +14,7 @@ func is_output_op(*operation op) bool {
     op.op_kind == op_type_output
 }
 
-func mark_used_values(*computation_graph g) []bool {
+func mark_used_values(*computation_graph g) bool[] {
     used = new bool[len(g.values)]
     for i in range(len(g.values)) {
         used[i] = false
@@ -35,7 +35,7 @@ func mark_used_values(*computation_graph g) []bool {
     used
 }
 
-func mark_live_operations(*computation_graph g, *[]bool used) []bool {
+func mark_live_operations(*computation_graph g, *bool[] used) bool[] {
     live = new bool[len(g.operations)]
     for i in range(len(g.operations)) {
         live[i] = false
@@ -63,8 +63,8 @@ func mark_live_operations(*computation_graph g, *[]bool used) []bool {
     live
 }
 
-func find_dead_operations(*computation_graph g) []int {
-    dead_ops = []int()
+func find_dead_operations(*computation_graph g) int[] {
+    dead_ops = int[]()
 
     used_values = mark_used_values(g)
     live_ops = mark_live_operations(g, *used_values)

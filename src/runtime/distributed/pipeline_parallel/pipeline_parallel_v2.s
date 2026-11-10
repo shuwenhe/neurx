@@ -26,16 +26,16 @@ struct microbatch_state {
     int microbatch_id
     bool forward_done
     bool backward_done
-    [][]double input_activation
-    [][]double output_activation
-    [][]double input_gradient
-    [][]double output_gradient
+    double[][] input_activation
+    double[][] output_activation
+    double[][] input_gradient
+    double[][] output_gradient
 }
 
 struct pipeline_state {
     pipeline_config config
     pipeline_stage stage_info
-    []microbatch_state mb_states
+    microbatch_state[] mb_states
     int forward_counter
     int backward_counter
     int total_warmup_microbatches
@@ -46,7 +46,7 @@ struct pipeline_state {
     double time_comm_ms
     double time_bubble_ms
     double peak_memory_bytes
-    [][][][]double layer_weights
+    double[][][][] layer_weights
 }
 
 func pp_mod(int val, int div) int {
@@ -76,7 +76,7 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
     }
     state.stage_info.end_layer = state.stage_info.start_layer + state.stage_info.num_layers_local - 1
     int num_mb = cfg.num_microbatches
-    state.mb_states = make([]microbatch_state, num_mb)
+    state.mb_states = make(microbatch_state[], num_mb)
     int i = 0
     for i < num_mb {
         state.mb_states[i] = microbatch_state{
@@ -96,10 +96,10 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
     state.time_comm_ms = 0.0
     state.time_bubble_ms = 0.0
     state.peak_memory_bytes = 0.0
-    state.layer_weights = [][][]make([]double, state.stage_info.num_layers_local)
+    state.layer_weights = make[][][](double[], state.stage_info.num_layers_local)
     int w = 0
     for w < state.stage_info.num_layers_local {
-        state.layer_weights[w] = [][]make([]double, 10)
+        state.layer_weights[w] = make[][](double[], 10)
         w = w + 1
     }
     return state
@@ -107,7 +107,7 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
 
 func execute_1f1b_step(
     ref pipeline_state state,
-    [][]double initial_input,
+    double[][] initial_input,
     func forward_fn,
 
     func backward_fn,
@@ -127,14 +127,14 @@ func execute_1f1b_step(
     int fwd_idx = 0
     for fwd_idx < warmup_count  state.forward_counter < M {
         int mb_id = state.forward_counter
-        [][]double mb_input
+        double[][] mb_input
         if is_first_stage {
             mb_input = initial_input[mb_id]
         } else {
             mb_input = p2p_recv_from_prev(state, mb_id)
         }
         double t0 = 0.0
-        [][]double output = run_forward_stage(state, mb_input, mb_id)
+        double[][] output = run_forward_stage(state, mb_input, mb_id)
         double t1 = 0.0
         state.time_forward_ms = state.time_forward_ms + (t1 - t0)
         state.mb_states[mb_id].output_activation = output
@@ -154,14 +154,14 @@ func execute_1f1b_step(
     for ss_idx < steady_count {
         if state.forward_counter < M {
             int fwd_mb_id = state.forward_counter
-            [][]double fwd_input
+            double[][] fwd_input
             if is_first_stage {
                 fwd_input = initial_input[fwd_mb_id]
             } else {
                 fwd_input = p2p_recv_from_prev(state, fwd_mb_id)
             }
             double tf0 = 0.0
-            [][]double fwd_out = run_forward_stage(state, fwd_input, fwd_mb_id)
+            double[][] fwd_out = run_forward_stage(state, fwd_input, fwd_mb_id)
             double tf1 = 0.0
             state.time_forward_ms = state.time_forward_ms + (tf1 - tf0)
             state.mb_states[fwd_mb_id].output_activation = fwd_out
@@ -178,14 +178,14 @@ func execute_1f1b_step(
         if bwd_mb_id >= 0  bwd_mb_id < M
            state.mb_states[bwd_mb_id].forward_done
            !state.mb_states[bwd_mb_id].backward_done {
-            [][]double grad_output
+            double[][] grad_output
             if is_last_stage {
                 grad_output = state.mb_states[bwd_mb_id].input_gradient
             } else {
                 grad_output = p2p_recv_grad_from_next(state, bwd_mb_id)
             }
             double tb0 = 0.0
-            [][]double grad_input = run_backward_stage(state, grad_output, bwd_mb_id)
+            double[][] grad_input = run_backward_stage(state, grad_output, bwd_mb_id)
             double tb1 = 0.0
             state.time_backward_ms = state.time_backward_ms + (tb1 - tb0)
             state.mb_states[bwd_mb_id].output_gradient = grad_input
@@ -200,14 +200,14 @@ func execute_1f1b_step(
     }
     for state.backward_counter < M {
         int cool_mb_id = state.backward_counter
-        [][]double cool_grad
+        double[][] cool_grad
         if is_last_stage {
             cool_grad = state.mb_states[cool_mb_id].input_gradient
         } else {
             cool_grad = p2p_recv_grad_from_next(state, cool_mb_id)
         }
         double tc0 = 0.0
-        [][]double cool_grad_in = run_backward_stage(state, cool_grad, cool_mb_id)
+        double[][] cool_grad_in = run_backward_stage(state, cool_grad, cool_mb_id)
         double tc1 = 0.0
         state.time_backward_ms = state.time_backward_ms + (tc1 - tc0)
         state.mb_states[cool_mb_id].backward_done = true
@@ -223,8 +223,8 @@ func execute_1f1b_step(
     return 0.0
 }
 
-func run_forward_stage(pipeline_state state, [][]double input, int mb_id) [][]double {
-    [][]double current = input
+func run_forward_stage(pipeline_state state, double[][] input, int mb_id) double[][] {
+    double[][] current = input
     if state.config.use_activation_checkpointing != 2 {
         state.mb_states[mb_id].input_activation = copy_tensor(input)
     }
@@ -235,8 +235,8 @@ func run_forward_stage(pipeline_state state, [][]double input, int mb_id) [][]do
     return current
 }
 
-func run_backward_stage(pipeline_state state, [][]double grad_output, int mb_id) [][]double {
-    [][]double current_grad = grad_output
+func run_backward_stage(pipeline_state state, double[][] grad_output, int mb_id) double[][] {
+    double[][] current_grad = grad_output
     int layer_idx = state.stage_info.num_layers_local - 1
     for layer_idx >= 0 {
         layer_idx = layer_idx - 1
@@ -244,37 +244,37 @@ func run_backward_stage(pipeline_state state, [][]double grad_output, int mb_id)
     return current_grad
 }
 
-func p2p_send_to_next(pipeline_state state, [][]double activation, int mb_id) {
+func p2p_send_to_next(pipeline_state state, double[][] activation, int mb_id) {
     state.time_comm_ms = state.time_comm_ms + 0.05
 }
 
-func p2p_recv_from_prev(pipeline_state state, int mb_id) [][]double {
+func p2p_recv_from_prev(pipeline_state state, int mb_id) double[][] {
     state.time_comm_ms = state.time_comm_ms + 0.05
-    return [][]double{}
+    return double[][]{}
 }
 
-func p2p_send_grad_to_prev(pipeline_state state, [][]double gradient, int mb_id) {
+func p2p_send_grad_to_prev(pipeline_state state, double[][] gradient, int mb_id) {
     state.time_comm_ms = state.time_comm_ms + 0.05
 }
 
-func p2p_recv_grad_from_next(pipeline_state state, int mb_id) [][]double {
+func p2p_recv_grad_from_next(pipeline_state state, int mb_id) double[][] {
     state.time_comm_ms = state.time_comm_ms + 0.05
-    return [][]double{}
+    return double[][]{}
 }
 
 func free_microbatch_activations(ref pipeline_state state, int mb_id) {
-    state.mb_states[mb_id].input_activation = [][]double{}
-    state.mb_states[mb_id].output_activation = [][]double{}
+    state.mb_states[mb_id].input_activation = double[][]{}
+    state.mb_states[mb_id].output_activation = double[][]{}
 }
 
-func copy_tensor([][]double src) [][]double {
+func copy_tensor(double[][] src) double[][] {
     int rows = len(src)
-    if rows == 0 { return [][]double{} }
+    if rows == 0 { return double[][]{} }
     int cols = len(src[0])
-    [][]double dst = []make([]double, rows)
+    double[][] dst = make[](double[], rows)
     int i = 0
     for i < rows {
-        dst[i] = make([]double, cols)
+        dst[i] = make(double[], cols)
         int j = 0
         for j < cols {
             dst[i][j] = src[i][j]

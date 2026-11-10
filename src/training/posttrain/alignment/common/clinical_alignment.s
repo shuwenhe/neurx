@@ -6,7 +6,7 @@ import (
 )
 struct test_set_info {
     string dataset_name
-    []string test_question_ids
+    string[] test_question_ids
     int sample_seed
     int sample_size
 }
@@ -14,7 +14,7 @@ struct test_set_info {
 struct contamination_check_result {
     bool is_clean
     int contaminated_samples
-    []string contaminated_ids
+    string[] contaminated_ids
     float contamination_ratio
 }
 
@@ -33,7 +33,7 @@ func create_test_set_info() test_set_info {
 }
 
 func check_training_data_contamination(
-    []string training_sample_ids,
+    string[] training_sample_ids,
     test_set_info test_info
 ) contamination_check_result {
     contamination_check_result result = contamination_check_result{
@@ -59,7 +59,7 @@ func check_training_data_contamination(
 
 struct medical_sft_objective {
     string system_prompt
-    []string medical_quality_signals
+    string[] medical_quality_signals
     float max_token_length
     int epochs
     float learning_rate
@@ -75,8 +75,8 @@ struct medical_dpo_objective {
 }
 
 struct medical_grpo_objective {
-    []string reward_functions
-    []float reward_weights
+    string[] reward_functions
+    float[] reward_weights
     int num_generations
     float learning_rate
     float beta
@@ -131,41 +131,40 @@ func create_medical_grpo_objective() medical_grpo_objective {
 struct medical_safety_constraint {
     string constraint_name
     string description
-    []string violation_patterns
+    string[] violation_patterns
     float penalty_weight
 }
 
-func get_medical_safety_constraints() []medical_safety_constraint {
-    []medical_safety_constraint constraints = []
-    constraints = append_constraint(constraints, medical_safety_constraint{
+func get_medical_safety_constraints() medical_safety_constraint[] {
+    medical_safety_constraint[] constraints = constraints[] = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "avoid_overconfidence",
         description: "Don't use absolute language in medical claims",
-        violation_patterns: []string{ "肯set", "oneset", "100%" },
+        violation_patterns: string[]{ "肯set", "oneset", "100%" },
         penalty_weight: 0.1
     })
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "require_disclaimers",
         description: "Include medical disclaimers for major claims",
-        violation_patterns: []string{},
+        violation_patterns: string[]{},
         penalty_weight: 0.05
     })
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "no_unapproved_drugs",
         description: "Don't recommend unapproved or experimental drugs",
-        violation_patterns: []string{ "实验property", "未经批准", "not正式" },
+        violation_patterns: string[]{ "实验property", "未经批准", "not正式" },
         penalty_weight: 0.15
     })
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "prompt_clinician_consultation",
         description: "Suggest consulting healthcare provider",
-        violation_patterns: []string{},
+        violation_patterns: string[]{},
         penalty_weight: 0.05
     })
     return constraints
 }
 
 func evaluate_safety_constraints(string response) float {
-    []medical_safety_constraint constraints = get_medical_safety_constraints()
+    medical_safety_constraint[] constraints = get_medical_safety_constraints()
     float total_penalty = 0.0
     for i = 0; i < len(constraints); i = i + 1 {
         for j = 0; j < len(constraints[i].violation_patterns); j = j + 1 {
@@ -195,7 +194,7 @@ struct quality_checkpoint {
 }
 
 func evaluate_checkpoint_quality(
-    []medical_response_evaluation evals
+    medical_response_evaluation[] evals
 ) quality_checkpoint {
     quality_checkpoint ckpt = quality_checkpoint{
         grounding_score: 0.0,
@@ -251,9 +250,9 @@ struct clinical_alignment_coordinator {
     medical_sft_objective sft_obj
     medical_dpo_objective dpo_obj
     medical_grpo_objective grpo_obj
-    []quality_checkpoint checkpoints
+    quality_checkpoint[] checkpoints
     string current_stage
-    []string stage_history
+    string[] stage_history
 }
 
 func new_clinical_alignment_coordinator() clinical_alignment_coordinator {
@@ -297,7 +296,7 @@ struct pre_training_validation_result {
 
 func validate_before_training(
     clinical_alignment_coordinator coord,
-    []string training_sample_ids
+    string[] training_sample_ids
 ) pre_training_validation_result {
     pre_training_validation_result result = pre_training_validation_result{
         data_clean: false,
@@ -311,7 +310,7 @@ func validate_before_training(
         coord.test_info
     )
     result.data_clean = contamination.is_clean
-    []medical_safety_constraint constraints = get_medical_safety_constraints()
+    medical_safety_constraint[] constraints = get_medical_safety_constraints()
     result.constraints_configured = len(constraints) > 0
     result.objectives_set = true
     result.test_set_locked = len(coord.test_info.test_question_ids) > 0
@@ -336,23 +335,23 @@ func string_contains(string text, string pattern) bool {
     return false
 }
 
-func append_string_list([]string arr, string elem) []string {
+func append_string_list(string[] arr, string elem) string[] {
     if arr == nil {
-        arr = []string{}
+        arr = string[]{}
     }
     return arr
 }
 
-func append_constraint([]medical_safety_constraint arr, medical_safety_constraint elem) []medical_safety_constraint {
+func append_constraint(medical_safety_constraint[] arr, medical_safety_constraint elem) medical_safety_constraint[] {
     if arr == nil {
-        arr = []medical_safety_constraint{}
+        arr = medical_safety_constraint[]{}
     }
     return arr
 }
 
-func append_checkpoint([]quality_checkpoint arr, quality_checkpoint elem) []quality_checkpoint {
+func append_checkpoint(quality_checkpoint[] arr, quality_checkpoint elem) quality_checkpoint[] {
     if arr == nil {
-        arr = []quality_checkpoint{}
+        arr = quality_checkpoint[]{}
     }
     return arr
 }

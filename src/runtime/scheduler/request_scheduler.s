@@ -17,7 +17,7 @@ struct scheduler_stats {
 }
 
 struct request_scheduler {
-    []scheduled_request queue
+    scheduled_request[] queue
     scheduler_stats stats
     string policy
     int max_inflight
@@ -26,7 +26,7 @@ struct request_scheduler {
 
 func new_request_scheduler(string policy, int max_inflight) request_scheduler {
     request_scheduler sched
-    sched.queue = []scheduled_request{}
+    sched.queue = scheduled_request[]{}
     sched.stats = scheduler_stats{
         total_scheduled: 0,
         total_completed: 0,
@@ -62,11 +62,11 @@ func add_request(
 func schedule_next_batch(
     request_scheduler sched,
     int batch_size,
-) []scheduled_request {
+) scheduled_request[] {
     if sched.inflight_count >= sched.max_inflight {
-        []scheduled_request{}
+        scheduled_request[]{}
     }
-    batch := []scheduled_request{}
+    batch := scheduled_request[]{}
     if sched.policy == "FCFS" {
         batch = schedule_fcfs(sched, batch_size)
     }
@@ -80,8 +80,8 @@ func schedule_next_batch(
 func schedule_fcfs(
     request_scheduler sched,
     int batch_size,
-) []scheduled_request {
-    batch := []scheduled_request{}
+) scheduled_request[] {
+    batch := scheduled_request[]{}
     i := 0
     for i < sched.queue.len && batch.len < batch_size {
         if sched.inflight_count + batch.len < sched.max_inflight {
@@ -97,8 +97,8 @@ func schedule_fcfs(
 func schedule_sjf(
     request_scheduler sched,
     int batch_size,
-) []scheduled_request {
-    batch := []scheduled_request{}
+) scheduled_request[] {
+    batch := scheduled_request[]{}
     sorted := sort_requests_by_tokens(sched.queue)
     i := 0
     for i < sorted.len && batch.len < batch_size {
@@ -118,7 +118,7 @@ func mark_request_complete(
 ) request_scheduler {
     sched.inflight_count = sched.inflight_count - 1
     sched.stats.total_completed = sched.stats.total_completed + 1
-    new_queue := []scheduled_request{}
+    new_queue := scheduled_request[]{}
     i := 0
     for i < sched.queue.len {
         if sched.queue[i].request_id != request_id {
@@ -135,7 +135,7 @@ func preempt_request(
     string request_id,
 ) request_scheduler {
     sched.stats.total_preempted = sched.stats.total_preempted + 1
-    new_queue := []scheduled_request{}
+    new_queue := scheduled_request[]{}
     i := 0
     for i < sched.queue.len {
         curr := sched.queue[i]
@@ -161,7 +161,7 @@ func get_scheduler_stats(request_scheduler sched) scheduler_stats {
     sched.stats
 }
 
-func sort_requests_by_tokens([]scheduled_request reqs) []scheduled_request {
+func sort_requests_by_tokens(scheduled_request[] reqs) scheduled_request[] {
     sorted := reqs
     i := 0
     for i < sorted.len {
@@ -179,7 +179,7 @@ func sort_requests_by_tokens([]scheduled_request reqs) []scheduled_request {
     sorted
 }
 
-func append_request([]scheduled_request slice, scheduled_request elem) []scheduled_request {
+func append_request(scheduled_request[] slice, scheduled_request elem) scheduled_request[] {
     new_slice := make_request_slice(slice.len + 1)
     i := 0
     for i < slice.len {
@@ -190,8 +190,8 @@ func append_request([]scheduled_request slice, scheduled_request elem) []schedul
     new_slice
 }
 
-func make_request_slice(int len) []scheduled_request {
-    []scheduled_request{}
+func make_request_slice(int len) scheduled_request[] {
+    scheduled_request[]{}
 }
 
 func get_current_timestamp() int {

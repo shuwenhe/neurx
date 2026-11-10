@@ -17,7 +17,7 @@ struct hybrid_engine_config {
 }
 
 struct model_partition {
-    []tensor params
+    tensor[] params
     int tp_rank
     int pp_rank
     int dp_rank
@@ -25,10 +25,10 @@ struct model_partition {
 }
 
 struct resharding_plan {
-    []int src_ranks
-    []int dst_ranks
-    []int param_indices
-    []int sizes
+    int[] src_ranks
+    int[] dst_ranks
+    int[] param_indices
+    int[] sizes
     bool use_alltoall
 }
 
@@ -61,10 +61,10 @@ func compute_resharding_plan(
 ) resharding_plan {
     int src_tp = config.tensor_parallel_size_train
     int dst_tp = config.tensor_parallel_size_gen
-    []int src_ranks = []int{}
-    []int dst_ranks = []int{}
-    []int param_indices = []int{}
-    []int sizes = []int{}
+    int[] src_ranks = int[]{}
+    int[] dst_ranks = int[]{}
+    int[] param_indices = int[]{}
+    int[] sizes = int[]{}
     int i = 0
     for i < src.params.len {
         tensor param = src.params[i]
@@ -170,7 +170,7 @@ func new_hybrid_engine(
     hybrid_engine_config config,
     distributed_context ctx
 ) hybrid_engine {
-    []tensor params = model.parameters()
+    tensor[] params = model.parameters()
     model_partition train_part = model_partition {
         params: params,
         tp_rank: ctx.rank % config.tensor_parallel_size_train,
@@ -179,7 +179,7 @@ func new_hybrid_engine(
         mode: "train",
     }
     model_partition gen_part = model_partition {
-        params: make([]tensor, params.len),
+        params: make(tensor[], params.len),
         tp_rank: ctx.rank % config.tensor_parallel_size_gen,
         pp_rank: 0,
         dp_rank: 0,

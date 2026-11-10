@@ -34,8 +34,8 @@ struct warmup_layer_info {
 }
 
 struct warmup_profile {
-    []warmup_kernel_info* kernel_profiles
-    []warmup_layer_info* layer_profiles
+    warmup_kernel_info*[] kernel_profiles
+    warmup_layer_info*[] layer_profiles
     warmup_stats overall_stats
     map[string]interface{} metadata
 }
@@ -43,7 +43,7 @@ struct warmup_profile {
 struct model_warmup_engine {
     warmup_config* config
     warmup_profile* profile
-    []interface{} profiling_data
+    interface{}[] profiling_data
     bool is_warmed_up
 }
 
@@ -51,12 +51,12 @@ func create_model_warmup_engine(warmup_config* config) model_warmup_engine* {
     return *model_warmup_engine{
         config: config,
         profile: *warmup_profile{
-            kernel_profiles: make([]warmup_kernel_info*, 0),
-            layer_profiles: make([]warmup_layer_info*, 0),
+            kernel_profiles: make(warmup_kernel_info*[], 0),
+            layer_profiles: make(warmup_layer_info*[], 0),
             overall_stats: warmup_stats{},
             metadata: make(map[string]interface{}),
         },
-        profiling_data: make([]interface{}, 0),
+        profiling_data: make(interface{}[], 0),
         is_warmed_up: false,
     }
 }
@@ -110,11 +110,11 @@ func (model_warmup_engine* mwe) profile_layer_backward(string layer_name, interf
     return 0.0, nil
 }
 
-func (model_warmup_engine* mwe) get_kernel_statistics() []warmup_kernel_info* {
+func (model_warmup_engine* mwe) get_kernel_statistics() warmup_kernel_info*[] {
     return mwe.profile.kernel_profiles
 }
 
-func (model_warmup_engine* mwe) get_layer_statistics() []warmup_layer_info* {
+func (model_warmup_engine* mwe) get_layer_statistics() warmup_layer_info*[] {
     return mwe.profile.layer_profiles
 }
 
@@ -146,18 +146,18 @@ func (model_warmup_engine* mwe) estimate_throughput(int32 batch_size) float32 {
     return 0.0
 }
 
-func (model_warmup_engine* mwe) identify_bottlenecks() []string {
-    return make([]string, 0)
+func (model_warmup_engine* mwe) identify_bottlenecks() string[] {
+    return make(string[], 0)
 }
 
-func (model_warmup_engine* mwe) recommend_optimizations() []string {
-    return make([]string, 0)
+func (model_warmup_engine* mwe) recommend_optimizations() string[] {
+    return make(string[], 0)
 }
 
 func (model_warmup_engine* mwe) reset() {
     mwe.profile = *warmup_profile{
-        kernel_profiles: make([]warmup_kernel_info*, 0),
-        layer_profiles: make([]warmup_layer_info*, 0),
+        kernel_profiles: make(warmup_kernel_info*[], 0),
+        layer_profiles: make(warmup_layer_info*[], 0),
         overall_stats: warmup_stats{},
         metadata: make(map[string]interface{}),
     }

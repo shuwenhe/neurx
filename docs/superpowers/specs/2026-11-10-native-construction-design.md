@@ -1,6 +1,6 @@
 # Native construction: semantic audit and design
 
-Status: proposed implementation design; architecture selected by the implementer under the user's explicit instruction to evaluate and choose the smallest safe mechanism. Not an acceptance claim.
+Status: implemented and tested; final specified-Qwen evidence is in `docs/NATIVE_INFERENCE_ACCEPTANCE.md`; architecture selected by the implementer under the user's explicit instruction to evaluate and choose the smallest safe mechanism. Not an acceptance claim.
 
 ## Scope and state
 

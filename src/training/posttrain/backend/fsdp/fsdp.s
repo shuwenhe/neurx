@@ -14,13 +14,13 @@ struct fsdp_config {
     int backward_prefetch
     int forward_prefetch
     bool use_orig_params
-    []string ignored_modules
+    string[] ignored_modules
 }
 
 struct fsdp_state {
-    []tensor sharded_params
-    []tensor gathered_params
-    []tensor param_grads
+    tensor[] sharded_params
+    tensor[] gathered_params
+    tensor[] param_grads
     int shard_size
     int global_size
     bool is_gathered
@@ -43,16 +43,16 @@ func new_fsdp_config() fsdp_config {
         backward_prefetch: 1,
         forward_prefetch: 1,
         use_orig_params: false,
-        ignored_modules: []string{},
+        ignored_modules: string[]{},
     }
 }
 
 func fsdp_shard_parameters(
-    []tensor params,
+    tensor[] params,
     int world_size,
     int rank
-) []tensor {
-    []tensor sharded = make([]tensor, params.len)
+) tensor[] {
+    tensor[] sharded = make(tensor[], params.len)
     int i = 0
     for i < params.len {
         tensor param = params[i]
@@ -71,10 +71,10 @@ func fsdp_shard_parameters(
 }
 
 func fsdp_gather_parameters(
-    []tensor sharded_params,
+    tensor[] sharded_params,
     distributed_context ctx
-) []tensor {
-    []tensor gathered = make([]tensor, sharded_params.len)
+) tensor[] {
+    tensor[] gathered = make(tensor[], sharded_params.len)
     int i = 0
     for i < sharded_params.len {
         tensor shard = sharded_params[i]
@@ -86,10 +86,10 @@ func fsdp_gather_parameters(
 }
 
 func fsdp_reduce_scatter_gradients(
-    []tensor param_grads,
+    tensor[] param_grads,
     distributed_context ctx
-) []tensor {
-    []tensor reduced = make([]tensor, param_grads.len)
+) tensor[] {
+    tensor[] reduced = make(tensor[], param_grads.len)
     int i = 0
     for i < param_grads.len {
         tensor grad = param_grads[i]
@@ -105,16 +105,16 @@ func new_fsdp_module(
     fsdp_config config,
     distributed_context ctx
 ) fsdp_module {
-    []tensor params = base_module.parameters()
-    []tensor sharded = fsdp_shard_parameters(
+    tensor[] params = base_module.parameters()
+    tensor[] sharded = fsdp_shard_parameters(
         params,
         config.world_size,
         config.rank
     )
     fsdp_state state = fsdp_state {
         sharded_params: sharded,
-        gathered_params: []tensor{},
-        param_grads: make([]tensor, params.len),
+        gathered_params: tensor[]{},
+        param_grads: make(tensor[], params.len),
         shard_size: 0,
         global_size: 0,
         is_gathered: false,
@@ -139,7 +139,7 @@ func fsdp_forward(fsdp_module fsdp_mod, tensor input) tensor {
     tensor output = fsdp_mod.base_module.forward(input)
     if fsdp_mod.config.sharding_strategy == "full_shard" {
         fsdp_mod.state.is_gathered = false
-        fsdp_mod.state.gathered_params = []tensor{}
+        fsdp_mod.state.gathered_params = tensor[]{}
     }
     output
 }
@@ -153,7 +153,7 @@ func fsdp_backward(fsdp_module fsdp_mod, tensor grad_output) {
         fsdp_mod.state.is_gathered = true
     }
     grad_output.backward()
-    []tensor grads = fsdp_mod.base_module.get_gradients()
+    tensor[] grads = fsdp_mod.base_module.get_gradients()
     fsdp_mod.state.param_grads = fsdp_reduce_scatter_gradients(
         grads,
         fsdp_mod.ctx
@@ -161,6 +161,6 @@ func fsdp_backward(fsdp_module fsdp_mod, tensor grad_output) {
     fsdp_mod.state.sharded_params = fsdp_mod.state.param_grads
     if fsdp_mod.config.sharding_strategy == "full_shard" {
         fsdp_mod.state.is_gathered = false
-        fsdp_mod.state.gathered_params = []tensor{}
+        fsdp_mod.state.gathered_params = tensor[]{}
     }
 }

@@ -103,8 +103,7 @@ struct mo_effn_layer {
         this.config = config
         this.loss_computer = new load_balance_loss_computer(config)
         this.training = true
-        this.experts = []
-        for i in range(config.num_experts):
+        this.experts = for[] i in range(config.num_experts):
             expert := moe_expert{
                 id=i,
                 up_proj=new linear(config.hidden_size, config.intermediate_size),
@@ -113,8 +112,7 @@ struct mo_effn_layer {
                 is_active=true
             }
             this.experts.append(expert)
-        this.shared_experts = []
-        if config.num_shared_experts > 0:
+        this.shared_experts = if config.num_shared_experts > 0:
             for i in range(config.num_shared_experts) {
                 shared_exp := moe_expert{
                     id=config.num_experts + i,
@@ -288,8 +286,7 @@ struct mo_effn_layer {
     _compute_dispatch_statistics(expert_mask: tensor, int capacity) {
         tokens_per_expert = expert_mask.sum(dim=(0, 1)).tolist()
         total_tokens = expert_mask.sum().item()
-        expert_utilization: list<float> = []
-        for count in tokens_per_expert:
+        expert_utilization: list<float> = for[] count in tokens_per_expert:
             utilization = min(count / (total_tokens / this.config.num_experts + 1e-6), 1.0)
             expert_utilization.append(utilization)
         arr = tensor(tokens_per_expert).float()
@@ -376,8 +373,7 @@ struct expert_specializer {
         return this.config.diversity_penalty * confidence_reward * 0.01
     }
     analyze_expert_specialization(moe_layer: MoEFFNLayer) {
-        reports: list<individual_expert_report> = []
-        for expert in moe_layer.experts:
+        reports: list<individual_expert_report> = for[] expert in moe_layer.experts:
             up_weight_norm = expert.up_proj.weight.norm(dim=1).mean().item()
             down_weight_norm = expert.down_proj.weight.norm(dim=1).mean().item()
             weight_magnitude = (expert.up_proj.weight.abs().mean() + expert.down_proj.weight.abs().mean()).item()
@@ -464,8 +460,7 @@ struct expert_manager {
         }
     }
     merge_similar_experts(float similarity_threshold = 0.95) {
-        merge_operations: list<merge_operation> = []
-        for layer in this.moe_layers:
+        merge_operations: list<merge_operation> = for[] layer in this.moe_layers:
             active_experts = [e for e in layer.experts if e.is_active]
             for i in range(len(active_experts)):
                 for j in range(i + 1, len(active_experts)):
@@ -501,8 +496,7 @@ struct expert_manager {
     get_global_efficiency_report() {
         total_params_before = 0
         total_params_after = 0
-        all_dispatch_patterns: list<dispatch_pattern> = []
-        for layer in this.moe_layers:
+        all_dispatch_patterns: list<dispatch_pattern> = for[] layer in this.moe_layers:
             for expert in layer.experts:
                 total_params_before += count_parameters(expert.up_proj) + count_parameters(expert.down_proj)
                 if expert.is_active:

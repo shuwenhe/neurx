@@ -71,8 +71,8 @@ func trim_string(string s) string {
         return ""
     }
     string_slice(s, start, end + 1)
-func get_model_files() []model_file_info {
-    []model_file_info files = make([]model_file_info, 6)
+func get_model_files() model_file_info[] {
+    model_file_info[] files = make(model_file_info[], 6)
     files[0] = model_file_info{
         name: "model.safetensors",
         size_bytes: 1945505792,
@@ -140,7 +140,7 @@ func download_file(
     return true
 }
 
-func verify_downloaded_files(download_config config, []model_file_info files) (int, int) {
+func verify_downloaded_files(download_config config, model_file_info[] files) (int, int) {
     int verified = 0
     int failed = 0
     int i = 0
@@ -156,7 +156,7 @@ func verify_downloaded_files(download_config config, []model_file_info files) (i
         i = i + 1
     }
     (verified, failed)
-func calculate_total_size([]model_file_info files) int {
+func calculate_total_size(model_file_info[] files) int {
     int total = 0
     int i = 0
     for i < len(files) {
@@ -168,7 +168,7 @@ func calculate_total_size([]model_file_info files) int {
     total
 func log_message(download_config config, string message) {
     println(message)
-func print_download_status(download_config config, []model_file_info files) {
+func print_download_status(download_config config, model_file_info[] files) {
     println("")
     println("╔════════════════════════════════════════════════════════════╗")
     println("║           NeurX Model Download Status                      ║")
@@ -222,7 +222,7 @@ func main() {
     }
     println("✓ Model directory ready")
     println("")
-    []model_file_info files = get_model_files()
+    model_file_info[] files = get_model_files()
     log_message(config, "Starting model download: " + config.model_name)
     log_message(config, "Target directory: " + config.model_dir)
     int downloaded = 0
@@ -273,7 +273,7 @@ func main() {
     }
     println("✓ Model directory ready")
     println("")
-    []model_file_info files = get_model_files()
+    model_file_info[] files = get_model_files()
     log_message(config, "Starting model download: " + config.model_name)
     log_message(config, "Target directory: " + config.model_dir)
     int downloaded = 0

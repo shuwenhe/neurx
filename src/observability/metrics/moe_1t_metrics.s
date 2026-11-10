@@ -17,9 +17,9 @@ struct training_metrics {
 }
 
 struct moe_metrics {
-    []float expert_load
-    []float expert_utilization
-    []int expert_dropout_count
+    float[] expert_load
+    float[] expert_utilization
+    int[] expert_dropout_count
     float load_balance_ratio
     float expert_diversity
 }
@@ -61,7 +61,7 @@ struct metrics_collector {
     int local_rank
     int local_world_size
     metrics_frame current_frame
-    []metrics_frame frames_history
+    metrics_frame[] frames_history
     int max_history_size
     float avg_loss
     float max_loss
@@ -100,9 +100,9 @@ func metrics_collector_new(
                 gradient_flow: 0.0,
             },
             moe_metrics: moe_metrics {
-                expert_load: make([]float, 256),
-                expert_utilization: make([]float, 256),
-                expert_dropout_count: make([]int, 256),
+                expert_load: make(float[], 256),
+                expert_utilization: make(float[], 256),
+                expert_dropout_count: make(int[], 256),
                 load_balance_ratio: 0.0,
                 expert_diversity: 0.0,
             },
@@ -126,7 +126,7 @@ func metrics_collector_new(
                 iteration_time_ms: 0.0,
             },
         },
-        frames_history: make([]metrics_frame, 0),
+        frames_history: make(metrics_frame[], 0),
         max_history_size: 1000,
         avg_loss: 0.0,
         max_loss: 0.0,
@@ -174,9 +174,9 @@ func update_training_metrics(
 
 func update_moe_metrics(
     metrics_collector collector,
-    []float expert_load,
-    []float expert_utilization,
-    []int expert_dropout_count
+    float[] expert_load,
+    float[] expert_utilization,
+    int[] expert_dropout_count
 ) {
     collector.current_frame.moe_metrics.expert_load = expert_load
     collector.current_frame.moe_metrics.expert_utilization = expert_utilization
@@ -293,9 +293,9 @@ func save_metrics(
     io_println("Metrics saved to " + filename)
 }
 
-func append_frame([]metrics_frame frames, metrics_frame f) []metrics_frame {
+func append_frame(metrics_frame[] frames, metrics_frame f) metrics_frame[] {
     int n = len(frames)
-    []metrics_frame out = make([]metrics_frame, n + 1)
+    metrics_frame[] out = make(metrics_frame[], n + 1)
     int i = 0
     for i < n {
         out[i] = frames[i]
@@ -349,12 +349,12 @@ func float_to_string(float x, int precision) string {
     return float_to_string_precision(x, precision)
 }
 
-func trim_history([]metrics_frame frames, int limit) []metrics_frame {
+func trim_history(metrics_frame[] frames, int limit) metrics_frame[] {
     int n = len(frames)
     if n <= limit {
         return frames
     }
-    []metrics_frame out = make([]metrics_frame, limit)
+    metrics_frame[] out = make(metrics_frame[], limit)
     int start = n - limit
     int i = 0
     for i < limit {

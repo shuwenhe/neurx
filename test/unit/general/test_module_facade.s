@@ -24,7 +24,7 @@ func test_module_facade_basic() bool {
     if neurx.module.module_child_count(root) != 1 {
         return false
     }
-    []string names = neurx.module.module_named_parameters(root)
+    string[] names = neurx.module.module_named_parameters(root)
     if len(names) != 2 {
         return false
     }
@@ -40,7 +40,7 @@ func test_module_facade_basic() bool {
         return false
     }
     nn.module frozen = neurx.module.module_freeze(loaded)
-    []tensor params = neurx.module.module_parameters(frozen)
+    tensor[] params = neurx.module.module_parameters(frozen)
     int i = 0
     for i < len(params) {
         if params[i].requires_grad {

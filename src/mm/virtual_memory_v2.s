@@ -5,7 +5,7 @@ import (
 struct page_struct {
     int page_num
     int flags
-    []int mapping
+    int[] mapping
     int count
     int lru_next
     int lru_prev
@@ -34,8 +34,7 @@ struct mm_struct {
     pte_entry[] pgd
     int nr_vmas
 }
-page_struct g_page_structures[]
-int g_lru_head
+page_struct int[] g_page_structures g_lru_head
 int g_lru_tail
 int g_total_pages
 func init_vm(int total_pages) int {
@@ -94,7 +93,7 @@ func free_page(int page_num) int {
     -1
 }
 
-func shrink_page_list([]int page_list, int nr_pages) int {
+func shrink_page_list(int[] page_list, int nr_pages) int {
     var reclaimed = 0
     var i = 0
     for i < nr_pages {

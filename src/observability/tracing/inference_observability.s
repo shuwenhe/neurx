@@ -26,7 +26,7 @@ struct inference_observability_state {
     int latency_le_500_ms
     int latency_over_500_ms
     int latency_sum_ms
-    []inference_trace_span spans
+    inference_trace_span[] spans
 }
 
 func new_inference_observability() inference_observability_state {
@@ -47,7 +47,7 @@ func new_inference_observability() inference_observability_state {
     state.latency_le_500_ms = 0
     state.latency_over_500_ms = 0
     state.latency_sum_ms = 0
-    state.spans = make([]inference_trace_span, 4096)
+    state.spans = make(inference_trace_span[], 4096)
     state
 }
 

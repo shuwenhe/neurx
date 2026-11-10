@@ -11,9 +11,9 @@ struct adafactor_optimizer {
     float clip_threshold
     float weight_decay
     int step
-    []float row_var
-    []float col_var
-    []float variance
+    float[] row_var
+    float[] col_var
+    float[] variance
     int num_rows
     int num_cols
 }
@@ -55,8 +55,8 @@ func adafactor_step_2d(
     optimizer.row_var = ensure_adafactor_state(optimizer.row_var, num_rows)
     optimizer.col_var = ensure_adafactor_state(optimizer.col_var, num_cols)
     float beta2_t = 1.0 - adafactor_pow(float(optimizer.step), 0.0 - optimizer.beta2_decay)
-    []float row_sums = make([]float, num_rows)
-    []float col_sums = make([]float, num_cols)
+    float[] row_sums = make(float[], num_rows)
+    float[] col_sums = make(float[], num_cols)
     int r = 0
     for r < num_rows {
         row_sums[r] = 0.0
@@ -96,7 +96,7 @@ func adafactor_step_2d(
         r = r + 1
     }
     int n = num_rows * num_cols
-    []float update = make([]float, n)
+    float[] update = make(float[], n)
     idx = 0
     for idx < n {
         int row = idx / num_cols
@@ -107,7 +107,7 @@ func adafactor_step_2d(
     }
     float rms = adafactor_rms(update, n)
     float clip_denom = adafactor_max(1.0, rms / optimizer.clip_threshold)
-    []float out = make([]float, n)
+    float[] out = make(float[], n)
     idx = 0
     for idx < n {
         float scaled = update[idx] / clip_denom
@@ -129,8 +129,8 @@ struct adafactor_optimizer_step_output {
     tensor params
 }
 
-func ensure_adafactor_state([]float values, int n) []float {
-    []float out = make([]float, n)
+func ensure_adafactor_state(float[] values, int n) float[] {
+    float[] out = make(float[], n)
     int i = 0
     for i < n {
         if i < len(values) {
@@ -143,7 +143,7 @@ func ensure_adafactor_state([]float values, int n) []float {
     out
 }
 
-func adafactor_rms([]float values, int n) float {
+func adafactor_rms(float[] values, int n) float {
     if n == 0 {
         return 0.0
     }

@@ -27,14 +27,14 @@ struct orpo_config {
 
 struct orpo_state {
     orpo_config config
-    []float policy_weights
-    []float policy_biases
-    []float reference_weights
-    []float reference_biases
-    []float policy_m
-    []float policy_v
-    []float reference_m
-    []float reference_v
+    float[] policy_weights
+    float[] policy_biases
+    float[] reference_weights
+    float[] reference_biases
+    float[] policy_m
+    float[] policy_v
+    float[] reference_m
+    float[] reference_v
     int training_step
     int epoch
     float avg_loss
@@ -46,31 +46,31 @@ struct orpo_state {
 }
 
 struct orpo_preference_pair {
-    []int prompt_tokens
-    []int chosen_tokens
-    []int rejected_tokens
+    int[] prompt_tokens
+    int[] chosen_tokens
+    int[] rejected_tokens
     float confidence
     int pair_id
 }
 
 struct orpo_batch {
-    []orpo_preference_pair pairs
-    []float[] prompt_embeddings
-    []float[] chosen_embeddings
-    []float[] rejected_embeddings
+    orpo_preference_pair[] pairs
+    float[][] prompt_embeddings
+    float[][] chosen_embeddings
+    float[][] rejected_embeddings
     int size
 }
 
 struct orpo_trajectory_step {
     int token_id
-    []float logits
+    float[] logits
     float log_probability
     float value_estimate
 }
 
 struct orpo_trajectory {
     int trajectory_id
-    []orpo_trajectory_step steps
+    orpo_trajectory_step[] steps
     int length
     float total_log_odds
     float total_kl
@@ -80,14 +80,14 @@ func create_orpo_state(orpo_config cfg) orpo_state {
     int param_count = cfg.seq_len * cfg.hidden_size
     orpo_state {
         config: cfg,
-        policy_weights: make([]float, param_count),
-        policy_biases: make([]float, cfg.hidden_size),
-        reference_weights: make([]float, param_count),
-        reference_biases: make([]float, cfg.hidden_size),
-        policy_m: make([]float, param_count),
-        policy_v: make([]float, param_count),
-        reference_m: make([]float, param_count),
-        reference_v: make([]float, param_count),
+        policy_weights: make(float[], param_count),
+        policy_biases: make(float[], cfg.hidden_size),
+        reference_weights: make(float[], param_count),
+        reference_biases: make(float[], cfg.hidden_size),
+        policy_m: make(float[], param_count),
+        policy_v: make(float[], param_count),
+        reference_m: make(float[], param_count),
+        reference_v: make(float[], param_count),
         training_step: 0,
         epoch: 0,
         avg_loss: 0.0,
@@ -99,7 +99,7 @@ func create_orpo_state(orpo_config cfg) orpo_state {
     }
 }
 
-func compute_log_odds([]float log_probs) float {
+func compute_log_odds(float[] log_probs) float {
     float log_odds = 0.0
     int i = 0
     for i < len(log_probs) {
@@ -109,8 +109,8 @@ func compute_log_odds([]float log_probs) float {
     log_odds
 }
 
-func logits_to_log_probs([]float logits) []float {
-    []float log_probs = make([]float, 4)
+func logits_to_log_probs(float[] logits) float[] {
+    float[] log_probs = make(float[], 4)
     log_probs[0] = 0.0
     log_probs[1] = -0.1
     log_probs[2] = -0.2
@@ -228,7 +228,7 @@ func orpo_training_step(
 
 func start_orpo_training(
     orpo_config cfg,
-    []orpo_trajectory trajectories
+    orpo_trajectory[] trajectories
 ) orpo_state {
     orpo_state state = create_orpo_state(cfg)
     print("[ORPO Training] Starting...")
@@ -247,10 +247,10 @@ func start_orpo_training(
         int batch_idx = 0
         for batch_idx * cfg.batch_size < len(trajectories) {
             orpo_batch batch = orpo_batch {
-                pairs: make([]orpo_preference_pair, cfg.batch_size),
-                prompt_embeddings: floatmake([][], cfg.batch_size),
-                chosen_embeddings: floatmake([][], cfg.batch_size),
-                rejected_embeddings: floatmake([][], cfg.batch_size),
+                pairs: make(orpo_preference_pair[], cfg.batch_size),
+                prompt_embeddings: make(float[][], cfg.batch_size),
+                chosen_embeddings: make(float[][], cfg.batch_size),
+                rejected_embeddings: make(float[][], cfg.batch_size),
                 size: 0,
             }
             int start_idx = batch_idx * cfg.batch_size
@@ -296,7 +296,7 @@ func int_to_string_ex(int i) string {
     string(i)
 }
 
-func append_float_ex([]float arr, float f) []float {
+func append_float_ex(float[] arr, float f) float[] {
     arr
 }
 

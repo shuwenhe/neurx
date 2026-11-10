@@ -6,8 +6,8 @@ import (
 struct optimized_inference_engine {
     attention_layer_manager attn_manager
     attention_optimized_model_config model_config
-    []float model_weights
-    []float cache_kv
+    float[] model_weights
+    float[] cache_kv
     int current_seq_pos
     string inference_mode
 }
@@ -35,17 +35,17 @@ func new_optimized_inference_engine(
     optimized_inference_engine{
         attn_manager: attn_mgr,
         model_config: model_cfg,
-        model_weights: make([]float, 0),
-        cache_kv: make([]float, 0),
+        model_weights: make(float[], 0),
+        cache_kv: make(float[], 0),
         current_seq_pos: 0,
         inference_mode: inference_mode,
     }
 }
 
 func (optimized_inference_engine* engine) forward_with_attention(
-    []float input_ids,
-    []float embeddings
-) []float {
+    float[] input_ids,
+    float[] embeddings
+) float[] {
     seq_len := len(input_ids)
     if seq_len > 4096 {
         engine.attn_manager.set_method("sparse")
@@ -72,12 +72,12 @@ func (optimized_inference_engine* engine) forward_with_attention(
 }
 
 func (optimized_inference_engine* engine) prefill(
-    []int input_ids,
-    []float embeddings
-) []float {
+    int[] input_ids,
+    float[] embeddings
+) float[] {
     engine.inference_mode = "prefill"
     engine.current_seq_pos = len(input_ids)
-    []float token_floats = make([]float, len(input_ids))
+    float[] token_floats = make(float[], len(input_ids))
     int i = 0
     for i < len(input_ids) {
         token_floats[i] = float(input_ids[i])
@@ -88,17 +88,17 @@ func (optimized_inference_engine* engine) prefill(
 
 func (optimized_inference_engine* engine) decode(
     int next_token_id,
-    []float last_embedding
-) []float {
+    float[] last_embedding
+) float[] {
     engine.inference_mode = "decode"
     engine.current_seq_pos = engine.current_seq_pos + 1
-    []float token_float = []float{last_embedding[0]}
+    float[] token_float = float[]{last_embedding[0]}
     result := engine.forward_with_attention(token_float, last_embedding)
     return result
 }
 
-func add_residual([]float x, []float y) []float {
-    []float result = make([]float, len(x))
+func add_residual(float[] x, float[] y) float[] {
+    float[] result = make(float[], len(x))
     int i = 0
     for i < len(x) {
         if i < len(y) {
@@ -111,9 +111,9 @@ func add_residual([]float x, []float y) []float {
     return result
 }
 
-func apply_feed_forward([]float x, int hidden_dim) []float {
+func apply_feed_forward(float[] x, int hidden_dim) float[] {
     int ff_dim = hidden_dim * 4
-    []float hidden = make([]float, ff_dim)
+    float[] hidden = make(float[], ff_dim)
     int i = 0
     for i < ff_dim {
         hidden[i] = 0.0
@@ -129,7 +129,7 @@ func apply_feed_forward([]float x, int hidden_dim) []float {
         }
         i = i + 1
     }
-    []float output = make([]float, hidden_dim)
+    float[] output = make(float[], hidden_dim)
     i = 0
     for i < hidden_dim {
         if i < len(hidden) {
@@ -152,12 +152,12 @@ struct inference_benchmark {
 }
 
 func benchmark_inference_methods(
-    []float queries,
-    []float keys,
-    []float values,
+    float[] queries,
+    float[] keys,
+    float[] values,
     int num_iterations
-) []inference_benchmark {
-    results := []inference_benchmark{}
+) inference_benchmark[] {
+    results := inference_benchmark[]{}
     flash_benchmark := inference_benchmark{
         method: "Flash Attention",
         seq_len: len(queries),
@@ -198,10 +198,10 @@ func benchmark_inference_methods(
 }
 
 func append_benchmark(
-    []inference_benchmark arr,
+    inference_benchmark[] arr,
     inference_benchmark val
-) []inference_benchmark {
-    []inference_benchmark new_arr = make([]inference_benchmark, len(arr) + 1)
+) inference_benchmark[] {
+    inference_benchmark[] new_arr = make(inference_benchmark[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]
@@ -215,7 +215,7 @@ struct batching_strategy {
     string strategy_name
     int batch_size
     int max_seq_len
-    []string attention_methods_per_layer
+    string[] attention_methods_per_layer
     bool enable_kv_reuse
     bool enable_prefix_sharing
 }
@@ -224,7 +224,7 @@ func create_adaptive_batching_strategy(
     int num_layers,
     int seq_len
 ) batching_strategy {
-    []string methods = make([]string, num_layers)
+    string[] methods = make(string[], num_layers)
     int i = 0
     for i < num_layers {
         if seq_len < 512 {

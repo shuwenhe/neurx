@@ -20,14 +20,14 @@ struct queue_stats {
 }
 
 struct request_queue {
-    []request_item items
+    request_item[] items
     int max_queue_size
     int timeout_ms
 }
 
 func create_request_queue(int max_size, int timeout_ms) request_queue {
     return request_queue{
-        items: []request_item{},
+        items: request_item[]{},
         max_queue_size: max_size,
         timeout_ms: timeout_ms,
     }
@@ -54,7 +54,7 @@ func dequeue_request(request_queue queue) request_item {
         }
     }
     item := queue.items[0]
-    new_items := []request_item{}
+    new_items := request_item[]{}
     for i := 1; i < len(queue.items); i++ {
         new_items = append(new_items, queue.items[i])
     }
@@ -89,7 +89,7 @@ func is_queue_full(request_queue queue) bool {
 }
 
 func clear_queue(request_queue queue) {
-    queue.items = []request_item{}
+    queue.items = request_item[]{}
 }
 
 func get_queue_stats(request_queue queue) queue_stats {
@@ -115,7 +115,7 @@ func prioritize_queue(request_queue queue) {
 }
 
 func remove_expired_requests(request_queue queue, float current_time_ms) {
-    new_items := []request_item{}
+    new_items := request_item[]{}
     for i := 0; i < len(queue.items); i++ {
         item := queue.items[i]
         elapsed := current_time_ms - item.timestamp_ms
@@ -160,14 +160,14 @@ func find_request_by_id(request_queue queue, string request_id) request_item {
     }
 }
 
-func batch_requests(request_queue queue, int batch_size) [][]request_item {
-    batches := [][]request_item{}
+func batch_requests(request_queue queue, int batch_size) request_item[][] {
+    batches := request_item[][]{}
     for i := 0; i < len(queue.items); i = i + batch_size {
         end := i + batch_size
         if end > len(queue.items) {
             end = len(queue.items)
         }
-        batch := []request_item{}
+        batch := request_item[]{}
         for j := i; j < end; j++ {
             batch = append(batch, queue.items[j])
         }

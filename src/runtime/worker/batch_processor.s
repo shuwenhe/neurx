@@ -2,7 +2,7 @@ import "types.s"
 struct BatchProcessor {
     max_batch_size      i32
     scheduling_policy   SchedulingPolicy
-    active_batches      []Batch
+    active_batches      Batch[]
     batch_count         i32
     completed_batches   i64
     failed_batches      i64
@@ -22,7 +22,7 @@ func NewBatchProcessor(max_size i32, policy SchedulingPolicy) *BatchProcessor {
     }
 }
 
-func (BatchProcessor* bp) CreateBatch(requests []RequestMetadata) Batch {
+func (BatchProcessor* bp) CreateBatch(requests RequestMetadata[]) Batch {
     batch_size := len(requests)
     if batch_size > bp.max_batch_size {
         batch_size = bp.max_batch_size
@@ -52,7 +52,7 @@ func (BatchProcessor* bp) CreateBatch(requests []RequestMetadata) Batch {
     return batch
 }
 
-func (BatchProcessor* bp) MergeBatches(batches []Batch) Batch {
+func (BatchProcessor* bp) MergeBatches(batches Batch[]) Batch {
     merged := Batch{
         batch_id: bp.batch_count,
         request_count: 0,
@@ -76,8 +76,8 @@ func (BatchProcessor* bp) MergeBatches(batches []Batch) Batch {
     return merged
 }
 
-func (BatchProcessor* bp) SplitBatch(batch Batch, split_size i32) []Batch {
-    result := make([]Batch, 0)
+func (BatchProcessor* bp) SplitBatch(batch Batch, split_size i32) Batch[] {
+    result := make(Batch[], 0)
     for i := i32(0); i < batch.request_count; i += split_size {
         end := i + split_size
         if end > batch.request_count {

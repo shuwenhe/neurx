@@ -136,13 +136,12 @@ func (otb_trainer* trainer) compute_advantages(
 }
 
 func (otb_trainer* trainer) train_step(
-    []tensor prompts,
-    []tensor responses,
-    []tensor rewards
+    tensor[] prompts,
+    tensor[] responses,
+    tensor[] rewards
 ) . (f32, f32, f32) {
     batch_size := len(prompts)
-    inputs := []
-    for i in 0..batch_size {
+    inputs := for[] i in 0..batch_size {
         inputs = append(inputs, concat(prompts[i], responses[i]))
     }
     total_policy_loss := 0.0
@@ -197,9 +196,8 @@ func (otb_trainer* trainer) train_step(
     )
 }
 
-func (otb_trainer* trainer) train(DataLoader train_data) . []f32 {
-    policy_losses := []
-    for batch in train_data {
+func (otb_trainer* trainer) train(DataLoader train_data) . f32[] {
+    policy_losses := for[] batch in train_data {
         policy_loss, baseline_loss, entropy  := trainer.train_step(
             batch.prompts,
             batch.responses,
@@ -241,7 +239,7 @@ func compute_variance_tensor(Tensor x) . f32 {
     return variance.item()
 }
 
-func compute_mean([]f32 values) . f32 {
+func compute_mean(f32[] values) . f32 {
     if len(values) == 0 {
         return 0.0
     }
@@ -252,7 +250,7 @@ func compute_mean([]f32 values) . f32 {
     return sum / f32(len(values))
 }
 
-func compute_variance([]f32 values, f32 mean) . f32 {
+func compute_variance(f32[] values, f32 mean) . f32 {
     if len(values) == 0 {
         return 0.0
     }

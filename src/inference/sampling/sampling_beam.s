@@ -1,5 +1,5 @@
 package neurx.inference.sampling
-func select_top_k_beams([]beam_state candidates, int k) []beam_state {
+func select_top_k_beams(beam_state[] candidates, int k) beam_state[] {
     if len(candidates) <= k {
         return candidates
     }
@@ -16,14 +16,13 @@ func select_top_k_beams([]beam_state candidates, int k) []beam_state {
             candidates[max_idx] = temp
         }
     }
-    []beam_state result = []
-    for i in 0..k {
+    beam_state[] result = for[] i in 0..k {
         result = append(result, candidates[i])
     }
     result
 }
 
-func find_best_beam([]beam_state finished) beam {
+func find_best_beam(beam_state[] finished) beam {
     if len(finished) == 0 {
         return beam { token_ids: [], score: -1e10, is_finished: true }
     }

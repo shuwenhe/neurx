@@ -20,7 +20,7 @@ struct xpu_context {
     int64 oneapi_handle
     int64 level_zero_handle
     int allocated_memory_bytes
-    []xpu_memory_allocation allocations
+    xpu_memory_allocation[] allocations
 }
 
 struct xpu_memory_allocation {
@@ -92,7 +92,7 @@ func xpu_get_memory_info(xpu_device device) [int, int] {
     [device.free_memory_bytes, device.total_memory_bytes]
 }
 
-func xpu_supported_compute_capabilities() []string {
+func xpu_supported_compute_capabilities() string[] {
     ["gen12", "dg1", "alchemist"]
 }
 

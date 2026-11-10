@@ -31,10 +31,9 @@ struct ParsedValue {
     string string_value
     float number_value
     bool bool_value
-    array_values: []ParsedValue
-    object_keys: []string
-    object_values: []ParsedValue
-    string raw_text
+    array_values: ParsedValue[]
+    object_keys: string[]
+    object_values: string[] ParsedValue raw_text
 }
 
 struct ParseResult {
@@ -49,7 +48,7 @@ struct ParseResult {
     string recovery_method
     int parse_time_ms
     float confidence
-    warnings: []string
+    warnings: string[]
     map[string]string metadata
 }
 
@@ -83,10 +82,10 @@ struct ParserConfig {
 }
 
 struct TokenBuffer {
-    tokens: []string
-    positions: []int
-    types: []int
-    confidence: []float
+    tokens: string[]
+    positions: int[]
+    types: int[]
+    confidence: float[]
     int buffer_size
 }
 
@@ -98,16 +97,16 @@ struct ParseContext {
     ParseConfig config
     IncrementalParseState state
     TokenBuffer token_buffer
-    scope_stack: []string
-    format_hints: []string
-    errors: []string
-    warnings: []string
+    scope_stack: string[]
+    format_hints: string[]
+    errors: string[]
+    warnings: string[]
 }
 
 struct FormatDetectionResult {
     int detected_format
     float confidence
-    indicators: []string
+    indicators: string[]
     map[string]string metadata
 }
 
@@ -145,7 +144,7 @@ func create_parse_result() ParseResult {
         recovery_method: "",
         parse_time_ms: 0,
         confidence: 0.0,
-        warnings: []string{},
+        warnings: string[]{},
         metadata: map[string]string{},
     }
 }
@@ -156,9 +155,9 @@ func create_null_value() ParsedValue {
         string_value: "",
         number_value: 0.0,
         bool_value: false,
-        array_values: []ParsedValue{},
-        object_keys: []string{},
-        object_values: []ParsedValue{},
+        array_values: ParsedValue[]{},
+        object_keys: string[]{},
+        object_values: ParsedValue[]{},
         raw_text: "null",
     }
 }
@@ -169,9 +168,9 @@ func create_string_value(string s) ParsedValue {
         string_value: s,
         number_value: 0.0,
         bool_value: false,
-        array_values: []ParsedValue{},
-        object_keys: []string{},
-        object_values: []ParsedValue{},
+        array_values: ParsedValue[]{},
+        object_keys: string[]{},
+        object_values: ParsedValue[]{},
         raw_text: "\"" + s + "\"",
     }
 }
@@ -189,9 +188,9 @@ func create_number_value(float n) ParsedValue {
         string_value: str_val,
         number_value: n,
         bool_value: false,
-        array_values: []ParsedValue{},
-        object_keys: []string{},
-        object_values: []ParsedValue{},
+        array_values: ParsedValue[]{},
+        object_keys: string[]{},
+        object_values: ParsedValue[]{},
         raw_text: str_val,
     }
 }
@@ -203,33 +202,33 @@ func create_bool_value(bool b) ParsedValue {
         string_value: str_val,
         number_value: 0.0,
         bool_value: b,
-        array_values: []ParsedValue{},
-        object_keys: []string{},
-        object_values: []ParsedValue{},
+        array_values: ParsedValue[]{},
+        object_keys: string[]{},
+        object_values: ParsedValue[]{},
         raw_text: str_val,
     }
 }
 
-func create_array_value([]ParsedValue items) ParsedValue {
+func create_array_value(ParsedValue[] items) ParsedValue {
     return ParsedValue{
         type: 4,
         string_value: "",
         number_value: 0.0,
         bool_value: false,
         array_values: items,
-        object_keys: []string{},
-        object_values: []ParsedValue{},
+        object_keys: string[]{},
+        object_values: ParsedValue[]{},
         raw_text: "[...]",
     }
 }
 
-func create_object_value([]string keys, []ParsedValue values) ParsedValue {
+func create_object_value(string[] keys, ParsedValue[] values) ParsedValue {
     return ParsedValue{
         type: 5,
         string_value: "",
         number_value: 0.0,
         bool_value: false,
-        array_values: []ParsedValue{},
+        array_values: ParsedValue[]{},
         object_keys: keys,
         object_values: values,
         raw_text: "{...}",
@@ -274,16 +273,16 @@ func create_parser_context(string input, ParseConfig config) ParseContext {
             last_token: "",
         },
         token_buffer: TokenBuffer{
-            tokens: []string{},
-            positions: []int{},
-            types: []int{},
-            confidence: []float{},
+            tokens: string[]{},
+            positions: int[]{},
+            types: int[]{},
+            confidence: float[]{},
             buffer_size: 0,
         },
-        scope_stack: []string{},
-        format_hints: []string{},
-        errors: []string{},
-        warnings: []string{},
+        scope_stack: string[]{},
+        format_hints: string[]{},
+        errors: string[]{},
+        warnings: string[]{},
     }
 }
 

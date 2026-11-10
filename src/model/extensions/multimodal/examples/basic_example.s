@@ -32,7 +32,7 @@ func main() {
     println("-" * 40)
     image_data := types.ImageData{
         id: "img_001",
-        raw_data: make([]i8, 224 * 224 * 3),
+        raw_data: make(i8[], 224 * 224 * 3),
         width: 224,
         height: 224,
         channels: 3,
@@ -42,7 +42,7 @@ func main() {
     image_data.metadata["source"] = "camera"
     image_data.metadata["timestamp"] = "2024-08-14T10:30:00"
     println(fmt("✓ Created image: %s (%dx%d)", image_data.id, image_data.width, image_data.height))
-    image_processor := image_processor.NewImageProcessor(224, 224, [3]f32{0.485, 0.456, 0.406}, [3]f32{0.229, 0.224, 0.225})
+    image_processor := image_processor.NewImageProcessor(224, 224, f32[3]{0.485, 0.456, 0.406}, f32[3]{0.229, 0.224, 0.225})
     processed_tensor := image_processor.Process(*image_data)
     println(fmt("✓ Processed image tensor shape: [%d, %d, %d]", processed_tensor.shape[0], processed_tensor.shape[1], processed_tensor.shape[2]))
     vision_encoder := vision_encoder.NewVisionEncoder("clip-vit", 768, 16, "cuda")
@@ -53,12 +53,12 @@ func main() {
     input := types.MultimodalInput{
         id: "input_001",
         text: "A red cat sitting on a mat",
-        images: []types.ImageData{image_data},
-        audios: make([]types.AudioData, 0),
-        videos: make([]types.VideoData, 0),
+        images: types.ImageData[]{image_data},
+        audios: make(types.AudioData[], 0),
+        videos: make(types.VideoData[], 0),
         depth: nil,
         timestamp: 1723618200000,
-        sequence_order: []i32{0}
+        sequence_order: i32[]{0}
     }
     println(fmt("✓ Created multimodal input: %s", input.id))
     println(fmt("  - Text: '%s'", input.text))

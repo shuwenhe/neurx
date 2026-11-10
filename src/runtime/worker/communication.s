@@ -1,6 +1,6 @@
 import "types.s"
 struct MessageQueue {
-    messages        []WorkerMessage
+    messages        WorkerMessage[]
     queue_size      i32
     max_size        i32
     send_count      i64
@@ -9,7 +9,7 @@ struct MessageQueue {
 
 struct CommunicationHandler {
     config              CommunicationConfig
-    message_queues      []MessageQueue
+    message_queues      MessageQueue[]
     queue_count         i32
     total_messages_sent i64
     total_messages_recv i64
@@ -82,7 +82,7 @@ func (CommunicationHandler* h) ReceiveMessage(worker_id i32) WorkerMessage {
     return msg
 }
 
-func (CommunicationHandler* h) BroadcastMessage(msg WorkerMessage, target_ids []i32) i32 {
+func (CommunicationHandler* h) BroadcastMessage(msg WorkerMessage, target_ids i32[]) i32 {
     success_count := i32(0)
     for i := 0; i < len(target_ids); i++ {
         target_id := target_ids[i]
@@ -110,7 +110,7 @@ func (CommunicationHandler* h) ReceiveAck(worker_id i32, message_id i64) i32 {
     return 0
 }
 
-func (CommunicationHandler* h) SyncBarrier(worker_ids []i32, timeout_ms i32) WorkerResult {
+func (CommunicationHandler* h) SyncBarrier(worker_ids i32[], timeout_ms i32) WorkerResult {
     barrier_id := get_barrier_id()
     ack_count := i32(0)
     target_count := len(worker_ids)
@@ -138,7 +138,7 @@ func (CommunicationHandler* h) SyncBarrier(worker_ids []i32, timeout_ms i32) Wor
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (CommunicationHandler* h) AllReduce(data []f32, worker_ids []i32) WorkerResult {
+func (CommunicationHandler* h) AllReduce(data f32[], worker_ids i32[]) WorkerResult {
     reduce_msg := WorkerMessage{
         message_id: get_message_id(),
         message_type: 2,
@@ -151,9 +151,9 @@ func (CommunicationHandler* h) AllReduce(data []f32, worker_ids []i32) WorkerRes
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (CommunicationHandler* h) AllGather(local_data []f32, worker_ids []i32) []f32 {
+func (CommunicationHandler* h) AllGather(local_data f32[], worker_ids i32[]) f32[] {
     total_size := len(local_data) * len(worker_ids)
-    gathered := make([]f32, total_size)
+    gathered := make(f32[], total_size)
     for i := 0; i < len(local_data); i++ {
         gathered[i] = local_data[i]
     }
@@ -189,7 +189,7 @@ func (CommunicationHandler* h) PurgeQueue(worker_id i32) WorkerResult {
             error_message: "Invalid worker ID",
         }
     }
-    h.message_queues[worker_id].messages = []WorkerMessage{}
+    h.message_queues[worker_id].messages = WorkerMessage[]{}
     h.message_queues[worker_id].queue_size = 0
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
@@ -201,7 +201,7 @@ func (CommunicationHandler* h) Shutdown() WorkerResult {
 
 struct SynchronizationManager {
     sync_state          SyncState
-    pending_syncs       []SyncState
+    pending_syncs       SyncState[]
     completed_syncs     i64
     failed_syncs        i64
 }
@@ -214,7 +214,7 @@ func NewSynchronizationManager() *SynchronizationManager {
 }
 
 func (SynchronizationManager* s) InitiateSync(source_worker i32,
-                                              target_workers []i32) WorkerResult {
+                                              target_workers i32[]) WorkerResult {
     sync := SyncState{
         sync_id: get_sync_id(),
         source_worker: source_worker,

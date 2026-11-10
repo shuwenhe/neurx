@@ -22,7 +22,7 @@ struct rocm_context {
     uint64 hipblas_handle
     uint64 miopen_handle
     int allocated_memory_bytes
-    []rocm_memory_allocation allocations
+    rocm_memory_allocation[] allocations
 }
 
 struct rocm_memory_allocation {

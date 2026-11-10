@@ -25,8 +25,8 @@ struct dentry {
 }
 
 struct vfs_state {
-    []inode  inodes
-    []dentry dentries
+    inode[]  inodes
+    dentry[] dentries
     int      next_ino
     int      next_dino
 }

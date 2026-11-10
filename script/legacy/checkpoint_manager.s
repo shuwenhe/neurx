@@ -23,13 +23,13 @@ struct checkpoint_metadata {
 struct checkpoint_manager {
     string checkpoint_dir
     int max_checkpoints
-    checkpoints: []checkpoint_metadata
+    checkpoints: checkpoint_metadata[]
 }
 
 func (checkpoint_manager* cm) init(string checkpoint_dir, int max_checkpoints) error {
     cm.checkpoint_dir = checkpoint_dir
     cm.max_checkpoints = max_checkpoints
-    cm.checkpoints = make([]checkpoint_metadata, 0)
+    cm.checkpoints = make(checkpoint_metadata[], 0)
     if err := os.MkdirAll(checkpoint_dir, 0755); err != nil {
         return err
     }
@@ -152,8 +152,8 @@ func (checkpoint_manager* cm) validate_checkpoint(
     return nil
 }
 
-func (checkpoint_manager* cm) list_checkpoints(): []map[string]interface{} {
-    result := make([]map[string]interface{}, len(cm.checkpoints))
+func (checkpoint_manager* cm) list_checkpoints(): (map[string]interface{})[] {
+    result := make((map[string]interface{})[], len(cm.checkpoints))
     for i, metadata := range cm.checkpoints {
         result[i] = map[string]interface{}{
             "step": metadata.step,
@@ -230,7 +230,7 @@ func (checkpoint_manager* cm) get_best_perplexity(): float {
     return best
 }
 
-func compute_hash([]byte data): string {
+func compute_hash(byte[] data): string {
     h := sha256.Sum256(data)
     return fmt.Sprintf("%x", h)
 }

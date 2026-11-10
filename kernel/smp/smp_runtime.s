@@ -43,7 +43,7 @@ struct smp_runtime {
     int[64] next_task
     int[64] timer_ticks
     bool[64] need_reschedule
-    [64]cpu_context context
+    cpu_context[64] context
     int context_switches
     int ipi_sent
     int ipi_received
@@ -64,7 +64,7 @@ func smp_runtime_create() smp_runtime {
         gdt_address: int[64]{}, tss_address: int[64]{},
         ipi_pending: int[64]{}, current_task: int[64]{}, next_task: int[64]{},
         timer_ticks: int[64]{}, need_reschedule: bool[64]{},
-        context: [64]cpu_context{}, context_switches: 0,
+        context: cpu_context[64]{}, context_switches: 0,
         ipi_sent: 0, ipi_received: 0
     }
     int cpu = 0

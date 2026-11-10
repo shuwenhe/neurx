@@ -8,25 +8,25 @@ import (
 }
 
 struct backward_pass_output {
-    []float grad_input_ids
-    []float grad_hidden_states
-    []float[] grad_layer_weights
-    []float grad_lm_head
-    []float grad_token_embedding
+    float[] grad_input_ids
+    float[] grad_hidden_states
+    float[][] grad_layer_weights
+    float[] grad_lm_head
+    float[] grad_token_embedding
 }
 
 struct gradient_accumulator {
-    []float grad_wq
-    []float grad_wk
-    []float grad_wv
-    []float grad_wo
-    []float grad_w_up
-    []float grad_w_down
-    []float grad_bias_terms
+    float[] grad_wq
+    float[] grad_wk
+    float[] grad_wv
+    float[] grad_wo
+    float[] grad_w_up
+    float[] grad_w_down
+    float[] grad_bias_terms
 }
 
-func allocate_vector(int size, float init_val) []float {
-    []float v = make([]float, size)
+func allocate_vector(int size, float init_val) float[] {
+    float[] v = make(float[], size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -35,8 +35,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector([]float src) []float {
-    []float out = allocate_vector(len(src), 0.0)
+func copy_vector(float[] src) float[] {
+    float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -45,8 +45,8 @@ func copy_vector([]float src) []float {
     out
 }
 
-func add_vectors([]float a, []float b) []float {
-    []float out = copy_vector(a)
+func add_vectors(float[] a, float[] b) float[] {
+    float[] out = copy_vector(a)
     int i = 0
     for i < len(out) {
         out[i] = out[i] + b[i]
@@ -55,8 +55,8 @@ func add_vectors([]float a, []float b) []float {
     out
 }
 
-func scale_vector([]float v, float scale) []float {
-    []float out = copy_vector(v)
+func scale_vector(float[] v, float scale) float[] {
+    float[] out = copy_vector(v)
     int i = 0
     for i < len(out) {
         out[i] = out[i] * scale
@@ -66,14 +66,14 @@ func scale_vector([]float v, float scale) []float {
 }
 
 func compute_cross_entropy_loss_with_gradient(
-    []float logits,
-    []int target_ids,
+    float[] logits,
+    int[] target_ids,
     int batch_size,
     int seq_len,
     int vocab_size
-) []float[] {
-    []float loss_vec = allocate_vector(batch_size * seq_len, 0.0)
-    []float grad_logits = allocate_vector(batch_size * seq_len * vocab_size, 0.0)
+) float[][] {
+    float[] loss_vec = allocate_vector(batch_size * seq_len, 0.0)
+    float[] grad_logits = allocate_vector(batch_size * seq_len * vocab_size, 0.0)
     float total_loss = 0.0
     int b = 0
     for b < batch_size {
@@ -128,23 +128,23 @@ func compute_cross_entropy_loss_with_gradient(
         }
         b = b + 1
     }
-    []float[] result = floatmake([][], 2)
+    float[][] result = make(float[][], 2)
     result[0] = loss_vec
     result[1] = grad_logits
     result
 }
 
 func lm_head_backward(
-    []float grad_logits,
-    []float hidden_states,
-    []float lm_head_weight,
+    float[] grad_logits,
+    float[] hidden_states,
+    float[] lm_head_weight,
     int batch_size,
     int seq_len,
     int hidden_dim,
     int vocab_size
-) []float[] {
-    []float grad_hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
-    []float grad_weight = allocate_vector(vocab_size * hidden_dim, 0.0)
+) float[][] {
+    float[] grad_hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    float[] grad_weight = allocate_vector(vocab_size * hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -175,31 +175,31 @@ func lm_head_backward(
         }
         b = b + 1
     }
-    []float[] result = floatmake([][], 2)
+    float[][] result = make(float[][], 2)
     result[0] = grad_hidden
     result[1] = grad_weight
     result
 }
 
 func feed_forward_backward(
-    []float grad_output,
-    []float hidden_states,
-    []float w_up,
-    []float w_down,
+    float[] grad_output,
+    float[] hidden_states,
+    float[] w_up,
+    float[] w_down,
     int batch_size,
     int seq_len,
     int hidden_dim,
     int intermediate_dim
-) []float[] {
-    []float grad_hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
-    []float grad_w_up = allocate_vector(intermediate_dim * hidden_dim, 0.0)
-    []float grad_w_down = allocate_vector(hidden_dim * intermediate_dim, 0.0)
+) float[][] {
+    float[] grad_hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    float[] grad_w_up = allocate_vector(intermediate_dim * hidden_dim, 0.0)
+    float[] grad_w_down = allocate_vector(hidden_dim * intermediate_dim, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
         for s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
-            []float grad_intermediate = allocate_vector(intermediate_dim, 0.0)
+            float[] grad_intermediate = allocate_vector(intermediate_dim, 0.0)
             int d = 0
             for d < hidden_dim {
                 int i = 0
@@ -239,7 +239,7 @@ func feed_forward_backward(
         }
         b = b + 1
     }
-    []float[] result = floatmake([][], 3)
+    float[][] result = make(float[][], 3)
     result[0] = grad_hidden
     result[1] = grad_w_up
     result[2] = grad_w_down
@@ -247,23 +247,23 @@ func feed_forward_backward(
 }
 
 func attention_backward(
-    []float grad_output,
-    []float hidden_states,
-    []float wq,
-    []float wk,
-    []float wv,
-    []float wo,
+    float[] grad_output,
+    float[] hidden_states,
+    float[] wq,
+    float[] wk,
+    float[] wv,
+    float[] wo,
     int batch_size,
     int seq_len,
     int hidden_dim,
     int num_heads,
     bool use_causal_mask
-) []float[] {
-    []float grad_hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
-    []float grad_wq = allocate_vector(hidden_dim * hidden_dim, 0.0)
-    []float grad_wk = allocate_vector(hidden_dim * hidden_dim, 0.0)
-    []float grad_wv = allocate_vector(hidden_dim * hidden_dim, 0.0)
-    []float grad_wo = allocate_vector(hidden_dim * hidden_dim, 0.0)
+) float[][] {
+    float[] grad_hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    float[] grad_wq = allocate_vector(hidden_dim * hidden_dim, 0.0)
+    float[] grad_wk = allocate_vector(hidden_dim * hidden_dim, 0.0)
+    float[] grad_wv = allocate_vector(hidden_dim * hidden_dim, 0.0)
+    float[] grad_wo = allocate_vector(hidden_dim * hidden_dim, 0.0)
     int head_dim = hidden_dim / num_heads
     int b = 0
     for b < batch_size {
@@ -298,7 +298,7 @@ func attention_backward(
         }
         b = b + 1
     }
-    []float[] result = floatmake([][], 5)
+    float[][] result = make(float[][], 5)
     result[0] = grad_hidden
     result[1] = grad_wq
     result[2] = grad_wk
@@ -308,25 +308,25 @@ func attention_backward(
 }
 
 func transformer_layer_backward(
-    []float grad_output,
-    []float hidden_states_in,
-    []float hidden_states_out,
+    float[] grad_output,
+    float[] hidden_states_in,
+    float[] hidden_states_out,
     layer_norm_state norm1,
     layer_norm_state norm2,
-    []float wq,
-    []float wk,
-    []float wv,
-    []float wo,
-    []float w_up,
-    []float w_down,
+    float[] wq,
+    float[] wk,
+    float[] wv,
+    float[] wo,
+    float[] w_up,
+    float[] w_down,
     int batch_size,
     int seq_len,
     int hidden_dim,
     int num_heads,
     int intermediate_dim,
     bool pre_norm
-) []float[] {
-    []float grad_input = copy_vector(grad_output)
+) float[][] {
+    float[] grad_input = copy_vector(grad_output)
     ffn_grads := feed_forward_backward(
         grad_output,
         hidden_states_out,
@@ -356,7 +356,7 @@ func transformer_layer_backward(
         false
     )
     grad_input = attn_grads[0]
-    []float[] result = floatmake([][], 10)
+    float[][] result = make(float[][], 10)
     result[0] = grad_input
     result[1] = attn_grads[1]
     result[2] = attn_grads[2]
@@ -371,10 +371,10 @@ func transformer_layer_backward(
 }
 
 func transformer_backward_pass(
-    []float loss_gradient,
-    []float[] layer_outputs,
-    []float token_embedding,
-    []float lm_head_weight,
+    float[] loss_gradient,
+    float[][] layer_outputs,
+    float[] token_embedding,
+    float[] lm_head_weight,
     int num_layers,
     int batch_size,
     int seq_len,
@@ -382,8 +382,8 @@ func transformer_backward_pass(
     int num_heads,
     int vocab_size
 ) backward_pass_output {
-    []float grad_hidden = copy_vector(loss_gradient)
-    []float[] grad_layer_weights = floatmake([][], num_layers)
+    float[] grad_hidden = copy_vector(loss_gradient)
+    float[][] grad_layer_weights = make(float[][], num_layers)
     lm_grads := lm_head_backward(
         grad_hidden,
         layer_outputs[num_layers - 1],
@@ -394,7 +394,7 @@ func transformer_backward_pass(
         vocab_size
     )
     grad_hidden = copy_vector(lm_grads[0])
-    []float grad_lm_head = copy_vector(lm_grads[1])
+    float[] grad_lm_head = copy_vector(lm_grads[1])
     int layer_idx = num_layers - 1
     for layer_idx >= 0 {
         grad_layer_weights[layer_idx] = grad_hidden

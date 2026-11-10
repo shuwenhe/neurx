@@ -1,5 +1,5 @@
 struct fusion_info {
-    kernel_ids: []i64
+    kernel_ids: i64[]
     string fused_kernel_name
     f64 expected_speedup
 }
@@ -8,8 +8,8 @@ struct kernel_launch_info {
     i64 kernel_id
     string kernel_name
     device device
-    grid_size: []i64
-    block_size: []i64
+    grid_size: i64[]
+    block_size: i64[]
     i64 shared_memory
     stream stream
 }
@@ -24,17 +24,16 @@ struct memory_allocation_plan {
 
 struct execution_plan {
     i64 id
-    kernel_launches: []kernel_launch_info
-    memory_plan: []memory_allocation_plan
-    fusion_groups: []fusion_info
-    i64 total_memory
+    kernel_launches: kernel_launch_info[]
+    memory_plan: memory_allocation_plan[]
+    fusion_groups: i64[] fusion_info total_memory
     i64 estimated_time_us
 }
 interface i_execution_plan {
     plan_id() . i64
-    kernel_launches() . []kernel_launch_info
-    memory_plan() . []memory_allocation_plan
-    fusion_groups() . []fusion_info
+    kernel_launches() . kernel_launch_info[]
+    memory_plan() . memory_allocation_plan[]
+    fusion_groups() . fusion_info[]
     total_memory() . i64
     estimated_time() . i64
 }
@@ -45,7 +44,7 @@ interface i_execution_planner {
     estimate_time(plan: execution_plan) . i64
 }
 interface i_fusion_optimizer {
-    find_fusion_groups(plan: execution_plan) . []fusion_info
+    find_fusion_groups(plan: execution_plan) . fusion_info[]
     apply_fusion(plan: execution_plan, fusion: fusion_info) . execution_plan
     can_fuse(k1: kernel_launch_info, k2: kernel_launch_info) . bool
 }
@@ -61,6 +60,6 @@ interface icuda_graph_builder {
     can_reuse_graph(plan: execution_plan) . bool
 }
 interface i_dynamic_shape_handler {
-    update_plan_for_shapes(plan: execution_plan, shapes: [][]i64) . execution_plan
-    is_compatible(plan: execution_plan, shapes: [][]i64) . bool
+    update_plan_for_shapes(plan: execution_plan, shapes: i64[][]) . execution_plan
+    is_compatible(plan: execution_plan, shapes: i64[][]) . bool
 }

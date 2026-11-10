@@ -14,7 +14,7 @@ func remove_line_comments(string line) string {
 
 func remove_comments(string content) string {
 	lines := strings.split(content, "\n")
-	result := []string{}
+	result := string[]{}
 	in_multiline := false
 	for i := 0; i < len(lines); i += 1 {
 		line := lines[i]
@@ -44,7 +44,7 @@ func remove_comments(string content) string {
 
 func remove_extra_blank_lines(string content) string {
 	lines := strings.split(content, "\n")
-	result := []string{}
+	result := string[]{}
 	blank_count := 0
 	for i := 0; i < len(lines); i += 1 {
 		line := lines[i]
@@ -64,7 +64,7 @@ func remove_extra_blank_lines(string content) string {
 
 func ensure_spacing(string content) string {
 	lines := strings.split(content, "\n")
-	result := []string{}
+	result := string[]{}
 	for i := 0; i < len(lines); i += 1 {
 		line := lines[i]
 		result = result + [line]

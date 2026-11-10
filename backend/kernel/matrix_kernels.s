@@ -29,12 +29,12 @@ func (MatrixKernels* k) GEMM(
     n: i32,
     kk: i32,
     alpha: f32,
-    A: []f32,
+    A: f32[],
     lda: i32,
-    B: []f32,
+    B: f32[],
     ldb: i32,
     beta: f32,
-    C: *[]f32,
+    C: *f32[],
     i32 ldc
 ) types.KernelResult {
 
@@ -87,10 +87,10 @@ func (MatrixKernels* k) BatchGEMM(
     n: i32,
     kk: i32,
     alpha: f32,
-    A_batch: [][]f32,
-    B_batch: [][]f32,
+    A_batch: f32[][],
+    B_batch: f32[][],
     beta: f32,
-    C_batch: *[][]f32
+    C_batch: *f32[][]
 ) types.KernelResult {
 
     for batch := i32(0); batch < batch_size; batch += 1 {
@@ -114,8 +114,8 @@ func (MatrixKernels* k) BatchGEMM(
 func (MatrixKernels* k) Transpose(
     m: i32,
     n: i32,
-    A: []f32,
-    B: *[]f32
+    A: f32[],
+    B: *f32[]
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -155,10 +155,10 @@ func (MatrixKernels* k) Add(
     m: i32,
     n: i32,
     alpha: f32,
-    A: []f32,
+    A: f32[],
     beta: f32,
-    B: []f32,
-    C: *[]f32
+    B: f32[],
+    C: *f32[]
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -194,7 +194,7 @@ func (MatrixKernels* k) Scale(
     m: i32,
     n: i32,
     alpha: f32,
-    A: *[]f32
+    A: *f32[]
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -229,10 +229,10 @@ func (MatrixKernels* k) GEMV(
     m: i32,
     n: i32,
     alpha: f32,
-    A: []f32,
-    x: []f32,
+    A: f32[],
+    x: f32[],
     beta: f32,
-    y: *[]f32
+    y: *f32[]
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -273,9 +273,9 @@ func (MatrixKernels* k) OuterProduct(
     m: i32,
     n: i32,
     alpha: f32,
-    x: []f32,
-    y: []f32,
-    A: *[]f32
+    x: f32[],
+    y: f32[],
+    A: *f32[]
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {

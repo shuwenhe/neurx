@@ -22,8 +22,8 @@ struct worker {
 }
 
 struct cpu_state {
-    []cpu_info cpus
-    []worker   workers
+    cpu_info[] cpus
+    worker[]   workers
     int        next_worker_id
 }
 

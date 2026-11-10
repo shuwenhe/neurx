@@ -76,9 +76,9 @@ func get_microbatch_id_in_model_chunk(
     return group_idx * group_size + microbatch_id_in_group
 }
 
-func build_interleaved_schedule(interleaved_config config) []schedule_op {
+func build_interleaved_schedule(interleaved_config config) schedule_op[] {
     interleaved_plan plan = compute_warmup_microbatches(config)
-    []schedule_op ops = make([]schedule_op, 0)
+    schedule_op[] ops = make(schedule_op[], 0)
     for int k = 0; k < plan.num_warmup_microbatches; k = k + 1 {
         int chunk_id = get_model_chunk_id(config, k, true)
         int mb_id = get_microbatch_id_in_model_chunk(config, k)

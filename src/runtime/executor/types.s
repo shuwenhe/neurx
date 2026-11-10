@@ -62,7 +62,7 @@ struct ExecutionIteration {
     start_time      i64
     end_time        i64
     duration_ms     i32
-    sequence_ids    []string
+    sequence_ids    string[]
     sequence_count  i32
     total_tokens    i32
     output_tokens   i32
@@ -96,7 +96,7 @@ struct KVCacheManager {
     total_size_gb   f64
     allocated_mb    i32
     free_mb         i32
-    blocks          []KVCacheBlock
+    blocks          KVCacheBlock[]
     block_count     i32
     eviction_policy i32
     max_blocks      i32
@@ -155,13 +155,13 @@ struct DistributedConfig {
 
 struct IterationSchedule {
     iteration_id    i64
-    prefill_batch   []string
+    prefill_batch   string[]
     prefill_count   i32
-    decode_batch    []string
+    decode_batch    string[]
     decode_count    i32
-    mixed_batch     []string
+    mixed_batch     string[]
     mixed_count     i32
-    priority_order  []i32
+    priority_order  i32[]
 }
 
 struct ExecutorMetrics {
@@ -179,7 +179,7 @@ struct ExecutorMetrics {
 
 struct AttentionMask {
     sequence_id     string
-    mask_data       []u8
+    mask_data       u8[]
     mask_size       i32
     is_causal       i32
     enable_prefix   i32

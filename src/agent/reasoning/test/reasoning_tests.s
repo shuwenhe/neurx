@@ -16,12 +16,12 @@ struct test_result {
 }
 
 struct test_logger {
-    []test_result results
+    test_result[] results
 }
 
 func new_test_logger() test_logger {
     test_logger {
-        results: []test_result{},
+        results: test_result[]{},
     }
 }
 
@@ -167,7 +167,7 @@ func test_confidence_calculation(test_logger logger) test_result {
     config := new_default_cot_config()
     chain := new_reasoning_chain("conf_test", "Test", config)
     chain = chain.start()
-    confidences := []float{0.9, 0.8, 0.95}
+    confidences := float[]{0.9, 0.8, 0.95}
     for i := 0; i < len(confidences); i = i + 1 {
         step := new_reasoning_step(i+1, i+1, step_type.analysis)
         step = step.complete("Reasoning", "Result", confidences[i])

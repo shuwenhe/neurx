@@ -46,9 +46,9 @@ struct sk_buff {
 }
 
 struct net_state {
-    []net_socket sockets
-    []sk_buff    recv_queue
-    []sk_buff    send_queue
+    net_socket[] sockets
+    sk_buff[]    recv_queue
+    sk_buff[]    send_queue
     int          next_sock_id
     int          next_pkt_id
 }
@@ -134,8 +134,7 @@ func net_recv(ns net_state, int sock_id) (net_state, sk_buff, bool) {
     for i < len(ns.recv_queue) {
         if ns.recv_queue[i].sock_id == sock_id {
             sk_buff pkt = ns.recv_queue[i]
-            []sk_buff remaining = []
-            int j = 0
+            sk_buff[] remaining = int[] j = 0
             for j < len(ns.recv_queue) {
                 if j != i {
                     remaining = append(remaining, ns.recv_queue[j])

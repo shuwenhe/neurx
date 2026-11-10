@@ -27,7 +27,7 @@ struct benchmark_report {
     int num_steps
     int batch_size
     int seq_length
-    []benchmark_metrics phases
+    benchmark_metrics[] phases
     int64 total_time_ms
     float avg_tokens_per_sec
     string notes
@@ -286,7 +286,7 @@ func main() void {
     report.num_steps = num_steps
     report.batch_size = batch_size
     report.seq_length = seq_length
-    report.phases = []benchmark_metrics{data_metric, model_metric, forward_metric, backward_metric, optimizer_metric}
+    report.phases = benchmark_metrics[]{data_metric, model_metric, forward_metric, backward_metric, optimizer_metric}
     report.total_time_ms = total_time
     report.avg_tokens_per_sec = avg_throughput
     report.notes = "Benchmark completed successfully"

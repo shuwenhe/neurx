@@ -34,7 +34,7 @@ struct latency_stats {
 }
 
 struct training_performance_state {
-    []performance_metric metrics
+    performance_metric[] metrics
     gpu_memory_stats gpu_memory
     throughput_stats throughput
     latency_stats latency
@@ -45,7 +45,7 @@ struct training_performance_state {
 
 func new_performance_monitor() training_performance_state {
     training_performance_state {
-        metrics: make([]performance_metric, 10000),
+        metrics: make(performance_metric[], 10000),
         gpu_memory: gpu_memory_stats{
             allocated_gb: 0.0,
             reserved_gb: 0.0,
@@ -80,7 +80,7 @@ func perf_record_metric(training_performance_state state, string metric_name, fl
         unit: unit,
         timestamp: 0,
     }
-    state.metrics += []performance_metric{metric}
+    state.metrics += performance_metric[]{metric}
     state
 }
 
@@ -161,19 +161,19 @@ func perf_generate_report(training_performance_state state) string {
     report
 }
 
-func perf_get_metric_history(training_performance_state state, string metric_name) []float {
-    []float history = make([]float, len(state.metrics))
+func perf_get_metric_history(training_performance_state state, string metric_name) float[] {
+    float[] history = make(float[], len(state.metrics))
     for i in range(len(state.metrics)) {
         performance_metric m = state.metrics[i]
         if m.metric_name == metric_name {
-            history += []float{m.value}
+            history += float[]{m.value}
         }
     }
     history
 }
 
 func perf_get_metric_stats(training_performance_state state, string metric_name) (float, float, float) {
-    []float values = perf_get_metric_history(state, metric_name)
+    float[] values = perf_get_metric_history(state, metric_name)
     if len(values) == 0 {
         return 0.0, 0.0, 0.0
     }

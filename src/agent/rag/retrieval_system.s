@@ -125,8 +125,7 @@ struct in_memory_vector_db implements vector_db_interface {
         this.last_updated = current_timestamp()
     }
     search(query_embedding: tensor, int top_k) {
-        results: list<search_result_item> = []
-        for chunk_id, doc_emb in this.embeddings {
+        results: list<search_result_item> = for[] chunk_id, doc_emb in this.embeddings {
             score := compute_similarity(query_embedding, doc_emb, this.config.metric)
             if score >= this.config.similarity_threshold {
                 results.append(search_result_item{
@@ -233,8 +232,7 @@ struct faiss_vector_db implements vector_db_interface {
     }
     insert(chunks: list<document_chunk>) {
         if chunks.length == 0 { return }
-        valid_chunks: list<(document_chunk, tensor)> = []
-        for chunk in chunks {
+        valid_chunks: list<(document_chunk, tensor)> = for[] chunk in chunks {
             if chunk.embedding != null {
                 valid_chunks.append((chunk, chunk.embedding!))
             }
@@ -276,8 +274,7 @@ struct faiss_vector_db implements vector_db_interface {
         k_actual = min(top_k * 2, this.index.ntotal)
         if k_actual == 0 { return [] }
         distances, indices = this.index.search(query_embedding, k_actual)
-        results: list<search_result_item> = []
-        for i in range(distances.shape[1]) {
+        results: list<search_result_item> = for[] i in range(distances.shape[1]) {
             int_id = indices[0][i]
             if int_id < 0 || int_id not in this.id_to_chunk { continue }
             score = distances[0][i]
@@ -368,12 +365,9 @@ struct embedding_service {
             this.model.to(device="cuda")
     }
     embed(texts: list<string>) {
-        embeddings: list<tensor> = []
-        for batch_start in range(0, texts.length, this.config.embedding_batch_size) {
+        embeddings: list<tensor> = for[] batch_start in range(0, texts.length, this.config.embedding_batch_size) {
             batch_texts = texts[batch_start : batch_start + this.config.embedding_batch_size]
-            uncached_texts: list<string> = []
-            uncached_indices: list<int> = []
-            cached_results: map<int, tensor> = {}
+            uncached_texts: list<string> = uncached_indices[]: list<int> = cached_results[]: map<int, tensor> = {}
             for i, text in enumerate(batch_texts) {
                 cache_key = text[:200]
                 if cache_key in this.cache {
@@ -422,8 +416,7 @@ struct embedding_service {
         embeddings = sum_embeddings / sum_mask
         if this.config.normalize_embeddings {
             embeddings = l2_normalize(embeddings, p=2, dim=1)
-        result: list<tensor> = []
-        for i in range(embeddings.shape[0]):
+        result: list<tensor> = for[] i in range(embeddings.shape[0]):
             result.append(embeddings[i].detach().cpu())
         return result
     }
@@ -467,8 +460,7 @@ struct document_processor {
     }
     process_document(string content, metadata: document_metadata) {
         raw_chunks = this.splitter.split_text(content)
-        chunks: list<document_chunk> = []
-        for i, chunk_text in enumerate(raw_chunks) {
+        chunks: list<document_chunk> = for[] i, chunk_text in enumerate(raw_chunks) {
             chunks.append(document_chunk{
                 id=generate_uuid(),
                 content=chunk_text,
@@ -480,8 +472,7 @@ struct document_processor {
         return chunks
     }
     process_documents(documents: list<{string content, metadata: document_metadata}>) {
-        all_chunks: list<document_chunk> = []
-        for doc in documents {
+        all_chunks: list<document_chunk> = for[] doc in documents {
             chunks := this.process_document(doc.content, doc.metadata)
             all_chunks.extend(chunks)
         }
@@ -511,8 +502,7 @@ struct recursive_character_text_splitter {
             return this._split_by_length(text)
         }
         parts = text.split(separator)
-        chunks: list<string> = []
-        current_chunk = ""
+        chunks: list<string> = current_chunk[] = ""
         for part in parts {
             new_text = current_chunk + (current_chunk.empty()  "" : separator) + part
             if new_text.length > this.chunk_size {
@@ -534,8 +524,7 @@ struct recursive_character_text_splitter {
         return chunks
     }
     _split_by_length(string text) {
-        chunks: list<string> = []
-        start = 0
+        chunks: list<string> = start[] = 0
         for start < text.length {
             end = start + this.chunk_size
             chunks.append(text[start:end])
@@ -596,8 +585,7 @@ Expanded queries:
             "example": ["English text", "English text", "English text", "example"],
             "compare": ["English text", "English text", "English text", "English text"]
         }
-        expanded: list<string> = []
-        words = query.split_whitespace()
+        expanded: list<string> = words[] = query.split_whitespace()
         for word in words {
             lower_word = word.lower()
             if lower_word in synonyms_map {
@@ -627,11 +615,8 @@ struct b_m_25_retriever {
     k1: float = 1.5
     b: float = 0.75
     init() {
-        this.corpus = []
-        this.doc_ids = []
-        this.df = map<string, int>{}
-        this.tf = []
-        this.avg_doc_len = 0.0
+        this.corpus = this.doc_ids[] = this.df[] = map<string, int>{}
+        this.tf = this.avg_doc_len[] = 0.0
     }
     build_index(documents: list<document_chunk>) {
         this.doc_ids = [doc.id for doc in documents]
@@ -655,14 +640,12 @@ struct b_m_25_retriever {
     }
     search(string query, int top_k) {
         query_tokens = this._tokenize(query.lower())
-        scores: list<tuple<int, float>> = []
-        for doc_idx in range(this.corpus.length) {
+        scores: list<tuple<int, float>> = for[] doc_idx in range(this.corpus.length) {
             score = this._score_bm25(query_tokens, doc_idx)
             scores.append((doc_idx, score))
         }
         scores.sort_by_descending(s => s[1])
-        results: list<bm25_result> = []
-        for doc_idx, score in scores[:top_k] {
+        results: list<bm25_result> = for[] doc_idx, score in scores[:top_k] {
             if score > 0 {
                 results.append(bm25_result{
                     chunk_id=this.doc_ids[doc_idx],
@@ -713,8 +696,7 @@ struct cross_encoder_reranker {
     }
     rerank(string query, candidates: list<document_chunk>, int top_k) {
         if candidates.length == 0 { return [] }
-        pairs: list<tuple<string, string>> = []
-        for candidate in candidates {
+        pairs: list<tuple<string, string>> = for[] candidate in candidates {
             pairs.append((query, candidate.content))
         }
         features = this.tokenizer(
@@ -728,13 +710,11 @@ struct cross_encoder_reranker {
             scores = this.model(**features).logits.squeeze(-1)
         if scores.ndim == 2 && scores.shape[1] == 2:
             scores = softmax(scores, dim=-1)[:, 1]
-        scored_candidates: list<tuple<document_chunk, float>> = []
-        for i, candidate in enumerate(candidates) {
+        scored_candidates: list<tuple<document_chunk, float>> = for[] i, candidate in enumerate(candidates) {
             scored_candidates.append((candidate, float(scores[i])))
         }
         scored_candidates.sort_by_descending(x => x[1])
-        results: list<reranked_result> = []
-        for candidate, score in scored_candidates[:top_k] {
+        results: list<reranked_result> = for[] candidate, score in scored_candidates[:top_k] {
             results.append(reranked_result{
                 chunk=candidate,
                 rerank_score=score
@@ -789,8 +769,7 @@ struct hybrid_fusion_engine {
             rrf_score = 1.0 / (k_constant + rank + 1)
             scores[br.chunk_id] = scores.get(br.chunk_id, 0.0) + rrf_score * this.keyword_weight
         sorted_scores = list(scores.items()).sort_by_descending(x => x[1])
-        results: list<fused_result> = []
-        for chunk_id, score in sorted_scores[:top_k] {
+        results: list<fused_result> = for[] chunk_id, score in sorted_scores[:top_k] {
             results.append(fused_result{chunk_id=chunk_id, fused_score=score})
         }
         return results
@@ -826,8 +805,7 @@ struct hybrid_fusion_engine {
             combined[chunk_id] = v_s + k_s
         }
         sorted_combined = list(combined.items()).sort_by_descending(x => x[1])
-        results: list<fused_result> = []
-        for chunk_id, score in sorted_combined[:top_k] {
+        results: list<fused_result> = for[] chunk_id, score in sorted_combined[:top_k] {
             results.append(fused_result{chunk_id=chunk_id, fused_score=score})
         }
         return results
@@ -927,16 +905,14 @@ struct retrieval_engine {
         query_embedding = this.embedding_service.embed_single(query)
         vec_results = this.vector_db.search(query_embedding, effective_top_k * 2)
         vec_time = current_time_millis() - vec_start
-        bm25_results: list<bm25_result> = []
-        bm25_time = 0.0
+        bm25_results: list<bm25_result> = bm25_time[] = 0.0
         if this.bm25_retriever != null && this.config.enable_hybrid_search {
             bm25_start = current_time_millis()
             bm25_results = this.bm25_retriever!.search(query, effective_top_k * 2)
             bm25_time = current_time_millis() - bm25_start
         }
         fuse_start = current_time_millis()
-        fused_results: list<fused_result> = []
-        if bm25_results.length > 0 && vec_results.length > 0 {
+        fused_results: list<fused_result> = if bm25_results.length > 0 && vec_results.length > 0 {
             fused_results = this.fusion_engine.fuse(vec_results, bm25_results, effective_top_k)
         } else if vec_results.length > 0 {
             fused_results = [fused_result{chunk_id=v.chunk_id, fused_score=v.score} for v in vec_results[:effective_top_k]]
@@ -944,12 +920,9 @@ struct retrieval_engine {
             fused_results = [fused_result{chunk_id=b.chunk_id, fused_score=b.score} for b in bm25_results[:effective_top_k]]
         }
         fuse_time = current_time_millis() - fuse_start
-        final_chunks: list<document_chunk> = []
-        final_scores: list<float> = []
-        rerank_time = 0.0
+        final_chunks: list<document_chunk> = final_scores[]: list<float> = rerank_time[] = 0.0
         if this.reranker != null && this.config.enable_reranking && fused_results.length > 0 {
-            candidates: list<document_chunk> = []
-            for fr in fused_results {
+            candidates: list<document_chunk> = for[] fr in fused_results {
                 if fr.chunk_id in this.documents_store {
                     candidates.append(this.documents_store[fr.chunk_id])
                 }
@@ -989,8 +962,7 @@ struct retrieval_engine {
     }
     generate_context_for_llm(search_result: search_result, max_tokens: int) {
         effective_max_tokens = max_tokens  this.config.max_context_tokens
-        context_parts: list<string> = []
-        total_tokens = 0
+        context_parts: list<string> = total_tokens[] = 0
         for i, chunk in enumerate(search_result.chunks) {
             if total_tokens + chunk.token_count > effective_max_tokens {
                 break

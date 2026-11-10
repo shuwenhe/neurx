@@ -5,26 +5,26 @@ struct safetensors_metadata {
 
 struct tensor_info {
     string dtype
-    []int shape
+    int[] shape
     int offset_start
     int offset_end
 }
 
 struct safetensors_header {
-    []string tensor_names
-    []tensor_info tensor_infos
+    string[] tensor_names
+    tensor_info[] tensor_infos
     safetensors_metadata metadata
 }
 
 struct weight_tensor {
     string name
     string dtype
-    []int shape
+    int[] shape
     int size_bytes
 }
 
 struct weight_dict {
-    []weight_tensor tensors
+    weight_tensor[] tensors
     int total_size_bytes
 }
 
@@ -70,9 +70,9 @@ func map_layer_name_to_neurx(string hf_name) string {
 }
 
 func convert_weight_names_huggingface_to_neurx(
-    hf_names: []string
-) []string {
-    []string neurx_names
+    hf_names: string[]
+) string[] {
+    string[] neurx_names
     for hf_name in hf_names {
         neurx_name := map_layer_name_to_neurx(hf_name)
         neurx_names.append(neurx_name)
@@ -96,7 +96,7 @@ func dtype_size_bytes(string dtype) int {
     4
 }
 
-func calculate_tensor_size([]int shape, string dtype) int {
+func calculate_tensor_size(int[] shape, string dtype) int {
     int size = 1
     for dim in shape {
         size = size * dim
@@ -113,9 +113,9 @@ func load_safetensors_metadata(string file_path) weight_dict {
 
 func extract_weights_from_safetensors(
     file_path: string,
-    layer_patterns: []string
-) []weight_tensor {
-    []weight_tensor extracted
+    layer_patterns: string[]
+) weight_tensor[] {
+    weight_tensor[] extracted
     weight_dict dict = load_safetensors_metadata(file_path)
     for tensor in dict.tensors {
         for pattern in layer_patterns {
@@ -130,8 +130,8 @@ func extract_weights_from_safetensors(
 
 struct weight_validation_result {
     bool is_valid
-    []string errors
-    []string warnings
+    string[] errors
+    string[] warnings
 }
 
 func validate_weight_compatibility(
@@ -139,8 +139,8 @@ func validate_weight_compatibility(
     weight_dict: weight_dict,
     string target_model_type
 ) weight_validation_result {
-    []string errors
-    []string warnings
+    string[] errors
+    string[] warnings
     if len(weight_dict.tensors) == 0 {
         errors.append("No tensors found in weight file")
     }

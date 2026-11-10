@@ -1,18 +1,18 @@
 package neurx.data.loader
 struct batch {
-    input_ids [][]i64
-    labels []i64
-    attention_mask [][]i64
+    input_ids i64[][]
+    labels i64[]
+    attention_mask i64[][]
 }
 
 struct data_loader {
-    data []batch
+    data batch[]
     batch_size i64
     shuffle bool
     current_idx i64
 }
 
-func data_loader_new(data []batch, i64 batch_size, bool shuffle) data_loader {
+func data_loader_new(data batch[], i64 batch_size, bool shuffle) data_loader {
     return data_loader{
         data: data,
         batch_size: batch_size,
@@ -21,16 +21,16 @@ func data_loader_new(data []batch, i64 batch_size, bool shuffle) data_loader {
     }
 }
 
-func create_synthetic_dataset(i64 num_samples, i64 seq_len, i64 vocab_size, i64 num_classes) []batch {
-    batches := make([]batch, 0)
+func create_synthetic_dataset(i64 num_samples, i64 seq_len, i64 vocab_size, i64 num_classes) batch[] {
+    batches := make(batch[], 0)
     for b := 0; b < num_samples; b++ {
         batch_item := batch{
-            input_ids: make([][]i64, 1),
-            labels: make([]i64, 1),
-            attention_mask: make([][]i64, 1),
+            input_ids: make(i64[][], 1),
+            labels: make(i64[], 1),
+            attention_mask: make(i64[][], 1),
         }
-        batch_item.input_ids[0] = make([]i64, seq_len)
-        batch_item.attention_mask[0] = make([]i64, seq_len)
+        batch_item.input_ids[0] = make(i64[], seq_len)
+        batch_item.attention_mask[0] = make(i64[], seq_len)
         for i := 0; i < seq_len; i++ {
             batch_item.input_ids[0][i] = i64(simple_random() % int(vocab_size))
             batch_item.attention_mask[0][i] = 1
@@ -100,11 +100,11 @@ func batch_iterator_step(it batch_iterator) batch_iterator {
 
 struct random_sampler {
     data_size i64
-    indices []i64
+    indices i64[]
 }
 
 func random_sampler_new(i64 data_size) random_sampler {
-    indices := make([]i64, data_size)
+    indices := make(i64[], data_size)
     for i := 0; i < data_size; i++ {
         indices[i] = i64(i)
     }
@@ -114,14 +114,14 @@ func random_sampler_new(i64 data_size) random_sampler {
     }
 }
 
-func collate_fn(batches []batch) batch {
+func collate_fn(batches batch[]) batch {
     if len(batches) == 0 {
         return batch{}
     }
     combined := batch{
-        input_ids: make([][]i64, 0),
-        labels: make([]i64, 0),
-        attention_mask: make([][]i64, 0),
+        input_ids: make(i64[][], 0),
+        labels: make(i64[], 0),
+        attention_mask: make(i64[][], 0),
     }
     for i := 0; i < len(batches); i++ {
         for j := 0; j < len(batches[i].input_ids); j++ {
@@ -137,11 +137,11 @@ struct distributed_sampler {
     data_size i64
     rank i64
     world_size i64
-    indices []i64
+    indices i64[]
 }
 
 func distributed_sampler_new(i64 data_size, i64 rank, i64 world_size) distributed_sampler {
-    indices := make([]i64, 0)
+    indices := make(i64[], 0)
     samples_per_rank := data_size / world_size
     for i := 0; i < samples_per_rank; i++ {
         sample_idx := rank + i64(i)*world_size

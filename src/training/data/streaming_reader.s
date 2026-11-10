@@ -45,7 +45,7 @@ struct data_chunk {
     int64 start_byte_offset
     int64 end_byte_offset
     int64 size_bytes
-    []byte raw_data
+    byte[] raw_data
     bool is_loaded
     bool is_mmap_mapped
     int access_count
@@ -55,11 +55,11 @@ struct data_chunk {
 struct streaming_reader_state {
     file_metadata meta
     stream_reader_config config
-    []data_chunk chunks
+    data_chunk[] chunks
     int num_chunks
     int current_chunk_idx
     int max_loaded_chunks
-    []int loaded_chunk_indices
+    int[] loaded_chunk_indices
     int64 current_byte_pos
     int current_line_in_chunk
     int total_lines_processed
@@ -99,7 +99,7 @@ func analyze_file_metadata(string filepath, stream_reader_config config) file_me
     meta.file_size_bytes = get_file_size(filepath)
     meta.file_size_gb = meta.file_size_bytes / (1024 * 1024 * 1024)
     if meta.file_size_bytes > 0:
-        []byte header = read_file_header(filepath, 8192)
+        byte[] header = read_file_header(filepath, 8192)
         (meta.encoding, meta.has_bom) = detect_encoding(header, config.default_encoding)
         if meta.file_size_bytes > 10 * 1024 * 1024:
             (meta.line_count, meta.quality_score) = sample_file_quality(filepath, meta.file_size_bytes)
@@ -129,7 +129,7 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
     if num_chunks == 0:
         num_chunks = 1
     reader.num_chunks = num_chunks
-    reader.chunks = make([]data_chunk, num_chunks)
+    reader.chunks = make(data_chunk[], num_chunks)
     int64 current_offset = 0
     int c = 0
     for c < num_chunks {
@@ -151,7 +151,7 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
         reader.chunks[c] = chunk
         current_offset = end_offset
         c = c + 1
-    reader.loaded_chunk_indices = make([]int, reader.max_loaded_chunks)
+    reader.loaded_chunk_indices = make(int[], reader.max_loaded_chunks)
     return reader
 struct line_read_result {
     string line_content
@@ -249,13 +249,13 @@ func unload_chunk(streaming_reader_state reader, int chunk_idx) streaming_reader
     if chunk.is_mmap_mapped:
         unmap_region(chunk.raw_data)
     else:
-        chunk.raw_data = make([]byte, 0)
+        chunk.raw_data = make(byte[], 0)
     chunk.is_loaded = false
     reader.chunks[chunk_idx] = chunk
     remove_from_lru(reader.loaded_chunk_indices, chunk_idx)
     return reader
 struct batch_read_result {
-    []string lines
+    string[] lines
     int count
     bool end_of_file
     streaming_reader_state updated_reader
@@ -265,7 +265,7 @@ func read_batch_of_lines(
     streaming_reader_state reader,
     int batch_size
 ) batch_read_result {
-    []string batch_lines = make([]string, batch_size)
+    string[] batch_lines = make(string[], batch_size)
     int count = 0
     bool eof = false
     for count < batch_size and !eof {
@@ -336,10 +336,10 @@ func get_progress(streaming_reader_state reader) reader_progress {
 
 func get_file_size(string path) int64:
     return 0
-func read_file_header(string path, int num_bytes) []byte:
-    return make([]byte, 0)
+func read_file_header(string path, int num_bytes) byte[]:
+    return make(byte[], 0)
 
-func detect_encoding([]byte header, string default_enc) (string, bool):
+func detect_encoding(byte[] header, string default_enc) (string, bool):
     return default_enc, false
 func sample_file_quality(string path, int64 size) (int, float):
     return 0, 0.0
@@ -353,19 +353,19 @@ func extract_line_from_chunk(data_chunk chunk, int line_index) (string, bool, bo
     return "", false, false
 func get_line_byte_offset(data_chunk chunk, int line_index) int64:
     return 0
-func mmap_region(string path, int64 offset, int64 size) []byte:
-    return make([]byte, 0)
+func mmap_region(string path, int64 offset, int64 size) byte[]:
+    return make(byte[], 0)
 
-func unmap_region([]byte mapped_data) void:
+func unmap_region(byte[] mapped_data) void:
     return
-func read_file_range(string path, int64 offset, int64 size) []byte:
-    return make([]byte, 0)
+func read_file_range(string path, int64 offset, int64 size) byte[]:
+    return make(byte[], 0)
 
-func move_to_front_of_lru([]int lru_list, int item) void:
+func move_to_front_of_lru(int[] lru_list, int item) void:
     return
-func insert_at_front_of_lru([]int lru_list, int item) void:
+func insert_at_front_of_lru(int[] lru_list, int item) void:
     return
-func remove_from_lru([]int lru_list, int item) void:
+func remove_from_lru(int[] lru_list, int item) void:
     return
 func get_current_time_ms() int:
     return 0

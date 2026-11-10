@@ -51,7 +51,7 @@ func (FeatureFusion* f) FuseConcatenation(
             total_dim += embedding.shape[1]
         }
     }
-    fused := make([]f32, seq_len * total_dim)
+    fused := make(f32[], seq_len * total_dim)
     col_idx := 0
     for modality, embedding := range embeddings {
         emb_dim := embedding.shape[1]
@@ -64,7 +64,7 @@ func (FeatureFusion* f) FuseConcatenation(
     }
     return *types.Tensor{
         data: fused,
-        shape: [2]i32{seq_len, total_dim},
+        shape: i32[2]{seq_len, total_dim},
         dtype: "float32"
     }
 }
@@ -76,7 +76,7 @@ func (FeatureFusion* f) FuseAddition(
     count := i32(0)
     for modality, embedding := range embeddings {
         if fused == nil {
-            fused_data := make([]f32, len(embedding.data))
+            fused_data := make(f32[], len(embedding.data))
             for i := 0; i < len(embedding.data); i += 1 {
                 fused_data[i] = embedding.data[i]
             }
@@ -113,9 +113,9 @@ func (FeatureFusion* f) FuseAttention(
     }
     seq_len := query_tensor.shape[0]
     output_dim := f.hidden_dim
-    output := make([]f32, seq_len * output_dim)
+    output := make(f32[], seq_len * output_dim)
     for seq := 0; seq < seq_len; seq += 1 {
-        total_context := make([]f32, output_dim)
+        total_context := make(f32[], output_dim)
         var total_weight f32 = 0.0
         for modality, embedding := range embeddings {
             if modality == query_modality {
@@ -140,7 +140,7 @@ func (FeatureFusion* f) FuseAttention(
     }
     return *types.Tensor{
         data: output,
-        shape: [2]i32{seq_len, output_dim},
+        shape: i32[2]{seq_len, output_dim},
         dtype: "float32"
     }
 }
@@ -154,7 +154,7 @@ func (FeatureFusion* f) FuseGating(
     }
     seq_len := concat.shape[0]
     total_dim := concat.shape[1]
-    output := make([]f32, seq_len * f.hidden_dim)
+    output := make(f32[], seq_len * f.hidden_dim)
     modality_count := i32(len(embeddings))
     for seq := 0; seq < seq_len; seq += 1 {
         for dim := 0; dim < f.hidden_dim; dim += 1 {
@@ -171,7 +171,7 @@ func (FeatureFusion* f) FuseGating(
     }
     return *types.Tensor{
         data: output,
-        shape: [2]i32{seq_len, f.hidden_dim},
+        shape: i32[2]{seq_len, f.hidden_dim},
         dtype: "float32"
     }
 }
@@ -182,7 +182,7 @@ func (FeatureFusion* f) ApplyLayerNorm(
 ) *types.Tensor {
     seq_len := tensor.shape[0]
     feature_dim := tensor.shape[1]
-    normalized := make([]f32, len(tensor.data))
+    normalized := make(f32[], len(tensor.data))
     for seq := 0; seq < seq_len; seq += 1 {
         mean := f32(0.0)
         variance := f32(0.0)

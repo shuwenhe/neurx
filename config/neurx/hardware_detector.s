@@ -44,7 +44,7 @@ struct cpu_properties {
     int32 l2_cache_size
     int32 l3_cache_size
     cpu_arch architecture
-    []string features
+    string[] features
 }
 
 struct memory_info {
@@ -72,8 +72,8 @@ struct hardware_info {
 struct detection_result {
     bool success
     hardware_info* hw_info
-    []string warnings
-    []string errors
+    string[] warnings
+    string[] errors
     int64 detection_time_ms
 }
 
@@ -112,8 +112,8 @@ func (hardware_detector_impl* d) detect() (detection_result*) {
     result := *detection_result{
         success: false,
         hw_info: nil,
-        warnings: []string{},
-        errors: []string{},
+        warnings: string[]{},
+        errors: string[]{},
         detection_time_ms: 0,
     }
 
@@ -136,7 +136,7 @@ func (hardware_detector_impl* d) detect() (detection_result*) {
         cpu_props: nil,
         mem_info: memory_info{},
         num_devices: 0,
-        visible_device_ids: []int32{},
+        visible_device_ids: int32[]{},
         pytorch_version: "2.0+",
         cuda_available: device == device_type.cuda,
         rocm_available: device == device_type.rocm,
@@ -203,7 +203,7 @@ func (hardware_detector_impl* d) detect_cpu_properties() (cpu_properties*) {
         l2_cache_size: 256 * 1024,
         l3_cache_size: 16 * 1024 * 1024,
         architecture: cpu_arch.x86,
-        features: []string{"sse", "sse2", "avx", "avx2"},
+        features: string[]{"sse", "sse2", "avx", "avx2"},
     }
     return props
 }

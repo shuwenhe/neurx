@@ -7,13 +7,13 @@ struct structured_field_rule {
     string field_name
     string value_type
     bool required
-    []string enum_values
+    string[] enum_values
 }
 
 struct structured_schema {
     string schema_name
     int root_type
-    []structured_field_rule fields
+    structured_field_rule[] fields
     bool allow_additional_fields
 }
 
@@ -289,7 +289,7 @@ func structured_read_string(string text, int start) string {
     ""
 }
 
-func structured_enum_contains([]string values, string value) bool {
+func structured_enum_contains(string[] values, string value) bool {
     int i = 0
     for i < len(values) {
         if values[i] == value {

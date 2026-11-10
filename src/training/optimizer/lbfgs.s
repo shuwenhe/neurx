@@ -10,11 +10,11 @@ struct lbfgs_optimizer {
     float tolerance_grad
     float tolerance_change
     int step
-    []float prev_flat_grad
-    []float[] old_dirs
-    []float[] old_stps
-    []float rho
-    []float prev_params
+    float[] prev_flat_grad
+    float[][] old_dirs
+    float[][] old_stps
+    float[] rho
+    float[] prev_params
 }
 
 func new_lbfgs(
@@ -42,7 +42,7 @@ func new_lbfgs(
 func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_optimizer_step_output {
     int n = len(params.data)
     optimizer.step = optimizer.step + 1
-    []float flat_grad = copy_float_array(grads.data, n)
+    float[] flat_grad = copy_float_array(grads.data, n)
     float grad_max = lbfgs_abs_max(flat_grad, n)
     if grad_max <= optimizer.tolerance_grad {
         return lbfgs_optimizer_step_output {
@@ -50,7 +50,7 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
             params: params,
         }
     }
-    []float direction = make([]float, n)
+    float[] direction = make(float[], n)
     if optimizer.step == 1 {
         int i = 0
         for i < n {
@@ -58,8 +58,8 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
             i = i + 1
         }
     } else {
-        []float y = make([]float, n)
-        []float s = make([]float, n)
+        float[] y = make(float[], n)
+        float[] s = make(float[], n)
         int i = 0
         for i < n {
             y[i] = flat_grad[i] - optimizer.prev_flat_grad[i]
@@ -81,7 +81,7 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
         float h_diag = ys / yy
         direction = two_loop_recursion(optimizer, flat_grad, h_diag, n)
     }
-    []float out = make([]float, n)
+    float[] out = make(float[], n)
     int i = 0
     for i < n {
         out[i] = params.data[i] + optimizer.lr * direction[i]
@@ -97,18 +97,18 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
 
 func two_loop_recursion(
     lbfgs_optimizer optimizer,
-    []float flat_grad,
+    float[] flat_grad,
     float h_diag,
     int n
-) []float {
+) float[] {
     int num_old = len(optimizer.old_dirs)
-    []float q = make([]float, n)
+    float[] q = make(float[], n)
     int i = 0
     for i < n {
         q[i] = 0.0 - flat_grad[i]
         i = i + 1
     }
-    []float alpha = make([]float, num_old)
+    float[] alpha = make(float[], num_old)
     int j = 0
     for j < num_old {
         alpha[j] = 0.0
@@ -148,8 +148,8 @@ struct lbfgs_optimizer_step_output {
     tensor params
 }
 
-func copy_float_array([]float src, int n) []float {
-    []float out = make([]float, n)
+func copy_float_array(float[] src, int n) float[] {
+    float[] out = make(float[], n)
     int i = 0
     for i < n {
         out[i] = src[i]
@@ -158,7 +158,7 @@ func copy_float_array([]float src, int n) []float {
     out
 }
 
-func lbfgs_dot([]float a, []float b, int n) float {
+func lbfgs_dot(float[] a, float[] b, int n) float {
     float sum = 0.0
     int i = 0
     for i < n {
@@ -168,7 +168,7 @@ func lbfgs_dot([]float a, []float b, int n) float {
     sum
 }
 
-func lbfgs_abs_max([]float values, int n) float {
+func lbfgs_abs_max(float[] values, int n) float {
     float max_val = 0.0
     int i = 0
     for i < n {
@@ -184,8 +184,8 @@ func lbfgs_abs_max([]float values, int n) float {
     max_val
 }
 
-func pop_front_2d([]float[] arr) []float[] {
-    []float[] out = floatmake([][], len(arr) - 1)
+func pop_front_2d(float[][] arr) float[][] {
+    float[][] out = make(float[][], len(arr) - 1)
     int i = 1
     for i < len(arr) {
         out[i - 1] = arr[i]
@@ -194,8 +194,8 @@ func pop_front_2d([]float[] arr) []float[] {
     out
 }
 
-func pop_front_1d([]float arr) []float {
-    []float out = make([]float, len(arr) - 1)
+func pop_front_1d(float[] arr) float[] {
+    float[] out = make(float[], len(arr) - 1)
     int i = 1
     for i < len(arr) {
         out[i - 1] = arr[i]

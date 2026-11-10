@@ -54,17 +54,17 @@ struct tokenizer_interface {
 	map[int32]string reverse_vocab
 	map[string]int32 special_tokens_map
 	bool cache_enabled
-	map[string][]int32 cache
+	map[string]int32[] cache
 	int32 cache_size
 	int32 max_cache_size
 }
 
 struct encode_result {
-	[]int32 tokens
-	[][2]int32 offsets
-	[]int32 special_tokens_mask
-	[]int32 attention_mask
-	[]int32 token_type_ids
+	int32[] tokens
+	int32[2][] offsets
+	int32[] special_tokens_mask
+	int32[] attention_mask
+	int32[] token_type_ids
 	int64 encode_time_ms
 }
 
@@ -108,7 +108,7 @@ func create_tokenizer(tokenizer_id string, model_id string, tokenizer_type token
 		reverse_vocab: make(map[int32]string),
 		special_tokens_map: make(map[string]int32),
 		cache_enabled: true,
-		cache: make(map[string][]int32),
+		cache: make(map[string]int32[]),
 		max_cache_size: 10000,
 	}
 }
@@ -140,8 +140,8 @@ func (tokenizer_interface* t) encode(text string) *encode_result {
 	}
 	t.mu.Unlock()
 	start_time := time.Now()
-	tokens := []int32{}
-	words := []rune(text)
+	tokens := int32[]{}
+	words := rune[](text)
 	for _, ch := range words {
 		token_str := string(ch)
 		if token_id, exists := t.vocab[token_str]; exists {
@@ -166,7 +166,7 @@ func (tokenizer_interface* t) encode(text string) *encode_result {
 	}
 }
 
-func (tokenizer_interface* t) decode(tokens []int32) *decode_result {
+func (tokenizer_interface* t) decode(tokens int32[]) *decode_result {
 	start_time := time.Now()
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -242,7 +242,7 @@ func (tokenizer_interface* t) get_stats() *tokenizer_stats {
 func (tokenizer_interface* t) clear_cache() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	t.cache = make(map[string][]int32)
+	t.cache = make(map[string]int32[])
 	t.cache_size = 0
 }
 
@@ -251,7 +251,7 @@ func (tokenizer_interface* t) enable_cache(enabled bool) {
 	defer t.mu.Unlock()
 	t.cache_enabled = enabled
 	if !enabled {
-		t.cache = make(map[string][]int32)
+		t.cache = make(map[string]int32[])
 		t.cache_size = 0
 	}
 }

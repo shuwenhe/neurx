@@ -258,7 +258,7 @@ func int_to_string(int n) string {
     return result
 }
 
-func vec_new() []string {
+func vec_new() string[] {
     v := vec_new()
     return v
 }

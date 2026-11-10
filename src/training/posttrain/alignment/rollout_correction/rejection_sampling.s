@@ -153,9 +153,8 @@ func compute_rejection_sampling(
     Tensor old_log_probs,
     RolloutCorrectionConfig config,
     Tensor response_mask
-) . []rs_result {
-    results := []
-    if len(config.rs_modes) == 0 {
+) . rs_result[] {
+    results := if len(config.rs_modes) == 0 {
         return results
     }
     reference_log_probs := Tensor()
@@ -193,7 +192,7 @@ func compute_rejection_sampling(
     return results
 }
 
-func combine_rejection_results([]rs_result results) . RSResult {
+func combine_rejection_results(rs_result[] results) . RSResult {
     if len(results) == 0 {
         return rs_result{
             rejection_mask: tensor_zeros([1, 1]).to_bool(),
@@ -236,7 +235,7 @@ func apply_rejection_to_mask(
     return response_mask * (1.0 - rejection_result.rejection_mask.to_float())
 }
 
-func compute_rs_statistics([]rs_result results) . map[string]f32 {
+func compute_rs_statistics(rs_result[] results) . map[string]f32 {
     stats := map[string]f32{}
     for i in len(0..results) {
         prefix := f"rs_mode_{i}"

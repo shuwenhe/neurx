@@ -29,7 +29,7 @@ struct experiment_config {
     description         string
     model_name          string
     dataset_name        string
-    hyperparameters     []hyper_parameter
+    hyperparameters     hyper_parameter[]
     start_time          int64
     end_time            int64
     status              string
@@ -37,7 +37,7 @@ struct experiment_config {
 
 struct experiment_result {
     config              experiment_config
-    metrics_history     []experiment_metrics
+    metrics_history     experiment_metrics[]
     best_checkpoint     string
     best_loss           float64
     best_perplexity     float64
@@ -46,7 +46,7 @@ struct experiment_result {
 }
 
 struct experiment_comparison {
-    experiment_ids      []string
+    experiment_ids      string[]
     metric_name         string
     results             map[string]float64
     winner              string
@@ -56,7 +56,7 @@ struct experiment_comparison {
 struct experiment_manager {
     experiments         map[string]experiment_result
     current_experiment  string
-    comparison_history  []experiment_comparison
+    comparison_history  experiment_comparison[]
     best_experiment     string
 }
 
@@ -86,7 +86,7 @@ func (experiment_manager* manager) create_experiment(
         description:     description,
         model_name:      model_name,
         dataset_name:    dataset_name,
-        hyperparameters: make([]hyper_parameter, 0),
+        hyperparameters: make(hyper_parameter[], 0),
         start_time:      1719842400,
         end_time:        0,
         status:          "created",
@@ -172,7 +172,7 @@ func (experiment_manager* manager) get_metrics_summary(experiment_id string) {
 }
 
 func (experiment_manager* manager) compare_experiments(
-    exp_ids []string,
+    exp_ids string[],
     metric string) experiment_comparison {
     fmt.Printf("\n[Comparison] Comparing %d experiments on metric: %s\n", len(exp_ids), metric)
     comparison := experiment_comparison{
@@ -285,7 +285,7 @@ func new_experiment_manager() *experiment_manager {
     return *experiment_manager{
         experiments:        make(map[string]experiment_result),
         current_experiment: "",
-        comparison_history: make([]experiment_comparison, 0),
+        comparison_history: make(experiment_comparison[], 0),
         best_experiment:    "",
     }
 }
@@ -295,7 +295,7 @@ func (experiment_manager* manager) run_complete_experiment_cycle() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Creating and Running Experiments      │")
     fmt.Println("└────────────────────────────────────────┘")
-    experiments := []struct {
+    experiments := struct[] {
         id    string
         name  string
         lr    string
@@ -315,7 +315,7 @@ func (experiment_manager* manager) run_complete_experiment_cycle() {
         )
         result := experiment_result{
             config:          config,
-            metrics_history: make([]experiment_metrics, 0),
+            metrics_history: make(experiment_metrics[], 0),
             best_loss:       math.MaxFloat64,
             best_perplexity: math.MaxFloat64,
         }
@@ -351,7 +351,7 @@ func (experiment_manager* manager) run_complete_experiment_cycle() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Comparing Experiments                 │")
     fmt.Println("└────────────────────────────────────────┘")
-    exp_ids := []string{"exp-001", "exp-002", "exp-003"}
+    exp_ids := string[]{"exp-001", "exp-002", "exp-003"}
     comparison := manager.compare_experiments(exp_ids, "perplexity")
     manager.comparison_history = append(manager.comparison_history, comparison)
     manager.get_experiment_history()

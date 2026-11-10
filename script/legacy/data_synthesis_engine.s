@@ -10,7 +10,7 @@ struct data_synthesis_config {
     num_preference_pairs    int
     quality_threshold       float64
     diversity_weight        float64
-    task_types              []string
+    task_types              string[]
 }
 
 struct synthetic_example {
@@ -36,8 +36,8 @@ struct preference_pair {
 
 struct data_synthesis_engine {
     config                  data_synthesis_config
-    synthetic_examples      []synthetic_example
-    preference_pairs        []preference_pair
+    synthetic_examples      synthetic_example[]
+    preference_pairs        preference_pair[]
     task_distribution       map[string]int
     quality_stats           synthesis_quality_stats
 }
@@ -52,7 +52,7 @@ struct synthesis_quality_stats {
 
 func (data_synthesis_engine* engine) generate_synthetic_examples() {
     fmt.Println("[DataSynthesis] Generating synthetic examples...")
-    tasks := []string{"qa", "writing", "coding", "math", "reasoning", "translation"}
+    tasks := string[]{"qa", "writing", "coding", "math", "reasoning", "translation"}
     for i := 0; i < engine.config.num_synthetic_samples; i++ {
         task_idx := i % len(tasks)
         task := tasks[task_idx]
@@ -83,7 +83,7 @@ func (data_synthesis_engine* engine) generate_synthetic_examples() {
 }
 
 func (data_synthesis_engine* engine) generate_prompt(task string, int index) string {
-    prompts := map[string][]string{
+    prompts := map[string]string[]{
         "qa": {
             "What is the capital of France",
             "Explain quantum computing in simple terms",
@@ -259,8 +259,8 @@ func (data_synthesis_engine* engine) export_to_jsonl() {
 func new_data_synthesis_engine(config data_synthesis_config) *data_synthesis_engine {
     return *data_synthesis_engine{
         config: config,
-        synthetic_examples: []synthetic_example{},
-        preference_pairs: []preference_pair{},
+        synthetic_examples: synthetic_example[]{},
+        preference_pairs: preference_pair[]{},
         task_distribution: make(map[string]int),
         quality_stats: synthesis_quality_stats{},
     }

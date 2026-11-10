@@ -23,7 +23,7 @@ struct cuda_context {
     uint64 cublas_handle
     uint64 cudnn_handle
     int allocated_memory_bytes
-    []memory_allocation allocations
+    memory_allocation[] allocations
 }
 
 struct memory_allocation {

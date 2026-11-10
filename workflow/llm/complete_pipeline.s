@@ -18,8 +18,8 @@ struct ir_module {
     string name
     string version
     i32 optimization_level
-    instructions: []string
-    data_section: []string
+    instructions: string[]
+    data_section: string[]
 }
 
 func compile_neurx_code(compile_config config) (bool, ir_module) {
@@ -58,8 +58,8 @@ func compile_neurx_code(compile_config config) (bool, ir_module) {
     ir.name = "train_forward_backward"
     ir.version = "1.0"
     ir.optimization_level = config.optimization_level
-    ir.instructions = []string{}
-    ir.data_section = []string{}
+    ir.instructions = string[]{}
+    ir.data_section = string[]{}
     ir.instructions = append(ir.instructions, "module_init()")
     ir.instructions = append(ir.instructions, "alloc_tensor([32, 256], FP32)")
     ir.instructions = append(ir.instructions, "load_weights(embedding_table)")
@@ -77,8 +77,8 @@ func compile_neurx_code(compile_config config) (bool, ir_module) {
 }
 
 struct tensor_2 {
-    data: []f64
-    shape: []i32
+    data: f64[]
+    shape: i32[]
     string dtype
     string device
 }
@@ -96,26 +96,26 @@ func bundle_training_data(i32 batch_size, i32 seq_len, i32 vocab_size) data_bund
     println("╚════════════════════════════════════════════════════════╝")
     println("")
     println("📦 Preparing Training Data:")
-    input_data := []f64{}
+    input_data := f64[]{}
     for i := 0; i < batch_size * seq_len; i = i + 1 {
         input_data = append(input_data, f64((i * 7 + 13) % vocab_size))
     }
     input_tensor := tensor_2
     input_tensor.data = input_data
-    input_tensor.shape = []i32{batch_size, seq_len}
+    input_tensor.shape = i32[]{batch_size, seq_len}
     input_tensor.dtype = "INT32"
     input_tensor.device = "CUDA"
     println("   Input Shape: [" + strings.from_i32(batch_size) + ", " + strings.from_i32(seq_len) + "]")
     println("   Input Size: " + strings.format_size(i64(len(input_data)) * 4) + " bytes")
     println("   Input Device: GPU (CUDA)")
     println("")
-    target_data := []f64{}
+    target_data := f64[]{}
     for i := 0; i < batch_size * seq_len; i = i + 1 {
         target_data = append(target_data, f64(((i + 1) * 7 + 13) % vocab_size))
     }
     target_tensor := tensor_2
     target_tensor.data = target_data
-    target_tensor.shape = []i32{batch_size, seq_len}
+    target_tensor.shape = i32[]{batch_size, seq_len}
     target_tensor.dtype = "INT32"
     target_tensor.device = "CUDA"
     println("   Target Shape: [" + strings.from_i32(batch_size) + ", " + strings.from_i32(seq_len) + "]")
@@ -169,10 +169,10 @@ func init_runner(model_config config, data_bundle batch, f64 learning_rate) runn
                        config.num_layers * config.hidden_dim * config.num_heads +
                        config.num_layers * config.ffn_dim * config.hidden_dim
     model_params := tensor_2
-    model_params.shape = []i32{total_params}
+    model_params.shape = i32[]{total_params}
     model_params.dtype = "FP32"
     model_params.device = "CUDA"
-    model_params.data = []f64{}
+    model_params.data = f64[]{}
     println("📊 model Parameters:")
     println("   Total Params: " + strings.format_large_number(i64(total_params)))
     println("   Parameter Memory: " + strings.format_size(i64(total_params) * 4) + " MB")
@@ -182,13 +182,13 @@ func init_runner(model_config config, data_bundle batch, f64 learning_rate) runn
     m_tensor.shape = model_params.shape
     m_tensor.dtype = "FP32"
     m_tensor.device = "CUDA"
-    m_tensor.data = []f64{}
+    m_tensor.data = f64[]{}
     optimizer_state["m"] = m_tensor
     v_tensor := tensor_2
     v_tensor.shape = model_params.shape
     v_tensor.dtype = "FP32"
     v_tensor.device = "CUDA"
-    v_tensor.data = []f64{}
+    v_tensor.data = f64[]{}
     optimizer_state["v"] = v_tensor
     println("⚙️ optimizer_2 State (adam_w):")
     println("   m (momentum): " + strings.format_size(i64(total_params) * 4) + " MB")
@@ -213,7 +213,7 @@ func init_runner(model_config config, data_bundle batch, f64 learning_rate) runn
 
 struct forward_output {
     tensor_2 logits
-    hidden_states: []tensor_2
+    hidden_states: tensor_2[]
     map[string]tensor_2 cache
 }
 
@@ -248,10 +248,10 @@ func forward_pass(runner runner) (forward_output, f64) {
     println("")
     output := forward_output
     logits := tensor_2
-    logits.shape = []i32{runner.batch.input_tensor.shape[0], runner.batch.input_tensor.shape[1], runner.config.vocab_size}
+    logits.shape = i32[]{runner.batch.input_tensor.shape[0], runner.batch.input_tensor.shape[1], runner.config.vocab_size}
     logits.dtype = "FP32"
     logits.device = "CUDA"
-    logits.data = []f64{}
+    logits.data = f64[]{}
     for i := 0; i < 32 * 2048 * 32000; i = i + 1 {
         logits.data = append(logits.data, math.sin(f64(i) / 1000.0))
     }

@@ -17,8 +17,8 @@ struct response_metrics {
     string response_quality
 }
 
-func create_test_queries() []test_query {
-    []test_query queries = make([]test_query, 5)
+func create_test_queries() test_query[] {
+    test_query[] queries = make(test_query[], 5)
     queries[0] = test_query{
         question: "What are the symptoms of diabetes",
         expected_topic: "diabetes symptoms"
@@ -119,7 +119,7 @@ func verify_inference_changes() string {
     output = output + "\n════════════════════════════════════════════\n"
     output = output + "  Inference Output Verification\n"
     output = output + "════════════════════════════════════════════\n\n"
-    []test_query queries = create_test_queries()
+    test_query[] queries = create_test_queries()
     i32 queries_len = len(queries)
     i32 improved_count = 0
     for i := 0; i < queries_len; i = i + 1 {

@@ -17,9 +17,9 @@ struct vlm_config {
 
 struct multimodal_input {
     tensor image
-    []int text_tokens
-    []int attention_mask
-    []int image_positions
+    int[] text_tokens
+    int[] attention_mask
+    int[] image_positions
 }
 
 struct vlm_output {
@@ -64,7 +64,7 @@ func encode_image(
 func fuse_vision_text_features(
     tensor vision_features,
     tensor text_embeddings,
-    []int image_positions,
+    int[] image_positions,
     int seq_len
 ) tensor {
     int batch_size = text_embeddings.shape[0]
@@ -126,15 +126,15 @@ func vlm_forward(
 func vlm_grpo_step(
     module policy,
     module reference_policy,
-    []multimodal_input inputs,
-    []int[] actions,
-    []tensor rewards,
+    multimodal_input[] inputs,
+    int[][] actions,
+    tensor[] rewards,
     int group_size,
     float kl_coef
 ) tensor {
     int batch_size = inputs.len
-    []vlm_output outputs = make([]vlm_output, batch_size)
-    []vlm_output ref_outputs = make([]vlm_output, batch_size)
+    vlm_output[] outputs = make(vlm_output[], batch_size)
+    vlm_output[] ref_outputs = make(vlm_output[], batch_size)
     int i = 0
     for i < batch_size {
         outputs[i] = policy.forward_vlm(inputs[i])
@@ -143,7 +143,7 @@ func vlm_grpo_step(
         }
         i = i + 1
     }
-    []tensor baselines = make([]tensor, batch_size)
+    tensor[] baselines = make(tensor[], batch_size)
     i = 0
     for i < batch_size {
         int group_idx = i / group_size
@@ -160,7 +160,7 @@ func vlm_grpo_step(
         baselines[i] = tensor_ops.div_scalar(sum, count * 1.0)
         i = i + 1
     }
-    []tensor advantages = make([]tensor, batch_size)
+    tensor[] advantages = make(tensor[], batch_size)
     i = 0
     for i < batch_size {
         advantages[i] = tensor_ops.sub(rewards[i], baselines[i])

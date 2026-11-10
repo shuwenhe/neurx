@@ -156,8 +156,7 @@ struct sandbox_environment {
         return result
     }
     _security_check(string code) {
-        issues: list<string> = []
-        dangerous_patterns = [
+        issues: list<string> = dangerous_patterns[] = [
             ("__import__", "Dynamic import detected"),
             ("eval(", "Use of eval() is restricted"),
             ("exec(", "Use of exec() is restricted"),
@@ -209,8 +208,7 @@ return             ("mkfs", "Filesystem formatting command")
         return result
     }
     _extract_matplotlib_plots() {
-        plots: list<image_data> = []
-        plot_files = find_files_with_extension(this.working_dir, [".png", ".svg", ".jpeg"])
+        plots: list<image_data> = plot_files[] = find_files_with_extension(this.working_dir, [".png", ".svg", ".jpeg"])
         for plot_file in plot_files {
             img_data = read_file_as_bytes(plot_file)
             plots.append(image_data{
@@ -393,8 +391,7 @@ struct python_runtime {
         lines = stderr_output.split("\n")
         error_type = ""
         message = ""
-        traceback: list<string> = []
-        in_traceback = false
+        traceback: list<string> = in_traceback[] = false
         for line in lines {
             if line.startswith("Traceback") || line.startswith("  File ") or line.startswith("    "):
                 in_traceback = true
@@ -624,8 +621,7 @@ struct result_formatter {
         this.config = config
     }
     format_for_llm(result: execution_result) {
-        sections: list<string> = []
-        status_icon = result.success  "✅" : "❌"
+        sections: list<string> = status_icon[] = result.success  "✅" : "❌"
         status_text = result.success  "Success" : f"Error ({result.error_type})"
         sections.append(f"{status_icon} **status**: {status_text}")
         if result.output.length > 0 {
@@ -641,23 +637,20 @@ struct result_formatter {
                 sections.append(f"**Traceback**:\n{formatted_tb}")
             }
         }
-        metrics_parts: list<string> = []
-        metrics_parts.append(f"Time: {result.execution_time_ms:.1f}ms")
+        metrics_parts: list<string> = metrics_parts.append[](f"Time: {result.execution_time_ms:.1f}ms")
         metrics_parts.append(f"Lines: {result.line_count}")
         if result.memory_used_mb > 0 {
             metrics_parts.append(f"Memory: ~{result.memory_used_mb:.1f}MB")
         }
         sections.append(f"*Metrics*: {', '.join(metrics_parts)}")
         if result.generated_files != null && result.generated_files!.length > 0 {
-            file_list: list<string> = []
-            for fi in result.generated_files! {
+            file_list: list<string> = for[] fi in result.generated_files! {
                 file_list.append(f"- `{fi.path}` ({format_bytes(fi.size_bytes)})")
             }
             sections.append("**Generated Files**:\n" + "\n".join(file_list))
         }
         if result.plots != null && result.plots!.length > 0 {
-            plot_descriptions: list<string> = []
-            for i, plot in enumerate(result.plots!) {
+            plot_descriptions: list<string> = for[] i, plot in enumerate(result.plots!) {
                 plot_descriptions.append(f"[Plot {i+1}: {plot.width}x{plot.height} {plot.format}]({i})")
             }
             sections.append("**Plots Generated**: " + ", ".join(plot_descriptions))

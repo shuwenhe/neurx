@@ -3,7 +3,7 @@ struct BaseWorker {
     config              WorkerConfig
     state               i32
     stats               WorkerStats
-    request_queue       []RequestMetadata
+    request_queue       RequestMetadata[]
     queue_size          i32
     max_queue_size      i32
     current_batch_id    i32
@@ -126,7 +126,7 @@ func (BaseWorker* w) CompleteBatch(batch_id i32, result_count i32,
         if len(w.request_queue) > 1 {
             w.request_queue = w.request_queue[1:]
         } else {
-            w.request_queue = []RequestMetadata{}
+            w.request_queue = RequestMetadata[]{}
         }
     }
     if w.queue_size == 0 {

@@ -8,7 +8,7 @@ struct memory_allocator {
     int device_id
     int64 total_memory
     int64 allocated_memory
-    []memory_block allocations
+    memory_block[] allocations
     bool enable_caching
 }
 
@@ -98,7 +98,7 @@ func rotate_kv_cache(kv_cache_allocator cache, int new_batch_size) int {
 struct pinned_memory_allocator {
     int64 total_pinned_memory
     int64 allocated_pinned_memory
-    []pinned_memory_block allocations
+    pinned_memory_block[] allocations
 }
 
 struct pinned_memory_block {

@@ -19,7 +19,7 @@ struct message {
 
 struct conversation_turn {
     int turn_id
-    []message messages
+    message[] messages
     string query
     string response
     float reward
@@ -28,7 +28,7 @@ struct conversation_turn {
 
 struct multiturn_conversation {
     int conversation_id
-    []conversation_turn turns
+    conversation_turn[] turns
     int total_turns
     float cumulative_reward
     string task_type
@@ -37,7 +37,7 @@ struct multiturn_conversation {
 }
 
 struct multiturn_manager_state {
-    []multiturn_conversation conversations
+    multiturn_conversation[] conversations
     int conversation_count
     int total_turns
     float avg_reward_per_conversation
@@ -47,7 +47,7 @@ struct multiturn_manager_state {
 
 func new_multiturn_manager(int max_turns) multiturn_manager_state {
     multiturn_manager_state {
-        conversations: make([]multiturn_conversation, 1000),
+        conversations: make(multiturn_conversation[], 1000),
         conversation_count: 0,
         total_turns: 0,
         avg_reward_per_conversation: 0.0,
@@ -65,14 +65,14 @@ func multiturn_enable_tool_calling(multiturn_manager_state state, bool enable) m
 func multiturn_start_conversation(multiturn_manager_state state, string task_type, int step) (multiturn_manager_state, int) {
     multiturn_conversation conv = multiturn_conversation {
         conversation_id: state.conversation_count,
-        turns: make([]conversation_turn, state.max_turns_per_conversation),
+        turns: make(conversation_turn[], state.max_turns_per_conversation),
         total_turns: 0,
         cumulative_reward: 0.0,
         task_type: task_type,
         start_step: step,
         end_step: step,
     }
-    state.conversations += []multiturn_conversation{conv}
+    state.conversations += multiturn_conversation[]{conv}
     state.conversation_count = state.conversation_count + 1
     eprintln("[MultiTurn] Started conversation #" + int_to_str(state.conversation_count - 1))
     state, state.conversation_count - 1
@@ -94,7 +94,7 @@ func multiturn_add_message(multiturn_manager_state state, int conv_id, message_r
     }
     if len(conv.turns) > 0 {
         conversation_turn turn = conv.turns[len(conv.turns) - 1]
-        turn.messages += []message{msg}
+        turn.messages += message[]{msg}
         conv.turns[len(conv.turns) - 1] = turn
     }
     state.conversations[conv_id] = conv
@@ -112,7 +112,7 @@ func multiturn_start_turn(multiturn_manager_state state, int conv_id, string que
     }
     conversation_turn turn = conversation_turn {
         turn_id: conv.total_turns,
-        messages: make([]message, 10),
+        messages: make(message[], 10),
         query: query,
         response: "",
         reward: 0.0,
@@ -126,8 +126,8 @@ func multiturn_start_turn(multiturn_manager_state state, int conv_id, string que
         tool_name: "",
         tool_input: "",
     }
-    turn.messages += []message{user_msg}
-    conv.turns += []conversation_turn{turn}
+    turn.messages += message[]{user_msg}
+    conv.turns += conversation_turn[]{turn}
     conv.total_turns = conv.total_turns + 1
     state.total_turns = state.total_turns + 1
     state.conversations[conv_id] = conv
@@ -155,7 +155,7 @@ func multiturn_complete_turn(multiturn_manager_state state, int conv_id, string 
         tool_name: "",
         tool_input: "",
     }
-    turn.messages += []message{asst_msg}
+    turn.messages += message[]{asst_msg}
     conv.cumulative_reward = conv.cumulative_reward + reward
     state.conversations[conv_id] = conv
     eprintln("[MultiTurn] Completed turn with reward: " + (if reward > 0.0 then "+" else "") + reward_to_str(reward))
@@ -179,7 +179,7 @@ func multiturn_add_tool_call(multiturn_manager_state state, int conv_id, string 
         tool_name: tool_name,
         tool_input: tool_input,
     }
-    turn.messages += []message{tool_msg}
+    turn.messages += message[]{tool_msg}
     turn.response = tool_name
     conv.turns[len(conv.turns) - 1] = turn
     state.conversations[conv_id] = conv

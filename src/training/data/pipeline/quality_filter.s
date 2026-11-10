@@ -49,7 +49,7 @@ func default_2t_quality_filter_config() quality_filter_config:
     cfg.batch_size_for_scoring = 1000
     return cfg
 struct bloom_filter:
-    []byte bit_array
+    byte[] bit_array
     int64 size_bits
     int64 num_items_inserted
     int num_hash_functions
@@ -71,7 +71,7 @@ func calculate_bloom_params(
     return m, k
 func new_bloom_filter(int64 size_bits, int num_hashes) bloom_filter:
     int64 array_size = (size_bits + 7) / 8
-    []byte bit_array = make([]byte, array_size)
+    byte[] bit_array = make(byte[], array_size)
     int i = 0
     for i < array_size {
         bit_array = append(bit_array, 0)
@@ -143,14 +143,14 @@ struct quality_scorer_state:
     int total_samples_seen
     int total_samples_kept
     int total_samples_rejected
-    []string rejection_reasons
+    string[] rejection_reasons
 func new_quality_scorer(quality_filter_config config) quality_scorer_state:
     quality_scorer_state scorer
     scorer.config = config
     scorer.total_samples_seen = 0
     scorer.total_samples_kept = 0
     scorer.total_samples_rejected = 0
-    scorer.rejection_reasons = make([]string, 1000)
+    scorer.rejection_reasons = make(string[], 1000)
     if config.enable_dedup and config.dedup_method == "bloom_filter":
         int64 estimated_items = int64(10 * 1024 * 1024 * 1024)
         (int64 bits, int hashes) = calculate_bloom_params(
@@ -164,7 +164,7 @@ func new_quality_scorer(quality_filter_config config) quality_scorer_state:
 func score_sample(
     quality_scorer_state scorer,
     string text,
-    []int token_ids
+    int[] token_ids
 ) quality_metrics:
     scorer.total_samples_seen = scorer.total_samples_seen + 1
     quality_metrics metrics
@@ -209,7 +209,7 @@ func compute_length_score(int char_count, int token_count, quality_filter_config
     if cfg.max_tokens > 0 and token_count > cfg.max_tokens:
         return 0.85
     return 1.0
-func compute_content_quality(string text, []int token_ids, quality_metrics metrics) float:
+func compute_content_quality(string text, int[] token_ids, quality_metrics metrics) float:
     if len(token_ids) == 0:
         return 0.0
     map<int, int> token_freq
@@ -293,7 +293,7 @@ func compute_format_score(string text, float code_indicator) float:
         return 0.8
     else:
         return 0.5
-func normalize_for_dedup(string text, []int token_ids) string:
+func normalize_for_dedup(string text, int[] token_ids) string:
     string normalized = to_lower_case(trim(text))
     if len(normalized) > 500:
         normalized = substring(normalized, 0, 500)

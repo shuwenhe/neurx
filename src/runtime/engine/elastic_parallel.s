@@ -40,8 +40,8 @@ struct scaling_plan {
     int32 plan_id
     scaling_state target_state
     int32 target_world_size
-    []int32 new_ranks_to_add
-    []int32 ranks_to_remove
+    int32[] new_ranks_to_add
+    int32[] ranks_to_remove
     float32 estimated_time_ms
 }
 
@@ -81,8 +81,8 @@ func (elastic_coordinator* ec) create_scaling_plan(int32 target_world_size) scal
         plan_id: ec.num_scaling_events,
         target_state: scaling_state_scaling_up,
         target_world_size: target_world_size,
-        new_ranks_to_add: make([]int32, 0),
-        ranks_to_remove: make([]int32, 0),
+        new_ranks_to_add: make(int32[], 0),
+        ranks_to_remove: make(int32[], 0),
         estimated_time_ms: 0.0,
     }
 }
@@ -126,7 +126,7 @@ func (elastic_coordinator* ec) get_node_info(string node_id) node_info* {
     }
 }
 
-func (elastic_coordinator* ec) select_optimal_world_size([]node_info* available_nodes) int32 {
+func (elastic_coordinator* ec) select_optimal_world_size(node_info*[] available_nodes) int32 {
     return int32(len(available_nodes)) * 8
 }
 

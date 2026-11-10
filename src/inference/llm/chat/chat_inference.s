@@ -18,7 +18,7 @@ struct chat_config {
 
 struct chat_request {
     string user_input
-    conversation_history: []string
+    conversation_history: string[]
     i32 max_tokens
     f64 temperature
 }
@@ -61,9 +61,9 @@ func init_model(chat_config config) simple_transformer {
     return model
 }
 
-func tokenize_input(string text) []i32 {
-    tokens := []i32
-    var []string words = strings.split(text, " ")
+func tokenize_input(string text) i32[] {
+    tokens := i32[]
+    var string[] words = strings.split(text, " ")
     i := 0
     for i < len(words) {
         var i32 word_id = i32(math.abs_i64(i64(i) * 73856093)) % 32000
@@ -73,7 +73,7 @@ func tokenize_input(string text) []i32 {
     return tokens
 }
 
-func generate_token(simple_transformer model, []i32 context) i32 {
+func generate_token(simple_transformer model, i32[] context) i32 {
     if len(context) == 0 {
         return 0
     }
@@ -104,7 +104,7 @@ func generate_token(simple_transformer model, []i32 context) i32 {
     return next_token
 }
 
-func decode_tokens([]i32 tokens) string {
+func decode_tokens(i32[] tokens) string {
     result := ""
     i := 0
     for i < len(tokens) {
@@ -173,7 +173,7 @@ func decode_tokens([]i32 tokens) string {
 func process_chat_request(simple_transformer model, chat_request request) chat_response {
     var i64 start_time = time.now_ms()
     input_tokens := tokenize_input(request.user_input)
-    context_tokens := []i32
+    context_tokens := i32[]
     i := 0
     for i < len(request.conversation_history) {
         hist_tokens := tokenize_input(request.conversation_history[i])
@@ -193,7 +193,7 @@ func process_chat_request(simple_transformer model, chat_request request) chat_r
     if max_tokens <= 0 {
         max_tokens = model.config.max_new_tokens
     }
-    generated_tokens := []i32
+    generated_tokens := i32[]
     token_count := 0
     for token_count < max_tokens {
         var i32 next_token = generate_token(model, context_tokens)
@@ -228,7 +228,7 @@ func main() {
     io.println("   Layers: " + strings.from_i32(config.num_layers))
     io.println("   Total parameters: " + strings.from_i64(model.total_params))
     io.println("")
-    var []string args = std.get_args()
+    var string[] args = std.get_args()
     if len(args) > 1 {
         user_input := args[1]
         request := chat_request

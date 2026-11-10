@@ -29,7 +29,7 @@ struct training_progress_s {
     int current_step
     float best_loss
     int best_step
-    []training_step_s step_history
+    training_step_s[] step_history
     float total_time_seconds
     bool finished
 }
@@ -55,7 +55,7 @@ func new_training_progress_s(int max_steps) training_progress_s {
         current_step: 0,
         best_loss: 1000000.0,
         best_step: -1,
-        step_history: make([]training_step_s, 0),
+        step_history: make(training_step_s[], 0),
         total_time_seconds: 0.0,
         finished: false,
     }

@@ -49,7 +49,7 @@ struct monitoring_dashboard {
     model_performance text_model_perf
     model_performance vl_model_perf
     system_metrics system_stats
-    []performance_metric metric_history
+    performance_metric[] metric_history
 }
 
 func init_inference_metrics() inference_metrics {

@@ -32,11 +32,10 @@ struct InferenceResponse {
     success: bool
 }
 
-var nodes: RemoteNode[] = []
-var active_tunnels: map<string, int> = map<string, int>()
+var nodes: RemoteNode[] = var[] active_tunnels: map<string, int> = map<string, int>()
 
 func init_nodes() {
-    nodes = []RemoteNode{
+    nodes = RemoteNode[]{
         RemoteNode{
             name: "Controller",
             ip: "192.168.10.39",

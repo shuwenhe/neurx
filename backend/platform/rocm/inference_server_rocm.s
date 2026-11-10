@@ -26,7 +26,7 @@ struct rocm_inference_engine {
     bool is_ready
     int64 hipblas_handle
     int64 miopen_handle
-    []rocm_rt.rocm_memory_ptr model_weights
+    rocm_rt.rocm_memory_ptr[] model_weights
     int inference_count
 }
 
@@ -44,7 +44,7 @@ func create_rocm_engine(rocm_model_config config, int device_id) rocm_inference_
 }
 
 func rocm_load_model_weights(rocm_inference_engine engine,
-                            []rocm_rt.rocm_memory_ptr weights) int {
+                            rocm_rt.rocm_memory_ptr[] weights) int {
     engine_updated = rocm_inference_engine {
         context: engine.context,
         config: engine.config,
@@ -78,14 +78,14 @@ func rocm_generate_token(rocm_inference_engine engine,
 }
 
 func rocm_batch_prefill(rocm_inference_engine engine,
-                       []rocm_rt.rocm_memory_ptr batch_inputs,
-                       []int seq_lengths) []rocm_rt.rocm_memory_ptr {
+                       rocm_rt.rocm_memory_ptr[] batch_inputs,
+                       int[] seq_lengths) rocm_rt.rocm_memory_ptr[] {
     []
 }
 
 func rocm_batch_decode(rocm_inference_engine engine,
                       rocm_rt.rocm_memory_ptr kv_cache,
-                      int batch_size) []rocm_rt.rocm_memory_ptr {
+                      int batch_size) rocm_rt.rocm_memory_ptr[] {
     []
 }
 

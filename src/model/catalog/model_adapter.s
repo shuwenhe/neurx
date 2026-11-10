@@ -219,10 +219,10 @@ func (model_adapter_registry* registry) get_adapter_metadata(model_type model_ty
 	return registry.adapter_metadata[type_str]
 }
 
-func (model_adapter_registry* registry) list_registered_adapters() []string {
+func (model_adapter_registry* registry) list_registered_adapters() string[] {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	adapters := make([]string, 0, len(registry.adapters))
+	adapters := make(string[], 0, len(registry.adapters))
 	for key := range registry.adapters {
 		adapters = append(adapters, key)
 	}
@@ -307,32 +307,32 @@ func register_all_standard_adapters(model_adapter_registry* registry) {
 	qwen_metadata := *model_metadata{
 		model_type: TYPE_QWEN,
 		vocabulary_size: 32000,
-		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
-		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
+		supported_devices: model_device_type[]{DEVICE_CUDA, DEVICE_CPU},
+		capabilities: model_capability[]{CAP_CHAT, CAP_COMPLETION},
 	}
 	llama_metadata := *model_metadata{
 		model_type: TYPE_LLAMA,
 		vocabulary_size: 32000,
-		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
-		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION, CAP_CODE_GENERATION},
+		supported_devices: model_device_type[]{DEVICE_CUDA, DEVICE_CPU},
+		capabilities: model_capability[]{CAP_CHAT, CAP_COMPLETION, CAP_CODE_GENERATION},
 	}
 	mixtral_metadata := *model_metadata{
 		model_type: TYPE_MIXTRAL,
 		vocabulary_size: 32000,
-		supported_devices: []model_device_type{DEVICE_CUDA},
-		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION, CAP_CODE_GENERATION},
+		supported_devices: model_device_type[]{DEVICE_CUDA},
+		capabilities: model_capability[]{CAP_CHAT, CAP_COMPLETION, CAP_CODE_GENERATION},
 	}
 	chatglm_metadata := *model_metadata{
 		model_type: TYPE_CHATGLM,
 		vocabulary_size: 130528,
-		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
-		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
+		supported_devices: model_device_type[]{DEVICE_CUDA, DEVICE_CPU},
+		capabilities: model_capability[]{CAP_CHAT, CAP_COMPLETION},
 	}
 	baichuan_metadata := *model_metadata{
 		model_type: TYPE_BAICHUAN,
 		vocabulary_size: 125696,
-		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
-		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
+		supported_devices: model_device_type[]{DEVICE_CUDA, DEVICE_CPU},
+		capabilities: model_capability[]{CAP_CHAT, CAP_COMPLETION},
 	}
 	registry.register_adapter(TYPE_QWEN, create_qwen_adapter("qwen-7b", "Qwen-7B", "1.0"), qwen_metadata)
 	registry.register_adapter(TYPE_LLAMA, create_llama_adapter("llama-7b", "Llama-7B", 4096), llama_metadata)
@@ -342,19 +342,19 @@ func register_all_standard_adapters(model_adapter_registry* registry) {
 	registry.register_adapter(TYPE_INTERNLM, create_internlm_adapter("internlm-7b", "InternLM-7B"), *model_metadata{
 		model_type: TYPE_INTERNLM,
 		vocabulary_size: 103168,
-		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
-		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
+		supported_devices: model_device_type[]{DEVICE_CUDA, DEVICE_CPU},
+		capabilities: model_capability[]{CAP_CHAT, CAP_COMPLETION},
 	})
 	registry.register_adapter(TYPE_FALCON, create_falcon_adapter("falcon-7b", "Falcon-7B", 32), *model_metadata{
 		model_type: TYPE_FALCON,
 		vocabulary_size: 65024,
-		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
-		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
+		supported_devices: model_device_type[]{DEVICE_CUDA, DEVICE_CPU},
+		capabilities: model_capability[]{CAP_CHAT, CAP_COMPLETION},
 	})
 	registry.register_adapter(TYPE_MPT, create_mpt_adapter("mpt-7b", "MPT-7B", 32), *model_metadata{
 		model_type: TYPE_MPT,
 		vocabulary_size: 50257,
-		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
-		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
+		supported_devices: model_device_type[]{DEVICE_CUDA, DEVICE_CPU},
+		capabilities: model_capability[]{CAP_CHAT, CAP_COMPLETION},
 	})
 }

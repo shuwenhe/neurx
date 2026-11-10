@@ -20,8 +20,8 @@ struct gspo_trainer {
     *model policy_model
     *model reference_model
     *optimizer optimizer
-    expert_routing_counts: []i32
-    load_balance_losses: []f32
+    expert_routing_counts: i32[]
+    load_balance_losses: f32[]
 }
 
 func new_gspo_trainer(gspo_config config, *model model, *model ref_model) . gspo_trainer {
@@ -36,7 +36,7 @@ func new_gspo_trainer(gspo_config config, *model model, *model ref_model) . gspo
     }
 }
 
-func (gspo_trainer* trainer) group_sequences([]tensor sequences) . [][]tensor {
+func (gspo_trainer* trainer) group_sequences(tensor[] sequences) . tensor[][] {
     match trainer.config.sequence_group_method {
         "length" => return trainer.group_by_length(sequences),
         "similarity" => return trainer.group_by_similarity(sequences),
@@ -45,12 +45,10 @@ func (gspo_trainer* trainer) group_sequences([]tensor sequences) . [][]tensor {
     }
 }
 
-func (gspo_trainer* trainer) group_by_length([]tensor sequences) . [][]tensor {
+func (gspo_trainer* trainer) group_by_length(tensor[] sequences) . tensor[][] {
     sorted_seqs := sequences.clone()
     sorted_seqs.sort(|a, b| a.shape[0] - b.shape[0])
-    groups := []
-    current_group := []
-    for i, seq in sorted_seqs {
+    groups := current_group[] := for[] i, seq in sorted_seqs {
         current_group = append(current_group, seq)
         if len(current_group) >= trainer.config.group_size {
             groups = append(groups, current_group)
@@ -63,16 +61,14 @@ func (gspo_trainer* trainer) group_by_length([]tensor sequences) . [][]tensor {
     return groups
 }
 
-func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) . [][]tensor {
-    embeddings := []
-    for seq in sequences {
+func (gspo_trainer* trainer) group_by_similarity(tensor[] sequences) . tensor[][] {
+    embeddings := for[] seq in sequences {
         emb := trainer.policy_model.encode(seq)
         embeddings = append(embeddings, emb.mean(dim: 0))
     }
     num_groups := len(sequences) / trainer.config.group_size
     cluster_assignments := kmeans_clustering(embeddings, num_groups)
-    groups := []
-    for i in 0..num_groups {
+    groups := for[] i in 0..num_groups {
         groups = append(groups, [])
     }
     for i, assignment in cluster_assignments {
@@ -81,12 +77,10 @@ func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) . [][]tenso
     return groups
 }
 
-func (gspo_trainer* trainer) group_randomly([]tensor sequences) . [][]tensor {
+func (gspo_trainer* trainer) group_randomly(tensor[] sequences) . tensor[][] {
     shuffled := sequences.clone()
     shuffled.shuffle()
-    groups := []
-    current_group := []
-    for seq in shuffled {
+    groups := current_group[] := for[] seq in shuffled {
         current_group = append(current_group, seq)
         if len(current_group) >= trainer.config.group_size {
             groups = append(groups, current_group)
@@ -100,9 +94,9 @@ func (gspo_trainer* trainer) group_randomly([]tensor sequences) . [][]tensor {
 }
 
 func (gspo_trainer* trainer) compute_sequence_advantages(
-    []tensor group,
-    []f32 rewards
-) . []f32 {
+    tensor[] group,
+    f32[] rewards
+) . f32[] {
     mean_reward := 0.0
     for r in rewards {
         mean_reward += r
@@ -113,8 +107,7 @@ func (gspo_trainer* trainer) compute_sequence_advantages(
         std_reward += (r - mean_reward) * (r - mean_reward)
     }
     std_reward = sqrt(std_reward / f32(len(rewards)))
-    advantages := []
-    for r in rewards {
+    advantages := for[] r in rewards {
         adv := (r - mean_reward) / (std_reward + 1e-8)
         advantages = append(advantages, adv)
     }
@@ -140,10 +133,7 @@ func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
     total_lb_loss := 0.0
     num_groups := len(groups)
     for group in groups {
-        responses := []
-        log_probs_list := []
-        router_logits_list := []
-        for prompt in group {
+        responses := log_probs_list[] := router_logits_list[] := for[] prompt in group {
             resp, log_probs, router_logits  := trainer.policy_model.generate(
                 prompt,
                 temperature: 1.0,
@@ -154,8 +144,7 @@ func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
             log_probs_list = append(log_probs_list, log_probs)
             router_logits_list = append(router_logits_list, router_logits)
         }
-        group_rewards := []
-        for i, resp in responses {
+        group_rewards := for[] i, resp in responses {
             r := compute_reward(group[i], resp)
             group_rewards = append(group_rewards, r)
         }
@@ -184,10 +173,8 @@ func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
     return total_policy_loss, total_lb_loss
 }
 
-func (gspo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
-    policy_losses := []
-    lb_losses := []
-    for epoch in 0..trainer.config.num_epochs {
+func (gspo_trainer* trainer) train(DataLoader train_data) . (f32[], f32[]) {
+    policy_losses := lb_losses[] := for[] epoch in 0..trainer.config.num_epochs {
         println(f"GSPO Epoch {epoch + 1}/{trainer.config.num_epochs}")
         for batch in train_data {
             policy_loss, lb_loss  := trainer.train_step(batch)
@@ -201,11 +188,10 @@ func (gspo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     return policy_losses, lb_losses
 }
 
-func kmeans_clustering([]tensor embeddings, i32 k) . []i32 {
+func kmeans_clustering(tensor[] embeddings, i32 k) . i32[] {
     n := len(embeddings)
     dim := embeddings[0].shape[0]
-    centroids := []
-    indices := random_permutation(n)
+    centroids := indices[] := random_permutation(n)
     for i in 0..k {
         centroids = append(centroids, embeddings[indices[i]])
     }
@@ -224,8 +210,7 @@ func kmeans_clustering([]tensor embeddings, i32 k) . []i32 {
             assignments[i] = best_cluster
         }
         for j in 0..k {
-            cluster_points := []
-            for i in 0..n {
+            cluster_points := for[] i in 0..n {
                 if assignments[i] == j {
                     cluster_points = append(cluster_points, embeddings[i])
                 }

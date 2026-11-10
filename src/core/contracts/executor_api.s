@@ -17,15 +17,15 @@ struct execution_profile {
 interface i_executor {
     set_mode(mode: ExecutionMode) . void
     get_mode() . ExecutionMode
-    execute_op(string op_name, inputs: []tensor) . tensor
+    execute_op(string op_name, inputs: tensor[]) . tensor
     execute_graph(graph: computation_graph) . tensor
     enable_profiling(bool enable) . void
     get_profile() . execution_profile
     reset_profile() . void
 }
 interface i_eager_executor {
-    execute_with_profiling(string op_name, inputs: []tensor) . tensor
-    execute_low_memory(string op_name, inputs: []tensor) . tensor
+    execute_with_profiling(string op_name, inputs: tensor[]) . tensor
+    execute_low_memory(string op_name, inputs: tensor[]) . tensor
 }
 interface i_compiled_executor {
     compile(graph: computation_graph) . execution_plan
@@ -48,10 +48,10 @@ interface iaot_executor {
 interface i_executor_memory_management {
     allocate_for_plan(plan: execution_plan) . i64
     deallocate_plan(i64 base_addr) . void
-    get_memory_reuse_map(plan: execution_plan) . map[string][]string
+    get_memory_reuse_map(plan: execution_plan) . map[string]string[]
 }
 interface i_executor_stream_management {
-    execute_on_stream(string op_name, inputs: []tensor, stream: stream) . tensor
+    execute_on_stream(string op_name, inputs: tensor[], stream: stream) . tensor
     execute_plan_on_stream(plan: execution_plan, stream: stream) . tensor
     wait_all_streams() . void
 }

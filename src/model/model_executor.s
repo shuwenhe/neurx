@@ -36,20 +36,20 @@ func (model_executor* executor) load_model(string model_name, string device) boo
 }
 
 struct forward_output {
-    logits: []f32
+    logits: f32[]
     bool kv_cache_updated
     int compute_time_ms
 }
 
 func (model_executor* executor) forward_pass(
     model_name: string,
-    input_ids: *[]int,
-    attention_mask: option[&[]int]
+    input_ids: *int[],
+    attention_mask: option[&int[]]
 ) forward_output {
     batch_size := 1
     seq_len := len(input_ids)
     output := forward_output {
-        logits: []f32,
+        logits: f32[],
         kv_cache_updated: true,
         compute_time_ms: 0,
     }

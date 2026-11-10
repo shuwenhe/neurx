@@ -8,7 +8,7 @@ import (
 struct v1_request {
     request_id         string
     model             string
-    messages          []interface{}
+    messages          interface{}[]
     max_tokens         int32
     temperature       float32
     top_p              float32
@@ -16,8 +16,8 @@ struct v1_request {
     frequency_penalty  float32
     presence_penalty   float32
     stream            bool
-    stop              []string
-    tools             []interface{}
+    stop              string[]
+    tools             interface{}[]
     tool_choice        interface{}
 }
 
@@ -26,7 +26,7 @@ struct v1_response {
     object            string
     created           int64
     model             string
-    content           []map[string]interface{}
+    content           (map[string]interface{})[]
     stop_reason        string
     usage             map[string]int32
 }
@@ -36,7 +36,7 @@ struct v1_stream_response {
     object            string
     created           int64
     model             string
-    choices           []map[string]interface{}
+    choices           (map[string]interface{})[]
     usage             map[string]int32
 }
 type reasoning_mode string
@@ -495,7 +495,7 @@ func run_reasoned_generation(ve *v1_engine, req *v1_request, prompt string) (str
 
 struct request_pool {
     max_size           int32
-    requests          []*v1_request
+    requests          v1_request*[]
     indices           map[string]int32
 }
 
@@ -509,7 +509,7 @@ struct v1_engine {
 func new_request_pool(max_size int32) *request_pool {
     return *request_pool{
         max_size:  max_size,
-        requests: make([]*v1_request, 0, max_size),
+        requests: make(v1_request*[], 0, max_size),
         indices:  make(map[string]int32),
     }
 }
@@ -599,7 +599,7 @@ func (v1_engine* ve) execute(v1_request* req) (*v1_response, error) {
         object:  "chat.completion",
         created: core.CurrentTimeMs(),
         model:   req.model,
-        content: []map[string]interface{}{
+        content: (map[string]interface{})[]{
             {
                 "type": "text",
                 "text": generated_text,
@@ -637,7 +637,7 @@ func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, 
             object:  "chat.completion.chunk",
             created: core.CurrentTimeMs(),
             model:   req.model,
-            choices: []map[string]interface{}{
+            choices: (map[string]interface{})[]{
                 {
                     "index": 0,
                     "delta": map[string]interface{}{
@@ -654,7 +654,7 @@ func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, 
                 object:  "chat.completion.chunk",
                 created: core.CurrentTimeMs(),
                 model:   req.model,
-                choices: []map[string]interface{}{
+                choices: (map[string]interface{})[]{
                     {
                         "index": 0,
                         "delta": map[string]interface{}{
@@ -669,7 +669,7 @@ func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, 
             object:  "chat.completion.chunk",
             created: core.CurrentTimeMs(),
             model:   req.model,
-            choices: []map[string]interface{}{
+            choices: (map[string]interface{})[]{
                 {
                     "index":        0,
                     "delta":        map[string]interface{}{},
@@ -702,7 +702,7 @@ func (v1_engine* ve) execute_async(req *v1_request, callback func(*v1_response, 
         object:  "chat.completion",
         created: core.CurrentTimeMs(),
         model:   req.model,
-        content: []map[string]interface{}{
+        content: (map[string]interface{})[]{
             {
                 "type": "text",
                 "text": generated_text,

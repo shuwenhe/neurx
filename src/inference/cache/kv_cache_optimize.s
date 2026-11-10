@@ -17,8 +17,8 @@ struct kv_cache_page {
     int page_id
     int used_tokens
     int max_tokens
-    []float key_data
-    []float value_data
+    float[] key_data
+    float[] value_data
     int last_accessed_step
     int access_count
 }
@@ -35,11 +35,11 @@ struct kv_cache_statistics {
 }
 
 struct kv_cache_optimizer {
-    []kv_cache_page pages
+    kv_cache_page[] pages
     kv_cache_config config
     kv_cache_statistics stats
-    []int free_page_list
-    []int lru_order
+    int[] free_page_list
+    int[] lru_order
     int current_step
 }
 
@@ -73,7 +73,7 @@ func create_default_kv_config() kv_cache_config {
 
 func create_kv_cache_optimizer(kv_cache_config config) kv_cache_optimizer {
     kv_cache_optimizer opt = kv_cache_optimizer{
-        pages: make([]kv_cache_page, config.max_pages),
+        pages: make(kv_cache_page[], config.max_pages),
         config: config,
         stats: kv_cache_statistics{
             total_pages: 0,
@@ -85,8 +85,8 @@ func create_kv_cache_optimizer(kv_cache_config config) kv_cache_optimizer {
             total_evictions: 0,
             avg_page_age: 0.0
         },
-        free_page_list: make([]int, config.max_pages),
-        lru_order: make([]int, config.max_pages),
+        free_page_list: make(int[], config.max_pages),
+        lru_order: make(int[], config.max_pages),
         current_step: 0
     }
     int i = 0
@@ -107,8 +107,8 @@ func allocate_kv_page(kv_cache_optimizer* opt) int {
         page_id: page_id,
         used_tokens: 0,
         max_tokens: opt.config.page_size_tokens,
-        key_data: make([]float, opt.config.page_size_tokens * opt.config.token_dim),
-        value_data: make([]float, opt.config.page_size_tokens * opt.config.token_dim),
+        key_data: make(float[], opt.config.page_size_tokens * opt.config.token_dim),
+        value_data: make(float[], opt.config.page_size_tokens * opt.config.token_dim),
         last_accessed_step: opt.current_step,
         access_count: 0
     }
@@ -165,8 +165,8 @@ func evict_page_if_needed(kv_cache_optimizer* opt) bool {
 
 func add_kv_tokens(
     kv_cache_optimizer* opt,
-    []float key_tokens,
-    []float value_tokens
+    float[] key_tokens,
+    float[] value_tokens
 ) bool {
     if len(key_tokens) == 0 {
         return true
@@ -245,9 +245,9 @@ func optimize_cache_layout(kv_cache_optimizer* opt) {
 }
 
 func reset_cache(kv_cache_optimizer* opt) {
-    opt.pages = make([]kv_cache_page, opt.config.max_pages)
-    opt.free_page_list = make([]int, opt.config.max_pages)
-    opt.lru_order = make([]int, opt.config.max_pages)
+    opt.pages = make(kv_cache_page[], opt.config.max_pages)
+    opt.free_page_list = make(int[], opt.config.max_pages)
+    opt.lru_order = make(int[], opt.config.max_pages)
     opt.current_step = 0
     opt.stats.active_pages = 0
     opt.stats.free_pages = opt.config.max_pages
@@ -308,8 +308,8 @@ func main() {
     println("")
     println("Step 2: Simulating token caching")
     println("─────────────────────────────────────────────────────────────")
-    []float dummy_keys = make([]float, 1024)
-    []float dummy_values = make([]float, 1024)
+    float[] dummy_keys = make(float[], 1024)
+    float[] dummy_values = make(float[], 1024)
     int j = 0
     for j < 10 {
         if add_kv_tokens(opt, dummy_keys, dummy_values) {

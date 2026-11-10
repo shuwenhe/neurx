@@ -18,10 +18,10 @@ struct task_struct {
 }
 
 struct run_queue {
-    []task_struct  rt_queue
-    []task_struct  normal_queue
-    []task_struct  batch_queue
-    []task_struct  idle_queue
+    task_struct[]  rt_queue
+    task_struct[]  normal_queue
+    task_struct[]  batch_queue
+    task_struct[]  idle_queue
     int            current_pid
     int            clock_ms
 }

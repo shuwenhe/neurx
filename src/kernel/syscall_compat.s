@@ -10,23 +10,23 @@ struct syscall_entry {
     string name
 }
 syscall_entry[] syscall_table
-map[int][]int fd_table
+map[int]int[] fd_table
 int next_fd
 const enosys = -38
 func init_syscall_table() int {
-    syscall_table = []syscall_entry{}
+    syscall_table = syscall_entry[]{}
     syscall_table = append(syscall_table, syscall_entry{number:0, name:"read"})
     syscall_table = append(syscall_table, syscall_entry{number:1, name:"write"})
     syscall_table = append(syscall_table, syscall_entry{number:2, name:"open"})
     syscall_table = append(syscall_table, syscall_entry{number:3, name:"close"})
-    fd_table = map[int][]int{}
+    fd_table = map[int]int[]{}
     next_fd = 3
     init_phys_mem()
     0
 }
 
 func sys_read(int fd, int buf_addr, int count) int {
-    data := []int{}
+    data := int[]{}
     if has(fd_table, fd) {
         data = fd_table[fd]
     }
@@ -34,7 +34,7 @@ func sys_read(int fd, int buf_addr, int count) int {
     if n > len(data) {
         n = len(data)
     }
-    slice := []int{}
+    slice := int[]{}
     i := 0
     for i < n {
         slice = append(slice, data[i])
@@ -46,7 +46,7 @@ func sys_read(int fd, int buf_addr, int count) int {
 
 func sys_write(int fd, int buf_addr, int count) int {
     bytes := mem_get(buf_addr, count)
-    existing := []int{}
+    existing := int[]{}
     if has(fd_table, fd) {
         existing = fd_table[fd]
     }
@@ -63,13 +63,13 @@ func sys_open(string path, int flags) int {
     eprintln("sys_open called path=" + path)
     fd := next_fd
     next_fd = next_fd + 1
-    fd_table[fd] = []int{}
+    fd_table[fd] = int[]{}
     fd
 }
 
 func sys_close(int fd) int {
     if has(fd_table, fd) {
-        fd_table[fd] = []int{}
+        fd_table[fd] = int[]{}
     }
     0
 }
@@ -94,7 +94,7 @@ func sys_exit(int code) int {
     code
 }
 
-func syscall_dispatch(int num, []int args) int {
+func syscall_dispatch(int num, int[] args) int {
     eprintln("syscall_dispatch: " + int_to_string(num))
     if num == 0 {
         if len(args) >= 3 {

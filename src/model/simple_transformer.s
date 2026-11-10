@@ -8,22 +8,22 @@ struct simple_transformer {
     num_layers i64
     num_heads i64
     max_seq_len i64
-    embeddings [][]f64
-    pos_embeddings [][]f64
-    attention_w_q [][][]f64
-    attention_w_k [][][]f64
-    attention_w_v [][][]f64
-    attention_w_o [][][]f64
-    ff_w1 [][][]f64
-    ff_w2 [][][]f64
-    ln_gamma [][][]f64
-    ln_beta [][][]f64
-    output_weight [][]f64
+    embeddings f64[][]
+    pos_embeddings f64[][]
+    attention_w_q f64[][][]
+    attention_w_k f64[][][]
+    attention_w_v f64[][][]
+    attention_w_o f64[][][]
+    ff_w1 f64[][][]
+    ff_w2 f64[][][]
+    ln_gamma f64[][][]
+    ln_beta f64[][][]
+    output_weight f64[][]
 }
 
 struct transformer_output {
-    logits [][]f64
-    hidden_states [][]f64
+    logits f64[][]
+    hidden_states f64[][]
 }
 
 func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_heads, i64 max_seq_len) simple_transformer {
@@ -33,26 +33,26 @@ func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_he
         num_layers: num_layers,
         num_heads: num_heads,
         max_seq_len: max_seq_len,
-        embeddings: make([][]f64, vocab_size),
-        pos_embeddings: make([][]f64, max_seq_len),
-        attention_w_q: make([][][]f64, num_layers),
-        attention_w_k: make([][][]f64, num_layers),
-        attention_w_v: make([][][]f64, num_layers),
-        attention_w_o: make([][][]f64, num_layers),
-        ff_w1: make([][][]f64, num_layers),
-        ff_w2: make([][][]f64, num_layers),
-        ln_gamma: make([][][]f64, num_layers),
-        ln_beta: make([][][]f64, num_layers),
-        output_weight: make([][]f64, hidden_size),
+        embeddings: make(f64[][], vocab_size),
+        pos_embeddings: make(f64[][], max_seq_len),
+        attention_w_q: make(f64[][][], num_layers),
+        attention_w_k: make(f64[][][], num_layers),
+        attention_w_v: make(f64[][][], num_layers),
+        attention_w_o: make(f64[][][], num_layers),
+        ff_w1: make(f64[][][], num_layers),
+        ff_w2: make(f64[][][], num_layers),
+        ln_gamma: make(f64[][][], num_layers),
+        ln_beta: make(f64[][][], num_layers),
+        output_weight: make(f64[][], hidden_size),
     }
     for i := 0; i < len(t.embeddings); i++ {
-        t.embeddings[i] = make([]f64, hidden_size)
+        t.embeddings[i] = make(f64[], hidden_size)
         for j := 0; j < hidden_size; j++ {
             t.embeddings[i][j] = random_normal() * 0.02
         }
     }
     for i := 0; i < len(t.pos_embeddings); i++ {
-        t.pos_embeddings[i] = make([]f64, hidden_size)
+        t.pos_embeddings[i] = make(f64[], hidden_size)
         for j := 0; j < hidden_size; j++ {
             dim := f64(j)
             freq := 1.0 / pow_approx(10000.0, dim/f64(hidden_size))
@@ -64,19 +64,19 @@ func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_he
         }
     }
     for l := 0; l < len(t.attention_w_q); l++ {
-        t.attention_w_q[l] = make([][]f64, hidden_size)
-        t.attention_w_k[l] = make([][]f64, hidden_size)
-        t.attention_w_v[l] = make([][]f64, hidden_size)
-        t.attention_w_o[l] = make([][]f64, hidden_size)
-        t.ff_w1[l] = make([][]f64, hidden_size)
-        t.ff_w2[l] = make([][]f64, hidden_size*4)
-        t.ln_gamma[l] = make([][]f64, 2)
-        t.ln_beta[l] = make([][]f64, 2)
+        t.attention_w_q[l] = make(f64[][], hidden_size)
+        t.attention_w_k[l] = make(f64[][], hidden_size)
+        t.attention_w_v[l] = make(f64[][], hidden_size)
+        t.attention_w_o[l] = make(f64[][], hidden_size)
+        t.ff_w1[l] = make(f64[][], hidden_size)
+        t.ff_w2[l] = make(f64[][], hidden_size*4)
+        t.ln_gamma[l] = make(f64[][], 2)
+        t.ln_beta[l] = make(f64[][], 2)
         for i := 0; i < hidden_size; i++ {
-            t.attention_w_q[l][i] = make([]f64, hidden_size)
-            t.attention_w_k[l][i] = make([]f64, hidden_size)
-            t.attention_w_v[l][i] = make([]f64, hidden_size)
-            t.attention_w_o[l][i] = make([]f64, hidden_size)
+            t.attention_w_q[l][i] = make(f64[], hidden_size)
+            t.attention_w_k[l][i] = make(f64[], hidden_size)
+            t.attention_w_v[l][i] = make(f64[], hidden_size)
+            t.attention_w_o[l][i] = make(f64[], hidden_size)
             for j := 0; j < hidden_size; j++ {
                 t.attention_w_q[l][i][j] = random_normal() * 0.02
                 t.attention_w_k[l][i][j] = random_normal() * 0.02
@@ -85,21 +85,21 @@ func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_he
             }
         }
         for i := 0; i < hidden_size; i++ {
-            t.ff_w1[l][i] = make([]f64, hidden_size*4)
+            t.ff_w1[l][i] = make(f64[], hidden_size*4)
             for j := 0; j < hidden_size*4; j++ {
                 t.ff_w1[l][i][j] = random_normal() * 0.02
             }
         }
         for i := 0; i < hidden_size*4; i++ {
-            t.ff_w2[l][i] = make([]f64, hidden_size)
+            t.ff_w2[l][i] = make(f64[], hidden_size)
             for j := 0; j < hidden_size; j++ {
                 t.ff_w2[l][i][j] = random_normal() * 0.02
             }
         }
-        t.ln_gamma[l][0] = make([]f64, hidden_size)
-        t.ln_beta[l][0] = make([]f64, hidden_size)
-        t.ln_gamma[l][1] = make([]f64, hidden_size)
-        t.ln_beta[l][1] = make([]f64, hidden_size)
+        t.ln_gamma[l][0] = make(f64[], hidden_size)
+        t.ln_beta[l][0] = make(f64[], hidden_size)
+        t.ln_gamma[l][1] = make(f64[], hidden_size)
+        t.ln_beta[l][1] = make(f64[], hidden_size)
         for i := 0; i < hidden_size; i++ {
             t.ln_gamma[l][0][i] = 1.0
             t.ln_beta[l][0][i] = 0.0
@@ -108,7 +108,7 @@ func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_he
         }
     }
     for i := 0; i < hidden_size; i++ {
-        t.output_weight[i] = make([]f64, vocab_size)
+        t.output_weight[i] = make(f64[], vocab_size)
         for j := 0; j < vocab_size; j++ {
             t.output_weight[i][j] = random_normal() * 0.02
         }
@@ -116,16 +116,16 @@ func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_he
     return t
 }
 
-func transformer_forward(t simple_transformer, input_ids [][]i64) transformer_output {
+func transformer_forward(t simple_transformer, input_ids i64[][]) transformer_output {
     batch_size := i64(len(input_ids))
     seq_len := i64(len(input_ids[0]))
     hidden_size := t.hidden_size
-    hidden := make([][]f64, batch_size*seq_len)
+    hidden := make(f64[][], batch_size*seq_len)
     for b := 0; b < len(input_ids); b++ {
         for s := 0; s < len(input_ids[b]); s++ {
             token_id := int(input_ids[b][s])
             idx := b * len(input_ids[b]) + s
-            hidden[idx] = make([]f64, hidden_size)
+            hidden[idx] = make(f64[], hidden_size)
             for h := 0; h < hidden_size; h++ {
                 if token_id >= 0 && token_id < len(t.embeddings) {
                     hidden[idx][h] = t.embeddings[token_id][h] + t.pos_embeddings[s][h]
@@ -147,7 +147,7 @@ func transformer_forward(t simple_transformer, input_ids [][]i64) transformer_ou
         hidden = layer_norm(add_vectors(hidden, ff_out), t.ln_gamma[layer][1], t.ln_beta[layer][1])
     }
     logits_flat := matrix_multiply(hidden, t.output_weight)
-    logits := make([][]f64, batch_size*seq_len)
+    logits := make(f64[][], batch_size*seq_len)
     for i := 0; i < len(logits_flat); i++ {
         logits[i] = logits_flat[i]
     }
@@ -157,15 +157,15 @@ func transformer_forward(t simple_transformer, input_ids [][]i64) transformer_ou
     }
 }
 
-func matrix_multiply(a [][]f64, b [][]f64) [][]f64 {
+func matrix_multiply(a f64[][], b f64[][]) f64[][] {
     if len(a) == 0 || len(b) == 0 {
-        return make([][]f64, 0)
+        return make(f64[][], 0)
     }
     rows := len(a)
     cols := len(b[0])
-    result := make([][]f64, rows)
+    result := make(f64[][], rows)
     for i := 0; i < rows; i++ {
-        result[i] = make([]f64, cols)
+        result[i] = make(f64[], cols)
         for j := 0; j < cols; j++ {
             sum := 0.0
             for k := 0; k < len(b); k++ {
@@ -177,10 +177,10 @@ func matrix_multiply(a [][]f64, b [][]f64) [][]f64 {
     return result
 }
 
-func add_vectors(a [][]f64, b [][]f64) [][]f64 {
-    result := make([][]f64, len(a))
+func add_vectors(a f64[][], b f64[][]) f64[][] {
+    result := make(f64[][], len(a))
     for i := 0; i < len(a); i++ {
-        result[i] = make([]f64, len(a[i]))
+        result[i] = make(f64[], len(a[i]))
         for j := 0; j < len(a[i]); j++ {
             result[i][j] = a[i][j] + b[i][j]
         }
@@ -188,10 +188,10 @@ func add_vectors(a [][]f64, b [][]f64) [][]f64 {
     return result
 }
 
-func apply_relu(x [][]f64) [][]f64 {
-    result := make([][]f64, len(x))
+func apply_relu(x f64[][]) f64[][] {
+    result := make(f64[][], len(x))
     for i := 0; i < len(x); i++ {
-        result[i] = make([]f64, len(x[i]))
+        result[i] = make(f64[], len(x[i]))
         for j := 0; j < len(x[i]); j++ {
             if x[i][j] > 0.0 {
                 result[i][j] = x[i][j]
@@ -203,11 +203,11 @@ func apply_relu(x [][]f64) [][]f64 {
     return result
 }
 
-func layer_norm(x [][]f64, gamma []f64, beta []f64) [][]f64 {
-    result := make([][]f64, len(x))
+func layer_norm(x f64[][], gamma f64[], beta f64[]) f64[][] {
+    result := make(f64[][], len(x))
     eps := 1e-6
     for i := 0; i < len(x); i++ {
-        result[i] = make([]f64, len(x[i]))
+        result[i] = make(f64[], len(x[i]))
         mean := 0.0
         for j := 0; j < len(x[i]); j++ {
             mean = mean + x[i][j]

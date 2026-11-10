@@ -11,7 +11,7 @@ import (
 
 struct inference_request {
     string request_id
-    []int input_ids
+    int[] input_ids
     int max_tokens
     float temperature
     float top_p
@@ -20,8 +20,8 @@ struct inference_request {
 
 struct inference_response {
     string request_id
-    []int output_ids
-    []float logits
+    int[] output_ids
+    float[] logits
     bool success
     string error_msg
 }
@@ -72,7 +72,7 @@ func new_gpu_inference_engine(string model_path, int device_id) (gpu_inference_e
 }
 
 func generate_next_token(gpu_inference_engine* engine,
-                        []int input_ids,
+                        int[] input_ids,
                         float temperature) (int, bool, string) {
     
     if !engine.initialized {
@@ -146,7 +146,7 @@ func inference_single(gpu_inference_engine* engine,
     for gen_idx := 0; gen_idx < req.max_tokens; gen_idx = gen_idx + 1 {
         
         next_token, ok, err := generate_next_token(engine,
-                                                   current_ids as []int,
+                                                   current_ids as int[],
                                                    req.temperature)
         if !ok {
             result.error_msg = err
@@ -166,7 +166,7 @@ func inference_single(gpu_inference_engine* engine,
 }
 
 func infer_streaming(gpu_inference_engine* engine,
-                    []int input_ids,
+                    int[] input_ids,
                     int max_tokens,
                     int64 callback_fn) (bool, string) {
     
@@ -177,7 +177,7 @@ func infer_streaming(gpu_inference_engine* engine,
     
     for gen_idx := 0; gen_idx < max_tokens; gen_idx = gen_idx + 1 {
         next_token, ok, err := generate_next_token(engine,
-                                                   current_ids as []int,
+                                                   current_ids as int[],
                                                    0.7)
         if !ok {
             return false, err
@@ -194,8 +194,8 @@ func infer_streaming(gpu_inference_engine* engine,
 }
 
 func infer_prefill_decode(gpu_inference_engine* engine,
-                         []int input_ids,
-                         int max_new_tokens) ([]int, bool, string) {
+                         int[] input_ids,
+                         int max_new_tokens) (int[], bool, string) {
     
     output_ids := vec[int]()
     
@@ -209,7 +209,7 @@ func infer_prefill_decode(gpu_inference_engine* engine,
     
     for i := 0; i < max_new_tokens; i = i + 1 {
         next_token, ok, err := generate_next_token(engine,
-                                                   current_ids as []int,
+                                                   current_ids as int[],
                                                    0.8)
         if !ok {
             return 0, false, err
@@ -227,8 +227,8 @@ func infer_prefill_decode(gpu_inference_engine* engine,
 }
 
 func infer_tensor_parallel(gpu_inference_engine* engines[],
-                          []int input_ids,
-                          int max_tokens) ([]int, bool, string) {
+                          int[] input_ids,
+                          int max_tokens) (int[], bool, string) {
     
     if engines.len() == 0 {
         return 0, false, "no engines provided"
@@ -240,8 +240,8 @@ func infer_tensor_parallel(gpu_inference_engine* engines[],
 }
 
 func infer_pipeline_parallel(gpu_inference_engine* engines[],
-                            []int input_ids,
-                            int max_tokens) ([]int, bool, string) {
+                            int[] input_ids,
+                            int max_tokens) (int[], bool, string) {
     
     if engines.len() == 0 {
         return 0, false, "no engines provided"
@@ -277,12 +277,12 @@ func sample_token_with_temperature(gpu_matrix logits, float temperature) int {
     return 0
 }
 
-func sample_token_top_k([]int logits, int k, float temperature) int {
+func sample_token_top_k(int[] logits, int k, float temperature) int {
 
     return 0
 }
 
-func sample_token_nucleus([]int logits, float p, float temperature) int {
+func sample_token_nucleus(int[] logits, float p, float temperature) int {
 
     return 0
 }

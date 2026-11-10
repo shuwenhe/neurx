@@ -35,8 +35,8 @@ struct reward_sample {
 }
 
 struct verifiable_reward_manager_state {
-    []reward_function_config reward_functions
-    []reward_sample history
+    reward_function_config[] reward_functions
+    reward_sample[] history
     int sample_count
     float avg_reward
     float reward_variance
@@ -46,8 +46,8 @@ struct verifiable_reward_manager_state {
 
 func new_verifiable_reward_manager() verifiable_reward_manager_state {
     verifiable_reward_manager_state {
-        reward_functions: make([]reward_function_config, 50),
-        history: make([]reward_sample, 100000),
+        reward_functions: make(reward_function_config[], 50),
+        history: make(reward_sample[], 100000),
         sample_count: 0,
         avg_reward: 0.0,
         reward_variance: 0.0,
@@ -65,7 +65,7 @@ func reward_register_function(verifiable_reward_manager_state state, string func
         max_reward: max_reward,
         min_reward: -max_reward,
     }
-    state.reward_functions += []reward_function_config{config}
+    state.reward_functions += reward_function_config[]{config}
     state.function_call_count[func_name] = 0
     eprintln("[RewardManager] Registered reward function: " + func_name + " (type: " + reward_type_to_string(reward_t) + ")")
     state
@@ -109,7 +109,7 @@ func reward_compute_math_reward(verifiable_reward_manager_state state, int step,
         verification: verification,
         step: step,
     }
-    state.history += []reward_sample{sample}
+    state.history += reward_sample[]{sample}
     state.sample_count = state.sample_count + 1
     int count = state.function_call_count["math"]
     state.function_call_count["math"] = count + 1
@@ -137,7 +137,7 @@ func reward_compute_code_reward(verifiable_reward_manager_state state, int step,
         verification: verification,
         step: step,
     }
-    state.history += []reward_sample{sample}
+    state.history += reward_sample[]{sample}
     state.sample_count = state.sample_count + 1
     int count = state.function_call_count["code"]
     state.function_call_count["code"] = count + 1
@@ -161,7 +161,7 @@ func reward_compute_model_based(verifiable_reward_manager_state state, int step,
         },
         step: step,
     }
-    state.history += []reward_sample{sample}
+    state.history += reward_sample[]{sample}
     state.sample_count = state.sample_count + 1
     int count = state.function_call_count["model_based"]
     state.function_call_count["model_based"] = count + 1
@@ -235,7 +235,7 @@ func reward_get_report(verifiable_reward_manager_state state) string {
     report = report + "Verification Ratio: " + float_to_str_func(reward_get_verification_ratio(state)) + "\n"
     report = report + "Accuracy (Verifiable): " + float_to_str_func(reward_get_accuracy(state)) + "\n"
     report = report + "Function Calls:\n"
-    []string keys = map_keys_func(state.function_call_count)
+    string[] keys = map_keys_func(state.function_call_count)
     for i in range(len(keys)) {
         string key = keys[i]
         int count = state.function_call_count[key]
@@ -276,7 +276,7 @@ func float_to_str_func(float f) string {
     ""
 }
 
-func map_keys_func(map string = int m) []string {
-    []string keys = make([]string, 100)
+func map_keys_func(map string = int m) string[] {
+    string[] keys = make(string[], 100)
     keys
 }

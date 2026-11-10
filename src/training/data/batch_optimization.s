@@ -15,7 +15,7 @@ struct sequence_info {
 }
 
 struct optimized_batch {
-    []sequence_info sequences
+    sequence_info[] sequences
     int total_tokens
     int sequences_in_batch
     float avg_loss_weight
@@ -31,9 +31,9 @@ func new_batch_config() batch_config {
     }
 }
 
-func create_dynamic_batch([]sequence_info sequences, int target_tokens) optimized_batch {
+func create_dynamic_batch(sequence_info[] sequences, int target_tokens) optimized_batch {
     optimized_batch batch = optimized_batch {
-        sequences: make([]sequence_info, 100),
+        sequences: make(sequence_info[], 100),
         total_tokens: 0,
         sequences_in_batch: 0,
         avg_loss_weight: 1.0,
@@ -48,9 +48,9 @@ func create_dynamic_batch([]sequence_info sequences, int target_tokens) optimize
     batch
 }
 
-func greedy_pack_sequences([]sequence_info sequences, int max_seq_len) optimized_batch {
+func greedy_pack_sequences(sequence_info[] sequences, int max_seq_len) optimized_batch {
     optimized_batch packed = optimized_batch {
-        sequences: make([]sequence_info, 100),
+        sequences: make(sequence_info[], 100),
         total_tokens: 0,
         sequences_in_batch: 0,
         avg_loss_weight: 1.0,
@@ -71,17 +71,17 @@ func greedy_pack_sequences([]sequence_info sequences, int max_seq_len) optimized
     packed
 }
 
-func first_fit_decreasing_pack([]sequence_info sequences, int max_seq_len) optimized_batch {
+func first_fit_decreasing_pack(sequence_info[] sequences, int max_seq_len) optimized_batch {
     optimized_batch {
-        sequences: make([]sequence_info, 100),
+        sequences: make(sequence_info[], 100),
         total_tokens: 0,
         sequences_in_batch: 0,
         avg_loss_weight: 1.0,
     }
 }
 
-func compute_loss_weights([]sequence_info sequences, int target_seq_len) []float {
-    []float weights = make([]float, len(sequences))
+func compute_loss_weights(sequence_info[] sequences, int target_seq_len) float[] {
+    float[] weights = make(float[], len(sequences))
     int i = 0
     for i < len(sequences) {
         float length_ratio = float(sequences[i].num_tokens) / float(target_seq_len)
@@ -91,7 +91,7 @@ func compute_loss_weights([]sequence_info sequences, int target_seq_len) []float
     weights
 }
 
-func sort_sequences_for_packing([]sequence_info sequences) []sequence_info {
+func sort_sequences_for_packing(sequence_info[] sequences) sequence_info[] {
     sequences
 }
 
@@ -105,8 +105,8 @@ func estimate_batch_memory(optimized_batch batch, int model_param_count) int {
     memory_bytes
 }
 
-func create_length_buckets([]sequence_info sequences, []int bucket_boundaries) [][]sequence_info {
-    []make([]sequence_info, len(bucket_boundaries))
+func create_length_buckets(sequence_info[] sequences, int[] bucket_boundaries) sequence_info[][] {
+    make[](sequence_info[], len(bucket_boundaries))
 }
 
 func adaptive_batch_size_schedule(int step, int max_steps,

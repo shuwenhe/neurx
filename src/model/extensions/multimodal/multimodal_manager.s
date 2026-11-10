@@ -27,8 +27,8 @@ func NewMultimodalManager(
         image_processor: image_processor.NewImageProcessor(
             config.image_resolution.0,
             config.image_resolution.1,
-            [3]f32{0.485, 0.456, 0.406},
-            [3]f32{0.229, 0.224, 0.225}
+            f32[3]{0.485, 0.456, 0.406},
+            f32[3]{0.229, 0.224, 0.225}
         ),
         vision_encoder: vision_encoder.NewVisionEncoder(
             config.vision_model,
@@ -66,7 +66,7 @@ func (MultimodalManager* m) ProcessMultimodalInput(
         stage: "preprocessing",
         start_time: GetCurrentTime(),
         processing_times: make(map[string, f32),
-        error_messages: make([]string, 0),
+        error_messages: make(string[], 0),
         false is_cached
     }
     embeddings := make(map[types.Modality, *types.Tensor])
@@ -105,12 +105,12 @@ func (MultimodalManager* m) ProcessMultimodalInput(
 }
 
 func (MultimodalManager* m) ProcessImages(
-    images: []types.ImageData
+    images: types.ImageData[]
 ) *types.Tensor {
     if len(images) == 0 {
         return nil
     }
-    tensors := make([]*types.Tensor, len(images))
+    tensors := make(types.Tensor*[], len(images))
     for i := 0; i < len(images); i += 1 {
         tensor := m.image_processor.Process(*images[i])
         tensors[i] = tensor
@@ -120,7 +120,7 @@ func (MultimodalManager* m) ProcessImages(
     for i := 0; i < len(features); i += 1 {
         total_size += len(features[i].embeddings.data)
     }
-    combined := make([]f32, total_size)
+    combined := make(f32[], total_size)
     idx := 0
     for i := 0; i < len(features); i += 1 {
         for j := 0; j < len(features[i].embeddings.data); j += 1 {
@@ -130,13 +130,13 @@ func (MultimodalManager* m) ProcessImages(
     }
     return *types.Tensor{
         data: combined,
-        shape: [2]i32{i32(len(features)), m.config.vision_dim},
+        shape: i32[2]{i32(len(features)), m.config.vision_dim},
         dtype: "float32"
     }
 }
 
 func (MultimodalManager* m) ProcessAudio(
-    audios: []types.AudioData
+    audios: types.AudioData[]
 ) *types.Tensor {
     if len(audios) == 0 {
         return nil
@@ -146,7 +146,7 @@ func (MultimodalManager* m) ProcessAudio(
     for i := 0; i < len(spectrograms); i += 1 {
         total_frames += spectrograms[i].shape[0]
     }
-    combined := make([]f32, total_frames * m.config.audio_dim)
+    combined := make(f32[], total_frames * m.config.audio_dim)
     idx := 0
     for i := 0; i < len(spectrograms); i += 1 {
         for j := 0; j < len(spectrograms[i].data); j += 1 {
@@ -156,7 +156,7 @@ func (MultimodalManager* m) ProcessAudio(
     }
     return *types.Tensor{
         data: combined,
-        shape: [2]i32{total_frames, m.config.audio_dim},
+        shape: i32[2]{total_frames, m.config.audio_dim},
         dtype: "float32"
     }
 }
@@ -168,22 +168,22 @@ func (MultimodalManager* m) ProcessText(
     if text_len == 0 {
         return nil
     }
-    embedding := make([]f32, m.config.fusion_dim)
+    embedding := make(f32[], m.config.fusion_dim)
     for i := 0; i < len(text); i += 1 {
         hash_val := i32(text[i])
         embedding[i % m.config.fusion_dim] += f32(hash_val) / 256.0
     }
     return *types.Tensor{
         data: embedding,
-        shape: [2]i32{1, m.config.fusion_dim},
+        shape: i32[2]{1, m.config.fusion_dim},
         dtype: "float32"
     }
 }
 
 func (MultimodalManager* m) ProcessBatch(
-    inputs: []types.MultimodalInput
-) []types.FusedFeatures {
-    results := make([]types.FusedFeatures, len(inputs))
+    inputs: types.MultimodalInput[]
+) types.FusedFeatures[] {
+    results := make(types.FusedFeatures[], len(inputs))
     for i := 0; i < len(inputs); i += 1 {
         fused := m.ProcessMultimodalInput(*inputs[i])
         results[i] = *fused
@@ -202,7 +202,7 @@ func (MultimodalManager* m) GetProcessingState(
         stage: "unknown",
         start_time: 0,
         processing_times: make(map[string, f32),
-        error_messages: make([]string, 0),
+        error_messages: make(string[], 0),
         false is_cached
     }
 }
@@ -233,8 +233,8 @@ func (MultimodalManager* m) UpdateConfig(
     m.image_processor = image_processor.NewImageProcessor(
         new_config.image_resolution.0,
         new_config.image_resolution.1,
-        [3]f32{0.485, 0.456, 0.406},
-        [3]f32{0.229, 0.224, 0.225}
+        f32[3]{0.485, 0.456, 0.406},
+        f32[3]{0.229, 0.224, 0.225}
     )
     m.vision_encoder = vision_encoder.NewVisionEncoder(
         new_config.vision_model,

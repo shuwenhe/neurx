@@ -24,14 +24,14 @@ struct inference_request {
 }
 
 struct batch_request {
-    []inference_request requests
+    inference_request[] requests
     int batch_size
     int max_length
     int total_tokens
 }
 
 struct batch_scheduler {
-    []inference_request queue
+    inference_request[] queue
     batch_config config
     int request_counter
     int total_scheduled
@@ -80,7 +80,7 @@ func create_default_batch_config() batch_config {
 
 func create_batch_scheduler(batch_config config) batch_scheduler {
     batch_scheduler{
-        queue: make([]inference_request, config.queue_size),
+        queue: make(inference_request[], config.queue_size),
         config: config,
         request_counter: 0,
         total_scheduled: 0,
@@ -101,7 +101,7 @@ func add_request(batch_scheduler* scheduler, inference_request req) bool {
 
 func get_next_batch(batch_scheduler* scheduler) batch_request {
     batch_request batch = batch_request{
-        requests: make([]inference_request, scheduler.config.max_batch_size),
+        requests: make(inference_request[], scheduler.config.max_batch_size),
         batch_size: 0,
         max_length: 0,
         total_tokens: 0
@@ -158,7 +158,7 @@ func should_merge_batches(batch_request batch1, batch_request batch2, batch_conf
 
 func merge_batches(batch_request batch1, batch_request batch2) batch_request {
     batch_request merged = batch_request{
-        requests: make([]inference_request, len(batch1.requests) + len(batch2.requests)),
+        requests: make(inference_request[], len(batch1.requests) + len(batch2.requests)),
         batch_size: batch1.batch_size + batch2.batch_size,
         max_length: batch1.max_length,
         total_tokens: batch1.total_tokens + batch2.total_tokens

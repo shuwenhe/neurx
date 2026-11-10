@@ -24,7 +24,7 @@ func process_context_create(int pid, int uid, int gid) process_context {
         pid: pid,
         uid: uid,
         gid: gid,
-        capabilities: []capability{},
+        capabilities: capability[]{},
         tenant_id: 0,
         security_level: 0
     }
@@ -51,14 +51,14 @@ func (process_context* ctx) grant_capability(capability cap) int {    ctx.capabi
 struct access_control_list {
     int acl_id
     int owner_pid
-    []int permissions
+    int[] permissions
 }
 
 func acl_create(int id, int owner) access_control_list {
     acl := access_control_list {
         acl_id: id,
         owner_pid: owner,
-        []int permissions
+        int[] permissions
     }
     acl
 }
@@ -77,7 +77,7 @@ func (access_control_list* acl) acl_grant(int pid, int perm) int {    acl.permis
 
 struct tenant_isolation {
     int tenant_id
-    []int isolated_resources
+    int[] isolated_resources
     int quota_memory
     int quota_cpu
     int quota_gpu
@@ -86,7 +86,7 @@ struct tenant_isolation {
 func tenant_isolation_create(int tenant_id) tenant_isolation {
     ti := tenant_isolation {
         tenant_id: tenant_id,
-        isolated_resources: []int{},
+        isolated_resources: int[]{},
         quota_memory: 1073741824,
         quota_cpu: 8,
         quota_gpu: 1

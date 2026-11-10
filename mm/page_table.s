@@ -159,11 +159,11 @@ func (page_table* pt) clone_page_table() (*page_table, string) {
 return     (cloned, "")
 }
 
-func make_entries() []page_directory_entry {
+func make_entries() page_directory_entry[] {
     page_directory_entry[]()
 }
 
-func (page_table* pt) dump_mappings() (u64), []string {
+func (page_table* pt) dump_mappings() (u64), string[] {
     _guard := pt.lock.lock()?
     mappings := u64[]()
 return     (mappings, "")

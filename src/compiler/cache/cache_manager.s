@@ -6,7 +6,7 @@ import (
 struct cache_entry {
     string cache_key
     ir_graph optimized_graph
-    []string backend_kernels
+    string[] backend_kernels
     int entry_size_bytes
     int created_at_timestamp
     int last_accessed_at_timestamp
@@ -22,7 +22,7 @@ struct cache_stats {
 }
 
 struct cache_manager {
-    []cache_entry entries
+    cache_entry[] entries
     cache_stats stats
     int max_cache_size_bytes
     string cache_directory
@@ -30,7 +30,7 @@ struct cache_manager {
 
 func new_cache_manager(string cache_dir, int max_size_mb) cache_manager {
     cache_manager {
-        entries: make([]cache_entry, 10000),
+        entries: make(cache_entry[], 10000),
         stats: cache_stats {
             total_entries: 0,
             hits: 0,
@@ -64,7 +64,7 @@ func cache_lookup(cache_manager mgr, ir_graph graph) cache_entry {
     }
 }
 
-func cache_store(cache_manager mgr, ir_graph graph, []string kernels) cache_manager {
+func cache_store(cache_manager mgr, ir_graph graph, string[] kernels) cache_manager {
     cache_entry entry = cache_entry {
         cache_key: generate_cache_key(graph),
         optimized_graph: graph,
@@ -96,6 +96,6 @@ func get_cache_stats(cache_manager mgr) cache_stats {
 func clear_cache(cache_manager mgr) cache_manager {
     mgr.stats.total_entries = 0
     mgr.stats.total_size_bytes = 0
-    mgr.entries = make([]cache_entry, 10000)
+    mgr.entries = make(cache_entry[], 10000)
     mgr
 }

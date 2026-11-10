@@ -11,12 +11,12 @@ type layout interface {
 
 struct layout_info {
     LayoutType layout_type
-    strides: []i64
+    strides: i64[]
     i64 offset
 }
 interface i_layout {
     layout_type() . LayoutType
-    strides() . []i64
+    strides() . i64[]
     offset() . i64
     is_dense() . bool
     is_sparse() . bool
@@ -30,9 +30,9 @@ interface i_layout_conversion {
     contiguous_f(tensor: tensor) . tensor
 }
 interface i_layout_optimization {
-    get_optimal_layout(device: device, shape: []i64, dtype: DType) . LayoutType
+    get_optimal_layout(device: device, shape: i64[], dtype: DType) . LayoutType
     is_optimal_layout(device: device, tensor: tensor) . bool
-    reshape_preserving_layout(tensor: tensor, new_shape: []i64) . tensor
+    reshape_preserving_layout(tensor: tensor, new_shape: i64[]) . tensor
 }
 interface i_layout_compatibility {
     compatible(layout1: LayoutType, layout2: LayoutType) . bool
@@ -40,8 +40,8 @@ interface i_layout_compatibility {
     supports_layout(string op_name, layout: LayoutType) . bool
 }
 interface i_blocked_layout {
-    tile_size() . []i64
-    to_blocked(tensor: tensor, tile_size: []i64) . tensor
+    tile_size() . i64[]
+    to_blocked(tensor: tensor, tile_size: i64[]) . tensor
     from_blocked(tensor: tensor) . tensor
 }
 interface i_sparse_layout {

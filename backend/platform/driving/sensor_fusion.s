@@ -14,19 +14,19 @@ import (
 
 struct sensor_reading {
     sensor_type stype
-    []float data
+    float[] data
     int timestamp_us
     bool valid
 }
 
 struct sensor_fusion_result {
-    []float fused_state
-    []float uncertainty
+    float[] fused_state
+    float[] uncertainty
     int fusion_latency_us
 }
 
 struct sensor_fusion_engine {
-    []sensor_type active_sensors
+    sensor_type[] active_sensors
     int fusion_rate_hz
     int max_sensor_latency_us
     bool outlier_rejection_enabled
@@ -45,8 +45,8 @@ func (sensor_fusion_engine* engine) register_sensor(sensor_type stype) {
     engine.active_sensors = append(engine.active_sensors, stype)
 }
 
-func (sensor_fusion_engine* engine) fuse_readings([]sensor_reading readings) sensor_fusion_result {    fused_state := []float()
-    uncertainty := []float()
+func (sensor_fusion_engine* engine) fuse_readings(sensor_reading[] readings) sensor_fusion_result {    fused_state := float[]()
+    uncertainty := float[]()
     
     for i in len(0..readings) {
         if readings[i].valid {

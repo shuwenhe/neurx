@@ -1,5 +1,7 @@
 # NeurX 本地推理诊断与修复记录
 
+> 本文保留早期失败阶段的历史结论。后续已完成指定原生 Qwen 验收；当前结果和剩余限制见 [最终验收报告](NATIVE_INFERENCE_ACCEPTANCE.md)。
+
 ## 验收结论
 
 **NOT DONE：没有完成真实 Qwen checkpoint 的完整加载，没有完成该 checkpoint 的前向传播，没有产生 logits 或生成 token。** 以下单元测试和 Stage1 诊断构建不作为最终验收成功的证据。没有用 Python、预设回答、外部 API 或 reference-model 冒充模型推理结果。

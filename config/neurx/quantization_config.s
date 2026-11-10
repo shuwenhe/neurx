@@ -38,7 +38,7 @@ struct quantization_config {
     float32 smooth_quant_alpha
 
     bool enable_mixed_precision
-    []string mixed_precision_layers
+    string[] mixed_precision_layers
 
     map[string]interface{} extra_config
 }
@@ -62,7 +62,7 @@ func create_default_quantization_config() quantization_config {
         use_smooth_quant: false,
         smooth_quant_alpha: 0.5,
         enable_mixed_precision: false,
-        mixed_precision_layers: make([]string, 0),
+        mixed_precision_layers: make(string[], 0),
         extra_config: make(map[string]interface{}),
     }
 }

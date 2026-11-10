@@ -36,7 +36,7 @@ interface i_stream_manager {
     get_default_stream(device: device) . stream
     create_priority_stream(device: device, priority: StreamPriority) . stream
     destroy_stream(stream: stream) . void
-    list_streams(device: device) . []stream
+    list_streams(device: device) . stream[]
     synchronize_all(device: device) . void
     set_current_stream(stream: stream) . void
     get_current_stream(device: device) . stream

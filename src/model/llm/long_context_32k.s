@@ -16,23 +16,23 @@ struct rope_config {
 struct rope_state {
     rope_config config
     rope_cache cache
-    []float freqs
-    []float scaled_freqs
+    float[] freqs
+    float[] scaled_freqs
     float extrapolation_ratio
     float freq_min
     float freq_max
 }
 
 struct rope_cache {
-    []float cos_cache
-    []float sin_cache
+    float[] cos_cache
+    float[] sin_cache
     int max_seq_len
     int freq_dim
 }
 
 struct rope_qk_result {
-    []float rotated_q
-    []float rotated_k
+    float[] rotated_q
+    float[] rotated_k
 }
 
 func rope_config_new(
@@ -52,9 +52,9 @@ func rope_config_new(
 
 func compute_rope_frequencies(
     rope_config config
-) []float {
+) float[] {
     int dim = config.dim
-    []float freqs = make([]float, dim / 2)
+    float[] freqs = make(float[], dim / 2)
     int i = 0
     for i < dim / 2 {
         float exp = -2.0 * float(i) / float(dim)
@@ -67,10 +67,10 @@ func compute_rope_frequencies(
 
 func apply_ntk_scaling(
     rope_config config,
-    []float freqs,
+    float[] freqs,
     int context_len
-) []float {
-    []float scaled_freqs = make([]float, len(freqs))
+) float[] {
+    float[] scaled_freqs = make(float[], len(freqs))
     float alpha = config.alpha
     if context_len > config.max_seq_len {
         float ratio = float(context_len) / float(config.max_seq_len)
@@ -86,10 +86,10 @@ func apply_ntk_scaling(
 
 func apply_linear_interpolation_scaling(
     rope_config config,
-    []float freqs,
+    float[] freqs,
     int context_len
-) []float {
-    []float scaled_freqs = make([]float, len(freqs))
+) float[] {
+    float[] scaled_freqs = make(float[], len(freqs))
     float scale = float(context_len) / float(config.max_seq_len)
     int i = 0
     for i < len(freqs) {
@@ -107,13 +107,13 @@ func apply_linear_interpolation_scaling(
 
 func precompute_rope_cache(
     rope_config config,
-    []float scaled_freqs
+    float[] scaled_freqs
 ) rope_cache {
     int max_seq_len = config.max_seq_len
     int freq_dim = len(scaled_freqs)
     int cache_size = max_seq_len * freq_dim
-    []float cos_cache = make([]float, cache_size)
-    []float sin_cache = make([]float, cache_size)
+    float[] cos_cache = make(float[], cache_size)
+    float[] sin_cache = make(float[], cache_size)
     int m = 0
     for m < max_seq_len {
         int i = 0
@@ -136,15 +136,15 @@ func precompute_rope_cache(
 
 func apply_rope_to_qk(
     rope_state rope,
-    []float query,
-    []float key,
+    float[] query,
+    float[] key,
     int batch_size,
     int seq_len,
     int num_heads,
     int head_dim
 ) rope_qk_result {
-    []float rotated_q = make([]float, len(query))
-    []float rotated_k = make([]float, len(key))
+    float[] rotated_q = make(float[], len(query))
+    float[] rotated_k = make(float[], len(key))
     int b = 0
     for b < batch_size {
         int s = 0
@@ -186,8 +186,8 @@ func apply_rope_to_qk(
 func rope_state_new(
     rope_config config
 ) rope_state {
-    []float freqs = compute_rope_frequencies(config)
-    []float scaled_freqs = freqs
+    float[] freqs = compute_rope_frequencies(config)
+    float[] scaled_freqs = freqs
     if config.scaling_type == "ntk" {
         scaled_freqs = apply_ntk_scaling(config, freqs, config.max_seq_len)
     } else if config.scaling_type == "linear" {

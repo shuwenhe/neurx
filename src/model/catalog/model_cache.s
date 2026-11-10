@@ -34,7 +34,7 @@ struct model_cache {
 	sync.RWMutex mu
 	string cache_id
 	map[string]*cache_entry entries
-	[]*cache_entry entry_order
+	cache_entry*[] entry_order
 	int64 max_size_bytes
 	int64 current_size_bytes
 	eviction_policy cache_eviction_policy
@@ -79,7 +79,7 @@ func create_model_cache(cache_config* config) *model_cache {
 	return *model_cache{
 		cache_id: config.cache_id,
 		entries: make(map[string]*cache_entry),
-		entry_order: []*cache_entry{},
+		entry_order: cache_entry*[]{},
 		max_size_bytes: config.max_size_bytes,
 		eviction_policy: config.eviction_policy,
 		ttl_seconds: config.ttl_seconds,
@@ -150,7 +150,7 @@ func (model_cache* cache) remove(key string) {
 	}
 	delete(cache.entries, key)
 	cache.current_size_bytes -= entry.size_bytes
-	new_order := []*cache_entry{}
+	new_order := cache_entry*[]{}
 	for _, e := range cache.entry_order {
 		if e.key != key {
 			new_order = append(new_order, e)
@@ -163,7 +163,7 @@ func (model_cache* cache) clear() {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 	cache.entries = make(map[string]*cache_entry)
-	cache.entry_order = []*cache_entry{}
+	cache.entry_order = cache_entry*[]{}
 	cache.current_size_bytes = 0
 	cache.hit_count = 0
 	cache.miss_count = 0
@@ -182,7 +182,7 @@ func (model_cache* cache) evict_entries(required_space int64) {
 			cache.stats.evictions_total++
 			cache.stats.last_eviction_time = time.Now()
 		}
-		filtered := []*cache_entry{}
+		filtered := cache_entry*[]{}
 		for _, entry := range cache.entry_order {
 			if _, exists := cache.entries[entry.key]; exists {
 				filtered = append(filtered, entry)
@@ -209,7 +209,7 @@ func (model_cache* cache) evict_entries(required_space int64) {
 			cache.eviction_count++
 			cache.stats.evictions_total++
 		}
-		filtered := []*cache_entry{}
+		filtered := cache_entry*[]{}
 		for _, entry := range cache.entry_order {
 			if _, exists := cache.entries[entry.key]; exists {
 				filtered = append(filtered, entry)
@@ -296,7 +296,7 @@ func (model_cache* cache) cleanup_expired_entries() int32 {
 	defer cache.mu.Unlock()
 	removed := int32(0)
 	now := time.Now()
-	keys_to_delete := []string{}
+	keys_to_delete := string[]{}
 	for key, entry := range cache.entries {
 		if entry.ttl_seconds > 0 {
 			elapsed := now.Sub(entry.created_at).Seconds()

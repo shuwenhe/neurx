@@ -25,8 +25,8 @@ import (
     backward_pass_output
 }
 
-func allocate_vector(int size, float init_val) []float {
-    []float v = make([]float, size)
+func allocate_vector(int size, float init_val) float[] {
+    float[] v = make(float[], size)
     int i = 0
     for i < size {
         v[i] = init_val
@@ -35,8 +35,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector([]float src) []float {
-    []float out = allocate_vector(len(src), 0.0)
+func copy_vector(float[] src) float[] {
+    float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -103,14 +103,14 @@ func initialize_transformer_layer(int hidden_dim, int intermediate_dim) transfor
 
 func initialize_transformer_state(transformer_forward_config cfg) transformer_forward_state {
     int head_dim = cfg.hidden_dim / cfg.num_heads
-    []transformer_layer_state layers = make([]transformer_layer_state, cfg.num_layers)
+    transformer_layer_state[] layers = make(transformer_layer_state[], cfg.num_layers)
     int layer_idx = 0
     for layer_idx < cfg.num_layers {
         layers[layer_idx] = initialize_transformer_layer(cfg.hidden_dim, cfg.intermediate_dim)
         layer_idx = layer_idx + 1
     }
-    []float token_embedding = allocate_vector(cfg.vocab_size * cfg.hidden_dim, 0.1)
-    []float lm_head_weight = allocate_vector(cfg.vocab_size * cfg.hidden_dim, 0.1)
+    float[] token_embedding = allocate_vector(cfg.vocab_size * cfg.hidden_dim, 0.1)
+    float[] lm_head_weight = allocate_vector(cfg.vocab_size * cfg.hidden_dim, 0.1)
     position_encoding_config pos_cfg = position_encoding_config {
         hidden_dim: cfg.hidden_dim,
         max_seq_len: cfg.max_seq_len,
@@ -142,15 +142,15 @@ func initialize_transformer_state(transformer_forward_config cfg) transformer_fo
 }
 
 struct training_batch {
-    []int input_ids
-    []int target_ids
+    int[] input_ids
+    int[] target_ids
     int batch_size
     int seq_len
 }
 
 func create_dummy_batch(int batch_size, int seq_len, int vocab_size) training_batch {
-    []int input_ids = allocate_vector(batch_size * seq_len, 1)
-    []int target_ids = allocate_vector(batch_size * seq_len, 1)
+    int[] input_ids = allocate_vector(batch_size * seq_len, 1)
+    int[] target_ids = allocate_vector(batch_size * seq_len, 1)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -174,7 +174,7 @@ func training_step(
     transformer_forward_state transformer,
     training_batch batch,
     float learning_rate
-) []float {
+) float[] {
     int batch_size = batch.batch_size
     int seq_len = batch.seq_len
     forward_output := transformer_forward_pass(
@@ -183,7 +183,7 @@ func training_step(
         batch_size,
         seq_len
     )
-    []float logits = forward_output.logits
+    float[] logits = forward_output.logits
     loss_result := compute_cross_entropy_loss_with_gradient(
         logits,
         batch.target_ids,
@@ -191,8 +191,8 @@ func training_step(
         seq_len,
         transformer.vocab_size
     )
-    []float loss_values = loss_result[0]
-    []float grad_logits = loss_result[1]
+    float[] loss_values = loss_result[0]
+    float[] grad_logits = loss_result[1]
     float total_loss = 0.0
     int i = 0
     for i < batch_size * seq_len {
@@ -212,7 +212,7 @@ func training_step(
         transformer.num_heads,
         transformer.vocab_size
     )
-    []float metrics = allocate_vector(3, 0.0)
+    float[] metrics = allocate_vector(3, 0.0)
     metrics[0] = total_loss
     metrics[1] = 0.0
     metrics[2] = 0.0
@@ -240,7 +240,7 @@ func example_inference_forward_pass() {
     transformer := initialize_transformer_state(transformer_cfg)
     int batch_size = 1
     int seq_len = 16
-    []int input_ids = allocate_vector(batch_size * seq_len, 1)
+    int[] input_ids = allocate_vector(batch_size * seq_len, 1)
     int i = 0
     for i < batch_size * seq_len {
         input_ids[i] = i % transformer_cfg.vocab_size
@@ -252,7 +252,7 @@ func example_inference_forward_pass() {
         batch_size,
         seq_len
     )
-    []float logits = output.logits
+    float[] logits = output.logits
     int seq_idx = 0
     for seq_idx < seq_len {
         int logit_idx = seq_idx * transformer_cfg.vocab_size

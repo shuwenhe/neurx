@@ -47,8 +47,7 @@ struct ext4_superblock {
 }
 ext4_superblock g_superblock
 ext4_block_group g_block_groups[]
-ext4_inode g_inode_cache[]
-int g_nr_block_groups
+ext4_inode int[] g_inode_cache g_nr_block_groups
 func ext4_init_superblock(int total_blocks, int total_inodes) int {
     var block_size = 4096
     var blocks_per_group = 32768
@@ -210,21 +209,21 @@ func ext4_statfs() (int, int, int) {
     total_blocks, used_blocks, free_blocks
 }
 
-func ext4_set_bit([]int bitmap, int bit_num) int {
+func ext4_set_bit(int[] bitmap, int bit_num) int {
     var byte_num = bit_num / 8
     var bit_offset = bit_num % 8
     bitmap[byte_num] = bitmap[byte_num] | (1 << bit_offset)
     0
 }
 
-func ext4_clear_bit([]int bitmap, int bit_num) int {
+func ext4_clear_bit(int[] bitmap, int bit_num) int {
     var byte_num = bit_num / 8
     var bit_offset = bit_num % 8
     bitmap[byte_num] = bitmap[byte_num] & ~(1 << bit_offset)
     0
 }
 
-func ext4_test_bit([]int bitmap, int bit_num) bool {
+func ext4_test_bit(int[] bitmap, int bit_num) bool {
     var byte_num = bit_num / 8
     var bit_offset = bit_num % 8
     var val = bitmap[byte_num] & (1 << bit_offset)

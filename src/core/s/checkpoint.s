@@ -5,9 +5,9 @@ import (
     "neurx.tensor.tensor"
 )
 
-func copy_float([]float data) []float {
+func copy_float(float[] data) float[] {
     int n = len(data)
-    []float out = make([]float, n)
+    float[] out = make(float[], n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -16,9 +16,9 @@ func copy_float([]float data) []float {
     out
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     int n = len(data)
-    []int out = make([]int, n)
+    int[] out = make(int[], n)
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -182,9 +182,9 @@ func resolve_checkpoint_path(string path) string {
     target
 }
 
-func split_lines(string text) []string {
+func split_lines(string text) string[] {
     int n = len(text)
-    []string lines = []string{}
+    string[] lines = string[]{}
     string current = ""
     int i = 0
     for i < n {
@@ -208,9 +208,9 @@ func split_lines(string text) []string {
     lines
 }
 
-func csv_tokens(string text) []string {
+func csv_tokens(string text) string[] {
     int n = len(text)
-    []string tokens = []string{}
+    string[] tokens = string[]{}
     string current = ""
     int i = 0
     for i < n {
@@ -230,7 +230,7 @@ func csv_tokens(string text) []string {
     tokens
 }
 
-func join_ints([]int values) string {
+func join_ints(int[] values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -243,7 +243,7 @@ func join_ints([]int values) string {
     out
 }
 
-func join_floats([]float values) string {
+func join_floats(float[] values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -256,9 +256,9 @@ func join_floats([]float values) string {
     out
 }
 
-func parse_int_list(string value) []int {
-    []string parts = csv_tokens(value)
-    []int out = []int{}
+func parse_int_list(string value) int[] {
+    string[] parts = csv_tokens(value)
+    int[] out = int[]{}
     int i = 0
     for i < len(parts) {
         string token = trim(parts[i])
@@ -270,9 +270,9 @@ func parse_int_list(string value) []int {
     out
 }
 
-func parse_float_list(string value) []float {
-    []string parts = csv_tokens(value)
-    []float out = []float{}
+func parse_float_list(string value) float[] {
+    string[] parts = csv_tokens(value)
+    float[] out = float[]{}
     int i = 0
     for i < len(parts) {
         string token = trim(parts[i])
@@ -293,8 +293,8 @@ func parse_bool_flag(string value) bool {
     r1 || r2 || r3 || r4
 }
 
-func tensor_to_checkpoint_lines(int index, tensor value) []string {
-    []string lines = []string{}
+func tensor_to_checkpoint_lines(int index, tensor value) string[] {
+    string[] lines = string[]{}
     string idx_str = string(index)
     string line1 = neurx.strings.concat5("param", idx_str, ".requires_grad=", string(value.requires_grad), "")
     string line2 = neurx.strings.concat5("param", idx_str, ".shape=", join_ints(value.shape), "")
@@ -305,9 +305,9 @@ func tensor_to_checkpoint_lines(int index, tensor value) []string {
     lines
 }
 
-func tensor_to_checkpoint_lines_from_params([]tensor params, int index) []string {
-    []float empty_data = []float{}
-    []int empty_shape = []int{}
+func tensor_to_checkpoint_lines_from_params(tensor[] params, int index) string[] {
+    float[] empty_data = float[]{}
+    int[] empty_shape = int[]{}
     tensor t = new(empty_data, empty_shape, false)
     if index < len(params) {
         int k = 0
@@ -332,7 +332,7 @@ func checkpoint_to_text(checkpoint state) string {
     out = neurx.strings.concat2(out, count_line)
     int i = 0
     for i < len(state.params) {
-        []string lines = tensor_to_checkpoint_lines_from_params(state.params, i)
+        string[] lines = tensor_to_checkpoint_lines_from_params(state.params, i)
         int j = 0
         for j < len(lines) {
             string line_j = neurx.string_at(lines, j)
@@ -344,7 +344,7 @@ func checkpoint_to_text(checkpoint state) string {
     out
 }
 
-func parse_checkpoint_lines([]string lines) checkpoint {
+func parse_checkpoint_lines(string[] lines) checkpoint {
     if len(lines) == 0 {
         return new_checkpoint(0, 0.0, [])
     }
@@ -366,7 +366,7 @@ func parse_checkpoint_lines([]string lines) checkpoint {
         }
         i = i + 1
     }
-    []tensor params = make([]tensor, 0)
+    tensor[] params = make(tensor[], 0)
     i = 1
     for i < len(lines) {
         string line = lines[i]
@@ -398,8 +398,8 @@ func parse_checkpoint_lines([]string lines) checkpoint {
                     string shape_key = neurx.strings.concat4("param", string(idx), ".shape=", "")
                     string data_key = neurx.strings.concat4("param", string(idx), ".data=", "")
                     bool requires_grad = parse_bool_flag(flag)
-                    []int shape = []int{}
-                    []float data = []float{}
+                    int[] shape = int[]{}
+                    float[] data = float[]{}
                     int k = 0
                     for k < len(lines) {
                         string candidate = lines[k]
@@ -420,9 +420,9 @@ func parse_checkpoint_lines([]string lines) checkpoint {
     new_checkpoint(step, loss, params)
 }
 
-func copy_params([]tensor params) []tensor {
+func copy_params(tensor[] params) tensor[] {
     int n = len(params)
-    []tensor out = make([]tensor, n)
+    tensor[] out = make(tensor[], n)
     int i = 0
     for i < n {
         out[i] = copy_tensor(params[i])
@@ -434,10 +434,10 @@ func copy_params([]tensor params) []tensor {
 struct checkpoint {
     int step
     float loss
-    []tensor params
+    tensor[] params
 }
 
-func new_checkpoint(int step, float loss, []tensor params) checkpoint {
+func new_checkpoint(int step, float loss, tensor[] params) checkpoint {
     checkpoint {
         step: step,
         loss: loss,
@@ -461,7 +461,7 @@ func checkpoint_load_state_dict(checkpoint state, checkpoint other) checkpoint {
     }
 }
 
-func save_checkpoint(string path, int step, float loss, []tensor params) () {
+func save_checkpoint(string path, int step, float loss, tensor[] params) () {
     string target = normalize_checkpoint_path(path)
     runtime_write_text_file(target, checkpoint_to_text(new_checkpoint(step, loss, params)))
     string manifest = checkpoint_manifest_path(target)
@@ -507,7 +507,7 @@ func checkpoint_loss(checkpoint state) float {
     state.loss
 }
 
-func checkpoint_params(checkpoint state) []tensor {
+func checkpoint_params(checkpoint state) tensor[] {
     state.params
 }
 

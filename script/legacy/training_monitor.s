@@ -19,8 +19,7 @@ struct training_metrics {
 
 struct training_monitor {
     start_time: time.Time
-    steps: []training_metrics
-    int total_steps
+    steps: int[] training_metrics total_steps
     string log_file
     int update_interval
 }
@@ -30,7 +29,7 @@ func (training_monitor* tm) init(
     string log_file,
     int update_interval) error {
     tm.start_time = time.Now()
-    tm.steps = make([]training_metrics, 0)
+    tm.steps = make(training_metrics[], 0)
     tm.total_steps = total_steps
     tm.log_file = log_file
     tm.update_interval = update_interval

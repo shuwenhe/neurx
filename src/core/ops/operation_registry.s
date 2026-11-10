@@ -21,8 +21,8 @@ package ops
 struct operation_metadata {
     string op_name
     operation_type op_type
-    []string input_types
-    []string output_types
+    string[] input_types
+    string[] output_types
     bool supports_fused_ops
     compute_capability[] supported_hardware
     int estimated_flops
@@ -40,7 +40,7 @@ struct operation_kernel {
 
 struct fused_operation {
     string fused_op_id
-    []string component_ops
+    string[] component_ops
     string fusion_name
     int estimated_flops_saved
     int estimated_memory_saved
@@ -68,10 +68,10 @@ func new_operation_metadata(string name, operation_type op_type) operation_metad
     operation_metadata {
         op_name: name,
         op_type: op_type,
-        input_types: []string{},
-        output_types: []string{},
+        input_types: string[]{},
+        output_types: string[]{},
         supports_fused_ops: false,
-        supported_hardware: []compute_capability{},
+        supported_hardware: compute_capability[]{},
         estimated_flops: 0,
     }
 }
@@ -94,7 +94,7 @@ func new_custom_operation(string op_id, string op_name, operation_type op_type) 
         op_name: op_name,
         op_type: op_type,
         metadata: new_operation_metadata(op_name, op_type),
-        kernels: []operation_kernel{},
+        kernels: operation_kernel[]{},
         is_registered: false,
         registration_time: 0,
     }
@@ -171,7 +171,7 @@ func (operation_registry* reg) get_operation(string op_id) custom_operation {
     new_custom_operation("", "", operation_type_custom)
 }
 
-func (operation_registry* reg) register_fused_operation(string fused_id, []string component_ops, string fusion_name) bool {
+func (operation_registry* reg) register_fused_operation(string fused_id, string[] component_ops, string fusion_name) bool {
     if fused_id in reg.fused_ops {
         false
     }
@@ -197,31 +197,31 @@ func (operation_registry* reg) get_fused_operation(string fused_id) fused_operat
     }
     fused_operation {
         fused_op_id: "",
-        component_ops: []string{},
+        component_ops: string[]{},
         fusion_name: "",
         estimated_flops_saved: 0,
         estimated_memory_saved: 0,
     }
 }
 
-func (operation_registry* reg) list_operations() []string {
-    result := []string{}
+func (operation_registry* reg) list_operations() string[] {
+    result := string[]{}
     for op_id in reg.operations.keys() {
         result = append(result, op_id)
     }
     result
 }
 
-func (operation_registry* reg) list_fused_operations() []string {
-    result := []string{}
+func (operation_registry* reg) list_fused_operations() string[] {
+    result := string[]{}
     for fused_id in reg.fused_ops.keys() {
         result = append(result, fused_id)
     }
     result
 }
 
-func (operation_registry* reg) find_operations_by_type(operation_type op_type) []string {
-    result := []string{}
+func (operation_registry* reg) find_operations_by_type(operation_type op_type) string[] {
+    result := string[]{}
     for op_id in reg.operations.keys() {
         op := reg.get_operation(op_id)
         if op.op_type == op_type {
@@ -231,8 +231,8 @@ func (operation_registry* reg) find_operations_by_type(operation_type op_type) [
     result
 }
 
-func (operation_registry* reg) find_operations_for_hardware(compute_capability hw) []string {
-    result := []string{}
+func (operation_registry* reg) find_operations_for_hardware(compute_capability hw) string[] {
+    result := string[]{}
     for op_id in reg.operations.keys() {
         op := reg.get_operation(op_id)
         i := 0

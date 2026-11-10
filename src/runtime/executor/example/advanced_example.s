@@ -42,8 +42,8 @@ func AdaptiveBatchingExample() {
 
 func CacheEvictionPoliciesExample() {
     println("=== Cache Eviction Policies Example ===")
-    policies := []i32{EVICTION_LRU, EVICTION_LFU, EVICTION_FIFO, EVICTION_ADAPTIVE}
-    policy_names := []string{"LRU", "LFU", "FIFO", "ADAPTIVE"}
+    policies := i32[]{EVICTION_LRU, EVICTION_LFU, EVICTION_FIFO, EVICTION_ADAPTIVE}
+    policy_names := string[]{"LRU", "LFU", "FIFO", "ADAPTIVE"}
     for idx := 0; idx < len(policies); idx++ {
         println("\n--- Policy:", policy_names[idx], "---")
         cache := NewKVCacheManager(10, policies[idx])
@@ -96,7 +96,7 @@ func PrefillDecodeOptimizationExample() {
 func PromptCachingExample() {
     println("=== Prompt Caching Example ===")
     cache_manager := NewKVCacheManager(16, EVICTION_LRU)
-    prompts := []string{
+    prompts := string[]{
         "You are a helpful assistant.",
         "Translate to Spanish:",
         "Summarize the following:",
@@ -141,7 +141,7 @@ func TensorParallelismExample() {
     println("Setting up tensor parallelism:")
     println("Total GPUs:", dist_config.world_size)
     println("Tensor parallel degree:", dist_config.tensor_parallel)
-    input_data := make([]f32, 4096)
+    input_data := make(f32[], 4096)
     result := dist_exec.TensorParallelForward(input_data)
     if result.success == 1 {
         println("Tensor parallel forward completed")
@@ -171,7 +171,7 @@ func PipelineParallelismExample() {
     println("Pipeline parallelism setup:")
     println("Number of stages:", dist_config.pipeline_parallel)
     println("Each stage processes 24 layers")
-    layers := make([]string, 96)
+    layers := make(string[], 96)
     for i := 0; i < 96; i++ {
         layers[i] = "layer_" + string(i)
     }

@@ -58,11 +58,11 @@ func main() {
     }
     println("\n2. Batch Processing Multiple Images")
     println("-" * 40)
-    images := make([]types.ImageData, 3)
+    images := make(types.ImageData[], 3)
     for i := 0; i < 3; i += 1 {
         images[i] = types.ImageData{
             id: fmt("img_%03d", i),
-            raw_data: make([]i8, 384 * 384 * 3),
+            raw_data: make(i8[], 384 * 384 * 3),
             width: 384,
             height: 384,
             channels: 3,
@@ -78,11 +78,11 @@ func main() {
     }
     println("\n3. Audio Processing")
     println("-" * 40)
-    audios := make([]types.AudioData, 2)
+    audios := make(types.AudioData[], 2)
     for i := 0; i < 2; i += 1 {
         audios[i] = types.AudioData{
             id: fmt("audio_%03d", i),
-            samples: make([]f32, 16000 * 5),
+            samples: make(f32[], 16000 * 5),
             sample_rate: 16000,
             num_channels: 1,
             duration_ms: 5000,
@@ -96,7 +96,7 @@ func main() {
     }
     println("\n4. Feature Fusion Strategies")
     println("-" * 40)
-    strategies := []string{
+    strategies := string[]{
         "concatenation",
         "addition",
         "attention",
@@ -109,8 +109,8 @@ func main() {
     println("\n5. Multi-crop Processing")
     println("-" * 40)
     sample_tensor := *types.Tensor{
-        data: make([]f32, 384 * 384 * 3),
-        shape: [3]i32{384, 384, 3},
+        data: make(f32[], 384 * 384 * 3),
+        shape: i32[3]{384, 384, 3},
         dtype: "float32"
     }
     crops := res_proc.MultiCropProcess(sample_tensor, 5)
@@ -138,17 +138,17 @@ func main() {
     println(fmt("✓ Audio validation: %d/%d valid", audio_valid_count, len(audios)))
     println("\n7. Complete Multimodal Processing Pipeline")
     println("-" * 40)
-    inputs := make([]types.MultimodalInput, 2)
+    inputs := make(types.MultimodalInput[], 2)
     for i := 0; i < 2; i += 1 {
         inputs[i] = types.MultimodalInput{
             id: fmt("multimodal_%03d", i),
             text: "Complex scene with multiple objects",
-            images: []types.ImageData{images[i]},
-            audios: []types.AudioData{audios[i]},
-            videos: make([]types.VideoData, 0),
+            images: types.ImageData[]{images[i]},
+            audios: types.AudioData[]{audios[i]},
+            videos: make(types.VideoData[], 0),
             depth: nil,
             timestamp: 1723618200000 + i64(i) * 1000,
-            sequence_order: []i32{0, 1}
+            sequence_order: i32[]{0, 1}
         }
     }
     results := manager.ProcessBatch(inputs)

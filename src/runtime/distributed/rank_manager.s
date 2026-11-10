@@ -43,7 +43,7 @@ struct rank_coordinates {
 
 struct rank_group {
     int kind
-    []int ranks
+    int[] ranks
     int rank_in_group
     int64 communicator
     bool initialized
@@ -111,8 +111,7 @@ func rank_coordinates_for(parallel_topology topology, int global_rank, int local
 func empty_rank_group(int kind) rank_group {
     rank_group group
     group.kind = kind
-    group.ranks = []
-    group.rank_in_group = -1
+    group.ranks = group.rank_in_group[] = -1
     group.communicator = i64(0)
     group.initialized = false
     group

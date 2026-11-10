@@ -29,9 +29,9 @@ struct kv_cache_config {
 
 struct kv_transfer_plan {
     int32 plan_id
-    []int32 block_ids_to_transfer
-    []kv_cache_location src_locations
-    []kv_cache_location dst_locations
+    int32[] block_ids_to_transfer
+    kv_cache_location[] src_locations
+    kv_cache_location[] dst_locations
     int64 total_bytes
     float32 estimated_time_ms
 }
@@ -50,9 +50,9 @@ struct kv_cache_manager {
     map[int32]kv_cache_block* blocks
     communicator* comm
     device_communicator* dev_comm
-    []kv_cache_block* gpu_blocks
-    []kv_cache_block* cpu_blocks
-    []kv_cache_block* nvme_blocks
+    kv_cache_block*[] gpu_blocks
+    kv_cache_block*[] cpu_blocks
+    kv_cache_block*[] nvme_blocks
     kv_transfer_stats stats
 }
 
@@ -62,9 +62,9 @@ func create_kv_cache_manager(kv_cache_config* config, communicator* comm, device
         blocks: make(map[int32]kv_cache_block*),
         comm: comm,
         dev_comm: dev_comm,
-        gpu_blocks: make([]kv_cache_block*, 0),
-        cpu_blocks: make([]kv_cache_block*, 0),
-        nvme_blocks: make([]kv_cache_block*, 0),
+        gpu_blocks: make(kv_cache_block*[], 0),
+        cpu_blocks: make(kv_cache_block*[], 0),
+        nvme_blocks: make(kv_cache_block*[], 0),
         stats: kv_transfer_stats{},
     }
 }
@@ -116,9 +116,9 @@ func (kv_cache_manager* kcm) get_block(int32 block_id) kv_cache_block* {
 func (kv_cache_manager* kcm) create_transfer_plan() kv_transfer_plan* {
     return *kv_transfer_plan{
         plan_id: 0,
-        block_ids_to_transfer: make([]int32, 0),
-        src_locations: make([]kv_cache_location, 0),
-        dst_locations: make([]kv_cache_location, 0),
+        block_ids_to_transfer: make(int32[], 0),
+        src_locations: make(kv_cache_location[], 0),
+        dst_locations: make(kv_cache_location[], 0),
         total_bytes: 0,
         estimated_time_ms: 0.0,
     }

@@ -24,8 +24,8 @@ struct io_request {
 }
 
 struct io_ring {
-    []io_request  submission_queue
-    []io_request  completion_queue
+    io_request[]  submission_queue
+    io_request[]  completion_queue
     int           sq_head
     int           sq_tail
     int           depth
@@ -36,7 +36,7 @@ struct storage_state {
     io_ring  ring
     int      total_capacity_mb
     int      used_mb
-    []string mount_points
+    string[] mount_points
     bool     writeback_enabled
     int      writeback_dirty_mb
 }
@@ -93,8 +93,7 @@ func io_complete(ss storage_state, int req_id, string err) storage_state {
                 r.err   = err
             }
             ss.ring.completion_queue = append(ss.ring.completion_queue, r)
-            []io_request sq = []
-            int j = 0
+            io_request[] sq = int[] j = 0
             for j < len(ss.ring.submission_queue) {
                 if j != i {
                     sq = append(sq, ss.ring.submission_queue[j])
@@ -109,10 +108,8 @@ func io_complete(ss storage_state, int req_id, string err) storage_state {
     return ss
 }
 
-func io_poll(ss storage_state, int owner_pid) (storage_state, []io_request) {
-    []io_request done = []
-    []io_request remaining = []
-    int i = 0
+func io_poll(ss storage_state, int owner_pid) (storage_state, io_request[]) {
+    io_request[] done = io_request[][] remaining = int[] i = 0
     for i < len(ss.ring.completion_queue) {
         if ss.ring.completion_queue[i].owner_pid == owner_pid {
             done = append(done, ss.ring.completion_queue[i])

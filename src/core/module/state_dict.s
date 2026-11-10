@@ -10,8 +10,8 @@ struct named_tensor {
 
 struct module_state {
     nn.module root
-    []string parameter_names
-    []string buffer_names
+    string[] parameter_names
+    string[] buffer_names
     int parameter_count
     int buffer_count
     int child_count
@@ -32,14 +32,14 @@ func module_load_state_dict(nn.module m, module_state state) nn.module {
     neurx.nn.module_load_state_dict(m, state.root)
 }
 
-func module_named_parameter_tensors(nn.module m) []named_tensor {
-    []string names = neurx.nn.module_named_parameters(m)
-    []tensor values = neurx.nn.module_parameters(m)
+func module_named_parameter_tensors(nn.module m) named_tensor[] {
+    string[] names = neurx.nn.module_named_parameters(m)
+    tensor[] values = neurx.nn.module_parameters(m)
     int n = len(names)
     if len(values) < n {
         n = len(values)
     }
-    []named_tensor out = make([]named_tensor, n)
+    named_tensor[] out = make(named_tensor[], n)
     int i = 0
     for i < n {
         out[i] = named_tensor {
@@ -51,14 +51,14 @@ func module_named_parameter_tensors(nn.module m) []named_tensor {
     out
 }
 
-func module_named_buffer_tensors(nn.module m) []named_tensor {
-    []string names = neurx.nn.module_named_buffers(m)
-    []tensor values = neurx.nn.module_buffers(m)
+func module_named_buffer_tensors(nn.module m) named_tensor[] {
+    string[] names = neurx.nn.module_named_buffers(m)
+    tensor[] values = neurx.nn.module_buffers(m)
     int n = len(names)
     if len(values) < n {
         n = len(values)
     }
-    []named_tensor out = make([]named_tensor, n)
+    named_tensor[] out = make(named_tensor[], n)
     int i = 0
     for i < n {
         out[i] = named_tensor {

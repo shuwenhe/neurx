@@ -20,7 +20,7 @@ struct mem_alloc_result {
 }
 
 struct mem_state {
-    []mem_region regions
+    mem_region[] regions
     int          next_region_id
 }
 

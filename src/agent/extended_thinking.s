@@ -17,7 +17,7 @@ struct extended_thinking_state {
     int            steps_used
     int            token_budget
     int            tokens_used
-    []extended_thought thoughts
+    extended_thought[] thoughts
     int            thought_count
     string         working_conclusion
     string         final_conclusion
@@ -32,7 +32,7 @@ func new_extended_thinking_state(string goal, int budget_steps) extended_thinkin
         steps_used:         0,
         token_budget:       0,
         tokens_used:        0,
-        thoughts:           make([]extended_thought, budget_steps + 1),
+        thoughts:           make(extended_thought[], budget_steps + 1),
         thought_count:      0,
         working_conclusion: "",
         final_conclusion:   "",
@@ -48,7 +48,7 @@ func new_extended_thinking_state_with_token_budget(string goal, int budget_steps
         steps_used:         0,
         token_budget:       token_budget,
         tokens_used:        0,
-        thoughts:           make([]extended_thought, budget_steps + 1),
+        thoughts:           make(extended_thought[], budget_steps + 1),
         thought_count:      0,
         working_conclusion: "",
         final_conclusion:   "",
@@ -68,7 +68,7 @@ func extended_thinking_estimate_tokens(string text) int {
 
 func extended_thinking_append(extended_thinking_state state, string thought, string conclusion) extended_thinking_state {
     int n = state.thought_count
-    []extended_thought next = make([]extended_thought, n + 1)
+    extended_thought[] next = make(extended_thought[], n + 1)
     int i = 0
     for i < n {
         next[i] = state.thoughts[i]

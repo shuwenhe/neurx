@@ -24,7 +24,7 @@ interface i_storage {
     is_contiguous() . bool
     clone() . storage
     narrow(i64 offset, i64 length) . storage
-    reshape(shape: []i64) . storage
+    reshape(shape: i64[]) . storage
     transpose(i64 dim0, i64 dim1) . storage
 }
 interface i_storage_factory {

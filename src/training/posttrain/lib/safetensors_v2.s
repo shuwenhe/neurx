@@ -5,7 +5,7 @@ import (
 struct safe_tensor_info {
     string name
     string dtype
-    []int shape
+    int[] shape
     int byte_start
     int byte_end
 }
@@ -38,7 +38,7 @@ func dtype_size(string dtype) int {
     return 0
 }
 
-func shape_numel([]int shape) int {
+func shape_numel(int[] shape) int {
     int result = 1
     int i = 0
     for i < len(shape) {
@@ -63,8 +63,8 @@ func open_safetensors(string path) safe_tensor_file {
     return file
 }
 
-func load_tensor_float(safe_tensor_file file, safe_tensor_info info) []float {
-    []float result
+func load_tensor_float(safe_tensor_file file, safe_tensor_info info) float[] {
+    float[] result
     return result
 }
 

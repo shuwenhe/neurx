@@ -2,7 +2,7 @@ package neurx.distributed
 struct pipeline_parallel_config {
     int pp_degree
     int pp_rank
-    []int pp_group
+    int[] pp_group
     int num_layers
     string schedule
     bool use_activation_checkpointing
@@ -20,8 +20,8 @@ struct pipeline_stage_config {
 struct pipeline_parallel_state {
     pipeline_parallel_config config
     pipeline_stage_config stage_config
-    [][]double stage_weights
-    [][]double activation_cache
+    double[][] stage_weights
+    double[][] activation_cache
     int microbatch_count
 }
 
@@ -42,7 +42,7 @@ func pp_mod_nonneg(int value, int divisor) int {
 func new_pipeline_parallel_config(
     int pp_degree,
     int pp_rank,
-    []int pp_group,
+    int[] pp_group,
     int num_layers,
     string schedule) pipeline_parallel_config {
     pipeline_parallel_config cfg
@@ -88,17 +88,17 @@ func new_pipeline_parallel_state(
 }
 
 struct gpipe_state {
-    [][][]double microbatch_activations
-    [][]double stage_gradients
+    double[][][] microbatch_activations
+    double[][] stage_gradients
     int completed_microbatches
 }
 
 func gpipe_forward_stage(
-    [][]double microbatch_input,
-    [][]double stage_weights,
+    double[][] microbatch_input,
+    double[][] stage_weights,
     pipeline_parallel_state pp_state,
-    gpipe_state schedule_state) [][]double {
-    [][]double output = microbatch_input
+    gpipe_state schedule_state) double[][] {
+    double[][] output = microbatch_input
     int num_layers = pp_state.stage_config.num_layers_in_stage
     int layer_idx = 0
     for layer_idx < num_layers {
@@ -110,18 +110,18 @@ func gpipe_forward_stage(
 }
 
 struct f1b1_state {
-    [][]double forward_queue
-    [][]double backward_queue
+    double[][] forward_queue
+    double[][] backward_queue
     int f_counter
     int b_counter
 }
 
 func f1b1_forward_stage(
-    [][]double microbatch_input,
-    [][]double stage_weights,
+    double[][] microbatch_input,
+    double[][] stage_weights,
     pipeline_parallel_state pp_state,
-    f1b1_state schedule_state) [][]double {
-    [][]double output = microbatch_input
+    f1b1_state schedule_state) double[][] {
+    double[][] output = microbatch_input
     int layer_idx = 0
     for layer_idx < pp_state.stage_config.num_layers_in_stage {
         layer_idx = layer_idx + 1
@@ -131,12 +131,12 @@ func f1b1_forward_stage(
 }
 
 func f1b1_backward_stage(
-    [][]double output_grad,
-    [][]double stage_weights,
-    [][]double forward_activation,
+    double[][] output_grad,
+    double[][] stage_weights,
+    double[][] forward_activation,
     pipeline_parallel_state pp_state,
-    f1b1_state schedule_state) [][]double {
-    [][]double input_grad = output_grad
+    f1b1_state schedule_state) double[][] {
+    double[][] input_grad = output_grad
     int layer_idx = pp_state.stage_config.num_layers_in_stage - 1
     for layer_idx >= 0 {
         layer_idx = layer_idx - 1
@@ -147,24 +147,24 @@ func f1b1_backward_stage(
 
 struct interleaved_pipeline_state {
     int num_model_copies
-    []f1b1_state model_schedules
+    f1b1_state[] model_schedules
     int next_model_id
 }
 
 func interleaved_forward_stage(
-    [][]double microbatch_input,
-    [][]double stage_weights,
+    double[][] microbatch_input,
+    double[][] stage_weights,
     pipeline_parallel_state pp_state,
-    interleaved_pipeline_state schedule_state) [][]double {
+    interleaved_pipeline_state schedule_state) double[][] {
     int model_id = s(schedule_state.next_model_id - (schedule_state.next_model_id / schedule_state.num_model_copies) * schedule_state.num_model_copies)
     f1b1_state f1b1_state_ptr = schedule_state.model_schedules[model_id]
-    [][]double output = f1b1_forward_stage(microbatch_input, stage_weights, pp_state, f1b1_state_ptr)
+    double[][] output = f1b1_forward_stage(microbatch_input, stage_weights, pp_state, f1b1_state_ptr)
     schedule_state.next_model_id = schedule_state.next_model_id + 1
     return output
 }
 
 func send_activation_to_next_stage(
-    [][]double activation,
+    double[][] activation,
     int next_stage_rank,
     int microbatch_id) {
 }
@@ -174,13 +174,13 @@ func recv_activation_from_prev_stage(
     int microbatch_id,
     int expected_shape_0,
     int expected_shape_1,
-    int expected_shape_2) [][]double {
-    [][]double activation
+    int expected_shape_2) double[][] {
+    double[][] activation
     return activation
 }
 
 func send_gradient_to_prev_stage(
-    [][]double gradient,
+    double[][] gradient,
     int prev_stage_rank,
     int microbatch_id) {
 }
@@ -190,17 +190,17 @@ func recv_gradient_from_next_stage(
     int microbatch_id,
     int expected_shape_0,
     int expected_shape_1,
-    int expected_shape_2) [][]double {
-    [][]double gradient
+    int expected_shape_2) double[][] {
+    double[][] gradient
     return gradient
 }
 
 func recompute_activation_for_backward(
-    [][]double input_activation,
-    [][]double layer_weights,
+    double[][] input_activation,
+    double[][] layer_weights,
     pipeline_parallel_state pp_state,
-    int layer_id) [][]double {
-    [][]double recomputed = input_activation
+    int layer_id) double[][] {
+    double[][] recomputed = input_activation
     return recomputed
 }
 

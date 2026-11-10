@@ -7,16 +7,16 @@ struct gdpo_config {
     i32 num_epochs
     f32 max_grad_norm
     i32 num_rewards
-    reward_weights: []f32
+    reward_weights: f32[]
     bool use_weighted_loss
     string aggregation_method
     f32 label_smoothing
 }
 
 struct rubric {
-    reward_names: []string
-    reward_values: []f32
-    weights: []f32
+    reward_names: string[]
+    reward_values: f32[]
+    weights: f32[]
 }
 
 struct gdpo_trainer {
@@ -24,15 +24,13 @@ struct gdpo_trainer {
     *model policy_model
     *model reference_model
     *optimizer optimizer
-    reward_scales: []f32
-    reward_histories: [][]f32
+    reward_scales: f32[]
+    reward_histories: f32[][]
 }
 
 func new_gdpo_trainer(gdpo_config config, *model model, *model ref_model) . gdpo_trainer {
     optimizer := adamw_optimizer(model.parameters(), config.learning_rate)
-    reward_scales := []
-    reward_histories := []
-    for i in 0..config.num_rewards {
+    reward_scales := reward_histories[] := for[] i in 0..config.num_rewards {
         reward_scales = append(reward_scales, 1.0)
         reward_histories = append(reward_histories, [])
     }
@@ -110,12 +108,12 @@ func (gdpo_trainer* trainer) normalize_rubric(rubric rubric) . rubric {
 }
 
 func (gdpo_trainer* trainer) compute_gdpo_loss(
-    []tensor chosen_prompts,
-    []tensor chosen_responses,
-    []tensor rejected_prompts,
-    []tensor rejected_responses,
-    []rubric chosen_rubrics,
-    []rubric rejected_rubrics
+    tensor[] chosen_prompts,
+    tensor[] chosen_responses,
+    tensor[] rejected_prompts,
+    tensor[] rejected_responses,
+    rubric[] chosen_rubrics,
+    rubric[] rejected_rubrics
 ) . tensor {
     batch_size := len(chosen_prompts)
     total_loss := tensor_zeros([1])
@@ -154,12 +152,12 @@ func (gdpo_trainer* trainer) compute_gdpo_loss(
 }
 
 func (gdpo_trainer* trainer) train_step(
-    []tensor chosen_prompts,
-    []tensor chosen_responses,
-    []tensor rejected_prompts,
-    []tensor rejected_responses,
-    []rubric chosen_rubrics,
-    []rubric rejected_rubrics
+    tensor[] chosen_prompts,
+    tensor[] chosen_responses,
+    tensor[] rejected_prompts,
+    tensor[] rejected_responses,
+    rubric[] chosen_rubrics,
+    rubric[] rejected_rubrics
 ) . f32 {
     loss := trainer.compute_gdpo_loss(
         chosen_prompts,
@@ -176,9 +174,8 @@ func (gdpo_trainer* trainer) train_step(
     return loss.item()
 }
 
-func (gdpo_trainer* trainer) train(DataLoader train_data) . []f32 {
-    losses := []
-    for epoch in 0..trainer.config.num_epochs {
+func (gdpo_trainer* trainer) train(DataLoader train_data) . f32[] {
+    losses := for[] epoch in 0..trainer.config.num_epochs {
         println(f"GDPO Epoch {epoch + 1}/{trainer.config.num_epochs}")
         for batch in train_data {
             loss := trainer.train_step(
@@ -210,7 +207,7 @@ func (gdpo_trainer* trainer) print_reward_statistics() {
     }
 }
 
-func compute_mean([]f32 values) . f32 {
+func compute_mean(f32[] values) . f32 {
     if len(values) == 0 {
         return 0.0
     }
@@ -221,7 +218,7 @@ func compute_mean([]f32 values) . f32 {
     return sum / f32(len(values))
 }
 
-func compute_std([]f32 values, f32 mean) . f32 {
+func compute_std(f32[] values, f32 mean) . f32 {
     if len(values) == 0 {
         return 1.0
     }

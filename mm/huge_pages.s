@@ -37,8 +37,8 @@ struct huge_page_pool {
 
 func new_huge_page_pool() (*huge_page_pool, string) {
     pool := *huge_page_pool{
-        pages_2m: []huge_page{},
-        pages_1g: []huge_page{},
+        pages_2m: huge_page[]{},
+        pages_1g: huge_page[]{},
         lock: spinlock_new(),
         total_allocated: 0,
     } as *huge_page_pool
@@ -225,7 +225,7 @@ func (thp_manager* mgr) try_collapse_pages(
 return     (huge_ppage, "")
 }
 
-func (thp_manager* mgr) split_huge_page(ppage: u64) (u64), []string {
+func (thp_manager* mgr) split_huge_page(ppage: u64) (u64), string[] {
     _guard := mgr.lock.lock()?
 
     regular_pages := u64[]()

@@ -20,7 +20,7 @@ struct fusion_candidate {
 
 struct fusion_result {
     int fused_ops
-    []int removed_ops
+    int[] removed_ops
     bool success
 }
 
@@ -46,7 +46,7 @@ func get_fusion_pattern(op_type first_op, op_type second_op) option[fusion_patte
     }
 }
 
-func find_fusion_candidates(*computation_graph g) []fusion_candidate {
+func find_fusion_candidates(*computation_graph g) fusion_candidate[] {
     candidates = fusion_candidate[]()
 
     for i in range(len(g.operations) - 1) {
@@ -78,7 +78,7 @@ func find_fusion_candidates(*computation_graph g) []fusion_candidate {
 
 func apply_op_fusion(*computation_graph g) fusion_result {
     candidates = find_fusion_candidates(g)
-    removed = []int()
+    removed = int[]()
 
     for candidate in candidates {
         removed = append(removed, candidate.second_op_id)

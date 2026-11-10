@@ -59,9 +59,9 @@ struct phase_timing {
 
 struct profiler {
     enabled         bool
-    events          []profile_event
+    events          profile_event[]
     phase_timings   map[string]phase_timing
-    request_traces  map[string][]profile_event
+    request_traces  map[string]profile_event[]
     max_events      int32
     current_size    int32
 }
@@ -70,7 +70,7 @@ struct request_profiler {
     request_id      string
     start_time_ns   int64
     end_time_ns     int64
-    phases          []phase_timing
+    phases          phase_timing[]
     memory_peak_mb  int32
 }
 
@@ -91,9 +91,9 @@ struct profiler_report {
 func NewProfiler() *profiler {
     return *profiler{
         enabled:        true,
-        events:         make([]profile_event, 0),
+        events:         make(profile_event[], 0),
         phase_timings:  make(map[string]phase_timing),
-        request_traces: make(map[string][]profile_event),
+        request_traces: make(map[string]profile_event[]),
         max_events:     1000000,
         current_size:   0,
     }
@@ -151,7 +151,7 @@ func (profiler* p) StartRequestProfile(request_id string) {
     if !p.enabled {
         return
     }
-    p.request_traces[request_id] = make([]profile_event, 0)
+    p.request_traces[request_id] = make(profile_event[], 0)
 }
 
 func (profiler* p) RecordRequestEvent(
@@ -164,7 +164,7 @@ func (profiler* p) RecordRequestEvent(
     }
     trace, exists := p.request_traces[request_id]
     if !exists {
-        trace = make([]profile_event, 0)
+        trace = make(profile_event[], 0)
     }
     event := profile_event{
         event_id:     request_id + "_" + name,
@@ -232,29 +232,29 @@ func (profiler* p) PrintProfile() {
 }
 
 struct timeline_analyzer {
-    traces          map[string][]profile_event
-    critical_paths  map[string][]profile_event
+    traces          map[string]profile_event[]
+    critical_paths  map[string]profile_event[]
 }
 
 func NewTimelineAnalyzer() *timeline_analyzer {
     return *timeline_analyzer{
-        traces:         make(map[string][]profile_event),
-        critical_paths: make(map[string][]profile_event),
+        traces:         make(map[string]profile_event[]),
+        critical_paths: make(map[string]profile_event[]),
     }
 }
 
-func (timeline_analyzer* ta) AddTrace(request_id string, events []profile_event) {
+func (timeline_analyzer* ta) AddTrace(request_id string, events profile_event[]) {
     ta.traces[request_id] = events
 }
 
-func (timeline_analyzer* ta) FindCriticalPath(request_id string) []profile_event {
+func (timeline_analyzer* ta) FindCriticalPath(request_id string) profile_event[] {
     events, exists := ta.traces[request_id]
     if !exists {
-        return []profile_event{}
+        return profile_event[]{}
     }
-    sorted := make([]profile_event, len(events))
+    sorted := make(profile_event[], len(events))
     copy(sorted, events)
-    critical := make([]profile_event, 0)
+    critical := make(profile_event[], 0)
     for _, event := range sorted {
         if event.event_type == ProfileEventTypeValues().FORWARD_START ||
            event.event_type == ProfileEventTypeValues().FORWARD_END ||

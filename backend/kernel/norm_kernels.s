@@ -17,11 +17,11 @@ func NewNormKernels(types.KernelConfig config) *NormKernels {
 func (NormKernels* k) LayerNorm(
     m: i32,
     n: i32,
-    input: []f32,
-    gamma: []f32,
-    beta: []f32,
+    input: f32[],
+    gamma: f32[],
+    beta: f32[],
     params: types.NormParams,
-    output: *[]f32
+    output: *f32[]
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -102,13 +102,13 @@ func (NormKernels* k) BatchNorm(
     c: i32,
     h: i32,
     w: i32,
-    input: []f32,
-    running_mean: *[]f32,
-    running_var: *[]f32,
-    gamma: []f32,
-    beta: []f32,
+    input: f32[],
+    running_mean: *f32[],
+    running_var: *f32[],
+    gamma: f32[],
+    beta: f32[],
     params: types.NormParams,
-    output: *[]f32
+    output: *f32[]
 ) types.KernelResult {
 
     if n <= 0 || c <= 0 || h <= 0 || w <= 0 {
@@ -186,10 +186,10 @@ func (NormKernels* k) BatchNorm(
 func (NormKernels* k) RMSNorm(
     m: i32,
     n: i32,
-    input: []f32,
-    weight: []f32,
+    input: f32[],
+    weight: f32[],
     epsilon: f32,
-    output: *[]f32
+    output: *f32[]
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -253,11 +253,11 @@ func (NormKernels* k) GroupNorm(
     h: i32,
     w: i32,
     num_groups: i32,
-    input: []f32,
-    weight: []f32,
-    bias: []f32,
+    input: f32[],
+    weight: f32[],
+    bias: f32[],
     epsilon: f32,
-    output: *[]f32
+    output: *f32[]
 ) types.KernelResult {
 
     if n <= 0 || c <= 0 || h <= 0 || w <= 0 || num_groups <= 0 {

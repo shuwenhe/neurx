@@ -19,7 +19,7 @@ struct proc_descriptor {
 }
 
 struct proc_table {
-    []proc_descriptor procs
+    proc_descriptor[] procs
     int               next_pid
 }
 

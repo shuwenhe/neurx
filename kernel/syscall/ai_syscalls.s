@@ -26,7 +26,7 @@ struct syscall_result {
 struct infer_request {
     string model_id
     string request_id
-    []byte input_data
+    byte[] input_data
     int input_size_bytes
     int max_output_tokens
     int timeout_ms
@@ -35,7 +35,7 @@ struct infer_request {
 
 struct infer_response {
     string request_id
-    []byte output_data
+    byte[] output_data
     int output_size_bytes
     int actual_tokens
     string finish_reason
@@ -46,7 +46,7 @@ func neuray_infer(infer_request req) infer_response {
 
     return infer_response {
         request_id: req.request_id,
-        output_data: make([]byte, 0),
+        output_data: make(byte[], 0),
         output_size_bytes: 0,
         actual_tokens: 0,
         finish_reason: "error",
@@ -63,7 +63,7 @@ func neuray_infer_result_get(string request_id) infer_response {
 
     return infer_response {
         request_id: request_id,
-        output_data: make([]byte, 0),
+        output_data: make(byte[], 0),
         output_size_bytes: 0,
         finish_reason: "pending",
         latency_ms: 0,
@@ -157,7 +157,7 @@ struct workload_schedule {
     workload_type wl_type
     int priority
     int deadline_ms
-    []string resource_hints
+    string[] resource_hints
 }
 
 func neuray_schedule(workload_schedule wl) syscall_result {
@@ -196,7 +196,7 @@ enum device_ctl_command {
 func neuray_device_ctl(
     string device_id,
     device_ctl_command cmd,
-    []byte params,
+    byte[] params,
     int params_size
 ) syscall_result {
 
@@ -241,21 +241,21 @@ func neuray_metrics_start(string device_id) syscall_result {
 
 struct recorded_metrics {
     int sample_count
-    []int timestamps
-    []int utilization
-    []int power_watts
-    []int temperature_c
-    []int bandwidth_gbps
+    int[] timestamps
+    int[] utilization
+    int[] power_watts
+    int[] temperature_c
+    int[] bandwidth_gbps
 }
 
 func neuray_metrics_get(string device_id) recorded_metrics {
     return recorded_metrics {
         sample_count: 0,
-        timestamps: []int{},
-        utilization: []int{},
-        power_watts: []int{},
-        temperature_c: []int{},
-        bandwidth_gbps: []int{},
+        timestamps: int[]{},
+        utilization: int[]{},
+        power_watts: int[]{},
+        temperature_c: int[]{},
+        bandwidth_gbps: int[]{},
     }
 }
 

@@ -25,8 +25,7 @@ struct cispo_trainer {
     *model value_model
     *model reference_model
     *optimizer optimizer
-    behavior_log_probs: []tensor
-    i64 step_count
+    behavior_log_probs: i64[] tensor step_count
     ISWeightStats is_weight_stats
 }
 
@@ -68,11 +67,10 @@ func new_cispo_trainer(
 }
 
 func (cispo_trainer* trainer) compute_is_weights(
-    []tensor new_log_probs,
-    []tensor behavior_log_probs
-) . []tensor {
-    is_weights := []
-    for i in len(0..new_log_probs) {
+    tensor[] new_log_probs,
+    tensor[] behavior_log_probs
+) . tensor[] {
+    is_weights := for[] i in len(0..new_log_probs) {
         log_ratio := new_log_probs[i] - behavior_log_probs[i]
         ratio := exp(log_ratio)
         clipped_ratio := clamp(
@@ -86,9 +84,8 @@ func (cispo_trainer* trainer) compute_is_weights(
     return is_weights
 }
 
-func (cispo_trainer* trainer) update_is_weight_stats([]tensor is_weights) {
-    values := []
-    clipped_count := 0
+func (cispo_trainer* trainer) update_is_weight_stats(tensor[] is_weights) {
+    values := clipped_count[] := 0
     total_count := 0
     for weight in is_weights {
         for i in 0..weight.numel() {
@@ -147,14 +144,12 @@ func (cispo_trainer* trainer) compute_cispo_objective(
 }
 
 func (cispo_trainer* trainer) compute_gae(
-    []tensor rewards,
-    []tensor values,
-    []tensor dones
-) . ([]tensor, []tensor) {
+    tensor[] rewards,
+    tensor[] values,
+    tensor[] dones
+) . (tensor[], tensor[]) {
     batch_size := len(rewards)
-    advantages := []
-    returns := []
-    for b in 0..batch_size {
+    advantages := returns[] := for[] b in 0..batch_size {
         seq_len := rewards[b].shape[0]
         seq_advantages := tensor_zeros([seq_len])
         seq_returns := tensor_zeros([seq_len])
@@ -177,17 +172,15 @@ func (cispo_trainer* trainer) compute_gae(
 }
 
 func (cispo_trainer* trainer) train_step(
-    []tensor prompts,
-    []tensor responses,
-    []tensor rewards
+    tensor[] prompts,
+    tensor[] responses,
+    tensor[] rewards
 ) . (f32, f32, f32) {
     batch_size := len(prompts)
-    inputs := []
-    for i in 0..batch_size {
+    inputs := for[] i in 0..batch_size {
         inputs = append(inputs, concat(prompts[i], responses[i]))
     }
-    values := []
-    if trainer.config.use_value_loss {
+    values := if trainer.config.use_value_loss {
         for input in inputs {
             value := trainer.value_model.forward(input)
             values = append(values, value)
@@ -197,35 +190,30 @@ func (cispo_trainer* trainer) train_step(
             values = append(values, tensor_zeros([responses[i].shape[0]]))
         }
     }
-    dones := []
-    for resp in responses {
+    dones := for[] resp in responses {
         seq_len := resp.shape[0]
         done := tensor_zeros([seq_len])
         done[-1] = tensor_scalar(1.0)
         dones = append(dones, done)
     }
     advantages, returns  := trainer.compute_gae(rewards, values, dones)
-    all_advantages := []
-    for adv in advantages {
+    all_advantages := for[] adv in advantages {
         for i in 0..adv.numel() {
             all_advantages = append(all_advantages, adv.flatten()[i].item())
         }
     }
     adv_mean := compute_mean(all_advantages)
     adv_std := compute_std(all_advantages, adv_mean)
-    normalized_advantages := []
-    for adv in advantages {
+    normalized_advantages := for[] adv in advantages {
         norm_adv := (adv - adv_mean) / (adv_std + 1e-8)
         normalized_advantages = append(normalized_advantages, norm_adv)
     }
-    behavior_log_probs := []
-    for input in inputs {
+    behavior_log_probs := for[] input in inputs {
         logits := trainer.policy_model.forward(input)
         log_probs := log_softmax(logits, dim: -1)
         behavior_log_probs = append(behavior_log_probs, log_probs)
     }
-    ref_log_probs := []
-    for input in inputs {
+    ref_log_probs := for[] input in inputs {
         logits := trainer.reference_model.forward(input)
         log_probs := log_softmax(logits, dim: -1)
         ref_log_probs = append(ref_log_probs, log_probs)
@@ -292,10 +280,8 @@ func (cispo_trainer* trainer) train_step(
     )
 }
 
-func (cispo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
-    policy_losses := []
-    value_losses := []
-    for batch in train_data {
+func (cispo_trainer* trainer) train(DataLoader train_data) . (f32[], f32[]) {
+    policy_losses := value_losses[] := for[] batch in train_data {
         policy_loss, value_loss, kl  := trainer.train_step(
             batch.prompts,
             batch.responses,
@@ -319,7 +305,7 @@ func (cispo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     return policy_losses, value_losses
 }
 
-func compute_mean([]f32 values) . f32 {
+func compute_mean(f32[] values) . f32 {
     if len(values) == 0 {
         return 0.0
     }
@@ -330,7 +316,7 @@ func compute_mean([]f32 values) . f32 {
     return sum / f32(len(values))
 }
 
-func compute_std([]f32 values, f32 mean) . f32 {
+func compute_std(f32[] values, f32 mean) . f32 {
     if len(values) == 0 {
         return 1.0
     }

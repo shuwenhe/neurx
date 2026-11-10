@@ -25,7 +25,7 @@ struct http_request {
     string path
     map[string]string headers
     map[string]string query_params
-    []uint8 body
+    uint8[] body
     string content_type
 }
 
@@ -51,7 +51,7 @@ struct web_server_config {
     string host
     int32 port
     bool enable_cors
-    []string cors_origins
+    string[] cors_origins
     bool enable_compression
     bool enable_auth
     string auth_header
@@ -62,8 +62,8 @@ struct web_server_config {
 struct web_server {
     web_server_config config
     llm_engine* engine
-    []route_handler* routes
-    []middleware* middlewares
+    route_handler*[] routes
+    middleware*[] middlewares
     bool running
 }
 
@@ -85,8 +85,8 @@ func create_web_server(web_server_config* config, llm_engine* engine) web_server
     return *web_server{
         config: *config,
         engine: engine,
-        routes: make([]route_handler*, 0),
-        middlewares: make([]middleware*, 0),
+        routes: make(route_handler*[], 0),
+        middlewares: make(middleware*[], 0),
         running: false,
     }
 }
@@ -205,7 +205,7 @@ func (web_server* ws) get_host() string {
     return ws.config.host
 }
 
-func (web_server* ws) enable_cors([]string origins) {
+func (web_server* ws) enable_cors(string[] origins) {
     ws.config.enable_cors = true
     ws.config.cors_origins = origins
 }

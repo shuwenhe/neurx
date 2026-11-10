@@ -13,13 +13,13 @@ struct chunk_state {
     start_token         int32
     end_token           int32
     status              string
-    attention_cache     []float32
-    hidden_state        []float32
+    attention_cache     float32[]
+    hidden_state        float32[]
 }
 
 struct chunked_prefill_processor {
     config              chunk_config
-    chunks              []chunk_state
+    chunks              chunk_state[]
     total_tokens        int32
     num_chunks          int32
 }
@@ -30,7 +30,7 @@ func NewChunkedPrefillProcessor(config chunk_config) *chunked_prefill_processor 
     }
     return *chunked_prefill_processor{
         config:       config,
-        chunks:       make([]chunk_state, 0),
+        chunks:       make(chunk_state[], 0),
         total_tokens: 0,
         num_chunks:   0,
     }
@@ -51,8 +51,8 @@ func (chunked_prefill_processor* cpp) PrepareChunks(total_tokens int32) {
             start_token:     current_start,
             end_token:       current_end,
             status:          "pending",
-            attention_cache: make([]float32, 0),
-            hidden_state:    make([]float32, 0),
+            attention_cache: make(float32[], 0),
+            hidden_state:    make(float32[], 0),
         }
         cpp.chunks = append(cpp.chunks, chunk)
         current_start = current_end - overlap
@@ -63,11 +63,11 @@ func (chunked_prefill_processor* cpp) PrepareChunks(total_tokens int32) {
 }
 
 func (chunked_prefill_processor* cpp) ProcessChunksPrefill(
-    token_ids []int32,
-    embedding_table []float32,
+    token_ids int32[],
+    embedding_table float32[],
     embedding_dim int32,
-) []float[]32 {
-    chunk_outputs := make([]float[]32, 0)
+) float[][]32 {
+    chunk_outputs := make(float[][]32, 0)
     for i, chunk := range cpp.chunks {
         chunk_tokens := token_ids[chunk.start_token : chunk.end_token]
         chunk_embeddings := cpp.embedChunk(chunk_tokens, embedding_table, embedding_dim)
@@ -80,11 +80,11 @@ func (chunked_prefill_processor* cpp) ProcessChunksPrefill(
 }
 
 func (chunked_prefill_processor* cpp) embedChunk(
-    token_ids []int32,
-    embedding_table []float32,
+    token_ids int32[],
+    embedding_table float32[],
     embedding_dim int32,
-) []float32 {
-    embeddings := make([]float32, int(int32(len(token_ids))*embedding_dim))
+) float32[] {
+    embeddings := make(float32[], int(int32(len(token_ids))*embedding_dim))
     for i, token_id := range token_ids {
         offset := token_id * embedding_dim
         copy(embeddings[i*int(embedding_dim):(i+1)*int(embedding_dim)],
@@ -94,10 +94,10 @@ func (chunked_prefill_processor* cpp) embedChunk(
 }
 
 func (chunked_prefill_processor* cpp) processPrefillChunk(
-    embeddings []float32,
+    embeddings float32[],
     chunk_id int32,
-) []float32 {
-    output := make([]float32, len(embeddings))
+) float32[] {
+    output := make(float32[], len(embeddings))
     for i := 0; i < len(embeddings); i++ {
         output[i] = embeddings[i] * (1.0 - float32(chunk_id)*0.01)
     }
@@ -155,11 +155,11 @@ func NewRingAttentionProcessor(
 }
 
 func (ring_attention_processor* rap) ComputeRingAttention(
-    q []float32,
-    k []float32,
-    v []float32,
-) []float32 {
-    output := make([]float32, len(q))
+    q float32[],
+    k float32[],
+    v float32[],
+) float32[] {
+    output := make(float32[], len(q))
     for round := int32(0); round < rap.num_devices; round++ {
         local_output := rap.computeLocalAttention(q, k, v)
         for i := 0; i < len(output); i++ {
@@ -172,19 +172,19 @@ func (ring_attention_processor* rap) ComputeRingAttention(
 }
 
 func (ring_attention_processor* rap) computeLocalAttention(
-    q []float32,
-    k []float32,
-    v []float32,
-) []float32 {
-    output := make([]float32, len(q))
+    q float32[],
+    k float32[],
+    v float32[],
+) float32[] {
+    output := make(float32[], len(q))
     for i := 0; i < len(q); i++ {
         output[i] = q[i] * 0.1
     }
     return output
 }
 
-func (ring_attention_processor* rap) rotateKV(kv []float32) []float32 {
-    rotated := make([]float32, len(kv))
+func (ring_attention_processor* rap) rotateKV(kv float32[]) float32[] {
+    rotated := make(float32[], len(kv))
     copy(rotated, kv)
     return rotated
 }

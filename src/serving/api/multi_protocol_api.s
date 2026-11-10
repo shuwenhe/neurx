@@ -8,12 +8,12 @@ struct anthropic_message {
 
 struct anthropic_request {
     model             string
-    messages          []anthropic_message
+    messages          anthropic_message[]
     max_tokens         int32
     temperature       float32
     top_p              float32
     top_k              int32
-    stop_sequences     []string
+    stop_sequences     string[]
     system_prompt      string
     stream            bool
 }
@@ -22,7 +22,7 @@ struct anthropic_response {
     id        string
     type      string
     role      string
-    content   []map[string]interface{}
+    content   (map[string]interface{})[]
     model     string
     stop_reason string
     usage     map[string]int32
@@ -37,13 +37,13 @@ struct cohere_request {
     p                 float32
     frequency_penalty  float32
     presence_penalty   float32
-    stop_sequences     []string
+    stop_sequences     string[]
     return_likelihoods string
     stream            bool
 }
 
 struct cohere_response {
-    generations       []map[string]interface{}
+    generations       (map[string]interface{})[]
     id                string
 }
 
@@ -109,7 +109,7 @@ func (anthropic_api* aa) create_message(req anthropic_request) (*anthropic_respo
         },
     }
     if output != nil && len(output.text) > 0 {
-        response.content = []map[string]interface{}{
+        response.content = (map[string]interface{})[]{
             {
                 "type": "text",
                 "text": output.text[0],
@@ -173,7 +173,7 @@ func (cohere_api* ca) generate(req cohere_request) (*cohere_response, error) {
     if err != nil {
         return nil, err
     }
-    generations := make([]map[string]interface{}, 0)
+    generations := make((map[string]interface{})[], 0)
     if output != nil && len(output.text) > 0 {
         generation := make(map[string]interface{})
         generation["text"] = output.text[0]
@@ -196,14 +196,14 @@ func (cohere_api* ca) generate_stream(req cohere_request) (chan *cohere_response
         defer close(resp_chan)
         resp_chan <- *cohere_response{
             id:          core.GenerateId(),
-            generations: make([]map[string]interface{}, 0),
+            generations: make((map[string]interface{})[], 0),
         }
     }()
     return resp_chan, nil
 }
 
-func convert_openai_to_anthropic(messages []interface{}, model string) anthropic_request {
-    anthropic_messages := make([]anthropic_message, 0)
+func convert_openai_to_anthropic(messages interface{}[], model string) anthropic_request {
+    anthropic_messages := make(anthropic_message[], 0)
     for _, msg := range messages {
         msg_map := msg.(map[string]interface{})
         anthropic_messages = append(anthropic_messages, anthropic_message{
@@ -230,7 +230,7 @@ func convert_anthropic_to_openai(anthropic_response* resp) map[string]interface{
     result["object"] = "chat.completion"
     result["created"] = core.CurrentTimeMs()
     result["model"] = resp.model
-    choices := make([]map[string]interface{}, 0)
+    choices := make((map[string]interface{})[], 0)
     if len(resp.content) > 0 {
         choice := make(map[string]interface{})
         choice["index"] = 0
@@ -252,7 +252,7 @@ func convert_cohere_to_openai(resp *cohere_response, model string) map[string]in
     result["object"] = "chat.completion"
     result["created"] = core.CurrentTimeMs()
     result["model"] = model
-    choices := make([]map[string]interface{}, 0)
+    choices := make((map[string]interface{})[], 0)
     if len(resp.generations) > 0 {
         choice := make(map[string]interface{})
         choice["index"] = 0

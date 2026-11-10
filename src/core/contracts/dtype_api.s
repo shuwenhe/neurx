@@ -39,14 +39,14 @@ struct dtype_promotion_rule {
 }
 interface id_type_promotion {
     promote(dtype1: DType, dtype2: DType) . DType
-    get_promotion_chain(from_dtype: DType, to_dtype: DType) . []d_type
+    get_promotion_chain(from_dtype: DType, to_dtype: DType) . d_type[]
     can_promote(from_dtype: DType, to_dtype: DType) . bool
     promotion_cost(from_dtype: DType, to_dtype: DType) . i64
 }
 interface id_type_registry {
     register_dtype(string name, i64 size, category: DTypeCategory) . DType
     register_promotion_rule(rule: dtype_promotion_rule) . void
-    get_all_promotion_rules() . []dtype_promotion_rule
+    get_all_promotion_rules() . dtype_promotion_rule[]
 }
 interface id_type_casting {
     cast(input: tensor, target_dtype: DType) . tensor

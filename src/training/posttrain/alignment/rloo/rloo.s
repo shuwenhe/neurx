@@ -45,11 +45,11 @@ func new_rloo_config() rloo_config {
 }
 
 func rloo_compute_loo_baselines(
-    []tensor rewards,
+    tensor[] rewards,
     int num_samples
-) []tensor {
+) tensor[] {
     int n = rewards.len
-    []tensor baselines = make([]tensor, n)
+    tensor[] baselines = make(tensor[], n)
     int i = 0
     for i < n {
         int group_idx = i / num_samples
@@ -103,10 +103,10 @@ func rloo_compute_policy_loss(
 func rloo_step(
     module policy,
     module reference_policy,
-    []tensor states,
-    []tensor actions,
-    []tensor rewards,
-    []tensor old_log_probs,
+    tensor[] states,
+    tensor[] actions,
+    tensor[] rewards,
+    tensor[] old_log_probs,
     rloo_config cfg
 ) rloo_state {
     int i = 0
@@ -118,11 +118,11 @@ func rloo_step(
         )
         i = i + 1
     }
-    []tensor baselines = rloo_compute_loo_baselines(
+    tensor[] baselines = rloo_compute_loo_baselines(
         rewards,
         cfg.num_samples
     )
-    []tensor advantages = make([]tensor, rewards.len)
+    tensor[] advantages = make(tensor[], rewards.len)
     i = 0
     for i < rewards.len {
         advantages[i] = tensor_ops.sub(rewards[i], baselines[i])

@@ -19,16 +19,16 @@ struct gradient_partition {
     int start_param_idx
     int end_param_idx
     int num_params
-    []float gradients
-    []float accumulated_grad
+    float[] gradients
+    float[] accumulated_grad
     int num_backward_calls
     float grad_norm_local
 }
 
 struct zero_stage3_state {
     zero_stage3_config config
-    []gradient_partition partitions
-    []float gradient_buffer_full
+    gradient_partition[] partitions
+    float[] gradient_buffer_full
     long total_allreduce_bytes
     long total_reduce_scatter_bytes
     int num_reduce_operations
@@ -51,7 +51,7 @@ func zero_stage3_new(
         overlap_reduce_backward: 1,
         max_gradient_buffer_mb: 512,
     }
-    []gradient_partition partitions = make([]gradient_partition, world_size)
+    gradient_partition[] partitions = make(gradient_partition[], world_size)
     int i = 0
     for i < world_size {
         int start_idx = i * cfg.partition_size
@@ -64,8 +64,8 @@ func zero_stage3_new(
             start_param_idx: start_idx,
             end_param_idx: end_idx,
             num_params: end_idx - start_idx,
-            gradients: make([]float, end_idx - start_idx),
-            accumulated_grad: make([]float, end_idx - start_idx),
+            gradients: make(float[], end_idx - start_idx),
+            accumulated_grad: make(float[], end_idx - start_idx),
             num_backward_calls: 0,
             grad_norm_local: 0.0,
         }
@@ -74,7 +74,7 @@ func zero_stage3_new(
     zero_stage3_state state = zero_stage3_state {
         config: cfg,
         partitions: partitions,
-        gradient_buffer_full: make([]float, total_params),
+        gradient_buffer_full: make(float[], total_params),
         total_allreduce_bytes: 0,
         total_reduce_scatter_bytes: 0,
         num_reduce_operations: 0,
@@ -87,7 +87,7 @@ func zero_stage3_new(
 
 func zero_stage3_accumulate_gradients(
     zero_stage3_state state,
-    []float layer_gradients,
+    float[] layer_gradients,
     int param_start_idx,
     int param_end_idx
 ) {
@@ -229,7 +229,7 @@ func zero_stage3_compute_global_grad_norm(
     zero_stage3_state state,
     collective_state comm
 ) float {
-    []float local_norms_sq = make([]float, len(state.partitions))
+    float[] local_norms_sq = make(float[], len(state.partitions))
     int i = 0
     for i < len(state.partitions) {
         local_norms_sq[i] = state.partitions[i].grad_norm_local * state.partitions[i].grad_norm_local
@@ -272,7 +272,7 @@ func zero_stage3_clip_gradients(
 
 func zero_stage3_optimizer_step(
     zero_stage3_state state,
-    []float parameters,
+    float[] parameters,
     float learning_rate,
     float beta1,
     float beta2,

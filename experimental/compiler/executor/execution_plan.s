@@ -8,8 +8,8 @@ import (
 struct execution_task {
     int op_id
     operation op
-    []int input_memory_offsets
-    []int output_memory_offsets
+    int[] input_memory_offsets
+    int[] output_memory_offsets
     string execution_device
 }
 
