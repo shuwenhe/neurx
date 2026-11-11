@@ -35,8 +35,8 @@ struct kv_cache {
     int layer_count
     int cache_size_per_layer
 }
-
-struct inference_config {
+c
+structrj                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     inference_config {
     int hidden_size
     int num_heads
     int num_layers
