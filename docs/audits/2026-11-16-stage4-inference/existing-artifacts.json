@@ -1,0 +1,37 @@
+[
+  {
+    "path": "artifact/build/production_s_inference/cpu_backend.ir",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifact/build/production_s_inference/wait_backend_ready.ir",
+    "size": 5650,
+    "sha256": "64594b3dc9e2642923b59441a744009ceac0329ec2cb78c4c5cb089dc71dd71e"
+  },
+  {
+    "path": "artifact/build/production_s_inference/gpu_backend_enhanced.ir",
+    "size": 125608,
+    "sha256": "13d848b0ece9928d3084dbe289a53f7e4ac2d5889477a87134d18ecefb06d4d4"
+  },
+  {
+    "path": "artifact/build/production_s_inference/gpu_backend_enhanced_entry.ir",
+    "size": 91610,
+    "sha256": "7cc87012e0414357f02ec670730d675e57ce2376ed3263c72d14b0c49ec7ee2c"
+  },
+  {
+    "path": "artifact/build/production_s_inference/chat_client.ir",
+    "size": 20395,
+    "sha256": "d5959f52e37997d0848f67e883d474e20dadef2acc91c58f9a35b791ac11d99b"
+  },
+  {
+    "path": "artifact/build/production_s_inference/hf_config.ir",
+    "size": 28263,
+    "sha256": "b3a9e161b1c6b370ffb02dbba0b3c70b085577acaff6770396992500584cd646"
+  },
+  {
+    "path": "artifact/build/s_gpu_runtime/libneurx_s_cuda.so",
+    "size": 1451560,
+    "sha256": "5f9a1ac199b84fc14e76d257db1e487624f476c07237c3192dde6cb52d12d88b"
+  }
+]
