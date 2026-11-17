@@ -2782,7 +2782,7 @@ hf-decoder-cuda-build: check-nvcc
 hf-decoder-cuda-kernels-test: check-nvcc
 	@mkdir -p artifact/build/hf_decoder_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
-		backend/cuda/hf_decoder_kernels_test.cu \
+		backend/platform/cuda/hf_decoder_kernels_test.cu \
 		-o artifact/build/hf_decoder_cuda/hf_decoder_kernels_test
 	@artifact/build/hf_decoder_cuda/hf_decoder_kernels_test
 hf-decoder-cuda-parity-test: hf-decoder-cuda-build

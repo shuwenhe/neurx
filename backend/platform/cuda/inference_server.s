@@ -35,8 +35,8 @@ struct kv_cache {
     int layer_count
     int cache_size_per_layer
 }
-c
-structrj                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     inference_config {
+
+struct inference_config {
     int hidden_size
     int num_heads
     int num_layers
@@ -1059,7 +1059,7 @@ func main() {
     }
     bool gpu_ok = gpu_available()
     if !gpu_ok {
-        print("ERROR: no local CUDA GPU is available; CPU fallback is disabled\n")
+        print("ERROR: " + neurx_s_cuda_last_error() + "; CPU fallback is disabled\n")
         return
     }
     hf_model_config model_config = load_hf_config(model_path)

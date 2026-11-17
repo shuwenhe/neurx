@@ -78,7 +78,17 @@ std::string chat_prompt(const std::string& prompt) {
 
 extern "C" int neurx_s_cuda_device_count() {
   int count = 0;
-  return cudaGetDeviceCount(&count) == cudaSuccess ? count : 0;
+  g_error.clear();
+  const cudaError_t status = cudaGetDeviceCount(&count);
+  if (status != cudaSuccess) {
+    g_error = std::string("cudaGetDeviceCount: ") + cudaGetErrorName(status) +
+        " (" + std::to_string(static_cast<int>(status)) + "): " +
+        cudaGetErrorString(status) +
+        "; check NVIDIA driver, /dev/nvidia* access and container GPU passthrough";
+    return -1;
+  }
+  if (count == 0) g_error = "cudaGetDeviceCount succeeded but found zero visible GPUs; check CUDA_VISIBLE_DEVICES and GPU passthrough";
+  return count;
 }
 
 extern "C" const char* neurx_s_cuda_device_name() { return g_device_name.c_str(); }
@@ -88,17 +98,23 @@ extern "C" const char* neurx_s_cuda_last_error() { return g_error.c_str(); }
 extern "C" int neurx_s_cuda_initialize(const char* model_directory, int device) {
   try {
     g_error.clear();
-    int count = 0;
-    const cudaError_t count_status = cudaGetDeviceCount(&count);
-    if (count_status != cudaSuccess || count <= 0) {
-      throw std::runtime_error("no local CUDA GPU is available");
-    }
+    const int count = neurx_s_cuda_device_count();
+    if (count <= 0) throw std::runtime_error(g_error);
     if (device < 0 || device >= count) {
       throw std::runtime_error("NEURX_CUDA_DEVICE is outside the local GPU range");
     }
     cudaDeviceProp properties{};
-    if (cudaGetDeviceProperties(&properties, device) != cudaSuccess) {
-      throw std::runtime_error("failed to query the local CUDA GPU");
+    const cudaError_t property_status = cudaGetDeviceProperties(&properties, device);
+    if (property_status != cudaSuccess) {
+      throw std::runtime_error(std::string("cudaGetDeviceProperties: ") + cudaGetErrorString(property_status));
+    }
+    const cudaError_t context_status = cudaSetDevice(device);
+    if (context_status != cudaSuccess) {
+      throw std::runtime_error(std::string("cudaSetDevice: ") + cudaGetErrorString(context_status));
+    }
+    const cudaError_t initialize_status = cudaFree(nullptr);
+    if (initialize_status != cudaSuccess) {
+      throw std::runtime_error(std::string("CUDA primary context initialization: ") + cudaGetErrorString(initialize_status));
     }
     g_device_name = properties.name;
     const std::string directory = model_directory == nullptr ? "" : model_directory;
@@ -162,17 +178,23 @@ extern "C" int neurx_s_cuda_config_finalize(const char* rms_norm_eps_text,
                                               int tie_word_embeddings) {
   try {
     g_error.clear();
-    int count = 0;
-    const cudaError_t count_status = cudaGetDeviceCount(&count);
-    if (count_status != cudaSuccess || count <= 0) {
-      throw std::runtime_error("no local CUDA GPU is available");
-    }
+    const int count = neurx_s_cuda_device_count();
+    if (count <= 0) throw std::runtime_error(g_error);
     if (g_pending_device < 0 || g_pending_device >= count) {
       throw std::runtime_error("NEURX_CUDA_DEVICE is outside the local GPU range");
     }
     cudaDeviceProp properties{};
-    if (cudaGetDeviceProperties(&properties, g_pending_device) != cudaSuccess) {
-      throw std::runtime_error("failed to query the local CUDA GPU");
+    const cudaError_t property_status = cudaGetDeviceProperties(&properties, g_pending_device);
+    if (property_status != cudaSuccess) {
+      throw std::runtime_error(std::string("cudaGetDeviceProperties: ") + cudaGetErrorString(property_status));
+    }
+    const cudaError_t context_status = cudaSetDevice(g_pending_device);
+    if (context_status != cudaSuccess) {
+      throw std::runtime_error(std::string("cudaSetDevice: ") + cudaGetErrorString(context_status));
+    }
+    const cudaError_t initialize_status = cudaFree(nullptr);
+    if (initialize_status != cudaSuccess) {
+      throw std::runtime_error(std::string("CUDA primary context initialization: ") + cudaGetErrorString(initialize_status));
     }
     g_device_name = properties.name;
     if (rms_norm_eps_text == nullptr || rope_theta_text == nullptr) {
