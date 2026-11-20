@@ -1,0 +1,10 @@
+# Official SDK staging
+
+**BLOCKED.** No package, checksum manifest or extraction has been placed here.
+
+1. Obtain the exact vendor-approved Focal bundle and its authenticated SHA-256 or signed manifest via Cambricon AI Repo. Record the official source, exact package versions and sanitized URLs. Record the start/end time and final HTTP status per download. Never commit temporary authorization tokens.
+2. Retain vendor archives under `packages/` and resumable transfers under the same directory with a `.part` suffix. For each named package, use `curl -q --fail --location --continue-at - --output "$partial" "$official_url"` with the vendor-authorized mechanism. If the server does not support resume, keep the partial for inspection and obtain a fresh vendor-authorized transfer. Only finalize a file after the vendor digest matches.
+3. Verify the signed manifest using the vendor-provided trusted key when available. Validate SHA-256 for every archive, using the expected final package filename or an explicit expected-digest check on its partial path. A locally generated hash or an MD5 sidecar alone cannot establish vendor SHA-256 verification.
+4. For each verified archive run `dpkg-deb -f "$pkg" Package Version Architecture Depends Pre-Depends` and extract under a distinct `extracted/<package-version>/` with `dpkg-deb -x`. Do not use an installer or run maintainer scripts.
+5. For each extracted ELF inspect `readelf -h`, `readelf -l`, `readelf -d`, and `readelf --version-info`. Audit version requirements, every direct and transitive dependency, interpreter, architecture, and resolution on the native host. Reject any required GLIBC version above 2.31. Verify CNRT/CNNL/CNCL version relationships and compiler target support against the release manifest and matching headers. Perform syntax-only checks before any execution where possible.
+6. Obtain separate authorization before installation. Native initialization, enumeration and hardware Vector Add remain future acceptance gates. A passing static audit does not establish native execution.

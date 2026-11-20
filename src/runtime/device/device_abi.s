@@ -16,6 +16,8 @@ func device_backend_cuda() string { "cuda" }
 
 func device_backend_cann() string { "cann" }
 
+func device_backend_mlu() string { "mlu" }
+
 func device_backend_cpu() string { "cpu" }
 
 func device_buffer_alloc(int context, int bytes, string memory_kind) int {
@@ -105,6 +107,9 @@ func device_capability_for(string backend, bool available) device_backend_capabi
     }
     if backend == device_backend_cann() || backend == "ascend" {
         return device_backend_capability {backend: device_backend_cann(), available: available, feature_flags: 63, collective_backend: "hccl"}
+    }
+    if backend == device_backend_mlu() {
+        return device_backend_capability {backend: backend, available: available, feature_flags: 0, collective_backend: ""}
     }
     device_backend_capability {backend: device_backend_cpu(), available: available, feature_flags: 36, collective_backend: "gloo"}
 }

@@ -233,6 +233,14 @@ DEVICE_ABI_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/device_abi
 DEVICE_ABI_COMMON_LIB := $(DEVICE_ABI_BUILD_DIR)/libneurx_device.so
 DEVICE_ABI_CUDA_PLUGIN := $(DEVICE_ABI_BUILD_DIR)/libneurx_backend_cuda.so
 DEVICE_ABI_CANN_PLUGIN := $(DEVICE_ABI_BUILD_DIR)/libneurx_backend_cann.so
+DEVICE_ABI_MLU_PLUGIN := $(DEVICE_ABI_BUILD_DIR)/libneurx_backend_mlu.so
+DEVICE_ABI_MLU_S_LIB := $(DEVICE_ABI_BUILD_DIR)/libneurx_mlu_s.so
+DEVICE_ABI_MLU_DIR := backend/platform/mlu
+DEVICE_ABI_MLU_CNRT_INCLUDE ?=
+ifneq ($(strip $(DEVICE_ABI_MLU_CNRT_INCLUDE)),)
+DEVICE_ABI_MLU_CNRT_FLAGS := -DNEURX_ENABLE_CNRT_DIAGNOSTIC -I'$(DEVICE_ABI_MLU_CNRT_INCLUDE)'
+DEVICE_ABI_MLU_CNRT_HEADER := $(DEVICE_ABI_MLU_CNRT_INCLUDE)/cnrt.h
+endif
 COLLECTIVE_ABI_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/collective_abi
 COLLECTIVE_ABI_LIB := $(COLLECTIVE_ABI_BUILD_DIR)/libneurx_collective.so
 
@@ -250,6 +258,25 @@ $(DEVICE_ABI_CANN_PLUGIN): backend/cann/device_abi_cann.cpp backend/cann/runtime
 
 $(DEVICE_ABI_CUDA_PLUGIN): backend/cuda/device_abi_cuda.cu backend/api/device_plugin_abi.h | $(DEVICE_ABI_BUILD_DIR)
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -Xcompiler=-fPIC -shared -Ibackend/api '$<' -lcublasLt -lcublas -o '$@'
+
+.PHONY: device-abi-mlu-build device-abi-mlu-test
+device-abi-mlu-build: $(DEVICE_ABI_MLU_PLUGIN)
+
+$(DEVICE_ABI_BUILD_DIR)/device_abi_mlu.ir: $(DEVICE_ABI_MLU_DIR)/device_abi_mlu.s $(wildcard $(S_SEED_COMPILER)) | $(DEVICE_ABI_BUILD_DIR)
+	@test -x '$(S_SEED_COMPILER)' || { echo 'MLU Device ABI requires a prebuilt S seed compiler at $(S_SEED_COMPILER)' >&2; exit 1; }
+	@'$(S_SEED_COMPILER)' '$<' '$@'
+
+$(DEVICE_ABI_MLU_S_LIB): $(DEVICE_ABI_BUILD_DIR)/device_abi_mlu.ir
+	@S_SOURCE_ROOT='$(S_REPO_ROOT)' '$(S_SEED_COMPILER)' --emit-shared '$<' '$@'
+
+$(DEVICE_ABI_MLU_PLUGIN): $(DEVICE_ABI_MLU_DIR)/device_abi_mlu.c backend/api/device_plugin_abi.h $(DEVICE_ABI_MLU_S_LIB) $(DEVICE_ABI_MLU_CNRT_HEADER)
+	@$(CC) -O2 -std=c11 -Wall -Wextra -Werror $(DEVICE_ABI_MLU_CNRT_FLAGS) -fPIC -shared '$<' -L'$(DEVICE_ABI_BUILD_DIR)' -lneurx_mlu_s -ldl -pthread -Wl,-z,defs,-rpath,'$$ORIGIN' -o '$@'
+
+$(DEVICE_ABI_BUILD_DIR)/device_abi_mlu_unavailable_test: test/contract/device_abi_mlu_unavailable_test.cpp backend/api/device_abi.h backend/api/device_plugin_abi.h $(DEVICE_ABI_COMMON_LIB)
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror '$<' -L'$(DEVICE_ABI_BUILD_DIR)' -lneurx_device -ldl -Wl,-rpath,'$$ORIGIN' -o '$@'
+
+device-abi-mlu-test: device-abi-mlu-build $(DEVICE_ABI_BUILD_DIR)/device_abi_mlu_unavailable_test
+	@NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' '$(DEVICE_ABI_BUILD_DIR)/device_abi_mlu_unavailable_test' '$(DEVICE_ABI_MLU_PLUGIN)'
 
 $(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test: test/contract/device_abi_registry_test.cpp $(DEVICE_ABI_COMMON_LIB) | $(DEVICE_ABI_BUILD_DIR)
 	@$(CXX) -O2 -std=c++17 -Ibackend/api '$<' -L'$(DEVICE_ABI_BUILD_DIR)' -lneurx_device -Wl,-rpath,'$(DEVICE_ABI_BUILD_DIR)' -o '$@'
