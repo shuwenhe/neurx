@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "mlu_gemm_reference.h"
+
 _Static_assert(FLT_RADIX == 2 && FLT_MANT_DIG == 24 && FLT_MAX_EXP == 128 &&
                FLT_EVAL_METHOD == 0, "reference requires binary32 arithmetic");
 
@@ -40,18 +42,6 @@ static int oracle_a(int q, int bf16) {
     return q;
 }
 
-/* Increasing-K FP32 reference. The compiler invocation disables contraction. */
-static void reference(const float *a, const float *b, float *c,
-                      int m, int n, int k, int lda, int ldb, int ldc) {
-    for (int i = 0; i < m; ++i) {
-        float *row = c + i*ldc;
-        for (int j = 0; j < n; ++j) row[j] = 0.0f;
-        for (int p = 0; p < k; ++p)
-            for (int j = 0; j < n; ++j)
-                row[j] += a[i*lda+p] * b[p*ldb+j];
-    }
-}
-
 static int validate(struct shape s, int bf16) {
     int lda = s.k+s.pa, ldb = s.n+s.pb, ldc = s.n+s.pc;
     float *a = malloc((size_t)s.m*lda*sizeof(*a));
@@ -71,7 +61,7 @@ static int validate(struct shape s, int bf16) {
     for (int i = 0; i < s.m; ++i)
         for (int j = 0; j < ldc; ++j) c[i*ldc+j] = NAN;
 
-    reference(a,b,c,s.m,s.n,s.k,lda,ldb,ldc);
+    mlu_gemm_reference(a,b,c,s.m,s.n,s.k,lda,ldb,ldc);
     double max_abs = 0, max_rel = 0, sum_abs = 0;
     size_t mismatches = 0, nonfinite = 0, padding_errors = 0, zero_outputs = 0;
     for (int i = 0; i < s.m; ++i) {
@@ -119,11 +109,11 @@ static int boundaries(int bf16) {
     float c[1];
 
     const float cancel[] = {4096,1,-4096};
-    reference(cancel,b,c,1,1,3,3,1,1);
+    mlu_gemm_reference(cancel,b,c,1,1,3,3,1,1);
     if (c[0] != 0) return 1; /* FP64 increasing-K would produce 1. */
-    reference(&maximum,&(const float){0.5f},c,1,1,1,1,1,1);
+    mlu_gemm_reference(&maximum,&(const float){0.5f},c,1,1,1,1,1,1);
     if (c[0] != maximum/2) return 1;
-    reference(&minimum,&(const float){1.0f},c,1,1,1,1,1,1);
+    mlu_gemm_reference(&minimum,&(const float){1.0f},c,1,1,1,1,1,1);
     return c[0] != minimum;
 }
 
