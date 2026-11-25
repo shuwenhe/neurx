@@ -1,0 +1,77 @@
+{
+  "prompt": "The capital of France is",
+  "output": " Paris.\nThe capital of France is Paris.\nThe capital of France is",
+  "elapsed_s": 123.61093814000014,
+  "events": [
+    {
+      "delta": " Paris",
+      "done": false
+    },
+    {
+      "delta": ".",
+      "done": false
+    },
+    {
+      "delta": "\n",
+      "done": false
+    },
+    {
+      "delta": "The",
+      "done": false
+    },
+    {
+      "delta": " capital",
+      "done": false
+    },
+    {
+      "delta": " of",
+      "done": false
+    },
+    {
+      "delta": " France",
+      "done": false
+    },
+    {
+      "delta": " is",
+      "done": false
+    },
+    {
+      "delta": " Paris",
+      "done": false
+    },
+    {
+      "delta": ".",
+      "done": false
+    },
+    {
+      "delta": "\n",
+      "done": false
+    },
+    {
+      "delta": "The",
+      "done": false
+    },
+    {
+      "delta": " capital",
+      "done": false
+    },
+    {
+      "delta": " of",
+      "done": false
+    },
+    {
+      "delta": " France",
+      "done": false
+    },
+    {
+      "delta": " is",
+      "done": false
+    },
+    {
+      "delta": "",
+      "done": true,
+      "backend": "neurx-gpu-enhanced",
+      "generated_tokens": 16
+    }
+  ]
+}

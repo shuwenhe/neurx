@@ -1,4 +1,6 @@
 #include "hf_decoder_cuda.h"
+#include "deepseek_v2_cuda.h"
+#include "../../../src/runtime/model/json.h"
 #include "../../../src/runtime/model/bpe_tokenizer.h"
 
 #include <cuda_runtime.h>
@@ -21,6 +23,7 @@ using neurx::runtime::model::bpe_tokenizer;
 struct generation_session {
   std::mutex mutex;
   std::unique_ptr<hf_cuda_kv_cache> cache = std::make_unique<hf_cuda_kv_cache>();
+  std::unique_ptr<neurx::cuda::deepseek_v2_cache> deepseek_cache;
   std::vector<float> logits;
   std::vector<int32_t> generated;
   std::string output;
@@ -28,6 +31,7 @@ struct generation_session {
 };
 
 std::unique_ptr<hf_decoder_cuda> g_model;
+std::unique_ptr<neurx::cuda::deepseek_v2_cuda> g_deepseek;
 std::unique_ptr<bpe_tokenizer> g_tokenizer;
 std::vector<int32_t> g_stop_tokens;
 std::string g_error;
@@ -67,11 +71,34 @@ void clear_sessions() {
 }
 
 std::string chat_prompt(const std::string& prompt) {
+  if (g_deepseek) return prompt;
   if (prompt.find("<|im_start|>") != std::string::npos) return prompt;
   return "<|im_start|>system\n"
          "You are a helpful assistant. Answer accurately and directly.\n"
          "<|im_end|>\n<|im_start|>user\n" +
          prompt + "\n<|im_end|>\n<|im_start|>assistant\n";
+}
+
+void load_model(const std::string& directory, int device,
+                const neurx::runtime::model::hf_config* config = nullptr) {
+  g_model.reset();
+  g_deepseek.reset();
+  clear_sessions();
+  auto metadata = neurx::runtime::model::json::parse_file(directory + "/config.json");
+  g_tokenizer = std::make_unique<bpe_tokenizer>(bpe_tokenizer::from_directory(directory));
+  g_stop_tokens.clear();
+  if (metadata.at("model_type").as_string() == "deepseek_v2") {
+    g_deepseek = std::make_unique<neurx::cuda::deepseek_v2_cuda>(directory, device);
+    g_stop_tokens.push_back(g_deepseek->eos_token_id());
+  } else {
+    g_model = config ? std::make_unique<hf_decoder_cuda>(directory, *config, device)
+                     : std::make_unique<hf_decoder_cuda>(directory, device);
+    for (const char* marker : {"<|endoftext|>", "<|im_end|>"}) {
+      const int32_t id = g_tokenizer->token_id(marker);
+      if (id >= 0) g_stop_tokens.push_back(id);
+    }
+    if (g_stop_tokens.empty()) throw std::runtime_error("model stop tokens are missing");
+  }
 }
 
 }
@@ -92,6 +119,8 @@ extern "C" int neurx_s_cuda_device_count() {
 }
 
 extern "C" const char* neurx_s_cuda_device_name() { return g_device_name.c_str(); }
+
+extern "C" const char* neurx_s_cuda_prompt_format() { return g_deepseek ? "plain" : "chatml"; }
 
 extern "C" const char* neurx_s_cuda_last_error() { return g_error.c_str(); }
 
@@ -120,19 +149,12 @@ extern "C" int neurx_s_cuda_initialize(const char* model_directory, int device) 
     const std::string directory = model_directory == nullptr ? "" : model_directory;
     if (directory.empty()) throw std::runtime_error("NEURX_MODEL_DIR is required");
 
-    g_tokenizer = std::make_unique<bpe_tokenizer>(bpe_tokenizer::from_directory(directory));
-    g_model = std::make_unique<hf_decoder_cuda>(directory, device);
-    clear_sessions();
-    g_stop_tokens.clear();
-    for (const char* marker : {"<|endoftext|>", "<|im_end|>"}) {
-      const int32_t id = g_tokenizer->token_id(marker);
-      if (id >= 0) g_stop_tokens.push_back(id);
-    }
-    if (g_stop_tokens.empty()) throw std::runtime_error("Qwen stop tokens are missing");
+    load_model(directory, device);
     return 0;
   } catch (const std::exception& error) {
     set_error(error);
     g_model.reset();
+    g_deepseek.reset();
     g_tokenizer.reset();
     clear_sessions();
     return -1;
@@ -207,21 +229,12 @@ extern "C" int neurx_s_cuda_config_finalize(const char* rms_norm_eps_text,
     g_pending_config.tie_word_embeddings = tie_word_embeddings != 0;
     g_pending_config.validate();
 
-    g_tokenizer = std::make_unique<bpe_tokenizer>(
-        bpe_tokenizer::from_directory(g_pending_directory));
-    g_model = std::make_unique<hf_decoder_cuda>(
-        g_pending_directory, g_pending_config, g_pending_device);
-    clear_sessions();
-    g_stop_tokens.clear();
-    for (const char* marker : {"<|endoftext|>", "<|im_end|>"}) {
-      const int32_t id = g_tokenizer->token_id(marker);
-      if (id >= 0) g_stop_tokens.push_back(id);
-    }
-    if (g_stop_tokens.empty()) throw std::runtime_error("Qwen stop tokens are missing");
+    load_model(g_pending_directory, g_pending_device, &g_pending_config);
     return 0;
   } catch (const std::exception& error) {
     set_error(error);
     g_model.reset();
+    g_deepseek.reset();
     g_tokenizer.reset();
     clear_sessions();
     return -1;
@@ -230,7 +243,7 @@ extern "C" int neurx_s_cuda_config_finalize(const char* rms_norm_eps_text,
 
 extern "C" int neurx_s_cuda_session_create() {
   std::lock_guard<std::mutex> lock(g_runtime_mutex);
-  if (!g_model || !g_tokenizer) { g_error = "NeurX CUDA runtime is not initialized"; return -1; }
+  if ((!g_model && !g_deepseek) || !g_tokenizer) { g_error = "NeurX CUDA runtime is not initialized"; return -1; }
   int session_id = g_next_session++;
   g_session.emplace(session_id, std::make_shared<generation_session>());
   return session_id;
@@ -253,14 +266,19 @@ extern "C" int neurx_s_cuda_session_begin(int session_id, const char* prompt, in
     if (!session) throw std::runtime_error("unknown CUDA generation session");
     std::lock_guard<std::mutex> session_lock(session->mutex);
     session->error.clear();
-    if (!g_model || !g_tokenizer) {
+    if ((!g_model && !g_deepseek) || !g_tokenizer) {
       throw std::runtime_error("NeurX CUDA runtime is not initialized");
     }
     if (maximum_new_tokens <= 0) throw std::runtime_error("max_new_tokens must be positive");
     std::vector<int32_t> input = g_tokenizer->encode(
         chat_prompt(prompt == nullptr ? "" : prompt), true);
-    const std::size_t context =
+    if (g_deepseek && (input.empty() || input.front() != g_deepseek->bos_token_id()))
+      input.insert(input.begin(), g_deepseek->bos_token_id());
+    const std::size_t context = g_deepseek ? g_deepseek->context_limit() :
         static_cast<std::size_t>(g_model->config().max_position_embeddings);
+    if (g_deepseek && (static_cast<std::size_t>(maximum_new_tokens) >= context ||
+        input.size() + static_cast<std::size_t>(maximum_new_tokens) > context))
+      throw std::runtime_error("DeepSeek prompt + generation exceed NEURX_DEEPSEEK_CONTEXT");
     const std::size_t reserve = std::min<std::size_t>(maximum_new_tokens, context - 1);
     if (input.size() + reserve > context) {
       input.erase(input.begin(), input.begin() + (input.size() + reserve - context));
@@ -270,7 +288,13 @@ extern "C" int neurx_s_cuda_session_begin(int session_id, const char* prompt, in
     session->generated.clear();
     session->output.clear();
     std::lock_guard<std::mutex> model_lock(g_model_mutex);
-    session->logits = g_model->prefill(input, session->cache.get());
+    if (g_deepseek) {
+      session->deepseek_cache.reset();
+      session->deepseek_cache = g_deepseek->create_cache();
+      session->logits = g_deepseek->prefill(input, session->deepseek_cache.get());
+    } else {
+      session->logits = g_model->prefill(input, session->cache.get());
+    }
     return static_cast<int>(input.size());
   } catch (const std::exception& error) {
     auto session = find_session(session_id);
@@ -285,14 +309,17 @@ extern "C" int neurx_s_cuda_session_next(int session_id) {
     if (!session) throw std::runtime_error("unknown CUDA generation session");
     std::lock_guard<std::mutex> session_lock(session->mutex);
     session->error.clear();
-    if (!g_model || !g_tokenizer || !session->cache || session->logits.empty()) {
+    if ((!g_model && !g_deepseek) || !g_tokenizer ||
+        (g_deepseek ? !session->deepseek_cache : !session->cache) || session->logits.empty()) {
       throw std::runtime_error("NeurX CUDA generation session is not ready");
     }
     const int32_t token = hf_decoder_cuda::greedy(session->logits);
     if (is_stop_token(token)) return -1;
     session->generated.push_back(token);
     std::lock_guard<std::mutex> model_lock(g_model_mutex);
-    session->logits = g_model->decode(token, session->cache.get());
+    session->logits = g_deepseek
+        ? g_deepseek->decode(token, session->deepseek_cache.get())
+        : g_model->decode(token, session->cache.get());
     return token;
   } catch (const std::exception& error) {
     auto session = find_session(session_id);

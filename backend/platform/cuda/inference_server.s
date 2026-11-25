@@ -14,6 +14,7 @@ extern "intrinsic" func __host_read_binary_file_range(string path, int offset, i
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "libc:neurx_s_cuda_device_count" func neurx_s_cuda_device_count() int
 extern "libc:neurx_s_cuda_device_name" func neurx_s_cuda_device_name() string
+extern "libc:neurx_s_cuda_prompt_format" func neurx_s_cuda_prompt_format() string
 extern "libc:neurx_s_cuda_last_error" func neurx_s_cuda_last_error() string
 extern "libc:neurx_s_cuda_initialize" func neurx_s_cuda_initialize(string model_path, int device_id) int
 extern "libc:neurx_s_cuda_config_dimensions" func neurx_s_cuda_config_dimensions(string model_path, int device_id, int vocab_size, int hidden_size, int intermediate_size, int num_hidden_layers) int
@@ -332,36 +333,18 @@ func gpu_device_info() string {
 }
 
 func model_hidden_dim() int {
-    string model_path = runtime_env_get("NEURX_MODEL_DIR", "")
-    if len(model_path) > 0 && (contains_substring(model_path, "0.5B") || contains_substring(model_path, "500M")) {
-        return 896
-    }
-    if len(model_path) > 0 && (contains_substring(model_path, "7B") || contains_substring(model_path, "VL-7B")) {
-        return 3584
-    }
-    return 896
+    hf_model_config config = load_hf_config(runtime_env_get("NEURX_MODEL_DIR", ""))
+    return config.hidden_size
 }
 
 func num_transformer_layers() int {
-    string model_path = runtime_env_get("NEURX_MODEL_DIR", "")
-    if len(model_path) > 0 && (contains_substring(model_path, "0.5B") || contains_substring(model_path, "500M")) {
-        return 24
-    }
-    if len(model_path) > 0 && (contains_substring(model_path, "7B") || contains_substring(model_path, "VL-7B")) {
-        return 28
-    }
-    return 24
+    hf_model_config config = load_hf_config(runtime_env_get("NEURX_MODEL_DIR", ""))
+    return config.layers
 }
 
 func active_transformer_layers() int {
-    int configured = parse_int_or_default(runtime_env_get("NEURX_ACTIVE_LAYERS", "24"), 24)
-    if configured < 1 {
-        return 1
-    }
-    if configured > num_transformer_layers() {
-        return num_transformer_layers()
-    }
-    return configured
+    // Native CUDA always executes the complete configured model.
+    return num_transformer_layers()
 }
 
 func bind_backend_socket(int listener_fd, string host, int port) int {
@@ -1006,7 +989,7 @@ func handle_client_gpu(int client_fd, string model_path, string device_type) {
     string response = ""
     if is_health {
         print("[GPU-Backend] Health check\n")
-        response = "{\"status\":\"ok\",\"backend\":\"neurx-gpu-enhanced\",\"layers\":" + int_to_string(active_transformer_layers()) + "}"
+        response = "{\"status\":\"ok\",\"backend\":\"neurx-gpu-enhanced\",\"layers\":" + int_to_string(active_transformer_layers()) + ",\"prompt_format\":\"" + neurx_s_cuda_prompt_format() + "\"}"
     } else if is_generate {
         print("[GPU-Backend] Processing generate request\n")
         string prompt = extract_json_string(request, "prompt")
@@ -1073,7 +1056,7 @@ func main() {
     if model_config.attention_bias { attention_bias = 1 }
     if model_config.mlp_bias { mlp_bias = 1 }
     if model_config.tie_word_embeddings { tie_word_embeddings = 1 }
-    print("  Loading model weights into local GPU memory...\n")
+    print("  Initializing model weights (device residency is backend-managed)...\n")
     if neurx_s_cuda_config_dimensions(model_path, device_id, model_config.vocabulary_size, model_config.hidden_size, model_config.intermediate_size, model_config.layers) != 0 {
         print("ERROR: NeurX CUDA dimension configuration failed: " + neurx_s_cuda_last_error() + "\n")
         return

@@ -1,0 +1,17 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Ti 16GB",
+  "model": "Qwen2.5-0.5B-Instruct",
+  "backend": "NeurX S + native CUDA, 24 layers, FP32",
+  "warmups": 1,
+  "runs": 5,
+  "output_tokens_each": 128,
+  "concurrency": 1,
+  "aggregate_tps": 69.53465894939961,
+  "mean_decode_tps": 70.92479817803788,
+  "mean_ttft_ms": 50.038552199839614,
+  "tps_range": [
+    68.54147704754104,
+    70.37706328816654
+  ],
+  "note": "Includes HTTP and prefill in aggregate TPS; desktop and another NeurX instance were present. Client sends headers and body together to accommodate server request reads."
+}

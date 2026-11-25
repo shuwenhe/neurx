@@ -226,7 +226,7 @@ func main() {
     string host = runtime_env_get("NEURX_S_HOST", "127.0.0.1")
     string port_str = runtime_env_get("NEURX_S_PORT", "18083")
     int port = string_to_int(port_str)
-    string model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
+    string model = runtime_env_get("NEURX_MODEL_DIR", runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain"))
     string max_tokens = runtime_env_get("NEURX_CHAT_MAX_NEW_TOKENS", "16")
     string system_prompt = runtime_env_get(
         "NEURX_CHAT_SYSTEM_PROMPT",
@@ -264,7 +264,9 @@ func main() {
         return
     }
     print("✅ Backend is ready\n\n")
+    bool plain_prompt = extract_json_string(health_response, "prompt_format") == "plain"
     string history = "<|im_start|>system\n" + system_prompt + "<|im_end|>\n"
+    if plain_prompt { print("Mode: base-model text completion\n\n") }
     int turn = 0
     int empty_attempts = 0
     for true {
@@ -293,6 +295,7 @@ func main() {
         string prompt = history +
             "<|im_start|>user\n" + user_input + "<|im_end|>\n" +
             "<|im_start|>assistant\n"
+        if plain_prompt { prompt = user_input }
         print("⏳ Generating response...\n")
         string request_body = "{\"action\":\"generate\",\"prompt\":\"" + json_escape(prompt) + "\",\"max_new_tokens\":" + max_tokens + "}"
         string raw_response = http_request(

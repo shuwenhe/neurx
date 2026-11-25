@@ -69,11 +69,11 @@ std::string pair_key(const std::string& first, const std::string& second) {
   return first + '\x1f' + second;
 }
 
-void inspect_pre_tokenizer(const json& node, std::string* split_pattern, bool* byte_level) {
+void inspect_pre_tokenizer(const json& node, std::vector<std::string>* split_patterns, bool* byte_level) {
   const std::string type = node.at("type").as_string();
   if (type == "Sequence") {
     for (const auto& child : node.at("pretokenizers").as_array()) {
-      inspect_pre_tokenizer(child, split_pattern, byte_level);
+      inspect_pre_tokenizer(child, split_patterns, byte_level);
     }
     return;
   }
@@ -88,7 +88,11 @@ void inspect_pre_tokenizer(const json& node, std::string* split_pattern, bool* b
     if (!pattern.is_object() || !pattern.contains("Regex")) {
       throw std::runtime_error("only regex Split pre-tokenizers are supported");
     }
-    *split_pattern = pattern.at("Regex").as_string();
+    split_patterns->push_back(pattern.at("Regex").as_string());
+    return;
+  }
+  if (type == "Digits") {
+    split_patterns->push_back(node.at("individual_digits").as_bool() ? "\\p{N}" : "\\p{N}+");
     return;
   }
   if (type == "ByteLevel") {
@@ -201,10 +205,14 @@ bpe_tokenizer bpe_tokenizer::from_tokenizer_json(const std::string& path) {
     if (it != tokenizer.token_to_id_.end()) tokenizer.unknown_id_ = it->second;
   }
   if (root.contains("normalizer") && !root.at("normalizer").is_null()) {
-    tokenizer.normalizer_type_ = root.at("normalizer").at("type").as_string();
+    const auto& norm = root.at("normalizer");
+    if (norm.at("type").as_string() != "Sequence" ||
+        !norm.at("normalizers").as_array().empty()) {
+      tokenizer.normalizer_type_ = norm.at("type").as_string();
+    }
   }
   if (root.contains("pre_tokenizer") && !root.at("pre_tokenizer").is_null()) {
-    inspect_pre_tokenizer(root.at("pre_tokenizer"), &tokenizer.split_pattern_,
+    inspect_pre_tokenizer(root.at("pre_tokenizer"), &tokenizer.split_patterns_,
                           &tokenizer.byte_level_);
   }
   return tokenizer;
@@ -234,39 +242,44 @@ std::string bpe_tokenizer::normalize(const std::string& text) const {
 }
 
 std::vector<std::string> bpe_tokenizer::pretokenize(const std::string& text) const {
-  if (split_pattern_.empty()) return {text};
-  UErrorCode status = U_ZERO_ERROR;
-  const icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(split_pattern_);
-  std::unique_ptr<icu::RegexPattern> compiled(icu::RegexPattern::compile(pattern, 0, status));
-  if (U_FAILURE(status) || !compiled) {
-    throw std::runtime_error("cannot compile tokenizer Split regex");
-  }
-  const icu::UnicodeString input = icu::UnicodeString::fromUTF8(text);
-  std::unique_ptr<icu::RegexMatcher> matcher(compiled->matcher(input, status));
-  if (U_FAILURE(status) || !matcher) {
-    throw std::runtime_error("cannot create tokenizer Split matcher");
-  }
-  std::vector<std::string> pieces;
-  int32_t cursor = 0;
-  while (matcher->find(status)) {
-    if (U_FAILURE(status)) throw std::runtime_error("tokenizer Split regex failed");
-    if (matcher->start(status) > cursor) {
-      std::string gap;
-      input.tempSubStringBetween(cursor, matcher->start(status)).toUTF8String(gap);
-      pieces.push_back(std::move(gap));
+  std::vector<std::string> current{text};
+  for (const auto& stage : split_patterns_) {
+    std::vector<std::string> pieces;
+    for (const auto& part : current) {
+      UErrorCode status = U_ZERO_ERROR;
+      const icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(stage);
+      std::unique_ptr<icu::RegexPattern> compiled(icu::RegexPattern::compile(pattern, 0, status));
+      if (U_FAILURE(status) || !compiled) {
+        throw std::runtime_error("cannot compile tokenizer Split regex");
+      }
+      const icu::UnicodeString input = icu::UnicodeString::fromUTF8(part);
+      std::unique_ptr<icu::RegexMatcher> matcher(compiled->matcher(input, status));
+      if (U_FAILURE(status) || !matcher) {
+        throw std::runtime_error("cannot create tokenizer Split matcher");
+      }
+      int32_t cursor = 0;
+      while (matcher->find(status)) {
+        if (U_FAILURE(status)) throw std::runtime_error("tokenizer Split regex failed");
+        if (matcher->start(status) > cursor) {
+          std::string gap;
+          input.tempSubStringBetween(cursor, matcher->start(status)).toUTF8String(gap);
+          pieces.push_back(std::move(gap));
+        }
+        std::string piece;
+        matcher->group(status).toUTF8String(piece);
+        pieces.push_back(std::move(piece));
+        cursor = matcher->end(status);
+      }
+      if (U_FAILURE(status)) throw std::runtime_error("tokenizer Split regex failed");
+      if (cursor < input.length()) {
+        std::string tail;
+        input.tempSubString(cursor).toUTF8String(tail);
+        pieces.push_back(std::move(tail));
+      }
     }
-    std::string piece;
-    matcher->group(status).toUTF8String(piece);
-    pieces.push_back(std::move(piece));
-    cursor = matcher->end(status);
+    current = std::move(pieces);
   }
-  if (U_FAILURE(status)) throw std::runtime_error("tokenizer Split regex failed");
-  if (cursor < input.length()) {
-    std::string tail;
-    input.tempSubString(cursor).toUTF8String(tail);
-    pieces.push_back(std::move(tail));
-  }
-  return pieces;
+  return current;
 }
 
 std::vector<std::string> bpe_tokenizer::byte_symbols(const std::string& bytes) const {

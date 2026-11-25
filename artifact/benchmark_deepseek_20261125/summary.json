@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "model": "DeepSeek-V2-Lite",
+    "gpu": "NVIDIA GeForce RTX 4060 Ti 16GB",
+    "backend": "NeurX S + native CUDA MLA/YaRN/MoE",
+    "precision": "BF16 checkpoint, FP32 arithmetic/activations",
+    "weight_cache_mb": 8192,
+    "context_limit": 2048,
+    "host_offload": true,
+    "concurrency": 1,
+    "max_new_tokens": 32,
+    "prompt": "Artificial intelligence is",
+    "warmups": 1,
+    "measured_runs": 3,
+    "endpoint": "127.0.0.1:18084",
+    "note": "Reuses existing user instance; host OS file cache is not flushed. End-to-end excludes model initialization. Decode TPS = (generated_tokens-1)/(done_time-first_delta_time), including serving overhead."
+  },
+  "summary": {
+    "aggregate_tps": 0.1626269337525025,
+    "mean_tps": 0.19471820983708799,
+    "aggregate_decode_tps": 0.3303378694929994,
+    "mean_ttft_s": 102.92606155733363,
+    "tps_range": [
+      0.12958890194814182,
+      0.3236942340476676
+    ],
+    "measured_output_tokens": 96
+  },
+  "validation": {
+    "completed_runs": 4,
+    "formal_runs": 3,
+    "formal_tokens": 96,
+    "all_generated_outputs_identical": true,
+    "runtime_observation": "During long wait: process state D (disk sleep), GPU utilization 9%; host offload and OS cache variability present.",
+    "existing_service_health": {
+      "status": "ok",
+      "backend": "neurx-gpu-enhanced",
+      "layers": 27,
+      "prompt_format": "plain"
+    }
+  }
+}

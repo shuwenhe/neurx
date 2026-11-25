@@ -1,0 +1,17 @@
+{
+  "reference": "independent NumPy BF16 weights, FP32 activations",
+  "positions": 4,
+  "max_absolute_logit_error": 2.8572080634781116e-07,
+  "expected_greedy_ids": [
+    8,
+    4,
+    20,
+    27
+  ],
+  "actual_greedy_ids": [
+    8,
+    4,
+    20,
+    27
+  ]
+}

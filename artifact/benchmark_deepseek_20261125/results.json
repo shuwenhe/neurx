@@ -1,0 +1,580 @@
+{
+  "metadata": {
+    "model": "DeepSeek-V2-Lite",
+    "gpu": "NVIDIA GeForce RTX 4060 Ti 16GB",
+    "backend": "NeurX S + native CUDA MLA/YaRN/MoE",
+    "precision": "BF16 checkpoint, FP32 arithmetic/activations",
+    "weight_cache_mb": 8192,
+    "context_limit": 2048,
+    "host_offload": true,
+    "concurrency": 1,
+    "max_new_tokens": 32,
+    "prompt": "Artificial intelligence is",
+    "warmups": 1,
+    "measured_runs": 3,
+    "endpoint": "127.0.0.1:18084",
+    "note": "Reuses existing user instance; host OS file cache is not flushed. End-to-end excludes model initialization. Decode TPS = (generated_tokens-1)/(done_time-first_delta_time), including serving overhead."
+  },
+  "rows": [
+    {
+      "run": 0,
+      "warmup": true,
+      "generated_tokens": 32,
+      "elapsed_s": 132.65257697200104,
+      "ttft_s": 25.231970678001744,
+      "tps": 0.24123164985143286,
+      "decode_tps": 0.2885852265174909,
+      "output": " a hot topic in the tech world. It’s also a hot topic in the business world.\nArtificial intelligence is a hot topic in the tech world",
+      "events": [
+        {
+          "time_s": 25.231970678001744,
+          "delta": " a"
+        },
+        {
+          "time_s": 29.473174211001606,
+          "delta": " hot"
+        },
+        {
+          "time_s": 34.348979896001765,
+          "delta": " topic"
+        },
+        {
+          "time_s": 40.58401910900102,
+          "delta": " in"
+        },
+        {
+          "time_s": 43.75186860000031,
+          "delta": " the"
+        },
+        {
+          "time_s": 48.12624436600163,
+          "delta": " tech"
+        },
+        {
+          "time_s": 51.968683206001515,
+          "delta": " world"
+        },
+        {
+          "time_s": 57.85748695100119,
+          "delta": "."
+        },
+        {
+          "time_s": 62.94820822100155,
+          "delta": " It"
+        },
+        {
+          "time_s": 65.58006593000027,
+          "delta": "’"
+        },
+        {
+          "time_s": 69.05138023700056,
+          "delta": "s"
+        },
+        {
+          "time_s": 71.68607264400089,
+          "delta": " also"
+        },
+        {
+          "time_s": 75.06717482100066,
+          "delta": " a"
+        },
+        {
+          "time_s": 78.2284331710016,
+          "delta": " hot"
+        },
+        {
+          "time_s": 82.35011640500124,
+          "delta": " topic"
+        },
+        {
+          "time_s": 85.06450049600062,
+          "delta": " in"
+        },
+        {
+          "time_s": 86.17352602300161,
+          "delta": " the"
+        },
+        {
+          "time_s": 88.03313875599997,
+          "delta": " business"
+        },
+        {
+          "time_s": 89.89375734900023,
+          "delta": " world"
+        },
+        {
+          "time_s": 96.64686605600036,
+          "delta": "."
+        },
+        {
+          "time_s": 98.3532275510006,
+          "delta": "\n"
+        },
+        {
+          "time_s": 103.90159550600038,
+          "delta": "Art"
+        },
+        {
+          "time_s": 107.08027709200178,
+          "delta": "ificial"
+        },
+        {
+          "time_s": 109.37796147800145,
+          "delta": " intelligence"
+        },
+        {
+          "time_s": 112.8416938850005,
+          "delta": " is"
+        },
+        {
+          "time_s": 116.56163905600079,
+          "delta": " a"
+        },
+        {
+          "time_s": 118.78282444600154,
+          "delta": " hot"
+        },
+        {
+          "time_s": 120.84679994900034,
+          "delta": " topic"
+        },
+        {
+          "time_s": 123.53917009400175,
+          "delta": " in"
+        },
+        {
+          "time_s": 126.17845150700123,
+          "delta": " the"
+        },
+        {
+          "time_s": 129.33554672800165,
+          "delta": " tech"
+        },
+        {
+          "time_s": 132.65242065100028,
+          "delta": " world"
+        }
+      ]
+    },
+    {
+      "run": 1,
+      "warmup": false,
+      "generated_tokens": 32,
+      "elapsed_s": 244.51466962300037,
+      "ttft_s": 140.80302289800056,
+      "tps": 0.13087149351545452,
+      "decode_tps": 0.29890567722060296,
+      "output": " a hot topic in the tech world. It’s also a hot topic in the business world.\nArtificial intelligence is a hot topic in the tech world",
+      "events": [
+        {
+          "time_s": 140.80302289800056,
+          "delta": " a"
+        },
+        {
+          "time_s": 144.25725790400065,
+          "delta": " hot"
+        },
+        {
+          "time_s": 150.29338653800005,
+          "delta": " topic"
+        },
+        {
+          "time_s": 154.65484252200076,
+          "delta": " in"
+        },
+        {
+          "time_s": 157.71410653100065,
+          "delta": " the"
+        },
+        {
+          "time_s": 160.81070235900006,
+          "delta": " tech"
+        },
+        {
+          "time_s": 164.00234508200083,
+          "delta": " world"
+        },
+        {
+          "time_s": 173.64523164100137,
+          "delta": "."
+        },
+        {
+          "time_s": 178.10641912700157,
+          "delta": " It"
+        },
+        {
+          "time_s": 181.73755293600152,
+          "delta": "’"
+        },
+        {
+          "time_s": 184.7330969630002,
+          "delta": "s"
+        },
+        {
+          "time_s": 186.39727371400113,
+          "delta": " also"
+        },
+        {
+          "time_s": 188.2160638410005,
+          "delta": " a"
+        },
+        {
+          "time_s": 190.31934070400166,
+          "delta": " hot"
+        },
+        {
+          "time_s": 193.02506833500047,
+          "delta": " topic"
+        },
+        {
+          "time_s": 196.27439323200088,
+          "delta": " in"
+        },
+        {
+          "time_s": 197.06200099700072,
+          "delta": " the"
+        },
+        {
+          "time_s": 199.95906348000062,
+          "delta": " business"
+        },
+        {
+          "time_s": 203.05407382200065,
+          "delta": " world"
+        },
+        {
+          "time_s": 205.22139265000078,
+          "delta": "."
+        },
+        {
+          "time_s": 207.75920037600008,
+          "delta": "\n"
+        },
+        {
+          "time_s": 214.29765992400098,
+          "delta": "Art"
+        },
+        {
+          "time_s": 217.15596756500054,
+          "delta": "ificial"
+        },
+        {
+          "time_s": 221.3656857060014,
+          "delta": " intelligence"
+        },
+        {
+          "time_s": 224.45953564700176,
+          "delta": " is"
+        },
+        {
+          "time_s": 226.70444036400113,
+          "delta": " a"
+        },
+        {
+          "time_s": 229.24637635300132,
+          "delta": " hot"
+        },
+        {
+          "time_s": 232.92228015,
+          "delta": " topic"
+        },
+        {
+          "time_s": 235.61846998500005,
+          "delta": " in"
+        },
+        {
+          "time_s": 238.23928459700073,
+          "delta": " the"
+        },
+        {
+          "time_s": 241.1044100750005,
+          "delta": " tech"
+        },
+        {
+          "time_s": 244.5144201210005,
+          "delta": " world"
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "warmup": false,
+      "generated_tokens": 32,
+      "elapsed_s": 246.93472603699956,
+      "ttft_s": 152.31140528300057,
+      "tps": 0.12958890194814182,
+      "decode_tps": 0.3276147967855997,
+      "output": " a hot topic in the tech world. It’s also a hot topic in the business world.\nArtificial intelligence is a hot topic in the tech world",
+      "events": [
+        {
+          "time_s": 152.31140528300057,
+          "delta": " a"
+        },
+        {
+          "time_s": 155.7853078499993,
+          "delta": " hot"
+        },
+        {
+          "time_s": 159.2725746870001,
+          "delta": " topic"
+        },
+        {
+          "time_s": 163.18301481600065,
+          "delta": " in"
+        },
+        {
+          "time_s": 165.78332277499976,
+          "delta": " the"
+        },
+        {
+          "time_s": 169.1349196430001,
+          "delta": " tech"
+        },
+        {
+          "time_s": 172.81746808500066,
+          "delta": " world"
+        },
+        {
+          "time_s": 176.9804622770007,
+          "delta": "."
+        },
+        {
+          "time_s": 181.25506284099902,
+          "delta": " It"
+        },
+        {
+          "time_s": 185.87167407299967,
+          "delta": "’"
+        },
+        {
+          "time_s": 189.07813122799962,
+          "delta": "s"
+        },
+        {
+          "time_s": 190.73640031300056,
+          "delta": " also"
+        },
+        {
+          "time_s": 193.182251233,
+          "delta": " a"
+        },
+        {
+          "time_s": 195.32167087699963,
+          "delta": " hot"
+        },
+        {
+          "time_s": 197.13500624799963,
+          "delta": " topic"
+        },
+        {
+          "time_s": 201.04659470499973,
+          "delta": " in"
+        },
+        {
+          "time_s": 203.92661623300046,
+          "delta": " the"
+        },
+        {
+          "time_s": 207.3427820069992,
+          "delta": " business"
+        },
+        {
+          "time_s": 210.81918228500035,
+          "delta": " world"
+        },
+        {
+          "time_s": 213.26184175399976,
+          "delta": "."
+        },
+        {
+          "time_s": 214.83743123599925,
+          "delta": "\n"
+        },
+        {
+          "time_s": 218.53567279299932,
+          "delta": "Art"
+        },
+        {
+          "time_s": 220.79033017300026,
+          "delta": "ificial"
+        },
+        {
+          "time_s": 223.56318704799924,
+          "delta": " intelligence"
+        },
+        {
+          "time_s": 228.36618872799954,
+          "delta": " is"
+        },
+        {
+          "time_s": 230.16963773099997,
+          "delta": " a"
+        },
+        {
+          "time_s": 232.1434666240002,
+          "delta": " hot"
+        },
+        {
+          "time_s": 234.37942431900046,
+          "delta": " topic"
+        },
+        {
+          "time_s": 239.47973540599924,
+          "delta": " in"
+        },
+        {
+          "time_s": 241.63123823100068,
+          "delta": " the"
+        },
+        {
+          "time_s": 244.2622261939996,
+          "delta": " tech"
+        },
+        {
+          "time_s": 246.93453273699924,
+          "delta": " world"
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "warmup": false,
+      "generated_tokens": 32,
+      "elapsed_s": 98.85872726199887,
+      "ttft_s": 15.66375649099973,
+      "tps": 0.3236942340476676,
+      "decode_tps": 0.37261867770024226,
+      "output": " a hot topic in the tech world. It’s also a hot topic in the business world.\nArtificial intelligence is a hot topic in the tech world",
+      "events": [
+        {
+          "time_s": 15.66375649099973,
+          "delta": " a"
+        },
+        {
+          "time_s": 18.571129439998913,
+          "delta": " hot"
+        },
+        {
+          "time_s": 21.630645109999023,
+          "delta": " topic"
+        },
+        {
+          "time_s": 22.61176026099929,
+          "delta": " in"
+        },
+        {
+          "time_s": 23.813183079999362,
+          "delta": " the"
+        },
+        {
+          "time_s": 25.443457904999377,
+          "delta": " tech"
+        },
+        {
+          "time_s": 27.806030911999187,
+          "delta": " world"
+        },
+        {
+          "time_s": 35.46563582899944,
+          "delta": "."
+        },
+        {
+          "time_s": 39.42570542999965,
+          "delta": " It"
+        },
+        {
+          "time_s": 41.766028707999794,
+          "delta": "’"
+        },
+        {
+          "time_s": 43.826330947000315,
+          "delta": "s"
+        },
+        {
+          "time_s": 45.51979893299904,
+          "delta": " also"
+        },
+        {
+          "time_s": 47.39953287000026,
+          "delta": " a"
+        },
+        {
+          "time_s": 49.85007148499972,
+          "delta": " hot"
+        },
+        {
+          "time_s": 52.02056416999949,
+          "delta": " topic"
+        },
+        {
+          "time_s": 53.78713692199926,
+          "delta": " in"
+        },
+        {
+          "time_s": 54.488733197998954,
+          "delta": " the"
+        },
+        {
+          "time_s": 58.04091761899872,
+          "delta": " business"
+        },
+        {
+          "time_s": 59.313990399999966,
+          "delta": " world"
+        },
+        {
+          "time_s": 61.497920480000175,
+          "delta": "."
+        },
+        {
+          "time_s": 62.50532415399903,
+          "delta": "\n"
+        },
+        {
+          "time_s": 67.61187569999856,
+          "delta": "Art"
+        },
+        {
+          "time_s": 70.63425304500015,
+          "delta": "ificial"
+        },
+        {
+          "time_s": 73.54039831499904,
+          "delta": " intelligence"
+        },
+        {
+          "time_s": 76.92962235899904,
+          "delta": " is"
+        },
+        {
+          "time_s": 80.0363842099996,
+          "delta": " a"
+        },
+        {
+          "time_s": 83.0655662249992,
+          "delta": " hot"
+        },
+        {
+          "time_s": 87.15730565099875,
+          "delta": " topic"
+        },
+        {
+          "time_s": 90.01495368500036,
+          "delta": " in"
+        },
+        {
+          "time_s": 92.26185497499864,
+          "delta": " the"
+        },
+        {
+          "time_s": 95.28682266400028,
+          "delta": " tech"
+        },
+        {
+          "time_s": 98.8585467519988,
+          "delta": " world"
+        }
+      ]
+    }
+  ]
+}

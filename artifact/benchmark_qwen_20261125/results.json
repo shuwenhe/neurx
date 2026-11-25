@@ -1,0 +1,67 @@
+{
+  "prompt": "Write a detailed explanation of how computers work, covering processors, memory, storage, and operating systems.",
+  "max_new_tokens": 128,
+  "concurrency": 1,
+  "rows": [
+    {
+      "run": 0,
+      "warmup": true,
+      "generated_tokens": 128,
+      "elapsed_s": 1.912778992999847,
+      "ttft_s": 0.1284161249996032,
+      "tps": 66.91834261482306,
+      "decode_tps": 71.17386394748864,
+      "output": "Computers work by utilizing a combination of hardware and software components. Here's a detailed explanation of how they function:\n\n1. **Processor**: The processor is the brain of the computer, responsible for executing instructions and performing calculations. It consists of multiple cores, each capable of executing a single instruction at a time. The processor is typically a central processing unit (CPU) that manages the flow of data and instructions between the memory and the memory itself.\n\n2. **Memory**: Memory is the storage space used by the computer to temporarily store data and instructions. It can be volatile (e.g., RAM) or non-volatile (e.g.,"
+    },
+    {
+      "run": 1,
+      "warmup": false,
+      "generated_tokens": 128,
+      "elapsed_s": 1.8352183699998932,
+      "ttft_s": 0.05227363999983936,
+      "tps": 69.74646837259343,
+      "decode_tps": 71.2304749906612,
+      "output": "Computers work by utilizing a combination of hardware and software components. Here's a detailed explanation of how they function:\n\n1. **Processor**: The processor is the brain of the computer, responsible for executing instructions and performing calculations. It consists of multiple cores, each capable of executing a single instruction at a time. The processor is typically a central processing unit (CPU) that manages the flow of data and instructions between the memory and the memory itself.\n\n2. **Memory**: Memory is the storage space used by the computer to temporarily store data and instructions. It can be volatile (e.g., RAM) or non-volatile (e.g.,"
+    },
+    {
+      "run": 2,
+      "warmup": false,
+      "generated_tokens": 128,
+      "elapsed_s": 1.8394613919999756,
+      "ttft_s": 0.04995155699998577,
+      "tps": 69.58558660523477,
+      "decode_tps": 70.96915452269684,
+      "output": "Computers work by utilizing a combination of hardware and software components. Here's a detailed explanation of how they function:\n\n1. **Processor**: The processor is the brain of the computer, responsible for executing instructions and performing calculations. It consists of multiple cores, each capable of executing a single instruction at a time. The processor is typically a central processing unit (CPU) that manages the flow of data and instructions between the memory and the memory itself.\n\n2. **Memory**: Memory is the storage space used by the computer to temporarily store data and instructions. It can be volatile (e.g., RAM) or non-volatile (e.g.,"
+    },
+    {
+      "run": 3,
+      "warmup": false,
+      "generated_tokens": 128,
+      "elapsed_s": 1.8674823699993794,
+      "ttft_s": 0.04935974899944995,
+      "tps": 68.54147704754104,
+      "decode_tps": 69.8522742817823,
+      "output": "Computers work by utilizing a combination of hardware and software components. Here's a detailed explanation of how they function:\n\n1. **Processor**: The processor is the brain of the computer, responsible for executing instructions and performing calculations. It consists of multiple cores, each capable of executing a single instruction at a time. The processor is typically a central processing unit (CPU) that manages the flow of data and instructions between the memory and the memory itself.\n\n2. **Memory**: Memory is the storage space used by the computer to temporarily store data and instructions. It can be volatile (e.g., RAM) or non-volatile (e.g.,"
+    },
+    {
+      "run": 4,
+      "warmup": false,
+      "generated_tokens": 128,
+      "elapsed_s": 1.8431066129996907,
+      "ttft_s": 0.0494056460001957,
+      "tps": 69.44796307343154,
+      "decode_tps": 70.80332917055051,
+      "output": "Computers work by utilizing a combination of hardware and software components. Here's a detailed explanation of how they function:\n\n1. **Processor**: The processor is the brain of the computer, responsible for executing instructions and performing calculations. It consists of multiple cores, each capable of executing a single instruction at a time. The processor is typically a central processing unit (CPU) that manages the flow of data and instructions between the memory and the memory itself.\n\n2. **Memory**: Memory is the storage space used by the computer to temporarily store data and instructions. It can be volatile (e.g., RAM) or non-volatile (e.g.,"
+    },
+    {
+      "run": 5,
+      "warmup": false,
+      "generated_tokens": 128,
+      "elapsed_s": 1.818774384999415,
+      "ttft_s": 0.04920216899972729,
+      "tps": 70.37706328816654,
+      "decode_tps": 71.76875792449853,
+      "output": "Computers work by utilizing a combination of hardware and software components. Here's a detailed explanation of how they function:\n\n1. **Processor**: The processor is the brain of the computer, responsible for executing instructions and performing calculations. It consists of multiple cores, each capable of executing a single instruction at a time. The processor is typically a central processing unit (CPU) that manages the flow of data and instructions between the memory and the memory itself.\n\n2. **Memory**: Memory is the storage space used by the computer to temporarily store data and instructions. It can be volatile (e.g., RAM) or non-volatile (e.g.,"
+    }
+  ]
+}

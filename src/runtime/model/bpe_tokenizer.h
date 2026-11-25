@@ -25,7 +25,7 @@ class bpe_tokenizer {
   std::unordered_map<uint32_t, uint8_t> unicode_to_byte_;
   std::vector<std::string> byte_to_symbol_;
   std::string normalizer_type_;
-  std::string split_pattern_;
+  std::vector<std::string> split_patterns_;
   bool byte_level_ = false;
   int32_t unknown_id_ = -1;
 };

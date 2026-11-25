@@ -160,8 +160,8 @@ POSTTRAIN_ADAPTER_DIR ?= $(POSTTRAIN_OUTPUT_DIR)/adapter
 POSTTRAIN_MERGED_MODEL_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
 POSTTRAIN_LORA_ALPHA ?= 16.0
 POSTTRAIN_LORA_RANK ?= 8
-CHAT_MODEL_PATH ?= $(if $(wildcard /model/Qwen2.5-VL-7B/model.safetensors.index.json),/model/Qwen2.5-VL-7B,$(if $(wildcard /home/shuwen/model/Qwen2.5-0.5B-Instruct/model.safetensors),/home/shuwen/model/Qwen2.5-0.5B-Instruct,$(if $(wildcard /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/model.safetensors),/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct,$(if $(wildcard /app/model/Qwen2.5-0.5B-Instruct/model.safetensors),/app/model/Qwen2.5-0.5B-Instruct,$(if $(wildcard $(CURDIR_UNIX)/../posttrain/model.safetensors),$(CURDIR_UNIX)/../posttrain,$(POSTTRAIN_OUTPUT_DIR))))))
-CHAT_MAX_NEW_TOKENS ?= 1024
+CHAT_MODEL_PATH ?= $(CURDIR_UNIX)/../model/DeepSeek-V2-Lite
+CHAT_MAX_NEW_TOKENS ?= $(if $(findstring DeepSeek-V2-Lite,$(CHAT_MODEL_PATH)),32,1024)
 POSTTRAIN_GOLDEN_DIR ?= /home/shuwen/shuwen/posttrain/golden
 POSTTRAIN_GOLDEN_SOURCE ?= $(CURDIR_UNIX)/script/posttrain_golden.s
 POSTTRAIN_VERIFY_TENSORS_SOURCE ?= $(CURDIR_UNIX)/script/verify_posttrain_tensors.s
@@ -1275,6 +1275,8 @@ build-s-gpu-cuda-runtime: check-nvcc
 	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
 		backend/platform/cuda/hf_decoder_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o'
 	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
+		backend/platform/cuda/deepseek_v2_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/deepseek_v2_cuda.o'
+	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
 		backend/platform/cuda/s_inference_cuda_bridge.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o'
 	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/json.cpp \
 		-o '$(S_GPU_RUNTIME_BUILD_DIR)/json.o'
@@ -1289,6 +1291,7 @@ build-s-gpu-cuda-runtime: check-nvcc
 	@$(CUDA_NVCC) -shared \
 		'$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o' \
 		'$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o' \
+		'$(S_GPU_RUNTIME_BUILD_DIR)/deepseek_v2_cuda.o' \
 		'$(S_GPU_RUNTIME_BUILD_DIR)/json.o' \
 		'$(S_GPU_RUNTIME_BUILD_DIR)/safetensors.o' \
 		'$(S_GPU_RUNTIME_BUILD_DIR)/hf_model.o' \
@@ -1297,11 +1300,19 @@ build-s-gpu-cuda-runtime: check-nvcc
 		-lcublas -licui18n -licuuc -licudata -o '$(S_GPU_RUNTIME_LIB)'
 	@test -s '$(S_GPU_RUNTIME_LIB)'
 
+.PHONY: deepseek-cuda-test
+deepseek-cuda-test: check-nvcc
+	@mkdir -p artifact/build/deepseek_cuda
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+		test/deepseek_cuda_probe.cu backend/platform/cuda/deepseek_v2_cuda.cu \
+		src/runtime/model/json.cpp -o artifact/build/deepseek_cuda/probe
+	@python3 test/native-construction/test_deepseek_cuda.py artifact/build/deepseek_cuda/probe
+
 chat-gpu: build-s-ir-runner build-s-gpu-cuda-runtime $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_CLIENT_IR) $(WAIT_BACKEND_READY_IR) chat-gpu-run
 
 chat-gpu-run:
 	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference)"
-	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: Qwen2.5-0.5B-Instruct"
+	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: $(CHAT_MODEL_PATH)"
 	@echo "   ⏳ Starting backend with smart health check..."
 	@if [ -s '$(GPU_BACKEND_PID_FILE)' ]; then \
 		backend_pid="$$(cat '$(GPU_BACKEND_PID_FILE)')"; \
@@ -1317,18 +1328,18 @@ chat-gpu-run:
 		exit 1; \
 	fi
 	@bash -c '\
-		LD_PRELOAD="$(S_GPU_RUNTIME_LIB)" NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/home/shuwen/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_CUDA_DEVICE=0 NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & \
+		LD_PRELOAD="$(S_GPU_RUNTIME_LIB)" NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR="$(CHAT_MODEL_PATH)" NEURX_INFER_DEVICE=gpu NEURX_CUDA_DEVICE=0 NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & \
 		backend_pid=$$!; printf "%s\n" "$$backend_pid" > "$(GPU_BACKEND_PID_FILE)"; \
 		NEURX_S_PORT=$(GPU_BACKEND_PORT) "$(S_RUNNER_BIN)" "$(WAIT_BACKEND_READY_IR)"; \
 		if ! kill -0 "$$backend_pid" 2>/dev/null; then echo "ERROR: GPU backend exited during startup"; tail -50 /tmp/neurx_gpu_backend.log; printf "" > "$(GPU_BACKEND_PID_FILE)"; exit 1; fi; \
 		sleep 2; \
-		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/home/shuwen/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; client_status=$$?; \
+		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR="$(CHAT_MODEL_PATH)" NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; client_status=$$?; \
 		kill "$$backend_pid" 2>/dev/null || true; wait "$$backend_pid" 2>/dev/null || true; printf "" > "$(GPU_BACKEND_PID_FILE)"; exit "$$client_status"; \
 	'
 
 chat-gpu-native: build-production-s-inference
 	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference - Native)"
-	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: Qwen2.5-0.5B-Instruct"
+	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: $(CHAT_MODEL_PATH)"
 	@echo "   Note: GPU backend may fail with socket binding issues"
 	@pkill -9 NeurX 2>/dev/null || true
 	@sleep 3
@@ -1336,7 +1347,7 @@ chat-gpu-native: build-production-s-inference
 	@for i in 1 2 3 4 5 6 7; do if lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1; then sleep 1; else break; fi; done
 	@echo "   Initializing GPU backend..."
 	NEURX_ROOT=$(CURDIR_UNIX) \
-		NEURX_MODEL_DIR=/home/shuwen/model/Qwen2.5-0.5B-Instruct \
+		NEURX_MODEL_DIR="$(CHAT_MODEL_PATH)" \
 		NEURX_INFER_DEVICE=gpu \
 		NEURX_S_PORT=$(GPU_BACKEND_PORT) \
 		NEURX_S_HOST=127.0.0.1 \
