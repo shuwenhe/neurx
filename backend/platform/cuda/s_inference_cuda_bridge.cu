@@ -1,5 +1,6 @@
 #include "hf_decoder_cuda.h"
 #include "deepseek_v2_cuda.h"
+#include "qwen_vl_text_cuda.h"
 #include "../../../src/runtime/model/json.h"
 #include "../../../src/runtime/model/bpe_tokenizer.h"
 
@@ -32,6 +33,8 @@ struct generation_session {
 
 std::unique_ptr<hf_decoder_cuda> g_model;
 std::unique_ptr<neurx::cuda::deepseek_v2_cuda> g_deepseek;
+std::unique_ptr<neurx::cuda::qwen_vl_text_cuda> g_qwen;
+std::vector<int32_t> g_vision_tokens;
 std::unique_ptr<bpe_tokenizer> g_tokenizer;
 std::vector<int32_t> g_stop_tokens;
 std::string g_error;
@@ -83,13 +86,24 @@ void load_model(const std::string& directory, int device,
                 const neurx::runtime::model::hf_config* config = nullptr) {
   g_model.reset();
   g_deepseek.reset();
+  g_qwen.reset();
   clear_sessions();
   auto metadata = neurx::runtime::model::json::parse_file(directory + "/config.json");
   g_tokenizer = std::make_unique<bpe_tokenizer>(bpe_tokenizer::from_directory(directory));
   g_stop_tokens.clear();
+  g_vision_tokens.clear();
   if (metadata.at("model_type").as_string() == "deepseek_v2") {
     g_deepseek = std::make_unique<neurx::cuda::deepseek_v2_cuda>(directory, device);
     g_stop_tokens.push_back(g_deepseek->eos_token_id());
+  } else if (metadata.at("model_type").as_string() == "qwen2_5_vl") {
+    g_qwen = std::make_unique<neurx::cuda::qwen_vl_text_cuda>(directory, device);
+    for (const char* key : {"vision_start_token_id", "vision_end_token_id", "vision_token_id", "image_token_id", "video_token_id"})
+      if (metadata.contains(key)) g_vision_tokens.push_back(metadata.at(key).as_int());
+    for (const char* marker : {"<|endoftext|>", "<|im_end|>"}) {
+      const int32_t id = g_tokenizer->token_id(marker);
+      if (id >= 0) g_stop_tokens.push_back(id);
+    }
+    if (g_stop_tokens.empty()) throw std::runtime_error("Qwen stop tokens are missing");
   } else {
     g_model = config ? std::make_unique<hf_decoder_cuda>(directory, *config, device)
                      : std::make_unique<hf_decoder_cuda>(directory, device);
@@ -155,6 +169,7 @@ extern "C" int neurx_s_cuda_initialize(const char* model_directory, int device) 
     set_error(error);
     g_model.reset();
     g_deepseek.reset();
+  g_qwen.reset();
     g_tokenizer.reset();
     clear_sessions();
     return -1;
@@ -235,6 +250,7 @@ extern "C" int neurx_s_cuda_config_finalize(const char* rms_norm_eps_text,
     set_error(error);
     g_model.reset();
     g_deepseek.reset();
+  g_qwen.reset();
     g_tokenizer.reset();
     clear_sessions();
     return -1;
@@ -243,7 +259,7 @@ extern "C" int neurx_s_cuda_config_finalize(const char* rms_norm_eps_text,
 
 extern "C" int neurx_s_cuda_session_create() {
   std::lock_guard<std::mutex> lock(g_runtime_mutex);
-  if ((!g_model && !g_deepseek) || !g_tokenizer) { g_error = "NeurX CUDA runtime is not initialized"; return -1; }
+  if ((!g_model && !g_deepseek && !g_qwen) || !g_tokenizer) { g_error = "NeurX CUDA runtime is not initialized"; return -1; }
   int session_id = g_next_session++;
   g_session.emplace(session_id, std::make_shared<generation_session>());
   return session_id;
@@ -266,7 +282,7 @@ extern "C" int neurx_s_cuda_session_begin(int session_id, const char* prompt, in
     if (!session) throw std::runtime_error("unknown CUDA generation session");
     std::lock_guard<std::mutex> session_lock(session->mutex);
     session->error.clear();
-    if ((!g_model && !g_deepseek) || !g_tokenizer) {
+    if ((!g_model && !g_deepseek && !g_qwen) || !g_tokenizer) {
       throw std::runtime_error("NeurX CUDA runtime is not initialized");
     }
     if (maximum_new_tokens <= 0) throw std::runtime_error("max_new_tokens must be positive");
@@ -274,11 +290,14 @@ extern "C" int neurx_s_cuda_session_begin(int session_id, const char* prompt, in
         chat_prompt(prompt == nullptr ? "" : prompt), true);
     if (g_deepseek && (input.empty() || input.front() != g_deepseek->bos_token_id()))
       input.insert(input.begin(), g_deepseek->bos_token_id());
-    const std::size_t context = g_deepseek ? g_deepseek->context_limit() :
+    if (g_qwen) for (int32_t token : input)
+      if (std::find(g_vision_tokens.begin(), g_vision_tokens.end(), token) != g_vision_tokens.end())
+        throw std::runtime_error("Qwen VL text mode does not support image/video inputs; vision encoder is not loaded");
+    const std::size_t context = g_qwen ? g_qwen->context_limit() : g_deepseek ? g_deepseek->context_limit() :
         static_cast<std::size_t>(g_model->config().max_position_embeddings);
-    if (g_deepseek && (static_cast<std::size_t>(maximum_new_tokens) >= context ||
+    if ((g_deepseek || g_qwen) && (static_cast<std::size_t>(maximum_new_tokens) >= context ||
         input.size() + static_cast<std::size_t>(maximum_new_tokens) > context))
-      throw std::runtime_error("DeepSeek prompt + generation exceed NEURX_DEEPSEEK_CONTEXT");
+      throw std::runtime_error("Offloaded model prompt + generation exceed context limit");
     const std::size_t reserve = std::min<std::size_t>(maximum_new_tokens, context - 1);
     if (input.size() + reserve > context) {
       input.erase(input.begin(), input.begin() + (input.size() + reserve - context));
@@ -292,6 +311,10 @@ extern "C" int neurx_s_cuda_session_begin(int session_id, const char* prompt, in
       session->deepseek_cache.reset();
       session->deepseek_cache = g_deepseek->create_cache();
       session->logits = g_deepseek->prefill(input, session->deepseek_cache.get());
+    } else if (g_qwen) {
+      session->deepseek_cache.reset();
+      session->deepseek_cache = g_qwen->create_cache();
+      session->logits = g_qwen->prefill(input, session->deepseek_cache.get());
     } else {
       session->logits = g_model->prefill(input, session->cache.get());
     }
@@ -309,8 +332,8 @@ extern "C" int neurx_s_cuda_session_next(int session_id) {
     if (!session) throw std::runtime_error("unknown CUDA generation session");
     std::lock_guard<std::mutex> session_lock(session->mutex);
     session->error.clear();
-    if ((!g_model && !g_deepseek) || !g_tokenizer ||
-        (g_deepseek ? !session->deepseek_cache : !session->cache) || session->logits.empty()) {
+    if ((!g_model && !g_deepseek && !g_qwen) || !g_tokenizer ||
+        ((g_deepseek || g_qwen) ? !session->deepseek_cache : !session->cache) || session->logits.empty()) {
       throw std::runtime_error("NeurX CUDA generation session is not ready");
     }
     const int32_t token = hf_decoder_cuda::greedy(session->logits);
@@ -319,6 +342,7 @@ extern "C" int neurx_s_cuda_session_next(int session_id) {
     std::lock_guard<std::mutex> model_lock(g_model_mutex);
     session->logits = g_deepseek
         ? g_deepseek->decode(token, session->deepseek_cache.get())
+        : g_qwen ? g_qwen->decode(token, session->deepseek_cache.get())
         : g_model->decode(token, session->cache.get());
     return token;
   } catch (const std::exception& error) {

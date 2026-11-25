@@ -1,5 +1,6 @@
 #include "../../../src/runtime/model/json.h"
 #include "deepseek_v2_cuda.h"
+#include "qwen_vl_text_cuda.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -90,11 +91,14 @@ class weights {
     uint64_t used;
   };
   std::map<std::string, resident> gpu;
-  size_t budget = 0, used = 0;
+  size_t budget = 0, used = 0, largest = 0;
+  bool fixed;
+  buffer staging;
   uint64_t clock = 0;
 
 public:
-  weights(const std::string &dir, size_t bytes) : budget(bytes) {
+  weights(const std::string &dir, size_t bytes, bool fixed_residency = false)
+      : budget(bytes), fixed(fixed_residency) {
     std::map<std::string, std::vector<std::string>> shards;
     const auto index =
         std::filesystem::path(dir) / "model.safetensors.index.json";
@@ -145,6 +149,7 @@ public:
         size_t width = t.bf16 ? 2 : 4;
         if (count > SIZE_MAX / width || count * width != t.bytes)
           throw std::runtime_error("tensor byte count mismatch");
+        largest = std::max(largest, t.bytes);
         if (!views.emplace(kv.first, t).second)
           throw std::runtime_error("duplicate checkpoint tensor");
       }
@@ -174,6 +179,16 @@ public:
     const auto &v = at(name);
     if (v.bytes > budget)
       throw std::runtime_error("DeepSeek weight cache too small for " + name);
+    // Dense decode visits all weights every token. Keep a fixed resident
+    // prefix instead of evicting every weight in a cyclic LRU scan. Reserve
+    // one largest-tensor slot so transient uploads stay inside the budget.
+    if (fixed && (largest > budget || used + v.bytes > budget - largest)) {
+      staging = buffer();
+      staging = buffer(v.bytes);
+      ck(cudaMemcpy(staging.p, v.p, v.bytes, cudaMemcpyHostToDevice),
+         "upload offloaded weight");
+      return staging.p;
+    }
     while (used + v.bytes > budget) {
       auto old = std::min_element(gpu.begin(), gpu.end(),
                                   [](const auto &a, const auto &b) {
@@ -626,4 +641,255 @@ std::vector<float> deepseek_v2_cuda::decode(int32_t id,
 int deepseek_v2_cuda::context_limit() const { return impl_->limit; }
 int deepseek_v2_cuda::bos_token_id() const { return impl_->bos; }
 int deepseek_v2_cuda::eos_token_id() const { return impl_->eos; }
+// Qwen text decoder shares the bounded mmap weight store above.
+namespace {
+__global__ void projection_bias(float *x, const void *bias, int n, bool bf) {
+  int i = blockIdx.x * 256 + threadIdx.x;
+  if (i < n)
+    x[i] += value(bias, i, bf);
+}
+__global__ void qwen_prepare(const float *q, const float *k, const float *v,
+                             float *qr, float *keys, float *values, int pos,
+                             int heads, int kvheads, int dim, float theta) {
+  int i = blockIdx.x * 256 + threadIdx.x;
+  if (i < heads * dim) {
+    int d = i % dim, j = d % (dim / 2), base = i - d;
+    float angle = pos * powf(theta, -2.f * j / dim), cs = cosf(angle),
+          sn = sinf(angle);
+    qr[i] = d < dim / 2 ? q[base + j] * cs - q[base + j + dim / 2] * sn
+                        : q[base + j] * sn + q[base + j + dim / 2] * cs;
+  }
+  if (i < kvheads * dim) {
+    int d = i % dim, j = d % (dim / 2), base = i - d;
+    float angle = pos * powf(theta, -2.f * j / dim), cs = cosf(angle),
+          sn = sinf(angle);
+    keys[pos * kvheads * dim + i] =
+        d < dim / 2 ? k[base + j] * cs - k[base + j + dim / 2] * sn
+                    : k[base + j] * sn + k[base + j + dim / 2] * cs;
+    values[pos * kvheads * dim + i] = v[i];
+  }
+}
+__global__ void qwen_attention(const float *q, const float *k, const float *v,
+                               float *out, int heads, int kvheads, int dim,
+                               int length) {
+  extern __shared__ float scores[];
+  int h = blockIdx.x, kh = h / (heads / kvheads), tid = threadIdx.x;
+  float mx = -INFINITY;
+  for (int t = tid; t < length; t += 256) {
+    float z = 0;
+    for (int d = 0; d < dim; ++d)
+      z += q[h * dim + d] * k[(t * kvheads + kh) * dim + d];
+    scores[t] = z * rsqrtf(float(dim));
+    mx = fmaxf(mx, scores[t]);
+  }
+  __shared__ float reduction[256];
+  reduction[tid] = mx;
+  __syncthreads();
+  for (int n = 128; n; n >>= 1) {
+    if (tid < n)
+      reduction[tid] = fmaxf(reduction[tid], reduction[tid + n]);
+    __syncthreads();
+  }
+  mx = reduction[0];
+  float total = 0;
+  for (int t = tid; t < length; t += 256) {
+    scores[t] = expf(scores[t] - mx);
+    total += scores[t];
+  }
+  total = sum256(total);
+  __syncthreads();
+  for (int d = tid; d < dim; d += 256) {
+    float y = 0;
+    for (int t = 0; t < length; ++t)
+      y += scores[t] * v[(t * kvheads + kh) * dim + d];
+    out[h * dim + d] = y / total;
+  }
+}
+} // namespace
+struct qwen_vl_text_cuda::impl {
+  int device, h, vocab, layers, heads, kvheads, dim, inter, limit;
+  float eps, theta;
+  std::unique_ptr<weights> store;
+  buffer x, z, q, k, v, qr, attn, tmp, gate, up, output, logits;
+  explicit impl(const std::string &dir, int dev) : device(dev) {
+    ck(cudaSetDevice(dev), "Qwen text device");
+    auto c = json::parse_file(dir + "/config.json");
+    if (c.at("model_type").as_string() != "qwen2_5_vl" ||
+        c.at("hidden_act").as_string() != "silu" ||
+        (c.contains("use_sliding_window") &&
+         c.at("use_sliding_window").as_bool()) ||
+        c.at("tie_word_embeddings").as_bool())
+      throw std::runtime_error("unsupported Qwen VL text configuration");
+    h = integer(c, "hidden_size");
+    vocab = integer(c, "vocab_size");
+    layers = integer(c, "num_hidden_layers");
+    heads = integer(c, "num_attention_heads");
+    kvheads = integer(c, "num_key_value_heads");
+    inter = integer(c, "intermediate_size");
+    if (h <= 0 || vocab <= 0 || layers <= 0 || heads <= 0 || kvheads <= 0 ||
+        heads % kvheads || h % heads || inter <= 0)
+      throw std::runtime_error("invalid Qwen VL text dimensions");
+    dim = h / heads;
+    if (dim % 2)
+      throw std::runtime_error("Qwen rotary dimension must be even");
+    eps = number(c, "rms_norm_eps", 1e-6);
+    theta = number(c, "rope_theta", 1000000);
+    if (!std::isfinite(eps) || eps <= 0 || !std::isfinite(theta) || theta <= 1)
+      throw std::runtime_error("invalid Qwen numeric configuration");
+    const auto &r = c.at("rope_scaling");
+    if (r.at("type").as_string() != "mrope")
+      throw std::runtime_error("Qwen VL text decoder requires MRoPE");
+    int sections = 0;
+    for (const auto &x : r.at("mrope_section").as_array())
+      sections += x.as_int();
+    if (sections != dim / 2)
+      throw std::runtime_error("invalid MRoPE sections");
+    limit = std::min(integer(c, "max_position_embeddings"),
+                     env_int("NEURX_QWEN_CONTEXT", 2048));
+    if (limit <= 0 || limit > 8192)
+      throw std::runtime_error("Qwen text context must be 1..8192");
+    size_t free = 0, total = 0;
+    ck(cudaMemGetInfo(&free, &total), "Qwen available memory");
+    size_t reserve =
+        size_t(layers) * limit * kvheads * dim * 8 + 512ULL * 1024 * 1024;
+    if (free <= reserve + 64 * 1024 * 1024)
+      throw std::runtime_error(
+          "insufficient memory for Qwen text KV/workspace");
+    size_t budget = std::min(
+        size_t(env_int("NEURX_QWEN_WEIGHT_CACHE_MB", 12288)) * 1024 * 1024,
+        free - reserve);
+    store = std::make_unique<weights>(dir, budget, true);
+    store->expect("model.embed_tokens.weight", {vocab, h});
+    store->expect("model.norm.weight", {h});
+    store->expect("lm_head.weight", {vocab, h});
+    for (int l = 0; l < layers; ++l) {
+      auto p = "model.layers." + std::to_string(l) + ".";
+      auto a = p + "self_attn.";
+      store->expect(p + "input_layernorm.weight", {h});
+      store->expect(p + "post_attention_layernorm.weight", {h});
+      for (auto n : {"q_proj", "k_proj", "v_proj"}) {
+        int d = std::string(n) == "q_proj" ? h : kvheads * dim;
+        store->expect(a + n + ".weight", {d, h});
+        store->expect(a + n + ".bias", {d});
+      }
+      store->expect(a + "o_proj.weight", {h, h});
+      store->expect(p + "mlp.gate_proj.weight", {inter, h});
+      store->expect(p + "mlp.up_proj.weight", {inter, h});
+      store->expect(p + "mlp.down_proj.weight", {h, inter});
+    }
+    x = buffer(h * 4);
+    z = buffer(h * 4);
+    q = buffer(h * 4);
+    k = buffer(kvheads * dim * 4);
+    v = buffer(k.size);
+    qr = buffer(h * 4);
+    attn = buffer(h * 4);
+    tmp = buffer(h * 4);
+    gate = buffer(inter * 4);
+    up = buffer(inter * 4);
+    output = buffer(h * 4);
+    logits = buffer(vocab * 4);
+    fprintf(stderr,
+            "[Qwen2.5-VL text] %d layers, GQA %d/%d, BF16/F32 checkpoint + "
+            "FP32 activations; fixed GPU weight cache %.0f MiB, context %d; "
+            "host offload, no vision encoder\n",
+            layers, heads, kvheads, budget / 1048576., limit);
+  }
+  void linear(const std::string &name, float *input, float *out,
+              bool bias = false) {
+    const auto &t = store->at(name + ".weight");
+    auto p = store->get(name + ".weight");
+    matvec<<<t.shape[0], 256>>>(p, input, out, t.shape[1], t.shape[0], t.bf16);
+    if (bias) {
+      const auto &b = store->at(name + ".bias");
+      auto bp = store->get(name + ".bias");
+      projection_bias<<<(t.shape[0] + 255) / 256, 256>>>(out, bp, t.shape[0],
+                                                         b.bf16);
+    }
+  }
+  void norm(const std::string &name, float *input, float *out) {
+    const auto &t = store->at(name);
+    auto p = store->get(name);
+    rms<<<1, 256>>>(input, p, out, h, eps, t.bf16);
+  }
+  std::vector<float> step(int id, deepseek_v2_cache::state &s) {
+    ck(cudaSetDevice(device), "Qwen decode device");
+    if (id < 0 || id >= vocab)
+      throw std::runtime_error("Qwen token out of range");
+    if (s.owner != this)
+      throw std::runtime_error("Qwen cache belongs to another model");
+    if (s.length >= limit)
+      throw std::runtime_error("Qwen context limit reached");
+    const auto &t = store->at("model.embed_tokens.weight");
+    auto ep = store->get("model.embed_tokens.weight");
+    embedding<<<(h + 255) / 256, 256>>>(ep, x.f(), id, h, t.bf16);
+    for (int l = 0; l < layers; ++l) {
+      auto p = "model.layers." + std::to_string(l) + ".";
+      auto a = p + "self_attn.";
+      norm(p + "input_layernorm.weight", x.f(), z.f());
+      linear(a + "q_proj", z.f(), q.f(), true);
+      linear(a + "k_proj", z.f(), k.f(), true);
+      linear(a + "v_proj", z.f(), v.f(), true);
+      qwen_prepare<<<(h + 255) / 256, 256>>>(
+          q.f(), k.f(), v.f(), qr.f(), s.keys[l].f(), s.values[l].f(), s.length,
+          heads, kvheads, dim, theta);
+      qwen_attention<<<heads, 256, (s.length + 1) * sizeof(float)>>>(
+          qr.f(), s.keys[l].f(), s.values[l].f(), attn.f(), heads, kvheads, dim,
+          s.length + 1);
+      linear(a + "o_proj", attn.f(), tmp.f());
+      add<<<(h + 255) / 256, 256>>>(x.f(), tmp.f(), h, 1);
+      norm(p + "post_attention_layernorm.weight", x.f(), z.f());
+      linear(p + "mlp.gate_proj", z.f(), gate.f());
+      linear(p + "mlp.up_proj", z.f(), up.f());
+      swiglu<<<(inter + 255) / 256, 256>>>(gate.f(), up.f(), inter);
+      linear(p + "mlp.down_proj", gate.f(), output.f());
+      add<<<(h + 255) / 256, 256>>>(x.f(), output.f(), h, 1);
+    }
+    norm("model.norm.weight", x.f(), z.f());
+    linear("lm_head", z.f(), logits.f());
+    std::vector<float> out(vocab);
+    ck(cudaGetLastError(), "Qwen text kernels");
+    ck(cudaMemcpy(out.data(), logits.p, vocab * 4, cudaMemcpyDeviceToHost),
+       "Qwen text logits");
+    if (!std::all_of(out.begin(), out.end(),
+                     [](float v) { return std::isfinite(v); }))
+      throw std::runtime_error("non-finite Qwen logits");
+    ++s.length;
+    return out;
+  }
+};
+qwen_vl_text_cuda::qwen_vl_text_cuda(const std::string &dir, int device)
+    : impl_(std::make_unique<impl>(dir, device)) {}
+qwen_vl_text_cuda::~qwen_vl_text_cuda() = default;
+std::unique_ptr<deepseek_v2_cache> qwen_vl_text_cuda::create_cache() const {
+  auto s = std::make_unique<deepseek_v2_cache::state>();
+  s->owner = impl_.get();
+  s->limit = impl_->limit;
+  ck(cudaSetDevice(impl_->device), "Qwen cache device");
+  for (int l = 0; l < impl_->layers; ++l) {
+    s->keys.emplace_back(size_t(impl_->limit) * impl_->kvheads * impl_->dim *
+                         4);
+    s->values.emplace_back(s->keys.back().size);
+  }
+  return std::unique_ptr<deepseek_v2_cache>(
+      new deepseek_v2_cache(std::move(s)));
+}
+std::vector<float> qwen_vl_text_cuda::prefill(const std::vector<int32_t> &ids,
+                                              deepseek_v2_cache *cache) {
+  if (!cache || ids.empty() ||
+      ids.size() + cache->length() > size_t(impl_->limit))
+    throw std::runtime_error("Qwen prompt exceeds context limit");
+  std::vector<float> out;
+  for (int id : ids)
+    out = decode(id, cache);
+  return out;
+}
+std::vector<float> qwen_vl_text_cuda::decode(int32_t id,
+                                             deepseek_v2_cache *cache) {
+  if (!cache)
+    throw std::runtime_error("Qwen cache required");
+  return impl_->step(id, *cache->state_);
+}
+int qwen_vl_text_cuda::context_limit() const { return impl_->limit; }
+
 } // namespace neurx::cuda

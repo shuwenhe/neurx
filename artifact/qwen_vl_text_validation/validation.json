@@ -1,0 +1,23 @@
+{
+  "model": "Qwen2.5-VL-7B",
+  "scope": "text-only; vision encoder not loaded; image/video marker inputs rejected",
+  "make_inference": {
+    "exit_code": 0,
+    "prompt": "What is 2+2? Answer briefly.",
+    "output": "4",
+    "max_new_tokens": 4,
+    "generated_tokens": 1,
+    "prompt_tokens": 29,
+    "http_health_ready_before_client": true
+  },
+  "numerics": {
+    "reference": "independent NumPy BF16 GQA+bias+RoPE",
+    "max_absolute_logit_error": 2.396453857578251e-07,
+    "prefill_decode_parity": true
+  },
+  "regressions": {
+    "startup_tests": 5,
+    "deepseek_logit_error": 2.8572080634781116e-07,
+    "qwen_0_5b_output": "Computers work by utilizing a combination of"
+  }
+}

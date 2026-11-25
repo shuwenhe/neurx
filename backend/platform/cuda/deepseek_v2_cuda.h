@@ -14,6 +14,7 @@ private:
   std::unique_ptr<state> state_;
   explicit deepseek_v2_cache(std::unique_ptr<state> state);
   friend class deepseek_v2_cuda;
+  friend class qwen_vl_text_cuda;
 };
 // Correctness-first BF16 checkpoint/FP32 activation decoder with bounded GPU
 // weight residency. Host mmap pages back experts that do not fit in device RAM.

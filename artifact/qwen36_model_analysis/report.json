@@ -1,0 +1,39 @@
+{
+  "directory": "/home/shuwen/shuwen/model/Qwen3.6-35B-A3B",
+  "model_type": "qwen3_5_moe",
+  "architectures": [
+    "Qwen3_5MoeForConditionalGeneration"
+  ],
+  "weight_files_present": 1,
+  "errors": [
+    "missing tokenizer.json",
+    "missing model.safetensors.index.json for sharded checkpoint",
+    "incomplete checkpoint: only 1/26 weight shards present",
+    "NeurX native qwen3_5_moe decoder is not implemented: requires Gated DeltaNet, gated full attention, partial RoPE, and Qwen MoE; changing the model path cannot enable it"
+  ],
+  "analysis": {
+    "architecture_family": "qwen3_5_moe",
+    "total_parameters_model_card": 35000000000,
+    "activated_parameters_model_card": 3000000000,
+    "layers": 40,
+    "linear_attention_layers": 30,
+    "full_attention_layers": 10,
+    "hidden_size": 2048,
+    "routed_experts": 256,
+    "routed_experts_per_token": 8,
+    "shared_experts_model_card": 1,
+    "context_length": 262144,
+    "checkpoint_dtype": "bfloat16",
+    "estimated_bf16_weight_bytes_from_35B": 70000000000,
+    "activation_count_does_not_reduce_total_weight_storage": true,
+    "local_complete_shard_bytes": 1096788232,
+    "download_cache_contains_incomplete_files": true,
+    "native_inference_verified": false,
+    "sources": [
+      "config.json",
+      "README.md",
+      "local checkpoint headers",
+      "neurx native backend source"
+    ]
+  }
+}
