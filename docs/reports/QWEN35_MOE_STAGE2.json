@@ -1,0 +1,225 @@
+{
+  "stage": 2,
+  "status": "FP32_BASELINE_PASS_SANITIZER_UNVERIFIED",
+  "base": "b5f2c713",
+  "tests_run": 11,
+  "tests_exit": 0,
+  "seconds": 6.446,
+  "numpy": "1.26.4",
+  "dtype": "FP32 CUDA; independent ordered FP32/FP64 CPU reductions",
+  "build_flags": [
+    "-O2",
+    "--fmad=false",
+    "-arch=sm_89",
+    "-U_FORTIFY_SOURCE",
+    "-D_FORTIFY_SOURCE=0"
+  ],
+  "tolerance": {
+    "maxabs": 2e-05,
+    "relative_l2": 1e-05,
+    "scope": "tested input distributions, both M32/M64 and CUDA/M32; NOT official BF16 or full-model thresholds"
+  },
+  "maximum": {
+    "m32_m64_maxabs": 9.4979642897286e-06,
+    "cuda_m32_maxabs": 2.86102294921875e-06,
+    "cuda_m64_maxabs": 9.4979642897286e-06,
+    "cuda_m32_relative_l2": 5.424536786488783e-07,
+    "m32_m64_relative_l2": 1.5178776584604877e-06,
+    "cuda_m32_rmse": 1.0200517857008377e-06,
+    "m32_m64_rmse": 1.8546020054409024e-06
+  },
+  "cases": {
+    "__main__.Stage2.test_continuous_decode_nonzero_positions": {
+      "records": 320,
+      "maximum": {
+        "m32_m64_maxabs": 5.452061109245676e-07,
+        "cuda_m32_maxabs": 2.384185791015625e-07,
+        "cuda_m64_maxabs": 5.452061109245676e-07,
+        "cuda_m32_relative_l2": 4.904188183651744e-07,
+        "m32_m64_relative_l2": 5.29221070991257e-07,
+        "cuda_m32_rmse": 9.30577218293905e-08,
+        "m32_m64_rmse": 1.704416634980521e-07
+      }
+    },
+    "__main__.Stage2.test_decode_chunk_and_prefill_equivalence": {
+      "records": 40,
+      "maximum": {
+        "m32_m64_maxabs": 3.6511467760291794e-07,
+        "cuda_m32_maxabs": 2.384185791015625e-07,
+        "cuda_m64_maxabs": 3.6511467760291794e-07,
+        "cuda_m32_relative_l2": 2.528499985092251e-07,
+        "m32_m64_relative_l2": 2.710050624952325e-07,
+        "cuda_m32_rmse": 6.244724472701628e-08,
+        "m32_m64_rmse": 1.1131681048811399e-07
+      }
+    },
+    "__main__.Stage2.test_heldout_reference_seed": {
+      "records": 5,
+      "maximum": {
+        "m32_m64_maxabs": 6.590841440612394e-06,
+        "cuda_m32_maxabs": 2.384185791015625e-06,
+        "cuda_m64_maxabs": 4.516350036620764e-06,
+        "cuda_m32_relative_l2": 3.7897625670116296e-07,
+        "m32_m64_relative_l2": 8.491208629370465e-07,
+        "cuda_m32_rmse": 7.470944463568279e-07,
+        "m32_m64_rmse": 1.6739136257644165e-06
+      }
+    },
+    "__main__.Stage2.test_prefill_matches_independent_reference": {
+      "records": 5,
+      "maximum": {
+        "m32_m64_maxabs": 3.6511467760291794e-07,
+        "cuda_m32_maxabs": 2.384185791015625e-07,
+        "cuda_m64_maxabs": 3.6511467760291794e-07,
+        "cuda_m32_relative_l2": 1.2676309355350387e-07,
+        "m32_m64_relative_l2": 1.6857349662167696e-07,
+        "cuda_m32_rmse": 5.162627738446445e-08,
+        "m32_m64_rmse": 9.08508225058769e-08
+      }
+    },
+    "__main__.Stage2.test_real_bf16_layer_weights_with_synthetic_input": {
+      "records": 10,
+      "maximum": {
+        "m32_m64_maxabs": 9.4979642897286e-06,
+        "cuda_m32_maxabs": 4.76837158203125e-07,
+        "cuda_m64_maxabs": 9.4979642897286e-06,
+        "cuda_m32_relative_l2": 4.627641550911609e-07,
+        "m32_m64_relative_l2": 1.5178776584604877e-06,
+        "cuda_m32_rmse": 7.40730193351027e-08,
+        "m32_m64_rmse": 1.1251922853100265e-06
+      }
+    },
+    "__main__.Stage2.test_real_head_dimension_partial_rope": {
+      "records": 5,
+      "maximum": {
+        "m32_m64_maxabs": 8.414343314555595e-06,
+        "cuda_m32_maxabs": 2.86102294921875e-06,
+        "cuda_m64_maxabs": 8.175924735454032e-06,
+        "cuda_m32_relative_l2": 5.424536786488783e-07,
+        "m32_m64_relative_l2": 9.862590901510436e-07,
+        "cuda_m32_rmse": 1.0200517857008377e-06,
+        "m32_m64_rmse": 1.8546020054409024e-06
+      }
+    },
+    "__main__.Stage2.test_zero_input_and_extreme_gates": {
+      "records": 10,
+      "maximum": {
+        "m32_m64_maxabs": 3.6511467760291794e-07,
+        "cuda_m32_maxabs": 2.384185791015625e-07,
+        "cuda_m64_maxabs": 3.6511467760291794e-07,
+        "cuda_m32_relative_l2": 1.7964986044991666e-07,
+        "m32_m64_relative_l2": 1.6024407306931132e-07,
+        "cuda_m32_rmse": 5.162627738446445e-08,
+        "m32_m64_rmse": 9.08508225058769e-08
+      }
+    }
+  },
+  "memory": [
+    {
+      "case": "__main__.Stage2.test_continuous_decode_nonzero_positions",
+      "allocated": 275264,
+      "free_before": 15134687232,
+      "free_after": 15132590080
+    },
+    {
+      "case": "__main__.Stage2.test_decode_chunk_and_prefill_equivalence",
+      "allocated": 17216,
+      "free_before": 15134687232,
+      "free_after": 15132590080
+    },
+    {
+      "case": "__main__.Stage2.test_decode_chunk_and_prefill_equivalence",
+      "allocated": 17216,
+      "free_before": 15134949376,
+      "free_after": 15132852224
+    },
+    {
+      "case": "__main__.Stage2.test_decode_chunk_and_prefill_equivalence",
+      "allocated": 17216,
+      "free_before": 15137112064,
+      "free_after": 15135014912
+    },
+    {
+      "case": "__main__.Stage2.test_heldout_reference_seed",
+      "allocated": 1460992,
+      "free_before": 15147663360,
+      "free_after": 15145566208
+    },
+    {
+      "case": "__main__.Stage2.test_prefill_matches_independent_reference",
+      "allocated": 17216,
+      "free_before": 15145828352,
+      "free_after": 15143731200
+    },
+    {
+      "case": "__main__.Stage2.test_real_bf16_layer_weights_with_synthetic_input",
+      "allocated": 109496320,
+      "free_before": 15152578560,
+      "free_after": 15041429504
+    },
+    {
+      "case": "__main__.Stage2.test_real_head_dimension_partial_rope",
+      "allocated": 1460992,
+      "free_before": 15087566848,
+      "free_after": 15085469696
+    },
+    {
+      "case": "__main__.Stage2.test_zero_input_and_extreme_gates",
+      "allocated": 17216,
+      "free_before": 15102312448,
+      "free_after": 15100215296
+    },
+    {
+      "case": "__main__.Stage2.test_zero_input_and_extreme_gates",
+      "allocated": 17216,
+      "free_before": 15102705664,
+      "free_after": 15100608512
+    }
+  ],
+  "reference_driver_max_rss_kib": 287544,
+  "source_sha256": {
+    "backend/platform/cuda/hybrid_attention_cuda.h": "e5a09b86c4b02a0c483db46c1ff547529993ddd94384c56223a839930b394456",
+    "backend/platform/cuda/hybrid_attention_cuda.cu": "ba60e46807d84379e6ddf81b76eab1c5ef9e6a28d086f4bf97a55a6398667949",
+    "backend/platform/cuda/gated_attention_kernels.cuh": "7c1e5ef1e3aa99904b2803fe06e602fb1bf6dc2bc0000e515c0fc6ce27cbf382",
+    "test/native-construction/qwen35_stage2_probe.cu": "881b549f63c81ca604593b973649ac1d27a877e32db9561f3ac4dd509073041f",
+    "test/native-construction/test_qwen35_stage2.py": "16a54d6f5d224d8cf7be7a6ecaa771bc4a4f3312748172641e6fbf90ee137387"
+  },
+  "regression_stage1": {
+    "tests": 11,
+    "exit": 0
+  },
+  "regression_stage4": {
+    "tests": 31,
+    "exit": 0,
+    "seconds": 460.193,
+    "compiler": "artifact/build/qwen35_stage1/seed-toolchain/compiler",
+    "log": "artifact/build/qwen35_stage2/native-stage4.log"
+  },
+  "sanitizer": {
+    "status": "UNVERIFIED_TOOL_FAILED_BEFORE_INSTRUMENTATION",
+    "initial_exit": 13,
+    "injection_path_exit": 255,
+    "logs": [
+      "artifact/build/qwen35_stage2/memcheck.log",
+      "artifact/build/qwen35_stage2/initcheck.log",
+      "artifact/build/qwen35_stage2/memcheck-all.log"
+    ]
+  },
+  "not_executed": [
+    "official BF16 fallback comparison",
+    "full 2048-position execution",
+    "multi-session/device-mismatch execution",
+    "failed-constructor GPU memory recovery measurement",
+    "complete hybrid Decoder",
+    "new architecture prefill/decode generation",
+    "full-model VRAM budget"
+  ],
+  "preflight_tests": {
+    "tests": 4,
+    "exit": 0
+  },
+  "startup_tests": {
+    "tests": 5,
+    "exit": 0
+  }
+}
