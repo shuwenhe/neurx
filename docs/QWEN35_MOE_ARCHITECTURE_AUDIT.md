@@ -1,11 +1,11 @@
 # Qwen3.6-35B-A3B 原生支持：架构审计
 
-日期：2026-11-26（Asia/Shanghai）。状态：只读审计完成，设计待审批，未实现 Decoder。
-仓库基线：`85aeb3f45b90fcda5335b6356c65f9fe7e66798f`。审计前工作树干净；本次仅新增四份 docs 文档，不安装依赖、不修改外部编译器或模型。
+日期：2026-11-26（Asia/Shanghai）。状态：**DESIGN REVIEW COMPLETED — WAITING FOR HUMAN APPROVAL**；未实现 Decoder。
+前次审计基线：`85aeb3f45b90fcda5335b6356c65f9fe7e66798f`；本轮复核HEAD：`781e8e6b01c01aa407901fd0a60ea0ed6dd362cc`，开始时工作树干净。两基线间git diff仅新增原四份docs，产品源码未变化；commit标题不能证明Decoder已实现：当前CUDA bridge仍只有deepseek_v2/qwen2_5_vl/旧dense分支，preflight拒绝仍在。本轮只修订原四份docs，不安装依赖、不修改产品、外部编译器或模型。
 
 ## 证据和状态规则
 
-IMPLEMENTED = 代码与本次运行测试支持该项有限结论；PARTIAL = 只有部分能力或不同架构的实现；MISSING = 所查生产调用链缺少所需能力；UNVERIFIED = 有代码/历史记录，但本次未复跑对应数值测试。MISSING 不宣称仓库任何角落都没有同名函数。仓库文件索引、关键词检索与关键生产路径逐段阅读结合使用；未逐行审查全部实验、训练和历史脚本。
+IMPLEMENTED = 代码与明确注明日期/轮次的运行测试支持该项有限结论（本轮未重跑运行测试）；PARTIAL = 只有部分能力或不同架构的实现；MISSING = 所查生产调用链缺少所需能力；UNVERIFIED = 有代码/历史记录，但本次未复跑对应数值测试。MISSING 不宣称仓库任何角落都没有同名函数。仓库文件索引、关键词检索与关键生产路径逐段阅读结合使用；未逐行审查全部实验、训练和历史脚本。
 
 证据代号：
 
@@ -39,8 +39,8 @@ IMPLEMENTED = 代码与本次运行测试支持该项有限结论；PARTIAL = �
 | KV Cache | PARTIAL | E4 每层 keys/values、owner 和长度校验，尚无 DeltaNet 状态混合管理 |
 | RoPE | PARTIAL | E4 half-split 全 head 旋转；新模型只旋转 64/256，且 query width 不等于 hidden |
 | Gated Full Attention | MISSING | E4 无 q/gate 交错拆分、QK offset-RMSNorm 和输出 sigmoid 门 |
-| Gated DeltaNet | MISSING | 生产 Decoder 未见 causal depthwise conv、衰减 delta recurrence 与 gated RMSNorm 的组合 |
-| 混合注意力 | MISSING | 未见按真实 layer_types 调度两类状态的可运行 Decoder |
+| Gated DeltaNet | MISSING | E3/E4/E5：生产 Decoder 未见 causal depthwise conv、衰减 delta recurrence 与 gated RMSNorm 的组合 |
+| 混合注意力 | MISSING | E3/E4/E5：未见按真实 layer_types 调度两类状态的可运行 Decoder |
 | Router/Top-K | PARTIAL | E4 DeepSeek 使用 softmax/selection，E10 有 CPU/S 路线；Qwen 精确语义与数值需独立验收 |
 | Expert FFN/dispatch/combine | PARTIAL | E4 支持命名独立专家、SwiGLU、weighted sum；本模型为融合 3D expert tensors |
 | Shared Experts | PARTIAL | E4 为 DeepSeek shared_experts，缺本模型 shared_expert_gate sigmoid |
@@ -48,16 +48,16 @@ IMPLEMENTED = 代码与本次运行测试支持该项有限结论；PARTIAL = �
 | Safetensors/分片/名称映射 | PARTIAL | E6 与 E4 均支持分片；E6 持有所有文件 bytes，不能用于 67GiB/32GiB 主机；E4 mmap 更适合作为基础 |
 | BF16/FP16 | PARTIAL | E6 解析 BF16/F16 等；E4 mmap 仅 BF16/F32，计算 FP32；dtype 解析不等于各 Kernel 支持 |
 | INT8/INT4 | UNVERIFIED | E11 API 与 S 算法存在，但生产 mmap 路径拒绝这些 dtype；未找到该 CUDA 解码路径的 packed INT4 GEMV 证据 |
-| GPU 显存/传输 | IMPLEMENTED | E7 本次沙箱外验收通过分配、H2D/D2H、真实 Kernel 和释放；不证明 Decoder 正确 |
+| GPU 显存/传输 | IMPLEMENTED | E7 前次审计沙箱外验收通过；本轮未重跑，分配、H2D/D2H、真实 Kernel 和释放；不证明 Decoder 正确 |
 | CUDA 异步执行 | PARTIAL | runtime 其他文件可能有 stream 能力；E4 权重上传为同步 cudaMemcpy；无该路径 prefetch/event/lease 生命周期证据 |
 | Tokenizer/生成 | PARTIAL | E12 可复用，但 Qwen3.6 全模板、特殊 token 与双 EOS 需验收 |
 | 单元/模型构造测试 | PARTIAL | E8、`test/native-stage4/test_hf_numerics.py` 与 loader validation 存在，未证明新架构构造 |
 | 算子精度测试 | UNVERIFIED | E8/E9 针对旧架构；不覆盖新 DeltaNet/门控/融合专家 |
-| Prefill/Decode/真实模型测试 | MISSING | 尚无本模型 40 层、中间值、logits 独立对齐证据 |
+| Prefill/Decode/真实模型测试 | MISSING | E2/E3/E8/E9：尚无本模型 40 层、中间值、logits 独立对齐证据 |
 
-量化存在额外构建风险：`makefile:2566` 引用的 `src/runtime/native/quantization.cpp` 和 `test/numeric_alignment_probe.cpp` 本次实际不存在，不能将该目标视为已验证能力。`expert_routing.s:221` 用 embedding 与 expert_id 计算路由，不读取真实 router 权重；`moe_core.s` 使用 latent router、近似指数和不同激活，不可直接替代 Qwen MoE。S 文件中的功能名和自测打印不是数值正确性的证明。
+量化存在额外构建风险：`makefile:2566` 引用的 `src/runtime/native/quantization.cpp` 和 `test/numeric_alignment_probe.cpp` 前次审计及本轮静态核对均不存在，不能将该目标视为已验证能力。`expert_routing.s:221` 用 embedding 与 expert_id 计算路由，不读取真实 router 权重；`moe_core.s` 使用 latent router、近似指数和不同激活，不可直接替代 Qwen MoE。S 文件中的功能名和自测打印不是数值正确性的证明。
 
-## 本次实际运行证据
+## 前次审计实际运行记录（本轮仅复核文档，未重跑）
 
 1. `PYTHONDONTWRITEBYTECODE=1 python3 test/native-construction/test_inference_model_preflight.py`：4 tests，OK。仅证明门禁与缺失/截断检查的这些用例。
 2. 现有 `artifact/cuda_validation/cuda_runtime_acceptance` 沙箱内：退出 77，`CUDA_ERROR_NO_DEVICE`，记 BLOCKED，不记 PASS。
@@ -111,7 +111,7 @@ tokenizer_config 还列出 tokenizer.json 未加入的 audio token；生成时�
 已在线核对 [Qwen 官方配置](https://huggingface.co/Qwen/Qwen3.6-35B-A3B/raw/main/config.json) 的架构标识；它将模型路由到 Qwen3.5 MoE 实现，而不是普通 Transformer MoE。
 详细公式和执行顺序依据本机已安装的官方 Transformers 5.15.0 源码静态阅读（未 import torch/执行框架）：
 `/home/shuwen/.local/lib/python3.12/site-packages/transformers/models/qwen3_5_moe/modeling_qwen3_5_moe.py`。
-关键位置：85 rotary、169 gated norm、201 causal conv、243 L2 norm、332 recurrence、385 DeltaNet、627 full attention、721 experts、760 router、779 shared gate、801 offset norm、821 Decoder。源码 SHA256=`16ef7b0dc6e26eae26a6ffd0ad11d93f85424f90ffb85fbcc9eecc0759cc930d`。这些为参考定义，不是正式推理后端；torch 当前未安装。
+关键位置：85 rotary、169 gated norm、201 causal conv、243 L2 norm、332 recurrence、385 DeltaNet、627 full attention、721 experts、760 router、779 shared gate、801 offset norm、821 Decoder。源码 SHA256=`16ef7b0dc6e26eae26a6ffd0ad11d93f85424f90ffb85fbcc9eecc0759cc930d`。这些为参考定义，不是正式推理后端；前次环境检查torch未安装，本轮不安装、不运行框架。BF16参考固定源码hash，但torch版本/运行dtype探针/实际舍入仍PENDING，详见设计精度契约。
 
 模型 JSON SHA256：
 
@@ -126,3 +126,11 @@ tokenizer_config 还列出 tokenizer.json 未加入的 audio token；生成时�
 ## 未确定事项
 
 官方主分支会变化，应固定本次本机参考 hash 后再建立 oracle；config 中 transformers_version=4.57.1 不是实际兼容性证明。新量化在真实权重上的质量、PCIe/NVMe 实测带宽、专家命中率、Qwen3.6 模板/BPE 的完整原生一致性仍未验证。现有 preflight 的结构检查不等于模型数值正确。本次审计不给新 Decoder 的任何 PASS。
+
+## 本轮交叉审查记录与证据边界
+
+重新读取五项JSON并核对SHA256，均与上表一致；读取26分片全部header，确认1045 BF16 tensors、payload71,903,645,408 bytes与index一致。逐层验证40层分类、18/15项层张量集合及expert gate_up/down和mixer投影shape；30 linear与10 full结构没有变化。全部主text应按693 tensors映射，vision333和MTP19分别非执行，合计1045。内存计算重新按主experts/主非experts分类，避免MTP专家重复计入。
+
+本轮未执行preflight测试、CUDA程序、量化转换、Kernel、模型prefill/decode或性能测试；历史CUDA PASS仅限已有二进制，不证明当前源代码重新构建或新Decoder正确。宿主机可用与沙箱不可见是前次分环境运行记录，不能据沙箱无设备重装驱动。现有模块IMPLEMENTED/PARTIAL/MISSING/UNVERIFIED状态保持其证据边界，不把拟议文件记为已实现。
+
+修订纠正：撤回未经实测的浮点容差，统一PENDING；明确M64/M32/O-BF16及源码hash；冻结Q4E-v1格式和FP16 scale舍入规则；专家cache默认目标7GiB且动态下调；预算包括workspace/临时/碎片与runtime占用取样边界；七阶段新增依赖/失败回退。代码证据E1/E3/E4/E6/E11支撑缺口，权重header支撑架构与理论容量，但不支撑量化质量、内存峰值或TPS结论。

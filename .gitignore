@@ -64,3 +64,5 @@ Thumbs.db
 
 # Local inference recovery, toolchain sources, build products and evidence
 /artifact/local-inference/
+/artifact/reference-cache/
+/artifact/reference-env/
