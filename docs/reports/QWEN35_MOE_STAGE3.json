@@ -1,0 +1,389 @@
+{
+  "stage": 3,
+  "status": "FP32_FUNCTIONAL_PASS_OFFICIAL_REFERENCE_BLOCKED",
+  "stage_gate": "BLOCKED: required O-BF16 reference and final precision budgets not verified; stage4 not started",
+  "base": "99fe05e3",
+  "gpu_tests": {
+    "tests": 16,
+    "exit": 0,
+    "seconds": 21.348,
+    "log": "artifact/build/qwen35_stage3/gpu-final.log"
+  },
+  "references": {
+    "M64": "independent ordered NumPy FP64",
+    "M32": "independent ordered NumPy FP32",
+    "O_BF16": {
+      "status": "BLOCKED",
+      "reason": "torch module unavailable; dependency installation requires user approval",
+      "transformers": "5.15.0",
+      "source": "/home/shuwen/.local/lib/python3.12/site-packages/transformers/models/qwen3_5_moe/modeling_qwen3_5_moe.py",
+      "source_sha256": "16ef7b0dc6e26eae26a6ffd0ad11d93f85424f90ffb85fbcc9eecc0759cc930d"
+    }
+  },
+  "python": "3.12.3 (main, Jun 19 2026, 12:46:00) [GCC 13.3.0]",
+  "numpy": "1.26.4",
+  "candidate_FP32_regression_bounds": {
+    "maxabs": 2e-05,
+    "relative_l2": 5e-05,
+    "relative_l2_denominator": "max(norm(reference),1e-12)",
+    "scope": "tested FP32 math only; NOT full-model or official BF16 acceptance"
+  },
+  "maximum": {
+    "cuda_m32_maxabs": 2.7418136596679688e-06,
+    "m32_m64_maxabs": 5.890286368881448e-06,
+    "cuda_m32_relative_l2": 3.986975664875381e-06,
+    "m32_m64_relative_l2": 1.4496396255494298e-05,
+    "cuda_m32_rmse": 6.293042103457314e-07,
+    "m32_m64_rmse": 1.8644859198604484e-06
+  },
+  "minimum_cosine": {
+    "cuda_m32_cosine": 0.9999999999921154,
+    "m32_m64_cosine": 0.9999999999561864
+  },
+  "cases": {
+    "__main__.Stage3.test_chunk_decode_equivalence": {
+      "records": 64,
+      "maximum": {
+        "cuda_m32_maxabs": 1.7136335372924805e-07,
+        "m32_m64_maxabs": 1.4751460142292672e-07,
+        "cuda_m32_relative_l2": 3.3554021046652936e-07,
+        "m32_m64_relative_l2": 5.573902660247647e-07,
+        "cuda_m32_rmse": 1.0738920647948663e-07,
+        "m32_m64_rmse": 8.560838253000296e-08
+      }
+    },
+    "__main__.Stage3.test_continuous_decode_2048": {
+      "records": 16384,
+      "maximum": {
+        "cuda_m32_maxabs": 4.172325134277344e-07,
+        "m32_m64_maxabs": 2.6264846687829024e-06,
+        "cuda_m32_relative_l2": 3.986975664875381e-06,
+        "m32_m64_relative_l2": 1.4496396255494298e-05,
+        "cuda_m32_rmse": 2.0071922996226113e-07,
+        "m32_m64_rmse": 1.8644859198604484e-06
+      }
+    },
+    "__main__.Stage3.test_exact_unit_and_zero_decay_limits": {
+      "records": 8,
+      "maximum": {
+        "cuda_m32_maxabs": 6.05359673500061e-08,
+        "m32_m64_maxabs": 1.9970986325779094e-07,
+        "cuda_m32_relative_l2": 1.5853416036050506e-07,
+        "m32_m64_relative_l2": 2.737154645434869e-07,
+        "cuda_m32_rmse": 3.630326774293805e-08,
+        "m32_m64_rmse": 5.910758122523149e-08
+      }
+    },
+    "__main__.Stage3.test_extreme_beta_and_zero_input_nonzero_state": {
+      "records": 16,
+      "maximum": {
+        "cuda_m32_maxabs": 1.7881393432617188e-07,
+        "m32_m64_maxabs": 1.293032479837697e-07,
+        "cuda_m32_relative_l2": 1.859957049140147e-07,
+        "m32_m64_relative_l2": 1.90872550824845e-07,
+        "cuda_m32_rmse": 5.663351495799516e-08,
+        "m32_m64_rmse": 3.800806711477368e-08
+      }
+    },
+    "__main__.Stage3.test_independent_heldout_seed": {
+      "records": 16,
+      "maximum": {
+        "cuda_m32_maxabs": 1.6391277313232422e-07,
+        "m32_m64_maxabs": 4.006828518421379e-07,
+        "cuda_m32_relative_l2": 2.796203221953585e-07,
+        "m32_m64_relative_l2": 5.98405686665163e-07,
+        "cuda_m32_rmse": 5.262949696982763e-08,
+        "m32_m64_rmse": 1.1263053636058958e-07
+      }
+    },
+    "__main__.Stage3.test_long_operator_8192": {
+      "records": 8,
+      "maximum": {
+        "cuda_m32_maxabs": 1.4901161193847656e-06,
+        "m32_m64_maxabs": 3.5222455854466705e-06,
+        "cuda_m32_relative_l2": 3.066711617309783e-07,
+        "m32_m64_relative_l2": 4.302314050166421e-07,
+        "cuda_m32_rmse": 5.6103972650427496e-08,
+        "m32_m64_rmse": 6.982691524119944e-08
+      }
+    },
+    "__main__.Stage3.test_nonzero_initial_state_and_history": {
+      "records": 8,
+      "maximum": {
+        "cuda_m32_maxabs": 2.2724270820617676e-07,
+        "m32_m64_maxabs": 2.664743350977439e-07,
+        "cuda_m32_relative_l2": 2.955458984500167e-07,
+        "m32_m64_relative_l2": 3.971691150177745e-07,
+        "cuda_m32_rmse": 6.332523915567755e-08,
+        "m32_m64_rmse": 8.509955899769123e-08
+      }
+    },
+    "__main__.Stage3.test_prefill_every_token_output_state_history": {
+      "records": 8,
+      "maximum": {
+        "cuda_m32_maxabs": 1.7136335372924805e-07,
+        "m32_m64_maxabs": 1.4751460142292672e-07,
+        "cuda_m32_relative_l2": 2.5244045833069794e-07,
+        "m32_m64_relative_l2": 2.877496676639203e-07,
+        "cuda_m32_rmse": 5.8984416615061e-08,
+        "m32_m64_rmse": 4.6249308030066194e-08
+      }
+    },
+    "__main__.Stage3.test_real_bf16_weights_synthetic_input": {
+      "records": 16,
+      "maximum": {
+        "cuda_m32_maxabs": 1.1920928955078125e-07,
+        "m32_m64_maxabs": 1.987295156880009e-06,
+        "cuda_m32_relative_l2": 4.7441128319760365e-07,
+        "m32_m64_relative_l2": 2.8521746132585607e-06,
+        "cuda_m32_rmse": 4.505137586015397e-08,
+        "m32_m64_rmse": 9.7264758584122e-08
+      }
+    },
+    "__main__.Stage3.test_real_head_dimensions": {
+      "records": 8,
+      "maximum": {
+        "cuda_m32_maxabs": 2.7418136596679688e-06,
+        "m32_m64_maxabs": 5.890286368881448e-06,
+        "cuda_m32_relative_l2": 6.495363910754706e-07,
+        "m32_m64_relative_l2": 1.6397417757551798e-06,
+        "cuda_m32_rmse": 6.293042103457314e-07,
+        "m32_m64_rmse": 1.5886646748166595e-06
+      }
+    },
+    "__main__.Stage3.test_sequence_and_chunk_boundaries": {
+      "records": 80,
+      "maximum": {
+        "cuda_m32_maxabs": 6.183981895446777e-07,
+        "m32_m64_maxabs": 1.7716386611528467e-06,
+        "cuda_m32_relative_l2": 4.047493970748998e-07,
+        "m32_m64_relative_l2": 1.0453330446086014e-06,
+        "cuda_m32_rmse": 8.688795409866125e-08,
+        "m32_m64_rmse": 1.311599182152648e-07
+      }
+    },
+    "__main__.Stage3.test_zero_small_norm_and_extreme_decay": {
+      "records": 24,
+      "maximum": {
+        "cuda_m32_maxabs": 1.1920928955078125e-07,
+        "m32_m64_maxabs": 2.6924572518738366e-07,
+        "cuda_m32_relative_l2": 1.4653093180415086e-07,
+        "m32_m64_relative_l2": 3.9038929547767473e-07,
+        "cuda_m32_rmse": 3.630326774293805e-08,
+        "m32_m64_rmse": 7.912004006457305e-08
+      }
+    }
+  },
+  "memory": [
+    {
+      "case": "__main__.Stage3.test_chunk_decode_equivalence",
+      "allocated": 5472,
+      "free_before": 15196160000,
+      "free_after": 15194062848
+    },
+    {
+      "case": "__main__.Stage3.test_chunk_decode_equivalence",
+      "allocated": 5472,
+      "free_before": 15196291072,
+      "free_after": 15194193920
+    },
+    {
+      "case": "__main__.Stage3.test_chunk_decode_equivalence",
+      "allocated": 5472,
+      "free_before": 15195570176,
+      "free_after": 15193473024
+    },
+    {
+      "case": "__main__.Stage3.test_continuous_decode_2048",
+      "allocated": 1088,
+      "free_before": 15195635712,
+      "free_after": 15193538560
+    },
+    {
+      "case": "__main__.Stage3.test_exact_unit_and_zero_decay_limits",
+      "allocated": 5472,
+      "free_before": 15191965696,
+      "free_after": 15189868544
+    },
+    {
+      "case": "__main__.Stage3.test_extreme_beta_and_zero_input_nonzero_state",
+      "allocated": 5472,
+      "free_before": 15191965696,
+      "free_after": 15189868544
+    },
+    {
+      "case": "__main__.Stage3.test_extreme_beta_and_zero_input_nonzero_state",
+      "allocated": 5472,
+      "free_before": 15193669632,
+      "free_after": 15191572480
+    },
+    {
+      "case": "__main__.Stage3.test_independent_heldout_seed",
+      "allocated": 5472,
+      "free_before": 15192489984,
+      "free_after": 15190392832
+    },
+    {
+      "case": "__main__.Stage3.test_independent_heldout_seed",
+      "allocated": 5472,
+      "free_before": 15191375872,
+      "free_after": 15189278720
+    },
+    {
+      "case": "__main__.Stage3.test_long_operator_8192",
+      "allocated": 984008,
+      "free_before": 15187640320,
+      "free_after": 15185543168
+    },
+    {
+      "case": "__main__.Stage3.test_nonzero_initial_state_and_history",
+      "allocated": 5472,
+      "free_before": 15112339456,
+      "free_after": 15110242304
+    },
+    {
+      "case": "__main__.Stage3.test_prefill_every_token_output_state_history",
+      "allocated": 5472,
+      "free_before": 14945746944,
+      "free_after": 14943649792
+    },
+    {
+      "case": "__main__.Stage3.test_real_bf16_weights_synthetic_input",
+      "allocated": 137315840,
+      "free_before": 14898364416,
+      "free_after": 14759952384
+    },
+    {
+      "case": "__main__.Stage3.test_real_head_dimensions",
+      "allocated": 3150104,
+      "free_before": 15028715520,
+      "free_after": 15024521216
+    },
+    {
+      "case": "__main__.Stage3.test_sequence_and_chunk_boundaries",
+      "allocated": 1088,
+      "free_before": 15266873344,
+      "free_after": 15264776192
+    },
+    {
+      "case": "__main__.Stage3.test_sequence_and_chunk_boundaries",
+      "allocated": 1328,
+      "free_before": 15265824768,
+      "free_after": 15263727616
+    },
+    {
+      "case": "__main__.Stage3.test_sequence_and_chunk_boundaries",
+      "allocated": 1448,
+      "free_before": 15271591936,
+      "free_after": 15269494784
+    },
+    {
+      "case": "__main__.Stage3.test_sequence_and_chunk_boundaries",
+      "allocated": 8528,
+      "free_before": 15271723008,
+      "free_after": 15269625856
+    },
+    {
+      "case": "__main__.Stage3.test_sequence_and_chunk_boundaries",
+      "allocated": 8648,
+      "free_before": 15270608896,
+      "free_after": 15268511744
+    },
+    {
+      "case": "__main__.Stage3.test_sequence_and_chunk_boundaries",
+      "allocated": 8768,
+      "free_before": 15264907264,
+      "free_after": 15262810112
+    },
+    {
+      "case": "__main__.Stage3.test_sequence_and_chunk_boundaries",
+      "allocated": 8768,
+      "free_before": 15265824768,
+      "free_after": 15263727616
+    },
+    {
+      "case": "__main__.Stage3.test_sequence_and_chunk_boundaries",
+      "allocated": 31808,
+      "free_before": 15265824768,
+      "free_after": 15263727616
+    },
+    {
+      "case": "__main__.Stage3.test_zero_small_norm_and_extreme_decay",
+      "allocated": 5472,
+      "free_before": 15267135488,
+      "free_after": 15265038336
+    },
+    {
+      "case": "__main__.Stage3.test_zero_small_norm_and_extreme_decay",
+      "allocated": 5472,
+      "free_before": 15272837120,
+      "free_after": 15270739968
+    },
+    {
+      "case": "__main__.Stage3.test_zero_small_norm_and_extreme_decay",
+      "allocated": 5472,
+      "free_before": 15272837120,
+      "free_after": 15270739968
+    }
+  ],
+  "reference_driver_peak_rss_kib": 721780,
+  "weight_payload_sha256": {
+    "model.language_model.layers.0.linear_attn.in_proj_qkv.weight": "b06edcc9973be74f862d072f89a195e2eecea067ee615144be8510656122401f",
+    "model.language_model.layers.0.linear_attn.in_proj_z.weight": "8cc5be8e1a62cc4088f800b3d4cd3ad1892b1ac871b0d5f76aec014b4b14cf16",
+    "model.language_model.layers.0.linear_attn.in_proj_a.weight": "16bea87b244f5a7b28d809e68e35148fc3fcbce533479a8479ba07bfe2b57c42",
+    "model.language_model.layers.0.linear_attn.in_proj_b.weight": "908969c4aa9b431756794610716ddf0474d93aee69b02f79de84710ab9b886ee",
+    "model.language_model.layers.0.linear_attn.conv1d.weight": "196f8a5383dcc575e70695b134e8756f5c682e724e2c74dbbe2eecdd2a07ca38",
+    "model.language_model.layers.0.linear_attn.A_log": "5ececb99e657f82558eeb3331bf8426a207885d9d851f784d51b5698a715cd36",
+    "model.language_model.layers.0.linear_attn.dt_bias": "cea51c808c757af6ca7cbcf409da4013883284d48ab62b12177a5561952775bd",
+    "model.language_model.layers.0.linear_attn.norm.weight": "7ebc17576e1c103ebb3d74bc593c0ab5d43afdcc0fdcad5cef7e11c2351c8a20",
+    "model.language_model.layers.0.linear_attn.out_proj.weight": "cc08048a238bc33be13fc3cb4b0b3771d34e92793911875ee680e9b4b85e4ca1"
+  },
+  "source_sha256": {
+    "backend/platform/cuda/hybrid_deltanet_cuda.h": "f7dfba6fba02c203e60c2f947854e46536249df0126fdbe4a43859fce7e1e35e",
+    "backend/platform/cuda/hybrid_deltanet_cuda.cu": "a1fc2f205ad722ab8eaccee008fd3861b9bb01e149f83ffa2ad02d4476d43a94",
+    "backend/platform/cuda/gated_deltanet_kernels.cuh": "5a6ca2256fe564ca1fd5799c8a0ff1de4d5328753e9ea4ff73108fe4cf686a9c",
+    "backend/platform/cuda/hybrid_mixer_state.h": "c6ffce32663a317d519aaa92f2c7bc5a3fac356d4622746361bb55ade3671e3b",
+    "test/native-construction/qwen35_stage3_probe.cu": "9c7e6e0bd511a6781209216953b2281fd2c35de970160012ffc6d817b961a83d",
+    "test/native-construction/test_qwen35_stage3.py": "8ca75c20e6ba4630382702f6b3ea5d8853a12e99a572dc774720780a85eabb3b"
+  },
+  "trace_budget": {
+    "limit": 67108864,
+    "red_actual_capacity": 72360748,
+    "green_actual_capacity": 65577004,
+    "scope": "FP32 trace vector element storage, excluding allocator metadata and test JSON serialization"
+  },
+  "regressions": {
+    "stage1": {
+      "tests": 11,
+      "exit": 0
+    },
+    "stage2": {
+      "tests": 11,
+      "exit": 0
+    },
+    "native_stage4": {
+      "tests": 31,
+      "exit": 0,
+      "seconds": 461.253,
+      "log": "artifact/build/qwen35_stage3/native-stage4.log"
+    },
+    "preflight": {
+      "tests": 4,
+      "exit": 0
+    },
+    "startup": {
+      "tests": 5,
+      "exit": 0
+    }
+  },
+  "sanitizer": "UNVERIFIED: existing Stage2 tool failed before instrumentation; not claimed run/pass for Stage3",
+  "deferred": [
+    "trace=false execution path",
+    "MixerState move/moved-from/null/zero-owner runtime tests",
+    "GPU device switch and failed-constructor memory recovery measurement",
+    "official BF16 rounding and chunk/recurrent compatibility",
+    "complete decoder/logits/argmax/generation",
+    "global 16GB admission and expert cache"
+  ],
+  "probe_sha256": "ec52164e248ea8514459e58308a6d6ed8aa960f3369076d40f575180377534d7"
+}
