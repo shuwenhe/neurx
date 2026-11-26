@@ -1,0 +1,6137 @@
+{
+  "runtime": {
+    "torch": "2.6.0+cu124",
+    "cuda": "12.4",
+    "cudnn": 90100,
+    "device": "NVIDIA GeForce RTX 4060 Ti",
+    "matmul": "highest",
+    "tf32": false,
+    "bf16_reduced_precision_reduction": false,
+    "deterministic": true,
+    "allocator_fraction": 0.1,
+    "autocast": false,
+    "compile": false
+  },
+  "rows": [
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.56506620579977e-08,
+        "rmse": 9.781954931320656e-09,
+        "relative_l2": 1.0230575941828687e-07,
+        "cosine": 0.9999999999999984
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 7.934096829531612e-08,
+        "rmse": 3.52498890629593e-08,
+        "relative_l2": 1.2111220760621337e-07,
+        "cosine": 0.9999999999999967
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 4.846636958433237e-08,
+        "rmse": 2.307521817856168e-08,
+        "relative_l2": 1.2133995204904544e-07,
+        "cosine": 0.9999999999999941
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 4.238169722114993e-08,
+        "rmse": 3.006171076432203e-08,
+        "relative_l2": 1.4804512965270712e-07,
+        "cosine": 0.999999999999989
+      },
+      "actual_argmax": 4,
+      "reference_argmax": 4,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 2.133632276968278e-07,
+        "rmse": 1.336116329746006e-07,
+        "relative_l2": 4.181965091603354e-07,
+        "cosine": 0.9999999999999328
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0007831919938325882,
+        "rmse": 0.0004009519458514435,
+        "relative_l2": 0.004193404810025404,
+        "cosine": 0.9999913548075773
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.004223644733428955,
+        "rmse": 0.0025889971559325126,
+        "relative_l2": 0.008895322565220113,
+        "cosine": 0.9999617986294854
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0010306686162948608,
+        "rmse": 0.0007040100252082987,
+        "relative_l2": 0.0037020038852291436,
+        "cosine": 0.9999935409099497
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0009877979755401611,
+        "rmse": 0.0006071145034470387,
+        "relative_l2": 0.00298986128914695,
+        "cosine": 0.9999955917493343
+      },
+      "actual_argmax": 4,
+      "reference_argmax": 4,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.004984676837921143,
+        "rmse": 0.002995630097526845,
+        "relative_l2": 0.00937614315235305,
+        "cosine": 0.9999879183022787
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.4901161193847656e-08,
+        "rmse": 7.582459518300108e-09,
+        "relative_l2": 7.930207733084157e-08,
+        "cosine": 0.9999999999999982
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.2672246460180897e-08,
+        "relative_l2": 4.353953021191198e-08,
+        "cosine": 0.9999999999999991
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 4.470348358154297e-08,
+        "rmse": 2.538357465972181e-08,
+        "relative_l2": 1.3347834355553503e-07,
+        "cosine": 0.9999999999999934
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.6314292652233723e-08,
+        "relative_l2": 8.034311778714279e-08,
+        "cosine": 0.9999999999999973
+      },
+      "actual_argmax": 4,
+      "reference_argmax": 4,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 1.1920928955078125e-07,
+        "rmse": 5.568387831759593e-08,
+        "relative_l2": 1.7428721083254802e-07,
+        "cosine": 0.9999999999999875
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0007831957191228867,
+        "rmse": 0.0004009531904362552,
+        "relative_l2": 0.004191180238550183,
+        "cosine": 0.9999913547261929
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.004223644733428955,
+        "rmse": 0.002588993251341948,
+        "relative_l2": 0.008910359680312636,
+        "cosine": 0.9999617987719372
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0010306760668754578,
+        "rmse": 0.0007040039877590472,
+        "relative_l2": 0.003705282500066796,
+        "cosine": 0.9999935409656713
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0009877681732177734,
+        "rmse": 0.0006071082940042593,
+        "relative_l2": 0.0029908919387410947,
+        "cosine": 0.9999955918307469
+      },
+      "actual_argmax": 4,
+      "reference_argmax": 4,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.004984676837921143,
+        "rmse": 0.002995593542351186,
+        "relative_l2": 0.009451607256699359,
+        "cosine": 0.9999879188188492
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 2.86992396861252e-09,
+        "rmse": 9.173330752500749e-10,
+        "relative_l2": 2.194462561011398e-07,
+        "cosine": 0.9999999999999826
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 2.1498356081450787e-09,
+        "rmse": 8.346403568270892e-10,
+        "relative_l2": 8.256919184698497e-08,
+        "cosine": 0.9999999999999986
+      },
+      "actual_argmax": 9,
+      "reference_argmax": 9,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 3.3855955469674903e-09,
+        "rmse": 1.3804724677977802e-09,
+        "relative_l2": 1.5012021068235568e-07,
+        "cosine": 0.9999999999999898
+      },
+      "actual_argmax": 14,
+      "reference_argmax": 14,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 1.427864972092241e-09,
+        "rmse": 7.816223505602761e-10,
+        "relative_l2": 8.808354860872126e-08,
+        "cosine": 0.9999999999999963
+      },
+      "actual_argmax": 6,
+      "reference_argmax": 6,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 5.831119254118278e-09,
+        "rmse": 1.96426424260723e-09,
+        "relative_l2": 1.7375633540114528e-07,
+        "cosine": 0.9999999999999847
+      },
+      "actual_argmax": 4,
+      "reference_argmax": 4,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.8055085092782974e-05,
+        "rmse": 9.460760965775279e-06,
+        "relative_l2": 0.002263222452543306,
+        "cosine": 0.9999980333479137
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.00014320947229862213,
+        "rmse": 5.713959473778743e-05,
+        "relative_l2": 0.005652697983681806,
+        "cosine": 0.9999941614619445
+      },
+      "actual_argmax": 9,
+      "reference_argmax": 9,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00019394978880882263,
+        "rmse": 6.496276705239617e-05,
+        "relative_l2": 0.00706441020586526,
+        "cosine": 0.999986625526221
+      },
+      "actual_argmax": 14,
+      "reference_argmax": 14,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.00012216717004776,
+        "rmse": 5.227325822720585e-05,
+        "relative_l2": 0.0058908423988331795,
+        "cosine": 0.9999855928609488
+      },
+      "actual_argmax": 6,
+      "reference_argmax": 6,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.00023891590535640717,
+        "rmse": 9.1732997218421e-05,
+        "relative_l2": 0.008114585130673728,
+        "cosine": 0.9999912092187391
+      },
+      "actual_argmax": 4,
+      "reference_argmax": 4,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.862645149230957e-09,
+        "rmse": 7.227982766451104e-10,
+        "relative_l2": 1.7290927170452707e-07,
+        "cosine": 0.999999999999986
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 3.725290298461914e-09,
+        "rmse": 1.176102902707103e-09,
+        "relative_l2": 1.1634934649507092e-07,
+        "cosine": 0.9999999999999994
+      },
+      "actual_argmax": 9,
+      "reference_argmax": 9,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 1.862645149230957e-09,
+        "rmse": 7.59492881520412e-10,
+        "relative_l2": 8.259145210313066e-08,
+        "cosine": 0.999999999999997
+      },
+      "actual_argmax": 14,
+      "reference_argmax": 14,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 1.862645149230957e-09,
+        "rmse": 7.981032366399937e-10,
+        "relative_l2": 8.99408329323912e-08,
+        "cosine": 0.9999999999999968
+      },
+      "actual_argmax": 6,
+      "reference_argmax": 6,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 2.7939677238464355e-09,
+        "rmse": 1.3570782532955358e-09,
+        "relative_l2": 1.2004542911785808e-07,
+        "cosine": 0.9999999999999953
+      },
+      "actual_argmax": 4,
+      "reference_argmax": 4,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.8055317923426628e-05,
+        "rmse": 9.461162365198455e-06,
+        "relative_l2": 0.0022657934529752314,
+        "cosine": 0.9999980331815416
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0001432076096534729,
+        "rmse": 5.7138854172961556e-05,
+        "relative_l2": 0.005678226260434332,
+        "cosine": 0.9999941613830711
+      },
+      "actual_argmax": 9,
+      "reference_argmax": 9,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00019394978880882263,
+        "rmse": 6.496256732784802e-05,
+        "relative_l2": 0.007098643411500505,
+        "cosine": 0.9999866255299688
+      },
+      "actual_argmax": 14,
+      "reference_argmax": 14,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.00012216903269290924,
+        "rmse": 5.22734669874492e-05,
+        "relative_l2": 0.0059052802278877145,
+        "cosine": 0.9999855928053324
+      },
+      "actual_argmax": 6,
+      "reference_argmax": 6,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.00023891590535640717,
+        "rmse": 9.173242683858039e-05,
+        "relative_l2": 0.008171375522773593,
+        "cosine": 0.9999912091710204
+      },
+      "actual_argmax": 4,
+      "reference_argmax": 4,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 3.3578107933029955e-09,
+        "rmse": 9.226524915925777e-10,
+        "relative_l2": 1.0268575548304776e-07,
+        "cosine": 0.9999999999999951
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 2.0139819326137065e-08,
+        "rmse": 3.1388687220395627e-09,
+        "relative_l2": 1.9407091736276662e-07,
+        "cosine": 0.9999999999999938
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 7.79041857759677e-09,
+        "rmse": 2.302699816973028e-09,
+        "relative_l2": 1.5844421007213317e-07,
+        "cosine": 0.9999999999999882
+      },
+      "actual_argmax": 38,
+      "reference_argmax": 38,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 9.454790735052843e-09,
+        "rmse": 2.672150822054174e-09,
+        "relative_l2": 1.1972474610820536e-07,
+        "cosine": 0.9999999999999928
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 1.408178046391484e-08,
+        "rmse": 3.4944313713777917e-09,
+        "relative_l2": 1.8908788020832507e-07,
+        "cosine": 0.9999999999999835
+      },
+      "actual_argmax": 38,
+      "reference_argmax": 38,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 8.654594421386719e-05,
+        "rmse": 2.1869695712769627e-05,
+        "relative_l2": 0.002433967504282659,
+        "cosine": 0.9999975020979233
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0006067156791687012,
+        "rmse": 0.0001060570142798293,
+        "relative_l2": 0.006557323876313127,
+        "cosine": 0.9999809684931432
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00037018395960330963,
+        "rmse": 7.939147729443856e-05,
+        "relative_l2": 0.005462770014187521,
+        "cosine": 0.9999888188276433
+      },
+      "actual_argmax": 38,
+      "reference_argmax": 38,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0005094185471534729,
+        "rmse": 0.0001013980599790075,
+        "relative_l2": 0.004543103226274393,
+        "cosine": 0.9999929049369062
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0006509609520435333,
+        "rmse": 0.00011779732889804397,
+        "relative_l2": 0.006374155359376383,
+        "cosine": 0.9999903619946322
+      },
+      "actual_argmax": 38,
+      "reference_argmax": 38,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 1.359229029795557e-09,
+        "relative_l2": 1.5127413443929709e-07,
+        "cosine": 0.9999999999999923
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 1.681181869932654e-09,
+        "relative_l2": 1.0394460084504548e-07,
+        "cosine": 0.9999999999999983
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 3.725290298461914e-09,
+        "rmse": 1.4606382974223184e-09,
+        "relative_l2": 1.0050362286546718e-07,
+        "cosine": 0.9999999999999957
+      },
+      "actual_argmax": 38,
+      "reference_argmax": 38,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 1.1175870895385742e-08,
+        "rmse": 2.3216880350319715e-09,
+        "relative_l2": 1.040223886387974e-07,
+        "cosine": 0.9999999999999958
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 1.7622443442808994e-09,
+        "relative_l2": 9.535716417942764e-08,
+        "cosine": 0.9999999999999966
+      },
+      "actual_argmax": 38,
+      "reference_argmax": 38,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 8.654873818159103e-05,
+        "rmse": 2.1869871378360066e-05,
+        "relative_l2": 0.0024363406402956385,
+        "cosine": 0.9999975019644002
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0006067231297492981,
+        "rmse": 0.00010605768107326916,
+        "relative_l2": 0.00654295330198868,
+        "cosine": 0.9999809684107202
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0003701820969581604,
+        "rmse": 7.939106519482919e-05,
+        "relative_l2": 0.005477784056557003,
+        "cosine": 0.9999888188921484
+      },
+      "actual_argmax": 38,
+      "reference_argmax": 38,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0005094185471534729,
+        "rmse": 0.00010139837101571604,
+        "relative_l2": 0.004554716765018644,
+        "cosine": 0.9999929050019747
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0006509646773338318,
+        "rmse": 0.00011779811596495453,
+        "relative_l2": 0.006403852075595699,
+        "cosine": 0.9999903619183755
+      },
+      "actual_argmax": 38,
+      "reference_argmax": 38,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 4.6698985288143806e-09,
+        "relative_l2": 1.4167876988447864e-08,
+        "cosine": 0.9999999999999999
+      },
+      "actual_argmax": 26,
+      "reference_argmax": 26,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 3.91155481338501e-08,
+        "rmse": 5.958177309183424e-09,
+        "relative_l2": 1.5209053277458554e-08,
+        "cosine": 1.0
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 3.91155481338501e-08,
+        "rmse": 6.282114220425506e-09,
+        "relative_l2": 1.3240828093796194e-08,
+        "cosine": 0.9999999999999999
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 3.91155481338501e-08,
+        "rmse": 6.282114220425506e-09,
+        "relative_l2": 1.2334001592427795e-08,
+        "cosine": 0.9999999999999999
+      },
+      "actual_argmax": 26,
+      "reference_argmax": 26,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0018458366394042969,
+        "rmse": 0.00033485131200918286,
+        "relative_l2": 0.0013347834310381635,
+        "cosine": 0.9999994895957418
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0018458366394042969,
+        "rmse": 0.00047449101716894797,
+        "relative_l2": 0.00143954526739662,
+        "cosine": 0.9999990192998633
+      },
+      "actual_argmax": 26,
+      "reference_argmax": 26,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0018458366394042969,
+        "rmse": 0.0005759010535430515,
+        "relative_l2": 0.0014700653076605817,
+        "cosine": 0.999998930431417
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.003584742546081543,
+        "rmse": 0.0008007659190940454,
+        "relative_l2": 0.0016877763554975914,
+        "cosine": 0.9999986389171375
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.003584742546081543,
+        "rmse": 0.0008798180424036146,
+        "relative_l2": 0.0017273925186342537,
+        "cosine": 0.999998508090337
+      },
+      "actual_argmax": 26,
+      "reference_argmax": 26,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 26,
+      "reference_argmax": 26,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 26,
+      "reference_argmax": 26,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0018458366394042969,
+        "rmse": 0.00033485131200918286,
+        "relative_l2": 0.0013359494089436718,
+        "cosine": 0.9999994895957418
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0018458366394042969,
+        "rmse": 0.00047449101716894797,
+        "relative_l2": 0.0014400262132574608,
+        "cosine": 0.9999990192998633
+      },
+      "actual_argmax": 26,
+      "reference_argmax": 26,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0018458366394042969,
+        "rmse": 0.0005759010535430515,
+        "relative_l2": 0.001470284740448076,
+        "cosine": 0.999998930431417
+      },
+      "actual_argmax": 25,
+      "reference_argmax": 25,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.003584742546081543,
+        "rmse": 0.0008007659190940454,
+        "relative_l2": 0.0016883789788680063,
+        "cosine": 0.9999986389171375
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.003584742546081543,
+        "rmse": 0.0008798180424036146,
+        "relative_l2": 0.0017274093207571013,
+        "cosine": 0.999998508090337
+      },
+      "actual_argmax": 26,
+      "reference_argmax": 26,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 2.3233023782598394e-08,
+        "rmse": 1.7710495787265813e-08,
+        "relative_l2": 3.9628379969810586e-08,
+        "cosine": 0.9999999999999993
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 7.253181055766333e-08,
+        "rmse": 3.683492834482009e-08,
+        "relative_l2": 8.033486696579147e-08,
+        "cosine": 0.9999999999999981
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 3.1963475921603646e-08,
+        "rmse": 1.7550485749730276e-08,
+        "relative_l2": 3.1867283176198706e-08,
+        "cosine": 0.9999999999999994
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 4.366240535791377e-08,
+        "rmse": 2.4437838646431228e-08,
+        "relative_l2": 5.463340548798934e-08,
+        "cosine": 0.999999999999999
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 1.9349774060817282e-08,
+        "rmse": 1.2679985207136503e-08,
+        "relative_l2": 3.094353063582744e-08,
+        "cosine": 0.9999999999999993
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0007596909999847412,
+        "rmse": 0.0005231121513926964,
+        "relative_l2": 0.0011704972944424931,
+        "cosine": 0.9999993448899772
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0014400482177734375,
+        "rmse": 0.0010659350120453446,
+        "relative_l2": 0.002324743025931094,
+        "cosine": 0.9999973019998646
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0018402934074401855,
+        "rmse": 0.001201758136207612,
+        "relative_l2": 0.00218209154314353,
+        "cosine": 0.9999976349656423
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0014147758483886719,
+        "rmse": 0.0008610878293305097,
+        "relative_l2": 0.0019250540118431149,
+        "cosine": 0.9999981550338407
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.000738680362701416,
+        "rmse": 0.00046067113141104893,
+        "relative_l2": 0.0011241961952201348,
+        "cosine": 0.9999994231071527
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.4901161193847656e-08,
+        "relative_l2": 3.334231257105084e-08,
+        "cosine": 0.9999999999999996
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 1.1920928955078125e-07,
+        "rmse": 6.143906154658885e-08,
+        "relative_l2": 1.3399506371042037e-07,
+        "cosine": 0.9999999999999953
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 2.9802322387695312e-08,
+        "relative_l2": 5.411354721795069e-08,
+        "cosine": 0.9999999999999989
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.4901161193847656e-08,
+        "relative_l2": 3.331314084376293e-08,
+        "cosine": 0.9999999999999996
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.4901161193847656e-08,
+        "relative_l2": 3.6363964607841e-08,
+        "cosine": 0.9999999999999996
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0007596909999847412,
+        "rmse": 0.0005231072990590868,
+        "relative_l2": 0.0011707736114737967,
+        "cosine": 0.9999993448982947
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0014400482177734375,
+        "rmse": 0.001065972004810986,
+        "relative_l2": 0.0023246164516802404,
+        "cosine": 0.999997301820392
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0018402934074401855,
+        "rmse": 0.0012017624504968706,
+        "relative_l2": 0.002181717563783765,
+        "cosine": 0.9999976349442095
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0014147758483886719,
+        "rmse": 0.0008610861383776512,
+        "relative_l2": 0.0019252965850975953,
+        "cosine": 0.9999981550425908
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0007386505603790283,
+        "rmse": 0.00046065918458490024,
+        "relative_l2": 0.0011245407113278085,
+        "cosine": 0.9999994231361188
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.9259488948097925e-08,
+        "rmse": 1.3903255126454127e-08,
+        "relative_l2": 2.9630381747953376e-08,
+        "cosine": 0.9999999999999997
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 5.249906431803453e-08,
+        "rmse": 4.1298767269635866e-08,
+        "relative_l2": 7.794830752772087e-08,
+        "cosine": 0.9999999999999969
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 2.6439824829527225e-08,
+        "rmse": 1.7594346075854424e-08,
+        "relative_l2": 3.4569619633134985e-08,
+        "cosine": 0.9999999999999991
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 3.936736592269341e-08,
+        "rmse": 2.1337660775962082e-08,
+        "relative_l2": 4.642728245504278e-08,
+        "cosine": 0.9999999999999991
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 4.9594496731586446e-08,
+        "rmse": 2.6333335114814925e-08,
+        "relative_l2": 4.519341177723026e-08,
+        "cosine": 0.9999999999999992
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.00021690130233764648,
+        "rmse": 0.00015817215373258915,
+        "relative_l2": 0.0003370938131523637,
+        "cosine": 0.9999999558182675
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.00021773576736450195,
+        "rmse": 0.00011534993500074756,
+        "relative_l2": 0.00021771430059315907,
+        "cosine": 0.9999999920934174
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0003670156002044678,
+        "rmse": 0.00019281188341227306,
+        "relative_l2": 0.00037883950934108646,
+        "cosine": 0.9999999343108045
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.000190049409866333,
+        "rmse": 0.00013896642535642453,
+        "relative_l2": 0.00030236835276647306,
+        "cosine": 0.9999999614488042
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0003535151481628418,
+        "rmse": 0.00024388616675261312,
+        "relative_l2": 0.0004185587498994061,
+        "cosine": 0.9999999267359513
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.4901161193847656e-08,
+        "relative_l2": 3.175710217440883e-08,
+        "cosine": 0.9999999999999997
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 4.470348358154297e-08,
+        "relative_l2": 8.437445293723245e-08,
+        "cosine": 0.9999999999999967
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 2.9802322387695312e-08,
+        "relative_l2": 5.855602357474149e-08,
+        "cosine": 0.9999999999999984
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 3.650024149988857e-08,
+        "relative_l2": 7.941859243765559e-08,
+        "cosine": 0.9999999999999973
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 3.0719530773294423e-08,
+        "relative_l2": 5.2721023784054714e-08,
+        "cosine": 0.9999999999999989
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.00021690130233764648,
+        "rmse": 0.00015817378706410706,
+        "relative_l2": 0.0003370437319766634,
+        "cosine": 0.9999999558195237
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.00021767616271972656,
+        "rmse": 0.0001153175496532648,
+        "relative_l2": 0.00021761450176848414,
+        "cosine": 0.999999992102425
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0003669559955596924,
+        "rmse": 0.0001927835194095382,
+        "relative_l2": 0.0003787420720977229,
+        "cosine": 0.9999999343293476
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0001900792121887207,
+        "rmse": 0.00013896356681067988,
+        "relative_l2": 0.0003023259611474262,
+        "cosine": 0.9999999614548887
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 781,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0003535151481628418,
+        "rmse": 0.00024388080884685164,
+        "relative_l2": 0.00041847873579794207,
+        "cosine": 0.9999999267434091
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 5.837306643607931e-08,
+        "rmse": 3.128410137097395e-08,
+        "relative_l2": 1.713097991298739e-07,
+        "cosine": 0.9999999999999857
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 5.6929828184948406e-08,
+        "rmse": 2.9045158642849703e-08,
+        "relative_l2": 1.9190816782840836e-07,
+        "cosine": 0.999999999999995
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 4.277401281782556e-08,
+        "rmse": 2.8329759100397113e-08,
+        "relative_l2": 2.14185229528974e-07,
+        "cosine": 0.999999999999983
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 2.068206814143103e-08,
+        "rmse": 1.4195759467821274e-08,
+        "relative_l2": 9.184516385503972e-08,
+        "cosine": 0.999999999999996
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 3.1990294246941886e-08,
+        "rmse": 1.6717982316180166e-08,
+        "relative_l2": 9.283620867998943e-08,
+        "cosine": 0.9999999999999973
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0010719746351242065,
+        "rmse": 0.0005154769111316511,
+        "relative_l2": 0.0028227195184132876,
+        "cosine": 0.9999969241992118
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.002037249505519867,
+        "rmse": 0.0008859523979171385,
+        "relative_l2": 0.005853696006533203,
+        "cosine": 0.9999844821358608
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.004002375528216362,
+        "rmse": 0.0025803613691391235,
+        "relative_l2": 0.01950864989447791,
+        "cosine": 0.9998649781013657
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.001857846975326538,
+        "rmse": 0.001197517444728633,
+        "relative_l2": 0.007747819671306007,
+        "cosine": 0.9999744229206317
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0007082223892211914,
+        "rmse": 0.0003663367824515032,
+        "relative_l2": 0.0020342957169386298,
+        "cosine": 0.9999982304343451
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 2.181306644414067e-08,
+        "relative_l2": 1.1944699574060355e-07,
+        "cosine": 0.9999999999999962
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 4.470348358154297e-08,
+        "rmse": 2.364480058159473e-08,
+        "relative_l2": 1.5622676236912245e-07,
+        "cosine": 0.9999999999999929
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 3.539725956813755e-08,
+        "relative_l2": 2.676186182283222e-07,
+        "cosine": 0.9999999999999751
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.7277046816158237e-08,
+        "relative_l2": 1.1178078763991553e-07,
+        "cosine": 0.9999999999999973
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 4.0978193283081055e-08,
+        "rmse": 2.054948314631392e-08,
+        "relative_l2": 1.1411282609980088e-07,
+        "cosine": 0.9999999999999941
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0010719895362854004,
+        "rmse": 0.000515482469419076,
+        "relative_l2": 0.0028265678658867823,
+        "cosine": 0.9999969242237475
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0020372718572616577,
+        "rmse": 0.0008859602295241856,
+        "relative_l2": 0.005864378773322258,
+        "cosine": 0.999984482013437
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0040023308247327805,
+        "rmse": 0.0025803300662016453,
+        "relative_l2": 0.01930799971119982,
+        "cosine": 0.9998649811675827
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0018578171730041504,
+        "rmse": 0.0011975036964853342,
+        "relative_l2": 0.007771080528581034,
+        "cosine": 0.9999744233522637
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0007082223892211914,
+        "rmse": 0.00036632992358389836,
+        "relative_l2": 0.002035837173333651,
+        "cosine": 0.9999982305359323
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.739555648833102e-09,
+        "rmse": 8.50523503546179e-10,
+        "relative_l2": 9.881642930439002e-08,
+        "cosine": 0.9999999999999956
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 2.1388587845283524e-09,
+        "rmse": 7.826131751943952e-10,
+        "relative_l2": 1.226315353808256e-07,
+        "cosine": 0.9999999999999926
+      },
+      "actual_argmax": 15,
+      "reference_argmax": 15,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 9.156819752095813e-09,
+        "rmse": 2.569153971494625e-09,
+        "relative_l2": 2.578817336761981e-07,
+        "cosine": 0.9999999999999678
+      },
+      "actual_argmax": 10,
+      "reference_argmax": 10,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 3.881837476460426e-09,
+        "rmse": 1.4707105793429916e-09,
+        "relative_l2": 1.201646259417464e-07,
+        "cosine": 0.9999999999999969
+      },
+      "actual_argmax": 10,
+      "reference_argmax": 10,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 4.642776468832821e-09,
+        "rmse": 2.085147471158955e-09,
+        "relative_l2": 8.434494841967191e-08,
+        "cosine": 0.9999999999999967
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0001981724053621292,
+        "rmse": 5.396883220031411e-05,
+        "relative_l2": 0.006270264663473871,
+        "cosine": 0.9999834007577567
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.00010713376104831696,
+        "rmse": 4.907340641438652e-05,
+        "relative_l2": 0.0076895552159959996,
+        "cosine": 0.9999724460075996
+      },
+      "actual_argmax": 15,
+      "reference_argmax": 15,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00022309646010398865,
+        "rmse": 7.052005867549978e-05,
+        "relative_l2": 0.007078530268027005,
+        "cosine": 0.9999764145784814
+      },
+      "actual_argmax": 10,
+      "reference_argmax": 10,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.00027856603264808655,
+        "rmse": 8.604556329744483e-05,
+        "relative_l2": 0.00703036486540355,
+        "cosine": 0.999984459809725
+      },
+      "actual_argmax": 10,
+      "reference_argmax": 10,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0003384798765182495,
+        "rmse": 0.00012177229294278784,
+        "relative_l2": 0.00492573198585063,
+        "cosine": 0.9999897706021105
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 3.725290298461914e-09,
+        "rmse": 1.061197545013153e-09,
+        "relative_l2": 1.2329318972038952e-07,
+        "cosine": 0.9999999999999925
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 1.862645149230957e-09,
+        "rmse": 6.05365576441701e-10,
+        "relative_l2": 9.4857731835527e-08,
+        "cosine": 0.999999999999996
+      },
+      "actual_argmax": 15,
+      "reference_argmax": 15,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 2.5546797957071614e-09,
+        "relative_l2": 2.564288600813764e-07,
+        "cosine": 0.9999999999999781
+      },
+      "actual_argmax": 10,
+      "reference_argmax": 10,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 3.725290298461914e-09,
+        "rmse": 1.3286942538879197e-09,
+        "relative_l2": 1.0856115110904977e-07,
+        "cosine": 0.9999999999999943
+      },
+      "actual_argmax": 10,
+      "reference_argmax": 10,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 5.587935447692871e-09,
+        "rmse": 2.412108893621884e-09,
+        "relative_l2": 9.757065128313151e-08,
+        "cosine": 0.9999999999999952
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.00019817613065242767,
+        "rmse": 5.3969837322596395e-05,
+        "relative_l2": 0.006255013736763312,
+        "cosine": 0.9999834000628033
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.00010713282972574234,
+        "rmse": 4.907351906547635e-05,
+        "relative_l2": 0.007674393325342342,
+        "cosine": 0.9999724459387714
+      },
+      "actual_argmax": 15,
+      "reference_argmax": 15,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00022308900952339172,
+        "rmse": 7.051793576274847e-05,
+        "relative_l2": 0.007090632602428574,
+        "cosine": 0.9999764158285375
+      },
+      "actual_argmax": 10,
+      "reference_argmax": 10,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0002785641700029373,
+        "rmse": 8.60451388491173e-05,
+        "relative_l2": 0.007000454554634121,
+        "cosine": 0.9999844599626075
+      },
+      "actual_argmax": 10,
+      "reference_argmax": 10,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0003384798765182495,
+        "rmse": 0.00012177222764806492,
+        "relative_l2": 0.004916190989184063,
+        "cosine": 0.9999897705834063
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 7.79699219077834e-09,
+        "rmse": 1.9036896273289973e-09,
+        "relative_l2": 1.0256637919094312e-07,
+        "cosine": 0.9999999999999969
+      },
+      "actual_argmax": 17,
+      "reference_argmax": 17,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 1.4121746078066266e-08,
+        "rmse": 3.2658829307460432e-09,
+        "relative_l2": 1.669764448669261e-07,
+        "cosine": 0.9999999999999868
+      },
+      "actual_argmax": 30,
+      "reference_argmax": 30,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 1.0617478049534945e-08,
+        "rmse": 2.9880635691454956e-09,
+        "relative_l2": 1.0640085917381766e-07,
+        "cosine": 0.9999999999999943
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 2.1978514758158596e-08,
+        "rmse": 5.166872230145294e-09,
+        "relative_l2": 1.7856919185284552e-07,
+        "cosine": 0.9999999999999934
+      },
+      "actual_argmax": 6,
+      "reference_argmax": 6,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 1.2936816021213993e-08,
+        "rmse": 2.6460931767455787e-09,
+        "relative_l2": 9.621663603654175e-08,
+        "cosine": 0.9999999999999962
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.00062570720911026,
+        "rmse": 0.00011023144768238234,
+        "relative_l2": 0.005939014164055092,
+        "cosine": 0.9999903718909285
+      },
+      "actual_argmax": 17,
+      "reference_argmax": 17,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0005884580314159393,
+        "rmse": 0.0001323534274401291,
+        "relative_l2": 0.006766900705572227,
+        "cosine": 0.9999805727979176
+      },
+      "actual_argmax": 30,
+      "reference_argmax": 30,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0005230158567428589,
+        "rmse": 0.00010878825637208638,
+        "relative_l2": 0.00387380103872748,
+        "cosine": 0.9999928896654172
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0003936663269996643,
+        "rmse": 0.00012115900036244973,
+        "relative_l2": 0.004187303436628115,
+        "cosine": 0.99999170917273
+      },
+      "actual_argmax": 6,
+      "reference_argmax": 6,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0007169023156166077,
+        "rmse": 0.00015380910701869195,
+        "relative_l2": 0.005592771927203864,
+        "cosine": 0.9999860359484403
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 3.725290298461914e-09,
+        "rmse": 1.1295284746667896e-09,
+        "relative_l2": 6.085636858438677e-08,
+        "cosine": 0.9999999999999981
+      },
+      "actual_argmax": 17,
+      "reference_argmax": 17,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 1.4305910299491153e-09,
+        "relative_l2": 7.314255200778292e-08,
+        "cosine": 0.9999999999999971
+      },
+      "actual_argmax": 30,
+      "reference_argmax": 30,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 1.4901161193847656e-08,
+        "rmse": 2.6979580486415703e-09,
+        "relative_l2": 9.607059658649478e-08,
+        "cosine": 0.9999999999999978
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 1.4901161193847656e-08,
+        "rmse": 3.3408452922653437e-09,
+        "relative_l2": 1.1546094744671665e-07,
+        "cosine": 0.9999999999999956
+      },
+      "actual_argmax": 6,
+      "reference_argmax": 6,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 2.277692404653339e-09,
+        "relative_l2": 8.28209355509916e-08,
+        "cosine": 0.9999999999999973
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.00062570720911026,
+        "rmse": 0.00011023175545419957,
+        "relative_l2": 0.005915414389476819,
+        "cosine": 0.999990371837998
+      },
+      "actual_argmax": 17,
+      "reference_argmax": 17,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0005884617567062378,
+        "rmse": 0.00013235334364323852,
+        "relative_l2": 0.006784898318598853,
+        "cosine": 0.999980572768726
+      },
+      "actual_argmax": 30,
+      "reference_argmax": 30,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0005230307579040527,
+        "rmse": 0.000108788977681236,
+        "relative_l2": 0.0038704234763592815,
+        "cosine": 0.9999928896290236
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.00039367377758026123,
+        "rmse": 0.00012115832332877246,
+        "relative_l2": 0.0041832332817894734,
+        "cosine": 0.99999170933117
+      },
+      "actual_argmax": 6,
+      "reference_argmax": 6,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0007168948650360107,
+        "rmse": 0.0001538080486651003,
+        "relative_l2": 0.005582591764375159,
+        "cosine": 0.9999860361191493
+      },
+      "actual_argmax": 27,
+      "reference_argmax": 27,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 71,
+      "reference_argmax": 71,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 70,
+      "reference_argmax": 70,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 69,
+      "reference_argmax": 69,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 68,
+      "reference_argmax": 68,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 0.9999999999999999
+      },
+      "actual_argmax": 39,
+      "reference_argmax": 39,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0037870407104492188,
+        "rmse": 0.0006633753720679895,
+        "relative_l2": 0.001898103904608471,
+        "cosine": 0.9999986373133978
+      },
+      "actual_argmax": 71,
+      "reference_argmax": 71,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0037870407104492188,
+        "rmse": 0.0007577581640513448,
+        "relative_l2": 0.0018350662200322472,
+        "cosine": 0.9999986977592067
+      },
+      "actual_argmax": 70,
+      "reference_argmax": 70,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0037870407104492188,
+        "rmse": 0.0008457246285287179,
+        "relative_l2": 0.001799419325585087,
+        "cosine": 0.999998718755829
+      },
+      "actual_argmax": 69,
+      "reference_argmax": 69,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0037870407104492188,
+        "rmse": 0.0008972467072781769,
+        "relative_l2": 0.0017559520488512276,
+        "cosine": 0.9999987655794538
+      },
+      "actual_argmax": 68,
+      "reference_argmax": 68,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.002037525177001953,
+        "rmse": 0.0006868014786836232,
+        "relative_l2": 0.001495250610457988,
+        "cosine": 0.9999989853981195
+      },
+      "actual_argmax": 39,
+      "reference_argmax": 39,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 71,
+      "reference_argmax": 71,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 70,
+      "reference_argmax": 70,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 69,
+      "reference_argmax": 69,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 68,
+      "reference_argmax": 68,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 0.9999999999999999
+      },
+      "actual_argmax": 39,
+      "reference_argmax": 39,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0037870407104492188,
+        "rmse": 0.0006633753720679895,
+        "relative_l2": 0.0018963301757943562,
+        "cosine": 0.9999986373133978
+      },
+      "actual_argmax": 71,
+      "reference_argmax": 71,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0037870407104492188,
+        "rmse": 0.0007577581640513448,
+        "relative_l2": 0.0018334670889529662,
+        "cosine": 0.9999986977592067
+      },
+      "actual_argmax": 70,
+      "reference_argmax": 70,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0037870407104492188,
+        "rmse": 0.0008457246285287179,
+        "relative_l2": 0.0017979440044577747,
+        "cosine": 0.999998718755829
+      },
+      "actual_argmax": 69,
+      "reference_argmax": 69,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0037870407104492188,
+        "rmse": 0.0008972467072781769,
+        "relative_l2": 0.0017545787681906642,
+        "cosine": 0.9999987655794538
+      },
+      "actual_argmax": 68,
+      "reference_argmax": 68,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.002037525177001953,
+        "rmse": 0.0006868014786836232,
+        "relative_l2": 0.0014945728411855826,
+        "cosine": 0.9999989853981195
+      },
+      "actual_argmax": 39,
+      "reference_argmax": 39,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 3.707658113860646e-08,
+        "rmse": 2.137369992397269e-08,
+        "relative_l2": 3.454016015743307e-08,
+        "cosine": 0.9999999999999996
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 1.118068360117519e-08,
+        "rmse": 8.236524110508597e-09,
+        "relative_l2": 1.9029655497268772e-08,
+        "cosine": 0.9999999999999997
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 3.223161737508917e-08,
+        "rmse": 2.601923763633236e-08,
+        "relative_l2": 4.682080441440828e-08,
+        "cosine": 0.9999999999999997
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 4.275214537940997e-08,
+        "rmse": 2.3553399871957177e-08,
+        "relative_l2": 4.8320798964447696e-08,
+        "cosine": 0.9999999999999996
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 4.610072723565395e-08,
+        "rmse": 2.6093247434790902e-08,
+        "relative_l2": 4.8815171051770676e-08,
+        "cosine": 0.9999999999999997
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0024055838584899902,
+        "rmse": 0.0012647465575209567,
+        "relative_l2": 0.0020438459360841814,
+        "cosine": 0.9999984125975501
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0017755627632141113,
+        "rmse": 0.0009567926734823079,
+        "relative_l2": 0.002210572650709746,
+        "cosine": 0.9999992434121626
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0011035799980163574,
+        "rmse": 0.0007492895550368511,
+        "relative_l2": 0.0013483231635348892,
+        "cosine": 0.9999990910119192
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0009183883666992188,
+        "rmse": 0.0006341559929176745,
+        "relative_l2": 0.0013009978759582449,
+        "cosine": 0.9999998890811822
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.001742720603942871,
+        "rmse": 0.0011540182616424175,
+        "relative_l2": 0.0021589340761319123,
+        "cosine": 0.9999996872988182
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 2.9802322387695312e-08,
+        "relative_l2": 4.816091819799429e-08,
+        "cosine": 0.9999999999999992
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 0.9999999999999999
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.4901161193847656e-08,
+        "relative_l2": 2.6814174395162718e-08,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 2.9802322387695312e-08,
+        "relative_l2": 5.57540998173572e-08,
+        "cosine": 0.9999999999999989
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0024056434631347656,
+        "rmse": 0.0012647748999861479,
+        "relative_l2": 0.0020459434888263632,
+        "cosine": 0.9999984125363388
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0017755627632141113,
+        "rmse": 0.0009567926734823079,
+        "relative_l2": 0.002214641952796199,
+        "cosine": 0.9999992434121626
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0011035799980163574,
+        "rmse": 0.0007492827096954924,
+        "relative_l2": 0.0013483122508280451,
+        "cosine": 0.99999909102855
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0009183883666992188,
+        "rmse": 0.0006341559929176745,
+        "relative_l2": 0.001299422148402765,
+        "cosine": 0.9999998890811822
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0017426609992980957,
+        "rmse": 0.0011539957590784705,
+        "relative_l2": 0.0021545643933765643,
+        "cosine": 0.9999996873370329
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 6.247843742368531e-08,
+        "rmse": 4.828311736563312e-08,
+        "relative_l2": 1.0124214499045681e-07,
+        "cosine": 0.9999999999999956
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 6.838721688939842e-08,
+        "rmse": 4.5360667429900026e-08,
+        "relative_l2": 7.786210408592525e-08,
+        "cosine": 0.9999999999999969
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 6.821572573478818e-08,
+        "rmse": 3.58407336421702e-08,
+        "relative_l2": 8.562949180484052e-08,
+        "cosine": 0.9999999999999966
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 4.8919833406380064e-08,
+        "rmse": 3.7165311054717235e-08,
+        "relative_l2": 6.238923733635258e-08,
+        "cosine": 0.9999999999999983
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 5.816540604719478e-08,
+        "rmse": 3.4459990762275915e-08,
+        "relative_l2": 6.537931004837543e-08,
+        "cosine": 0.999999999999998
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.000372469425201416,
+        "rmse": 0.00027514377230257345,
+        "relative_l2": 0.000576933474706532,
+        "cosine": 0.9999998425140018
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 5.346536636352539e-05,
+        "rmse": 3.364158174391279e-05,
+        "relative_l2": 5.774615912981672e-05,
+        "cosine": 0.9999999983327329
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00022330880165100098,
+        "rmse": 0.000150665977584186,
+        "relative_l2": 0.00035996615063766416,
+        "cosine": 0.9999999464654805
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.00015848875045776367,
+        "rmse": 0.00012337197984432012,
+        "relative_l2": 0.00020710397303067758,
+        "cosine": 0.9999999786297189
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 3.081560134887695e-05,
+        "rmse": 2.2818329668207305e-05,
+        "relative_l2": 4.3292138031937895e-05,
+        "cosine": 0.9999999992299314
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 5.1619136559035694e-08,
+        "relative_l2": 1.0823725925951804e-07,
+        "cosine": 0.9999999999999956
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 4.2146848510894035e-08,
+        "relative_l2": 7.234554663502847e-08,
+        "cosine": 0.9999999999999973
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 3.650024149988857e-08,
+        "relative_l2": 8.720516496644742e-08,
+        "cosine": 0.9999999999999966
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 5.3726900748371916e-08,
+        "relative_l2": 9.019110026161246e-08,
+        "cosine": 0.9999999999999964
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 4.470348358154297e-08,
+        "relative_l2": 8.481380582458177e-08,
+        "cosine": 0.9999999999999964
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0003725290298461914,
+        "rmse": 0.0002751683770292268,
+        "relative_l2": 0.0005770623209502421,
+        "cosine": 0.999999842491555
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 5.346536636352539e-05,
+        "rmse": 3.363807019988998e-05,
+        "relative_l2": 5.774011481542232e-05,
+        "cosine": 0.9999999983330823
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00022324919700622559,
+        "rmse": 0.00015064472160289578,
+        "relative_l2": 0.00035996938914314725,
+        "cosine": 0.9999999464798482
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.00015854835510253906,
+        "rmse": 0.000123386020167108,
+        "relative_l2": 0.0002071300962995292,
+        "cosine": 0.9999999786244594
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 2191,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 3.075599670410156e-05,
+        "rmse": 2.2786306885504674e-05,
+        "relative_l2": 4.32305926004671e-05,
+        "cosine": 0.9999999992328507
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.4746896370709806e-08,
+        "rmse": 7.2182329059847695e-09,
+        "relative_l2": 9.618937144125531e-08,
+        "cosine": 0.9999999999999956
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 3.767849648950161e-08,
+        "rmse": 2.000305502113735e-08,
+        "relative_l2": 9.822089159716272e-08,
+        "cosine": 0.9999999999999954
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 4.544651291404911e-08,
+        "rmse": 2.817185388165415e-08,
+        "relative_l2": 2.5709799432346756e-07,
+        "cosine": 0.9999999999999718
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 7.336979584993131e-08,
+        "rmse": 5.198485516404838e-08,
+        "relative_l2": 1.8671420782484235e-07,
+        "cosine": 0.999999999999984
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 2.797144343924529e-08,
+        "rmse": 1.7979561809828026e-08,
+        "relative_l2": 9.059901146695597e-08,
+        "cosine": 0.9999999999999963
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.002382829785346985,
+        "rmse": 0.0014643532417977477,
+        "relative_l2": 0.01951380927959533,
+        "cosine": 0.9998099444949797
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.002219974994659424,
+        "rmse": 0.0013112327424171899,
+        "relative_l2": 0.006438538763235288,
+        "cosine": 0.9999862705377021
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0019935518503189087,
+        "rmse": 0.001507310623392174,
+        "relative_l2": 0.013755806650710365,
+        "cosine": 0.9999239719501899
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.013407349586486816,
+        "rmse": 0.006567303263414621,
+        "relative_l2": 0.023587810062346466,
+        "cosine": 0.9997218354128491
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0017028748989105225,
+        "rmse": 0.0009143090268790912,
+        "relative_l2": 0.004607203024470213,
+        "cosine": 0.9999894020539636
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 2.074153856497266e-08,
+        "relative_l2": 2.763994480084269e-07,
+        "cosine": 0.999999999999979
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 2.9802322387695312e-08,
+        "rmse": 1.7359327450714038e-08,
+        "relative_l2": 8.523940798570732e-08,
+        "cosine": 0.9999999999999966
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 7.264316082000732e-08,
+        "rmse": 4.839294052409597e-08,
+        "relative_l2": 4.4163686155855605e-07,
+        "cosine": 0.9999999999999072
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 8.940696716308594e-08,
+        "rmse": 5.0138429715437025e-08,
+        "relative_l2": 1.800824036161722e-07,
+        "cosine": 0.9999999999999842
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 4.172729004622591e-08,
+        "relative_l2": 2.1026380715077483e-07,
+        "cosine": 0.9999999999999919
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.002382799983024597,
+        "rmse": 0.001464342104082103,
+        "relative_l2": 0.019533877642199816,
+        "cosine": 0.999809947167339
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.002219974994659424,
+        "rmse": 0.001311225570454463,
+        "relative_l2": 0.006462770333899321,
+        "cosine": 0.999986270701096
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0019936244934797287,
+        "rmse": 0.0015073526985292204,
+        "relative_l2": 0.013841633708029408,
+        "cosine": 0.9999239672391402
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.013407260179519653,
+        "rmse": 0.006567271396607377,
+        "relative_l2": 0.02358565530110562,
+        "cosine": 0.9997218381170031
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "output",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0017028450965881348,
+        "rmse": 0.0009142952955546119,
+        "relative_l2": 0.004607987944939501,
+        "cosine": 0.9999894023401212
+      },
+      "actual_argmax": 5,
+      "reference_argmax": 5,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 6.401125619143189e-10,
+        "rmse": 2.0787274330777986e-10,
+        "relative_l2": 6.481747894023152e-08,
+        "cosine": 0.9999999999999989
+      },
+      "actual_argmax": 14,
+      "reference_argmax": 14,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 3.3802680897421222e-09,
+        "rmse": 1.3955796075013611e-09,
+        "relative_l2": 2.62072973958737e-07,
+        "cosine": 0.9999999999999656
+      },
+      "actual_argmax": 8,
+      "reference_argmax": 8,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 5.158657730153227e-09,
+        "rmse": 2.5009020242055937e-09,
+        "relative_l2": 1.4940951392473646e-07,
+        "cosine": 0.999999999999995
+      },
+      "actual_argmax": 12,
+      "reference_argmax": 12,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 4.271458887983304e-09,
+        "rmse": 1.5272197724006788e-09,
+        "relative_l2": 1.1801172801822982e-07,
+        "cosine": 0.9999999999999937
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 7.638557245059907e-09,
+        "rmse": 2.7059042291117515e-09,
+        "relative_l2": 1.46043619437554e-07,
+        "cosine": 0.9999999999999932
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 3.819866105914116e-05,
+        "rmse": 1.796964233811902e-05,
+        "relative_l2": 0.005603173088994916,
+        "cosine": 0.9999898782116233
+      },
+      "actual_argmax": 14,
+      "reference_argmax": 14,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 8.73766839504242e-05,
+        "rmse": 4.537963323292918e-05,
+        "relative_l2": 0.008521746241491822,
+        "cosine": 0.9999691548547431
+      },
+      "actual_argmax": 8,
+      "reference_argmax": 8,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00024319440126419067,
+        "rmse": 9.346563089135535e-05,
+        "relative_l2": 0.005583846465580381,
+        "cosine": 0.9999962318218705
+      },
+      "actual_argmax": 12,
+      "reference_argmax": 12,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0007537417113780975,
+        "rmse": 0.00023042672840307838,
+        "relative_l2": 0.0178055953912163,
+        "cosine": 0.999863273476927
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0004862174391746521,
+        "rmse": 0.00014052067943635135,
+        "relative_l2": 0.007584210331719838,
+        "cosine": 0.9999743519226358
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 9.313225746154785e-10,
+        "rmse": 4.954100374330175e-10,
+        "relative_l2": 1.5447542792068794e-07,
+        "cosine": 0.9999999999999989
+      },
+      "actual_argmax": 14,
+      "reference_argmax": 14,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 1.862645149230957e-09,
+        "rmse": 5.71255352552184e-10,
+        "relative_l2": 1.0727484571230925e-07,
+        "cosine": 0.9999999999999943
+      },
+      "actual_argmax": 8,
+      "reference_argmax": 8,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 3.725290298461914e-09,
+        "rmse": 1.1181326531978874e-09,
+        "relative_l2": 6.679975306502208e-08,
+        "cosine": 0.9999999999999987
+      },
+      "actual_argmax": 12,
+      "reference_argmax": 12,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 2.598607014103536e-09,
+        "relative_l2": 2.0080025175276555e-07,
+        "cosine": 0.9999999999999809
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 1.4901161193847656e-08,
+        "rmse": 3.958120942115784e-09,
+        "relative_l2": 2.1362849840893596e-07,
+        "cosine": 0.9999999999999797
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 3.8197729736566544e-05,
+        "rmse": 1.796925638750176e-05,
+        "relative_l2": 0.005584460120045843,
+        "cosine": 0.9999898783994736
+      },
+      "actual_argmax": 14,
+      "reference_argmax": 14,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 8.737854659557343e-05,
+        "rmse": 4.537989635375267e-05,
+        "relative_l2": 0.008550328304834013,
+        "cosine": 0.9999691544478289
+      },
+      "actual_argmax": 8,
+      "reference_argmax": 8,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00024319812655448914,
+        "rmse": 9.346627272090164e-05,
+        "relative_l2": 0.0055568859097603444,
+        "cosine": 0.9999962317973388
+      },
+      "actual_argmax": 12,
+      "reference_argmax": 12,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0007537379860877991,
+        "rmse": 0.00023042649575245883,
+        "relative_l2": 0.017926403620115876,
+        "cosine": 0.999863274095556
+      },
+      "actual_argmax": 0,
+      "reference_argmax": 0,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "core",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.00048620253801345825,
+        "rmse": 0.00014051714786033213,
+        "relative_l2": 0.007565338658990741,
+        "cosine": 0.9999743531968854
+      },
+      "actual_argmax": 13,
+      "reference_argmax": 13,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 2.072231860064666e-09,
+        "rmse": 5.328786715089209e-10,
+        "relative_l2": 1.0072050218275851e-07,
+        "cosine": 0.999999999999995
+      },
+      "actual_argmax": 42,
+      "reference_argmax": 42,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 8.438663857968098e-09,
+        "rmse": 2.3981529013829402e-09,
+        "relative_l2": 1.0327159456426534e-07,
+        "cosine": 0.9999999999999961
+      },
+      "actual_argmax": 16,
+      "reference_argmax": 16,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 8.250465501763449e-09,
+        "rmse": 2.379243870653167e-09,
+        "relative_l2": 9.923155515112013e-08,
+        "cosine": 0.9999999999999968
+      },
+      "actual_argmax": 42,
+      "reference_argmax": 42,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 2.8555908054839207e-08,
+        "rmse": 6.253557191641573e-09,
+        "relative_l2": 1.4285516145330736e-07,
+        "cosine": 0.9999999999999926
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 2.1299777601402337e-08,
+        "rmse": 5.081594546396031e-09,
+        "relative_l2": 1.4043691541964165e-07,
+        "cosine": 0.9999999999999918
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 5.8117322623729706e-05,
+        "rmse": 2.1430278959576863e-05,
+        "relative_l2": 0.00405058143157556,
+        "cosine": 0.999993093349697
+      },
+      "actual_argmax": 42,
+      "reference_argmax": 42,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0002125278115272522,
+        "rmse": 6.770594583567911e-05,
+        "relative_l2": 0.00291561947198542,
+        "cosine": 0.9999959671374973
+      },
+      "actual_argmax": 16,
+      "reference_argmax": 16,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0002581290900707245,
+        "rmse": 7.041050023032094e-05,
+        "relative_l2": 0.0029366233317648757,
+        "cosine": 0.999996547942527
+      },
+      "actual_argmax": 42,
+      "reference_argmax": 42,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0008220523595809937,
+        "rmse": 0.000198937822816749,
+        "relative_l2": 0.0045445003205077765,
+        "cosine": 0.9999969715475574
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0006460137665271759,
+        "rmse": 0.00018070035990728995,
+        "relative_l2": 0.004993905450927032,
+        "cosine": 0.9999889728404825
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 9.313225746154785e-10,
+        "rmse": 3.4470051673157257e-10,
+        "relative_l2": 6.515255891727211e-08,
+        "cosine": 0.9999999999999981
+      },
+      "actual_argmax": 42,
+      "reference_argmax": 42,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 1.7369485271480967e-09,
+        "relative_l2": 7.479817149117582e-08,
+        "cosine": 0.9999999999999986
+      },
+      "actual_argmax": 16,
+      "reference_argmax": 16,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 7.450580596923828e-09,
+        "rmse": 1.350064343034575e-09,
+        "relative_l2": 5.6307375124028156e-08,
+        "cosine": 0.9999999999999993
+      },
+      "actual_argmax": 42,
+      "reference_argmax": 42,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 1.4901161193847656e-08,
+        "rmse": 3.714664372376602e-09,
+        "relative_l2": 8.485713371053851e-08,
+        "cosine": 0.9999999999999968
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 2.2351741790771484e-08,
+        "rmse": 4.909957948508357e-09,
+        "relative_l2": 1.356935081671035e-07,
+        "cosine": 0.9999999999999947
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 5.811639130115509e-05,
+        "rmse": 2.143007428444034e-05,
+        "relative_l2": 0.004044057412100958,
+        "cosine": 0.999993093499617
+      },
+      "actual_argmax": 42,
+      "reference_argmax": 42,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0002125278115272522,
+        "rmse": 6.770616360814589e-05,
+        "relative_l2": 0.002917565165892525,
+        "cosine": 0.9999959671473315
+      },
+      "actual_argmax": 16,
+      "reference_argmax": 16,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0002581290900707245,
+        "rmse": 7.041010630849244e-05,
+        "relative_l2": 0.0029404730589506845,
+        "cosine": 0.9999965479382729
+      },
+      "actual_argmax": 42,
+      "reference_argmax": 42,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0008220523595809937,
+        "rmse": 0.0001989397419917741,
+        "relative_l2": 0.004561986669821557,
+        "cosine": 0.9999969714437834
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "state",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0006459914147853851,
+        "rmse": 0.00018069729998989535,
+        "relative_l2": 0.004985408156786122,
+        "cosine": 0.9999889731117441
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 5.656805873528493e-09,
+        "relative_l2": 2.6036110696012817e-08,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 5.829407671984224e-09,
+        "relative_l2": 1.3510985448015159e-08,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 83,
+      "reference_argmax": 83,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 5.829407671984224e-09,
+        "relative_l2": 1.0618215798564915e-08,
+        "cosine": 1.0
+      },
+      "actual_argmax": 82,
+      "reference_argmax": 82,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 6.1601198070323806e-09,
+        "relative_l2": 1.019777055312405e-08,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 81,
+      "reference_argmax": 81,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 2.421438694000244e-08,
+        "rmse": 3.3440650381032925e-09,
+        "relative_l2": 5.064543900210853e-09,
+        "cosine": 1.0
+      },
+      "actual_argmax": 23,
+      "reference_argmax": 23,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0018286705017089844,
+        "rmse": 0.000362858303906646,
+        "relative_l2": 0.001670097765770324,
+        "cosine": 0.9999987654106531
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0021495819091796875,
+        "rmse": 0.0005605922384082277,
+        "relative_l2": 0.0012993007151168268,
+        "cosine": 0.9999991946775174
+      },
+      "actual_argmax": 83,
+      "reference_argmax": 83,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.002838134765625,
+        "rmse": 0.0007451993568369984,
+        "relative_l2": 0.0013573741994313267,
+        "cosine": 0.9999991138732756
+      },
+      "actual_argmax": 82,
+      "reference_argmax": 82,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.002838134765625,
+        "rmse": 0.0007948204210055016,
+        "relative_l2": 0.001315785492729987,
+        "cosine": 0.9999991482191167
+      },
+      "actual_argmax": 81,
+      "reference_argmax": 81,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.003848552703857422,
+        "rmse": 0.0009872236801862252,
+        "relative_l2": 0.0014951376882184604,
+        "cosine": 0.9999988826351518
+      },
+      "actual_argmax": 23,
+      "reference_argmax": 23,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "BF16"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 83,
+      "reference_argmax": 83,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 82,
+      "reference_argmax": 82,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 81,
+      "reference_argmax": 81,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 23,
+      "reference_argmax": 23,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0018286705017089844,
+        "rmse": 0.000362858303906646,
+        "relative_l2": 0.0016710451876605214,
+        "cosine": 0.9999987654106531
+      },
+      "actual_argmax": 31,
+      "reference_argmax": 31,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0021495819091796875,
+        "rmse": 0.0005605922384082277,
+        "relative_l2": 0.0012996636615814495,
+        "cosine": 0.9999991946775174
+      },
+      "actual_argmax": 83,
+      "reference_argmax": 83,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.002838134765625,
+        "rmse": 0.0007451993568369984,
+        "relative_l2": 0.0013577351692092106,
+        "cosine": 0.9999991138732756
+      },
+      "actual_argmax": 82,
+      "reference_argmax": 82,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.002838134765625,
+        "rmse": 0.0007948204210055016,
+        "relative_l2": 0.0013160057609309871,
+        "cosine": 0.9999991482191167
+      },
+      "actual_argmax": 81,
+      "reference_argmax": 81,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "history",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.003848552703857422,
+        "rmse": 0.0009872236801862252,
+        "relative_l2": 0.0014950995695064986,
+        "cosine": 0.9999988826351518
+      },
+      "actual_argmax": 23,
+      "reference_argmax": 23,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.5698868927049858e-08,
+        "rmse": 1.1629692412880417e-08,
+        "relative_l2": 2.3296045574588598e-08,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 4.3137482363952984e-08,
+        "rmse": 2.2737470950772568e-08,
+        "relative_l2": 3.4443044264482736e-08,
+        "cosine": 0.9999999999999993
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 3.1137354805643724e-08,
+        "rmse": 2.1007021534337954e-08,
+        "relative_l2": 3.818391924369419e-08,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 2.4956908428741542e-08,
+        "rmse": 1.9731518990970205e-08,
+        "relative_l2": 3.538916845143877e-08,
+        "cosine": 0.9999999999999993
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 8.960196279383936e-09,
+        "rmse": 7.934948426089313e-09,
+        "relative_l2": 1.5506632814712416e-08,
+        "cosine": 1.0
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0016330480575561523,
+        "rmse": 0.0008736160040851072,
+        "relative_l2": 0.0017499859364088232,
+        "cosine": 0.9999988085873407
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.001432180404663086,
+        "rmse": 0.0008486391001549474,
+        "relative_l2": 0.001285530587136281,
+        "cosine": 0.9999991737696352
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0012062788009643555,
+        "rmse": 0.0008190178099519697,
+        "relative_l2": 0.0014887075221623992,
+        "cosine": 0.9999988982200397
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0017531514167785645,
+        "rmse": 0.0012245995191603764,
+        "relative_l2": 0.002196362005511823,
+        "cosine": 0.9999976666121345
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0014513731002807617,
+        "rmse": 0.0009759989536606405,
+        "relative_l2": 0.0019073164188634934,
+        "cosine": 0.9999981888583301
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32 (captured after promotion)"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 3.332000937312528e-08,
+        "relative_l2": 6.674505449913774e-08,
+        "cosine": 0.9999999999999978
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 0.9999999999999999
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "cosine": 1.0
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 2.9802322387695312e-08,
+        "relative_l2": 5.3451506018251193e-08,
+        "cosine": 0.9999999999999989
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 1.4901161193847656e-08,
+        "rmse": 7.450580596923828e-09,
+        "relative_l2": 1.4560071657125653e-08,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0016330480575561523,
+        "rmse": 0.0008736131880341719,
+        "relative_l2": 0.0017485408905481815,
+        "cosine": 0.9999988086042622
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.001432180404663086,
+        "rmse": 0.0008486391001549474,
+        "relative_l2": 0.0012855462414286707,
+        "cosine": 0.9999991737696352
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.0012062788009643555,
+        "rmse": 0.0008190178099519697,
+        "relative_l2": 0.0014885414690411648,
+        "cosine": 0.9999988982200397
+      },
+      "actual_argmax": 1,
+      "reference_argmax": 1,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0017531514167785645,
+        "rmse": 0.0012246153762327106,
+        "relative_l2": 0.0021955249779586146,
+        "cosine": 0.9999976665399881
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "beta",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.0014513731002807617,
+        "rmse": 0.0009760004031221156,
+        "relative_l2": 0.0019075607761632437,
+        "cosine": 0.9999981888526225
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 0,
+      "metrics": {
+        "maxabs": 4.567463152138629e-08,
+        "rmse": 2.8902514530855527e-08,
+        "relative_l2": 5.254317875869581e-08,
+        "cosine": 0.9999999999999989
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 1,
+      "metrics": {
+        "maxabs": 4.335190961768376e-08,
+        "rmse": 2.2254314107214604e-08,
+        "relative_l2": 4.700940853272343e-08,
+        "cosine": 0.999999999999999
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 2,
+      "metrics": {
+        "maxabs": 5.786225615311835e-08,
+        "rmse": 3.905378512895453e-08,
+        "relative_l2": 8.476767656509604e-08,
+        "cosine": 0.9999999999999963
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 3,
+      "metrics": {
+        "maxabs": 2.450052005720238e-08,
+        "rmse": 1.411614982323313e-08,
+        "relative_l2": 2.98742705919878e-08,
+        "cosine": 0.9999999999999998
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "M32 vs M64",
+      "token": 4,
+      "metrics": {
+        "maxabs": 3.909455054129651e-08,
+        "rmse": 2.154147180700011e-08,
+        "relative_l2": 4.352546639881729e-08,
+        "cosine": 0.9999999999999993
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.00013172626495361328,
+        "rmse": 7.545628606115121e-05,
+        "relative_l2": 0.0001371753678559139,
+        "cosine": 0.9999999909021748
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.00021198391914367676,
+        "rmse": 0.00011738573569902956,
+        "relative_l2": 0.00024796244481949207,
+        "cosine": 0.9999999741699012
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00039839744567871094,
+        "rmse": 0.00028216309547748257,
+        "relative_l2": 0.000612445370444137,
+        "cosine": 0.9999998215989858
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0001901686191558838,
+        "rmse": 0.00011716937685757064,
+        "relative_l2": 0.00024796772708679125,
+        "cosine": 0.9999999722219323
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "O vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.00014826655387878418,
+        "rmse": 7.802826979090464e-05,
+        "relative_l2": 0.0001576594566042409,
+        "cosine": 0.9999999926679357
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 0,
+      "metrics": {
+        "maxabs": 1.1920928955078125e-07,
+        "rmse": 7.884953353001448e-08,
+        "relative_l2": 1.4334410467116402e-07,
+        "cosine": 0.9999999999999939
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 1,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 2.9802322387695312e-08,
+        "relative_l2": 6.295361763118127e-08,
+        "cosine": 0.9999999999999989
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 2,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 3.332000937312528e-08,
+        "relative_l2": 7.23223051164547e-08,
+        "cosine": 0.9999999999999977
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 3,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 4.2146848510894035e-08,
+        "relative_l2": 8.919615781367394e-08,
+        "cosine": 0.9999999999999976
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs M32",
+      "token": 4,
+      "metrics": {
+        "maxabs": 5.960464477539063e-08,
+        "rmse": 3.650024149988857e-08,
+        "relative_l2": 7.375029916999108e-08,
+        "cosine": 0.9999999999999993
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 0,
+      "metrics": {
+        "maxabs": 0.0001316666603088379,
+        "rmse": 7.542562875397516e-05,
+        "relative_l2": 0.0001371230540857451,
+        "cosine": 0.9999999909074965
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 1,
+      "metrics": {
+        "maxabs": 0.00021198391914367676,
+        "rmse": 0.00011738698035260342,
+        "relative_l2": 0.0002479405040301435,
+        "cosine": 0.9999999741650574
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 2,
+      "metrics": {
+        "maxabs": 0.00039839744567871094,
+        "rmse": 0.00028216926066875094,
+        "relative_l2": 0.0006125416959227696,
+        "cosine": 0.9999998215877954
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 3,
+      "metrics": {
+        "maxabs": 0.0001901090145111084,
+        "rmse": 0.00011713196592035579,
+        "relative_l2": 0.000247907654003918,
+        "cosine": 0.9999999722373585
+      },
+      "actual_argmax": 2,
+      "reference_argmax": 2,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    },
+    {
+      "seed": 7419,
+      "tensor": "decay",
+      "comparison": "N vs O",
+      "token": 4,
+      "metrics": {
+        "maxabs": 0.00014826655387878418,
+        "rmse": 7.803522151248028e-05,
+        "relative_l2": 0.0001576575873271271,
+        "cosine": 0.9999999926721597
+      },
+      "actual_argmax": 3,
+      "reference_argmax": 3,
+      "nan_inf_actual": 0,
+      "nan_inf_ref": 0,
+      "dtype_actual": "FP32"
+    }
+  ]
+}

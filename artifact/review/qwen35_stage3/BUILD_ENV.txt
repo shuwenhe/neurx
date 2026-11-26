@@ -1,0 +1,3 @@
+Probe build: nvcc -std=c++17 -O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 --fmad=false -arch=sm_89; sources: qwen35_stage3_probe.cu, hybrid_deltanet_cuda.cu, hybrid_attention_cuda.cu, hybrid_config.cpp, mapped_weight_store.cpp, architecture_registry.cpp; -lcrypto.
+Stage 3 FP32 historical regression: docs/reports/QWEN35_MOE_STAGE3.json.
+Torch 2.6.0+cu124, CUBLAS_WORKSPACE_CONFIG=:4096:8, TF32 disabled; fixture input synthetic.

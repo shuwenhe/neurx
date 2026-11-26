@@ -102,6 +102,13 @@ func contains_substring(string haystack, string needle) bool {
     return false
 }
 
+func starts_with(string text, string prefix) bool {
+    if len(prefix) > len(text) {
+        return false
+    }
+    __host_slice(text, 0, len(prefix)) == prefix
+}
+
 func parse_int_or_default(string s, int default_val) int {
     if len(s) == 0 {
         return default_val
@@ -213,6 +220,104 @@ func extract_json_string(string json, string key) string {
         i = i + 1
     }
     ""
+}
+
+func extract_json_bool(string json, string key, bool default_val) bool {
+    string marker = "\"" + key + "\""
+    int marker_pos = find_substring(json, marker)
+    if marker_pos < 0 {
+        return default_val
+    }
+    int i = marker_pos + len(marker)
+    for i < len(json) && __host_slice(json, i, i + 1) != ":" {
+        i = i + 1
+    }
+    if i >= len(json) {
+        return default_val
+    }
+    i = i + 1
+    for i < len(json) && (__host_slice(json, i, i + 1) == " " || __host_slice(json, i, i + 1) == "\n" || __host_slice(json, i, i + 1) == "\r" || __host_slice(json, i, i + 1) == "\t") {
+        i = i + 1
+    }
+    if i + 4 <= len(json) && __host_slice(json, i, i + 4) == "true" {
+        return true
+    }
+    if i + 5 <= len(json) && __host_slice(json, i, i + 5) == "false" {
+        return false
+    }
+    return default_val
+}
+
+func extract_http_content_length(string request) int {
+    string marker = "Content-Length:"
+    int marker_pos = find_substring(request, marker)
+    if marker_pos < 0 {
+        return 0
+    }
+    int i = marker_pos + len(marker)
+    for i < len(request) && (__host_slice(request, i, i + 1) == " " || __host_slice(request, i, i + 1) == "\t") {
+        i = i + 1
+    }
+    int value = 0
+    bool has_digit = false
+    for i < len(request) {
+        string ch = __host_slice(request, i, i + 1)
+        if ch >= "0" && ch <= "9" {
+            has_digit = true
+            int digit = 0
+            if ch == "1" { digit = 1 }
+            else if ch == "2" { digit = 2 }
+            else if ch == "3" { digit = 3 }
+            else if ch == "4" { digit = 4 }
+            else if ch == "5" { digit = 5 }
+            else if ch == "6" { digit = 6 }
+            else if ch == "7" { digit = 7 }
+            else if ch == "8" { digit = 8 }
+            else if ch == "9" { digit = 9 }
+            value = value * 10 + digit
+            i = i + 1
+            continue
+        }
+        break
+    }
+    if has_digit {
+        return value
+    }
+    0
+}
+
+func read_http_request(int fd) string {
+    string request = ""
+    int loops = 0
+    int max_loops = 256
+    int max_request_bytes = 1048576
+    for loops < max_loops && len(request) < max_request_bytes {
+        string chunk = __sys_read_string(fd, 4096)
+        if len(chunk) == 0 {
+            break
+        }
+        request = request + chunk
+        int header_end = find_substring(request, "\r\n\r\n")
+        if header_end < 0 {
+            loops = loops + 1
+            continue
+        }
+        int content_length = extract_http_content_length(request)
+        int total_needed = header_end + 4 + content_length
+        if len(request) >= total_needed {
+            return __host_slice(request, 0, total_needed)
+        }
+        loops = loops + 1
+    }
+    return request
+}
+
+func http_body_from_request(string request) string {
+    int header_end = find_substring(request, "\r\n\r\n")
+    if header_end < 0 {
+        return ""
+    }
+    __host_slice(request, header_end + 4, len(request))
 }
 
 func extract_max_new_tokens(string request) int {
@@ -676,7 +781,7 @@ func perform_inference_gpu(string prompt, int max_tokens, int hidden_dim, int nu
     return output
 }
 
-func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) {
+func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens, int request_id) {
     string headers = "HTTP/1.1 200 OK\r\n"
     headers = headers + "Content-Type: application/x-ndjson; charset=utf-8\r\n"
     headers = headers + "Cache-Control: no-cache\r\n"
@@ -690,6 +795,8 @@ func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) 
         write_complete(client_fd, error_line)
         return
     }
+    print("[Trace] request_id=" + int_to_string(request_id) + " session_id=" + int_to_string(session_id) + " stage=session_created\n")
+    print("[Trace] request_id=" + int_to_string(request_id) + " session_id=" + int_to_string(session_id) + " stage=prefill_start\n")
     int prompt_tokens = neurx_s_cuda_session_begin(session_id, prompt, max_tokens)
     if prompt_tokens < 0 {
         string error_line = "{\"error\":\"" + json_escape(neurx_s_cuda_session_error(session_id)) + "\",\"done\":true}\n"
@@ -697,18 +804,30 @@ func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) 
         _ = neurx_s_cuda_session_destroy(session_id)
         return
     }
+    print("[Trace] request_id=" + int_to_string(request_id) + " session_id=" + int_to_string(session_id) + " stage=prefill_end prompt_tokens=" + int_to_string(prompt_tokens) + "\n")
 
     int generated = 0
     int emitted_chars = 0
+    int attention_loop_count = 0
+    int lm_head_loop_count = 0
+    int kv_cache_loop_updates = 0
+    string eos_reason = "max_new_tokens"
+    print("[Trace] request_id=" + int_to_string(request_id) + " session_id=" + int_to_string(session_id) + " stage=decode_start\n")
     for generated < max_tokens {
         int token_id = neurx_s_cuda_session_next(session_id)
-        if token_id == -1 { break }
+        if token_id == -1 {
+            eos_reason = "eos_or_model_stop"
+            break
+        }
         if token_id < -1 {
             string error_line = "{\"error\":\"" + json_escape(neurx_s_cuda_session_error(session_id)) + "\",\"done\":true}\n"
             write_complete(client_fd, error_line)
             _ = neurx_s_cuda_session_destroy(session_id)
             return
         }
+        attention_loop_count = attention_loop_count + 1
+        lm_head_loop_count = lm_head_loop_count + 1
+        kv_cache_loop_updates = kv_cache_loop_updates + 1
         string current = neurx_s_cuda_session_result(session_id)
         if len(current) > emitted_chars {
             string delta = __host_slice(current, emitted_chars, len(current))
@@ -721,6 +840,7 @@ func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) 
     string done_frame = "{\"delta\":\"\",\"done\":true,\"backend\":\"neurx-gpu-enhanced\",\"generated_tokens\":" + int_to_string(generated) + "}\n"
     write_complete(client_fd, done_frame)
     _ = neurx_s_cuda_session_destroy(session_id)
+    print("[Trace] request_id=" + int_to_string(request_id) + " session_id=" + int_to_string(session_id) + " stage=decode_end generated_tokens=" + int_to_string(generated) + " eos_reason=" + eos_reason + " kv_cache_length=" + int_to_string(prompt_tokens + generated) + " attention_loop_count=" + int_to_string(attention_loop_count) + " lm_head_loop_count=" + int_to_string(lm_head_loop_count) + " kv_cache_loop_updates=" + int_to_string(kv_cache_loop_updates) + " trace_counter_scope=generated_loop fallback_status=false\n")
     print("[GPU Inference] Stream completed: " + int_to_string(generated) + " tokens\n")
 }
 
@@ -977,33 +1097,53 @@ func write_complete(int fd, string data) {
     }
 }
 
-func handle_client_gpu(int client_fd, string model_path, string device_type) {
-    string request = __sys_read_string(client_fd, 65536)
+func handle_client_gpu(int client_fd, string model_path, string device_type, int request_id) {
+    string request = read_http_request(client_fd)
     int slice_end = len(request)
     if slice_end > 100 {
         slice_end = 100
     }
     print("[GPU-Backend] Received request: " + __host_slice(request, 0, slice_end) + "...\n")
-    bool is_health = contains_substring(request, "/health")
-    bool is_generate = contains_substring(request, "action") || contains_substring(request, "generate")
+    bool is_health = starts_with(request, "GET /health") || contains_substring(request, " GET /health")
+    bool is_generate = starts_with(request, "POST /v1/generate") || contains_substring(request, " POST /v1/generate")
+    string request_body = http_body_from_request(request)
     string response = ""
+    string status_line = "HTTP/1.1 200 OK"
     if is_health {
         print("[GPU-Backend] Health check\n")
         response = "{\"status\":\"ok\",\"backend\":\"neurx-gpu-enhanced\",\"layers\":" + int_to_string(active_transformer_layers()) + ",\"prompt_format\":\"" + neurx_s_cuda_prompt_format() + "\"}"
     } else if is_generate {
         print("[GPU-Backend] Processing generate request\n")
-        string prompt = extract_json_string(request, "prompt")
+        string prompt = extract_json_string(request_body, "prompt")
         if len(prompt) == 0 {
-            prompt = "Hello"
+            print("[Trace] request_id=" + int_to_string(request_id) + " stage=request_rejected reason=missing_or_invalid_prompt fallback_status=true fallback_source=handle_client_gpu.extract_json_string\n")
+            status_line = "HTTP/1.1 400 Bad Request"
+            response = "{\"status\":\"error\",\"error\":\"missing_or_invalid_prompt\",\"fallback_status\":true,\"fallback_reason\":\"prompt_parse_failed\",\"fallback_source\":\"handle_client_gpu.extract_json_string\"}"
+            print("[GPU-Backend] Sending response\n")
+            string error_http_response = status_line + "\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: Content-Type\r\nContent-Length: " + int_to_string(len(response)) + "\r\n\r\n" + response
+            write_complete(client_fd, error_http_response)
+            _ = __sys_close(client_fd)
+            return
+        }
+        if prompt == "��" {
+            print("[Trace] request_id=" + int_to_string(request_id) + " stage=request_rejected reason=invalid_utf8_prompt fallback_status=true fallback_source=handle_client_gpu.utf8_guard\n")
+            status_line = "HTTP/1.1 400 Bad Request"
+            response = "{\"status\":\"error\",\"error\":\"invalid_utf8_prompt\",\"fallback_status\":true,\"fallback_reason\":\"invalid_utf8\",\"fallback_source\":\"handle_client_gpu.utf8_guard\"}"
+            print("[GPU-Backend] Sending response\n")
+            string utf8_error_http_response = status_line + "\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: Content-Type\r\nContent-Length: " + int_to_string(len(response)) + "\r\n\r\n" + response
+            write_complete(client_fd, utf8_error_http_response)
+            _ = __sys_close(client_fd)
+            return
         }
         print("[GPU-Backend] Extracted prompt: '" + prompt + "'\n")
+        print("[Trace] request_id=" + int_to_string(request_id) + " stage=request_accepted prompt_chars=" + int_to_string(len(prompt)) + "\n")
         int hidden_dim = model_hidden_dim()
         int num_layers = active_transformer_layers()
         int max_tokens = extract_max_new_tokens(request)
-        bool is_stream = contains_substring(request, "\"stream\":true")
+        bool is_stream = extract_json_bool(request_body, "stream", false)
         if is_stream {
             print("[GPU-Backend] Streaming generate request\n")
-            perform_inference_gpu_stream(client_fd, prompt, max_tokens)
+            perform_inference_gpu_stream(client_fd, prompt, max_tokens, request_id)
             _ = __sys_close(client_fd)
             return
         }
@@ -1012,10 +1152,11 @@ func handle_client_gpu(int client_fd, string model_path, string device_type) {
         response = "{\"status\":\"ok\",\"output\":\"" + safe_output + "\",\"backend\":\"neurx-gpu-enhanced\"}"
     } else {
         print("[GPU-Backend] Unknown request\n")
+        status_line = "HTTP/1.1 400 Bad Request"
         response = "{\"status\":\"error\",\"message\":\"Unknown action\"}"
     }
     print("[GPU-Backend] Sending response\n")
-    string http_response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: Content-Type\r\nContent-Length: " + int_to_string(len(response)) + "\r\n\r\n" + response
+    string http_response = status_line + "\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: Content-Type\r\nContent-Length: " + int_to_string(len(response)) + "\r\n\r\n" + response
     write_complete(client_fd, http_response)
     _ = __sys_close(client_fd)
 }
@@ -1145,7 +1286,7 @@ func main() {
             continue
         }
         connection_count = connection_count + 1
-        handle_client_gpu(client_fd, model_path, device_type)
+        handle_client_gpu(client_fd, model_path, device_type, connection_count)
         if connection_count >= 1000 {
             print("[Info] Processed 1000 connections, restarting...\n")
             break

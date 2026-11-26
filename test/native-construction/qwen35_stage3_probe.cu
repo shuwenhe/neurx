@@ -17,12 +17,22 @@ int main(int argc,char** argv) {
     json j; std::cin>>j;
     DeltaConfig c{j.at("hidden"),j.at("kh"),j.at("vh"),j.at("kd"),j.at("vd"),j.at("conv"),j.at("context"),j.at("chunk"),j.at("eps")};
     DeltaWeights w;
-    if(argc==3&&std::string(argv[1])=="--model") {
+    int selected_layer = -1;
+    if((argc==3 || argc==5)&&std::string(argv[1])=="--model") {
       namespace m=neurx::runtime::model;
       auto adapter=m::ArchitectureRegistry::resolve(argv[2]);auto store=m::MappedWeightStore::open(argv[2]);adapter.validate(store);
       const auto& cfg=adapter.config();size_t layer=0;
-      while(layer<cfg.layer_types.size()&&cfg.layer_types[layer]!=m::MixerKind::linear_attention)++layer;
-      if(layer==cfg.layer_types.size())throw std::runtime_error("no DeltaNet layer");
+      if(argc==5) {
+        if(std::string(argv[3])!="--layer")throw std::runtime_error("invalid layer option");
+        std::string arg=argv[4];
+        if(arg.empty() || arg.find_first_not_of("0123456789")!=std::string::npos)throw std::runtime_error("invalid layer index");
+        try { layer=std::stoull(arg); } catch(const std::exception&) { throw std::runtime_error("invalid layer index"); }
+        if(layer>=cfg.layer_types.size() || cfg.layer_types[layer]!=m::MixerKind::linear_attention)throw std::runtime_error("layer is out of range or not DeltaNet");
+      } else {
+        while(layer<cfg.layer_types.size()&&cfg.layer_types[layer]!=m::MixerKind::linear_attention)++layer;
+        if(layer==cfg.layer_types.size())throw std::runtime_error("no DeltaNet layer");
+      }
+      selected_layer=int(layer);
       if(c.hidden!=int(cfg.hidden_size)||c.key_heads!=int(cfg.delta.key_heads)||c.value_heads!=int(cfg.delta.value_heads)||c.key_dim!=int(cfg.delta.key_dim)||c.value_dim!=int(cfg.delta.value_dim)||c.conv_kernel!=int(cfg.delta.conv_kernel)||c.epsilon!=cfg.rms_epsilon)throw std::runtime_error("model config mismatch");
       auto pre="model.language_model.layers."+std::to_string(layer)+".linear_attn.";
       w.qkv=bf16(store,pre+"in_proj_qkv.weight");w.z=bf16(store,pre+"in_proj_z.weight");
@@ -30,6 +40,7 @@ int main(int argc,char** argv) {
       w.conv=bf16(store,pre+"conv1d.weight");w.alog=bf16(store,pre+"A_log");w.dt=bf16(store,pre+"dt_bias");
       w.norm=bf16(store,pre+"norm.weight");w.out=bf16(store,pre+"out_proj.weight");
     }else{
+    if(argc!=1)throw std::runtime_error("invalid model or layer arguments");
     w.qkv=j.at("qkv").get<std::vector<float>>();w.z=j.at("z").get<std::vector<float>>();
     w.a=j.at("a").get<std::vector<float>>();w.b=j.at("b").get<std::vector<float>>();
     w.conv=j.at("conv_weight").get<std::vector<float>>();w.alog=j.at("alog").get<std::vector<float>>();
@@ -68,6 +79,8 @@ int main(int argc,char** argv) {
                           {"q",t.q},{"k",t.k},{"beta",t.beta},{"decay",t.decay},{"length",s.length()}});
       }catch(const std::exception& e){result.push_back({{"error",e.what()},{"length",s.length()}});}
     }
-    std::cout<<json({{"calls",result},{"allocated",s.allocated_bytes()},{"free_before",before},{"free_after",after}}).dump()<<'\n';
+    json output={{"calls",result},{"allocated",s.allocated_bytes()},{"free_before",before},{"free_after",after}};
+    if(selected_layer>=0) output["layer"]=selected_layer;
+    std::cout<<output.dump()<<'\n';
   }catch(const std::exception& e){std::cout<<json({{"error",e.what()}}).dump()<<'\n';return 1;}
 }
