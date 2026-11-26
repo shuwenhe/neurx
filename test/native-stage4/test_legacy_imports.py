@@ -25,7 +25,8 @@ class LegacyImports(unittest.TestCase):
             text = output.read_text()
             self.assertIn('FUNC_BEGIN|load_real_text_engine|', text)
             self.assertIn('FUNC_BEGIN|loaded_weight|', text)
-            result = subprocess.run([str(ROOT / 'artifact/build/s_runner/s_ir_runner'), str(output)], capture_output=True, text=True, timeout=10)
+            # Match S_RUNNER_BIN in makefile; the executable was renamed to NeurX.
+            result = subprocess.run([str(ROOT / 'artifact/build/s_runner/NeurX'), str(output)], capture_output=True, text=True, timeout=10)
             self.assertEqual(result.returncode, 42, result.stdout + result.stderr)
 
 

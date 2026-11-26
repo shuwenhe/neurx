@@ -12,6 +12,30 @@ COMPILER = Path(os.environ.get('S_NATIVE_COMPILER', EXTENDED if EXTENDED.is_file
 
 
 class NativeIO(unittest.TestCase):
+    def test_hf_config_byte_conversion_preserves_nul(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            source = directory / 'config_bytes.s'
+            source.write_text('''package main
+import ("neurx.models.formats.hf_config")
+func main() int {
+    zero := byte_to_string(0)
+    if len(zero) != 1 { return 1 }
+    if zero[0] != 0 { return 2 }
+    if byte_to_string(65) != "A" { return 3 }
+    if byte_to_string(10) != "\\n" { return 4 }
+    return 0
+}
+''')
+            assembly = directory / 'config_bytes.sasm'
+            binary = directory / 'config_bytes'
+            for command in ([str(COMPILER), '--compile-unit', str(assembly), str(source),
+                             str(ROOT / 'src/model/formats/hf_config.s')],
+                            [str(COMPILER), '--emit-bin', str(assembly), str(binary)],
+                            [str(binary)]):
+                result = subprocess.run(command, capture_output=True, text=True, timeout=60)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_files_environment_and_captured_process_output(self):
         with tempfile.TemporaryDirectory() as directory:
             directory = Path(directory)

@@ -1,10 +1,11 @@
 package neurx.models.formats.hf_config
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __host_read_binary_file(string path) int[]
+extern "intrinsic" func __std_byte_string(int value) string
 
 // Convert byte (0-255) to single-character string
 func byte_to_string(int b) string {
-    if b == 0 { return "\x00" }
+    if b == 0 { return __std_byte_string(0) }
     if b == 10 { return "\n" }
     if b == 13 { return "\r" }
     if b == 9 { return "\t" }

@@ -1,6 +1,6 @@
 {
   "stage": 1,
-  "status": "FUNCTIONAL_TESTS_PASS_REGRESSION_GATE_BLOCKED",
+  "status": "PASS_WITH_EXPLICIT_LOCAL_NATIVE_COMPILER",
   "base_head": "781e8e6b01c01aa407901fd0a60ea0ed6dd362cc",
   "branch": "feat/qwen35-native",
   "stage1_tests": {
@@ -37,7 +37,7 @@
     "preflight_tests": 4,
     "startup_tests": 5,
     "targeted_regressions": "PASS",
-    "native_stage4": {
+    "native_stage4_initial": {
       "tests_run": 16,
       "errors": 3,
       "exit_code": 2,
@@ -47,6 +47,16 @@
         "setUpClass (test_serving.NativeServing)"
       ],
       "log": "artifact/build/qwen35_stage1/native-stage4.log"
+    },
+    "native_stage4": {
+      "tests_run": 31,
+      "errors": 0,
+      "exit_code": 0,
+      "seconds": 459.879,
+      "log": "artifact/build/qwen35_stage1/native-stage4-compatible.log",
+      "compiler_sha256": "a2e70fa48a1ab8320012e0cd511e9932210ab031f9cfe8ff098e29c6f37ad1e3",
+      "compiler_manifest": "artifact/build/qwen35_stage1/seed-toolchain/manifest.json",
+      "default_external_compiler_compatible": false
     }
   },
   "integrity_scope": "metadata identity covers config/headers/index and sizes, NOT payload hash; real expert sample compared with direct Python file read",
@@ -57,7 +67,7 @@
     "full model generation",
     "GPU memory admission"
   ],
-  "next_stage": "NOT_STARTED: stage1 overall regression gate unresolved",
+  "next_stage": "NOT_STARTED: stage2 independent references and CUDA validation required",
   "sanitizers": {
     "tests_run": 11,
     "exit_code": 0,
@@ -65,5 +75,13 @@
     "undefined": true,
     "leak_detection": true,
     "log": "artifact/build/qwen35_stage1/sanitizers.log"
+  },
+  "recovery": {
+    "stage1_tests": 11,
+    "preflight_tests": 4,
+    "startup_tests": 5,
+    "compiler_isolation_tests": 3,
+    "external_source_modified": false,
+    "preflight_modified": false
   }
 }

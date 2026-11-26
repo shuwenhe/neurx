@@ -2,7 +2,7 @@
 
 日期：2026-11-26（Asia/Shanghai）。分支：`feat/qwen35-native`。基线：`781e8e6b01c01aa407901fd0a60ea0ed6dd362cc`。
 
-**状态：阶段1代码与专项验收通过；全量旧回归门禁未通过，尚未进入阶段2。不是Decoder/推理完成报告。**
+**状态：阶段1代码、专项验收与指定隔离编译器下的完整旧路径回归通过。尚未实现Decoder；阶段2未开始。不是推理完成报告。**
 
 实施计划：[2026-11-26-qwen35-native.md](../superpowers/plans/2026-11-26-qwen35-native.md)。原有四份设计的未提交修订在开始时已存在，本次保留；开发授权来自用户明确批准，不把原文档中的审批快照当作新的拒绝。
 
@@ -59,10 +59,42 @@ context2048的FP32状态：KV83,886,080 bytes；Delta recurrent62,914,560 bytes�
   - `test_legacy_imports.LegacyImports.test_compiles_transitive_import_implementations`：缺少已有`artifact/build/s_runner/s_ir_runner`，FileNotFoundError。
 - 失败所用既有S源、tool、Makefile、legacy loader/bridge均与HEAD无diff；新增C++模块没有接入这些构建。上述为既有路径/环境阻塞的证据，不将其当成通过，也不修改外部S编译器解决。
 
-整体回归门禁尚未满足，因此**阶段2未开始**。下一步先解决或定位这三项旧回归阻塞，再按计划冻结阶段2独立参考/容差并实现新算子。当前不宣称可以运行目标make inference。
+上述为首次失败记录。后续修复与重跑见下节；当前仍不宣称可以运行目标make inference。
 
 ## 审阅与保留限制
 
 独立代码审阅及修复复查已完成，三项Important已关闭。保留Minor：vision/MTP目前只按声明与prefix清点，不验证其全部非执行模块shape/层编号；text693项精确验证。mmap失败分支虽RAII静态检查无泄漏，尚未故障注入专门触发；outer/rope未知字段的实现有白名单，但专项负例主要覆盖text。后续进入对应模块时补覆盖，不扩大本阶段为vision/MTP支持。
 
 尚未执行新架构算子、BF16 dtype探针、Q4转换、全层数值、prefill/decode/生成、GPU预算和性能验收。所有相关容差与质量/吞吐结论仍PENDING。未推送、未合并、未修改模型权重或外部源码。
+
+## 2026-11-26 回归阻塞恢复
+
+本次未修改外部S仓库、Makefile、Preflight、模型权重或CUDA bridge。
+
+1. `hf_config.s` 的 `"\x00"` 不被当前canonical parser支持。新增真实S编译/运行的NUL长度及byte测试，先RED复现，改用已有 `__std_byte_string(0)` intrinsic后GREEN；保留NUL字节，不用空串替代。
+2. legacy import测试引用已更名runner；修正为Makefile现有 `artifact/build/s_runner/NeurX`。真实transitive-import执行返回42，测试通过。
+3. 进一步暴露现有S二进制缺少tensor_builder使用的18项native builder ABI。新增可选 `tool/build_neurx_compiler.py`，只复制外部源至NeurX `artifact/`，在副本整合仓库已有native-builders补丁，保留新TCP/crypto逻辑；没有修改外部源码。输出受目录保护、不覆盖现有snapshot，构建子进程超时/失败不报告成功。3项输出越界/symlink/覆盖保护测试通过。
+
+可复现构建：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 tool/build_neurx_compiler.py \
+  --producer seed-native --timeout 180 \
+  --output artifact/build/qwen35_stage1/seed-toolchain
+```
+
+输出目录必须不存在。`seed-native`指C seed将本地S源码编译成独立原生编译器，不是解释执行，也不是外部推理后端。常规native producer首次尝试耗时较长已主动中止，不计通过。首次seed emitter因工作目录不能找到runtime assembly失败，改为副本根目录后成功；上述脚本已使用正确cwd。构建manifest记录producer/补丁/输出SHA256及原269项S源码、runtime C、generator前后hash，`external_sources_unchanged=true`。二进制SHA256：`a2e70fa48a1ab8320012e0cd511e9932210ab031f9cfe8ff098e29c6f37ad1e3`。
+
+完整回归命令：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 TMPDIR="$PWD/artifact/build/qwen35_stage1" \
+  make native-stage4-test \
+  S_NATIVE_COMPILER="$PWD/artifact/build/qwen35_stage1/compatible-toolchain/compiler-seed"
+```
+
+实际运行的one-off编译器与可复现脚本输出SHA256完全一致。**Ran 31 tests in 459.879s，OK，exit 0**。日志：`artifact/build/qwen35_stage1/native-stage4-compatible.log`。包括全部7项旧Qwen数值测试、4项服务测试（prefill/decode、cache、EOS）、命令/cluster/IO及legacy-import测试；不是新架构算子验收。正常默认外部编译器仍不含builder ABI，后续原生回归须显式选择上述本地compiler；没有修改默认工具链选择。
+
+Stage1专项11项、Preflight4项、startup5项再次通过；`git diff --check`通过。此前ASan/UBSan结果仍对应未改变的Stage1 C++模块，未把它冒充本轮S编译器sanitizer测试。恢复修改已独立审阅，无遗留Critical/Important。
+
+**阶段1门禁通过（使用明确记录的本地原生工具链）。阶段2的独立数学参考、CUDA数值容差与GPU验收尚未开始。** `make inference`保持拒绝，必须完成后续计算、状态、MoE、量化/显存预算和真实模型生成门禁后才能放行。
