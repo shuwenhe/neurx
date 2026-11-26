@@ -1,0 +1,69 @@
+{
+  "stage": 1,
+  "status": "FUNCTIONAL_TESTS_PASS_REGRESSION_GATE_BLOCKED",
+  "base_head": "781e8e6b01c01aa407901fd0a60ea0ed6dd362cc",
+  "branch": "feat/qwen35-native",
+  "stage1_tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python3 test/native-construction/test_qwen35_stage1.py",
+    "exit_code": 0,
+    "tests_run": 11,
+    "output": "test_config_duplicate_keys_rejected (__main__.Stage1.test_config_duplicate_keys_rejected) ... ok\ntest_config_reads_mixed_shapes_and_checked_state_bytes (__main__.Stage1.test_config_reads_mixed_shapes_and_checked_state_bytes) ... ok\ntest_config_rejects_invalid_or_unsupported_semantics (__main__.Stage1.test_config_rejects_invalid_or_unsupported_semantics) ... ok\ntest_expert_slice_rows_and_mapping_lifetime (__main__.Stage1.test_expert_slice_rows_and_mapping_lifetime) ... ok\ntest_fifo_inputs_fail_without_blocking (__main__.Stage1.test_fifo_inputs_fail_without_blocking) ... ok\ntest_manifest_exact_shapes_and_unsupported_runtime (__main__.Stage1.test_manifest_exact_shapes_and_unsupported_runtime) ... ok\ntest_metadata_limits_total_size_dtype_and_fd_cleanup (__main__.Stage1.test_metadata_limits_total_size_dtype_and_fd_cleanup) ... ok\ntest_raw_index_bytes_count_against_metadata_budget (__main__.Stage1.test_raw_index_bytes_count_against_metadata_budget) ... ok\ntest_real_checkpoint_metadata_and_expert_sample (__main__.Stage1.test_real_checkpoint_metadata_and_expert_sample) ... ok\ntest_shard_index_and_malformed_metadata_fail_closed (__main__.Stage1.test_shard_index_and_malformed_metadata_fail_closed) ... ok\ntest_sparse_large_payload_does_not_materialize_weights (__main__.Stage1.test_sparse_large_payload_does_not_materialize_weights) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.450s\n\nOK\n"
+  },
+  "actual_model": {
+    "elapsed_ms": 23.263937,
+    "mapped_bytes": 71903776776,
+    "max_rss_kib": 12684,
+    "metadata_identity": "c2e68b56d5e2e0cdf52191c49137d0f5497eca38439a89a42c811e1fce6bb057",
+    "mtp": 19,
+    "payload_bytes": 71903645408,
+    "runtime_supported": false,
+    "tensors": 1045,
+    "text": 693,
+    "vision": 333
+  },
+  "state_capacity_context2048": {
+    "conv_bytes": 3932160,
+    "elapsed_ms": 0.384272,
+    "full": 10,
+    "hidden": 2048,
+    "kv_bytes": 83886080,
+    "layers": 40,
+    "linear": 30,
+    "max_rss_kib": 12684,
+    "query_width": 4096,
+    "recurrent_bytes": 62914560
+  },
+  "regressions": {
+    "preflight_tests": 4,
+    "startup_tests": 5,
+    "targeted_regressions": "PASS",
+    "native_stage4": {
+      "tests_run": 16,
+      "errors": 3,
+      "exit_code": 2,
+      "error_names": [
+        "setUpClass (test_hf_numerics.NativeHFNumerics)",
+        "test_compiles_transitive_import_implementations (test_legacy_imports.LegacyImports.test_compiles_transitive_import_implementations)",
+        "setUpClass (test_serving.NativeServing)"
+      ],
+      "log": "artifact/build/qwen35_stage1/native-stage4.log"
+    }
+  },
+  "integrity_scope": "metadata identity covers config/headers/index and sizes, NOT payload hash; real expert sample compared with direct Python file read",
+  "not_executed": [
+    "CUDA Qwen3.5 operators",
+    "Q4 conversion",
+    "prefill/decode",
+    "full model generation",
+    "GPU memory admission"
+  ],
+  "next_stage": "NOT_STARTED: stage1 overall regression gate unresolved",
+  "sanitizers": {
+    "tests_run": 11,
+    "exit_code": 0,
+    "address": true,
+    "undefined": true,
+    "leak_detection": true,
+    "log": "artifact/build/qwen35_stage1/sanitizers.log"
+  }
+}
