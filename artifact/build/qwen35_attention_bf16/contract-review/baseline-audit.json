@@ -1,0 +1,32 @@
+{
+  "head": "d27229a8576cd7fa8b3a1ba241617d6b49cda5ad",
+  "status": "?? docs/superpowers/plans/2026-11-27-attention-bf16-contract-review.md\n?? test/native-construction/qwen35_attention_contract_diagnostics.py\n?? test/native-construction/test_qwen35_attention_contract_evidence.py\n",
+  "index": "",
+  "diff": "",
+  "untracked": "docs/superpowers/plans/2026-11-27-attention-bf16-contract-review.md\ntest/native-construction/qwen35_attention_contract_diagnostics.py\ntest/native-construction/test_qwen35_attention_contract_evidence.py\n",
+  "protected_sha256": {
+    "backend/platform/cuda/hybrid_attention_cuda.h": "e5a09b86c4b02a0c483db46c1ff547529993ddd94384c56223a839930b394456",
+    "backend/platform/cuda/hybrid_attention_cuda.cu": "ba60e46807d84379e6ddf81b76eab1c5ef9e6a28d086f4bf97a55a6398667949",
+    "backend/platform/cuda/gated_attention_kernels.cuh": "7c1e5ef1e3aa99904b2803fe06e602fb1bf6dc2bc0000e515c0fc6ce27cbf382",
+    "backend/platform/cuda/hybrid_deltanet_bf16.h": "2d53e35483f1cc2a03858d1df5036f9979b5a2363f722121fd5d3673dfc1273b",
+    "backend/platform/cuda/hybrid_deltanet_bf16.cu": "c87ea03d1bf548078c627d08f369f83f9dfb6abd000ddcd1a7f0641040758841",
+    "backend/platform/cuda/hybrid_mixer_state.h": "c6ffce32663a317d519aaa92f2c7bc5a3fac356d4622746361bb55ade3671e3b",
+    "backend/platform/cuda/inference_server.s": "a2377ba65f559f5584c53f8abd00bb94bc10a2aeef8288235d56cc2ecb6046c1",
+    "scripts/check_inference_model.py": "ca7c6a060fcc749717a1d007c60dc7f6a3363d4e70e7eddfda999e6f5d534bf4",
+    "scripts/run_cuda_sanitizer.py": "2c69cec35d86f10b84e4e81b08ae7604e853464ea3539010d4c09c96eb3ac614",
+    "test/native-construction/qwen35_official_reference.py": "d48e6c652a63b8ceaea8ab0fc3504e7ef0d4d60759cb1cb7abbf56fd3890b61b",
+    "test/native-construction/test_qwen35_stage2.py": "16a54d6f5d224d8cf7be7a6ecaa771bc4a4f3312748172641e6fbf90ee137387",
+    "test/native-construction/test_qwen35_stage3.py": "8ca75c20e6ba4630382702f6b3ea5d8853a12e99a572dc774720780a85eabb3b",
+    "test/native-construction/test_qwen35_p0_bf16.py": "5f347871e28ec996f2965321a30a45f5fae241bccdf5be0a7024dc80b4d8864a",
+    "src/runtime/model/architecture_registry.h": "b7b7f6b2092a21639bfcdcad706773dbf0bf2bd3601ad6b18ede08a249691da5",
+    "makefile": "2161688e13a188170b9eb3611595c60b3226dddbe01751381f80d6d40a46e12b",
+    "artifact/review/qwen35_stage3/source/test/test_qwen35_bf16_rounding.py": "e5bf3ae0cd743fa977acf1c0d0a1143e3ddb2e2adfa9651614486e88f3ed7e88",
+    "docs/reports/QWEN35_ATTENTION_BF16_ARCHITECTURE_AUDIT.md": "578b2e57a25aac1a47700117aaa40c4452de12cf324ab5f0de46dc39fc8e32be",
+    "docs/reports/QWEN35_ATTENTION_BF16_REFERENCE_ANALYSIS.md": "49d15513d15e5f016f996d84486c9fb7f33b1f0bb7fe9ca6ccb0838c17aeef30",
+    "docs/reports/QWEN35_ATTENTION_BF16_TEST_PLAN.md": "a160f2fd81cbe54e1fa6b0dd394cc7bc29e50b3559ecff85535c0ed416e09a7b",
+    "test/native-construction/test_qwen35_bf16_rounding.py": "e5bf3ae0cd743fa977acf1c0d0a1143e3ddb2e2adfa9651614486e88f3ed7e88",
+    "docs/reports/QWEN35_MOE_STAGE3_BF16_ACCEPTANCE.md": "267307930daaa9ca2d8b1d4b599cb2f995aed8621f62696ac8c99fc52c62ff87",
+    "docs/reports/QWEN35_STAGE3_BF16_DTYPE_AUDIT.md": "25ec1591f26fb9ed293095a2a10096dca9983d5598c370cac691f8aa75428b65"
+  },
+  "unchanged": 22
+}

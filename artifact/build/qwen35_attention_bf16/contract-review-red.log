@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/shuwen/shuwen/neurx/test/native-construction/qwen35_attention_contract_diagnostics.py", line 79, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/home/shuwen/shuwen/neurx/test/native-construction/qwen35_attention_contract_diagnostics.py", line 21, in main
+    runtime=configure_runtime();ns=load_official();norm=[];soft=[]
+            ^^^^^^^^^^^^^^^^^^^
+  File "/home/shuwen/shuwen/neurx/test/native-construction/qwen35_official_reference.py", line 68, in configure_runtime
+    if not torch.cuda.is_available():raise RuntimeError('official GPU oracle requires CUDA access')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: official GPU oracle requires CUDA access

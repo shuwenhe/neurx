@@ -1,0 +1,13 @@
+{
+  "torch": "2.6.0+cu124",
+  "cuda": "12.4",
+  "cudnn": 90100,
+  "device": "NVIDIA GeForce RTX 4060 Ti",
+  "matmul": "highest",
+  "tf32": false,
+  "bf16_reduced_precision_reduction": false,
+  "deterministic": true,
+  "allocator_fraction": 0.1,
+  "autocast": false,
+  "compile": false
+}

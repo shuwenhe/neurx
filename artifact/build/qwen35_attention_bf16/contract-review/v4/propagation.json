@@ -1,0 +1,2183 @@
+[
+  {
+    "length": 3,
+    "input_before": -0.734375,
+    "input_after": -0.73828125,
+    "description": "upstream input perturbation, not local kernel error or universal bound",
+    "stage_total_changes": {
+      "0:q_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 8.900960286458333e-05,
+        "max_relative_error": 0.055865921787709494,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 96
+      },
+      "0:gate_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 9.632110595703125e-05,
+        "max_relative_error": 0.1393939393939394,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 96
+      },
+      "0:q_rmsnorm": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 0.000152587890625,
+        "max_relative_error": 0.056179775280898875,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 96
+      },
+      "0:k_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          16
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 0.000152587890625,
+        "max_relative_error": 0.012605042016806723,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 48
+      },
+      "0:k_rmsnorm": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          2,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 0.000640869140625,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 48
+      },
+      "0:v_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          16
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 4.57763671875e-05,
+        "max_relative_error": 0.022388059701492536,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 48
+      },
+      "0:partial_rope_q": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          3,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 0.000152587890625,
+        "max_relative_error": 0.056179775280898875,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 96
+      },
+      "0:partial_rope_k": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          3,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 0.000640869140625,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 48
+      },
+      "0:kv_cache_k": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          3,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 0.000640869140625,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 48
+      },
+      "0:kv_cache_v": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          3,
+          8
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 4.57763671875e-05,
+        "max_relative_error": 0.022388059701492536,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 48
+      },
+      "0:qk_score": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          3,
+          3
+        ],
+        "max_absolute_error": 0.03125,
+        "mean_absolute_error": 0.0027669270833333335,
+        "max_relative_error": 0.06289308176100629,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      },
+      "0:scale": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          3,
+          3
+        ],
+        "max_absolute_error": 0.015625,
+        "mean_absolute_error": 0.001125759548611111,
+        "max_relative_error": 0.06222222222222222,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      },
+      "0:causal_mask": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          3,
+          3
+        ],
+        "max_absolute_error": 0.015625,
+        "mean_absolute_error": 0.0009901258680555555,
+        "max_relative_error": 0.06222222222222222,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      },
+      "0:fp32_softmax": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          3,
+          3
+        ],
+        "max_absolute_error": 0.0019480586051940918,
+        "mean_absolute_error": 0.0001960342956913842,
+        "max_relative_error": 0.007277631567715847,
+        "near_zero": 12,
+        "near_zero_1e_6": 12,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      },
+      "0:bf16_probability": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          3,
+          3
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 0.00017632378472222222,
+        "max_relative_error": 0.007462686567164179,
+        "near_zero": 12,
+        "near_zero_1e_6": 12,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      },
+      "0:av": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          3,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 0.00024286905924479166,
+        "max_relative_error": 0.02336448598130841,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 96
+      },
+      "0:sigmoid_gate": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          32
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 6.103515625e-05,
+        "max_relative_error": 0.005128205128205128,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 96
+      },
+      "0:gated_av": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          32
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 0.00012524922688802084,
+        "max_relative_error": 0.022099447513812154,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 96
+      },
+      "0:output_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          12
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 0.00024244520399305556,
+        "max_relative_error": 0.018404907975460124,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      }
+    },
+    "perturbed_local_same_operands": [
+      {
+        "node": "q_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "gate_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "q_rmsnorm",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "k_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "k_rmsnorm",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "v_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "partial_rope_q",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "partial_rope_k",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "kv_cache_k",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "kv_cache_v",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "qk_score",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "scale",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "causal_mask",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "fp32_softmax",
+        "metrics": {
+          "reference_near_zero_count": 12,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": null,
+          "max_bf16_ulp": null,
+          "max_absolute_error": 2.9802322387695312e-08,
+          "mean_absolute_error": 3.104408582051595e-09,
+          "max_relative_error": 1.0334491313084964e-07,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "bf16_probability",
+        "metrics": {
+          "reference_near_zero_count": 12,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "av",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "sigmoid_gate",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "gated_av",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "output_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      }
+    ]
+  },
+  {
+    "length": 17,
+    "input_before": -0.734375,
+    "input_after": -0.73828125,
+    "description": "upstream input perturbation, not local kernel error or universal bound",
+    "stage_total_changes": {
+      "0:q_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 1.570757697610294e-05,
+        "max_relative_error": 0.055865921787709494,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 544
+      },
+      "0:gate_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 1.6997842227711398e-05,
+        "max_relative_error": 0.1393939393939394,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 544
+      },
+      "0:q_rmsnorm": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 2.692727481617647e-05,
+        "max_relative_error": 0.056179775280898875,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 544
+      },
+      "0:k_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          16
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 2.692727481617647e-05,
+        "max_relative_error": 0.012605042016806723,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 272
+      },
+      "0:k_rmsnorm": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          2,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 0.00011309455422794118,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 272
+      },
+      "0:v_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          16
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 8.078182444852941e-06,
+        "max_relative_error": 0.022388059701492536,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 272
+      },
+      "0:partial_rope_q": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          17,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 2.692727481617647e-05,
+        "max_relative_error": 0.056179775280898875,
+        "near_zero": 1,
+        "near_zero_1e_6": 1,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 544
+      },
+      "0:partial_rope_k": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          17,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 0.00011309455422794118,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 272
+      },
+      "0:kv_cache_k": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          17,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 0.00011309455422794118,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 272
+      },
+      "0:kv_cache_v": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          17,
+          8
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 8.078182444852941e-06,
+        "max_relative_error": 0.022388059701492536,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 272
+      },
+      "0:qk_score": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          17,
+          17
+        ],
+        "max_absolute_error": 0.03125,
+        "mean_absolute_error": 0.0004483655249783737,
+        "max_relative_error": 0.13043478260869565,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1156
+      },
+      "0:scale": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          17,
+          17
+        ],
+        "max_absolute_error": 0.015625,
+        "mean_absolute_error": 0.00015248229346885814,
+        "max_relative_error": 0.13496932515337423,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1156
+      },
+      "0:causal_mask": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          17,
+          17
+        ],
+        "max_absolute_error": 0.015625,
+        "mean_absolute_error": 0.00012471024140354672,
+        "max_relative_error": 0.13496932515337423,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1156
+      },
+      "0:fp32_softmax": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          17,
+          17
+        ],
+        "max_absolute_error": 0.0019480586051940918,
+        "mean_absolute_error": 2.3158260896660156e-05,
+        "max_relative_error": 0.007622725106022778,
+        "near_zero": 544,
+        "near_zero_1e_6": 544,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1156
+      },
+      "0:bf16_probability": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          17,
+          17
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 2.1489021274870243e-05,
+        "max_relative_error": 0.011627906976744186,
+        "near_zero": 544,
+        "near_zero_1e_6": 544,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1156
+      },
+      "0:av": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          17,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 0.00015122750226189107,
+        "max_relative_error": 1.5348837209302326,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 544
+      },
+      "0:sigmoid_gate": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          32
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 1.0770909926470589e-05,
+        "max_relative_error": 0.005128205128205128,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 544
+      },
+      "0:gated_av": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          32
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 6.731161299873801e-05,
+        "max_relative_error": 1.522875816993464,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 544
+      },
+      "0:output_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          12
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 0.000148773193359375,
+        "max_relative_error": 0.05365853658536585,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 204
+      }
+    },
+    "perturbed_local_same_operands": [
+      {
+        "node": "q_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "gate_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "q_rmsnorm",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "k_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "k_rmsnorm",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "v_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "partial_rope_q",
+        "metrics": {
+          "reference_near_zero_count": 1,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "partial_rope_k",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "kv_cache_k",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "kv_cache_v",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "qk_score",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "scale",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "causal_mask",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "fp32_softmax",
+        "metrics": {
+          "reference_near_zero_count": 544,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": null,
+          "max_bf16_ulp": null,
+          "max_absolute_error": 5.960464477539063e-08,
+          "mean_absolute_error": 2.2394843657330244e-09,
+          "max_relative_error": 2.3175854560388223e-07,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "bf16_probability",
+        "metrics": {
+          "reference_near_zero_count": 544,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "av",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "sigmoid_gate",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "gated_av",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "output_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      }
+    ]
+  },
+  {
+    "length": 65,
+    "input_before": -0.734375,
+    "input_after": -0.73828125,
+    "description": "upstream input perturbation, not local kernel error or universal bound",
+    "stage_total_changes": {
+      "0:q_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 4.108135516826923e-06,
+        "max_relative_error": 0.055865921787709494,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 2080
+      },
+      "0:gate_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 4.445589505709135e-06,
+        "max_relative_error": 0.1393939393939394,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 2080
+      },
+      "0:q_rmsnorm": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          4,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 7.042518028846154e-06,
+        "max_relative_error": 0.056179775280898875,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 2080
+      },
+      "0:k_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          16
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 7.042518028846154e-06,
+        "max_relative_error": 0.012605042016806723,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1040
+      },
+      "0:k_rmsnorm": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          2,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 2.9578575721153846e-05,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1040
+      },
+      "0:v_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          16
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 2.1127554086538463e-06,
+        "max_relative_error": 0.022388059701492536,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1040
+      },
+      "0:partial_rope_q": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          65,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 7.042518028846154e-06,
+        "max_relative_error": 0.056179775280898875,
+        "near_zero": 1,
+        "near_zero_1e_6": 1,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 2080
+      },
+      "0:partial_rope_k": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          65,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 2.9578575721153846e-05,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1040
+      },
+      "0:kv_cache_k": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          65,
+          8
+        ],
+        "max_absolute_error": 0.0078125,
+        "mean_absolute_error": 2.9578575721153846e-05,
+        "max_relative_error": 0.012448132780082987,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1040
+      },
+      "0:kv_cache_v": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          2,
+          65,
+          8
+        ],
+        "max_absolute_error": 0.0009765625,
+        "mean_absolute_error": 2.1127554086538463e-06,
+        "max_relative_error": 0.022388059701492536,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 1040
+      },
+      "0:qk_score": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          65,
+          65
+        ],
+        "max_absolute_error": 0.03125,
+        "mean_absolute_error": 0.0001257829835428994,
+        "max_relative_error": 0.8394160583941606,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 16900
+      },
+      "0:scale": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          65,
+          65
+        ],
+        "max_absolute_error": 0.015625,
+        "mean_absolute_error": 4.321939141087278e-05,
+        "max_relative_error": 0.8350515463917526,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 16900
+      },
+      "0:causal_mask": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          65,
+          65
+        ],
+        "max_absolute_error": 0.015625,
+        "mean_absolute_error": 3.4103844998150887e-05,
+        "max_relative_error": 0.8350515463917526,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 16900
+      },
+      "0:fp32_softmax": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          65,
+          65
+        ],
+        "max_absolute_error": 0.0019480586051940918,
+        "mean_absolute_error": 3.2422202225972916e-06,
+        "max_relative_error": 0.01569127074643135,
+        "near_zero": 8320,
+        "near_zero_1e_6": 8320,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 16900
+      },
+      "0:bf16_probability": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          65,
+          65
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 3.1479152702015533e-06,
+        "max_relative_error": 0.01910828025477707,
+        "near_zero": 8320,
+        "near_zero_1e_6": 8320,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 16900
+      },
+      "0:av": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          4,
+          65,
+          8
+        ],
+        "max_absolute_error": 0.00390625,
+        "mean_absolute_error": 6.476273903479942e-05,
+        "max_relative_error": 1.5348837209302326,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 2080
+      },
+      "0:sigmoid_gate": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          32
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 2.8170072115384617e-06,
+        "max_relative_error": 0.005128205128205128,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 2080
+      },
+      "0:gated_av": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          32
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 2.9844848009256217e-05,
+        "max_relative_error": 1.522875816993464,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 2080
+      },
+      "0:output_projection": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          12
+        ],
+        "max_absolute_error": 0.001953125,
+        "mean_absolute_error": 6.531324142064804e-05,
+        "max_relative_error": 0.26422764227642276,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 780
+      }
+    },
+    "perturbed_local_same_operands": [
+      {
+        "node": "q_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "gate_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "q_rmsnorm",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "k_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "k_rmsnorm",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "v_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "partial_rope_q",
+        "metrics": {
+          "reference_near_zero_count": 1,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "partial_rope_k",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "kv_cache_k",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "kv_cache_v",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "qk_score",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "scale",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "causal_mask",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "fp32_softmax",
+        "metrics": {
+          "reference_near_zero_count": 8320,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": null,
+          "max_bf16_ulp": null,
+          "max_absolute_error": 5.960464477539063e-08,
+          "mean_absolute_error": 6.102332735114549e-10,
+          "max_relative_error": 2.506317591208239e-07,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "bf16_probability",
+        "metrics": {
+          "reference_near_zero_count": 8320,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "av",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "sigmoid_gate",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "gated_av",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      },
+      {
+        "node": "output_projection",
+        "metrics": {
+          "reference_near_zero_count": 0,
+          "nonfinite_locations": {
+            "actual": [],
+            "reference": []
+          },
+          "bf16_bit_mismatch_count": 0,
+          "max_bf16_ulp": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "max_relative_error": 0.0,
+          "relative_denominator_floor": 1.1754943508222875e-38,
+          "nan": 0,
+          "inf": 0,
+          "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+        }
+      }
+    ]
+  }
+]

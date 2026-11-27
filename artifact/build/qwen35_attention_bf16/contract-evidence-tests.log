@@ -1,0 +1,8 @@
+test_composition_coverage (__main__.Evidence.test_composition_coverage) ... ok
+test_norm_coverage_and_real_gpu (__main__.Evidence.test_norm_coverage_and_real_gpu) ... ok
+test_softmax_mask_policies (__main__.Evidence.test_softmax_mask_policies) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.043s
+
+OK

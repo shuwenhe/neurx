@@ -1,0 +1,130 @@
+{
+  "source_sha256": {
+    "model": "16ef7b0dc6e26eae26a6ffd0ad11d93f85424f90ffb85fbcc9eecc0759cc930d",
+    "cache": "0d5fd6901ce2b7108eff40e06d7ce29e9b0f9cc8ed2f40d2fb3a2e4d4f43e630",
+    "generic": "b60d9ecbbaeadb084134dda4a9b92419d35d22af6bc882e062fd530f4e47a4e1",
+    "torch_functional": "724c30072ca0cb69228553a636b2937ff88b60a2a2c80b806bd2a3827033e2b6"
+  },
+  "ast": {
+    "maybe_autocast": "168c4d3ed64734f313d967afdadcdbe2a94a3b5b633b0a95b1482b510e0c7061",
+    "CacheLayerMixin": "90535ec01a8be510c22638bee05cc8f39a6e00949982938a41a89bcfcb0de8ac",
+    "DynamicLayer": "4a1d565e6a1f6c647ca032b601b7ab3366d1dc02187e5a101ca47b78d16ff376",
+    "Cache": "6732e6938679161132085fcb90fb066de77328e5be31ab65cf36d17c742d95af",
+    "Qwen3_5MoeTextRotaryEmbedding": "02e2986132cb82ed40bcb08ecfc628a4791ec11c8923604862daf207690b9393",
+    "rotate_half": "b63a4b75f268261de9d58044ac01d4dd3ea394aae5f6e7248ea6eb2c7c27e084",
+    "apply_rotary_pos_emb": "03feb35dd8ce873805a7fe6d7a0694d55b8f73cea621a99f2ef4891327ee62f7",
+    "repeat_kv": "d769c2d7ee1ceb6ee2618390972632664499dc562b65a9271d3f0f60db3982b5",
+    "eager_attention_forward": "47a962721ecd098f91c0306d39157f6d69bac06e29882a03c5435db645c10cf4",
+    "Qwen3_5MoeRMSNorm": "20f51d53736f66bb8a4205357be348d0f2a8cfd2421e7ad85ed68581bb28af9f",
+    "Qwen3_5MoeAttention": "b55f259915cbc63cdc94ac2695fcd15fa03efa34d7139caa5e07734de43fcdb2"
+  },
+  "math_bodies": {
+    "maybe_autocast": {
+      "maybe_autocast:227": "dec2807103e4c72b53739516fce02712311779165d4828b4ea45c4585c483844"
+    },
+    "CacheLayerMixin": {
+      "__init_subclass__:36": "099527e6dad09d876ee6b1a043905857458bd1386cc5801cf2719c1cff905cca",
+      "__init__:44": "ff57472f8b64806ca464209072f9f8bbb2149a27905def9eb7c2e15df9e8992d",
+      "__repr__:49": "20220dc561e367e60c9f4f17f57b6cee39bdbad58133dda7b12f626fc6ec820f",
+      "lazy_initialization:53": "3d9e0c553f8a09e6f794a87e905d2d7ac0f558fce75901394999aabb73aface0",
+      "update:56": "3d9e0c553f8a09e6f794a87e905d2d7ac0f558fce75901394999aabb73aface0",
+      "get_mask_sizes:61": "3d9e0c553f8a09e6f794a87e905d2d7ac0f558fce75901394999aabb73aface0",
+      "get_seq_length:64": "3d9e0c553f8a09e6f794a87e905d2d7ac0f558fce75901394999aabb73aface0",
+      "get_max_length:67": "7681b24688243c8737bff877f104af8c7ccd70743ccb565a7727bbc9c2e0cdb5",
+      "offload:75": "c6c0c357e5c299f9ec57c76a4619dafc7c366e6dae17e8955b51bf5d0b75d361",
+      "prefetch:81": "43ad0bcf4163da76440afb27a38e124d1242103bf662a276f02c363df5febf3a",
+      "reset:87": "52b617e87ad07fbf85bcbe4f10c012f4359600490e63e97a1828a731817f46d7",
+      "reorder_cache:100": "10ac57be6513ce11843e82692bd1c062bc04616a964ae013b781ca2862d5fe26",
+      "get_max_cache_shape:106": "a1755f386c49ece84e8be21f704f3bb74aa2dfd26b433cc75308331d27083bb6"
+    },
+    "DynamicLayer": {
+      "lazy_initialization:121": "d3ab6f342d7bc24f664bae60e45c581d95814f2037a1ea715a7104b90eefe60d",
+      "update:127": "0c3207f90e6b60ef9339c0699e39a95e2795c80426aafb7962e2d9203314c42e",
+      "get_mask_sizes:148": "57080ac89db7654c0690c3e05dc688a53228391fd8910159664b4e6fc9e111a3",
+      "get_seq_length:154": "7ffe87d313d210c2358217f940f6e7976baeff7a6387ec2a630da15dfbe677a9",
+      "get_max_length:160": "daa6047268c97873c6db0949492d74adc3d40a2be64303a0eb64e6685407622f",
+      "crop:165": "7de8811f631338582eddbf51b1379f015eb854edaeb613e30d2b2b8d6f29d571",
+      "batch_repeat_interleave:190": "30de464ea8f3c98048cd7a9ebcf9fe5b03de4ab508c32245933a740548f7b0fc",
+      "batch_select_indices:196": "528aff560663acfd4b3534c89f01abb4b1473461450916382ca61b1e32abd1ce"
+    },
+    "Cache": {
+      "__init__:1282": "ec035d3ff012e0b0a49e1e99f84dee1bc65b2d59d3a11f968f7deb48678f1e32",
+      "__repr__:1306": "6d1bf7c89ae09376ddeff0510b08222d7227d27e4c57b855bae3371f528da151",
+      "__len__:1309": "b7f084fe03eadd0fdcb12b988d5978d988772adee4d56d39ac934ebb2f66b3ae",
+      "prefetch:1317": "e5192b9651feee8f4460eeb783710ae7df759bf3946981e9df1bb4e4b174c086",
+      "offload:1340": "76efd9f02b35fccc310ee4d2ccb6a7492076839ccff8aaf47e17f6d80cb102dc",
+      "update:1349": "129809cde6a6e597b05f9395c5873a4c28939770ffcf66b4043c9baa4a465781",
+      "update_conv_state:1383": "6d4a0252263b07694b6b24da3fc425d58fe9d1e65c3cbe3bfb530f2652fa5bf0",
+      "update_recurrent_state:1405": "3a30bcea8bbc754ac19825dc5341ae27efd32e53317313b5171fd87d1caad2a5",
+      "update_indexer:1427": "254c923822accb2ced5045a3a38ca44b479bea20b3267cfa90fc3ca87fb8fc57",
+      "early_initialization:1448": "fe4b4b707dbf1aea50d24c213557d4abb65b0edd5ab835e44bb88ae31be776f0",
+      "get_seq_length:1485": "973127c05ff79df7f62a790afecbe13624ed8c8bc623da5a736b0c9adafef5f5",
+      "get_max_length:1509": "bde7950fc8cfeca07311d8af5b8be350819623ff238965e7a9838a5672bfae31",
+      "has_previous_state:1525": "4f9b9aa74a4c51bd317abd4b7d0124252892a163bdff517334ca971321680fad",
+      "get_mask_sizes:1555": "6c84926ddc7967b8ed01ac7e62f96b5b0eb19227a0d9fbf12d7ae2db7b8bbde8",
+      "get_query_offset:1585": "274e1f07f8ce142696c8b5771e83dbf273dd1113cb5852dfc38ec1f8e87a29fd",
+      "reset:1592": "3303f85f7daea28f6fa19464fa3dc0b6289ae4e540515f6392aca77c679aba0c",
+      "reorder_cache:1597": "d480f51e3148de4232b4d7c9f157367f43d9732ac0b3bdc4c67baa667dc2bfb7",
+      "crop:1602": "9ee5d6fbb5e34b2a59f47b25d29916576ae4d745d5bdc48ab226f076064c3deb",
+      "batch_repeat_interleave:1612": "31bab0c8bc8dbc7ad03c7de9a27024b58ae67df050d04b3398d5c558262185da",
+      "batch_select_indices:1617": "4db8966850f82a16e77de237e8103bf8cf151ba7edf152e66f4f58b5c850aeb0",
+      "activate_past_recording:1622": "6887d4c0a9b3116e176b8c5dfdaa1b7929a18007f4877a5b8dddbdaae555214b",
+      "batch_size:1632": "838c5c7a83a8875736106229c83efbadf0247b63d271dc4f00d6f177e69936c2",
+      "is_compileable:1645": "37ad2afe03c0eb4a11d39750e13c0eca18d3d662a4a518eefcc7f8745716f30e",
+      "is_initialized:1653": "d15eee5bd9fb7df0fdcf00dc53e0d1a843d2f85389a188de585b99ad575ea818",
+      "is_sliding:1659": "a1d218dc62d9ec3400f149d88f8ee4ba7e1e99877140ae24bd96ce869e3159c3",
+      "is_linear:1664": "efc6564f973f56d25e0107d010db163b9b842ab28ae65caba30b026e92bee017",
+      "get_max_cache_shape:1673": "57b66e428e61ec0e4bcec7f01f8696f43a8154f1c2173a290957e05ff36a2a6c",
+      "max_cache_len:1680": "41650150072165b194626af7db5e7128a5ce5d4d7f2086d71b08188feec60421",
+      "max_batch_size:1687": "7fe24fc44e030c00bb31f263915a50f87788ee300b0a873a4c5d6b3cb4d6343a"
+    },
+    "Qwen3_5MoeTextRotaryEmbedding": {
+      "__init__:87": "9649f07dec97d7300e45f9de3840e9aad26bcbb6cf140a503576016c95c75d83",
+      "compute_default_rope_parameters:106": "e1780d0530ccbfee5f86df45abc29be5b936a59e902cc03203326421b929932d",
+      "forward:130": "abc95654f5d5a9b5a86729b42e3acb9eee227a07b28abc28ae1219d9d0e153ab",
+      "apply_interleaved_mrope:150": "1ae52e48892c71bab097974a5a038bcf7e64f0f64769146d549ef5d134c5286b"
+    },
+    "rotate_half": {
+      "rotate_half:544": "c84ac432437c77ffff4d13318af5492eedbc7fc16c8c081f9392ab733f15e939"
+    },
+    "apply_rotary_pos_emb": {
+      "apply_rotary_pos_emb:552": "f35bc0d05f9ce0a0d7ff29ee23888f0c7688c879d25e0063ac452b6d2fecaca8"
+    },
+    "repeat_kv": {
+      "repeat_kv:590": "ee7e252a9e0a0a309ef7a9c9b92710b7a79c4061d3a821f519141d3e8f2d153b"
+    },
+    "eager_attention_forward": {
+      "eager_attention_forward:602": "a1dab42c091f8b695c05d8f017b9094e1ee5ee8e035ff49daec2b9c2fdf0104a"
+    },
+    "Qwen3_5MoeRMSNorm": {
+      "__init__:802": "cc6fce10bc5f363ca37a453858970dc6660a9762587f28f77ca5760e39cfa167",
+      "_norm:807": "585b17b346a36ed48215560046377cd30a8e9c54bac7555cf1c638abab92d034",
+      "forward:810": "b4a897ec8cfb9940c053b1a907a81cf72760e16251749f4f52f32d74e83b20fc",
+      "extra_repr:817": "8a4f7b6189fb68c26d02fad6281465e6f263c8ba21ea74109aea49a1bd639b1b"
+    },
+    "Qwen3_5MoeAttention": {
+      "__init__:630": "ba73751499eb2b311d79a0a5262ab2d7982acc3673368fe4983fd8bc0e2e2509",
+      "forward:656": "cccf43b7290dbeab8659cda6090646ed1bdd44d49b6660f94d753fe3d734144c"
+    }
+  },
+  "removed_decorators": [
+    {
+      "node": "crop",
+      "decorator": "deprecate_kwarg('max_length', new_name='tokens_to_remove', version='5.18')"
+    },
+    {
+      "node": "__init__",
+      "decorator": "deprecate_kwarg('device', version='5.18')"
+    },
+    {
+      "node": "compute_default_rope_parameters",
+      "decorator": "deprecate_kwarg('device', version='5.18')"
+    },
+    {
+      "node": "forward",
+      "decorator": "dynamic_rope_update"
+    }
+  ],
+  "backend": "explicit_eager",
+  "rotary_policy": "default only; removed dynamic-update wrapper"
+}

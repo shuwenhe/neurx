@@ -1,0 +1,328 @@
+{
+  "norm": {
+    "random": {
+      "maxabs": 0.0,
+      "maxulp": 0
+    },
+    "overflow": {
+      "maxabs": 3.8125,
+      "maxulp": 16500
+    },
+    "zero": {
+      "maxabs": 0.0,
+      "maxulp": 0
+    },
+    "large_safe": {
+      "maxabs": 0.0,
+      "maxulp": 0
+    },
+    "tiny": {
+      "maxabs": 0.0,
+      "maxulp": 0
+    },
+    "nearzero": {
+      "maxabs": 0.0,
+      "maxulp": 0
+    }
+  },
+  "softmax": {
+    "all_finite_mask": {
+      "maxabs": 0.0,
+      "max_bf16_ulp": 0
+    },
+    "causal": {
+      "maxabs": 1.1920928955078125e-07,
+      "max_bf16_ulp": 0
+    },
+    "random": {
+      "maxabs": 1.1920928955078125e-07,
+      "max_bf16_ulp": 0
+    },
+    "all_inf_mask": {
+      "maxabs": null,
+      "max_bf16_ulp": null
+    },
+    "extreme": {
+      "maxabs": 1.2037062152420224e-35,
+      "max_bf16_ulp": 0
+    },
+    "tiny_prob": {
+      "maxabs": 5.960464477539063e-08,
+      "max_bf16_ulp": 0
+    }
+  },
+  "composition": [
+    {
+      "length": 3,
+      "partition": "prefill",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      }
+    },
+    {
+      "length": 3,
+      "partition": "decode",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      }
+    },
+    {
+      "length": 3,
+      "partition": "chunks",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          3,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 36
+      }
+    },
+    {
+      "length": 17,
+      "partition": "prefill",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 204
+      }
+    },
+    {
+      "length": 17,
+      "partition": "decode",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 204
+      }
+    },
+    {
+      "length": 17,
+      "partition": "chunks",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          17,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 204
+      }
+    },
+    {
+      "length": 65,
+      "partition": "prefill",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 780
+      }
+    },
+    {
+      "length": 65,
+      "partition": "decode",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 780
+      }
+    },
+    {
+      "length": 65,
+      "partition": "chunks",
+      "output_vs_prefill": {
+        "max_bf16_ulp": null,
+        "shape": [
+          1,
+          65,
+          12
+        ],
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "near_zero": 0,
+        "near_zero_1e_6": 0,
+        "nan": 0,
+        "inf": 0,
+        "nan_pattern_equal": true,
+        "inf_pattern_equal": true,
+        "finite_count": 780
+      }
+    }
+  ],
+  "propagation": [
+    {
+      "length": 3,
+      "stages": {
+        "0:q_projection": 0.0009765625,
+        "0:gate_projection": 0.001953125,
+        "0:q_rmsnorm": 0.00390625,
+        "0:k_projection": 0.001953125,
+        "0:k_rmsnorm": 0.0078125,
+        "0:v_projection": 0.0009765625,
+        "0:partial_rope_q": 0.00390625,
+        "0:partial_rope_k": 0.0078125,
+        "0:kv_cache_k": 0.0078125,
+        "0:kv_cache_v": 0.0009765625,
+        "0:qk_score": 0.03125,
+        "0:scale": 0.015625,
+        "0:causal_mask": 0.015625,
+        "0:fp32_softmax": 0.0019480586051940918,
+        "0:bf16_probability": 0.00390625,
+        "0:av": 0.00390625,
+        "0:sigmoid_gate": 0.001953125,
+        "0:gated_av": 0.001953125,
+        "0:output_projection": 0.001953125
+      }
+    },
+    {
+      "length": 17,
+      "stages": {
+        "0:q_projection": 0.0009765625,
+        "0:gate_projection": 0.001953125,
+        "0:q_rmsnorm": 0.00390625,
+        "0:k_projection": 0.001953125,
+        "0:k_rmsnorm": 0.0078125,
+        "0:v_projection": 0.0009765625,
+        "0:partial_rope_q": 0.00390625,
+        "0:partial_rope_k": 0.0078125,
+        "0:kv_cache_k": 0.0078125,
+        "0:kv_cache_v": 0.0009765625,
+        "0:qk_score": 0.03125,
+        "0:scale": 0.015625,
+        "0:causal_mask": 0.015625,
+        "0:fp32_softmax": 0.0019480586051940918,
+        "0:bf16_probability": 0.00390625,
+        "0:av": 0.00390625,
+        "0:sigmoid_gate": 0.001953125,
+        "0:gated_av": 0.001953125,
+        "0:output_projection": 0.001953125
+      }
+    },
+    {
+      "length": 65,
+      "stages": {
+        "0:q_projection": 0.0009765625,
+        "0:gate_projection": 0.001953125,
+        "0:q_rmsnorm": 0.00390625,
+        "0:k_projection": 0.001953125,
+        "0:k_rmsnorm": 0.0078125,
+        "0:v_projection": 0.0009765625,
+        "0:partial_rope_q": 0.00390625,
+        "0:partial_rope_k": 0.0078125,
+        "0:kv_cache_k": 0.0078125,
+        "0:kv_cache_v": 0.0009765625,
+        "0:qk_score": 0.03125,
+        "0:scale": 0.015625,
+        "0:causal_mask": 0.015625,
+        "0:fp32_softmax": 0.0019480586051940918,
+        "0:bf16_probability": 0.00390625,
+        "0:av": 0.00390625,
+        "0:sigmoid_gate": 0.001953125,
+        "0:gated_av": 0.001953125,
+        "0:output_projection": 0.001953125
+      }
+    }
+  ]
+}

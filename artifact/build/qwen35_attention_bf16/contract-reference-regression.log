@@ -1,0 +1,12 @@
+test_all_required_nodes_and_dtype_boundaries (test_qwen35_attention_official_bf16.OfficialAttention.test_all_required_nodes_and_dtype_boundaries) ... ok
+test_cached_decode_and_chunks_observation (test_qwen35_attention_official_bf16.OfficialAttention.test_cached_decode_and_chunks_observation) ... ok
+test_hash_rejection_before_source_execution (test_qwen35_attention_official_bf16.OfficialAttention.test_hash_rejection_before_source_execution) ... ok
+test_observation_does_not_change_results (test_qwen35_attention_official_bf16.OfficialAttention.test_observation_does_not_change_results) ... ok
+test_real_head_width_and_rope_generation (test_qwen35_attention_official_bf16.OfficialAttention.test_real_head_width_and_rope_generation) ... ok
+test_reference_only_boundary_calibration (test_qwen35_attention_official_bf16.OfficialAttention.test_reference_only_boundary_calibration) ... ok
+test_trace_metric_completeness (test_qwen35_attention_official_bf16.OfficialAttention.test_trace_metric_completeness) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 5.649s
+
+OK
