@@ -1,0 +1,10 @@
+test_lifecycle_and_admission (__main__.P0BF16.test_lifecycle_and_admission) ... ok
+test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages) ... ok
+test_nonzero_state_and_history (__main__.P0BF16.test_nonzero_state_and_history) ... ok
+test_prefill_decode_partition_and_reset (__main__.P0BF16.test_prefill_decode_partition_and_reset) ... ok
+test_wider_prefill_65_against_official_chunk (__main__.P0BF16.test_wider_prefill_65_against_official_chunk) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 13.969s
+
+OK

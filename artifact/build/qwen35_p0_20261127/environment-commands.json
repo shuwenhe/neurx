@@ -1,0 +1,31 @@
+{
+  "gpu": {
+    "command": [
+      "nvidia-smi"
+    ],
+    "exit": 0
+  },
+  "nvcc": {
+    "command": [
+      "nvcc",
+      "--version"
+    ],
+    "exit": 0
+  },
+  "sanitizer-version": {
+    "command": [
+      "compute-sanitizer",
+      "--version"
+    ],
+    "exit": 0
+  },
+  "packages": {
+    "command": [
+      "dpkg-query",
+      "-W",
+      "nvidia-cuda-toolkit",
+      "nvidia-cuda-dev"
+    ],
+    "exit": 0
+  }
+}

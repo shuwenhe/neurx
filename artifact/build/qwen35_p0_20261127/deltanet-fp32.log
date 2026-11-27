@@ -1,0 +1,21 @@
+test_chunk_decode_equivalence (__main__.Stage3.test_chunk_decode_equivalence) ... ok
+test_continuous_decode_2048 (__main__.Stage3.test_continuous_decode_2048) ... ok
+test_exact_unit_and_zero_decay_limits (__main__.Stage3.test_exact_unit_and_zero_decay_limits) ... ok
+test_extreme_beta_and_zero_input_nonzero_state (__main__.Stage3.test_extreme_beta_and_zero_input_nonzero_state) ... ok
+test_failure_invalid_reset_and_trace_budget (__main__.Stage3.test_failure_invalid_reset_and_trace_budget) ... ok
+test_hybrid_state_tags_owner_and_reset (__main__.Stage3.test_hybrid_state_tags_owner_and_reset) ... ok
+test_independent_heldout_seed (__main__.Stage3.test_independent_heldout_seed) ... ok
+test_long_operator_8192 (__main__.Stage3.test_long_operator_8192) ... ok
+test_nonzero_initial_state_and_history (__main__.Stage3.test_nonzero_initial_state_and_history) ... ok
+test_prefill_every_token_output_state_history (__main__.Stage3.test_prefill_every_token_output_state_history) ... ok
+test_real_bf16_weights_synthetic_input (__main__.Stage3.test_real_bf16_weights_synthetic_input) ... ok
+test_real_head_dimensions (__main__.Stage3.test_real_head_dimensions) ... ok
+test_reset_capacity_position_and_budget (__main__.Stage3.test_reset_capacity_position_and_budget) ... ok
+test_sequence_and_chunk_boundaries (__main__.Stage3.test_sequence_and_chunk_boundaries) ... ok
+test_trace_admission_bounds_actual_vector_capacity (__main__.Stage3.test_trace_admission_bounds_actual_vector_capacity) ... ok
+test_zero_small_norm_and_extreme_decay (__main__.Stage3.test_zero_small_norm_and_extreme_decay) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 41.841s
+
+OK

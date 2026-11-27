@@ -1,0 +1,21 @@
+test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages) ... FAIL
+
+======================================================================
+FAIL: test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/shuwen/shuwen/neurx/test/native-construction/test_qwen35_p0_bf16.py", line 29, in test_native_bf16_stages
+    self.assertEqual(a.shape,b.shape,key)
+AssertionError: Tuples differ: (140,) != (224,)
+
+First differing element 0:
+140
+224
+
+- (140,)
++ (224,) : conv
+
+----------------------------------------------------------------------
+Ran 1 test in 2.080s
+
+FAILED (failures=1)

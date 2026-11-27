@@ -1,0 +1,25 @@
+========= COMPUTE-SANITIZER
+========= Uninitialized __global__ memory read of size 4 bytes
+=========     at 0x40 in /home/shuwen/shuwen/neurx/test/native-construction/cuda_sanitizer_minimal.cu:6:uninitialized(const int *, int *)
+=========     by thread (0,0,0) in block (0,0,0)
+=========     Address 0x773341000200
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame:cuLaunchKernel [0x39fb95]
+=========                in /lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:__cudart798 [0x1003b]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:cudaLaunchKernel [0x6bf3b]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:__device_stub__Z13uninitializedPKiPi(int const*, int*) [0xb2e9]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:main [0xab2f]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:74:__libc_start_call_main [0x2a1ca]
+=========                in /lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:347:__libc_start_main [0x2a28b]
+=========                in /lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0xafb5]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+========= 
+CUDA_NEGATIVE_CONTROL_FINISHED
+========= ERROR SUMMARY: 1 error

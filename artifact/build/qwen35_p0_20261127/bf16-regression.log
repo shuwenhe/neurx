@@ -1,0 +1,8 @@
+test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages) ... ok
+test_nonzero_state_and_history (__main__.P0BF16.test_nonzero_state_and_history) ... ok
+test_prefill_decode_partition_and_reset (__main__.P0BF16.test_prefill_decode_partition_and_reset) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 11.524s
+
+OK

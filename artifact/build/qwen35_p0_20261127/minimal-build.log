@@ -1,0 +1,57 @@
+/usr/include/x86_64-linux-gnu/bits/stdlib.h(39): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h(67): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h(88): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h(123): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h(146): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/strings_fortified.h(26): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/strings_fortified.h(33): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(30): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(37): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(46): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(60): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(72): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(79): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(86): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(96): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(105): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(130): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(139): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(153): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h(170): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h(31): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h(45): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h(55): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h(69): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h(198): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h(210): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h(223): error: identifier "__builtin_dynamic_object_size" is undefined
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h(238): error: identifier "__builtin_dynamic_object_size" is undefined
+
+28 errors detected in the compilation of "test/native-construction/cuda_sanitizer_minimal.cu".

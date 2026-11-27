@@ -1,0 +1,1 @@
+nvcc -std=c++17 -O2 -lineinfo -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 --fmad=false -arch=sm_89 /home/shuwen/shuwen/neurx/test/native-construction/qwen35_p0_bf16_probe.cu /home/shuwen/shuwen/neurx/backend/platform/cuda/hybrid_deltanet_bf16.cu -o /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/bf16-probe

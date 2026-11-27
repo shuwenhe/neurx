@@ -1,0 +1,11 @@
+{
+  "admission_rejected": true,
+  "bf16_overflow_rejected": true,
+  "context_rejected": true,
+  "failed_forward_invalidates": true,
+  "nonfinite_rejected": true,
+  "position_rejected": true,
+  "reset_recovers": true,
+  "reset_shape_rejected": true,
+  "shape_rejected": true
+}

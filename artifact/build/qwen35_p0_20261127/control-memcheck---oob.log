@@ -1,0 +1,42 @@
+========= COMPUTE-SANITIZER
+========= Invalid __global__ write of size 4 bytes
+=========     at 0x50 in /home/shuwen/shuwen/neurx/test/native-construction/cuda_sanitizer_minimal.cu:5:oob(int *)
+=========     by thread (0,0,0) in block (0,0,0)
+=========     Address 0x7a6155000080 is out of bounds
+=========     and is 1 bytes after the nearest allocation at 0x7a6155000000 of size 128 bytes
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame:cuLaunchKernel [0x39fb95]
+=========                in /lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:__cudart798 [0x1003b]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:cudaLaunchKernel [0x6bf3b]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:__device_stub__Z3oobPi(int*) [0xb211]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:main [0xad13]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:74:__libc_start_call_main [0x2a1ca]
+=========                in /lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:347:__libc_start_main [0x2a28b]
+=========                in /lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0xafb5]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+========= 
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaDeviceSynchronize.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame: [0x4cb046]
+=========                in /lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:cudaDeviceSynchronize [0x46dfa]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:main [0xab9b]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:74:__libc_start_call_main [0x2a1ca]
+=========                in /lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:347:__libc_start_main [0x2a28b]
+=========                in /lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0xafb5]
+=========                in /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal
+========= 
+========= Target application returned an error
+========= ERROR SUMMARY: 2 errors
+CUDA ERROR: unspecified launch failure

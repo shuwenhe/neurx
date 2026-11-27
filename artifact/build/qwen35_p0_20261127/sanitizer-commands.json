@@ -1,0 +1,44 @@
+[
+  {
+    "name": "gpu",
+    "command": [
+      "nvidia-smi"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "minimal-direct",
+    "command": [
+      "artifact/build/qwen35_p0_20261127/minimal"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "minimal-memcheck",
+    "command": [
+      "compute-sanitizer",
+      "--injection-path",
+      "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer",
+      "--tool",
+      "memcheck",
+      "--error-exitcode",
+      "99",
+      "artifact/build/qwen35_p0_20261127/minimal"
+    ],
+    "exit": 255
+  },
+  {
+    "name": "minimal-initcheck",
+    "command": [
+      "compute-sanitizer",
+      "--injection-path",
+      "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer",
+      "--tool",
+      "initcheck",
+      "--error-exitcode",
+      "99",
+      "artifact/build/qwen35_p0_20261127/minimal"
+    ],
+    "exit": 255
+  }
+]

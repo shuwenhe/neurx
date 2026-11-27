@@ -1,0 +1,15 @@
+test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages) ... ERROR
+
+======================================================================
+ERROR: test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/shuwen/shuwen/neurx/test/native-construction/test_qwen35_p0_bf16.py", line 28, in test_native_bf16_stages
+    a=np.asarray(native[key],dtype=np.float32);b=np.asarray(official[key],dtype=np.float32)
+                                                            ~~~~~~~~^^^^^
+KeyError: 'conv'
+
+----------------------------------------------------------------------
+Ran 1 test in 2.207s
+
+FAILED (errors=1)

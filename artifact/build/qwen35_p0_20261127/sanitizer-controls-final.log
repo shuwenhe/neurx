@@ -1,0 +1,9 @@
+test_initcheck_clean (__main__.SanitizerP0.test_initcheck_clean) ... ok
+test_initcheck_detects_uninitialized_read (__main__.SanitizerP0.test_initcheck_detects_uninitialized_read) ... ok
+test_memcheck_clean (__main__.SanitizerP0.test_memcheck_clean) ... ok
+test_memcheck_detects_out_of_bounds (__main__.SanitizerP0.test_memcheck_detects_out_of_bounds) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 3.616s
+
+OK

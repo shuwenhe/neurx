@@ -1,0 +1,1 @@
+nvcc -std=c++17 -O2 -lineinfo -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -arch=sm_89 /home/shuwen/shuwen/neurx/test/native-construction/cuda_sanitizer_minimal.cu -o /home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal

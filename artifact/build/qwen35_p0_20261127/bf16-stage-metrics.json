@@ -1,0 +1,485 @@
+{
+  "runtime": {
+    "torch": "2.6.0+cu124",
+    "cuda": "12.4",
+    "cudnn": 90100,
+    "device": "NVIDIA GeForce RTX 4060 Ti",
+    "matmul": "highest",
+    "tf32": false,
+    "bf16_reduced_precision_reduction": false,
+    "deterministic": true,
+    "allocator_fraction": 0.1,
+    "autocast": false,
+    "compile": false
+  },
+  "records": [
+    {
+      "seed": 781,
+      "node": "fp32_qkv",
+      "maxabs": 0.003584742546081543,
+      "meanabs": 0.0005712261157376425,
+      "maxrelative": 0.003463531707550262
+    },
+    {
+      "seed": 781,
+      "node": "fp32_output",
+      "maxabs": 0.004984676837921143,
+      "meanabs": 0.001210341469517776,
+      "maxrelative": 0.15117818842489253
+    },
+    {
+      "seed": 781,
+      "node": "cast_only_output",
+      "maxabs": 0.0048828125,
+      "meanabs": 0.0011387416294642858,
+      "maxrelative": 0.15343915343915343
+    },
+    {
+      "seed": 781,
+      "node": "qkv",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "z",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "a",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "b",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "conv",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "activated",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "q",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "k",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "beta",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "decay",
+      "maxabs": 2.9802322387695312e-08,
+      "meanabs": 4.470348358154297e-09,
+      "maxrelative": 2.1055747829626154e-07,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "core",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "gated",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "output",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "state",
+      "maxabs": 3.725290298461914e-09,
+      "meanabs": 5.893525667488575e-11,
+      "maxrelative": 3.604574435651606e-07,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 781,
+      "node": "history",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "fp32_qkv",
+      "maxabs": 0.0037870407104492188,
+      "meanabs": 0.0005630195140838623,
+      "maxrelative": 0.0037720658396946565
+    },
+    {
+      "seed": 2191,
+      "node": "fp32_output",
+      "maxabs": 0.0040023308247327805,
+      "meanabs": 0.0009435150506240981,
+      "maxrelative": 0.4408764768703818
+    },
+    {
+      "seed": 2191,
+      "node": "cast_only_output",
+      "maxabs": 0.0040283203125,
+      "meanabs": 0.0008878435407366071,
+      "maxrelative": 0.43842364532019706
+    },
+    {
+      "seed": 2191,
+      "node": "qkv",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "z",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "a",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "b",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "conv",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "activated",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "q",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "k",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "beta",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "decay",
+      "maxabs": 2.9802322387695312e-08,
+      "meanabs": 1.4901161193847657e-09,
+      "maxrelative": 6.371161168333341e-08,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "core",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "gated",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "output",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "state",
+      "maxabs": 3.725290298461914e-09,
+      "meanabs": 3.395446886618932e-11,
+      "maxrelative": 7.875882394173737e-07,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 2191,
+      "node": "history",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "fp32_qkv",
+      "maxabs": 0.003848552703857422,
+      "meanabs": 0.0006175879921231951,
+      "maxrelative": 0.0036139940693430657
+    },
+    {
+      "seed": 7419,
+      "node": "fp32_output",
+      "maxabs": 0.013407260179519653,
+      "meanabs": 0.0019458468737346786,
+      "maxrelative": 1.3000415403451493
+    },
+    {
+      "seed": 7419,
+      "node": "cast_only_output",
+      "maxabs": 0.013671875,
+      "meanabs": 0.0019023895263671875,
+      "maxrelative": 1.2997512437810945
+    },
+    {
+      "seed": 7419,
+      "node": "qkv",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "z",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "a",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "b",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "conv",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "activated",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "q",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "k",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "beta",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "decay",
+      "maxabs": 5.960464477539063e-08,
+      "meanabs": 5.960464477539063e-09,
+      "maxrelative": 1.1487860605380386e-07,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "core",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "gated",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "output",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "state",
+      "maxabs": 7.450580596923828e-09,
+      "meanabs": 2.8206462350984414e-10,
+      "maxrelative": 3.289316792455623e-06,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "seed": 7419,
+      "node": "history",
+      "maxabs": 0.0,
+      "meanabs": 0.0,
+      "maxrelative": 0.0,
+      "nan": 0,
+      "inf": 0
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "bf16-final",
+    "command": [
+      "artifact/reference-env/bin/python",
+      "test/native-construction/test_qwen35_p0_bf16.py"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "sanitizer-controls-final",
+    "command": [
+      "python3",
+      "test/native-construction/test_cuda_sanitizer_p0.py"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "bf16-memcheck",
+    "command": [
+      "python3",
+      "scripts/run_cuda_sanitizer.py",
+      "--tool",
+      "memcheck",
+      "--",
+      "artifact/build/qwen35_p0_20261127/bf16-probe"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "bf16-initcheck",
+    "command": [
+      "python3",
+      "scripts/run_cuda_sanitizer.py",
+      "--tool",
+      "initcheck",
+      "--",
+      "artifact/build/qwen35_p0_20261127/bf16-probe"
+    ],
+    "exit": 0
+  }
+]

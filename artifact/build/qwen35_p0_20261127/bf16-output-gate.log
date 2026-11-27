@@ -1,0 +1,6 @@
+test_native_output_has_bf16_precision (__main__.NativeBF16Gate.test_native_output_has_bf16_precision) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.086s
+
+OK

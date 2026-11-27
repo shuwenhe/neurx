@@ -1,0 +1,34 @@
+[
+  {
+    "name": "deltanet-fp32",
+    "command": [
+      "python3",
+      "test/native-construction/test_qwen35_stage3.py"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "attention-fp32",
+    "command": [
+      "python3",
+      "test/native-construction/test_qwen35_stage2.py"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "official-bf16",
+    "command": [
+      "artifact/reference-env/bin/python",
+      "test/native-construction/test_qwen35_official_bf16.py"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "bf16-output-gate",
+    "command": [
+      "artifact/reference-env/bin/python",
+      "test/native-construction/test_qwen35_native_bf16_gate.py"
+    ],
+    "exit": 0
+  }
+]

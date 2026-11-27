@@ -1,0 +1,86 @@
+{
+  "output": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "qkv": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "conv": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "activated": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "q": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "k": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "beta": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "decay": {
+    "maxabs": 8.940696716308594e-08,
+    "meanabs": 3.725290298461914e-09,
+    "maxrelative": 2.3082331444736974e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  "core": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "gated": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  "state": {
+    "maxabs": 5.811452865600586e-07,
+    "meanabs": 1.9930439520976506e-08,
+    "maxrelative": 0.0007337390478656826,
+    "nan": 0,
+    "inf": 0
+  },
+  "history": {
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  }
+}

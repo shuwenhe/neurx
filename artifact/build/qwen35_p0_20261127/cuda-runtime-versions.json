@@ -1,0 +1,14 @@
+{
+  "cudaRuntimeGetVersion": {
+    "status": 0,
+    "value": 12000
+  },
+  "cudaDriverGetVersion": {
+    "status": 0,
+    "value": 13000
+  },
+  "cudaGetDeviceCount": {
+    "status": 0,
+    "value": 1
+  }
+}

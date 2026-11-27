@@ -1,0 +1,110 @@
+104542 execve("/usr/bin/compute-sanitizer", ["compute-sanitizer", "--injection-path", "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer", "--target-processes", "all", "--tool", "memcheck", "artifact/build/qwen35_p0_20261127/minimal"], 0x7ffe0c129f30 /* 94 vars */) = 0
+104542 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/glibc-hwcaps/x86-64-v3/libpthread.so.0", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 newfstatat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/glibc-hwcaps/x86-64-v3/", 0x7ffc0a63c0d0, 0) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/glibc-hwcaps/x86-64-v2/libpthread.so.0", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 newfstatat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/glibc-hwcaps/x86-64-v2/", 0x7ffc0a63c0d0, 0) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/libpthread.so.0", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 newfstatat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/", {st_mode=S_IFDIR|0755, st_size=4096, ...}, 0) = 0
+104542 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/librt.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/librt.so.1", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/libdl.so.2", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/libutil.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libutil.so.1", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/libm.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/share/locale/locale.alias", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_CTYPE", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_CTYPE", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_NUMERIC", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_NUMERIC", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_TIME", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_TIME", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_COLLATE", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_COLLATE", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_MONETARY", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_MONETARY", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_MESSAGES", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_MESSAGES", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_MESSAGES/SYS_LC_MESSAGES", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_PAPER", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_PAPER", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_NAME", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_NAME", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_ADDRESS", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_ADDRESS", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_TELEPHONE", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_TELEPHONE", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_MEASUREMENT", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_MEASUREMENT", O_RDONLY|O_CLOEXEC) = 3
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_IDENTIFICATION", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_IDENTIFICATION", O_RDONLY|O_CLOEXEC) = 3
+104542 write(1, "========= COMPUTE-SANITIZER\n", 28) = 28
+104542 stat("artifact/build/qwen35_p0_20261127/minimal", {st_mode=S_IFREG|0775, st_size=825048, ...}) = 0
+104542 getcwd("/home/shuwen/shuwen/neurx", 260) = 26
+104542 stat("/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/libsanitizer-collection.so", {st_mode=S_IFREG|0644, st_size=8152616, ...}) = 0
+104542 stat("/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/x86/libTreeLauncherTargetInjection.so", 0x7ffc0a63c3e0) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/proc/104542/status", O_RDONLY) = 3
+104542 readlink("/proc/self/exe", "/usr/bin/compute-sanitizer", 4096) = 26
+104542 openat(AT_FDCWD, "/usr/bin//nvlog.config", O_RDONLY) = -1 ENOENT (No such file or directory)
+104542 openat(AT_FDCWD, "/home/shuwen/nvlog.config", O_RDONLY) = -1 ENOENT (No such file or directory)
+104542 getcwd("/home/shuwen/shuwen/neurx", 260) = 26
+104542 access("/home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal", F_OK) = 0
+104542 access("/home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal", R_OK|X_OK) = 0
+104542 mkdir("/tmp/NVIDIA-treetracker-FXfNW0", 0700) = 0
+104542 access("/home/shuwen/shuwen/neurx", F_OK) = 0
+104542 stat("/home/shuwen/shuwen/neurx", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0
+104542 mknodat(AT_FDCWD, "/tmp/NVIDIA-treetracker-FXfNW0/pipe-0-ownerReadingStream", S_IFIFO|0666) = 0
+104542 mknodat(AT_FDCWD, "/tmp/NVIDIA-treetracker-FXfNW0/pipe-0-ownerWritingStream", S_IFIFO|0666) = 0
+104542 openat(AT_FDCWD, "/tmp/NVIDIA-treetracker-FXfNW0/pipe-0-ownerReadingStream", O_RDONLY|O_NONBLOCK) = 4
+104542 openat(AT_FDCWD, "/tmp/NVIDIA-treetracker-FXfNW0/pipe-0-ownerWritingStream", O_RDWR|O_NONBLOCK) = 5
+104542 clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0x7286c0cf4ed0) = 104543
+104543 chdir("/home/shuwen/shuwen/neurx") = 0
+104542 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7286c01ff990, parent_tid=0x7286c01ff990, exit_signal=0, stack=0x7286bf9ff000, stack_size=0x7fff00, tls=0x7286c01ff6c0} <unfinished ...>
+104543 openat(AT_FDCWD, "/tmp/NVIDIA-treetracker-FXfNW0/pipe-0-ownerWritingStream", O_RDONLY|O_NONBLOCK <unfinished ...>
+104542 <... clone3 resumed> => {parent_tid=[104544]}, 88) = 104544
+104543 <... openat resumed>)            = 6
+104543 openat(AT_FDCWD, "/tmp/NVIDIA-treetracker-FXfNW0/pipe-0-ownerReadingStream", O_RDWR|O_NONBLOCK) = 7
+104544 wait4(104543,  <unfinished ...>
+104542 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7286bf9fe990, parent_tid=0x7286bf9fe990, exit_signal=0, stack=0x7286bf1fe000, stack_size=0x7fff00, tls=0x7286bf9fe6c0} => {parent_tid=[104545]}, 88) = 104545
+104542 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7286bf1fd990, parent_tid=0x7286bf1fd990, exit_signal=0, stack=0x7286be9fd000, stack_size=0x7fff00, tls=0x7286bf1fd6c0} <unfinished ...>
+104543 execve("/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/TreeLauncherSubreaper", ["/usr/lib/nvidia-cuda-toolkit/compute-sanitizer/TreeLauncherSubreaper", "/home/shuwen/shuwen/neurx/artifact/build/qwen35_p0_20261127/minimal"], 0x2d0dd400 /* 103 vars */ <unfinished ...>
+104542 <... clone3 resumed> => {parent_tid=[104546]}, 88) = 104546
+104543 <... execve resumed>)            = -1 ENOENT (No such file or directory)
+104542 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7286be9fc990, parent_tid=0x7286be9fc990, exit_signal=0, stack=0x7286be1fc000, stack_size=0x7fff00, tls=0x7286be9fc6c0} => {parent_tid=[104547]}, 88) = 104547
+104542 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7286be1fb990, parent_tid=0x7286be1fb990, exit_signal=0, stack=0x7286bd9fb000, stack_size=0x7fff00, tls=0x7286be1fb6c0} => {parent_tid=[104548]}, 88) = 104548
+104542 write(6, "\1\0\0\0\0\0\0\0", 8)  = 8
+104543 exit_group(-1)                   = ?
+104543 +++ exited with 255 +++
+104545 --- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=104543, si_uid=1000, si_status=255, si_utime=0, si_stime=0} ---
+104544 <... wait4 resumed>[{WIFEXITED(s) && WEXITSTATUS(s) == 255}], WSTOPPED|WCONTINUED, NULL) = 104543
+104545 exit(0 <unfinished ...>
+104544 exit(0 <unfinished ...>
+104545 <... exit resumed>)              = ?
+104544 <... exit resumed>)              = ?
+104545 +++ exited with 0 +++
+104544 +++ exited with 0 +++
+104542 write(1, "========= Error: Target application terminated before first instrumented API call\n", 82) = 82
+104546 write(1, "========= Error: couldn't find exit code.\n", 42) = 42
+104548 exit(0)                          = ?
+104546 exit(0)                          = ?
+104548 +++ exited with 0 +++
+104546 +++ exited with 0 +++
+104547 exit(0)                          = ?
+104547 +++ exited with 0 +++
+104542 unlink("/tmp/NVIDIA-treetracker-FXfNW0/pipe-0-ownerReadingStream") = 0
+104542 unlink("/tmp/NVIDIA-treetracker-FXfNW0/pipe-0-ownerWritingStream") = 0
+104542 lstat("/tmp/NVIDIA-treetracker-FXfNW0", {st_mode=S_IFDIR|0700, st_size=4096, ...}) = 0
+104542 openat(AT_FDCWD, "/tmp/NVIDIA-treetracker-FXfNW0", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3
+104542 rmdir("/tmp/NVIDIA-treetracker-FXfNW0") = 0
+104542 exit_group(-1)                   = ?
+104542 +++ exited with 255 +++

@@ -1,0 +1,2702 @@
+[
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "decay",
+    "maxabs": 2.9802322387695312e-08,
+    "meanabs": 7.450580596923828e-09,
+    "maxrelative": 8.706655872735159e-08,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "decay",
+    "maxabs": 2.9802322387695312e-08,
+    "meanabs": 7.450580596923828e-09,
+    "maxrelative": 1.1760113903759226e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "decay",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "decay",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "decay",
+    "maxabs": 2.9802322387695312e-08,
+    "meanabs": 7.450580596923828e-09,
+    "maxrelative": 2.1055747829626154e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "state",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "state",
+    "maxabs": 1.862645149230957e-09,
+    "meanabs": 5.335702250401179e-11,
+    "maxrelative": 1.0040815916701391e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "state",
+    "maxabs": 1.862645149230957e-09,
+    "meanabs": 4.8506384094556175e-11,
+    "maxrelative": 8.30034086179783e-08,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "state",
+    "maxabs": 4.656612873077393e-10,
+    "meanabs": 9.701276818911234e-12,
+    "maxrelative": 7.10219756907402e-08,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "state",
+    "maxabs": 3.725290298461914e-09,
+    "meanabs": 1.8311159995694956e-10,
+    "maxrelative": 3.604574435651606e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "fp32_qkv",
+    "maxabs": 0.0018458366394042969,
+    "meanabs": 0.0004931901182447161,
+    "maxrelative": 0.0030571039575729925,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "fp32_qkv",
+    "maxabs": 0.001766204833984375,
+    "meanabs": 0.0004345455339976719,
+    "maxrelative": 0.0029256454366721855,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "fp32_qkv",
+    "maxabs": 0.0017712712287902832,
+    "meanabs": 0.00045622140169143677,
+    "maxrelative": 0.003463531707550262,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "fp32_qkv",
+    "maxabs": 0.003584742546081543,
+    "meanabs": 0.0007393046149185725,
+    "maxrelative": 0.0033482142857142855,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "fp32_qkv",
+    "maxabs": 0.0029249191284179688,
+    "meanabs": 0.0007328689098358154,
+    "maxrelative": 0.003188329385527482,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "fp32_output",
+    "maxabs": 0.0007831957191228867,
+    "meanabs": 0.00033720343240669796,
+    "maxrelative": 0.036248244808218574,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "fp32_output",
+    "maxabs": 0.004223644733428955,
+    "meanabs": 0.0021442073796476635,
+    "maxrelative": 0.06741022046708382,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "fp32_output",
+    "maxabs": 0.0010306760668754578,
+    "meanabs": 0.0006514702524457659,
+    "maxrelative": 0.015066262059563759,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "fp32_output",
+    "maxabs": 0.0009877681732177734,
+    "meanabs": 0.0004993248730897903,
+    "maxrelative": 0.01298234025402182,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "fp32_output",
+    "maxabs": 0.004984676837921143,
+    "meanabs": 0.002419501409998962,
+    "maxrelative": 0.15117818842489253,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 0,
+    "node": "cast_only_output",
+    "maxabs": 0.000732421875,
+    "meanabs": 0.00038364955357142856,
+    "maxrelative": 0.03389830508474576,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 1,
+    "node": "cast_only_output",
+    "maxabs": 0.00390625,
+    "meanabs": 0.0017438616071428572,
+    "maxrelative": 0.06635071090047394,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 2,
+    "node": "cast_only_output",
+    "maxabs": 0.0009765625,
+    "meanabs": 0.0006626674107142857,
+    "maxrelative": 0.013422818791946308,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 3,
+    "node": "cast_only_output",
+    "maxabs": 0.001953125,
+    "meanabs": 0.0005231584821428571,
+    "maxrelative": 0.011834319526627219,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 781,
+    "token": 4,
+    "node": "cast_only_output",
+    "maxabs": 0.0048828125,
+    "meanabs": 0.00238037109375,
+    "maxrelative": 0.15343915343915343,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "decay",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "decay",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "decay",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "decay",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "decay",
+    "maxabs": 2.9802322387695312e-08,
+    "meanabs": 7.450580596923828e-09,
+    "maxrelative": 6.371161168333341e-08,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "state",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "state",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "state",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "state",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "state",
+    "maxabs": 3.725290298461914e-09,
+    "meanabs": 1.697723443309466e-10,
+    "maxrelative": 7.875882394173737e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "fp32_qkv",
+    "maxabs": 0.0037870407104492188,
+    "meanabs": 0.000821735177721296,
+    "maxrelative": 0.0031945756871065646,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "fp32_qkv",
+    "maxabs": 0.001950979232788086,
+    "meanabs": 0.0005679428577423096,
+    "maxrelative": 0.0035427121350364963,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "fp32_qkv",
+    "maxabs": 0.002037525177001953,
+    "meanabs": 0.0005393539156232562,
+    "maxrelative": 0.0037720658396946565,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "fp32_qkv",
+    "maxabs": 0.00182342529296875,
+    "meanabs": 0.0003950681005205427,
+    "maxrelative": 0.0031464989505597014,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "fp32_qkv",
+    "maxabs": 0.0016814470291137695,
+    "meanabs": 0.0004909975188119071,
+    "maxrelative": 0.002920755525914634,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "fp32_output",
+    "maxabs": 0.0010719895362854004,
+    "meanabs": 0.0004096648522785732,
+    "maxrelative": 0.005838921729554521,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "fp32_output",
+    "maxabs": 0.0020372718572616577,
+    "meanabs": 0.0006954675274235862,
+    "maxrelative": 0.022553150073902028,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "fp32_output",
+    "maxabs": 0.0040023308247327805,
+    "meanabs": 0.0022514225648982184,
+    "maxrelative": 0.12514158059622496,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "fp32_output",
+    "maxabs": 0.0018578171730041504,
+    "meanabs": 0.0010626506326454027,
+    "maxrelative": 0.4408764768703818,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "fp32_output",
+    "maxabs": 0.0007082223892211914,
+    "meanabs": 0.0002983696758747101,
+    "maxrelative": 0.006886766446347268,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 0,
+    "node": "cast_only_output",
+    "maxabs": 0.0009765625,
+    "meanabs": 0.00027901785714285713,
+    "maxrelative": 0.0064516129032258064,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 1,
+    "node": "cast_only_output",
+    "maxabs": 0.001953125,
+    "meanabs": 0.0006277901785714286,
+    "maxrelative": 0.021621621621621623,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 2,
+    "node": "cast_only_output",
+    "maxabs": 0.0040283203125,
+    "meanabs": 0.0022495814732142855,
+    "maxrelative": 0.12595419847328243,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 3,
+    "node": "cast_only_output",
+    "maxabs": 0.001953125,
+    "meanabs": 0.0011084420340401785,
+    "maxrelative": 0.43842364532019706,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 2191,
+    "token": 4,
+    "node": "cast_only_output",
+    "maxabs": 0.00048828125,
+    "meanabs": 0.00017438616071428572,
+    "maxrelative": 0.006622516556291391,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "qkv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "z",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "a",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "b",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "conv",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "activated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "q",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "k",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "beta",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "decay",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "decay",
+    "maxabs": 2.9802322387695312e-08,
+    "meanabs": 7.450580596923828e-09,
+    "maxrelative": 1.1460578532296425e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "decay",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "decay",
+    "maxabs": 5.960464477539063e-08,
+    "meanabs": 1.4901161193847656e-08,
+    "maxrelative": 1.1487860605380386e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "decay",
+    "maxabs": 2.9802322387695312e-08,
+    "meanabs": 7.450580596923828e-09,
+    "maxrelative": 6.692361766590767e-08,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "core",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "gated",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "output",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "state",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "state",
+    "maxabs": 2.3283064365386963e-10,
+    "meanabs": 1.3339255626002947e-11,
+    "maxrelative": 1.8582143433521127e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "state",
+    "maxabs": 5.820766091346741e-11,
+    "meanabs": 2.4253192047278085e-12,
+    "maxrelative": 3.3327028970353107e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "state",
+    "maxabs": 7.450580596923828e-09,
+    "meanabs": 4.098789455989997e-10,
+    "maxrelative": 3.289316792455623e-06,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "state",
+    "maxabs": 7.450580596923828e-09,
+    "meanabs": 9.846795971194904e-10,
+    "maxrelative": 2.7887942898879154e-07,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "history",
+    "maxabs": 0.0,
+    "meanabs": 0.0,
+    "maxrelative": 0.0,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "fp32_qkv",
+    "maxabs": 0.0018286705017089844,
+    "meanabs": 0.0005138048103877477,
+    "maxrelative": 0.002629897173713235,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "fp32_qkv",
+    "maxabs": 0.0021495819091796875,
+    "meanabs": 0.0006316772529057094,
+    "maxrelative": 0.002941382859281437,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "fp32_qkv",
+    "maxabs": 0.002838134765625,
+    "meanabs": 0.0006204737084252494,
+    "maxrelative": 0.0036139940693430657,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "fp32_qkv",
+    "maxabs": 0.0013688206672668457,
+    "meanabs": 0.0004258134535380772,
+    "maxrelative": 0.002437734962406015,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "fp32_qkv",
+    "maxabs": 0.003848552703857422,
+    "meanabs": 0.0008961707353591919,
+    "maxrelative": 0.0028778785882994187,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "fp32_output",
+    "maxabs": 0.002382799983024597,
+    "meanabs": 0.0012005819007754326,
+    "maxrelative": 0.1787994913972182,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "fp32_output",
+    "maxabs": 0.002219974994659424,
+    "meanabs": 0.0010831821709871292,
+    "maxrelative": 0.06486920126123366,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "fp32_output",
+    "maxabs": 0.0019936244934797287,
+    "meanabs": 0.0014704766550234386,
+    "maxrelative": 1.3000415403451493,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "fp32_output",
+    "maxabs": 0.013407260179519653,
+    "meanabs": 0.005231107984270368,
+    "maxrelative": 0.06105904500992572,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "fp32_output",
+    "maxabs": 0.0017028450965881348,
+    "meanabs": 0.000743885657617024,
+    "maxrelative": 0.11671369100354381,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 0,
+    "node": "cast_only_output",
+    "maxabs": 0.00244140625,
+    "meanabs": 0.0012446812220982143,
+    "maxrelative": 0.1791907514450867,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 1,
+    "node": "cast_only_output",
+    "maxabs": 0.001953125,
+    "meanabs": 0.0010811941964285715,
+    "maxrelative": 0.06535947712418301,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 2,
+    "node": "cast_only_output",
+    "maxabs": 0.0019931793212890625,
+    "meanabs": 0.0014356885637555803,
+    "maxrelative": 1.2997512437810945,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 3,
+    "node": "cast_only_output",
+    "maxabs": 0.013671875,
+    "meanabs": 0.005092075892857143,
+    "maxrelative": 0.05737704918032787,
+    "nan": 0,
+    "inf": 0
+  },
+  {
+    "seed": 7419,
+    "token": 4,
+    "node": "cast_only_output",
+    "maxabs": 0.001953125,
+    "meanabs": 0.0006583077566964286,
+    "maxrelative": 0.11855670103092783,
+    "nan": 0,
+    "inf": 0
+  }
+]

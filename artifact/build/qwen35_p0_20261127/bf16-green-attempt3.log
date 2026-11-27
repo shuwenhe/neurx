@@ -1,0 +1,6 @@
+test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 3.133s
+
+OK

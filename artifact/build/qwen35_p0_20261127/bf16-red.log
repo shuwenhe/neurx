@@ -1,0 +1,14 @@
+test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages) ... FAIL
+
+======================================================================
+FAIL: test_native_bf16_stages (__main__.P0BF16.test_native_bf16_stages)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/shuwen/shuwen/neurx/test/native-construction/test_qwen35_p0_bf16.py", line 18, in test_native_bf16_stages
+    self.assertTrue(probe.is_file(), 'native BF16 execution path missing')
+AssertionError: False is not true : native BF16 execution path missing
+
+----------------------------------------------------------------------
+Ran 1 test in 0.992s
+
+FAILED (failures=1)

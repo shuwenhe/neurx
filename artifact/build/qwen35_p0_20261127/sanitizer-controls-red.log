@@ -1,0 +1,33 @@
+test_initcheck_clean (__main__.SanitizerP0.test_initcheck_clean) ... ok
+test_initcheck_detects_uninitialized_read (__main__.SanitizerP0.test_initcheck_detects_uninitialized_read) ... FAIL
+test_memcheck_clean (__main__.SanitizerP0.test_memcheck_clean) ... ok
+test_memcheck_detects_out_of_bounds (__main__.SanitizerP0.test_memcheck_detects_out_of_bounds) ... FAIL
+
+======================================================================
+FAIL: test_initcheck_detects_uninitialized_read (__main__.SanitizerP0.test_initcheck_detects_uninitialized_read)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/shuwen/shuwen/neurx/test/native-construction/test_cuda_sanitizer_p0.py", line 24, in test_initcheck_detects_uninitialized_read
+    p=self.run_tool('initcheck','--uninitialized');self.assertEqual(p.returncode,99,p.stdout+p.stderr)
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 99 : ========= COMPUTE-SANITIZER
+CUDA_MINIMAL_PASS
+========= ERROR SUMMARY: 0 errors
+
+
+======================================================================
+FAIL: test_memcheck_detects_out_of_bounds (__main__.SanitizerP0.test_memcheck_detects_out_of_bounds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/shuwen/shuwen/neurx/test/native-construction/test_cuda_sanitizer_p0.py", line 21, in test_memcheck_detects_out_of_bounds
+    p=self.run_tool('memcheck','--oob');self.assertEqual(p.returncode,99,p.stdout+p.stderr)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 99 : ========= COMPUTE-SANITIZER
+CUDA_MINIMAL_PASS
+========= ERROR SUMMARY: 0 errors
+
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.402s
+
+FAILED (failures=2)
