@@ -1,0 +1,23 @@
+test_observation_does_not_change_results (__main__.OfficialAttention.test_observation_does_not_change_results) ... FAIL
+test_trace_metric_completeness (__main__.OfficialAttention.test_trace_metric_completeness) ... FAIL
+
+======================================================================
+FAIL: test_observation_does_not_change_results (__main__.OfficialAttention.test_observation_does_not_change_results)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/shuwen/shuwen/neurx/test/native-construction/test_qwen35_attention_official_bf16.py", line 62, in test_observation_does_not_change_results
+    self.assertEqual(b.get('instrumentation'),dict(module_hooks=0,wrappers=[]), 'control must contain no observation hooks/wrappers')
+AssertionError: None != {'module_hooks': 0, 'wrappers': []} : control must contain no observation hooks/wrappers
+
+======================================================================
+FAIL: test_trace_metric_completeness (__main__.OfficialAttention.test_trace_metric_completeness)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/shuwen/shuwen/neurx/test/native-construction/test_qwen35_attention_official_bf16.py", line 49, in test_trace_metric_completeness
+    self.assertIn('stride',node)
+AssertionError: 'stride' not found in {'call': 0, 'node': 'q_projection', 'shape': [1, 1, 4, 8], 'input_dtype': ['torch.bfloat16', 'torch.bfloat16'], 'input_shape': [[1, 1, 12], [64, 12]], 'output_dtype': 'torch.bfloat16', 'bf16_boundary': 'BF16 shared Q+gate projection output/split', 'metrics': {'max_absolute_error': 0.0, 'mean_absolute_error': 0.0, 'max_relative_error': 0.0, 'relative_denominator_floor': 1.1754943508222875e-38, 'nan': 0, 'inf': 0, 'comparison': 'same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable'}, 'reference_only_dot_bound': {'model': 'gamma_n*sum(abs(a*b)); no-overflow normal-input FP32 accumulation assumption', 'n': 12, 'u': 5.960464477539063e-08, 'gamma_n': 7.152562488958232e-07, 'max_accumulation_bound': 1.1593026890411533e-06, 'mismatches_outside_interval': 0, 'ambiguous_rounded_cells': 0, 'max_quantized_interval_width': 0.0, 'library_arithmetic_proof': 'UNVERIFIED', 'scope': 'whole unsplit QG linear tensor'}}
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.375s
+
+FAILED (failures=2)

@@ -1,0 +1,18 @@
+# Native Batch 1：BLOCKED
+
+日期：2026-11-27。起始 Git：`a56388ea`；运行期间用户/外部提交 `c43c0577` 保留；本轮参考修正提交：`2bed257e7dd1e9c16e7a8782e3d2732424d41c63`。原始基线/index/diff/untracked 和22项受保护 SHA256 保存在 `artifact/build/qwen35_attention_bf16/reference/baseline.json`，最终逐项复核一致。
+
+修改范围：独立官方参考 Harness、测试、执行计划及本轮报告/证据。未修改 DeltaNet、FP32 Attention、Bridge、Preflight 或其他模型路径。无 Native Attention BF16 Kernel。
+
+环境：宿主机 RTX4060Ti，16380MiB，驱动580.159.03；PyTorch2.6.0+cu124、CUDA12.4、cuDNN90100；nvcc12.0.140、Compute Sanitizer2022.4.1。沙箱 nvidia-smi 退出9，宿主机读取退出0，两个结果均保留于 environment-final.json。
+
+参考测试命令：
+```bash
+CUBLAS_WORKSPACE_CONFIG=:4096:8 PYTHONDONTWRITEBYTECODE=1 \
+ artifact/reference-env/bin/python test/native-construction/test_qwen35_attention_official_bf16.py
+```
+原始证据：`artifact/build/qwen35_attention_bf16/reference/`；最终日志 `phase-a-final-reviewed.log`，退出0，7/7，5.774秒。该时间是测试总耗时，不是 Attention 延迟。节点误差见 `node-summary.json`、各 trace JSON；源码版本/SHA、dtype与舍入合同见 [TOLERANCE](QWEN35_ATTENTION_BF16_TOLERANCE.md)。
+
+官方 Q/K/V/shared-gate projection 与 Q/K RMSNorm 的 GPU 动态观察已完成；原始官方数学函数体保持，观察开关和重复执行输出/cache逐bit一致。真实head合成fixture H2048/Q16/KH2/D256/R64/T3中，Q/gate 对同操作数FP64诊断的max abs分别0.0625/0.03125；这不是Native误差。完整mean/max relative/NaN/Inf、shape/dtype在trace中。
+
+Native Batch1 RED→GREEN尚未开始。FP32 norm与组合传播预算PENDING，尚无人审SHA冻结。没有新增生产Kernel，因此Native CUDA数值测试、Sanitizer、显存/launch/转换开销均UNVERIFIED；不宣称投影或norm模块通过。

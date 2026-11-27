@@ -1,0 +1,38 @@
+{
+  "gpu": {
+    "command": [
+      "nvidia-smi",
+      "--query-gpu=name,driver_version,memory.total,memory.free",
+      "--format=csv"
+    ],
+    "exit_code": 9,
+    "stdout": "NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running.\n\n",
+    "stderr": ""
+  },
+  "nvcc": {
+    "command": [
+      "nvcc",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2023 NVIDIA Corporation\nBuilt on Fri_Jan__6_16:45:21_PST_2023\nCuda compilation tools, release 12.0, V12.0.140\nBuild cuda_12.0.r12.0/compiler.32267302_0\n",
+    "stderr": ""
+  },
+  "sanitizer": {
+    "command": [
+      "compute-sanitizer",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout": "NVIDIA (R) Compute Sanitizer\nCopyright (c) 2020-2023 NVIDIA Corporation\nVersion 2022.4.1\n",
+    "stderr": ""
+  },
+  "host_gpu": {
+    "exit_code": 0,
+    "name": "NVIDIA GeForce RTX 4060 Ti",
+    "driver": "580.159.03",
+    "total_MiB": 16380,
+    "free_MiB": 14579,
+    "execution": "host permission escalation; sandbox query exit9 retained"
+  }
+}

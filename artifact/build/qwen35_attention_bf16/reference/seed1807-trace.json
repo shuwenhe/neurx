@@ -1,0 +1,8891 @@
+{
+  "output": [
+    [
+      [
+        0.33984375,
+        0.056396484375,
+        0.169921875,
+        0.283203125,
+        -0.05078125,
+        -0.279296875,
+        0.1279296875,
+        0.1181640625,
+        0.478515625,
+        0.609375,
+        -0.67578125,
+        0.3515625
+      ],
+      [
+        0.26953125,
+        0.16015625,
+        0.09521484375,
+        0.0771484375,
+        0.058837890625,
+        -0.08447265625,
+        0.29296875,
+        0.009521484375,
+        0.60546875,
+        0.3203125,
+        -0.83203125,
+        0.12255859375
+      ],
+      [
+        0.412109375,
+        0.1689453125,
+        -0.03564453125,
+        0.19921875,
+        -0.126953125,
+        0.0712890625,
+        -0.1298828125,
+        -0.193359375,
+        0.455078125,
+        0.421875,
+        -0.478515625,
+        0.220703125
+      ],
+      [
+        0.392578125,
+        0.055908203125,
+        0.10400390625,
+        -0.00628662109375,
+        -0.0030670166015625,
+        0.103515625,
+        -0.1767578125,
+        -0.1591796875,
+        0.236328125,
+        0.26953125,
+        -0.357421875,
+        -0.000335693359375
+      ],
+      [
+        0.25,
+        0.1552734375,
+        0.09765625,
+        0.0625,
+        -0.0966796875,
+        0.049560546875,
+        -0.11767578125,
+        0.0072021484375,
+        0.4296875,
+        0.431640625,
+        -0.4609375,
+        0.26953125
+      ]
+    ]
+  ],
+  "nodes": [
+    {
+      "call": 0,
+      "node": "q_projection",
+      "shape": [
+        1,
+        5,
+        4,
+        8
+      ],
+      "stride": [
+        320,
+        64,
+        16,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 320,
+      "input_stride": [
+        [
+          60,
+          12,
+          1
+        ],
+        [
+          12,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        120,
+        1536
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          12
+        ],
+        [
+          64,
+          12
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 shared Q+gate projection output/split",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": {
+        "model": "gamma_n*sum(abs(a*b)); no-overflow normal-input FP32 accumulation assumption",
+        "n": 12,
+        "u": 5.960464477539063e-08,
+        "gamma_n": 7.152562488958232e-07,
+        "max_accumulation_bound": 1.5251144491162964e-06,
+        "mismatches_outside_interval": 0,
+        "ambiguous_rounded_cells": 1,
+        "max_quantized_interval_width": 2.0265579223632812e-06,
+        "library_arithmetic_proof": "UNVERIFIED",
+        "scope": "whole unsplit QG linear tensor"
+      }
+    },
+    {
+      "call": 0,
+      "node": "gate_projection",
+      "shape": [
+        1,
+        5,
+        4,
+        8
+      ],
+      "stride": [
+        320,
+        64,
+        16,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 320,
+      "input_stride": [
+        [
+          60,
+          12,
+          1
+        ],
+        [
+          12,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        120,
+        1536
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          12
+        ],
+        [
+          64,
+          12
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 shared Q+gate projection output/split",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": {
+        "model": "gamma_n*sum(abs(a*b)); no-overflow normal-input FP32 accumulation assumption",
+        "n": 12,
+        "u": 5.960464477539063e-08,
+        "gamma_n": 7.152562488958232e-07,
+        "max_accumulation_bound": 1.5251144491162964e-06,
+        "mismatches_outside_interval": 0,
+        "ambiguous_rounded_cells": 1,
+        "max_quantized_interval_width": 2.0265579223632812e-06,
+        "library_arithmetic_proof": "UNVERIFIED",
+        "scope": "whole unsplit QG linear tensor"
+      }
+    },
+    {
+      "call": 0,
+      "node": "q_rmsnorm",
+      "shape": [
+        1,
+        5,
+        4,
+        8
+      ],
+      "stride": [
+        160,
+        32,
+        8,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 320,
+      "input_stride": [
+        [
+          320,
+          64,
+          16,
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        320,
+        16
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          4,
+          8
+        ],
+        [
+          8
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "input BF16 -> FP32 normalize/weight -> BF16 once at exit",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "k_projection",
+      "shape": [
+        1,
+        5,
+        16
+      ],
+      "stride": [
+        80,
+        16,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 160,
+      "input_stride": [
+        [
+          60,
+          12,
+          1
+        ],
+        [
+          12,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        120,
+        384
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          12
+        ],
+        [
+          16,
+          12
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 linear output",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": {
+        "model": "gamma_n*sum(abs(a*b)); no-overflow normal-input FP32 accumulation assumption",
+        "n": 12,
+        "u": 5.960464477539063e-08,
+        "gamma_n": 7.152562488958232e-07,
+        "max_accumulation_bound": 1.491425778481205e-06,
+        "mismatches_outside_interval": 0,
+        "ambiguous_rounded_cells": 0,
+        "max_quantized_interval_width": 0.0,
+        "library_arithmetic_proof": "UNVERIFIED",
+        "scope": "whole linear output tensor"
+      }
+    },
+    {
+      "call": 0,
+      "node": "k_rmsnorm",
+      "shape": [
+        1,
+        5,
+        2,
+        8
+      ],
+      "stride": [
+        80,
+        16,
+        8,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 160,
+      "input_stride": [
+        [
+          80,
+          16,
+          8,
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        160,
+        16
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          2,
+          8
+        ],
+        [
+          8
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "input BF16 -> FP32 normalize/weight -> BF16 once at exit",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "v_projection",
+      "shape": [
+        1,
+        5,
+        16
+      ],
+      "stride": [
+        80,
+        16,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 160,
+      "input_stride": [
+        [
+          60,
+          12,
+          1
+        ],
+        [
+          12,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        120,
+        384
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          12
+        ],
+        [
+          16,
+          12
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 linear output",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": {
+        "model": "gamma_n*sum(abs(a*b)); no-overflow normal-input FP32 accumulation assumption",
+        "n": 12,
+        "u": 5.960464477539063e-08,
+        "gamma_n": 7.152562488958232e-07,
+        "max_accumulation_bound": 2.005233979598569e-06,
+        "mismatches_outside_interval": 0,
+        "ambiguous_rounded_cells": 2,
+        "max_quantized_interval_width": 0.0001220703125,
+        "library_arithmetic_proof": "UNVERIFIED",
+        "scope": "whole linear output tensor"
+      }
+    },
+    {
+      "call": 0,
+      "node": "partial_rope_q",
+      "shape": [
+        1,
+        4,
+        5,
+        8
+      ],
+      "stride": [
+        160,
+        40,
+        8,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 320,
+      "input_stride": [
+        [
+          160,
+          8,
+          32,
+          1
+        ],
+        [
+          20,
+          4,
+          1
+        ],
+        [
+          20,
+          4,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        320,
+        40,
+        40
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          4,
+          5,
+          8
+        ],
+        [
+          1,
+          5,
+          4
+        ],
+        [
+          1,
+          5,
+          4
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 mul, BF16 mul, BF16 add; untouched tail",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "partial_rope_k",
+      "shape": [
+        1,
+        2,
+        5,
+        8
+      ],
+      "stride": [
+        80,
+        40,
+        8,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 160,
+      "input_stride": [
+        [
+          80,
+          8,
+          16,
+          1
+        ],
+        [
+          20,
+          4,
+          1
+        ],
+        [
+          20,
+          4,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        160,
+        40,
+        40
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          2,
+          5,
+          8
+        ],
+        [
+          1,
+          5,
+          4
+        ],
+        [
+          1,
+          5,
+          4
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 mul, BF16 mul, BF16 add; untouched tail",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "kv_cache_k",
+      "shape": [
+        1,
+        2,
+        5,
+        8
+      ],
+      "stride": [
+        80,
+        40,
+        8,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 160,
+      "input_stride": [
+        [
+          80,
+          40,
+          8,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        160
+      ],
+      "input_dtype": [
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          2,
+          5,
+          8
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 post-RoPE K / projection V append; no dtype conversion",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "kv_cache_v",
+      "shape": [
+        1,
+        2,
+        5,
+        8
+      ],
+      "stride": [
+        80,
+        40,
+        8,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 160,
+      "input_stride": [
+        [
+          80,
+          8,
+          16,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        160
+      ],
+      "input_dtype": [
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          2,
+          5,
+          8
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 post-RoPE K / projection V append; no dtype conversion",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "qk_score",
+      "shape": [
+        1,
+        4,
+        5,
+        5
+      ],
+      "stride": [
+        100,
+        25,
+        5,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 200,
+      "input_stride": [
+        [
+          160,
+          40,
+          8,
+          1
+        ],
+        [
+          160,
+          40,
+          1,
+          8
+        ]
+      ],
+      "input_gpu_bytes": [
+        320,
+        320
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          4,
+          5,
+          8
+        ],
+        [
+          1,
+          4,
+          8,
+          5
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 matmul tensor output; library internal accumulation UNVERIFIED",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": {
+        "model": "gamma_n*sum(abs(a*b)); no-overflow normal-input FP32 accumulation assumption",
+        "n": 8,
+        "u": 5.960464477539063e-08,
+        "gamma_n": 4.768373855769089e-07,
+        "max_accumulation_bound": 3.8502175981401565e-06,
+        "mismatches_outside_interval": 0,
+        "ambiguous_rounded_cells": 0,
+        "max_quantized_interval_width": 0.0,
+        "library_arithmetic_proof": "UNVERIFIED"
+      }
+    },
+    {
+      "call": 0,
+      "node": "scale",
+      "shape": [
+        1,
+        4,
+        5,
+        5
+      ],
+      "stride": [
+        100,
+        25,
+        5,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 200,
+      "input_stride": [
+        [
+          100,
+          25,
+          5,
+          1
+        ],
+        []
+      ],
+      "input_gpu_bytes": [
+        200,
+        0
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "float"
+      ],
+      "input_shape": [
+        [
+          1,
+          4,
+          5,
+          5
+        ],
+        []
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 scalar multiply output",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "causal_mask",
+      "shape": [
+        1,
+        4,
+        5,
+        5
+      ],
+      "stride": [
+        100,
+        25,
+        5,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 200,
+      "input_stride": [
+        [
+          100,
+          25,
+          5,
+          1
+        ],
+        [
+          25,
+          25,
+          5,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        200,
+        50
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          4,
+          5,
+          5
+        ],
+        [
+          1,
+          1,
+          5,
+          5
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 additive mask output",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "fp32_softmax",
+      "shape": [
+        1,
+        4,
+        5,
+        5
+      ],
+      "stride": [
+        100,
+        25,
+        5,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 400,
+      "input_stride": [
+        [
+          100,
+          25,
+          5,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        200
+      ],
+      "input_dtype": [
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          4,
+          5,
+          5
+        ]
+      ],
+      "output_dtype": "torch.float32",
+      "bf16_boundary": "softmax input/output FP32; internal max/exp/sum topology UNVERIFIED",
+      "metrics": {
+        "reference_near_zero_count": 40,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": null,
+        "max_bf16_ulp": null,
+        "max_absolute_error": 5.960464477539063e-08,
+        "mean_absolute_error": 5.681067705154419e-09,
+        "max_relative_error": 1.1683846789717046e-07,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "bf16_probability",
+      "shape": [
+        1,
+        4,
+        5,
+        5
+      ],
+      "stride": [
+        100,
+        25,
+        5,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 200,
+      "input_stride": [
+        [
+          100,
+          25,
+          5,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        400
+      ],
+      "input_dtype": [
+        "torch.float32"
+      ],
+      "input_shape": [
+        [
+          1,
+          4,
+          5,
+          5
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "FP32 softmax result -> BF16 probability",
+      "metrics": {
+        "reference_near_zero_count": 40,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "av",
+      "shape": [
+        1,
+        4,
+        5,
+        8
+      ],
+      "stride": [
+        160,
+        40,
+        8,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 320,
+      "input_stride": [
+        [
+          100,
+          25,
+          5,
+          1
+        ],
+        [
+          160,
+          40,
+          8,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        200,
+        320
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          4,
+          5,
+          5
+        ],
+        [
+          1,
+          4,
+          5,
+          8
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 matmul tensor output; library internal accumulation UNVERIFIED",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": {
+        "model": "gamma_n*sum(abs(a*b)); no-overflow normal-input FP32 accumulation assumption",
+        "n": 5,
+        "u": 5.960464477539063e-08,
+        "gamma_n": 2.9802331269482156e-07,
+        "max_accumulation_bound": 4.726463474769436e-07,
+        "mismatches_outside_interval": 0,
+        "ambiguous_rounded_cells": 0,
+        "max_quantized_interval_width": 0.0,
+        "library_arithmetic_proof": "UNVERIFIED"
+      }
+    },
+    {
+      "call": 0,
+      "node": "sigmoid_gate",
+      "shape": [
+        1,
+        5,
+        32
+      ],
+      "stride": [
+        160,
+        32,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 320,
+      "input_stride": [
+        [
+          160,
+          32,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        320
+      ],
+      "input_dtype": [
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          32
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 sigmoid output",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "gated_av",
+      "shape": [
+        1,
+        5,
+        32
+      ],
+      "stride": [
+        160,
+        32,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 320,
+      "input_stride": [
+        [
+          160,
+          32,
+          1
+        ],
+        [
+          160,
+          32,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        320,
+        320
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          32
+        ],
+        [
+          1,
+          5,
+          32
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 AV times BF16 gate output",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": null
+    },
+    {
+      "call": 0,
+      "node": "output_projection",
+      "shape": [
+        1,
+        5,
+        12
+      ],
+      "stride": [
+        60,
+        12,
+        1
+      ],
+      "layout": "torch.strided",
+      "gpu_bytes": 120,
+      "input_stride": [
+        [
+          160,
+          32,
+          1
+        ],
+        [
+          32,
+          1
+        ]
+      ],
+      "input_gpu_bytes": [
+        320,
+        768
+      ],
+      "input_dtype": [
+        "torch.bfloat16",
+        "torch.bfloat16"
+      ],
+      "input_shape": [
+        [
+          1,
+          5,
+          32
+        ],
+        [
+          12,
+          32
+        ]
+      ],
+      "output_dtype": "torch.bfloat16",
+      "bf16_boundary": "BF16 linear output",
+      "metrics": {
+        "reference_near_zero_count": 0,
+        "nonfinite_locations": {
+          "actual": [],
+          "reference": []
+        },
+        "bf16_bit_mismatch_count": 0,
+        "max_bf16_ulp": 0,
+        "max_absolute_error": 0.0,
+        "mean_absolute_error": 0.0,
+        "max_relative_error": 0.0,
+        "relative_denominator_floor": 1.1754943508222875e-38,
+        "nan": 0,
+        "inf": 0,
+        "comparison": "same captured operands: independent CPU FP64 semantic replay; explicit FP64->FP32->BF16 output conversion where applicable"
+      },
+      "reference_only_dot_bound": {
+        "model": "gamma_n*sum(abs(a*b)); no-overflow normal-input FP32 accumulation assumption",
+        "n": 32,
+        "u": 5.960464477539063e-08,
+        "gamma_n": 1.907352270798246e-06,
+        "max_accumulation_bound": 2.0939740401848633e-06,
+        "mismatches_outside_interval": 0,
+        "ambiguous_rounded_cells": 1,
+        "max_quantized_interval_width": 1.9073486328125e-06,
+        "library_arithmetic_proof": "UNVERIFIED",
+        "scope": "whole linear output tensor"
+      }
+    }
+  ],
+  "events": [
+    {
+      "call": 0,
+      "scope": "outside",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            12
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            12
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "outside",
+      "op": "aten.arange.start",
+      "inputs": [],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "outside",
+      "op": "aten.reshape.default",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.expand.default",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            1,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            1,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            1,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            1,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.expand.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.to.dtype_layout",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            3,
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.matmul.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            2,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.transpose.int",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            2,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.select.int",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.select.int",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.copy_.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.select.int",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.copy_.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.cat.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.cos.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.sin.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.arange.default",
+      "inputs": [],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.arange.default",
+      "inputs": [],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.add.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.le.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            1,
+            5
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.int64",
+          "shape": [
+            5,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bool",
+          "shape": [
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.lift_fresh.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.detach_.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.where.ScalarOther",
+      "inputs": [
+        {
+          "dtype": "torch.bool",
+          "shape": [
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "rope_generation",
+      "op": "aten.reshape.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            1,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_proj",
+      "op": "aten.linear.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            12
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            64,
+            12
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            64
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_proj",
+      "op": "aten.reshape.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            64
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_proj",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_proj",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.view.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            64
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.chunk.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.reshape.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            32
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.view.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.pow.Tensor_Scalar",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.mean.dim",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.add.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.rsqrt.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.add.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "q_norm",
+      "op": "aten.type_as.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.transpose.int",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_proj",
+      "op": "aten.linear.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            12
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            16,
+            12
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.view.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.pow.Tensor_Scalar",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.mean.dim",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.add.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.rsqrt.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            1
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.add.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "k_norm",
+      "op": "aten.type_as.default",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.transpose.int",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "v_proj",
+      "op": "aten.linear.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            12
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            16,
+            12
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.view.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            16
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.transpose.int",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            2,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.neg.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.cat.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.add.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.neg.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.cat.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            2
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            1,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.add.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.cat.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "partial_rope",
+      "op": "aten.cat.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            4
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.lift_fresh.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.detach_.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.lift_fresh.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.detach_.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.cat.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.cat.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            0
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.expand.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.reshape.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.unsqueeze.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.slice.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.expand.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.reshape.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            2,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.transpose.int",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            8,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.matmul.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            8,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.add.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            1,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.softmax.int",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.to.dtype",
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.dropout.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.matmul.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            5
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.transpose.int",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            4,
+            5,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "eager",
+      "op": "aten.contiguous.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.reshape.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            8
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            32
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.sigmoid.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            32
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            32
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "attention",
+      "op": "aten.mul.Tensor",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            32
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            32
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            32
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    },
+    {
+      "call": 0,
+      "scope": "o_proj",
+      "op": "aten.linear.default",
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            32
+          ],
+          "device": "cuda:0"
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            12,
+            32
+          ],
+          "device": "cuda:0"
+        }
+      ],
+      "outputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            12
+          ],
+          "device": "cuda:0"
+        }
+      ]
+    }
+  ],
+  "instrumentation": {
+    "module_hooks": 12,
+    "wrappers": [
+      "rotary",
+      "eager",
+      "cache"
+    ]
+  },
+  "arrays": {
+    "0:q_projection": [
+      [
+        [
+          [
+            0.271484375,
+            -0.04052734375,
+            0.59765625,
+            -0.46484375,
+            -0.271484375,
+            -0.026611328125,
+            0.5859375,
+            -0.15234375
+          ],
+          [
+            0.6171875,
+            -0.015869140625,
+            -0.79296875,
+            0.1533203125,
+            0.25,
+            0.51171875,
+            0.703125,
+            0.71875
+          ],
+          [
+            0.65625,
+            -0.1435546875,
+            0.455078125,
+            -0.004791259765625,
+            1.0,
+            0.1904296875,
+            -0.302734375,
+            0.375
+          ],
+          [
+            -0.6015625,
+            -0.94140625,
+            -0.3203125,
+            -0.73046875,
+            -0.1015625,
+            -0.31640625,
+            -0.09912109375,
+            0.08935546875
+          ]
+        ],
+        [
+          [
+            0.490234375,
+            0.004058837890625,
+            0.25,
+            0.212890625,
+            -1.5,
+            -0.10107421875,
+            0.1328125,
+            -0.4921875
+          ],
+          [
+            0.52734375,
+            -0.396484375,
+            0.267578125,
+            0.81640625,
+            -0.287109375,
+            0.93359375,
+            -0.373046875,
+            -0.298828125
+          ],
+          [
+            0.32421875,
+            0.5625,
+            0.1337890625,
+            0.4609375,
+            -0.0140380859375,
+            -0.138671875,
+            0.373046875,
+            0.35546875
+          ],
+          [
+            -1.28125,
+            -0.125,
+            0.77734375,
+            0.16015625,
+            0.369140625,
+            -0.4609375,
+            0.1845703125,
+            -0.83984375
+          ]
+        ],
+        [
+          [
+            0.6328125,
+            0.208984375,
+            0.2734375,
+            -0.75390625,
+            -0.0341796875,
+            0.470703125,
+            0.031005859375,
+            -0.5
+          ],
+          [
+            0.30859375,
+            -0.318359375,
+            0.02880859375,
+            0.85546875,
+            -0.55078125,
+            0.10009765625,
+            0.96875,
+            -0.50390625
+          ],
+          [
+            -0.2099609375,
+            0.369140625,
+            -0.0283203125,
+            0.2734375,
+            0.83984375,
+            -0.26953125,
+            -1.1640625,
+            0.08203125
+          ],
+          [
+            -0.9609375,
+            -0.921875,
+            -0.91796875,
+            0.173828125,
+            0.33203125,
+            0.158203125,
+            -0.291015625,
+            -0.322265625
+          ]
+        ],
+        [
+          [
+            -0.060546875,
+            0.0296630859375,
+            0.0888671875,
+            0.46875,
+            -0.2236328125,
+            0.8203125,
+            -0.421875,
+            -0.326171875
+          ],
+          [
+            -0.765625,
+            0.018310546875,
+            -0.28125,
+            0.193359375,
+            0.287109375,
+            0.5234375,
+            0.68359375,
+            -0.42578125
+          ],
+          [
+            -0.2578125,
+            0.02685546875,
+            -0.462890625,
+            0.216796875,
+            0.16015625,
+            -0.1318359375,
+            0.38671875,
+            0.1650390625
+          ],
+          [
+            -0.396484375,
+            0.466796875,
+            -0.64453125,
+            0.203125,
+            -0.322265625,
+            -0.15625,
+            -0.271484375,
+            0.1845703125
+          ]
+        ],
+        [
+          [
+            -0.34375,
+            -0.1240234375,
+            -0.037841796875,
+            -0.6328125,
+            0.349609375,
+            0.02783203125,
+            -0.50390625,
+            0.0625
+          ],
+          [
+            0.62890625,
+            0.03466796875,
+            0.134765625,
+            0.32421875,
+            -0.65625,
+            -0.2578125,
+            0.373046875,
+            -0.58984375
+          ],
+          [
+            0.41015625,
+            0.59375,
+            0.130859375,
+            -0.150390625,
+            -1.0728836059570312e-05,
+            -0.384765625,
+            -0.94921875,
+            -0.021484375
+          ],
+          [
+            0.12158203125,
+            -0.8671875,
+            -0.93359375,
+            0.37890625,
+            -0.23828125,
+            0.61328125,
+            -0.373046875,
+            0.1650390625
+          ]
+        ]
+      ]
+    ],
+    "0:gate_projection": [
+      [
+        [
+          [
+            -0.296875,
+            -0.306640625,
+            0.22265625,
+            -0.0712890625,
+            0.54296875,
+            0.043212890625,
+            -0.13671875,
+            0.66796875
+          ],
+          [
+            -0.00179290771484375,
+            -0.2451171875,
+            -0.34375,
+            -0.2734375,
+            0.1064453125,
+            0.25390625,
+            -0.1474609375,
+            -0.30859375
+          ],
+          [
+            -1.3125,
+            0.185546875,
+            0.24609375,
+            0.287109375,
+            -0.5703125,
+            -0.62890625,
+            1.4296875,
+            0.224609375
+          ],
+          [
+            0.050537109375,
+            0.54296875,
+            -0.3046875,
+            -0.53515625,
+            -0.380859375,
+            0.7265625,
+            0.875,
+            -0.396484375
+          ]
+        ],
+        [
+          [
+            -0.70703125,
+            -0.291015625,
+            0.8984375,
+            0.53515625,
+            -0.62109375,
+            -0.9296875,
+            0.73828125,
+            -0.9296875
+          ],
+          [
+            0.32421875,
+            0.111328125,
+            -0.625,
+            -0.259765625,
+            -0.734375,
+            0.314453125,
+            -0.0810546875,
+            0.361328125
+          ],
+          [
+            0.703125,
+            0.55078125,
+            0.0302734375,
+            0.052978515625,
+            0.0625,
+            -0.01263427734375,
+            -0.55859375,
+            0.27734375
+          ],
+          [
+            -0.77734375,
+            0.2490234375,
+            -0.87109375,
+            -0.65625,
+            -0.2890625,
+            0.66015625,
+            -0.03125,
+            0.1767578125
+          ]
+        ],
+        [
+          [
+            -0.7109375,
+            -0.00848388671875,
+            0.9921875,
+            0.1767578125,
+            1.1484375,
+            -0.058349609375,
+            0.1875,
+            0.458984375
+          ],
+          [
+            0.33203125,
+            -0.287109375,
+            -0.56640625,
+            0.125,
+            0.70703125,
+            -0.051513671875,
+            0.0361328125,
+            -0.58203125
+          ],
+          [
+            -1.359375,
+            0.640625,
+            -0.41015625,
+            -0.1767578125,
+            0.140625,
+            -0.427734375,
+            0.98828125,
+            -0.474609375
+          ],
+          [
+            -0.87109375,
+            0.1318359375,
+            0.154296875,
+            0.62109375,
+            -0.609375,
+            0.53125,
+            0.337890625,
+            -0.1826171875
+          ]
+        ],
+        [
+          [
+            0.53125,
+            -0.376953125,
+            -0.0296630859375,
+            0.44140625,
+            0.042236328125,
+            -0.5,
+            0.75390625,
+            -0.42578125
+          ],
+          [
+            0.002685546875,
+            0.125,
+            -0.08251953125,
+            0.01416015625,
+            0.3671875,
+            0.6171875,
+            -0.337890625,
+            0.031982421875
+          ],
+          [
+            -0.490234375,
+            -0.1845703125,
+            0.0009918212890625,
+            -0.44140625,
+            0.09228515625,
+            0.6953125,
+            0.77734375,
+            -0.044189453125
+          ],
+          [
+            -0.90234375,
+            -0.06298828125,
+            -0.072265625,
+            0.66015625,
+            -0.271484375,
+            0.2578125,
+            -0.0306396484375,
+            0.07275390625
+          ]
+        ],
+        [
+          [
+            -0.15625,
+            -0.158203125,
+            0.00897216796875,
+            -0.2119140625,
+            0.9375,
+            0.640625,
+            -0.2734375,
+            0.76171875
+          ],
+          [
+            0.177734375,
+            -0.466796875,
+            0.1162109375,
+            0.314453125,
+            1.1953125,
+            -0.271484375,
+            0.0220947265625,
+            -0.7109375
+          ],
+          [
+            -0.7734375,
+            0.287109375,
+            0.1455078125,
+            -0.166015625,
+            0.2255859375,
+            -0.8046875,
+            0.640625,
+            -0.02587890625
+          ],
+          [
+            -0.138671875,
+            0.109375,
+            0.69140625,
+            0.259765625,
+            -0.421875,
+            -0.0177001953125,
+            0.984375,
+            -0.1728515625
+          ]
+        ]
+      ]
+    ],
+    "0:q_rmsnorm": [
+      [
+        [
+          [
+            0.7421875,
+            -0.10205078125,
+            2.109375,
+            -1.25,
+            -0.75,
+            -0.07177734375,
+            1.8046875,
+            -0.494140625
+          ],
+          [
+            1.140625,
+            -0.027099609375,
+            -1.8984375,
+            0.28125,
+            0.46875,
+            0.93359375,
+            1.46875,
+            1.5859375
+          ],
+          [
+            1.3515625,
+            -0.271484375,
+            1.2109375,
+            -0.00970458984375,
+            2.078125,
+            0.384765625,
+            -0.703125,
+            0.9140625
+          ],
+          [
+            -1.2109375,
+            -1.75,
+            -0.83203125,
+            -1.4453125,
+            -0.20703125,
+            -0.625,
+            -0.224609375,
+            0.2138671875
+          ]
+        ],
+        [
+          [
+            0.82421875,
+            0.006317138671875,
+            0.54296875,
+            0.353515625,
+            -2.5625,
+            -0.1669921875,
+            0.251953125,
+            -0.984375
+          ],
+          [
+            0.98046875,
+            -0.6796875,
+            0.640625,
+            1.5,
+            -0.5390625,
+            1.703125,
+            -0.78125,
+            -0.66015625
+          ],
+          [
+            0.95703125,
+            1.53125,
+            0.5078125,
+            1.34375,
+            -0.0419921875,
+            -0.40234375,
+            1.2421875,
+            1.2421875
+          ],
+          [
+            -1.9921875,
+            -0.1787109375,
+            1.5625,
+            0.2451171875,
+            0.58203125,
+            -0.703125,
+            0.32421875,
+            -1.546875
+          ]
+        ],
+        [
+          [
+            1.4453125,
+            0.439453125,
+            0.8046875,
+            -1.6953125,
+            -0.0791015625,
+            1.0546875,
+            0.080078125,
+            -1.359375
+          ],
+          [
+            0.5625,
+            -0.53515625,
+            0.06787109375,
+            1.5390625,
+            -1.0234375,
+            0.1796875,
+            2.0,
+            -1.09375
+          ],
+          [
+            -0.38671875,
+            0.62890625,
+            -0.0673828125,
+            0.498046875,
+            1.5703125,
+            -0.48828125,
+            -2.421875,
+            0.1796875
+          ],
+          [
+            -1.59375,
+            -1.40625,
+            -1.9609375,
+            0.283203125,
+            0.55859375,
+            0.2578125,
+            -0.54296875,
+            -0.6328125
+          ]
+        ],
+        [
+          [
+            -0.1552734375,
+            0.0703125,
+            0.294921875,
+            1.1875,
+            -0.58203125,
+            2.0625,
+            -1.21875,
+            -0.9921875
+          ],
+          [
+            -1.671875,
+            0.036865234375,
+            -0.79296875,
+            0.416015625,
+            0.63671875,
+            1.125,
+            1.6875,
+            -1.1015625
+          ],
+          [
+            -0.9921875,
+            0.095703125,
+            -2.296875,
+            0.82421875,
+            0.625,
+            -0.5,
+            1.6796875,
+            0.75390625
+          ],
+          [
+            -1.09375,
+            1.1875,
+            -2.296875,
+            0.5546875,
+            -0.90234375,
+            -0.423828125,
+            -0.84765625,
+            0.60546875
+          ]
+        ],
+        [
+          [
+            -1.0234375,
+            -0.341796875,
+            -0.1455078125,
+            -1.859375,
+            1.0546875,
+            0.08154296875,
+            -1.6953125,
+            0.2216796875
+          ],
+          [
+            1.4609375,
+            0.07421875,
+            0.404296875,
+            0.7421875,
+            -1.546875,
+            -0.58984375,
+            0.98046875,
+            -1.6328125
+          ],
+          [
+            0.921875,
+            1.234375,
+            0.380859375,
+            -0.333984375,
+            -2.4437904357910156e-05,
+            -0.8515625,
+            -2.40625,
+            -0.057373046875
+          ],
+          [
+            0.224609375,
+            -1.4765625,
+            -2.234375,
+            0.69140625,
+            -0.447265625,
+            1.1171875,
+            -0.77734375,
+            0.36328125
+          ]
+        ]
+      ]
+    ],
+    "0:k_projection": [
+      [
+        [
+          0.90625,
+          -0.408203125,
+          -0.75390625,
+          -0.18359375,
+          -0.73046875,
+          -0.1513671875,
+          -0.23046875,
+          -0.1611328125,
+          0.10205078125,
+          0.1708984375,
+          -0.70703125,
+          -0.01116943359375,
+          0.82421875,
+          0.10205078125,
+          -0.15625,
+          0.34765625
+        ],
+        [
+          -0.373046875,
+          0.55859375,
+          -1.625,
+          -0.15625,
+          0.263671875,
+          0.62109375,
+          0.291015625,
+          -0.00156402587890625,
+          0.068359375,
+          -0.34765625,
+          0.416015625,
+          0.53515625,
+          -0.57421875,
+          -0.30859375,
+          0.431640625,
+          0.388671875
+        ],
+        [
+          1.046875,
+          0.369140625,
+          -1.015625,
+          0.453125,
+          0.06494140625,
+          0.40625,
+          -0.369140625,
+          -0.82421875,
+          -0.90234375,
+          -0.2470703125,
+          -0.71875,
+          0.296875,
+          0.8984375,
+          0.08349609375,
+          0.48828125,
+          0.31640625
+        ],
+        [
+          0.75390625,
+          0.275390625,
+          -0.7734375,
+          -0.443359375,
+          -0.384765625,
+          -0.047607421875,
+          -0.053955078125,
+          -0.58984375,
+          -0.1630859375,
+          0.388671875,
+          -0.5703125,
+          0.0208740234375,
+          0.31640625,
+          0.2578125,
+          0.466796875,
+          0.2060546875
+        ],
+        [
+          1.078125,
+          0.33984375,
+          0.5234375,
+          0.0037841796875,
+          -0.2353515625,
+          -0.056640625,
+          -0.19921875,
+          -0.71875,
+          -0.4296875,
+          -0.2451171875,
+          -0.87890625,
+          -0.00787353515625,
+          0.93359375,
+          0.2392578125,
+          -0.23046875,
+          0.0235595703125
+        ]
+      ]
+    ],
+    "0:k_rmsnorm": [
+      [
+        [
+          [
+            1.5546875,
+            -0.8046875,
+            -1.1875,
+            -0.373046875,
+            -1.328125,
+            -0.3203125,
+            -0.435546875,
+            -0.3359375
+          ],
+          [
+            0.22265625,
+            0.4296875,
+            -1.4140625,
+            -0.02880859375,
+            1.90625,
+            0.275390625,
+            -0.376953125,
+            0.92578125
+          ]
+        ],
+        [
+          [
+            -0.5,
+            0.859375,
+            -1.9921875,
+            -0.2470703125,
+            0.375,
+            1.0234375,
+            0.4296875,
+            -0.0025482177734375
+          ],
+          [
+            0.150390625,
+            -0.8828125,
+            0.83984375,
+            1.3984375,
+            -1.34375,
+            -0.83984375,
+            1.046875,
+            1.046875
+          ]
+        ],
+        [
+          [
+            1.4453125,
+            0.5859375,
+            -1.28125,
+            0.73828125,
+            0.0947265625,
+            0.69140625,
+            -0.5625,
+            -1.3828125
+          ],
+          [
+            -1.421875,
+            -0.44921875,
+            -1.0390625,
+            0.5546875,
+            1.5,
+            0.1630859375,
+            0.8515625,
+            0.609375
+          ]
+        ],
+        [
+          [
+            1.3828125,
+            0.58203125,
+            -1.3046875,
+            -0.96484375,
+            -0.75,
+            -0.10791015625,
+            -0.109375,
+            -1.3203125
+          ],
+          [
+            -0.43359375,
+            1.1875,
+            -1.390625,
+            0.0654296875,
+            0.890625,
+            0.84375,
+            1.3671875,
+            0.66796875
+          ]
+        ],
+        [
+          [
+            1.875,
+            0.6796875,
+            0.8359375,
+            0.007781982421875,
+            -0.43359375,
+            -0.12158203125,
+            -0.3828125,
+            -1.5234375
+          ],
+          [
+            -0.77734375,
+            -0.51171875,
+            -1.4609375,
+            -0.016845703125,
+            1.7890625,
+            0.53515625,
+            -0.4609375,
+            0.052001953125
+          ]
+        ]
+      ]
+    ],
+    "0:v_projection": [
+      [
+        [
+          0.306640625,
+          -0.1376953125,
+          1.5625,
+          0.1357421875,
+          0.49609375,
+          -0.59375,
+          -0.205078125,
+          -0.029052734375,
+          -0.1484375,
+          0.1611328125,
+          1.5859375,
+          -0.1279296875,
+          -0.45703125,
+          0.01556396484375,
+          0.333984375,
+          -0.034423828125
+        ],
+        [
+          0.0712890625,
+          0.466796875,
+          0.6953125,
+          1.140625,
+          -0.1806640625,
+          -0.212890625,
+          0.345703125,
+          -0.04931640625,
+          0.703125,
+          -0.5234375,
+          1.0234375,
+          -0.68359375,
+          0.447265625,
+          0.0693359375,
+          -0.263671875,
+          -1.171875
+        ],
+        [
+          0.51171875,
+          0.2734375,
+          0.70703125,
+          -0.98046875,
+          1.4140625,
+          -0.83203125,
+          0.2353515625,
+          0.30859375,
+          -0.57421875,
+          -0.24609375,
+          1.0859375,
+          0.7734375,
+          0.1455078125,
+          0.000644683837890625,
+          0.734375,
+          0.1875
+        ],
+        [
+          -0.1337890625,
+          0.1142578125,
+          0.625,
+          0.5078125,
+          0.7734375,
+          -0.6640625,
+          0.2412109375,
+          0.08544921875,
+          0.375,
+          0.65625,
+          -0.05908203125,
+          0.58984375,
+          0.435546875,
+          -0.212890625,
+          0.0810546875,
+          -0.009765625
+        ],
+        [
+          0.953125,
+          -0.271484375,
+          0.62890625,
+          -1.578125,
+          0.921875,
+          -0.375,
+          -0.5859375,
+          0.57421875,
+          -0.796875,
+          0.404296875,
+          -0.1328125,
+          0.765625,
+          -0.216796875,
+          0.625,
+          0.189453125,
+          0.6171875
+        ]
+      ]
+    ],
+    "0:partial_rope_q": [
+      [
+        [
+          [
+            0.7421875,
+            -0.10205078125,
+            2.109375,
+            -1.25,
+            -0.75,
+            -0.07177734375,
+            1.8046875,
+            -0.494140625
+          ],
+          [
+            -0.01171875,
+            0.006195068359375,
+            0.984375,
+            0.353515625,
+            -2.5625,
+            -0.1669921875,
+            0.251953125,
+            -0.984375
+          ],
+          [
+            -1.328125,
+            0.44140625,
+            0.9765625,
+            -1.6953125,
+            -0.0791015625,
+            1.0546875,
+            0.080078125,
+            -1.359375
+          ],
+          [
+            0.111328125,
+            0.0693359375,
+            -0.3125,
+            1.1875,
+            -0.58203125,
+            2.0625,
+            -1.21875,
+            -0.9921875
+          ],
+          [
+            0.55859375,
+            -0.33984375,
+            0.87109375,
+            -1.859375,
+            1.0546875,
+            0.08154296875,
+            -1.6953125,
+            0.2216796875
+          ]
+        ],
+        [
+          [
+            1.140625,
+            -0.027099609375,
+            -1.8984375,
+            0.28125,
+            0.46875,
+            0.93359375,
+            1.46875,
+            1.5859375
+          ],
+          [
+            -0.01171875,
+            -0.6796875,
+            1.171875,
+            1.5,
+            -0.5390625,
+            1.703125,
+            -0.78125,
+            -0.66015625
+          ],
+          [
+            -0.296875,
+            -0.53515625,
+            0.484375,
+            1.5390625,
+            -1.0234375,
+            0.1796875,
+            2.0,
+            -1.09375
+          ],
+          [
+            1.7578125,
+            0.036376953125,
+            0.546875,
+            0.416015625,
+            0.63671875,
+            1.125,
+            1.6875,
+            -1.1015625
+          ],
+          [
+            -0.6484375,
+            0.0732421875,
+            -1.375,
+            0.7421875,
+            -1.546875,
+            -0.58984375,
+            0.98046875,
+            -1.6328125
+          ]
+        ],
+        [
+          [
+            1.3515625,
+            -0.271484375,
+            1.2109375,
+            -0.00970458984375,
+            2.078125,
+            0.384765625,
+            -0.703125,
+            0.9140625
+          ],
+          [
+            0.08984375,
+            1.53125,
+            1.078125,
+            1.34375,
+            -0.0419921875,
+            -0.40234375,
+            1.2421875,
+            1.2421875
+          ],
+          [
+            0.22265625,
+            0.62890625,
+            -0.32421875,
+            0.498046875,
+            1.5703125,
+            -0.48828125,
+            -2.421875,
+            0.1796875
+          ],
+          [
+            1.3046875,
+            0.0947265625,
+            2.125,
+            0.82421875,
+            0.625,
+            -0.5,
+            1.6796875,
+            0.75390625
+          ],
+          [
+            -0.3125,
+            1.234375,
+            -0.9453125,
+            -0.33203125,
+            -2.4437904357910156e-05,
+            -0.8515625,
+            -2.40625,
+            -0.057373046875
+          ]
+        ],
+        [
+          [
+            -1.2109375,
+            -1.75,
+            -0.83203125,
+            -1.4453125,
+            -0.20703125,
+            -0.625,
+            -0.224609375,
+            0.2138671875
+          ],
+          [
+            -2.375,
+            -0.1787109375,
+            -0.828125,
+            0.2451171875,
+            0.58203125,
+            -0.703125,
+            0.32421875,
+            -1.546875
+          ],
+          [
+            2.4375,
+            -1.40625,
+            -0.63671875,
+            0.283203125,
+            0.55859375,
+            0.2578125,
+            -0.54296875,
+            -0.6328125
+          ],
+          [
+            1.40625,
+            1.1875,
+            2.109375,
+            0.5546875,
+            -0.90234375,
+            -0.423828125,
+            -0.84765625,
+            0.60546875
+          ],
+          [
+            -1.84375,
+            -1.4765625,
+            1.2890625,
+            0.69140625,
+            -0.447265625,
+            1.1171875,
+            -0.77734375,
+            0.36328125
+          ]
+        ]
+      ]
+    ],
+    "0:partial_rope_k": [
+      [
+        [
+          [
+            1.5546875,
+            -0.8046875,
+            -1.1875,
+            -0.373046875,
+            -1.328125,
+            -0.3203125,
+            -0.435546875,
+            -0.3359375
+          ],
+          [
+            1.40625,
+            0.859375,
+            -1.4921875,
+            -0.2470703125,
+            0.375,
+            1.0234375,
+            0.4296875,
+            -0.0025482177734375
+          ],
+          [
+            0.5625,
+            0.5859375,
+            1.84375,
+            0.73828125,
+            0.0947265625,
+            0.69140625,
+            -0.5625,
+            -1.3828125
+          ],
+          [
+            -1.1796875,
+            0.58203125,
+            1.484375,
+            -0.96484375,
+            -0.75,
+            -0.10791015625,
+            -0.109375,
+            -1.3203125
+          ],
+          [
+            -0.59375,
+            0.6796875,
+            -1.96875,
+            0.0086669921875,
+            -0.43359375,
+            -0.12158203125,
+            -0.3828125,
+            -1.5234375
+          ]
+        ],
+        [
+          [
+            0.22265625,
+            0.4296875,
+            -1.4140625,
+            -0.02880859375,
+            1.90625,
+            0.275390625,
+            -0.376953125,
+            0.92578125
+          ],
+          [
+            -0.625,
+            -0.8828125,
+            0.578125,
+            1.3984375,
+            -1.34375,
+            -0.83984375,
+            1.046875,
+            1.046875
+          ],
+          [
+            1.53125,
+            -0.44921875,
+            -0.8671875,
+            0.5546875,
+            1.5,
+            0.1630859375,
+            0.8515625,
+            0.609375
+          ],
+          [
+            0.625,
+            1.1875,
+            1.3125,
+            0.06640625,
+            0.890625,
+            0.84375,
+            1.3671875,
+            0.66796875
+          ],
+          [
+            -0.6015625,
+            -0.51171875,
+            1.546875,
+            -0.0174560546875,
+            1.7890625,
+            0.53515625,
+            -0.4609375,
+            0.052001953125
+          ]
+        ]
+      ]
+    ],
+    "0:kv_cache_k": [
+      [
+        [
+          [
+            1.5546875,
+            -0.8046875,
+            -1.1875,
+            -0.373046875,
+            -1.328125,
+            -0.3203125,
+            -0.435546875,
+            -0.3359375
+          ],
+          [
+            1.40625,
+            0.859375,
+            -1.4921875,
+            -0.2470703125,
+            0.375,
+            1.0234375,
+            0.4296875,
+            -0.0025482177734375
+          ],
+          [
+            0.5625,
+            0.5859375,
+            1.84375,
+            0.73828125,
+            0.0947265625,
+            0.69140625,
+            -0.5625,
+            -1.3828125
+          ],
+          [
+            -1.1796875,
+            0.58203125,
+            1.484375,
+            -0.96484375,
+            -0.75,
+            -0.10791015625,
+            -0.109375,
+            -1.3203125
+          ],
+          [
+            -0.59375,
+            0.6796875,
+            -1.96875,
+            0.0086669921875,
+            -0.43359375,
+            -0.12158203125,
+            -0.3828125,
+            -1.5234375
+          ]
+        ],
+        [
+          [
+            0.22265625,
+            0.4296875,
+            -1.4140625,
+            -0.02880859375,
+            1.90625,
+            0.275390625,
+            -0.376953125,
+            0.92578125
+          ],
+          [
+            -0.625,
+            -0.8828125,
+            0.578125,
+            1.3984375,
+            -1.34375,
+            -0.83984375,
+            1.046875,
+            1.046875
+          ],
+          [
+            1.53125,
+            -0.44921875,
+            -0.8671875,
+            0.5546875,
+            1.5,
+            0.1630859375,
+            0.8515625,
+            0.609375
+          ],
+          [
+            0.625,
+            1.1875,
+            1.3125,
+            0.06640625,
+            0.890625,
+            0.84375,
+            1.3671875,
+            0.66796875
+          ],
+          [
+            -0.6015625,
+            -0.51171875,
+            1.546875,
+            -0.0174560546875,
+            1.7890625,
+            0.53515625,
+            -0.4609375,
+            0.052001953125
+          ]
+        ]
+      ]
+    ],
+    "0:kv_cache_v": [
+      [
+        [
+          [
+            0.306640625,
+            -0.1376953125,
+            1.5625,
+            0.1357421875,
+            0.49609375,
+            -0.59375,
+            -0.205078125,
+            -0.029052734375
+          ],
+          [
+            0.0712890625,
+            0.466796875,
+            0.6953125,
+            1.140625,
+            -0.1806640625,
+            -0.212890625,
+            0.345703125,
+            -0.04931640625
+          ],
+          [
+            0.51171875,
+            0.2734375,
+            0.70703125,
+            -0.98046875,
+            1.4140625,
+            -0.83203125,
+            0.2353515625,
+            0.30859375
+          ],
+          [
+            -0.1337890625,
+            0.1142578125,
+            0.625,
+            0.5078125,
+            0.7734375,
+            -0.6640625,
+            0.2412109375,
+            0.08544921875
+          ],
+          [
+            0.953125,
+            -0.271484375,
+            0.62890625,
+            -1.578125,
+            0.921875,
+            -0.375,
+            -0.5859375,
+            0.57421875
+          ]
+        ],
+        [
+          [
+            -0.1484375,
+            0.1611328125,
+            1.5859375,
+            -0.1279296875,
+            -0.45703125,
+            0.01556396484375,
+            0.333984375,
+            -0.034423828125
+          ],
+          [
+            0.703125,
+            -0.5234375,
+            1.0234375,
+            -0.68359375,
+            0.447265625,
+            0.0693359375,
+            -0.263671875,
+            -1.171875
+          ],
+          [
+            -0.57421875,
+            -0.24609375,
+            1.0859375,
+            0.7734375,
+            0.1455078125,
+            0.000644683837890625,
+            0.734375,
+            0.1875
+          ],
+          [
+            0.375,
+            0.65625,
+            -0.05908203125,
+            0.58984375,
+            0.435546875,
+            -0.212890625,
+            0.0810546875,
+            -0.009765625
+          ],
+          [
+            -0.796875,
+            0.404296875,
+            -0.1328125,
+            0.765625,
+            -0.216796875,
+            0.625,
+            0.189453125,
+            0.6171875
+          ]
+        ]
+      ]
+    ],
+    "0:qk_score": [
+      [
+        [
+          [
+            -0.404296875,
+            -1.4609375,
+            2.875,
+            4.4375,
+            -4.28125
+          ],
+          [
+            2.359375,
+            -2.59375,
+            2.9375,
+            4.34375,
+            0.609375
+          ],
+          [
+            -2.765625,
+            -1.4375,
+            2.609375,
+            6.625,
+            1.09375
+          ],
+          [
+            1.0234375,
+            1.7578125,
+            3.828125,
+            -0.04345703125,
+            2.59375
+          ],
+          [
+            0.0380859375,
+            -0.59765625,
+            1.1484375,
+            1.3203125,
+            -2.453125
+          ]
+        ],
+        [
+          [
+            1.8515625,
+            6.09375,
+            -5.0,
+            -7.15625,
+            -0.25
+          ],
+          [
+            -0.69140625,
+            -1.515625,
+            5.34375,
+            1.0859375,
+            -1.4140625
+          ],
+          [
+            -0.3828125,
+            -1.3203125,
+            1.9609375,
+            1.25,
+            0.1943359375
+          ],
+          [
+            0.328125,
+            3.703125,
+            3.734375,
+            -0.97265625,
+            -1.4765625
+          ],
+          [
+            2.65625,
+            0.26171875,
+            -1.15625,
+            1.3203125,
+            6.0
+          ]
+        ],
+        [
+          [
+            3.65625,
+            -2.8125,
+            4.28125,
+            3.9375,
+            5.5
+          ],
+          [
+            -0.39453125,
+            4.09375,
+            0.9453125,
+            5.53125,
+            0.00823974609375
+          ],
+          [
+            4.6875,
+            -4.21875,
+            0.9375,
+            -1.7109375,
+            2.703125
+          ],
+          [
+            -1.578125,
+            3.609375,
+            3.3125,
+            6.71875,
+            2.5625
+          ],
+          [
+            2.421875,
+            -3.765625,
+            -2.625,
+            -4.03125,
+            -1.25
+          ]
+        ],
+        [
+          [
+            -0.08740234375,
+            0.58984375,
+            -1.625,
+            -4.90625,
+            -0.228515625
+          ],
+          [
+            -0.080078125,
+            0.03466796875,
+            -2.609375,
+            -3.4375,
+            0.671875
+          ],
+          [
+            1.5859375,
+            -2.453125,
+            5.09375,
+            -1.4140625,
+            -0.3828125
+          ],
+          [
+            -3.125,
+            1.3828125,
+            -1.6796875,
+            3.171875,
+            0.380859375
+          ],
+          [
+            -2.796875,
+            3.390625,
+            -3.828125,
+            -1.4453125,
+            4.03125
+          ]
+        ]
+      ]
+    ],
+    "0:scale": [
+      [
+        [
+          [
+            -0.142578125,
+            -0.515625,
+            1.015625,
+            1.5703125,
+            -1.515625
+          ],
+          [
+            0.8359375,
+            -0.91796875,
+            1.0390625,
+            1.5390625,
+            0.2158203125
+          ],
+          [
+            -0.9765625,
+            -0.5078125,
+            0.921875,
+            2.34375,
+            0.38671875
+          ],
+          [
+            0.361328125,
+            0.62109375,
+            1.3515625,
+            -0.015380859375,
+            0.91796875
+          ],
+          [
+            0.01348876953125,
+            -0.2109375,
+            0.40625,
+            0.466796875,
+            -0.8671875
+          ]
+        ],
+        [
+          [
+            0.65625,
+            2.15625,
+            -1.765625,
+            -2.53125,
+            -0.08837890625
+          ],
+          [
+            -0.244140625,
+            -0.53515625,
+            1.890625,
+            0.384765625,
+            -0.5
+          ],
+          [
+            -0.1357421875,
+            -0.466796875,
+            0.69140625,
+            0.44140625,
+            0.06884765625
+          ],
+          [
+            0.1162109375,
+            1.3125,
+            1.3203125,
+            -0.34375,
+            -0.5234375
+          ],
+          [
+            0.9375,
+            0.0927734375,
+            -0.408203125,
+            0.466796875,
+            2.125
+          ]
+        ],
+        [
+          [
+            1.2890625,
+            -0.99609375,
+            1.515625,
+            1.390625,
+            1.9453125
+          ],
+          [
+            -0.1396484375,
+            1.4453125,
+            0.333984375,
+            1.953125,
+            0.0029144287109375
+          ],
+          [
+            1.65625,
+            -1.4921875,
+            0.33203125,
+            -0.60546875,
+            0.95703125
+          ],
+          [
+            -0.55859375,
+            1.2734375,
+            1.171875,
+            2.375,
+            0.90625
+          ],
+          [
+            0.85546875,
+            -1.328125,
+            -0.9296875,
+            -1.421875,
+            -0.44140625
+          ]
+        ],
+        [
+          [
+            -0.0308837890625,
+            0.208984375,
+            -0.57421875,
+            -1.734375,
+            -0.08056640625
+          ],
+          [
+            -0.0283203125,
+            0.01226806640625,
+            -0.921875,
+            -1.21875,
+            0.2373046875
+          ],
+          [
+            0.5625,
+            -0.8671875,
+            1.8046875,
+            -0.5,
+            -0.1357421875
+          ],
+          [
+            -1.1015625,
+            0.48828125,
+            -0.59375,
+            1.125,
+            0.134765625
+          ],
+          [
+            -0.98828125,
+            1.1953125,
+            -1.3515625,
+            -0.51171875,
+            1.421875
+          ]
+        ]
+      ]
+    ],
+    "0:causal_mask": [
+      [
+        [
+          [
+            -0.142578125,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            0.8359375,
+            -0.91796875,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            -0.9765625,
+            -0.5078125,
+            0.921875,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            0.361328125,
+            0.62109375,
+            1.3515625,
+            -0.015380859375,
+            -3.3895313892515355e+38
+          ],
+          [
+            0.01348876953125,
+            -0.2109375,
+            0.40625,
+            0.466796875,
+            -0.8671875
+          ]
+        ],
+        [
+          [
+            0.65625,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            -0.244140625,
+            -0.53515625,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            -0.1357421875,
+            -0.466796875,
+            0.69140625,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            0.1162109375,
+            1.3125,
+            1.3203125,
+            -0.34375,
+            -3.3895313892515355e+38
+          ],
+          [
+            0.9375,
+            0.0927734375,
+            -0.408203125,
+            0.466796875,
+            2.125
+          ]
+        ],
+        [
+          [
+            1.2890625,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            -0.1396484375,
+            1.4453125,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            1.65625,
+            -1.4921875,
+            0.33203125,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            -0.55859375,
+            1.2734375,
+            1.171875,
+            2.375,
+            -3.3895313892515355e+38
+          ],
+          [
+            0.85546875,
+            -1.328125,
+            -0.9296875,
+            -1.421875,
+            -0.44140625
+          ]
+        ],
+        [
+          [
+            -0.0308837890625,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            -0.0283203125,
+            0.01226806640625,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            0.5625,
+            -0.8671875,
+            1.8046875,
+            -3.3895313892515355e+38,
+            -3.3895313892515355e+38
+          ],
+          [
+            -1.1015625,
+            0.48828125,
+            -0.59375,
+            1.125,
+            -3.3895313892515355e+38
+          ],
+          [
+            -0.98828125,
+            1.1953125,
+            -1.3515625,
+            -0.51171875,
+            1.421875
+          ]
+        ]
+      ]
+    ],
+    "0:fp32_softmax": [
+      [
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.8524448275566101,
+            0.1475551873445511,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.10783472657203674,
+            0.17231939733028412,
+            0.7198459506034851,
+            0.0,
+            0.0
+          ],
+          [
+            0.17622363567352295,
+            0.22849619388580322,
+            0.4743703007698059,
+            0.12090981751680374,
+            0.0
+          ],
+          [
+            0.18982353806495667,
+            0.1516641527414322,
+            0.2811409533023834,
+            0.2986890375614166,
+            0.07868233323097229
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.5722447633743286,
+            0.4277552664279938,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.24969074130058289,
+            0.179319366812706,
+            0.5709899067878723,
+            0.0,
+            0.0
+          ],
+          [
+            0.1208767518401146,
+            0.399838387966156,
+            0.40297436714172363,
+            0.07631049305200577,
+            0.0
+          ],
+          [
+            0.1787799447774887,
+            0.07681725174188614,
+            0.04654654115438461,
+            0.11165933310985565,
+            0.5861968994140625
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.17009402811527252,
+            0.8299059271812439,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.7639828324317932,
+            0.032789479941129684,
+            0.20322760939598083,
+            0.0,
+            0.0
+          ],
+          [
+            0.031560759991407394,
+            0.1971462368965149,
+            0.17810678482055664,
+            0.5931861996650696,
+            0.0
+          ],
+          [
+            0.6037378907203674,
+            0.0680026262998581,
+            0.10128961503505707,
+            0.06191709637641907,
+            0.16505274176597595
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.4898543059825897,
+            0.5101456642150879,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.21264994144439697,
+            0.050904929637908936,
+            0.7364451289176941,
+            0.0,
+            0.0
+          ],
+          [
+            0.05940857157111168,
+            0.2912791967391968,
+            0.09871639311313629,
+            0.5505958199501038,
+            0.0
+          ],
+          [
+            0.04288206249475479,
+            0.380713552236557,
+            0.02981979213654995,
+            0.06906278431415558,
+            0.47752177715301514
+          ]
+        ]
+      ]
+    ],
+    "0:bf16_probability": [
+      [
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.8515625,
+            0.1474609375,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.10791015625,
+            0.171875,
+            0.71875,
+            0.0,
+            0.0
+          ],
+          [
+            0.17578125,
+            0.228515625,
+            0.474609375,
+            0.12109375,
+            0.0
+          ],
+          [
+            0.189453125,
+            0.1513671875,
+            0.28125,
+            0.298828125,
+            0.07861328125
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.5703125,
+            0.427734375,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.1796875,
+            0.5703125,
+            0.0,
+            0.0
+          ],
+          [
+            0.12109375,
+            0.400390625,
+            0.40234375,
+            0.076171875,
+            0.0
+          ],
+          [
+            0.1787109375,
+            0.07666015625,
+            0.046630859375,
+            0.11181640625,
+            0.5859375
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.169921875,
+            0.828125,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.765625,
+            0.03271484375,
+            0.203125,
+            0.0,
+            0.0
+          ],
+          [
+            0.031494140625,
+            0.197265625,
+            0.177734375,
+            0.59375,
+            0.0
+          ],
+          [
+            0.60546875,
+            0.06787109375,
+            0.10107421875,
+            0.06201171875,
+            0.1650390625
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.490234375,
+            0.51171875,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.212890625,
+            0.051025390625,
+            0.73828125,
+            0.0,
+            0.0
+          ],
+          [
+            0.059326171875,
+            0.291015625,
+            0.0986328125,
+            0.55078125,
+            0.0
+          ],
+          [
+            0.04296875,
+            0.380859375,
+            0.02978515625,
+            0.06884765625,
+            0.4765625
+          ]
+        ]
+      ]
+    ],
+    "0:av": [
+      [
+        [
+          [
+            0.306640625,
+            -0.1376953125,
+            1.5625,
+            0.1357421875,
+            0.49609375,
+            -0.59375,
+            -0.205078125,
+            -0.029052734375
+          ],
+          [
+            0.271484375,
+            -0.04833984375,
+            1.4296875,
+            0.283203125,
+            0.396484375,
+            -0.53515625,
+            -0.12353515625,
+            -0.031982421875
+          ],
+          [
+            0.4140625,
+            0.26171875,
+            0.796875,
+            -0.494140625,
+            1.0390625,
+            -0.69921875,
+            0.2060546875,
+            0.2099609375
+          ],
+          [
+            0.296875,
+            0.2265625,
+            0.84375,
+            -0.119140625,
+            0.8125,
+            -0.62890625,
+            0.18359375,
+            0.140625
+          ],
+          [
+            0.248046875,
+            0.1337890625,
+            0.8359375,
+            -0.0498046875,
+            0.76953125,
+            -0.60546875,
+            0.10546875,
+            0.14453125
+          ]
+        ],
+        [
+          [
+            0.306640625,
+            -0.1376953125,
+            1.5625,
+            0.1357421875,
+            0.49609375,
+            -0.59375,
+            -0.205078125,
+            -0.029052734375
+          ],
+          [
+            0.205078125,
+            0.12109375,
+            1.1875,
+            0.56640625,
+            0.2060546875,
+            -0.4296875,
+            0.0308837890625,
+            -0.03759765625
+          ],
+          [
+            0.380859375,
+            0.205078125,
+            0.91796875,
+            -0.3203125,
+            0.8984375,
+            -0.66015625,
+            0.1455078125,
+            0.16015625
+          ],
+          [
+            0.26171875,
+            0.2890625,
+            0.80078125,
+            0.1171875,
+            0.6171875,
+            -0.54296875,
+            0.2265625,
+            0.107421875
+          ],
+          [
+            0.62890625,
+            -0.12255859375,
+            0.8046875,
+            -0.80078125,
+            0.765625,
+            -0.455078125,
+            -0.31640625,
+            0.3515625
+          ]
+        ],
+        [
+          [
+            -0.1484375,
+            0.1611328125,
+            1.5859375,
+            -0.1279296875,
+            -0.45703125,
+            0.01556396484375,
+            0.333984375,
+            -0.034423828125
+          ],
+          [
+            0.55859375,
+            -0.40625,
+            1.1171875,
+            -0.5859375,
+            0.29296875,
+            0.06005859375,
+            -0.1611328125,
+            -0.9765625
+          ],
+          [
+            -0.20703125,
+            0.05615234375,
+            1.46875,
+            0.036865234375,
+            -0.306640625,
+            0.01434326171875,
+            0.396484375,
+            -0.026611328125
+          ],
+          [
+            0.25390625,
+            0.248046875,
+            0.41015625,
+            0.349609375,
+            0.357421875,
+            -0.1123046875,
+            0.13671875,
+            -0.205078125
+          ],
+          [
+            -0.2080078125,
+            0.14453125,
+            1.1171875,
+            0.1171875,
+            -0.240234375,
+            0.10400390625,
+            0.294921875,
+            0.019775390625
+          ]
+        ],
+        [
+          [
+            -0.1484375,
+            0.1611328125,
+            1.5859375,
+            -0.1279296875,
+            -0.45703125,
+            0.01556396484375,
+            0.333984375,
+            -0.034423828125
+          ],
+          [
+            0.287109375,
+            -0.1884765625,
+            1.3046875,
+            -0.412109375,
+            0.00482177734375,
+            0.043212890625,
+            0.02880859375,
+            -0.6171875
+          ],
+          [
+            -0.419921875,
+            -0.173828125,
+            1.1953125,
+            0.5078125,
+            0.032958984375,
+            0.00732421875,
+            0.6015625,
+            0.0712890625
+          ],
+          [
+            0.345703125,
+            0.1943359375,
+            0.466796875,
+            0.1943359375,
+            0.357421875,
+            -0.09619140625,
+            0.06005859375,
+            -0.330078125
+          ],
+          [
+            -0.10986328125,
+            0.0380859375,
+            0.423828125,
+            0.1630859375,
+            0.08154296875,
+            0.310546875,
+            0.03173828125,
+            -0.1484375
+          ]
+        ]
+      ]
+    ],
+    "0:sigmoid_gate": [
+      [
+        [
+          0.42578125,
+          0.423828125,
+          0.5546875,
+          0.482421875,
+          0.6328125,
+          0.51171875,
+          0.466796875,
+          0.66015625,
+          0.5,
+          0.439453125,
+          0.4140625,
+          0.431640625,
+          0.52734375,
+          0.5625,
+          0.462890625,
+          0.423828125,
+          0.2119140625,
+          0.546875,
+          0.5625,
+          0.5703125,
+          0.361328125,
+          0.34765625,
+          0.80859375,
+          0.5546875,
+          0.51171875,
+          0.6328125,
+          0.423828125,
+          0.369140625,
+          0.40625,
+          0.67578125,
+          0.70703125,
+          0.40234375
+        ],
+        [
+          0.330078125,
+          0.427734375,
+          0.7109375,
+          0.62890625,
+          0.349609375,
+          0.283203125,
+          0.67578125,
+          0.283203125,
+          0.58203125,
+          0.52734375,
+          0.349609375,
+          0.435546875,
+          0.32421875,
+          0.578125,
+          0.48046875,
+          0.58984375,
+          0.66796875,
+          0.6328125,
+          0.5078125,
+          0.51171875,
+          0.515625,
+          0.49609375,
+          0.36328125,
+          0.5703125,
+          0.314453125,
+          0.5625,
+          0.294921875,
+          0.341796875,
+          0.427734375,
+          0.66015625,
+          0.4921875,
+          0.54296875
+        ],
+        [
+          0.330078125,
+          0.498046875,
+          0.73046875,
+          0.54296875,
+          0.7578125,
+          0.486328125,
+          0.546875,
+          0.61328125,
+          0.58203125,
+          0.4296875,
+          0.361328125,
+          0.53125,
+          0.66796875,
+          0.486328125,
+          0.5078125,
+          0.359375,
+          0.2041015625,
+          0.65625,
+          0.3984375,
+          0.455078125,
+          0.53515625,
+          0.39453125,
+          0.73046875,
+          0.3828125,
+          0.294921875,
+          0.53125,
+          0.5390625,
+          0.65234375,
+          0.3515625,
+          0.62890625,
+          0.58203125,
+          0.455078125
+        ],
+        [
+          0.62890625,
+          0.40625,
+          0.4921875,
+          0.609375,
+          0.51171875,
+          0.376953125,
+          0.6796875,
+          0.39453125,
+          0.5,
+          0.53125,
+          0.478515625,
+          0.50390625,
+          0.58984375,
+          0.6484375,
+          0.416015625,
+          0.5078125,
+          0.37890625,
+          0.453125,
+          0.5,
+          0.390625,
+          0.5234375,
+          0.66796875,
+          0.68359375,
+          0.48828125,
+          0.2890625,
+          0.484375,
+          0.482421875,
+          0.66015625,
+          0.431640625,
+          0.5625,
+          0.4921875,
+          0.51953125
+        ],
+        [
+          0.4609375,
+          0.4609375,
+          0.50390625,
+          0.447265625,
+          0.71875,
+          0.65625,
+          0.431640625,
+          0.68359375,
+          0.54296875,
+          0.384765625,
+          0.52734375,
+          0.578125,
+          0.76953125,
+          0.431640625,
+          0.50390625,
+          0.330078125,
+          0.31640625,
+          0.5703125,
+          0.53515625,
+          0.458984375,
+          0.5546875,
+          0.30859375,
+          0.65625,
+          0.494140625,
+          0.46484375,
+          0.52734375,
+          0.66796875,
+          0.56640625,
+          0.396484375,
+          0.49609375,
+          0.7265625,
+          0.45703125
+        ]
+      ]
+    ],
+    "0:gated_av": [
+      [
+        [
+          0.130859375,
+          -0.058349609375,
+          0.8671875,
+          0.0654296875,
+          0.314453125,
+          -0.3046875,
+          -0.095703125,
+          -0.0191650390625,
+          0.1533203125,
+          -0.060546875,
+          0.6484375,
+          0.05859375,
+          0.26171875,
+          -0.333984375,
+          -0.0947265625,
+          -0.0123291015625,
+          -0.031494140625,
+          0.087890625,
+          0.890625,
+          -0.07275390625,
+          -0.1650390625,
+          0.005401611328125,
+          0.26953125,
+          -0.01904296875,
+          -0.076171875,
+          0.10205078125,
+          0.671875,
+          -0.047119140625,
+          -0.185546875,
+          0.010498046875,
+          0.236328125,
+          -0.01385498046875
+        ],
+        [
+          0.08984375,
+          -0.0206298828125,
+          1.015625,
+          0.177734375,
+          0.138671875,
+          -0.1513671875,
+          -0.08349609375,
+          -0.009033203125,
+          0.119140625,
+          0.06396484375,
+          0.416015625,
+          0.2470703125,
+          0.06689453125,
+          -0.248046875,
+          0.01483154296875,
+          -0.022216796875,
+          0.373046875,
+          -0.2578125,
+          0.56640625,
+          -0.30078125,
+          0.1513671875,
+          0.02978515625,
+          -0.05859375,
+          -0.55859375,
+          0.09033203125,
+          -0.10595703125,
+          0.384765625,
+          -0.140625,
+          0.0020599365234375,
+          0.028564453125,
+          0.01416015625,
+          -0.3359375
+        ],
+        [
+          0.13671875,
+          0.1298828125,
+          0.58203125,
+          -0.267578125,
+          0.7890625,
+          -0.33984375,
+          0.11279296875,
+          0.12890625,
+          0.2216796875,
+          0.087890625,
+          0.33203125,
+          -0.169921875,
+          0.6015625,
+          -0.3203125,
+          0.07373046875,
+          0.0576171875,
+          -0.042236328125,
+          0.036865234375,
+          0.5859375,
+          0.0167236328125,
+          -0.1640625,
+          0.005645751953125,
+          0.2890625,
+          -0.01019287109375,
+          -0.1240234375,
+          -0.09228515625,
+          0.64453125,
+          0.33203125,
+          0.0115966796875,
+          0.004608154296875,
+          0.349609375,
+          0.032470703125
+        ],
+        [
+          0.1865234375,
+          0.091796875,
+          0.416015625,
+          -0.07275390625,
+          0.416015625,
+          -0.2373046875,
+          0.125,
+          0.055419921875,
+          0.130859375,
+          0.1533203125,
+          0.3828125,
+          0.05908203125,
+          0.36328125,
+          -0.3515625,
+          0.09423828125,
+          0.054443359375,
+          0.09619140625,
+          0.1123046875,
+          0.205078125,
+          0.13671875,
+          0.1875,
+          -0.0751953125,
+          0.09326171875,
+          -0.10009765625,
+          0.10009765625,
+          0.09423828125,
+          0.2255859375,
+          0.1279296875,
+          0.154296875,
+          -0.05419921875,
+          0.029541015625,
+          -0.171875
+        ],
+        [
+          0.1142578125,
+          0.061767578125,
+          0.421875,
+          -0.022216796875,
+          0.5546875,
+          -0.396484375,
+          0.04541015625,
+          0.0986328125,
+          0.341796875,
+          -0.047119140625,
+          0.423828125,
+          -0.462890625,
+          0.58984375,
+          -0.1962890625,
+          -0.1591796875,
+          0.1162109375,
+          -0.06591796875,
+          0.08251953125,
+          0.59765625,
+          0.0537109375,
+          -0.1328125,
+          0.031982421875,
+          0.193359375,
+          0.009765625,
+          -0.051025390625,
+          0.0201416015625,
+          0.283203125,
+          0.09228515625,
+          0.0322265625,
+          0.154296875,
+          0.0230712890625,
+          -0.06787109375
+        ]
+      ]
+    ],
+    "0:output_projection": [
+      [
+        [
+          0.33984375,
+          0.056396484375,
+          0.169921875,
+          0.283203125,
+          -0.05078125,
+          -0.279296875,
+          0.1279296875,
+          0.1181640625,
+          0.478515625,
+          0.609375,
+          -0.67578125,
+          0.3515625
+        ],
+        [
+          0.26953125,
+          0.16015625,
+          0.09521484375,
+          0.0771484375,
+          0.058837890625,
+          -0.08447265625,
+          0.29296875,
+          0.009521484375,
+          0.60546875,
+          0.3203125,
+          -0.83203125,
+          0.12255859375
+        ],
+        [
+          0.412109375,
+          0.1689453125,
+          -0.03564453125,
+          0.19921875,
+          -0.126953125,
+          0.0712890625,
+          -0.1298828125,
+          -0.193359375,
+          0.455078125,
+          0.421875,
+          -0.478515625,
+          0.220703125
+        ],
+        [
+          0.392578125,
+          0.055908203125,
+          0.10400390625,
+          -0.00628662109375,
+          -0.0030670166015625,
+          0.103515625,
+          -0.1767578125,
+          -0.1591796875,
+          0.236328125,
+          0.26953125,
+          -0.357421875,
+          -0.000335693359375
+        ],
+        [
+          0.25,
+          0.1552734375,
+          0.09765625,
+          0.0625,
+          -0.0966796875,
+          0.049560546875,
+          -0.11767578125,
+          0.0072021484375,
+          0.4296875,
+          0.431640625,
+          -0.4609375,
+          0.26953125
+        ]
+      ]
+    ]
+  },
+  "cache": [
+    {
+      "call": 0,
+      "length": 5,
+      "dtype_k": "torch.bfloat16",
+      "dtype_v": "torch.bfloat16",
+      "k": [
+        [
+          [
+            [
+              1.5546875,
+              -0.8046875,
+              -1.1875,
+              -0.373046875,
+              -1.328125,
+              -0.3203125,
+              -0.435546875,
+              -0.3359375
+            ],
+            [
+              1.40625,
+              0.859375,
+              -1.4921875,
+              -0.2470703125,
+              0.375,
+              1.0234375,
+              0.4296875,
+              -0.0025482177734375
+            ],
+            [
+              0.5625,
+              0.5859375,
+              1.84375,
+              0.73828125,
+              0.0947265625,
+              0.69140625,
+              -0.5625,
+              -1.3828125
+            ],
+            [
+              -1.1796875,
+              0.58203125,
+              1.484375,
+              -0.96484375,
+              -0.75,
+              -0.10791015625,
+              -0.109375,
+              -1.3203125
+            ],
+            [
+              -0.59375,
+              0.6796875,
+              -1.96875,
+              0.0086669921875,
+              -0.43359375,
+              -0.12158203125,
+              -0.3828125,
+              -1.5234375
+            ]
+          ],
+          [
+            [
+              0.22265625,
+              0.4296875,
+              -1.4140625,
+              -0.02880859375,
+              1.90625,
+              0.275390625,
+              -0.376953125,
+              0.92578125
+            ],
+            [
+              -0.625,
+              -0.8828125,
+              0.578125,
+              1.3984375,
+              -1.34375,
+              -0.83984375,
+              1.046875,
+              1.046875
+            ],
+            [
+              1.53125,
+              -0.44921875,
+              -0.8671875,
+              0.5546875,
+              1.5,
+              0.1630859375,
+              0.8515625,
+              0.609375
+            ],
+            [
+              0.625,
+              1.1875,
+              1.3125,
+              0.06640625,
+              0.890625,
+              0.84375,
+              1.3671875,
+              0.66796875
+            ],
+            [
+              -0.6015625,
+              -0.51171875,
+              1.546875,
+              -0.0174560546875,
+              1.7890625,
+              0.53515625,
+              -0.4609375,
+              0.052001953125
+            ]
+          ]
+        ]
+      ],
+      "v": [
+        [
+          [
+            [
+              0.306640625,
+              -0.1376953125,
+              1.5625,
+              0.1357421875,
+              0.49609375,
+              -0.59375,
+              -0.205078125,
+              -0.029052734375
+            ],
+            [
+              0.0712890625,
+              0.466796875,
+              0.6953125,
+              1.140625,
+              -0.1806640625,
+              -0.212890625,
+              0.345703125,
+              -0.04931640625
+            ],
+            [
+              0.51171875,
+              0.2734375,
+              0.70703125,
+              -0.98046875,
+              1.4140625,
+              -0.83203125,
+              0.2353515625,
+              0.30859375
+            ],
+            [
+              -0.1337890625,
+              0.1142578125,
+              0.625,
+              0.5078125,
+              0.7734375,
+              -0.6640625,
+              0.2412109375,
+              0.08544921875
+            ],
+            [
+              0.953125,
+              -0.271484375,
+              0.62890625,
+              -1.578125,
+              0.921875,
+              -0.375,
+              -0.5859375,
+              0.57421875
+            ]
+          ],
+          [
+            [
+              -0.1484375,
+              0.1611328125,
+              1.5859375,
+              -0.1279296875,
+              -0.45703125,
+              0.01556396484375,
+              0.333984375,
+              -0.034423828125
+            ],
+            [
+              0.703125,
+              -0.5234375,
+              1.0234375,
+              -0.68359375,
+              0.447265625,
+              0.0693359375,
+              -0.263671875,
+              -1.171875
+            ],
+            [
+              -0.57421875,
+              -0.24609375,
+              1.0859375,
+              0.7734375,
+              0.1455078125,
+              0.000644683837890625,
+              0.734375,
+              0.1875
+            ],
+            [
+              0.375,
+              0.65625,
+              -0.05908203125,
+              0.58984375,
+              0.435546875,
+              -0.212890625,
+              0.0810546875,
+              -0.009765625
+            ],
+            [
+              -0.796875,
+              0.404296875,
+              -0.1328125,
+              0.765625,
+              -0.216796875,
+              0.625,
+              0.189453125,
+              0.6171875
+            ]
+          ]
+        ]
+      ],
+      "cos": [
+        [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            0.5390625,
+            1.0,
+            0.5390625,
+            1.0
+          ],
+          [
+            -0.416015625,
+            1.0,
+            -0.416015625,
+            1.0
+          ],
+          [
+            -0.98828125,
+            1.0,
+            -0.98828125,
+            1.0
+          ],
+          [
+            -0.65234375,
+            1.0,
+            -0.65234375,
+            1.0
+          ]
+        ]
+      ],
+      "sin": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.83984375,
+            0.000316619873046875,
+            0.83984375,
+            0.000316619873046875
+          ],
+          [
+            0.91015625,
+            0.00063323974609375,
+            0.91015625,
+            0.00063323974609375
+          ],
+          [
+            0.1416015625,
+            0.000949859619140625,
+            0.1416015625,
+            0.000949859619140625
+          ],
+          [
+            -0.7578125,
+            0.0012664794921875,
+            -0.7578125,
+            0.0012664794921875
+          ]
+        ]
+      ]
+    }
+  ],
+  "provenance": {
+    "source_sha256": {
+      "model": "16ef7b0dc6e26eae26a6ffd0ad11d93f85424f90ffb85fbcc9eecc0759cc930d",
+      "cache": "0d5fd6901ce2b7108eff40e06d7ce29e9b0f9cc8ed2f40d2fb3a2e4d4f43e630",
+      "generic": "b60d9ecbbaeadb084134dda4a9b92419d35d22af6bc882e062fd530f4e47a4e1",
+      "torch_functional": "724c30072ca0cb69228553a636b2937ff88b60a2a2c80b806bd2a3827033e2b6"
+    },
+    "ast": {
+      "maybe_autocast": "168c4d3ed64734f313d967afdadcdbe2a94a3b5b633b0a95b1482b510e0c7061",
+      "CacheLayerMixin": "90535ec01a8be510c22638bee05cc8f39a6e00949982938a41a89bcfcb0de8ac",
+      "DynamicLayer": "4a1d565e6a1f6c647ca032b601b7ab3366d1dc02187e5a101ca47b78d16ff376",
+      "Cache": "6732e6938679161132085fcb90fb066de77328e5be31ab65cf36d17c742d95af",
+      "Qwen3_5MoeTextRotaryEmbedding": "02e2986132cb82ed40bcb08ecfc628a4791ec11c8923604862daf207690b9393",
+      "rotate_half": "b63a4b75f268261de9d58044ac01d4dd3ea394aae5f6e7248ea6eb2c7c27e084",
+      "apply_rotary_pos_emb": "03feb35dd8ce873805a7fe6d7a0694d55b8f73cea621a99f2ef4891327ee62f7",
+      "repeat_kv": "d769c2d7ee1ceb6ee2618390972632664499dc562b65a9271d3f0f60db3982b5",
+      "eager_attention_forward": "47a962721ecd098f91c0306d39157f6d69bac06e29882a03c5435db645c10cf4",
+      "Qwen3_5MoeRMSNorm": "20f51d53736f66bb8a4205357be348d0f2a8cfd2421e7ad85ed68581bb28af9f",
+      "Qwen3_5MoeAttention": "b55f259915cbc63cdc94ac2695fcd15fa03efa34d7139caa5e07734de43fcdb2"
+    },
+    "math_bodies": {
+      "maybe_autocast": {
+        "maybe_autocast:227": "dec2807103e4c72b53739516fce02712311779165d4828b4ea45c4585c483844"
+      },
+      "CacheLayerMixin": {
+        "__init_subclass__:36": "099527e6dad09d876ee6b1a043905857458bd1386cc5801cf2719c1cff905cca",
+        "__init__:44": "ff57472f8b64806ca464209072f9f8bbb2149a27905def9eb7c2e15df9e8992d",
+        "__repr__:49": "20220dc561e367e60c9f4f17f57b6cee39bdbad58133dda7b12f626fc6ec820f",
+        "lazy_initialization:53": "3d9e0c553f8a09e6f794a87e905d2d7ac0f558fce75901394999aabb73aface0",
+        "update:56": "3d9e0c553f8a09e6f794a87e905d2d7ac0f558fce75901394999aabb73aface0",
+        "get_mask_sizes:61": "3d9e0c553f8a09e6f794a87e905d2d7ac0f558fce75901394999aabb73aface0",
+        "get_seq_length:64": "3d9e0c553f8a09e6f794a87e905d2d7ac0f558fce75901394999aabb73aface0",
+        "get_max_length:67": "7681b24688243c8737bff877f104af8c7ccd70743ccb565a7727bbc9c2e0cdb5",
+        "offload:75": "c6c0c357e5c299f9ec57c76a4619dafc7c366e6dae17e8955b51bf5d0b75d361",
+        "prefetch:81": "43ad0bcf4163da76440afb27a38e124d1242103bf662a276f02c363df5febf3a",
+        "reset:87": "52b617e87ad07fbf85bcbe4f10c012f4359600490e63e97a1828a731817f46d7",
+        "reorder_cache:100": "10ac57be6513ce11843e82692bd1c062bc04616a964ae013b781ca2862d5fe26",
+        "get_max_cache_shape:106": "a1755f386c49ece84e8be21f704f3bb74aa2dfd26b433cc75308331d27083bb6"
+      },
+      "DynamicLayer": {
+        "lazy_initialization:121": "d3ab6f342d7bc24f664bae60e45c581d95814f2037a1ea715a7104b90eefe60d",
+        "update:127": "0c3207f90e6b60ef9339c0699e39a95e2795c80426aafb7962e2d9203314c42e",
+        "get_mask_sizes:148": "57080ac89db7654c0690c3e05dc688a53228391fd8910159664b4e6fc9e111a3",
+        "get_seq_length:154": "7ffe87d313d210c2358217f940f6e7976baeff7a6387ec2a630da15dfbe677a9",
+        "get_max_length:160": "daa6047268c97873c6db0949492d74adc3d40a2be64303a0eb64e6685407622f",
+        "crop:165": "7de8811f631338582eddbf51b1379f015eb854edaeb613e30d2b2b8d6f29d571",
+        "batch_repeat_interleave:190": "30de464ea8f3c98048cd7a9ebcf9fe5b03de4ab508c32245933a740548f7b0fc",
+        "batch_select_indices:196": "528aff560663acfd4b3534c89f01abb4b1473461450916382ca61b1e32abd1ce"
+      },
+      "Cache": {
+        "__init__:1282": "ec035d3ff012e0b0a49e1e99f84dee1bc65b2d59d3a11f968f7deb48678f1e32",
+        "__repr__:1306": "6d1bf7c89ae09376ddeff0510b08222d7227d27e4c57b855bae3371f528da151",
+        "__len__:1309": "b7f084fe03eadd0fdcb12b988d5978d988772adee4d56d39ac934ebb2f66b3ae",
+        "prefetch:1317": "e5192b9651feee8f4460eeb783710ae7df759bf3946981e9df1bb4e4b174c086",
+        "offload:1340": "76efd9f02b35fccc310ee4d2ccb6a7492076839ccff8aaf47e17f6d80cb102dc",
+        "update:1349": "129809cde6a6e597b05f9395c5873a4c28939770ffcf66b4043c9baa4a465781",
+        "update_conv_state:1383": "6d4a0252263b07694b6b24da3fc425d58fe9d1e65c3cbe3bfb530f2652fa5bf0",
+        "update_recurrent_state:1405": "3a30bcea8bbc754ac19825dc5341ae27efd32e53317313b5171fd87d1caad2a5",
+        "update_indexer:1427": "254c923822accb2ced5045a3a38ca44b479bea20b3267cfa90fc3ca87fb8fc57",
+        "early_initialization:1448": "fe4b4b707dbf1aea50d24c213557d4abb65b0edd5ab835e44bb88ae31be776f0",
+        "get_seq_length:1485": "973127c05ff79df7f62a790afecbe13624ed8c8bc623da5a736b0c9adafef5f5",
+        "get_max_length:1509": "bde7950fc8cfeca07311d8af5b8be350819623ff238965e7a9838a5672bfae31",
+        "has_previous_state:1525": "4f9b9aa74a4c51bd317abd4b7d0124252892a163bdff517334ca971321680fad",
+        "get_mask_sizes:1555": "6c84926ddc7967b8ed01ac7e62f96b5b0eb19227a0d9fbf12d7ae2db7b8bbde8",
+        "get_query_offset:1585": "274e1f07f8ce142696c8b5771e83dbf273dd1113cb5852dfc38ec1f8e87a29fd",
+        "reset:1592": "3303f85f7daea28f6fa19464fa3dc0b6289ae4e540515f6392aca77c679aba0c",
+        "reorder_cache:1597": "d480f51e3148de4232b4d7c9f157367f43d9732ac0b3bdc4c67baa667dc2bfb7",
+        "crop:1602": "9ee5d6fbb5e34b2a59f47b25d29916576ae4d745d5bdc48ab226f076064c3deb",
+        "batch_repeat_interleave:1612": "31bab0c8bc8dbc7ad03c7de9a27024b58ae67df050d04b3398d5c558262185da",
+        "batch_select_indices:1617": "4db8966850f82a16e77de237e8103bf8cf151ba7edf152e66f4f58b5c850aeb0",
+        "activate_past_recording:1622": "6887d4c0a9b3116e176b8c5dfdaa1b7929a18007f4877a5b8dddbdaae555214b",
+        "batch_size:1632": "838c5c7a83a8875736106229c83efbadf0247b63d271dc4f00d6f177e69936c2",
+        "is_compileable:1645": "37ad2afe03c0eb4a11d39750e13c0eca18d3d662a4a518eefcc7f8745716f30e",
+        "is_initialized:1653": "d15eee5bd9fb7df0fdcf00dc53e0d1a843d2f85389a188de585b99ad575ea818",
+        "is_sliding:1659": "a1d218dc62d9ec3400f149d88f8ee4ba7e1e99877140ae24bd96ce869e3159c3",
+        "is_linear:1664": "efc6564f973f56d25e0107d010db163b9b842ab28ae65caba30b026e92bee017",
+        "get_max_cache_shape:1673": "57b66e428e61ec0e4bcec7f01f8696f43a8154f1c2173a290957e05ff36a2a6c",
+        "max_cache_len:1680": "41650150072165b194626af7db5e7128a5ce5d4d7f2086d71b08188feec60421",
+        "max_batch_size:1687": "7fe24fc44e030c00bb31f263915a50f87788ee300b0a873a4c5d6b3cb4d6343a"
+      },
+      "Qwen3_5MoeTextRotaryEmbedding": {
+        "__init__:87": "9649f07dec97d7300e45f9de3840e9aad26bcbb6cf140a503576016c95c75d83",
+        "compute_default_rope_parameters:106": "e1780d0530ccbfee5f86df45abc29be5b936a59e902cc03203326421b929932d",
+        "forward:130": "abc95654f5d5a9b5a86729b42e3acb9eee227a07b28abc28ae1219d9d0e153ab",
+        "apply_interleaved_mrope:150": "1ae52e48892c71bab097974a5a038bcf7e64f0f64769146d549ef5d134c5286b"
+      },
+      "rotate_half": {
+        "rotate_half:544": "c84ac432437c77ffff4d13318af5492eedbc7fc16c8c081f9392ab733f15e939"
+      },
+      "apply_rotary_pos_emb": {
+        "apply_rotary_pos_emb:552": "f35bc0d05f9ce0a0d7ff29ee23888f0c7688c879d25e0063ac452b6d2fecaca8"
+      },
+      "repeat_kv": {
+        "repeat_kv:590": "ee7e252a9e0a0a309ef7a9c9b92710b7a79c4061d3a821f519141d3e8f2d153b"
+      },
+      "eager_attention_forward": {
+        "eager_attention_forward:602": "a1dab42c091f8b695c05d8f017b9094e1ee5ee8e035ff49daec2b9c2fdf0104a"
+      },
+      "Qwen3_5MoeRMSNorm": {
+        "__init__:802": "cc6fce10bc5f363ca37a453858970dc6660a9762587f28f77ca5760e39cfa167",
+        "_norm:807": "585b17b346a36ed48215560046377cd30a8e9c54bac7555cf1c638abab92d034",
+        "forward:810": "b4a897ec8cfb9940c053b1a907a81cf72760e16251749f4f52f32d74e83b20fc",
+        "extra_repr:817": "8a4f7b6189fb68c26d02fad6281465e6f263c8ba21ea74109aea49a1bd639b1b"
+      },
+      "Qwen3_5MoeAttention": {
+        "__init__:630": "ba73751499eb2b311d79a0a5262ab2d7982acc3673368fe4983fd8bc0e2e2509",
+        "forward:656": "cccf43b7290dbeab8659cda6090646ed1bdd44d49b6660f94d753fe3d734144c"
+      }
+    },
+    "removed_decorators": [
+      {
+        "node": "crop",
+        "decorator": "deprecate_kwarg('max_length', new_name='tokens_to_remove', version='5.18')"
+      },
+      {
+        "node": "__init__",
+        "decorator": "deprecate_kwarg('device', version='5.18')"
+      },
+      {
+        "node": "compute_default_rope_parameters",
+        "decorator": "deprecate_kwarg('device', version='5.18')"
+      },
+      {
+        "node": "forward",
+        "decorator": "dynamic_rope_update"
+      }
+    ],
+    "backend": "explicit_eager",
+    "rotary_policy": "default only; removed dynamic-update wrapper"
+  },
+  "inv_freq_dtype": "torch.float32",
+  "inv_freq": [
+    1.0,
+    0.0003162277862429619
+  ],
+  "trace_bytes": 8640,
+  "backend": "eager",
+  "library_accumulation": "UNVERIFIED",
+  "softmax_internal_reduction": "UNVERIFIED"
+}

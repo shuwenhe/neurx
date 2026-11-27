@@ -1,0 +1,23 @@
+{
+  "seed": 1807,
+  "hidden": 2048,
+  "qh": 16,
+  "kh": 2,
+  "dim": 256,
+  "rotary": 64,
+  "theta": 10000000.0,
+  "eps": 1e-06,
+  "origin": 0,
+  "length": 3,
+  "numpy_version": "1.26.4",
+  "payload_float32_sha256": {
+    "qg": "6501d09c567e90af4c70ee986750ba1277cab799e4bd265062ccce03f1a2f82b",
+    "k": "3817589a2fabf992c41efbca9544794ab2d1543012d15151e586f4948578054f",
+    "v": "1cae667ef79c3c2dc1b3d05415abbe710d99d188c57d9e26351eeb941e8f465e",
+    "o": "8759c4376e9c07491b6765048c1c816550dca0bb387ae2a79c229092414ca91f",
+    "qnorm": "8f714cb491fcd343b48370bd86d423abc2fbf54ce7f6ba8e32d59ca9a8d16b4d",
+    "knorm": "0a292f97d22af2b8b7973a31600793029d379de53f013bd133c7239fa542b5f0",
+    "x": "cfdd90faa1fa20ac5f6cfd5966da2d6b88deae10f856018b8ba26738883c302a"
+  },
+  "reproduce": "fixture(**parameters): fixed RNG generation order in hash-pinned harness"
+}

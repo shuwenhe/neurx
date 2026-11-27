@@ -1,0 +1,62 @@
+[
+  {
+    "case": "seed521",
+    "node_count": 19,
+    "trace_bytes": 8640
+  },
+  {
+    "case": "seed1807",
+    "node_count": 19,
+    "trace_bytes": 8640
+  },
+  {
+    "case": "cache-prefill",
+    "node_count": 19,
+    "trace_bytes": 8640
+  },
+  {
+    "case": "cache-decode",
+    "node_count": 95,
+    "trace_bytes": 9120
+  },
+  {
+    "case": "cache-chunks",
+    "node_count": 57,
+    "trace_bytes": 8768
+  },
+  {
+    "case": "real-head-shape",
+    "node_count": 19,
+    "trace_bytes": 408384
+  },
+  {
+    "case": "calibration-t1-d6",
+    "node_count": 19,
+    "trace_bytes": 1088
+  },
+  {
+    "case": "calibration-t3-d6",
+    "node_count": 19,
+    "trace_bytes": 3744
+  },
+  {
+    "case": "calibration-t63-d8",
+    "node_count": 19,
+    "trace_bytes": 401184
+  },
+  {
+    "case": "calibration-t64-d8",
+    "node_count": 19,
+    "trace_bytes": 412672
+  },
+  {
+    "case": "calibration-t65-d8",
+    "node_count": 19,
+    "trace_bytes": 424320
+  },
+  {
+    "case": "heldout7319",
+    "node_count": 19,
+    "trace_bytes": 8640
+  }
+]

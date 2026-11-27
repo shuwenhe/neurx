@@ -1,0 +1,10 @@
+test_all_required_nodes_and_dtype_boundaries (__main__.OfficialAttention.test_all_required_nodes_and_dtype_boundaries) ... ok
+test_cached_decode_and_chunks_observation (__main__.OfficialAttention.test_cached_decode_and_chunks_observation) ... ok
+test_hash_rejection_before_source_execution (__main__.OfficialAttention.test_hash_rejection_before_source_execution) ... ok
+test_observation_does_not_change_results (__main__.OfficialAttention.test_observation_does_not_change_results) ... ok
+test_real_head_width_and_rope_generation (__main__.OfficialAttention.test_real_head_width_and_rope_generation) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 10.478s
+
+OK
