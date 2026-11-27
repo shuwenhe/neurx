@@ -43,6 +43,15 @@ class OfficialAttention(unittest.TestCase):
             self.assertEqual(a['library_accumulation'],'UNVERIFIED')
             self.assertEqual(a['cache'][-1]['length'],5)
 
+    def test_trace_metric_completeness(self):
+        a=run_reference(fixture(length=1))
+        for node in a['nodes']:
+            self.assertIn('stride',node)
+            self.assertIn('layout',node)
+            self.assertIn('gpu_bytes',node)
+            for field in ['reference_near_zero_count','nonfinite_locations','bf16_bit_mismatch_count','max_bf16_ulp']:
+                self.assertIn(field,node['metrics'])
+
     def test_hash_rejection_before_source_execution(self):
         with tempfile.TemporaryDirectory(dir=BUILD) as d:
             p=Path(d)/'wrong.py';p.write_text('raise AssertionError("must not execute")\n')
@@ -50,6 +59,7 @@ class OfficialAttention(unittest.TestCase):
 
     def test_observation_does_not_change_results(self):
         j=fixture();a=run_reference(j);b=run_reference(j,observe=False);c=run_reference(j)
+        self.assertEqual(b.get('instrumentation'),dict(module_hooks=0,wrappers=[]), 'control must contain no observation hooks/wrappers')
         np.testing.assert_array_equal(a['output'],b['output']);np.testing.assert_array_equal(a['output'],c['output'])
         self.assertEqual(a['arrays'],c['arrays'])
         self.assertEqual(a['cache'],b['cache'])

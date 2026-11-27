@@ -23,16 +23,16 @@ All changes under NeurX. Preserve initial HEAD/history, dirty reports, untracked
 
 Files: new test/native-construction/qwen35_attention_official_reference.py and test_qwen35_attention_official_bf16.py; evidence artifact/build/qwen35_attention_bf16/reference/.
 Interface: load_official(source=SOURCE) -> namespace/provenance; fixture(seed,length,dim,rotary,hidden,qh,kh) -> JSON-compatible fixture; run_reference(fixture, partition='prefill', observe=True) -> nodes, events, arrays, cache snapshots, provenance. Metrics explicitly name independent FP64 same-operand semantic reference.
-- [ ] Write test requiring missing harness; run and save RED.
-- [ ] Implement hash-pinned unchanged AST loader, module/dispatch/rotary/cache observers and independent FP64 metric calculation.
-- [ ] Execute host GPU tests for all required nodes/dtypes, deterministic repeat/trace on-off, hash rejection, cached decode, positions, real head width and inv_freq construction.
+- [x] Write test requiring missing harness; run and save RED.
+- [x] Implement hash-pinned unchanged AST loader, module/dispatch/rotary/cache observers and independent FP64 metric calculation.
+- [x] Execute host GPU tests for all required nodes/dtypes, deterministic repeat/trace on-off, hash rejection, cached decode, positions, real head width and inv_freq construction.
 - [ ] Preserve logs, tensor snapshots, per-node metrics, AST/source hashes, environment, baseline snapshot. Commit only new scoped files after verification.
 
 ## Task B: Tolerance review gate
 
 Files: docs/reports/QWEN35_ATTENTION_BF16_TOLERANCE.md and review evidence.
-- [ ] Define exact copy/layout/BF16 pointwise rules and FP32 comparison candidates from reference-only evidence and explicit analytic assumptions; no native implementation exists yet.
-- [ ] Independent review: confirm source/body provenance, coverage and that candidate budget is not reverse-fitted.
+- [x] Define exact copy/layout/BF16 pointwise rules and FP32 comparison candidates from reference-only evidence and explicit analytic assumptions; no native implementation exists yet.
+- [x] Independent review: confirm source/body provenance, coverage and that candidate budget is not reverse-fitted.
 - [ ] Obtain required human review/freeze of exact tolerance content. Until then state REVIEW_REQUIRED and stop Native implementation; no numerical PASS beyond reference self-tests.
 
 ## Task C: Native batches after B approval
@@ -50,3 +50,10 @@ No batch starts unless previous gate is green and evidence saved.
 - [ ] Real host memcheck/initcheck and existing deliberate-fault controls; original suites 11/16/5/11 plus new suite.
 - [ ] Record component prefill/decode latency, launch count and memory/convert overhead with measured vs estimated labels; never model TTFT/TPS.
 - [ ] Save PHASE1/PHASE2/KV_CACHE/FINAL reports with actual statuses and commits; independent final review before module PASS.
+
+## Execution ledger
+
+- Phase A RED: missing harness self-test FAIL; initial official GPU6/6.
+- Independent review: two P2 reference controls/metric completeness findings; added two failing tests, fixed by removing all hooks/wrappers in observation-off path and adding required metrics. Full GPU suite7/7 GREEN, original mathematical bodies unchanged.
+- Ruling: preserve concurrent user commit c43c0577 — it contains original protected work and initial reference implementation; rolling it back would destroy user history. Protected file hashes revalidated; cost if wrong would be misattributing changes, so starting and observed HEAD are both recorded.
+- Tolerance candidate remains incomplete/PENDING for FP32 norm/softmax and composition; reviewer did not grant human approval. Stop before Native kernels as required by the approved spec.

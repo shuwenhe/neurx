@@ -103,7 +103,7 @@ def fixture(seed=521, length=5, dim=8, rotary=4, hidden=12, qh=4, kh=2):
     return j
 
 
-def metrics(actual, expected):
+def metrics(actual, expected, bf16=False):
     a, b = np.asarray(actual, dtype='f8'), np.asarray(expected, dtype='f8')
     if a.shape != b.shape:
         raise ValueError(f'metric shape mismatch {a.shape} != {b.shape}')
@@ -111,7 +111,16 @@ def metrics(actual, expected):
     finite = np.isfinite(a) & np.isfinite(b)
     if not finite.all():
         raise ValueError('nonfinite trace/diagnostic reference')
-    return dict(max_absolute_error=float(delta.max()), mean_absolute_error=float(delta.mean()),
+    bf16_mismatch=None;ulp=None
+    if bf16:
+        aw=np.asarray(a,dtype='<f4').view('<u4')>>16
+        bw=np.asarray(b,dtype='<f4').view('<u4')>>16
+        ordered=lambda words: np.where(words & 0x8000,0x8000-(words & 0x7fff).astype('i8'),0x8000+words.astype('i8'))
+        bf16_mismatch=int(np.count_nonzero(aw!=bw));ulp=int(np.max(np.abs(ordered(aw)-ordered(bw))))
+    return dict(reference_near_zero_count=int(np.count_nonzero(np.abs(b)<=np.finfo('f4').tiny)),
+                nonfinite_locations=dict(actual=np.argwhere(~np.isfinite(a)).tolist(),reference=np.argwhere(~np.isfinite(b)).tolist()),
+                bf16_bit_mismatch_count=bf16_mismatch,max_bf16_ulp=ulp,
+                max_absolute_error=float(delta.max()), mean_absolute_error=float(delta.mean()),
                 max_relative_error=float(np.max(delta/np.maximum(np.abs(b), np.finfo('f4').tiny))),
                 relative_denominator_floor=float(np.finfo('f4').tiny),
                 nan=int(np.isnan(a).sum()), inf=int(np.isinf(a).sum()),
@@ -153,7 +162,9 @@ def run_reference(j, partition='prefill', observe=True):
     max_trace_bytes = 64 << 20
     trace_bytes = [0]
     def cpu(t):
-        return t.detach().float().cpu().numpy().copy()
+        # Observation transfers must not appear as official mathematical ops.
+        with torch._C._DisableTorchDispatch():
+            return t.detach().float().cpu().numpy().copy()
     def value64(t):
         return cpu(t).astype('f8') if isinstance(t, torch.Tensor) else t
     def rounded(a, dtype):
@@ -187,11 +198,14 @@ def run_reference(j, partition='prefill', observe=True):
         if expected is None:
             raise ValueError('independent diagnostic expected value required: '+name)
         expected = np.asarray(expected, dtype='f8')
-        nodes.append(dict(call=call_id[0], node=name, shape=list(out.shape),
+        nodes.append(dict(call=call_id[0], node=name, shape=list(out.shape),stride=list(out.stride()),layout=str(out.layout),
+                          gpu_bytes=out.numel()*out.element_size(),
+                          input_stride=[list(v.stride()) if isinstance(v,torch.Tensor) else [] for v in inputs],
+                          input_gpu_bytes=[v.numel()*v.element_size() if isinstance(v,torch.Tensor) else 0 for v in inputs],
                           input_dtype=[str(v.dtype) if isinstance(v, torch.Tensor) else type(v).__name__ for v in inputs],
                           input_shape=[list(v.shape) if isinstance(v, torch.Tensor) else [] for v in inputs],
                           output_dtype=str(out.dtype), bf16_boundary=boundary,
-                          metrics=metrics(a, expected), reference_only_dot_bound=diagnostic))
+                          metrics=metrics(a, expected, bf16=out.dtype==torch.bfloat16), reference_only_dot_bound=diagnostic))
         arrays[f'{call_id[0]}:{name}'] = a
     class Observer(TorchDispatchMode):
         def __torch_dispatch__(self, func, types, args=(), kwargs=None):
@@ -199,8 +213,8 @@ def run_reference(j, partition='prefill', observe=True):
             ins = [v for v in tree_flatten((args, kwargs))[0] if isinstance(v, torch.Tensor)]
             outs = [v for v in tree_flatten(result)[0] if isinstance(v, torch.Tensor)]
             events.append(dict(call=call_id[0], scope=scope[0], op=str(func),
-                               inputs=[dict(dtype=str(t.dtype), shape=list(t.shape)) for t in ins],
-                               outputs=[dict(dtype=str(t.dtype), shape=list(t.shape)) for t in outs]))
+                               inputs=[dict(dtype=str(t.dtype), shape=list(t.shape), device=str(t.device)) for t in ins],
+                               outputs=[dict(dtype=str(t.dtype), shape=list(t.shape), device=str(t.device)) for t in outs]))
             op = str(func)
             if scope[0] == 'eager':
                 if op == 'aten.matmul.default':
@@ -226,6 +240,7 @@ def run_reference(j, partition='prefill', observe=True):
                 record('gated_av', result, args[:2], rounded(value64(args[0])*value64(args[1]), result.dtype), 'BF16 AV times BF16 gate output')
                 current_gate[0] = None
             return result
+    hook_handles=[]
     for name, module in model.named_modules():
         if not name:
             continue
@@ -234,6 +249,7 @@ def run_reference(j, partition='prefill', observe=True):
         def post(mod, args, out, _name=name):
             if _name in ['q_proj', 'k_proj', 'v_proj', 'o_proj']:
                 diagnostic=dot_diagnostic(value64(args[0]),value64(mod.weight).T,out)
+                diagnostic['scope']='whole unsplit QG linear tensor' if _name=='q_proj' else 'whole linear output tensor'
                 exact = np.matmul(value64(args[0]), value64(mod.weight).T)
                 exact = rounded(exact, out.dtype)
                 if _name == 'q_proj':
@@ -250,7 +266,9 @@ def run_reference(j, partition='prefill', observe=True):
                 record(_name.replace('_norm', '_rmsnorm'), out, [args[0], mod.weight], rounded(expected, out.dtype),
                        'input BF16 -> FP32 normalize/weight -> BF16 once at exit')
             scope[0] = scope.pop()
-        module.register_forward_pre_hook(pre); module.register_forward_hook(post)
+        if observe:
+            hook_handles.append(module.register_forward_pre_hook(pre))
+            hook_handles.append(module.register_forward_hook(post))
     original_rope = ns['apply_rotary_pos_emb']
     def observed_rope(q, k, cos, sin, *args, **kwargs):
         before = scope[0]; scope[0] = 'partial_rope'
@@ -266,7 +284,8 @@ def run_reference(j, partition='prefill', observe=True):
             expected = np.concatenate([rounded(first+second, out.dtype), tail], axis=-1)
             record(name, out, [inp, cos, sin], expected, 'BF16 mul, BF16 mul, BF16 add; untouched tail')
         return result
-    ns['apply_rotary_pos_emb'] = observed_rope
+    if observe:
+        ns['apply_rotary_pos_emb'] = observed_rope
     original_eager = ns['eager_attention_forward']
     def observed_eager(*args, **kwargs):
         before = scope[0]; scope[0] = 'eager'; eager_counts.clear()
@@ -274,7 +293,8 @@ def run_reference(j, partition='prefill', observe=True):
             return original_eager(*args, **kwargs)
         finally:
             scope[0] = before
-    ns['eager_attention_forward'] = observed_eager
+    if observe:
+        ns['eager_attention_forward'] = observed_eager
     original_update = layer.update
     def observed_update(k, v, *args, **kwargs):
         oldk = cpu(layer.keys) if layer.is_initialized else None
@@ -284,7 +304,8 @@ def run_reference(j, partition='prefill', observe=True):
             expected = cpu(inp) if old is None else np.concatenate([old, cpu(inp)], axis=-2)
             record(name, out, [inp], expected, 'BF16 post-RoPE K / projection V append; no dtype conversion')
         return result
-    layer.update = observed_update
+    if observe:
+        layer.update = observed_update
     x = torch.as_tensor(j['x'], device='cuda', dtype=torch.bfloat16).reshape(1, -1, h)
     if partition == 'prefill':
         lengths = [x.shape[1]]
@@ -310,6 +331,7 @@ def run_reference(j, partition='prefill', observe=True):
                                       cos=cpu(cos).tolist(), sin=cpu(sin).tolist()))
     torch.cuda.synchronize()
     return dict(output=np.concatenate(outputs, axis=1).tolist(), nodes=nodes, events=events,
+                instrumentation=dict(module_hooks=len(hook_handles),wrappers=['rotary','eager','cache'] if observe else []),
                 arrays={k: a.tolist() for k, a in arrays.items()}, cache=cache_records,
                 provenance=ns['provenance'], inv_freq_dtype=str(rope.inv_freq.dtype),
                 inv_freq=cpu(rope.inv_freq).tolist(), trace_bytes=trace_bytes[0], backend='eager',
