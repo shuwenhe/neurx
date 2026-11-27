@@ -22,3 +22,5 @@
 ## 本轮门禁核对
 
 基线 `main` / `19cae974`；2026-11-26 宿主机 GPU RTX 4060 Ti、驱动 580.159.03、固定官方 model SHA256 未变。dtype 边界审计 **PARTIAL**：现有 1277 条 tensor 操作 trace 未给出 GPU kernel 内部累加 dtype，也没有覆盖四路所有 13 个中间量；不能据此证明 BF16 原生实现逐舍入兼容。BF16 每节点独立门限保持 PENDING，直到独立参考、足够分布与独立审查完成。
+
+本轮新增 `test/native-construction/test_qwen35_bf16_rounding.py`：36 个正负、次正规/正规及 BF16 tie 和相邻 FP32 位模式，比较 NumPy RNE fixture 转换与 GPU Torch BF16 转换，**1/1 PASS**。该结果只验证参考输入转换，不证明 kernel 内部运算或完整算子舍入语义。

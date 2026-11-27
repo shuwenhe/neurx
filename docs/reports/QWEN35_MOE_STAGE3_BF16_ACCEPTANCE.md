@@ -119,3 +119,5 @@ CUDA memcheck 和 initcheck 在宿主机使用已有 `compute-sanitizer` 执行�
 本轮再次使用现有 `compute-sanitizer --injection-path /usr/lib/nvidia-cuda-toolkit/compute-sanitizer --target-processes all` 执行 memcheck 和 initcheck：均 exit 255，并报告 `Target application terminated before first instrumented API call`；**UNVERIFIED**，不能计作通过。审查者因无文件读取工具无法独立检查源码；审查 **NOT COMPLETED**。
 
 完整四路 13 节点中间 trace **BLOCKED**；先前 output/core/state/history/beta/decay 的四路结果为 **PARTIAL**。BF16 每节点预算 **PENDING**，长序列 FP32/官方对比 **PARTIAL**；用户态测试 probe 变化并不等于实现 BF16 兼容路径。真实层比较结果见后续记录；所有上述门禁未关闭前，Stage 3 **BLOCKED**，Stage 4 **NOT AUTHORIZED**。
+
+BF16 输入转换的 36 个半 ULP 边界及相邻值（含正负和次正规）在 GPU Torch 与独立 fixture RNE 转换间一致（1 test PASS）；这不构成各中间算子门限。运行期间用户工作区提交更新为 `591699d0`；本任务未创建该提交，任务起始基线仍为 `19cae974`。
