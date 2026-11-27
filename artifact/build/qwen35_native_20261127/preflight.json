@@ -1,0 +1,11 @@
+{
+  "directory": "/home/shuwen/shuwen/model/Qwen3.6-35B-A3B",
+  "model_type": "qwen3_5_moe",
+  "architectures": [
+    "Qwen3_5MoeForConditionalGeneration"
+  ],
+  "weight_files_present": 26,
+  "errors": [
+    "NeurX native qwen3_5_moe decoder is not implemented: requires Gated DeltaNet, gated full attention, partial RoPE, and Qwen MoE; changing the model path cannot enable it"
+  ]
+}

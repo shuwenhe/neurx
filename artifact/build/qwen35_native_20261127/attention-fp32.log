@@ -1,0 +1,16 @@
+test_causal_future_tokens_do_not_change_prefix (__main__.Stage2.test_causal_future_tokens_do_not_change_prefix) ... ok
+test_continuous_decode_nonzero_positions (__main__.Stage2.test_continuous_decode_nonzero_positions) ... ok
+test_decode_chunk_and_prefill_equivalence (__main__.Stage2.test_decode_chunk_and_prefill_equivalence) ... ok
+test_heldout_reference_seed (__main__.Stage2.test_heldout_reference_seed) ... ok
+test_numeric_failure_invalidates_until_reset (__main__.Stage2.test_numeric_failure_invalidates_until_reset) ... ok
+test_prefill_matches_independent_reference (__main__.Stage2.test_prefill_matches_independent_reference) ... ok
+test_real_bf16_layer_weights_with_synthetic_input (__main__.Stage2.test_real_bf16_layer_weights_with_synthetic_input) ... ok
+test_real_head_dimension_partial_rope (__main__.Stage2.test_real_head_dimension_partial_rope) ... ok
+test_reject_bad_shapes_and_memory_budget (__main__.Stage2.test_reject_bad_shapes_and_memory_budget) ... ok
+test_reject_invalid_position_capacity_and_reset (__main__.Stage2.test_reject_invalid_position_capacity_and_reset) ... ok
+test_zero_input_and_extreme_gates (__main__.Stage2.test_zero_input_and_extreme_gates) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 25.628s
+
+OK

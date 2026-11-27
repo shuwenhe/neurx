@@ -1,0 +1,30 @@
+{
+  "runtime": {
+    "torch": "2.6.0+cu124",
+    "cuda": "12.4",
+    "cudnn": 90100,
+    "device": "NVIDIA GeForce RTX 4060 Ti",
+    "matmul": "highest",
+    "tf32": false,
+    "bf16_reduced_precision_reduction": false,
+    "deterministic": true,
+    "allocator_fraction": 0.1,
+    "autocast": false,
+    "compile": false
+  },
+  "native_storage": "FP32",
+  "native_arithmetic": "FP32",
+  "reference_output": "BF16",
+  "reference_state": "FP32",
+  "fp16_used": false,
+  "max_absolute_error": 0.004984676837921143,
+  "mean_absolute_error": 0.001210341469517776,
+  "max_relative_error": 0.15117818842489253,
+  "relative_error_denominator_floor": 1.1754943508222875e-38,
+  "native_nan": 0,
+  "native_inf": 0,
+  "non_bf16_outputs": 35,
+  "outputs": 35,
+  "numerical_budget": "PENDING: no numerical PASS asserted",
+  "status": "BLOCKED"
+}

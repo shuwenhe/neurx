@@ -1,0 +1,10 @@
+test_dtype_boundaries_and_cached_modes (__main__.OfficialBF16.test_dtype_boundaries_and_cached_modes) ... ok
+test_mathematical_baseline_calibration (__main__.OfficialBF16.test_mathematical_baseline_calibration) ... ok
+test_official_prefill_and_recurrent_equivalence (__main__.OfficialBF16.test_official_prefill_and_recurrent_equivalence) ... ok
+test_source_pin_fails_closed (__main__.OfficialBF16.test_source_pin_fails_closed) ... ok
+test_zero_small_norm_nonzero_initial_state (__main__.OfficialBF16.test_zero_small_norm_nonzero_initial_state) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 6.398s
+
+OK
