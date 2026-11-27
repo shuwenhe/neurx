@@ -109,16 +109,19 @@ def error_metrics(actual,reference):
                 cosine=float(np.clip(np.dot(a.ravel(),b.ravel())/(na*nb),-1,1)) if na and nb else float(not na and not nb))
 
 
-def run_official(j,partition='decode',observe=False):
+def run_official(j,partition='decode',observe=False,trace_stages=False):
     import torch
     from torch.utils._python_dispatch import TorchDispatchMode
     from torch.utils._pytree import tree_flatten
     from collections import Counter
     if partition not in ['decode','prefill']:raise ValueError('unknown reference partition')
-    ns=load_official();modes=[];snap={};events=[];scope=['mixer'];counts=Counter()
+    ns=load_official();modes=[];snap={};events=[];scope=['mixer'];counts=Counter();stages={};l2_calls=[0];conv_length=[0];current_tokens=[0]
     class Observer(TorchDispatchMode):
         def __torch_dispatch__(self,func,types,args=(),kwargs=None):
             result=func(*args,**(kwargs or {}))
+            if trace_stages and str(func)=='aten.conv1d.default':
+                trimmed=result[...,-conv_length[0]:] if scope[0]=='conv.decode' else result[...,:conv_length[0]]
+                stages.setdefault('conv',[]).append(cpu(trimmed[...,-current_tokens[0]:].transpose(1,2)))
             if counts[scope[0]]<32:
                 ins=[x for x in tree_flatten((args,kwargs))[0] if isinstance(x,torch.Tensor)]
                 outs=[x for x in tree_flatten(result)[0] if isinstance(x,torch.Tensor)]
@@ -132,7 +135,15 @@ def run_official(j,partition='decode',observe=False):
             try:return fn(*args,**kwargs)
             finally:scope[0]=before
         return call
-    ns['l2norm']=scoped('l2norm',ns['l2norm'])
+    original_l2=ns['l2norm']
+    def observed_l2(x,*args,**kwargs):
+        result=original_l2(x,*args,**kwargs)
+        if trace_stages:
+            # Official repeats key heads before L2; native stores unique heads.
+            name='q' if l2_calls[0]%2==0 else 'k';l2_calls[0]+=1
+            stages.setdefault(name,[]).append(cpu(result[:,:,::(j['vh']//j['kh']),:]))
+        return result
+    ns['l2norm']=scoped('l2norm',observed_l2)
     for mode in ['chunk','recurrent']:
         name='torch_'+mode+'_gated_delta_rule';fn=ns[name]
         def core_call(*args,_fn=fn,_mode=mode,**kwargs):
@@ -141,7 +152,14 @@ def run_official(j,partition='decode',observe=False):
             snap['core']=cpu(result[0]);snap['beta']=cpu(kwargs['beta']);snap['decay']=cpu(kwargs['g'].exp())
             return result
         ns[name]=scoped('core.'+mode,core_call)
-    for name,tag in [('causal_conv1d_fn','conv.prefill'),('causal_conv1d_update','conv.decode')]:ns[name]=scoped(tag,ns[name])
+    for name,tag in [('causal_conv1d_fn','conv.prefill'),('causal_conv1d_update','conv.decode')]:
+        fn=ns[name]
+        def conv_call(*args,_fn=fn,**kwargs):
+            conv_length[0]=args[0].shape[-1]
+            result=_fn(*args,**kwargs)
+            if trace_stages:stages.setdefault('activated',[]).append(cpu(result[...,-current_tokens[0]:].transpose(1,2)))
+            return result
+        ns[name]=scoped(tag,conv_call)
     h,kh,vh,kd,vd,kernel=[j[n] for n in ['hidden','kh','vh','kd','vd','conv']]
     config=SimpleNamespace(hidden_size=h,linear_num_value_heads=vh,linear_num_key_heads=kh,
         linear_key_head_dim=kd,linear_value_head_dim=vd,linear_conv_kernel_dim=kernel,
@@ -161,21 +179,26 @@ def run_official(j,partition='decode',observe=False):
     for name,module in model.named_modules():
         if not name:continue
         def pre(module,args,_name=name):scope.append(scope[0]);scope[0]='module.'+_name
-        def post(module,args,output):scope[0]=scope.pop()
+        def post(module,args,output,_name=name):
+            if trace_stages:
+                key={'in_proj_qkv':'qkv','in_proj_z':'z','in_proj_a':'a','in_proj_b':'b','norm':'gated'}.get(_name)
+                if key:stages.setdefault(key,[]).append(cpu(output))
+            scope[0]=scope.pop()
         module.register_forward_pre_hook(pre);module.register_forward_hook(post)
     collected={k:[] for k in ['output','core','state','history','beta','decay']};dtype={}
     from contextlib import nullcontext
-    with torch.inference_mode(),torch.autocast(device_type='cuda',enabled=False),Observer() if observe else nullcontext():
+    with torch.inference_mode(),torch.autocast(device_type='cuda',enabled=False),Observer() if observe or trace_stages else nullcontext():
         for call in j['calls']:
             if 'reset' in call:cache.reset();continue
             x=torch.as_tensor(call['x'],device='cuda',dtype=torch.bfloat16).reshape(1,-1,h)
             if x.shape[1]>j['context']:raise ValueError('reference context limit')
             chunks=x.split(1,dim=1) if partition=='decode' else [x]
             for chunk in chunks:
+                current_tokens[0]=chunk.shape[1]
                 y=model(chunk,cache_params=cache)
                 for key,tensor in [('output',y),('state',layer.recurrent_states[0]),('history',layer.conv_states[0])]:
                     collected[key].append(cpu(tensor));dtype[key+'_dtype']=str(tensor.dtype)
                 for key in ['core','beta','decay']:collected[key].append(snap[key])
     torch.cuda.synchronize()
-    return dict(**{k:np.concatenate(v) for k,v in collected.items()},**dtype,modes=modes,dtype_events=events,
+    return dict(**{k:np.concatenate(v) for k,v in collected.items()},**{k:np.concatenate(v) for k,v in stages.items()},**dtype,modes=modes,dtype_events=events,
                 provenance=ns['provenance'],gpu_peak_allocated=torch.cuda.max_memory_allocated(),gpu_peak_reserved=torch.cuda.max_memory_reserved())
