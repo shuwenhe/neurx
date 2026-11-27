@@ -1,0 +1,16 @@
+test_config_duplicate_keys_rejected (__main__.Stage1.test_config_duplicate_keys_rejected) ... ok
+test_config_reads_mixed_shapes_and_checked_state_bytes (__main__.Stage1.test_config_reads_mixed_shapes_and_checked_state_bytes) ... ok
+test_config_rejects_invalid_or_unsupported_semantics (__main__.Stage1.test_config_rejects_invalid_or_unsupported_semantics) ... ok
+test_expert_slice_rows_and_mapping_lifetime (__main__.Stage1.test_expert_slice_rows_and_mapping_lifetime) ... ok
+test_fifo_inputs_fail_without_blocking (__main__.Stage1.test_fifo_inputs_fail_without_blocking) ... ok
+test_manifest_exact_shapes_and_unsupported_runtime (__main__.Stage1.test_manifest_exact_shapes_and_unsupported_runtime) ... ok
+test_metadata_limits_total_size_dtype_and_fd_cleanup (__main__.Stage1.test_metadata_limits_total_size_dtype_and_fd_cleanup) ... ok
+test_raw_index_bytes_count_against_metadata_budget (__main__.Stage1.test_raw_index_bytes_count_against_metadata_budget) ... ok
+test_real_checkpoint_metadata_and_expert_sample (__main__.Stage1.test_real_checkpoint_metadata_and_expert_sample) ... ok
+test_shard_index_and_malformed_metadata_fail_closed (__main__.Stage1.test_shard_index_and_malformed_metadata_fail_closed) ... ok
+test_sparse_large_payload_does_not_materialize_weights (__main__.Stage1.test_sparse_large_payload_does_not_materialize_weights) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 10.123s
+
+OK

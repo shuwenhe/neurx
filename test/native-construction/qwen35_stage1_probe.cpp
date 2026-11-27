@@ -8,6 +8,11 @@
 #include <iomanip>
 #include <sstream>
 #include <filesystem>
+#include <fstream>
+#include <cstring>
+#include <set>
+#include <sys/mman.h>
+#include <unistd.h>
 using namespace neurx::runtime::model;
 using J = nlohmann::json;
 static J bytes(const TensorSlice& slice) {
@@ -37,6 +42,46 @@ int main(int argc, char** argv) {
            {"vision",manifest.vision},{"mtp",manifest.mtp},{"payload_bytes",store.payload_bytes()},
            {"mapped_bytes",store.mapped_bytes()},{"metadata_identity",adapter.metadata_identity(store)},
            {"runtime_supported",adapter.runtime_supported()}};
+    } else if (op=="verify-mapped") {
+      auto store=MappedWeightStore::open(dir);
+      ArchitectureRegistry::resolve(dir).validate(store);
+      std::vector<uint8_t> buffer(1<<20);
+      uint64_t total=0, tensors=0;
+      std::set<std::string> shards;
+      const auto page=uint64_t(::sysconf(_SC_PAGESIZE));
+      if (!page) throw std::runtime_error("invalid page size");
+      for (const auto& item:store.tensors()) {
+        const auto slice=store.tensor(item.first);
+        const auto* mapped=slice.data();
+        // Inspect actual VM permissions, rather than trusting an API comment.
+        std::ifstream maps("/proc/self/maps");std::string line;bool readonly=false;
+        while(std::getline(maps,line)) {
+          std::istringstream fields(line);std::string range,perms;
+          if (!(fields>>range>>perms)) continue;
+          auto dash=range.find('-');
+          auto lo=std::stoull(range.substr(0,dash),nullptr,16);
+          auto hi=std::stoull(range.substr(dash+1),nullptr,16);
+          auto address=reinterpret_cast<uintptr_t>(mapped);
+          if(address>=lo && address<hi) { readonly=perms.size()>=2 && perms[0]=='r' && perms[1]!='w';break; }
+        }
+        if(!readonly)throw std::runtime_error("tensor mapping is not read-only: "+item.first);
+        for(uint64_t offset=0;offset<slice.size();) {
+          auto count=std::min<uint64_t>(buffer.size(),slice.size()-offset);
+          slice.copy(offset,buffer.data(),count);
+          if(std::memcmp(mapped+offset,buffer.data(),count))
+            throw std::runtime_error("mapped/pread mismatch: "+item.first);
+          // Release touched pages from this process; do not accumulate 70GB RSS.
+          auto address=reinterpret_cast<uintptr_t>(mapped+offset);
+          auto aligned=address-address%page;
+          if(::madvise(reinterpret_cast<void*>(aligned),address-aligned+count,MADV_DONTNEED))
+            throw std::runtime_error("cannot release mapped verification pages");
+          offset+=count;total+=count;
+        }
+        shards.insert(item.second.shard);++tensors;
+      }
+      out={{"verified_tensors",tensors},{"verified_bytes",total},
+           {"verified_shards",shards.size()},{"read_only",true},
+           {"buffer_bytes",buffer.size()}};
     } else if (op=="lifetime") {
       if (argc!=4) throw std::runtime_error("lifetime tensor required");
       TensorSlice slice;

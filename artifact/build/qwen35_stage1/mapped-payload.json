@@ -1,0 +1,9 @@
+{
+  "buffer_bytes": 1048576,
+  "elapsed_ms": 54659.900552,
+  "max_rss_kib": 1018144,
+  "read_only": true,
+  "verified_bytes": 71903645408,
+  "verified_shards": 26,
+  "verified_tensors": 1045
+}

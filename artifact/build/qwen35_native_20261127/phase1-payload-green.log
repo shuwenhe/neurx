@@ -1,0 +1,6 @@
+test_all_real_checkpoint_payload_bytes (__main__.MappedPayload.test_all_real_checkpoint_payload_bytes) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 64.727s
+
+OK
